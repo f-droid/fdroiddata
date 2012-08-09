@@ -1,0 +1,96 @@
+Don't use gmaps to display GeoIP data - first of all, not all devices have
+gmaps, secondly, showing map-cartoons is not so required for system app,
+separate app could do that.
+
+diff --git a/OSMonitor/AndroidManifest.xml b/OSMonitor/AndroidManifest.xml
+index 22f89d9..bbb0f68 100644
+--- a/OSMonitor/AndroidManifest.xml
++++ b/OSMonitor/AndroidManifest.xml
+@@ -39,7 +39,6 @@
+         <activity android:configChanges="keyboardHidden" 
+                   android:name=".misc.MiscBox" />
+ 		<activity android:name=".preferences.Preferences" />
+-		<uses-library android:name="com.google.android.maps"/>
+ 	</application>
+     <uses-permission android:name="android.permission.INTERNET" />
+     <uses-permission android:name="android.permission.RESTART_PACKAGES" />
+diff --git a/OSMonitor/src/com/eolwral/osmonitor/networks/NetworkList.java b/OSMonitor/src/com/eolwral/osmonitor/networks/NetworkList.java
+index 62adda4..d2dfe09 100644
+--- a/OSMonitor/src/com/eolwral/osmonitor/networks/NetworkList.java
++++ b/OSMonitor/src/com/eolwral/osmonitor/networks/NetworkList.java
+@@ -30,11 +30,12 @@ import javax.xml.parsers.SAXParserFactory;
+ import org.xml.sax.InputSource;
+ import org.xml.sax.XMLReader;
+ 
+-import com.google.android.maps.GeoPoint;
++/*import com.google.android.maps.GeoPoint;
+ import com.google.android.maps.MapActivity;
+ import com.google.android.maps.MapController;
+-import com.google.android.maps.MapView;
++import com.google.android.maps.MapView;*/
+ 
++import android.app.Activity;
+ import android.app.AlertDialog;
+ import android.app.Dialog;
+ import android.app.ProgressDialog;
+@@ -78,7 +79,7 @@ import com.eolwral.osmonitor.*;
+ import com.eolwral.osmonitor.preferences.Preferences;
+ 
+ 
+-public class NetworkList extends MapActivity implements OnGestureListener, OnTouchListener  
++public class NetworkList extends Activity implements OnGestureListener, OnTouchListener  
+ {
+ 	private JNIInterface JNILibrary = JNIInterface.getInstance();
+ 	private NetworkListAdapter UpdateInterface = null;
+@@ -95,7 +96,7 @@ public class NetworkList extends MapActivity implements OnGestureListener, OnTou
+ 	private boolean RDNS = false;
+ 	
+ 	private WeakReference<FrameLayout> MapBodyRef = null;
+-	private MapView GeoIPMap = null;
++//	private MapView GeoIPMap = null;
+     
+ 	// Gesture
+ 	private GestureDetector gestureScanner = new GestureDetector(this);;
+@@ -305,9 +306,9 @@ public class NetworkList extends MapActivity implements OnGestureListener, OnTou
+         // Use a custom layout file
+         setContentView(R.layout.networklayout);
+ 
+-		GeoIPMap = new MapView(this, "0N4HYg91PN1-cGgp3exBmvC1AdzeiGYzp7C3V7g");
++//		GeoIPMap = new MapView(this, "0N4HYg91PN1-cGgp3exBmvC1AdzeiGYzp7C3V7g");
+ 		//GeoIPMap = new MapView(this, "0N4HYg91PN19P2R67mtD2NGBl3ce5DxqXlmH6TA");
+-		GeoIPMap.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT, 180));
++//		GeoIPMap.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT, 180));
+ 
+ 		ProcHandler = new EventHandler();
+         
+@@ -674,14 +675,14 @@ public class NetworkList extends MapActivity implements OnGestureListener, OnTou
+     	FrameLayout MapBody = new FrameLayout(this);	
+    		MapBodyRef = new WeakReference<FrameLayout>(MapBody);
+     	
+-        MapBody.addView(GeoIPMap);
+-        MapController GeoIPControl = GeoIPMap.getController();
++//        MapBody.addView(GeoIPMap);
++//        MapController GeoIPControl = GeoIPMap.getController();
+ 
+-        GeoPoint MapPoint = new GeoPoint((int)Longitude,(int)Latitude);
+-		GeoIPControl.setZoom(8);
+-        GeoIPControl.animateTo(MapPoint);
+-        GeoIPControl.setCenter(MapPoint);
+-    	GeoIPMap.getOverlays().add(new MapOverlay(this, MapPoint, R.drawable.point));
++//        GeoPoint MapPoint = new GeoPoint((int)Longitude,(int)Latitude);
++//		GeoIPControl.setZoom(8);
++//        GeoIPControl.animateTo(MapPoint);
++//        GeoIPControl.setCenter(MapPoint);
++//    	GeoIPMap.getOverlays().add(new MapOverlay(this, MapPoint, R.drawable.point));
+ 
+     	AlertDialog.Builder WhoisAlert = new AlertDialog.Builder(this);
+     	WhoisAlert.setTitle("Whois");
+@@ -942,7 +943,7 @@ public class NetworkList extends MapActivity implements OnGestureListener, OnTou
+ 		}
+     }
+ 
+-	@Override
++//	@Override
+ 	protected boolean isRouteDisplayed() {
+ 		// TODO Auto-generated method stub
+ 		return false;
