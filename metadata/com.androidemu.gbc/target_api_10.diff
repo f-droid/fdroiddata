@@ -1,0 +1,116 @@
+diff -Ndaur GBCoid.pristine/GBCoid/AndroidManifest.xml GBCoid.new/GBCoid/AndroidManifest.xml
+--- GBCoid.pristine/GBCoid/AndroidManifest.xml	2012-06-29 13:58:27.769929717 +1100
++++ GBCoid.new/GBCoid/AndroidManifest.xml	2012-06-29 14:11:31.035631588 +1100
+@@ -4,13 +4,14 @@
+ 		android:versionName="1.8.5"
+ 		android:installLocation="preferExternal">
+ 
+-	<uses-sdk android:minSdkVersion="3" />
++	<uses-sdk android:minSdkVersion="3" android:targetSdkVersion="10"/>
+ 
+     <uses-permission android:name="android.permission.VIBRATE" />
+     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+ 
+ 	<application android:label="@string/app_label"
+-			android:icon="@drawable/app_icon">
++			android:icon="@drawable/app_icon" android:hardwareAccelerated="true"
++                        android:theme="@style/MyTheme">
+ 
+ 		<activity android:name="MainActivity"
+ 				android:configChanges="orientation|keyboardHidden">
+diff -Ndaur GBCoid.pristine/GBCoid/res/values/themes.xml GBCoid.new/GBCoid/res/values/themes.xml
+--- GBCoid.pristine/GBCoid/res/values/themes.xml	1970-01-01 10:00:00.000000000 +1000
++++ GBCoid.new/GBCoid/res/values/themes.xml	2012-06-29 14:12:08.058761757 +1100
+@@ -0,0 +1,5 @@
++<resources>
++    <style name="MyTheme" parent="@android:style/Theme">
++        <!-- Any customizations for your app running on pre-3.0 devices here -->
++    </style>
++</resources>
+diff -Ndaur GBCoid.pristine/GBCoid/res/values-v11/themes.xml GBCoid.new/GBCoid/res/values-v11/themes.xml
+--- GBCoid.pristine/GBCoid/res/values-v11/themes.xml	1970-01-01 10:00:00.000000000 +1000
++++ GBCoid.new/GBCoid/res/values-v11/themes.xml	2012-06-29 14:12:46.791882546 +1100
+@@ -0,0 +1,5 @@
++<resources>
++    <style name="MyTheme" parent="@android:style/Theme.Holo">
++        <!-- Any customizations for your app running on devices with Theme.Holo here -->
++    </style>
++</resources>
+diff -Ndaur GBCoid.pristine/GBCoid/res/values-v14/themes.xml GBCoid.new/GBCoid/res/values-v14/themes.xml
+--- GBCoid.pristine/GBCoid/res/values-v14/themes.xml	1970-01-01 10:00:00.000000000 +1000
++++ GBCoid.new/GBCoid/res/values-v14/themes.xml	2012-06-29 14:12:46.791882546 +1100
+@@ -0,0 +1,5 @@
++<resources>
++    <style name="MyTheme" parent="@android:style/Theme.DeviceDefault">
++        <!-- Any customizations for your app running on devices with Theme.Holo here -->
++    </style>
++</resources>
+diff -Ndaur GBCoid.pristine/GBCoid/src/com/androidemu/gbc/EmulatorService.java GBCoid.new/GBCoid/src/com/androidemu/gbc/EmulatorService.java
+--- GBCoid.pristine/GBCoid/src/com/androidemu/gbc/EmulatorService.java	2012-06-29 13:58:27.819929442 +1100
++++ GBCoid.new/GBCoid/src/com/androidemu/gbc/EmulatorService.java	2012-06-29 14:20:13.526097780 +1100
+@@ -49,9 +49,10 @@
+     private NotificationManager mNM;
+     private Method mStartForeground;
+     private Method mStopForeground;
++    private Method mSetForeground = null;
+     private Object[] mStartForegroundArgs = new Object[2];
+     private Object[] mStopForegroundArgs = new Object[1];
+-    
++
+     @Override
+     public void onCreate() {
+         mNM = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
+@@ -63,6 +64,11 @@
+         } catch (NoSuchMethodException e) {
+             // Running on an older platform.
+             mStartForeground = mStopForeground = null;
++            try {
++                mSetForeground = getClass().getMethod("setForeground", mStopForegroundSignature);
++            } catch (NoSuchMethodException crap) {
++                Log.w(LOG_TAG, "OS doesn't have Service.startForeground OR Service.setForeground!", crap);
++            }
+         }
+     }
+ 
+@@ -128,7 +134,19 @@
+         }
+         
+         // Fall back on the old API.
+-        setForeground(true);
++        if (mSetForeground != null) {
++            mStopForegroundArgs[0] = Boolean.TRUE;
++            try {
++                mSetForeground.invoke(this, mStopForegroundArgs);
++            } catch (InvocationTargetException e) {
++                // Should not happen.
++                Log.w(LOG_TAG, "Unable to invoke setForeground", e);
++            } catch (IllegalAccessException e) {
++                // Should not happen.
++                Log.w(LOG_TAG, "Unable to invoke setForeground", e);
++            }
++            return;
++        }
+         mNM.notify(id, notification);
+     }
+     
+@@ -155,7 +173,19 @@
+         // Fall back on the old API.  Note to cancel BEFORE changing the
+         // foreground state, since we could be killed at that point.
+         mNM.cancel(id);
+-        setForeground(false);
++        if (mSetForeground != null) {
++            mStopForegroundArgs[0] = Boolean.FALSE;
++            try {
++                mSetForeground.invoke(this, mStopForegroundArgs);
++            } catch (InvocationTargetException e) {
++                // Should not happen.
++                Log.w(LOG_TAG, "Unable to invoke setForeground", e);
++            } catch (IllegalAccessException e) {
++                // Should not happen.
++                Log.w(LOG_TAG, "Unable to invoke setForeground", e);
++            }
++            return;
++        }
+     }
+     
+     @Override
