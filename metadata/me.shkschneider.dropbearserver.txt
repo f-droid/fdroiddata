@@ -1,6 +1,4 @@
-Disabled:Can't build properly (yet?) - see comment
-#there are dropbear binaries in the repo from an external source but they can be built
-#from https://github.com/shkschneider/android_external_dropbear . 
+Disabled:Now builds dropbear binaries, but work is needed to make these binaries integrate with this app!
 Category:System
 License:GPLv2
 Web Site:https://github.com/shkschneider/android_DropBearServer
@@ -15,7 +13,26 @@ This is a SSH server using DropBear, allows you to easily install, configure and
 Repo Type:git
 Repo:https://github.com/shkschneider/android_DropBearServer.git
 
-Build Version:1.9.4,194,1.9.4,target=android-10,prebuild=sed -i 's@\(android.library.reference.3=\).*@\1$$ActionBar$$@' project.properties && sed -i 's@\(android.library.reference.1=\).*@\1$$ViewPagerTabs$$@' project.properties && sed -i 's@\(android.library.reference.2=\).*@\1$$UITableView$$@' project.properties,srclibs=ActionBar@c8341dc;UITableView@c9a2525bce;ViewPagerTabs@67df90db08,update=../extlib/ViewPagerTabs
+# there are dropbear binaries in the repo from an external source but they can be built
+# from https://github.com/shkschneider/android_external_dropbear . 
+# the issue to remove the patch has been created at https://github.com/shkschneider/android_DropBearServer/issues/5
+Build Version:1.9.4,194,1.9.4,target=android-10,patch=ActionBar.patch,\
+srclibs=ActionBar@c8341dc;UITableView@1665555424;ViewPagerTabs@67df90db08;Dropbear@07accdedf45,\
+buildjni=no,prebuild=\
+sed -i 's@\(android.library.reference.3=\).*@\1$$ActionBar$$@' project.properties && \
+sed -i 's@\(android.library.reference.1=\).*@\1$$ViewPagerTabs$$@' project.properties && \
+sed -i 's@\(android.library.reference.2=\).*@\1$$UITableView$$@' project.properties && \
+rm res/raw/* && \
+mkdir -p jni/dropbear && \
+cp -r $$Dropbear$$/* jni/dropbear/ && \
+echo 'include $(call all-subdir-makefiles)' > jni/Android.mk && \
+$$NDK$$/ndk-build && \
+mv libs/armeabi/dropbear res/raw/dropbear && \
+mv libs/armeabi/dropbearkey res/raw/dropbearkey && \
+mv libs/armeabi/scp res/raw/scp && \
+mv libs/armeabi/ssh res/raw/ssh && \
+mv libs/armeabi/sftp-client res/raw/sftp_client && \
+echo "Welcome to DropBear SSH Server!" > res/raw/banner
 
 Update Check Mode:Market
 Current Version:1.9.4
