@@ -1,4 +1,3 @@
-AntiFeatures:NonFreeDep
 Category:Navigation
 License:GPLv3
 Web Site:https://github.com/ojacquemart/vlilleChecker
@@ -7,16 +6,13 @@ Issue Tracker:https://github.com/ojacquemart/vlilleChecker/issues
 
 Summary:Bicycle info for Lille
 Description:
+N.B. The v2.1 now uses OpenStreetMap.
+
 Vlille Checker est dédié aux utilisateurs du V'Lille et de son service VLS (Vélos en Libre Service) à Lille.
 Au quotidien, l'application vous permet de gérer facilement vos stations favorites.
 Le but est de pouvoir "checker" facilement l'état des stations.
 Vlille Checker se veut efficace en proposant un contrôle en temps réel des stations.
 L'application offre également une recherche rapide et une localisation des stations les plus proches.
-
-Remarquez qu'il n'est pas possible de se voir sa position sur une carte, parce que il n'y a qu'une
-source de cartes, celle de Google, et ça exige une clé que F-droid ne peut pas publier. Pourtant, la 
-prochaine vérsion utilisera les cartes de OpenStreetMap et n'aura pas l'anti-fonctionnalité Dépendence
-(de Google Maps).
 .
 
 Repo Type:git
@@ -26,7 +22,22 @@ Repo:https://github.com/ojacquemart/vlilleChecker.git
 #Previous commits used a different ActionBar and didn't build
 Build Version:1.1,2,5be3e6d6e056,srclibs=ActionBarSherlock@6e3f2bb,\
 prebuild=sed -i 's@\(android.library.reference.1=\).*@\1$$ActionBarSherlock$$@' project.properties
-Build Version:2.0,3,!not released and needs pull to refresh srclib
+
+Build Version:2.0,3,!not a release v2.0,srclibs=\
+ActionBarSherlock@4.1.0;PullToRefresh@v1.4.1,extlibs=android/android-support-v4.jar;\
+acra/acra-4.2.3.jar;commons-collections/commons-collections-3.2.1.jar;commons-lang/commons-lang3-3.1.jar;\
+osmdroid/osmdroid-android-3.0.8.jar;slf4j/slf4j-android-1.6.1-RC1.jar;junit/junit-4.10.jar,prebuild=\
+sed -i 's@\(android.library.reference.1=\).*@\1$$ActionBarSherlock$$@' project.properties && \
+sed -i 's@\(android.library.reference.2=\).*@\1$$PullToRefresh$$/library@' project.properties && \
+sed -i 's@\(android.library.reference.3=\).*@\1$$PullToRefresh$$/extras/PullToRefreshListFragment@' project.properties && \
+android update project -p $$PullToRefresh$$/library -s && \
+android update project -p $$PullToRefresh$$/extras/PullToRefreshListFragment -s && \
+mv libs/android-support-v4.jar $$ActionBarSherlock$$/libs/
+
+Build Version:2.1,4,!jar doesn't register v2.1,maven=yes,prebuild=\
+mvn install:install-file -Dfile=%VLILLE_CHECKER_DIR%/libs/osmbonuspack.jar -DgroupId=org.osmdroid -DartifactId=osmdroid-bonuspack -Dversion=1.0 -Dpackaging=apklib
+
+Build Version:2.2,5,!not a release
 
 Auto Update Mode:None
 #Can't find version code on playmarket
