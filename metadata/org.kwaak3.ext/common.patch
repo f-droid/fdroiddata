@@ -1,0 +1,406 @@
+From 6c8a42f869b1a5a01989aa307fcd49c80af0a4cd Mon Sep 17 00:00:00 2001
+From: Tasssadar <vbocek@gmail.com>
+Date: Thu, 17 Mar 2011 22:02:55 +0100
+Subject: [PATCH] add Q3 icon
+
+---
+ kwaak/project/AndroidManifest.xml             |    2 +-
+ kwaak/project/bin/classes.dex                 |  Bin 16844 -> 16872 bytes
+ kwaak/project/bin/kwaak3.apk                  |  Bin 100679 -> 196767 bytes
+ kwaak/project/bin/org/kwaak3/R$drawable.class |  Bin 376 -> 405 bytes
+ kwaak/project/bin/org/kwaak3/R$id.class       |  Bin 636 -> 636 bytes
+ kwaak/project/bin/org/kwaak3/R$layout.class   |  Bin 370 -> 370 bytes
+ kwaak/project/bin/org/kwaak3/R$string.class   |  Bin 374 -> 374 bytes
+ kwaak/project/bin/resources.ap_               |  Bin 11652 -> 107594 bytes
+ kwaak/project/gen/org/kwaak3/R.java           |    1 +
+ kwaak/project/res/drawable-hdpi/icon2.png     |  Bin 0 -> 33053 bytes
+ kwaak/project/res/drawable-ldpi/icon2.png     |  Bin 0 -> 33053 bytes
+ kwaak/project/res/drawable-mdpi/icon2.png     |  Bin 0 -> 33053 bytes
+ 12 files changed, 2 insertions(+), 1 deletion(-)
+ create mode 100644 kwaak/project/res/drawable-hdpi/icon2.png
+ create mode 100644 kwaak/project/res/drawable-ldpi/icon2.png
+ create mode 100644 kwaak/project/res/drawable-mdpi/icon2.png
+
+diff --git a/ioquake3/Makefile.local b/ioquake3/Makefile.local
+index 7b7bafa..b50868d 100644
+--- a/ioquake3/Makefile.local
++++ b/ioquake3/Makefile.local
+@@ -1,11 +1,13 @@
+ COMPILE_ARCH=arm
+ COMPILE_PLATFORM=linux
+-ANDROID_NDK_DIR=/home/roderick/android/android-ndk-1.6_r1
+-CC=/home/roderick/android/arm-eabi-4.4.0/bin/arm-eabi-gcc
++ANDROID_NDK_DIR= /home/tassadar/android-ndk-r5b
++CC=/home/tassadar/arm-eabi-4.4.0/bin/arm-eabi-gcc
+ #ANDROID_CFLAGS=-mcpu=cortex-a8 -mfloat-abi=softfp -mfpu=neon -fpic -fno-short-enums -ffunction-sections -funwind-tables -fstack-protector -ftree-vectorize -fsingle-precision-constant
++#ANDROID_CFLAGS=-march=armv6 -mtune=xscale -msoft-float -fpic -mthumb-interwork -ffunction-sections -funwind-tables -fstack-protector -fno-short-enums -D__ARM_ARCH_6__
++#ANDROID_CFLAGS=-march=armv5te -mtune=xscale -msoft-float -fpic -mthumb-interwork -ffunction-sections -funwind-tables -fstack-protector -fno-short-enums -D__ARM_ARCH_5__ -D__ARM_ARCH_5T__  -D__ARM_ARCH_5E__ -D__ARM_ARCH_5TE__
+ ANDROID_CFLAGS=-march=armv5te -mtune=xscale -msoft-float -fpic -mthumb-interwork -ffunction-sections -funwind-tables -fstack-protector -fno-short-enums -D__ARM_ARCH_5__ -D__ARM_ARCH_5T__  -D__ARM_ARCH_5E__ -D__ARM_ARCH_5TE__
+-CFLAGS=$(ANDROID_CFLAGS) -I$(ANDROID_NDK_DIR)/build/platforms/android-4/arch-arm/usr/include -DANDROID -D__linux__ -D__MATH_NEON
+-LDFLAGS=-nostdlib -L$(ANDROID_NDK_DIR)/build/platforms/android-4/arch-arm/usr/lib
++CFLAGS=$(ANDROID_CFLAGS) -I$(ANDROID_NDK_DIR)/platforms/android-8/arch-arm/usr/include -DANDROID -D__linux__ -D__MATH_NEON
++LDFLAGS=-nostdlib -L$(ANDROID_NDK_DIR)/platforms/android-8/arch-arm/usr/lib
+ BUILD_CLIENT=1
+ BUILD_CLIENT_SMP=0
+ BUILD_GAME_QVM=0
+diff --git a/ioquake3/code/qcommon/common.c b/ioquake3/code/qcommon/common.c
+index ac91a64..11671f1 100644
+--- a/ioquake3/code/qcommon/common.c
++++ b/ioquake3/code/qcommon/common.c
+@@ -244,7 +244,7 @@ void QDECL Com_Error( int code, const char *fmt, ... ) {
+ 	static int	lastErrorTime;
+ 	static int	errorCount;
+ 	int			currentTime;
+-
++        Com_Printf("Com_Error");
+ 	Cvar_Set( "com_errorCode", va( "%i", code ) );
+ 
+ 	// when we are running automated scripts, make sure we
+@@ -316,7 +316,7 @@ void QDECL Com_Error( int code, const char *fmt, ... ) {
+ 	}
+ 
+ 	Com_Shutdown ();
+-
++        Com_Printf("%s", com_errorMessage);
+ 	Sys_Error ("%s", com_errorMessage);
+ }
+ 
+diff --git a/ioquake3/code/renderer/qgl.h b/ioquake3/code/renderer/qgl.h
+index 4d9e076..c78afdd 100644
+--- a/ioquake3/code/renderer/qgl.h
++++ b/ioquake3/code/renderer/qgl.h
+@@ -46,7 +46,7 @@
+ #include "macosx_glimp.h"
+ 
+ #elif defined( __linux__ )
+-
++#include <GLES/glplatform.h>
+ #include <GLES/gl.h>
+ 
+ #include "../android/android_glimp.h"
+diff --git a/ioquake3/code/sys/con_tty.c b/ioquake3/code/sys/con_tty.c
+index 0c87a0e..e69fa86 100644
+--- a/ioquake3/code/sys/con_tty.c
++++ b/ioquake3/code/sys/con_tty.c
+@@ -271,8 +271,8 @@ void CON_Init( void )
+ 	|| (term && (!strcmp(term, "raw") || !strcmp(term, "dumb"))))
+ 	{
+ 		Com_Printf("tty console mode disabled\n");
+-		ttycon_on = qfalse;
+-		stdin_active = qtrue;
++		ttycon_on = qtrue;
++		stdin_active = qfalse;
+ 		return;
+ 	}
+ 
+diff --git a/ioquake3/code/sys/sys_main.c b/ioquake3/code/sys/sys_main.c
+index fa3ca71..9053c83 100644
+--- a/ioquake3/code/sys/sys_main.c
++++ b/ioquake3/code/sys/sys_main.c
+@@ -42,6 +42,10 @@
+ #endif
+ #endif
+ #endif
++//#include "../SDL12/include/SDL_active.h"
++//#define SDL_APPMOUSEFOCUS 0x01 /* The app has mouse coverage */
++//#define SDL_APPINPUTFOCUS 0x02 /* The app has input focus */
++//#define SDL_APPACTIVE 0x04 /* The application is active */
+ 
+ #include "sys_local.h"
+ #include "sys_loadlib.h"
+@@ -164,6 +168,7 @@ void Sys_Exit( int ex )
+ */
+ void Sys_Quit( void )
+ {
++   Com_Printf("sys_quit");
+ 	CL_Shutdown( );
+ 	Sys_Exit( 0 );
+ }
+@@ -294,7 +299,7 @@ void Sys_Error( const char *error, ... )
+ {
+ 	va_list argptr;
+ 	char    string[1024];
+-
++Com_Printf("sys_error");
+ 	CL_Shutdown ();
+ 
+ 	va_start (argptr,error);
+@@ -503,6 +508,8 @@ void Sys_SigHandler( int signal )
+ 		signalcaught = qtrue;
+ 		fprintf( stderr, "Received signal %d, exiting...\n", signal );
+ #ifndef DEDICATED
++Com_Printf("sighandler %d", signal);
++		
+ 		CL_Shutdown();
+ #endif
+ 		SV_Shutdown( "Signal caught" );
+@@ -574,20 +581,15 @@ int main( int argc, char **argv )
+ 	signal( SIGSEGV, Sys_SigHandler );
+ 	signal( SIGTERM, Sys_SigHandler );
+ 
+-#if 0
+-	while( 1 )
++/*	while( 1 )
+ 	{
+-#if !defined(NOKIA)
+-#ifndef DEDICATED
+-		int appState = SDL_GetAppState( );
+ 
+-		Cvar_SetValue( "com_unfocused",	!( appState & SDL_APPINPUTFOCUS ) );
+-		Cvar_SetValue( "com_minimized", !( appState & SDL_APPACTIVE ) );
+-#endif
+-#endif
++//		int appState = SDL_GetAppState( );
+ 
+-	}
+-#endif
++                Cvar_SetValue( "com_unfocused", qfalse );
++		Cvar_SetValue( "com_minimized", qfalse );
++
++	}*/
+ 
+ 	return 0;
+ }
+--- a/kwaak/project/jni/kwaakjni.c
++++ b/kwaak/project/jni/kwaakjni.c
+@@ -42,7 +42,7 @@
+ jmethodID android_setMenuState;
+ 
+ /* Contains the game directory e.g. /mnt/sdcard/quake3 */
+-static char* game_dir=NULL;
++static char* game_dir="";
+ 
+ /* Containts the path to /data/data/(package_name)/libs */
+ static char* lib_dir=NULL;
+@@ -58,7 +58,7 @@
+ static void *libdl;
+ static int init=0;
+ 
+-//#define DEBUG
++#define DEBUG
+ typedef enum fp_type 
+ {
+      FP_TYPE_NONE = 0,
+@@ -201,7 +201,7 @@ void setMenuState(int state)
+     __android_log_print(ANDROID_LOG_DEBUG, "Quake_JNI", "setMenuState state=%d", state);
+ #endif
+ 
+-    (*env)->CallVoidMethod(env, kwaakRendererObj, android_setMenuState, state);
++   // (*env)->CallVoidMethod(env, kwaakRendererObj, android_setMenuState, state);
+ }
+ 
+ int JNI_OnLoad(JavaVM* vm, void* reserved)
+diff --git a/kwaak/project/src/org/kwaak3/KwaakJNI.java b/kwaak/project/src/org/kwaak3/KwaakJNI.java
+index 6610890..3163de7 100644
+--- a/kwaak/project/src/org/kwaak3/KwaakJNI.java
++++ b/kwaak/project/src/org/kwaak3/KwaakJNI.java
+@@ -29,11 +29,13 @@
+ 	public static native void enableLightmaps(boolean enable);
+ 	public static native void setAudio(KwaakAudio audio);
+ 	public static native void showFramerate(boolean enable);
++
+ 	
+ 	/* Initialize the game engine */
+ 	public static native void initGame(int width, int height);
+ 
+ 	public static native void setLibraryDirectory(String path);
++	public static native void setGameDirectory(String path);
+ 
+ 	/* Compute and draw a new frame */
+ 	public static native void drawFrame();
+diff --git a/kwaak/project/src/org/kwaak3/KwaakRenderer.java b/kwaak/project/src/org/kwaak3/KwaakRenderer.java
+index 9b35afe..6b3072f 100644
+--- a/kwaak/project/src/org/kwaak3/KwaakRenderer.java
++++ b/kwaak/project/src/org/kwaak3/KwaakRenderer.java
+@@ -32,9 +32,11 @@ public KwaakRenderer() {
+ 		super();
+ 	}
+ 
++	
+ 	public void onDrawFrame(GL10 gl) {
+ 		/* Compute a new frame. After this call completes, Android will perform a eglSwapBuffers */
+-		KwaakJNI.drawFrame();
++		if(mInit)
++			KwaakJNI.drawFrame();
+ 	}
+ 	
+ 	public void onSurfaceChanged(GL10 gl, int width, int height) {
+diff --git a/kwaak/project/src/org/kwaak3/KwaakView.java b/kwaak/project/src/org/kwaak3/KwaakView.java
+index b65a717..02b500f 100644
+--- a/kwaak/project/src/org/kwaak3/KwaakView.java
++++ b/kwaak/project/src/org/kwaak3/KwaakView.java
+@@ -32,19 +32,24 @@
+ 	
+ 	public KwaakView(Context context){
+ 		super(context);
+-
+-		/* We need the path to the library directory for dlopen in our JNI library */
++	
++		
++		
++	/* We need the path to the library directory for dlopen in our JNI library */
+ 		String cache_dir, lib_dir;
+ 		try {
+ 			cache_dir = context.getCacheDir().getCanonicalPath();
++			
+ 			lib_dir = cache_dir.replace("cache", "lib");
+ 		} catch (IOException e) {
+ 			e.printStackTrace();
+ 			lib_dir = "/data/data/org.kwaak3/lib";
+ 		}
++		KwaakJNI.setGameDirectory(android.os.Environment.getExternalStorageDirectory().getPath() + "/quake3");
+ 		KwaakJNI.setLibraryDirectory(lib_dir);
+ 		
++		
+ 		mKwaakRenderer = new KwaakRenderer();
+ 		setRenderer(mKwaakRenderer);
+ 
+ diff -Ndaur org.kwaak3.ext.old/mkjni.sh org.kwaak3.ext/mkjni.sh
+--- org.kwaak3.ext.old/mkjni.sh	1970-01-01 10:00:00.000000000 +1000
++++ org.kwaak3.ext/mkjni.sh	2012-12-13 13:16:34.319760324 +1100
+@@ -0,0 +1,88 @@
++#!/bin/bash -e
++
++NDK="$ANDROID_NDK"
++
++if [ "$NDK_DEBUG" == "1" ]; then
++  MODE=debug
++else
++  MODE=release
++fi
++
++function mkjni()
++{
++  if [ "$NDK_DEBUG" == "1" ]; then
++    ANDROID_CFLAGS="$ANDROID_CFLAGS"
++  else
++    ANDROID_CFLAGS="$ANDROID_CFLAGS -ffunction-sections"
++  fi
++
++  pushd ioquake3
++
++  # XXX: ioquake3 assumes, that NOKIA="OpenGL ES"
++  CC="$CC --sysroot=$SYSROOT" ANDROID_NDK_DIR="$NDK" LDFLAGS="$LDFLAGS" \
++  CFLAGS="$ANDROID_CFLAGS -fno-short-enums -fpic -fstack-protector -DANDROID -DNOKIA" \
++  COMPILE_ARCH=$(uname -m | sed -e s/i.86/i386/) ARCH=$ARCH make -e $MODE
++
++  popd
++}
++
++# build ARM
++ARCH=arm
++TRIPLEX=arm-linux-androideabi
++# API 4 is needed by native GLES
++SYSROOT="$NDK/platforms/android-4/arch-arm/"
++CC="$NDK/toolchains/$TRIPLEX-4.6/prebuilt/*/bin/$TRIPLEX-gcc"
++
++mkdir -p kwaak/project/jni/prebuilt/armeabi/
++mkdir -p kwaak/project/jni/prebuilt/armeabi-v7a/
++
++# ARMv6
++ANDROID_CFLAGS="-march=armv5te -mtune=xscale -msoft-float -mthumb-interwork -funwind-tables -D__ARM_ARCH_5__ -D__ARM_ARCH_5T__  -D__ARM_ARCH_5E__ -D__ARM_ARCH_5TE__"
++mkjni
++
++# ARMv6 with VFP support, sorry
++cp ioquake3/build/$MODE-linux-arm/libquake3.so kwaak/project/jni/prebuilt/armeabi/libquake3.so
++cp ioquake3/build/$MODE-linux-arm/libquake3.so kwaak/project/jni/prebuilt/armeabi/libquake3_vfp.so
++cp ioquake3/build/$MODE-linux-arm/baseq3/{libcgamearm.so,libuiarm.so,libqagamearm.so} \
++  kwaak/project/jni/prebuilt/armeabi/
++
++rm -rf ioquake3/build/$MODE-linux-arm/*
++
++# ARMv7
++ANDROID_CFLAGS="-march=armv7-a -mfloat-abi=softfp -mfpu=vfpv3-d16 -funwind-tables"
++mkjni
++
++cp ioquake3/build/$MODE-linux-arm/libquake3.so kwaak/project/jni/prebuilt/armeabi-v7a/libquake3_vfp.so
++cp ioquake3/build/$MODE-linux-arm/baseq3/{libcgamearm.so,libuiarm.so,libqagamearm.so} \
++  kwaak/project/jni/prebuilt/armeabi-v7a/
++
++rm -rf ioquake3/build/$MODE-linux-arm/*
++
++# ARMv7 - Neon
++ANDROID_CFLAGS="-mtune=cortex-a8 -mfloat-abi=softfp -mfpu=neon -funwind-tables -ftree-vectorize -fsingle-precision-constant -D__MATH_NEON"
++LDFLAGS='-march=armv7-a -Wl,--fix-cortex-a8'
++mkjni
++
++# only libquake3.so is Neon-specific, rest are same for all ARM versions
++cp ioquake3/build/$MODE-linux-arm/libquake3.so kwaak/project/jni/prebuilt/armeabi-v7a/libquake3_neon.so
++
++LDFLAGS=""
++
++# these platforms aren't yet supported by upstream
++
++# build MIPS
++ARCH=mips
++TRIPLEX=mipsel-linux-android
++SYSROOT="$NDK/platforms/android-9/arch-mips/"
++ANDROID_CFLAGS="-march=mips32 -mhard-float"
++CC="$NDK/toolchains/$TRIPLEX-4.6/prebuilt/*/bin/$TRIPLEX-gcc"
++#mkjni
++
++# build i686
++ARCH=x86
++TRIPLEX=i686-linux-android
++SYSROOT="$NDK/platforms/android-9/arch-x86/"
++# NDK docs suggest -mtune=atom, but my ancient notebook, used for testing, disagrees
++ANDROID_CFLAGS="-march=i686 -mtune=pentium4 -mstackrealign -msse2 -mfpmath=sse -m32"
++CC="$NDK/toolchains/$ARCH-4.6/prebuilt/*/bin/$TRIPLEX-gcc"
++#mkjni
+diff -Ndaur org.kwaak3.ext.old/kwaak/Application.mk org.kwaak3.ext/kwaak/Application.mk
+--- org.kwaak3.ext.old/kwaak/Application.mk	2012-12-12 20:51:18.389663008 +1100
++++ org.kwaak3.ext/kwaak/Application.mk	1970-01-01 10:00:00.000000000 +1000
+@@ -1,2 +0,0 @@
+-APP_MODULES      := kwaakjni
+-APP_PROJECT_PATH := $(call my-dir)/project
+diff -Ndaur org.kwaak3.ext.old/kwaak/project/jni/Android.mk org.kwaak3.ext/kwaak/project/jni/Android.mk
+--- org.kwaak3.ext.old/kwaak/project/jni/Android.mk	2012-12-12 20:51:18.419663483 +1100
++++ org.kwaak3.ext/kwaak/project/jni/Android.mk	2012-12-13 14:08:50.212529088 +1100
+@@ -21,3 +21,5 @@
+ LOCAL_SRC_FILES := kwaakjni.c
+ 
+ include $(BUILD_SHARED_LIBRARY)
++
++include $(LOCAL_PATH)/prebuilt.mk
+diff -Ndaur org.kwaak3.ext.old/kwaak/project/jni/Application.mk org.kwaak3.ext/kwaak/project/jni/Application.mk
+--- org.kwaak3.ext.old/kwaak/project/jni/Application.mk	1970-01-01 10:00:00.000000000 +1000
++++ org.kwaak3.ext/kwaak/project/jni/Application.mk	2012-12-13 13:56:58.207971364 +1100
+@@ -0,0 +1,3 @@
++APP_PROJECT_PATH := $(call my-dir)/..
++
++APP_ABI := armeabi armeabi-v7a
+diff -Ndaur org.kwaak3.ext.old/kwaak/project/jni/prebuilt.mk org.kwaak3.ext/kwaak/project/jni/prebuilt.mk
+--- org.kwaak3.ext.old/kwaak/project/jni/prebuilt.mk	1970-01-01 10:00:00.000000000 +1000
++++ org.kwaak3.ext/kwaak/project/jni/prebuilt.mk	2012-12-13 13:18:02.831155648 +1100
+@@ -0,0 +1,31 @@
++LOCAL_PATH := $(call my-dir)
++
++include $(CLEAR_VARS)
++LOCAL_MODULE := libquake3
++LOCAL_SRC_FILES := prebuilt/armeabi/libquake3.so
++include $(PREBUILT_SHARED_LIBRARY)
++
++include $(CLEAR_VARS)
++LOCAL_MODULE := libquake3_vfp
++LOCAL_SRC_FILES := prebuilt/$(TARGET_ARCH_ABI)/libquake3_vfp.so
++include $(PREBUILT_SHARED_LIBRARY)
++
++include $(CLEAR_VARS)
++LOCAL_MODULE := libquake3_neon
++LOCAL_SRC_FILES := prebuilt/armeabi-v7a/libquake3_neon.so
++include $(PREBUILT_SHARED_LIBRARY)
++
++include $(CLEAR_VARS)
++LOCAL_MODULE := libcgamearm
++LOCAL_SRC_FILES := prebuilt/$(TARGET_ARCH_ABI)/libcgamearm.so
++include $(PREBUILT_SHARED_LIBRARY)
++
++include $(CLEAR_VARS)
++LOCAL_MODULE := libuiarm
++LOCAL_SRC_FILES := prebuilt/$(TARGET_ARCH_ABI)/libuiarm.so
++include $(PREBUILT_SHARED_LIBRARY)
++
++include $(CLEAR_VARS)
++LOCAL_MODULE := libqagamearm
++LOCAL_SRC_FILES := prebuilt/$(TARGET_ARCH_ABI)/libqagamearm.so
++include $(PREBUILT_SHARED_LIBRARY)
