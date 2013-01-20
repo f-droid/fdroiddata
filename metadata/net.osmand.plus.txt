@@ -8,15 +8,21 @@ Donate:http://code.google.com/p/osmand/#Please_support_the_project
 Name:OsmAnd~
 Summary:Maps & navigation; online and off
 Description:
-Osmand~'s features can be extended by enabling the plugins. All plugins are already present and include online
-maps from many sources, tracking, OSM editing and accessibility enhancements. Map data of both vector 
-and raster types can be stored on the phone memory card for offline usage, and navigation by default uses 
-offline methods. Map data packages for many territories are available from the Osmand website as well as a 
-desktop application for creating your own. Donations by way of PayPal or BidforFix are accepted.
+Osmand~'s features can be extended by enabling the plugins. All plugins are 
+already present and include online
+maps from many sources, tracking, OSM editing and accessibility enhancements. 
+Map data of both vector 
+and raster types can be stored on the phone memory card for offline usage, and 
+navigation by default uses 
+offline methods. Map data packages for many territories are available from 
+the Osmand website as well as a 
+desktop application for creating your own. Donations by way of PayPal or 
+BidforFix are accepted.
 
-Osmand~ is the generic name for builds of Osmand not done by the developers, though 
-f-droid.org of course tries to be as faithful as possible to the releases. Prior to v0.8.2 native 
-code isn't used, meaning the apk is smaller. x86 and MIPS modules are included in the apk.
+Osmand~ is the generic name for builds of Osmand not done by the developers, 
+though 
+f-droid.org of course tries to be as faithful as possible to the releases. 
+x86 and MIPS modules are included in the apk.
 .
 
 #Don't use master branch
@@ -47,7 +53,18 @@ cp ../DataExtractionOSM/build/OsmAndMapCreator.jar libs/ && \
 zip -d libs/OsmAndMapCreator.jar net/osmand/LogUtil.class && \
 cp -r ../DataExtractionOSM/build/lib/ libs/
 
-#Build Version:1.0.0,99,21fd17b8c,forceversion=yes,forcevercode=yes
+#Should build from head of v1.1.0 branch; jenkins is inactive; test without jni!
+Build Version:1.1.0,110,9e0f825531,subdir=OsmAnd,encoding=utf-8,\
+submodules=yes,update=force,srclibs=OsmAnd-tools@d67969427e;OsmAnd-core@62247627bd,prebuild=\
+sed -i 's/app_version">[^<]*/app_version">1.1.0-fdroid/' res/values/no_translate.xml && \
+sed -i 's@..\/core@$$OsmAnd-core$$@g' $$OsmAnd-tools$$/OsmAndMapCreator/build.xml && \
+sed -i 's/jar\,\ junits/jar/g' $$OsmAnd-tools$$/OsmAndMapCreator/build.xml && \
+sed -i 's/value="lib"/value="libs"/g' $$OsmAnd-tools$$/OsmAndMapCreator/build.xml && \
+mv $$OsmAnd-tools$$/OsmAndMapCreator/lib $$OsmAnd-tools$$/OsmAndMapCreator/libs && \
+ant compile build -f $$OsmAnd-tools$$/OsmAndMapCreator/build.xml && \
+cp $$OsmAnd-tools$$/OsmAndMapCreator/build/OsmAndMapCreator.jar libs/ && \
+cp $$OsmAnd-tools$$/OsmAndMapCreator/build/lib/OsmAnd-core.jar libs/ && rm ant.properties,buildjni=no
+
 Auto Update Mode:None
 Update Check Mode:Market
 Current Version:1.1.0
