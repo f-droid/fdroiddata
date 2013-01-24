@@ -1,4 +1,4 @@
-Disabled:Blobs in assets apart from Busybox and Constants needs patching
+Disabled:Need to build busybox binaries from source with NDK
 Category:System
 License:Apache2
 Web Site:http://code.google.com/p/busybox-android/
@@ -30,21 +30,19 @@ Build Version:7.5,105,!No source available
 Build Version:7.6.1,112,!No source available
 Build Version:7.8.3,117,!No source available
 
+#Sketch: Blobs in assets apart from Busybox and /src/.../Constants.java needs patching
 Build Version:9.6.3,141,26,subdir=app,srclibs=\
-ViewPagerIndicator@2.2.3;RootTools@211;Busybox@c9677ed83;BusyboxConfigs@835af752d,prebuild=\
+ViewPagerIndicator@2.2.3;RootTools@211;BusyboxConfigs@835af752d,prebuild=\
 sed -i 's@\(android.library.reference.1=\).*@\1$$ViewPagerIndicator$$@' project.properties && \
-mkdir -p libs/ && cp -r $$RootTools$$ . && cd RootTools && ant debug && \
+rm -f ../binaries/* && mkdir -p libs/ && cp -r $$RootTools$$ . && cd RootTools && ant debug && \
 ant -f makejar.ant && mv roottools.jar ../libs/ && ant clean && cd ../../ && \
-mkdir -p busybox/ && cp -r $$Busybox$$/* busybox/ && \
-cp -f $$BusyboxConfigs$$/android_ndk_stericson-like busybox/.config && \
-rm -f binaries/* && cp $$BusyboxConfigs$$/patches/* patches/ && \
-cd busybox && find ../patches -name * -print 0 | xargs -0 patch -p1 && \
-make CONFIG_SYSROOT="$$NDK$$/platforms/android-9/arch-arm" && \
-mv busybox ../binaries/busybox-1.20-arm && make clean && \
-make CONFIG_SYSROOT="$$NDK$$/platforms/android-9/arch-mips" && \
-mv busybox ../binaries/busybox-1.20-mips && make clean && \
-make CONFIG_SYSROOT="$$NDK$$/platforms/android-9/arch-x86" && \
-mv busybox ../binaries/busybox-1.20-x86 && make clean
+mkdir -p busybox/ && cp -r $$BusyboxConfigs$$/* busybox/ && cd busybox/ && \
+make ARCH="arm" CONFIG_SYSROOT="$$NDK$$/platforms/android-9/arch-arm" && \
+mv busybox-git.arm/busybox ../binaries/busybox-1.20-arm && make clean && \
+make ARCH="mips" CONFIG_SYSROOT="$$NDK$$/platforms/android-9/arch-mips" && \
+mv busybox-git.mips/busybox ../binaries/busybox-1.20-mips && make clean && \
+make ARCH="x86" CONFIG_SYSROOT="$$NDK$$/platforms/android-9/arch-x86" && \
+mv busybox-git.x86/busybox ../binaries/busybox-1.20-x86 && make clean
 
 Auto Update Mode:None
 Update Check Mode:Market
