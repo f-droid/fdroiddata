@@ -1,4 +1,4 @@
-Disabled:Can't build the binaries without patching c libraries, and source is not published anyway
+Disabled:Need to build busybox binaries from source with NDK
 Category:System
 License:Apache2
 Web Site:http://code.google.com/p/busybox-android/
@@ -29,12 +29,21 @@ Build Version:7.2,104,!No source available
 Build Version:7.5,105,!No source available
 Build Version:7.6.1,112,!No source available
 Build Version:7.8.3,117,!No source available
-#Compile busybox with ndk using stericsonlike config and srclib for RootTools. Fork package id?
-#Use srclib or just copy source files as above
-Build Version:9.6.3,141,!blobs 26,subdir=app,srclibs=ViewPagerIndicator@2.2.3;RootTools@211,prebuild=\
-mkdir -p libs/ && cp -r $$RootTools$$ . && cd RootTools && ant debug && \
-ant -f makejar.ant && mv roottools.jar ../libs/ && ant clean && cd .. && \
-sed -i 's@\(android.library.reference.1=\).*@\1$$ViewPagerIndicator$$@' project.properties
+
+#Sketch: Blobs in assets apart from Busybox and /src/.../Constants.java needs patching
+#sed errors when executing make
+Build Version:9.6.3,141,26,subdir=app,srclibs=\
+ViewPagerIndicator@2.2.3;RootTools@211;BusyboxConfigs@835af752d,prebuild=\
+sed -i 's@\(android.library.reference.1=\).*@\1$$ViewPagerIndicator$$@' project.properties && \
+rm -f ../binaries/* && mkdir -p libs/ && cp -r $$RootTools$$ . && cd RootTools && ant debug && \
+ant -f makejar.ant && mv roottools.jar ../libs/ && ant clean && cd ../../ && \
+mkdir -p busybox/ && cd busybox/ && cp -r $$BusyboxConfigs$$/* . &&  \
+make ARCH=arm ANDROID_NDK=$$NDK$$ && \
+mv busybox-git.arm/busybox ../binaries/busybox-1.20-arm && make clean && \
+make ARCH=mips ANDROID_NDK=$$NDK$$ && \
+mv busybox-git.mips/busybox ../binaries/busybox-1.20-mips && make clean && \
+make ARCH=x86 ANDROID_NDK=$$NDK$$ && \
+mv busybox-git.x86/busybox ../binaries/busybox-1.20-x86 && make clean
 
 Auto Update Mode:None
 Update Check Mode:Market
