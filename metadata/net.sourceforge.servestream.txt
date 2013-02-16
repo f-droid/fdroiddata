@@ -25,7 +25,7 @@ in the background. For use with any streaming media servers such as GNUMP3d.
 * Utilizes HTML parsing to allow navigation of HTTP servers that serve HTML pages e.g. http://listenlive.eu or http://magnatune.com/mobile
 .
 
-Repo Type:git-svn
+Repo Type:svn
 #Repo:https://servestream.svn.sourceforge.net/svnroot/servestream/trunk; old url prior to r1160
 Repo:http://svn.code.sf.net/p/servestream/code/trunk
 
@@ -42,25 +42,21 @@ Repo:http://svn.code.sf.net/p/servestream/code/trunk
 #Build Version:0.4.8,58,1031,prebuild=mv lib/ libs/
 #Build Version:0.4.9,59,1049,buildjni=no
 #Build Version:0.4.12,62,1160,buildjni=no
-#adapted from here http://servestream.sourceforge.net/build-servestream.sh. See tags for releases
-Build Version:0.5.1,65,!unknown build server problem 1266,prebuild=export NDK=$$NDK$$ && \
+Build Version:0.5.4,69,1354,prebuild=\
+rm custom_rules.xml && echo "android.library.reference.1=$$ActionBarSherlock$$" >> project.properties && \
 wget http://sourceforge.net/p/servestream/code/1175/tree/ffmpeg/ffmpeg-0.11.1-android-2012-09-18.tar.gz?\
 format=raw --output-document=ffmpeg-0.11.1-android-2012-09-18.tar.gz && \
-wget http://sourceforge.net/p/servestream/code/1175/tree/ffmpeg/scripts/arm-build.sh?\
-format=raw --output-document=arm-build.sh  && \
-wget http://sourceforge.net/p/servestream/code/1175/tree/ffmpeg/scripts/x86-build.sh?\
-format=raw --output-document=x86-build.sh && \
+wget http://sourceforge.net/p/servestream/code/1311/tree/ffmpeg/scripts/arm-build.sh?\
+format=raw --output-document=arm-build.sh && \
 tar -xvf ffmpeg-0.11.1-android-2012-09-18.tar.gz && \
-chmod +x arm-build.sh && chmod +x x86-build.sh && \
+chmod +x arm-build.sh && \
 mv arm-build.sh ffmpeg-0.11.1-android-2012-09-18 && \
-mv x86-build.sh ffmpeg-0.11.1-android-2012-09-18 && \
+sed -i 's/armeabi armeabi-v7a x86 mips/armeabi/g' jni/Application.mk && \
 cd ffmpeg-0.11.1-android-2012-09-18 && ./extract.sh && \
-sed -i 's/make -j4/make -j2/g' arm-build.sh && sed -i 's/make -j4/make -j2/g' x86-build.sh && \
-sed -i 's/bash/sh/g' arm-build.sh && sed -i 's/bash/sh/g' x86-build.sh && \
-sed -i '/PIPESTATUS/d' arm-build.sh && sed -i '/PIPESTATUS/d' x86-build.sh && \
-./arm-build.sh && cp -r build/ffmpeg/* ../jni/ffmpeg/ffmpeg && \
-./x86-build.sh && cp -r build/ffmpeg/* ../jni/ffmpeg/ffmpeg && cd ../,buildjni=yes
-Build Version:0.5.2,66,!waiting on MIPS script
+sed -i 's/bash/sh/g' arm-build.sh && \
+sed -i '/PIPESTATUS/d' arm-build.sh && \
+NDK=$$NDK$$ ./arm-build.sh && cp -r build/ffmpeg/* ../jni/ffmpeg/ffmpeg,buildjni=yes
+Build Version:0.5.5,70,1361,buildjni=no
 
 Auto Update Mode:None
 Update Check Mode:Market
