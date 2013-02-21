@@ -28,7 +28,7 @@ Status: We don't have the latest version of this app because it is difficult
 to build. Nightly builds by the developer are available via the Donate page.
 .
 
-#Don't use master branch
+#Don't use master branch for main app nor srclibs
 Repo Type:git
 Repo:https://github.com/osmandapp/Osmand.git
 
@@ -55,17 +55,21 @@ sed -i 's/app_version">[^<]*/app_version">0.8.2-fdroid/' res/values/no_translate
 cp ../DataExtractionOSM/build/OsmAndMapCreator.jar libs/ && \
 zip -d libs/OsmAndMapCreator.jar net/osmand/LogUtil.class && \
 cp -r ../DataExtractionOSM/build/lib/ libs/
-#Should build from head of v1.1.0 branch; jenkins is inactive; test without jni!
-Build Version:1.1.0,110,!WIP 9e0f825531,subdir=OsmAnd,encoding=utf-8,\
-submodules=yes,update=force,srclibs=OsmAnd-tools@d67969427e;OsmAnd-core@62247627bd,prebuild=\
-sed -i 's/app_version">[^<]*/app_version">1.1.0-fdroid/' res/values/no_translate.xml && \
+
+#ndk-r8b doesn't work but ndk-r8d does;ndk-build isn't building all native bits
+Build Version:1.1.2,110,!more WIP: top-level exceptions errors and native bits missing ceff4509a8,\
+subdir=OsmAnd,encoding=utf-8,\
+srclibs=OsmAnd-tools@94486e332d;OsmAnd-core@4759ffbd96,prebuild=\
+sed -i 's/app_version">[^<]*/app_version">1.1.2-fdroid/' res/values/no_translate.xml && \
 sed -i 's@..\/core@$$OsmAnd-core$$@g' $$OsmAnd-tools$$/OsmAndMapCreator/build.xml && \
-sed -i 's/jar\,\ junits/jar/g' $$OsmAnd-tools$$/OsmAndMapCreator/build.xml && \
-sed -i 's/value="lib"/value="libs"/g' $$OsmAnd-tools$$/OsmAndMapCreator/build.xml && \
-mv $$OsmAnd-tools$$/OsmAndMapCreator/lib $$OsmAnd-tools$$/OsmAndMapCreator/libs && \
-ant compile build -f $$OsmAnd-tools$$/OsmAndMapCreator/build.xml && \
-cp $$OsmAnd-tools$$/OsmAndMapCreator/build/OsmAndMapCreator.jar libs/ && \
-cp $$OsmAnd-tools$$/OsmAndMapCreator/build/lib/OsmAnd-core.jar libs/ && rm ant.properties,buildjni=yes
+sed -i 's@..\/..\/core@$$OsmAnd-core$$@g' build.xml && \
+sed -i 's@..\/..\/core@$$OsmAnd-core$$@g' jni/Android.mk && \
+ant jar -f $$OsmAnd-tools$$/OsmAndMapCreator/build.xml && \
+ant jar -f $$OsmAnd-core$$/OsmAnd-java/build.xml && \
+cp $$OsmAnd-tools$$/OsmAndMapCreator/OsmAndMapCreator.jar libs/ && \
+cp $$OsmAnd-core$$/OsmAnd-java/OsmAnd-core.jar libs/ && \
+zip -d libs/OsmAnd-core.jar net/osmand/PlatformUtil.class && rm ant.properties,\
+buildjni=yes
 
 Auto Update Mode:None
 Update Check Mode:Market
