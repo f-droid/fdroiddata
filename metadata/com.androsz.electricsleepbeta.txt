@@ -13,8 +13,31 @@ ElectricSleep is a smarter alarm clock.
 Repo Type:git
 Repo:https://github.com/jondwillis/ElectricSleep.git
 
-Build Version:1.1.1,50,!can't find output 1.1.1,maven=yes,bindir=target
+Build Version:1.1.1,50,1.1.1,maven=yes,srclibs=NoAnalytics@158a4a,bindir=target,\
+prebuild=sed -i '79s/1.4.2/0.0.1/g' pom.xml && ant clean debug -f $$NoAnalytics$$/build.xml && \
+sed -i '116s/android/android.apps/g' pom.xml && \
+mvn install:install-file \
+	-Dfile=$$NoAnalytics$$/bin/classes.jar \
+	-DgroupId=com.google.android.apps \
+	-DartifactId=analytics \
+	-Dversion=0.0.1 \
+	-Dpackaging=jar 
 
 Update Check Mode:Tags
 Current Version:1.1.1
 Current Version Code:50
+
+Build Version:1.1.1,50,!1.1.1,maven=yes,srclibs=NoAnalytics@158a4a,bindir=target,\
+prebuild=sed -i '79s/1.4.2/0.0.1/g' pom.xml && sed -i '119s/jar/apklib/g' pom.xml && \
+sed -i '116s/android/android.apps/g' pom.xml && zip -j NoAnalytics.apklib $$NoAnalytics$$/* && \
+mvn install:install-file \
+    -Dfile=NoAnalytics.apklib \
+    -DgroupId=com.google.android.apps \
+    -DartifactId=analytics \
+    -Dversion=0.0.1 \
+    -Dpackaging=apklib
+
+Build Version:1.1.1,50,!1.1.1,maven=yes,srclibs=NoAnalytics@158a4a,bindir=target,\
+prebuild=sed -i '115\,120d' pom.xml && cp -r $$NoAnalytics$$/* . 
+
+
