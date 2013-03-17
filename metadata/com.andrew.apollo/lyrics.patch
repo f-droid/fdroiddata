@@ -1,0 +1,392 @@
+diff --git a/libs/jaudiotagger.jar b/libs/jaudiotagger.jar
+deleted file mode 100644
+index 51d7774..0000000
+Binary files a/libs/jaudiotagger.jar and /dev/null differ
+diff --git a/res/layout/lyrics_base.xml b/res/layout/lyrics_base.xml
+deleted file mode 100644
+index 821a8f2..0000000
+--- a/res/layout/lyrics_base.xml
++++ /dev/null
+@@ -1,46 +0,0 @@
+-<?xml version="1.0" encoding="utf-8"?>
+-<!--
+-  Copyright (C) 2012 Andrew Neal
+- 
+-  Licensed under the Apache License, Version 2.0 (the "License");
+-  you may not use this file except in compliance with the License.
+-  You may obtain a copy of the License at
+- 
+-       http://www.apache.org/licenses/LICENSE-2.0
+- 
+-  Unless required by applicable law or agreed to in writing, software
+-  distributed under the License is distributed on an "AS IS" BASIS,
+-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+-  See the License for the specific language governing permissions and
+-  limitations under the License.
+--->
+-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+-    xmlns:app="http://schemas.android.com/apk/res/com.andrew.apollo"
+-    android:layout_width="match_parent"
+-    android:layout_height="match_parent" >
+-
+-    <ScrollView
+-        android:id="@+id/audio_player_lyrics_frame"
+-        android:layout_width="match_parent"
+-        android:layout_height="match_parent"
+-        android:fillViewport="true" >
+-
+-        <com.andrew.apollo.widgets.theme.ThemeableTextView
+-            android:id="@+id/audio_player_lyrics"
+-            android:layout_width="match_parent"
+-            android:layout_height="wrap_content"
+-            android:gravity="center_horizontal"
+-            android:padding="@dimen/list_preferred_item_padding"
+-            android:textStyle="bold"
+-            app:themeResource="lyrics" />
+-    </ScrollView>
+-
+-    <ProgressBar
+-        android:id="@+id/audio_player_lyrics_progess"
+-        style="?android:attr/progressBarStyleLarge"
+-        android:layout_width="wrap_content"
+-        android:layout_height="wrap_content"
+-        android:layout_gravity="center_vertical|center"
+-        android:visibility="gone" />
+-
+-</FrameLayout>
+\ No newline at end of file
+diff --git a/res/menu/audio_player.xml b/res/menu/audio_player.xml
+index 8625074..74af706 100644
+--- a/res/menu/audio_player.xml
++++ b/res/menu/audio_player.xml
+@@ -25,12 +25,8 @@
+         android:showAsAction="never"
+         android:title="@string/menu_equalizer"/>
+     <item
+-        android:id="@+id/menu_download_lyrics"
+-        android:showAsAction="never"
+-        android:title="@string/menu_download_lyrics"/>
+-    <item
+         android:id="@+id/menu_audio_player_ringtone"
+         android:showAsAction="never"
+         android:title="@string/context_menu_use_as_ringtone"/>
+ 
+-</menu>
+\ No newline at end of file
++</menu>
+diff --git a/res/values/strings.xml b/res/values/strings.xml
+index 0f0296d..6ea3bc3 100644
+--- a/res/values/strings.xml
++++ b/res/values/strings.xml
+@@ -38,9 +38,6 @@
+     <string name="menu_save_queue">Save queue</string>
+     <string name="menu_clear_favorites">Clear Favorites</string>
+     <string name="menu_share">Share</string>
+-    <string name="menu_save_lyrics">Save lyrics</string>
+-    <string name="menu_remove_lyrics">Delete lyrics</string>
+-    <string name="menu_download_lyrics">Fetch lyrics</string>
+     <string name="menu_add_to_homescreen">Place on Home screen</string>
+     <string name="menu_equalizer">Equalizer</string>
+     <string name="menu_simple">Simple</string>
+@@ -126,8 +123,6 @@
+     <string name="set_as_ringtone">\"<xliff:g id="name" example="Alarm Bell">%s</xliff:g>\" set as ringtone</string>
+     <string name="playlist_renamed">Playlist renamed</string>
+     <string name="theme_set">set as the theme</string>
+-    <string name="lyrics_saved">lyrics saved</string>
+-    <string name="lyrics_deleted">lyrics deleted</string>
+ 
+     <!-- Settings -->
+     <string name="settings_ui_category">Interface</string>
+@@ -183,7 +178,5 @@
+     <string name="empty_search">No search results found</string>
+     <string name="empty_favorite">Songs you mark as favorites will be shown here.</string>
+     <string name="empty_recent">Albums you\'ve listened to will show up here. Try playing some music.</string>
+-    <string name="no_lyrics">Lyrics for \"<xliff:g id="name">%s</xliff:g>\" could not be found</string>
+-    <string name="try_fetch_lyrics">To fetch lyrics for \"<xliff:g id="name">%s</xliff:g>\" use \"Fetch lyrics\" in the menu.</string>
+ 
+-</resources>
+\ No newline at end of file
++</resources>
+diff --git a/res/values/themeconfig.xml b/res/values/themeconfig.xml
+index bb5fb21..d41a5b7 100644
+--- a/res/values/themeconfig.xml
++++ b/res/values/themeconfig.xml
+@@ -25,9 +25,6 @@
+     <!-- The action bar sub title color -->
+     <color name="action_bar_subtitle">@color/transparent_white</color>
+ 
+-    <!-- Lyrics color -->
+-    <color name="lyrics">@color/white</color>
+-
+     <!-- Adpater lines -->
+     <color name="line_one">@color/white</color>
+     <color name="line_two">@color/transparent_white</color>
+@@ -51,4 +48,4 @@
+     <color name="shop_action">@color/transparent_white</color>
+     <color name="pinn_to_action">@color/transparent_white</color>
+ 
+-</resources>
+\ No newline at end of file
++</resources>
+diff --git a/src/com/andrew/apollo/lyrics/LyricsProvider.java b/src/com/andrew/apollo/lyrics/LyricsProvider.java
+deleted file mode 100644
+index 0ca57be..0000000
+--- a/src/com/andrew/apollo/lyrics/LyricsProvider.java
++++ /dev/null
+@@ -1,22 +0,0 @@
+-
+-package com.andrew.apollo.lyrics;
+-
+-public interface LyricsProvider {
+-
+-    /**
+-     * Gives the lyrics of the song, or null if they werent found
+-     * 
+-     * @param artist Artist name
+-     * @param song Song name
+-     * @return Full lyrics as a {@link String}
+-     */
+-    public String getLyrics(String artist, String song);
+-
+-    /**
+-     * Gives the name of the provider implementation
+-     * 
+-     * @return The name of the lyrics provider
+-     */
+-    public String getProviderName();
+-
+-}
+diff --git a/src/com/andrew/apollo/lyrics/LyricsProviderFactory.java b/src/com/andrew/apollo/lyrics/LyricsProviderFactory.java
+deleted file mode 100644
+index 2aff457..0000000
+--- a/src/com/andrew/apollo/lyrics/LyricsProviderFactory.java
++++ /dev/null
+@@ -1,27 +0,0 @@
+-
+-package com.andrew.apollo.lyrics;
+-
+-public final class LyricsProviderFactory {
+-
+-    /* This class is never initiated. */
+-    public LyricsProviderFactory() {
+-    }
+-
+-    /**
+-     * @param filePath The path to save the lyrics.
+-     * @return A new instance of {@link OfflineLyricsProvider}.
+-     */
+-    public static final LyricsProvider getOfflineProvider(String filePath) {
+-        return new OfflineLyricsProvider(filePath);
+-    }
+-
+-    /**
+-     * @return The current lyrics provider.
+-     */
+-    public static final LyricsProvider getMainOnlineProvider() {
+-        return new LyricsWikiProvider();
+-    }
+-
+-    // TODO Implement more providers, and also a system to iterate over them
+-
+-}
+diff --git a/src/com/andrew/apollo/lyrics/OfflineLyricsProvider.java b/src/com/andrew/apollo/lyrics/OfflineLyricsProvider.java
+deleted file mode 100644
+index dac8738..0000000
+--- a/src/com/andrew/apollo/lyrics/OfflineLyricsProvider.java
++++ /dev/null
+@@ -1,138 +0,0 @@
+-
+-package com.andrew.apollo.lyrics;
+-
+-import org.jaudiotagger.audio.AudioFile;
+-import org.jaudiotagger.audio.AudioFileIO;
+-import org.jaudiotagger.audio.exceptions.CannotReadException;
+-import org.jaudiotagger.audio.exceptions.CannotWriteException;
+-import org.jaudiotagger.audio.exceptions.InvalidAudioFrameException;
+-import org.jaudiotagger.audio.exceptions.ReadOnlyFileException;
+-import org.jaudiotagger.tag.FieldKey;
+-import org.jaudiotagger.tag.Tag;
+-import org.jaudiotagger.tag.TagException;
+-
+-import java.io.File;
+-import java.io.IOException;
+-
+-public class OfflineLyricsProvider implements LyricsProvider {
+-
+-    private File mAudioFile;
+-
+-    /**
+-     * Constructor of <code>OfflineLyricsProvider</code>
+-     * 
+-     * @param filePath The path to save the lyrics
+-     */
+-    public OfflineLyricsProvider(final String filePath) {
+-        setTrackFile(filePath);
+-    }
+-
+-    /**
+-     * @param path The file to save our {@link File}
+-     */
+-    public void setTrackFile(final String path) {
+-        if (path == null) {
+-            return;
+-        }
+-        mAudioFile = new File(path);
+-    }
+-
+-    /**
+-     * {@inheritDoc}
+-     */
+-    @Override
+-    public String getLyrics(final String artist, final String song) {
+-        String lyrics = null;
+-        try {
+-            if (mAudioFile == null) {
+-                return null;
+-            }
+-            if (mAudioFile.exists()) {
+-                // Use jAudioTagger library to get the file's lyrics
+-                final AudioFile file = AudioFileIO.read(mAudioFile);
+-                final Tag tag = file.getTag();
+-                lyrics = tag.getFirst(FieldKey.LYRICS);
+-            }
+-        } catch (final ReadOnlyFileException e) {
+-            e.printStackTrace();
+-        } catch (final CannotReadException e) {
+-            e.printStackTrace();
+-        } catch (final IOException e) {
+-            e.printStackTrace();
+-        } catch (final TagException e) {
+-            e.printStackTrace();
+-        } catch (final InvalidAudioFrameException e) {
+-            e.printStackTrace();
+-        } catch (final UnsupportedOperationException e) {
+-            e.printStackTrace();
+-        }
+-        return lyrics;
+-    }
+-
+-    /**
+-     * {@inheritDoc}
+-     */
+-    @Override
+-    public String getProviderName() {
+-        return "File metadata";
+-    }
+-
+-    /**
+-     * @param lyrics The lyrics to save
+-     * @param filePath The path to save them
+-     */
+-    public static void saveLyrics(final String lyrics, final String filePath) {
+-        try {
+-            final File file = new File(filePath);
+-            if (file.exists()) {
+-                // Use jAudioTagger library to set the file's lyrics
+-                final AudioFile audioFile = AudioFileIO.read(file);
+-                final Tag tag = audioFile.getTag();
+-                tag.setField(FieldKey.LYRICS, lyrics);
+-                audioFile.commit();
+-            }
+-        } catch (final ReadOnlyFileException e) {
+-            e.printStackTrace();
+-        } catch (final CannotReadException e) {
+-            e.printStackTrace();
+-        } catch (final IOException e) {
+-            e.printStackTrace();
+-        } catch (final TagException e) {
+-            e.printStackTrace();
+-        } catch (final InvalidAudioFrameException e) {
+-            e.printStackTrace();
+-        } catch (final CannotWriteException e) {
+-            e.printStackTrace();
+-        } catch (final NullPointerException e) {
+-            e.printStackTrace();
+-        }
+-    }
+-
+-    /**
+-     * @param filePath The path to the lyrics we're deleting
+-     */
+-    public static void deleteLyrics(final String filePath) {
+-        try {
+-            final File file = new File(filePath);
+-            if (file.exists()) {
+-                // Use jAudioTagger library to delete the file's lyrics
+-                final AudioFile audioFile = AudioFileIO.read(file);
+-                final Tag tag = audioFile.getTag();
+-                tag.deleteField(FieldKey.LYRICS);
+-                audioFile.commit();
+-            }
+-        } catch (final ReadOnlyFileException e) {
+-            e.printStackTrace();
+-        } catch (final CannotReadException e) {
+-            e.printStackTrace();
+-        } catch (final IOException e) {
+-            e.printStackTrace();
+-        } catch (final TagException e) {
+-            e.printStackTrace();
+-        } catch (final InvalidAudioFrameException e) {
+-            e.printStackTrace();
+-        } catch (final CannotWriteException e) {
+-            e.printStackTrace();
+-        }
+-    }
+-}
+diff --git a/src/com/andrew/apollo/ui/activities/AudioPlayerActivity.java b/src/com/andrew/apollo/ui/activities/AudioPlayerActivity.java
+index a952f74..840bbdb 100644
+--- a/src/com/andrew/apollo/ui/activities/AudioPlayerActivity.java
++++ b/src/com/andrew/apollo/ui/activities/AudioPlayerActivity.java
+@@ -51,7 +51,6 @@ import com.andrew.apollo.MusicPlaybackService;
+ import com.andrew.apollo.R;
+ import com.andrew.apollo.adapters.PagerAdapter;
+ import com.andrew.apollo.cache.ImageFetcher;
+-import com.andrew.apollo.ui.fragments.LyricsFragment;
+ import com.andrew.apollo.ui.fragments.QueueFragment;
+ import com.andrew.apollo.utils.ApolloUtils;
+ import com.andrew.apollo.utils.MusicUtils;
+@@ -351,10 +350,6 @@ public class AudioPlayerActivity extends SherlockFragmentActivity implements Ser
+                 // Sound effects
+                 NavUtils.openEffectsPanel(this);
+                 return true;
+-            case R.id.menu_download_lyrics:
+-                updateLyrics(true);
+-                hideAlbumArt();
+-                return true;
+             case R.id.menu_settings:
+                 // Settings
+                 NavUtils.openSettings(this);
+@@ -471,8 +466,6 @@ public class AudioPlayerActivity extends SherlockFragmentActivity implements Ser
+         mPagerAdapter = new PagerAdapter(this);
+         // Queue
+         mPagerAdapter.add(QueueFragment.class, null);
+-        // Lyrics
+-        mPagerAdapter.add(LyricsFragment.class, null);
+ 
+         // Initialize the ViewPager
+         mViewPager = (ViewPager)findViewById(R.id.audio_player_pager);
+@@ -548,15 +541,6 @@ public class AudioPlayerActivity extends SherlockFragmentActivity implements Ser
+         mRepeatButton.updateRepeatState();
+     }
+ 
+-    /**
+-     * Refreshes the lyrics and moves the view pager to the lyrics fragment.
+-     */
+-    public void updateLyrics(final boolean force) {
+-        ((LyricsFragment)mPagerAdapter.getFragment(1)).fetchLyrics(force);
+-        if (force && mViewPager.getCurrentItem() != 1) {
+-            mViewPager.setCurrentItem(1, true);
+-        }
+-    }
+ 
+     /**
+      * @param delay When to update
+@@ -884,8 +868,6 @@ public class AudioPlayerActivity extends SherlockFragmentActivity implements Ser
+                 mReference.get().updateNowPlayingInfo();
+                 // Update the favorites icon
+                 mReference.get().invalidateOptionsMenu();
+-                // Update the lyrics
+-                mReference.get().updateLyrics(false);
+             } else if (action.equals(MusicPlaybackService.PLAYSTATE_CHANGED)) {
+                 // Set the play and pause image
+                 mReference.get().mPlayPauseButton.updateState();
