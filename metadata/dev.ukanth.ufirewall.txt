@@ -26,7 +26,7 @@ Requires Root:Yes
 Repo Type:git
 Repo:https://github.com/ukanth/afwall.git
 
-Build Version:1.2.0,120,!wait on merge request 1.2.0,\
+Build Version:1.2.0,120,1.2.0,\
 srclibs=ActionBarSherlock@4.2.0;LockPattern@1c1307;Busybox@83785f0;\
 iptables@android-4.2.2_r1,extlibs=android/android-support-v4.jar,prebuild=\
 rm -rf res/raw/busybox_g1 res/raw/iptables_armv5 external/ && \
@@ -35,13 +35,15 @@ sed -i 's@\(android.library.reference.1=\).*@\1$$ActionBarSherlock$$@' project.p
 sed -i 's@\(android.library.reference.2=\).*@\1$$LockPattern$$@' project.properties && \
 export PATH=$$NDK$$/toolchains/arm-linux-androideabi-4.4.3/prebuilt/linux-x86/bin:$PATH && \
 mkdir -p bb/ && cp -r $$Busybox$$/* bb/ && cd bb/ && \
-wget https://raw.github.com/tias/android-busybox-ndk/bd2bf4f384350a2bb2f81444012a882ddd48662a/android_ndk_defconfigPlus && \
+wget https://raw.github.com/tias/android-busybox-ndk/\
+bd2bf4f384350a2bb2f81444012a882ddd48662a/android_ndk_defconfigPlus && \
 mv android_ndk_defconfigPlus .config && \
-make CONFIG_SYSROOT="$$NDK$$/platforms/android-9/arch-arm" && mv busybox ../res/raw/busybox_g1 && \
-cd ../ && git clone https://android.googlesource.com/platform/external/iptables && cd iptables && \
+make CONFIG_SYSROOT="$$NDK$$/platforms/android-9/arch-arm" && \
+mv busybox ../res/raw/busybox_g1 && cd ../ && \
+git clone https://android.googlesource.com/platform/external/iptables && cd iptables && \
 wget https://hg.adblockplus.org/adblockplusandroid/raw-file/c3c62b79e758/iptables.patch -P ../ && \
 git apply ../iptables.patch && sed -i 's@ndk-build@$$NDK$$/ndk-build@g' Makefile && \
-make all && mv libs/armeabi/iptables ../res/raw/iptables_armv5
+make fixextensions build && mv libs/armeabi/iptables ../res/raw/iptables_armv5
 
 Auto Update Mode:None
 Update Check Mode:Tags
