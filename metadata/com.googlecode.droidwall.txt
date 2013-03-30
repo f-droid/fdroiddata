@@ -1,38 +1,42 @@
-Disabled:Use another firewall like dev.ukanth.ufirewall
 Category:System
 License:GPLv3
 Web Site:http://code.google.com/p/droidwall/
-Source Code:http://code.google.com/p/droidwall/source/browse
+Source Code:http://droidwall.googlecode.com/svn/tags/v1.5.7
 Issue Tracker:http://code.google.com/p/droidwall/issues/list
 
-Summary:Control internet traffic
+Summary:Firewall frontend
 Description:
-A firewall frontend based on iptables.
+This might be used in
+preference to another firewall frontend if you are running
+lower-powered hardware, but be warned that it contains a lot of bugs that
+won't ever get fixed. 
 
-The package ID for this app on Google is different, and it is unlikely that it 
-will get any more
-updates. It won't probably work on Android 4+ and has several issues such as 
-not working until
-well after booting has stopped. There exists a couple of projects aimed at 
-fixing those issues.
+It has been patched to just work with Android 1.6 to 2.3.7. 
+The package ID for this app on Google is different, and it won't 
+be getting any more updates there either. 
 
-Requires root: Yes. iptables has to be run as root.
+Requires root: Yes. iptables (the firewall itself) has to be run as root.
 .
 
 Requires Root:Yes
 
-#N.B: iptables and busybox not built from source
-Repo Type:git-svn
-Repo:http://droidwall.googlecode.com/svn/trunk/
+#The trunk is now (08-2012) empty but svn/tags/ is still populated
+Repo Type:svn
+Repo:http://droidwall.googlecode.com/svn/tags/v1.5.7
 
-#Code has been refactored somehow: some builds have been disabled below as the revision appears to be wrong
-#The trunk is now (08-2012) empty  but svn/tags/ is still populated
-Build Version:1.4.3,143,!Old version in market - not bothering with it
-#Build Version:1.4.6,146,144
-Build Version:1.4.8,148,156
-#Build Version:1.5.3,153,219
-#Build Version:1.5.6,156,245,target=android-8
-Build Version:1.5.7,157,246,target=android-8
+Build Version:1.5.7,157,250,target=android-8,\
+srclibs=Busybox@83785f0,prebuild=rm -rf res/raw/busybox_g1 res/raw/iptables_armv5 \
+external/busybox external/iptables/extensions/initext* external/iptables/obj/ && \
+sed -i 's/android:minSdkVersion=\"3\"/android:minSdkVersion=\"4\" \
+android:maxSdkVersion=\"10\"/g' AndroidManifest.xml && \
+wget https://raw.github.com/tias/android-busybox-ndk/bd2bf4f384350a2bb2f8144401\
+2a882ddd48662a/android_ndk_defconfigPlus -O $$Busybox$$/.config,build=\
+export PATH=$$NDK$$/toolchains/arm-linux-androideabi-4.4.3/prebuilt/linux-x86/bin:$PATH && \
+make CONFIG_SYSROOT="$$NDK$$/platforms/android-9/arch-arm" -C $$Busybox$$ && \
+mv $$Busybox$$/busybox res/raw/busybox_g1 && \
+cd external/iptables && python extensions/fixinit.py && \
+$$NDK$$/ndk-build NDK_PROJECT_PATH=. APP_BUILD_SCRIPT=./Android.mk && \
+mv libs/armeabi/iptables ../../res/raw/iptables_armv5
 
 Update Check Mode:Static
 Current Version:1.5.7
