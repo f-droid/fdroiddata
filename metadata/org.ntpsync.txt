@@ -14,11 +14,34 @@ Synchronises time with NTP servers.
 Repo Type:git
 Repo:https://github.com/dschuermann/ntp-sync.git
 
-Build Version:1.0,1,038ddd0d3e822c535339a2ef1ca513810ff15fd3,subdir=org_ntpsync,prebuild=android update project -p ../org_donations
-Build Version:1.1,2,20bbfdd,subdir=org_ntpsync,prebuild=android update project -p ../org_donations
-Build Version:1.2,3,831529b40c,subdir=org_ntpsync,prebuild=android update project -p ../org_donations
+Build Version:1.0,1,038ddd0d3e822c535339a2ef1ca513810ff15fd3,subdir=org_ntpsync,prebuild=\
+$$SDK$$/tools/android update project -p ../org_donations
+Build Version:1.1,2,20bbfdd,subdir=org_ntpsync,prebuild=\
+$$SDK$$/tools/android update project -p ../org_donations
+Build Version:1.2,3,831529b40c,subdir=org_ntpsync,prebuild=\
+$$SDK$$/tools/android update project -p ../org_donations
+Build Version:1.3,4,ec05df6e39,subdir=NTPSync,\
+srclibs=RootCommands@349ef1335a,extlibs=htmlcleaner/htmlcleaner-2.2.jar,\
+init=cd android-libs && rm -f Donations/custom_rules.xml && \
+git clone https://github.com/dschuermann/HtmlSpanner HS && \
+svn co http://svn.apache.org/repos/asf/commons/proper/net/tags/NET_3_1 && \
+rm -rf NET_3_1/src/test NET_3_1/src/main/java/examples && \
+cd NET_3_1/src/main/java/org/apache/commons/net/ && \
+rm -rf bsd chargen daytime discard echo \
+finger ftp imap nntp pop3 smtp telnet tftp time whois,\
+update=.;android-libs/Donations;android-libs/HS/htmlspanner,prebuild=\
+rm -f libs/root-commands-1.2.jar libs/htmlspanner-0.2-fork.jar libs/commons-net-3.1-ntp-only.jar && \
+cp -f libs/htmlcleaner-2.2.jar android-libs/HS/htmlspanner/libs/ && \
+echo "android.library.reference.2=$$RootCommands$$" >> project.properties && \
+echo "android.library.reference.3=android-libs/HS/htmlspanner" >> project.properties && \
+find . -type f -print0 | xargs -0 sed -i 's/org.rootcommands/org.sufficientlysecure.rootcommands/g' && \
+cp android-libs/Donations/ant-templates/other/DonationsConfig.java \
+android-libs/Donations/src/org/donations/,build=\
+mvn package -Dmaven.test.skip=true -f android-libs/NET_3_1/pom.xml && \
+mv android-libs/NET_3_1/target/commons-net-3.1.jar libs/
 
+Auto Update Mode:None
 Update Check Mode:RepoManifest
-Current Version:1.2
-Current Version Code:3
+Current Version:1.3
+Current Version Code:4
 
