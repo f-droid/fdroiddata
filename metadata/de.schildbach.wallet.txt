@@ -26,6 +26,8 @@ There's a separate version of this application that uses a test version of the
 Bitcoin network. It would be wise to use that first, to verify that everything 
 works for you without using real Bitcoins.
 
+[http://code.google.com/p/bitcoin-wallet/source/browse/wallet/CHANGES Changelog]
+
 The f-droid.org build hasn't been updated in a while as the build process is 
 intricate for us. v2.41 is able to export private keys to local storage, encrypted
 with a password. It also uses bloom filtering to reduce the amount of data 
@@ -59,17 +61,19 @@ prebuild=\
 cd ../integration-android && mvn3 install && cd ../wallet && \
 mvn3 install:install-file -DgroupId=android -DartifactId=android -Dversion=2.3.3_r2 -Dpackaging=jar -Dfile=$$SDK$$/platforms/android-10/android.jar && \
 mvn3 install:install-file -DgroupId=android.support -DartifactId=compatibility-v4 -Dversion=r6 -Dpackaging=jar -Dfile=$$SDK$$/android-compatibility/v4/android-support-v4.jar
-Build Version:2.41,107,!needs maven2 and maven3 c34a67ac9e4e,subdir=wallet,maven=2,\
-bindir=wallet/target,\
-srclibs=BitcoinJWallet@3b7a494a370a,extlibs=android/android-support-v4.jar,\
-init=sed -i 's/_test//' AndroidManifest.xml && find src -name *.java -exec sed -i 's/_test\.R/.R/' {} \;,\
-prebuild=\
-cd ../integration-android && mvn3 install && cd ../wallet && \
-mvn3 install:install-file -DgroupId=android -DartifactId=android -Dversion=4.0.1.2 -Dpackaging=jar -Dfile=$$SDK$$/platforms/android-14/android.jar && \
-mvn3 install:install-file -DgroupId=android.support -DartifactId=compatibility-v4 -Dversion=r11 -Dpackaging=jar -Dfile=libs/android-support-v4.jar
+
+# Need to fix res/values/values.xml to point to right icons etc. and perhaps to use ant instead of maven
+Build Version:2.48,115,!WIP v2.48,forceversion=yes,maven=yes,bindir=wallet/target,\
+srclibs=BitcoinJWallet@release-0.7,init=\
+sed -i 's/_test//' wallet/AndroidManifest.xml && \
+find wallet/src -name *.java -exec sed -i 's/_test\.R/.R/' {} \; && \
+sed -i '57 i \\t<scope>provided</scope>' wallet/pom.xml,build=\
+$$MVN3$$ install -f $$BitcoinJWallet$$/pom.xml && \
+$$MVN3$$ install:install-file -DgroupId=com.google -DartifactId=bitcoinj -Dversion=0.7.3 \
+-Dpackaging=jar -Dfile=$$BitcoinJWallet$$/core/target/bitcoinj-0.7.3.jar
 
 Auto Update Mode:None
-#RM don't work
+# RM/Tags don't work because mvn is called from root dir
 Update Check Mode:Market
 Current Version:2.48
 Current Version Code:115
