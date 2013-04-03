@@ -4,41 +4,47 @@ Web Site:http://code.google.com/p/bitcoin-wallet/
 Source Code:http://code.google.com/p/bitcoin-wallet/source/checkout
 Issue Tracker:http://code.google.com/p/bitcoin-wallet/issues/list
 
-Summary:Wallet for the bitcoin currency
+Summary:Wallet for the Bitcoin currency
 Description:
-A bitcoin wallet, allowing you to store, send and receive bitcoins on your
-device (QR codes and NFC). The initial blockchain setup currently 
-downloads a several
-gigabytes of data, so make sure you use Wifi! The actual blockchain takes 
+N.B The recommended version here is quite old. We will be updating it
+soon and it would be wise to wait for that.
+
+* No cloud server or web service needed. This wallet works peer to peer
+* Display of wallet balance in Bitcoin and various other currencies
+* Sending and receiving of Bitcoin via NFC, QR-codes or Bitcoin URLs
+* Address book for regularly used Bitcoin addresses
+* Enter transactions while offline, will be executed when online
+* Manages blockchain on your device (for security, but see below)
+* System notifications for Bitcoin connectivity and received coins
+* App widget for Bitcoin balance (requirement: app moved from sdcard to phone)
+
+The initial blockchain setup downloads several
+gigabytes of data, so make sure you use WiFi! The actual blockchain takes 
 20MiB of storage,
 and the app is installed to the sdcard by default. When run for the first 
 time, it can 
 happen that the app shows only a white display for some seconds.
 
+Since v2.41 it is able to export private keys to local storage, encrypted
+with a password. It also uses bloom filtering to reduce the amount of data 
+that needs to be downloaded to set up the blockchain. 
+
+See the 
+[http://bitcoin-wallet.googlecode.com/git/wallet/README Readme] for details.
 Use this at your own risk, and be aware that if you lose access to the data
-of this application, you will lose any bitcoins contained in it. To back up
+of this application, you will lose any Bitcoins contained in it. To back up
 the wallet, either; 
 
-# use ADB from the Android SDK if you have Android 4.1+ on the phone (root not required), or 
-# manually back up the files in /data/data/de.schildbach.wallet/files/: <code>#tar cf /sdcard/wallet.tar /data/data/de.schildbach.wallet/files</code> and you may have to change the ownership of the files that you restore. (root required. You can also back up the blockchain.)
+# (From inside the app), export the keys to the sdcard (v2.41+ only)
+# Use ADB from the Android SDK if you have Android 4.1+ on the phone (root not required, but check that it works properly), or 
+# Manually back up the files in /data/data/de.schildbach.wallet/files/: #tar cf /sdcard/wallet.tar /data/data/de.schildbach.wallet/files and you may have to change the ownership of the files that you restore. (root required. You can also back up the blockchain in this way.)
 
 There's a separate version of this application that uses a test version of the 
 Bitcoin network. It would be wise to use that first, to verify that everything 
 works for you without using real Bitcoins.
 
 [http://code.google.com/p/bitcoin-wallet/source/browse/wallet/CHANGES Changelog]
-
-The f-droid.org build hasn't been updated in a while as the build process is 
-intricate for us. v2.41 is able to export private keys to local storage, encrypted
-with a password. It also uses bloom filtering to reduce the amount of data 
-that needs to be downloaded to set up the blockchain. 
-Developer-signed builds are available via the website.
 .
-
-#The application doesn't require root, but if you don't have root you'll have
-#no way of backing up your wallet data, so using it without root doesn't make
-#any sense.
-Requires Root:Yes
 
 Repo Type:git
 Repo:https://code.google.com/p/bitcoin-wallet/
@@ -61,19 +67,17 @@ prebuild=\
 cd ../integration-android && mvn3 install && cd ../wallet && \
 mvn3 install:install-file -DgroupId=android -DartifactId=android -Dversion=2.3.3_r2 -Dpackaging=jar -Dfile=$$SDK$$/platforms/android-10/android.jar && \
 mvn3 install:install-file -DgroupId=android.support -DartifactId=compatibility-v4 -Dversion=r6 -Dpackaging=jar -Dfile=$$SDK$$/android-compatibility/v4/android-support-v4.jar
-
-# Need to fix res/values/values.xml to point to right icons etc. and perhaps to use ant instead of maven
-Build Version:2.48,115,!WIP v2.48,forceversion=yes,maven=yes,bindir=wallet/target,\
-srclibs=BitcoinJWallet@release-0.7,init=\
-sed -i 's/_test//' wallet/AndroidManifest.xml && \
-find wallet/src -name *.java -exec sed -i 's/_test\.R/.R/' {} \; && \
-sed -i '57 i \\t<scope>provided</scope>' wallet/pom.xml,build=\
+# Build from prodnet branch which cherry picks some old commits and commits after tags
+# Next version will be coming from bitcoinj-0.8-prodnet branch -> master or prodnet
+Build Version:2.48,115,!Wait for 3.0 41dc87f5ec,maven=yes,bindir=wallet/target,\
+srclibs=BitcoinJWallet@release-0.7,prebuild=rm -rf market/ && \
+sed -i '57 i \\t<scope>provided</scope>' wallet/pom.xml && \
 $$MVN3$$ install -f $$BitcoinJWallet$$/pom.xml && \
 $$MVN3$$ install:install-file -DgroupId=com.google -DartifactId=bitcoinj -Dversion=0.7.3 \
 -Dpackaging=jar -Dfile=$$BitcoinJWallet$$/core/target/bitcoinj-0.7.3.jar
 
 Auto Update Mode:None
-# RM/Tags don't work because mvn is called from root dir
+# RM/Tags don't work
 Update Check Mode:Market
 Current Version:2.48
 Current Version Code:115
