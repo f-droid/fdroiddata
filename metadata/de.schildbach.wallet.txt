@@ -71,12 +71,15 @@ mvn3 install:install-file -DgroupId=android -DartifactId=android -Dversion=2.3.3
 mvn3 install:install-file -DgroupId=android.support -DartifactId=compatibility-v4 -Dversion=r6 -Dpackaging=jar -Dfile=$$SDK$$/android-compatibility/v4/android-support-v4.jar
 
 # Build from prodnet branch which cherry picks some old commits and commits after tags
-# Next version will be coming from bitcoinj-0.8-prodnet branch -> master or prodnet
+# Next version will be coming from bitcoinj-0.8-prodnet branch -> prodnet
 # Crashes on startup: java.lang.NoClassDefFoundError: com.google.bitcoin.core.NetworkParameters
-Build Version:2.48,115,!WIP 41dc87f5ec,maven=yes,bindir=wallet/target,\
+# The git reset is from the wiki and is used for security
+# Need to do more research into jar provenance and learn to use maven
+Build Version:2.48,115,prodnet,maven=yes,bindir=wallet/target,\
 srclibs=BitcoinJWallet@release-0.7,prebuild=rm -rf market/ && \
-sed -i '57 i \\t<scope>provided</scope>' wallet/pom.xml && \
-$$MVN3$$ clean install -f $$BitcoinJWallet$$/pom.xml
+sed -i 's/sample-integration-android/BitcoinJWallet/g' pom.xml && \
+cp -r $$BitcoinJWallet$$/ . && cd BitcoinJWallet/ && \
+sed -i '12\,13d' pom.xml && git reset --hard a9bd8631b904
 
 Auto Update Mode:None
 # RM/Tags don't work
