@@ -1,0 +1,68 @@
+diff --git a/android-proj/jni/Android.mk b/android-proj/jni/Android.mk
+index 0f83e81..c540c07 100644
+--- a/android-proj/jni/Android.mk
++++ b/android-proj/jni/Android.mk
+@@ -39,25 +39,32 @@ include $(PREBUILT_SHARED_LIBRARY)
+ 
+ include $(CLEAR_VARS)
+ 
+-LOCAL_MODULE := liballegro_ttf-prebuilt
+-LOCAL_SRC_FILES := $(TARGET_ARCH_ABI)/liballegro_ttf-debug.so
++LOCAL_MODULE := liballegro_acodec
++LOCAL_SRC_FILES := $(TARGET_ARCH_ABI)/liballegro_acodec-debug.so
+ include $(PREBUILT_SHARED_LIBRARY)
+ 
+ include $(CLEAR_VARS)
+ 
+-LOCAL_MODULE := libbass-prebuilt
+-LOCAL_SRC_FILES := $(TARGET_ARCH_ABI)/libbass.so
++LOCAL_MODULE := liballegro_audio
++LOCAL_SRC_FILES := $(TARGET_ARCH_ABI)/liballegro_audio-debug.so
+ include $(PREBUILT_SHARED_LIBRARY)
+ 
+ include $(CLEAR_VARS)
+ 
++LOCAL_MODULE := liballegro_ttf-prebuilt
++LOCAL_SRC_FILES := $(TARGET_ARCH_ABI)/liballegro_ttf-debug.so
++include $(PREBUILT_SHARED_LIBRARY)
++
++include $(CLEAR_VARS)
++
++
+ LOCAL_ALLOW_UNDEFINED_SYMBOLS := false
+ LOCAL_MODULE    := Bobby
+ LOCAL_SRC_FILES :=  Bobby.c bassstuff.cpp
+ LOCAL_LDLIBS    :=  
+-LOCAL_CFLAGS    := -I$(ANDROID_NDK_TOOLCHAIN_ROOT)/user/armeabi/include -DDEBUGMODE -DWITHOUT_GAMECENTER
++LOCAL_CFLAGS    := -I$(ANDROID_NDK_TOOLCHAIN_ROOT)/user/armeabi-v7a/include -DDEBUGMODE -DWITHOUT_GAMECENTER -DKCM_AUDIO -I$(ANDROID_NDK_TOOLCHAIN_ROOT)/user/armeabi/include -DDEBUGMODE -DWITHOUT_GAMECENTER -DKCM_AUDIO
+ 
+-LOCAL_LDLIBS    := -L$(ANDROID_NDK_TOOLCHAIN_ROOT)/user/armeabi/lib -L$(LOCAL_PATH)/$(TARGET_ARCH_ABI) -llog libs/$(TARGET_ARCH_ABI)/liballegro-debug.so libs/$(TARGET_ARCH_ABI)/liballegro_primitives-debug.so libs/$(TARGET_ARCH_ABI)/liballegro_image-debug.so libs/$(TARGET_ARCH_ABI)/liballegro_font-debug.so libs/$(TARGET_ARCH_ABI)/liballegro_ttf-debug.so libs/$(TARGET_ARCH_ABI)/libbass.so -lGLESv1_CM
++LOCAL_LDLIBS    := -L$(ANDROID_NDK_TOOLCHAIN_ROOT)/user/armeabi/lib -L$(LOCAL_PATH)/$(TARGET_ARCH_ABI) -llog libs/$(TARGET_ARCH_ABI)/liballegro-debug.so libs/$(TARGET_ARCH_ABI)/liballegro_primitives-debug.so libs/$(TARGET_ARCH_ABI)/liballegro_image-debug.so libs/$(TARGET_ARCH_ABI)/liballegro_font-debug.so libs/$(TARGET_ARCH_ABI)/liballegro_ttf-debug.so libs/$(TARGET_ARCH_ABI)/liballegro_audio-debug.so libs/$(TARGET_ARCH_ABI)/liballegro_acodec-debug.so -lGLESv1_CM
+ 
+ include $(BUILD_SHARED_LIBRARY)
+ 
+diff --git a/android-proj/jni/Application.mk b/android-proj/jni/Application.mk
+index 3a14cf5..4a51fd3 100644
+--- a/android-proj/jni/Application.mk
++++ b/android-proj/jni/Application.mk
+@@ -1,4 +1,4 @@
+ APP_PLATFORM := android-10
+-APP_ABI := armeabi
+-APP_MODULES := liballegro-prebuilt liballegro_primitives-prebuilt liballegro_image-prebuilt liballegro_font-prebuilt liballegro_ttf-prebuilt libbass-prebuilt Bobby
++APP_ABI := armeabi armeabi-v7a 
++APP_MODULES := liballegro-prebuilt liballegro_primitives-prebuilt liballegro_image-prebuilt liballegro_font-prebuilt liballegro_ttf-prebuilt liballegro_acodec liballegro_audio Bobby
+ APP_STL := stlport_static
+diff --git a/android-proj/src/com/nooskewl/bobby/AllegroActivity.java b/android-proj/src/com/nooskewl/bobby/AllegroActivity.java
+index 3e18663..063c0c1 100644
+--- a/android-proj/src/com/nooskewl/bobby/AllegroActivity.java
++++ b/android-proj/src/com/nooskewl/bobby/AllegroActivity.java
+@@ -117,7 +117,8 @@ public class AllegroActivity extends Activity implements SensorEventListener
+       System.loadLibrary("allegro_image-debug");
+       System.loadLibrary("allegro_font-debug");
+       System.loadLibrary("allegro_ttf-debug");
+-      System.loadLibrary("bass");
++      System.loadLibrary("allegro_audio");
++      System.loadLibrary("allegro_acodec");
+       System.loadLibrary("Bobby");
+    }
+ 	
