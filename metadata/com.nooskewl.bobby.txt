@@ -12,9 +12,8 @@ Description:
 Repo Type:git
 Repo:git://nooskewl.com/bobby.git
 
-# missing liballegro_ttf-debug.so and allegro5/allegro_ttf.h
 # allegro seems to be installed for armeabi-v7a not for armeabi
-# need to run make install as root to get freetype headers
+# problems configuring freetype and getting paths right for cmake
 Build Version:1.4.1,2,!WIP c544e260f,subdir=android-proj,\
 patch=bobby.patch,scanignore=toolchain;jni,rm=\
 android-proj/bobby-signed-googleplay.apk;android-proj/bobby-signed-amazon.apk,\
@@ -22,14 +21,18 @@ prebuild=sed -i 's/true/false/g' AndroidManifest.xml && \
 wget http://download.savannah.gnu.org/releases/freetype/freetype-2.4.10.tar.bz2 && \
 tar xvjf freetype-2.4.10.tar.bz2 && rm freetype-2.4.10.tar.bz2 && \
 git clone git://git.code.sf.net/p/alleg/allegro && \
-mkdir -p allegro/build jni/armeabi && mv libs/*.so jni/armeabi/,build=\
+mkdir -p allegro/build jni/armeabi,build=\
 $$NDK$$/build/tools/make-standalone-toolchain.sh \
 --platform=android-9 --install-dir=toolchain && cd freetype-2.4.10/ && \
-./configure --host=arm-linux-androideabi PLATFORM_PREFIX=../toolchain/ \
-NDK_PATH=$$NDK$$ NDK_PLATFORM=android-9 && make && sudo make install && \
+./configure --prefix=../toolchain --host=arm-linux-androideabi --enable-static=yes \
+--enable-shared=no CC=arm-linux-androideabi-gcc \
+CPP=arm-linux-androideabi-cpp AR=arm-linux-androideabi-ar && make && \
 cd ../allegro/ && git checkout 5.1 && cd build/ && \
 cmake .. -DANDROID_NDK_TOOLCHAIN_ROOT=../../toolchain -DWANT_ANDROID=on \
--DWANT_EXAMPLES=OFF -DWANT_DEMO=OFF -DCMAKE_BUILD_TYPE=Debug && \
+-DWANT_EXAMPLES=OFF -DWANT_DEMO=OFF -DCMAKE_BUILD_TYPE=Debug \
+-DFREETYPE_LIBRARY=../../freetype-2.4.10/builds/libfreetype.a -DFREETYPE_INCLUDE_DIR_freetype=\
+../../freetype-2.4.10/include/freetype  -DFREETYPE_INCLUDE_DIR_ft2build=\
+../../freetype-2.4.10/include && \
 make && make install && cd ../../ && mv allegro/build/lib/*.so jni/armeabi/ && \
 ANDROID_NDK_TOOLCHAIN_ROOT=toolchain $$NDK$$/ndk-build,buildjni=no
 
