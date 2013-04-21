@@ -1,0 +1,119 @@
+diff --git a/external/iptables/Android.mk b/external/iptables/Android.mk
+--- a/external/iptables/Android.mk	2012-05-30 14:16:39.408709076 +0400
++++ b/external/iptables/Android.mk	2012-05-30 18:50:01.378032668 +0400
+@@ -1,5 +1,3 @@
+-BUILD_IPTABLES_V14 := 1
+-
+ LOCAL_PATH:= $(call my-dir)
+ 
+ include $(call all-subdir-makefiles)
+diff --git a/external/iptables/extensions/Android.mk b/external/iptables/extensions/Android.mk
+--- a/external/iptables/extensions/Android.mk	2012-05-30 14:16:39.411709447 +0400
++++ b/external/iptables/extensions/Android.mk	2012-06-01 12:24:42.946696872 +0400
+@@ -4,7 +4,13 @@
+ 
+ MY_srcdir:=$(LOCAL_PATH)
+ # Exclude some modules that are problematic to compile (types/header).
+-MY_excluded_modules:=TCPOPTSTRIP
++MY_excluded_modules:=TCPOPTSTRIP MIRROR LOG TTL NETMAP ULOG MASQUERADE icmp ecn SAME realm \
++	SNAT CLUSTERIP ah ECN unclean addrtype ttl dscp NFQUEUE NFLOG physdev TEE CONNSECMARK \
++	SECMARK string recent hashlimit cpu CT sctp AUDIT osf connmark CONNMARK conntrack \
++	quota2 quota TRACE policy u32 udp cluster tos CLASSIFY comment TPROXY RATEEST time \
++	set mark MARK IDLETIMER state devgroup limit LED connlimit pkttype TCPMSS TOS esp \
++	CHECKSUM socket statistic connbytes NOTRACK DSCP iprange length tcpmss mac rateest \
++	helper
+ 
+ MY_pfx_build_mod := $(patsubst ${MY_srcdir}/libxt_%.c,%,$(wildcard ${MY_srcdir}/libxt_*.c))
+ MY_pf4_build_mod := $(patsubst ${MY_srcdir}/libipt_%.c,%,$(wildcard ${MY_srcdir}/libipt_*.c))
+@@ -46,7 +52,8 @@
+ 
+ MY_initext_func := $(addprefix xt_,${MY_pfx_build_mod})
+ MY_GEN_INITEXT:= $(MY_intermediates)/initext.c
+-$(MY_GEN_INITEXT):
++LOCAL_GEN_INITEXT:= $(LOCAL_PATH)/$(MY_GEN_INITEXT)
++$(LOCAL_GEN_INITEXT):
+ 	@mkdir -p $(dir $@)
+ 	@( \
+ 	echo "" >$@; \
+@@ -76,7 +83,7 @@
+ 
+ $(MY_intermediates)/initext.o : $(MY_GEN_INITEXT) $(MY_gen_lib_sources)
+ 
+-LOCAL_GENERATED_SOURCES:= $(MY_GEN_INITEXT) $(MY_gen_lib_sources)
++LOCAL_SRC_FILES:= $(MY_GEN_INITEXT) $(MY_gen_lib_sources)
+ 
+ include $(BUILD_STATIC_LIBRARY)
+ 
+@@ -109,7 +116,8 @@
+ 
+ MY_initext4_func  := $(addprefix ipt_,${MY_pf4_build_mod})
+ MY_GEN_INITEXT4:= $(MY_intermediates)/initext4.c
+-$(MY_GEN_INITEXT4):
++LOCAL_GEN_INITEXT4:= $(LOCAL_PATH)/$(MY_GEN_INITEXT4)
++$(LOCAL_GEN_INITEXT4):
+ 	@mkdir -p $(dir $@)
+ 	@( \
+ 	echo "" >$@; \
+@@ -139,7 +147,7 @@
+ 
+ $(MY_intermediates)/initext4.o : $(MY_GEN_INITEXT4) $(MY_gen_lib_sources)
+ 
+-LOCAL_GENERATED_SOURCES:= $(MY_GEN_INITEXT4) ${MY_gen_lib_sources}
++LOCAL_SRC_FILES:= $(MY_GEN_INITEXT4) ${MY_gen_lib_sources}
+ 
+ include $(BUILD_STATIC_LIBRARY)
+ 
+@@ -172,7 +180,8 @@
+ 
+ MY_initext6_func := $(addprefix ip6t_,${MY_pf6_build_mod})
+ MY_GEN_INITEXT6:= $(MY_intermediates)/initext6.c
+-$(MY_GEN_INITEXT6):
++LOCAL_GEN_INITEXT6:= $(LOCAL_PATH)/$(MY_GEN_INITEXT6)
++$(LOCAL_GEN_INITEXT6):
+ 	@mkdir -p $(dir $@)
+ 	@( \
+ 	echo "" >$@; \
+@@ -202,7 +211,7 @@
+ 
+ $(MY_intermediates)/initext6.o : $(MY_GEN_INITEXT6) $(MY_gen_lib_sources)
+ 
+-LOCAL_GENERATED_SOURCES:= $(MY_GEN_INITEXT6) $(MY_gen_lib_sources)
++LOCAL_SRC_FILES:= $(MY_GEN_INITEXT6) $(MY_gen_lib_sources)
+ 
+ include $(BUILD_STATIC_LIBRARY)
+ 
+diff --git a/external/iptables/extensions/fixinit.py b/external/iptables/extensions/fixinit.py
+--- a/iptables/extensions/fixinit.py	1970-01-01 03:00:00.000000000 +0300
++++ b/external/iptables/extensions/fixinit.py	2012-05-31 00:35:59.927307126 +0400
+@@ -0,0 +1,30 @@
++#!/usr/bin/python
++# Author: Rodrigo Zechin Rosauro
++"""
++This script will convert all _init() functions on iptables extension sources in order
++to compile then on Android.
++This will for example, convert "void _init(void)" on libipt_LOG.c to "void libipt_LOG_init(void)".
++This is necessary because we cannot use the "-D_INIT=$*_init" on LOCAL_CFLAGS due to the way NDK works.
++"""
++
++import sys, os, glob, re
++
++def main():
++    regex=re.compile(r"[^\w]_init\s*\(")
++    os.chdir(os.path.dirname(os.path.abspath(__file__)))
++    for prefix in ("libxt", "libipt", "libip6t"):
++        for src in glob.glob("%s_*.c"%prefix):
++            name = src.replace(".c","")
++            f=open(src, "r")
++            data=f.read()
++            f.close()
++            if regex.search(data):
++                print "Converting %s..."%src
++                data=regex.sub(" %s_init("%name, data)
++                f=open(src, "w")
++                f.write(data)
++                f.close()
++    print "DONE!"
++
++if __name__=="__main__":
++    main()
++

@@ -24,13 +24,14 @@ Requires Root:Yes
 Repo Type:svn
 Repo:http://droidwall.googlecode.com/svn/tags/v1.5.7
 
-Build Version:1.5.7,157,!/bin/sh: 1: ./extensions/create_initext4: Permission Denied 250,target=android-8,\
-srclibs=Busybox@83785f0,prebuild=rm -rf res/raw/busybox_g1 res/raw/iptables_armv5 \
-external/busybox external/iptables/extensions/initext* external/iptables/obj/ && \
+Build Version:1.5.7,157,250,target=android-8,init=\
+rm -rf external/iptables && cd external && \
+git clone https://android.googlesource.com/platform/external/iptables,\
+patch=iptables.patch,srclibs=Busybox@83785f0;BusyboxConfigs@bd2bf4f3,prebuild=\
+rm -rf res/raw/busybox_g1 res/raw/iptables_armv5 external/busybox && \
 sed -i 's/android:minSdkVersion=\"3\"/android:minSdkVersion=\"4\" \
 android:maxSdkVersion=\"10\"/g' AndroidManifest.xml && \
-wget https://raw.github.com/tias/android-busybox-ndk/bd2bf4f384350a2bb2f8144401\
-2a882ddd48662a/android_ndk_defconfigPlus -O $$Busybox$$/.config,build=\
+cp $$BusyboxConfigs$$/android_ndk_defconfigPlus $$Busybox$$/.config,build=\
 export PATH=$$NDK$$/toolchains/arm-linux-androideabi-4.4.3/prebuilt/linux-x86/bin:$PATH && \
 make CONFIG_SYSROOT="$$NDK$$/platforms/android-9/arch-arm" -C $$Busybox$$ && \
 mv $$Busybox$$/busybox res/raw/busybox_g1 && \
