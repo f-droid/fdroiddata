@@ -18,24 +18,25 @@ licensed.
 Requires Root:Yes
 
 Repo Type:git-svn
-Repo:http://busybox-android.googlecode.com/svn/trunk/
+Repo:http://busybox-android.googlecode.com/svn;trunk=trunk;tags=tags
 
 Build Version:7.1,103,!busybox prebuilt binaries 3,target=android-8,prebuild=\
 cd src/stericson &&\
 svn co -r 133 http://roottools.googlecode.com/svn/trunk/Developmental/RootTools_sdk3_generic/src/com/stericson/RootTools &&\
 cd ../..
-Build Version:7.2,104,!No source available
-Build Version:7.5,105,!No source available
-Build Version:7.6.1,112,!No source available
-Build Version:7.8.3,117,!No source available
+
 #Sketch: Blobs in assets apart from Busybox and /src/.../Constants.java needs patching
-#sed errors when executing make
-Build Version:9.6.3,141,!problems with BusyBox Makefile 26,subdir=app,srclibs=\
-ViewPagerIndicator@2.2.3;RootTools@211;BusyboxConfigs@835af752d,prebuild=\
-sed -i 's@\(android.library.reference.1=\).*@\1$$ViewPagerIndicator$$@' project.properties && \
-rm -f ../binaries/* && mkdir -p libs/ && cp -r $$RootTools$$ . && cd RootTools && ant debug && \
-ant -f makejar.ant && mv roottools.jar ../libs/ && ant clean && cd ../../ && \
-mkdir -p busybox/ && cd busybox/ && cp -r $$BusyboxConfigs$$/* . && \
+Build Version:9.6.3,141,!Errors building Busybox (at 26),subdir=app,srclibs=\
+ViewPagerIndicator@2.2.3;Busybox@1_21_0;RootTools@211;\
+BusyboxConfigs@e71bc43bd0,prebuild=\
+sed -i 's@\(reference.1=\).*@\1$$ViewPagerIndicator$$@' project.properties && \
+rm -f ../binaries/* && mkdir -p libs/ && \
+cp -r $$RootTools$$ .. && cp -r $$Busybox$$ .. && \
+mv $$BusyboxConfigs$$/android_ndk_stericson-like ../Busybox/.config,build=\
+cd ../RootTools && ant debug && ant -f makejar.ant && \
+mv roottools.jar ../app/libs/ && ant clean && \
+cd ../Busybox && \
+export PATH=$$NDK$$/toolchains/arm-linux-androideabi-4.4.3/prebuilt/linux-x86/bin:$PATH && \
 make ARCH=arm ANDROID_NDK=$$NDK$$ && \
 mv busybox-git.arm/busybox ../binaries/busybox-1.20-arm && make clean && \
 make ARCH=mips ANDROID_NDK=$$NDK$$ && \
@@ -44,7 +45,7 @@ make ARCH=x86 ANDROID_NDK=$$NDK$$ && \
 mv busybox-git.x86/busybox ../binaries/busybox-1.20-x86 && make clean
 
 Auto Update Mode:None
-Update Check Mode:Market
-Current Version:9.7.2
-Current Version Code:147
+Update Check Mode:Static
+Current Version:9.6.3
+Current Version Code:141
 
