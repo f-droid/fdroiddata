@@ -44,6 +44,26 @@ git clone https://android.googlesource.com/platform/external/iptables && cd ipta
 wget https://hg.adblockplus.org/adblockplusandroid/raw-file/c3c62b79e758/iptables.patch -P ../ && \
 git apply ../iptables.patch && sed -i 's@ndk-build@$$NDK$$/ndk-build@g' Makefile && \
 make fixextensions build && mv libs/armeabi/iptables ../res/raw/iptables_armv5
+Build Version:1.2.4,124,v1.2.4,srclibs=\
+ActionBarSherlock@4.2.0;LockPattern@1c1307;Busybox@1_21_0;\
+BusyboxConfigs@e71bc43bd0;iptables@android-4.2.2_r1,\
+extlibs=android/android-support-v4.jar;afwall.patch,prebuild=\
+rm -rf res/raw/busybox_g1 res/raw/iptables_armv5 external/busybox/* external/iptables/* && \
+mv libs/android-support-v4.jar $$ActionBarSherlock$$/libs/ && \
+sed -i 's@\(android.library.reference.1=\).*@\1$$ActionBarSherlock$$@' project.properties && \
+sed -i 's@\(android.library.reference.2=\).*@\1$$LockPattern$$@' project.properties && \
+cp -r $$iptables$$/* external/iptables/ && mv libs/afwall.patch . && \
+touch external/iptables/extensions/fixinit.py && \
+git apply afwall.patch && cp -r $$Busybox$$/* external/busybox/ && \
+cp -r $$BusyboxConfigs$$/* external/busybox/configs/ && \
+cd external/busybox && for i in configs/patches/*.patch; do patch -p1 < $i; done && \
+mv configs/android_ndk_stericson-like .config,build=\
+export PATH=$$NDK$$/toolchains/arm-linux-androideabi-4.4.3/prebuilt/linux-x86/bin:$PATH && \
+cd external/busybox/ && \
+make CONFIG_SYSROOT="$$NDK$$/platforms/android-9/arch-arm" ARCH=arm ANDROID_NDK=$$NDK$$ && \
+mv busybox ../../res/raw/busybox_g1 && cd ../iptables && python extensions/fixinit.py && \
+$$NDK$$/ndk-build NDK_PROJECT_PATH=. APP_BUILD_SCRIPT=./Android.mk && \
+mv libs/armeabi/iptables ../../res/raw/iptables_armv5
 
 Auto Update Mode:None
 Update Check Mode:Tags
