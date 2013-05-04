@@ -1,5 +1,5 @@
 diff --git a/AndroidManifest.xml b/AndroidManifest.xml
-index 37ebc19..342b717 100644
+index 53f1c12..143f341 100644
 --- a/AndroidManifest.xml
 +++ b/AndroidManifest.xml
 @@ -7,7 +7,7 @@
@@ -22,10 +22,10 @@ index 1408e55..d329bf2 100644
  
  This software has the follow third party dependencies:
 diff --git a/README.md b/README.md
-index d310f0d..6f727e4 100644
+index d310f0d..97a5819 100644
 --- a/README.md
 +++ b/README.md
-@@ -1,19 +1,17 @@
+@@ -1,50 +1,20 @@
 -TextSecure
 +ChatSafe
  =================
@@ -33,27 +33,28 @@ index d310f0d..6f727e4 100644
  A secure text messaging application for Android.
  
 -TextSecure is a replacement for the standard text messaging application, allowing you to send and receive text messages as normal.  Additionally, TextSecure provides:
-+ChatSafe is a fork of TextSecure
++Chatsafe is a replacement for the standard text messaging application, allowing you to send and receive text messages as normal.  Additionally, Chatsafe provides:
  
 -1. *Local Encryption* -- All text messages, regardless of destination, that are sent or received with TextSecure are stored in an encrypted database on your phone.
 -2. *Wire Encryption* -- When communicating with a recipient who is also using TextSecure, text messages are encrypted during transmission.
+ 
+-Bug tracker
+------------
 +1. *Local Encryption* -- All text messages, regardless of destination, that are sent or received with ChatSafe are stored in an encrypted database on your phone.
 +2. *Wire Encryption* -- When communicating with a recipient who is also using ChatSafe, text messages are encrypted during transmission.
- 
- Bug tracker
- -----------
  
 -Have a bug? Please create an issue here on GitHub!
 -
 -https://github.com/WhisperSystems/TextSecure/issues
-+Have a bug? Keep it to yourself ;-) 
- 
- 
- Documentation
-@@ -23,28 +21,18 @@ Looking for documentation? Check out the wiki!
- 
- https://github.com/WhisperSystems/TextSecure/wiki
- 
+-
+-
+-Documentation
+--------------
+-
+-Looking for documentation? Check out the wiki!
+-
+-https://github.com/WhisperSystems/TextSecure/wiki
+-
 -Mailing list
 -------------
 -
@@ -62,25 +63,56 @@ index d310f0d..6f727e4 100644
 -whispersystems@lists.riseup.net
 -
 -https://lists.riseup.net/www/info/whispersystems
- 
- Translation
- ------------
- 
+-
+-Translation
+-------------
+-
 -Interested in helping to translate TextSecure? Contribute here:
-+Interested in helping to translate ChatSafe? Not a chance.
- 
+-
 -https://www.transifex.com/projects/p/textsecure-official/
++ChatSafe is a fork of TextSecure.
  
  Downloads
  ------------
  
 -TextSecure can be downloaded from the Play Store here:
-+ChatSafe can be downloaded from http://f-droid.org
- 
+-
 -https://play.google.com/store/apps/details?id=org.thoughtcrime.securesms
++ChatSafe can be downloaded from http://f-droid.org
  
  Cryptography Notice
  ------------
+diff --git a/build.xml b/build.xml
+index c601eef..a1d8966 100644
+--- a/build.xml
++++ b/build.xml
+@@ -22,4 +22,26 @@
+     <!-- version-tag: 1 -->
+     <import file="${sdk.dir}/tools/ant/build.xml" />
+ 
++    <target name="-package-resources" depends="-crunch">
++        <exec executable="${aapt}" failonerror="true">
++            <arg value="package" />
++            <arg value="-f" />
++            <arg value="-M" />
++            <arg path="AndroidManifest.xml" />
++            <arg value="-F" />
++            <arg path="${out.absolute.dir}/${resource.package.file.name}" />
++            <arg value="-I" />
++            <arg path="${android.jar}" />
++            <arg value="-S" />
++            <arg path="${resource.absolute.dir}" />
++            <arg value="-S" />
++            <arg path="${android.library.reference.1}/res" />
++            <arg value="--extra-packages" />
++            <arg value="com.actionbarsherlock" />
++            <arg value="--auto-add-overlay" />
++            <arg value="--rename-manifest-package" />
++            <arg value="org.fdroid.chatsafe" />
++        </exec>
++   </target>
++
+ </project>
 diff --git a/res/raw/disclaimer b/res/raw/disclaimer
 index a9287d2..14d62f2 100644
 --- a/res/raw/disclaimer
@@ -93,7 +125,7 @@ index a9287d2..14d62f2 100644
 -Please report any problems at https://github.com/WhisperSystems/TextSecure/issues
 +ChatSafe is based on TextSecure: https://github.com/WhisperSystems/TextSecure
 diff --git a/res/values-de/strings.xml b/res/values-de/strings.xml
-index e5d1141..4e2ae81 100644
+index ff362f5..dab5857 100644
 --- a/res/values-de/strings.xml
 +++ b/res/values-de/strings.xml
 @@ -1,16 +1,16 @@
@@ -116,7 +148,7 @@ index e5d1141..4e2ae81 100644
    <string name="ApplicationExportManager_exporting_database_and_keys">Datenbank und Schlüssel exportieren</string>
    <string name="ApplicationExportManager_exporting_your_sms_database_keys_and_settings">SMS Datenbank, Schlüssel und Einstellungen werden exportiert...</string>
    <string name="ApplicationExportManager_no_sd_card_found_exclamation">Keine SD-Karte vorhanden!</string>
-@@ -180,14 +180,14 @@
+@@ -181,14 +181,14 @@
    <!--MmsSender-->
    <!--ApplicationMigrationService-->
    <!--KeyCachingService-->
@@ -133,7 +165,7 @@ index e5d1141..4e2ae81 100644
    <string name="auto_initiate_activity__initiate_exchange">Austausch initieren</string>
    <!--change_passphrase_activity-->
    <string name="change_passphrase_activity__old_passphrase">Altes Passwort:</string>
-@@ -246,7 +246,7 @@
+@@ -248,7 +248,7 @@
    <string name="AndroidManifest__create_passphrase">Passwort erstellen</string>
    <string name="AndroidManifest__enter_passphrase">Passwort eingeben</string>
    <string name="AndroidManifest__select_contacts">Kontakt auswählen</string>
@@ -142,7 +174,7 @@ index e5d1141..4e2ae81 100644
    <string name="AndroidManifest__public_identity_key">Öffentlicher Schlüssel</string>
    <string name="AndroidManifest__change_passphrase">Passwort ändern</string>
    <string name="AndroidManifest__verify_session">Sitzung verifizieren</string>
-@@ -259,8 +259,8 @@
+@@ -261,8 +261,8 @@
    <string name="preferences__use_settings">Nutzungs-Einstellungen</string>
    <string name="preferences__pref_all_sms_title">Für alle SMS benutzen</string>
    <string name="preferences__pref_all_mms_title">Für alle MMS benutzen</string>
@@ -154,7 +186,7 @@ index e5d1141..4e2ae81 100644
    <string name="preferences__pref_enter_sends_title">Enter schickt ab</string>
    <string name="preferences__pressing_the_enter_key_will_send_text_messages">Enter Taste versendet Nachrichten</string>
 diff --git a/res/values-es/strings.xml b/res/values-es/strings.xml
-index ed7c421..4aa7330 100644
+index 383b6eb..d1ec10e 100644
 --- a/res/values-es/strings.xml
 +++ b/res/values-es/strings.xml
 @@ -1,16 +1,16 @@
@@ -177,16 +209,25 @@ index ed7c421..4aa7330 100644
    <string name="ApplicationExportManager_exporting_database_and_keys">Exportando la base de datos y claves</string>
    <string name="ApplicationExportManager_exporting_your_sms_database_keys_and_settings">Exportando su base de datos SMS, claves y preferencias...</string>
    <string name="ApplicationExportManager_no_sd_card_found_exclamation">¡No se encontró ninguna tarjeta SD!</string>
-@@ -188,7 +188,7 @@
-   <string name="MmsSender_currently_unable_to_send_your_mms_message">Actualmente no se puede enviar tu mensaje MMS. Será enviado en cuanto el servicio esté disponible.</string>
-   <!--ApplicationMigrationService-->
+@@ -107,7 +107,7 @@
+   <!--PromptApnActivity-->
+   <string name="PromptApnActivity_you_must_specify_an_mmsc_url_for_your_carrier">Debes especificar una URL MMSC para tu operador.</string>
+   <string name="PromptApnActivity_mms_settings_updated">Configuración MMS Actualizada</string>
+-  <string name="PromptApnActivity_you_can_modify_these_values_from_the_textsecure_settings_menu_at_any_time_">Puedes modificar estos valores en el menú de configuración de TextSecure en cualquier momento.</string>
++  <string name="PromptApnActivity_you_can_modify_these_values_from_the_textsecure_settings_menu_at_any_time_">Puedes modificar estos valores en el menú de configuración de ChatSafe en cualquier momento.</string>
+   <!--ReceiveKeyActivity-->
+   <string name="ReceiveKeyActivity_error_you_have_received_a_corrupted_public_key">ERROR:\n\nHa recibido una clave pública dañada.  Esta clave no puede ser procesada, por favor reinicie su sesión segura. </string>
+   <string name="ReceiveKeyActivity_error_you_have_received_a_public_key_from_an_unsupported_version_of_the_protocol">ERROR:\n\nHa recibido una clave pública de una versión no soportada del protocolo. Esta clave no puede ser procesada, por favor reinicie la sesión segura.</string>
+@@ -199,7 +199,7 @@
+   <string name="ApplicationMigrationService_import_in_progress">Importación en progreso</string>
+   <string name="ApplicationMigrationService_importing_text_messages">Importando Mensajes de Texto</string>
    <!--KeyCachingService-->
 -  <string name="KeyCachingService_textsecure_passphrase_cached">Frase de contraseña de TextSecure en memoria caché</string>
 +  <string name="KeyCachingService_textsecure_passphrase_cached">Frase de contraseña de ChatSafe en memoria caché</string>
    <string name="KeyCachingService_passphrase_cached">Frase de contraseña en memoria caché</string>
    <!--MessageNotifier-->
    <string name="MessageNotifier_d_new_messages">(%d) nuevos mensajes</string>
-@@ -203,7 +203,7 @@
+@@ -214,7 +214,7 @@
    <!--SmsReceiver-->
    <string name="SmsReceiver_currently_unable_to_send_your_sms_message">Actualmente no se puede enviar tu mensaje SMS. Será enviado en cuanto el servicio esté disponible.</string>
    <!--auto_initiate_activity-->
@@ -195,7 +236,25 @@ index ed7c421..4aa7330 100644
    <string name="auto_initiate_activity__initiate_exchange">Iniciar intercambio</string>
    <!--change_passphrase_activity-->
    <string name="change_passphrase_activity__old_passphrase">Frase de contraseña anterior:</string>
-@@ -262,7 +262,7 @@
+@@ -246,7 +246,7 @@
+   <string name="create_passphrase_activity__continue">Continuar</string>
+   <string name="create_passphrase_activity__generating_secrets">GENERANDO SECRETOS</string>
+   <!--database_migration_activity-->
+-  <string name="database_migration_activity__would_you_like_to_import_your_existing_text_messages">¿Te gustaría importar los mensajes de texto existentes en la base de datos cifrada de TextSecure?</string>
++  <string name="database_migration_activity__would_you_like_to_import_your_existing_text_messages">¿Te gustaría importar los mensajes de texto existentes en la base de datos cifrada de ChatSafe?</string>
+   <string name="database_migration_activity__the_default_system_database_will_not_be_modified">La base de datos de sistema por defecto no será modificada o alterada de ningún modo.</string>
+   <string name="database_migration_activity__skip">Saltar</string>
+   <string name="database_migration_activity__import">Importar</string>
+@@ -256,7 +256,7 @@
+   <string name="prompt_passphrase_activity__textsecure_passphrase">FRASE DE CONTRASEÑA DE TEXTSECURE</string>
+   <string name="prompt_passphrase_activity__unlock">Desbloquear</string>
+   <!--prompt_apn_activity-->
+-  <string name="prompt_apn_activity__textsecure_requires_apn_settings_to_deliver_media_messages_via_your_wireless_carrier">TextSecure necesita las opciones de APN para enviar mensajes multimedia por tu operador móvil. Tu dispositivo no proporciona esta información, lo que sería porque tu dispositivo está bloqueado o presenta otra configuración restrictiva.</string>
++  <string name="prompt_apn_activity__textsecure_requires_apn_settings_to_deliver_media_messages_via_your_wireless_carrier">ChatSafe necesita las opciones de APN para enviar mensajes multimedia por tu operador móvil. Tu dispositivo no proporciona esta información, lo que sería porque tu dispositivo está bloqueado o presenta otra configuración restrictiva.</string>
+   <string name="prompt_apn_activity__to_send_media_messages_please_complete_the_necessary_apn_information_below">Para enviar mensajes multimedia, por favor completa la información APN necesaria abajo. Los valores para tu proveedor pueden por lo general ser encontrados buscando \'&amp;lt;tu operador&amp;gt; APN\'. Solo necesitarás hacer esto una única vez.</string>
+   <string name="prompt_apn_activity__mmsc_url_required">URL MMSC (REQUERIDA):</string>
+   <string name="prompt_apn_activity__mms_proxy_host_optional">MMS PROXY HOST (OPCIONAL):</string>
+@@ -289,7 +289,7 @@
    <string name="AndroidManifest__create_passphrase">Crear frase de contraseña</string>
    <string name="AndroidManifest__enter_passphrase">Ingresar frase de contraseña</string>
    <string name="AndroidManifest__select_contacts">Seleccionar Contactos</string>
@@ -204,7 +263,7 @@ index ed7c421..4aa7330 100644
    <string name="AndroidManifest__public_identity_key">Clave de Identidad Pública</string>
    <string name="AndroidManifest__change_passphrase">Cambiar la frase de contraseña</string>
    <string name="AndroidManifest__verify_session">Verificar sesión</string>
-@@ -275,8 +275,8 @@
+@@ -302,8 +302,8 @@
    <string name="preferences__use_settings">Preferencias de uso</string>
    <string name="preferences__pref_all_sms_title">Usar para todos los SMS</string>
    <string name="preferences__pref_all_mms_title">Usar para todos los MMS</string>
@@ -215,7 +274,7 @@ index ed7c421..4aa7330 100644
    <string name="preferences__input_settings">Preferencias de escritura</string>
    <string name="preferences__pref_enter_sends_title">Envío con la tecla de entrada</string>
    <string name="preferences__pressing_the_enter_key_will_send_text_messages">Presionar la tecla de entrada enviará sus mensajes de texto</string>
-@@ -396,6 +396,6 @@
+@@ -423,6 +423,6 @@
    <!--verify_keys-->
    <string name="verify_keys__menu_verified">Verificado</string>
    <!--Misc. piggybacking-->
@@ -224,7 +283,7 @@ index ed7c421..4aa7330 100644
    <!--EOF-->
  </resources>
 diff --git a/res/values-fr/strings.xml b/res/values-fr/strings.xml
-index f0c198e..8089aaa 100644
+index c22019e..d53a153 100644
 --- a/res/values-fr/strings.xml
 +++ b/res/values-fr/strings.xml
 @@ -1,16 +1,16 @@
@@ -247,16 +306,25 @@ index f0c198e..8089aaa 100644
    <string name="ApplicationExportManager_exporting_database_and_keys">Exportation de la base de donnée et des clés</string>
    <string name="ApplicationExportManager_exporting_your_sms_database_keys_and_settings">Exportation de votre base de données SMS, des clés et des paramètres…</string>
    <string name="ApplicationExportManager_no_sd_card_found_exclamation">Aucune carte SD trouvée !</string>
-@@ -188,7 +188,7 @@
-   <string name="MmsSender_currently_unable_to_send_your_mms_message">Impossible d’envoyer votre message MMS pour le moment. Il sera envoyé  lorsque le service deviendra disponible.</string>
-   <!--ApplicationMigrationService-->
+@@ -107,7 +107,7 @@
+   <!--PromptApnActivity-->
+   <string name="PromptApnActivity_you_must_specify_an_mmsc_url_for_your_carrier">Vous devez indiquer une URL MMSC de votre opérateur.</string>
+   <string name="PromptApnActivity_mms_settings_updated">Paramètres MMS mis à jour</string>
+-  <string name="PromptApnActivity_you_can_modify_these_values_from_the_textsecure_settings_menu_at_any_time_">Vous pouvez modifier ces valeurs depuis le menu des paramètres de TextSecure à tout moment.</string>
++  <string name="PromptApnActivity_you_can_modify_these_values_from_the_textsecure_settings_menu_at_any_time_">Vous pouvez modifier ces valeurs depuis le menu des paramètres de ChatSafe à tout moment.</string>
+   <!--ReceiveKeyActivity-->
+   <string name="ReceiveKeyActivity_error_you_have_received_a_corrupted_public_key">ERREUR:\n\nVous avez reçu une clef publique corrompue. Cette clef est inutilisable, veuillez renouveler la session sécurisée.</string>
+   <string name="ReceiveKeyActivity_error_you_have_received_a_public_key_from_an_unsupported_version_of_the_protocol">ERREUR:\n\nVous avez reçu une clef publique issue d\'une version de protocole non supportée. Cette clef est inutilisable, veuillez renouveler la session sécurisée.</string>
+@@ -199,7 +199,7 @@
+   <string name="ApplicationMigrationService_import_in_progress">Importation en cours</string>
+   <string name="ApplicationMigrationService_importing_text_messages">Importation des Messages Texte</string>
    <!--KeyCachingService-->
 -  <string name="KeyCachingService_textsecure_passphrase_cached">Phrase de passe TextSecure en cache</string>
 +  <string name="KeyCachingService_textsecure_passphrase_cached">Phrase de passe ChatSafe en cache</string>
    <string name="KeyCachingService_passphrase_cached">Phrase de passe en cache</string>
    <!--MessageNotifier-->
    <string name="MessageNotifier_d_new_messages">(%d) Nouveaux messages</string>
-@@ -203,7 +203,7 @@
+@@ -214,7 +214,7 @@
    <!--SmsReceiver-->
    <string name="SmsReceiver_currently_unable_to_send_your_sms_message">Impossible d’envoyer votre message SMS pour le moment. Il sera envoyé  lorsque le service deviendra disponible.</string>
    <!--auto_initiate_activity-->
@@ -265,7 +333,25 @@ index f0c198e..8089aaa 100644
    <string name="auto_initiate_activity__initiate_exchange">Commencer l\'échange</string>
    <!--change_passphrase_activity-->
    <string name="change_passphrase_activity__old_passphrase">Ancienne phrase de passe :</string>
-@@ -262,7 +262,7 @@
+@@ -246,7 +246,7 @@
+   <string name="create_passphrase_activity__continue">Continuer</string>
+   <string name="create_passphrase_activity__generating_secrets">GÉNÉRATION DE CLÉS SECRÈTES</string>
+   <!--database_migration_activity-->
+-  <string name="database_migration_activity__would_you_like_to_import_your_existing_text_messages">Voulez-vous importer vos messages texte existant dans la base de données chiffrée de TextSecure ?</string>
++  <string name="database_migration_activity__would_you_like_to_import_your_existing_text_messages">Voulez-vous importer vos messages texte existant dans la base de données chiffrée de ChatSafe ?</string>
+   <string name="database_migration_activity__the_default_system_database_will_not_be_modified">La base de donnée par défaut du système ne sera en aucune façon modifiée ou altérée.</string>
+   <string name="database_migration_activity__skip">Passer</string>
+   <string name="database_migration_activity__import">Importer</string>
+@@ -256,7 +256,7 @@
+   <string name="prompt_passphrase_activity__textsecure_passphrase">PHRASE DE PASSE TEXTSECURE</string>
+   <string name="prompt_passphrase_activity__unlock">Déverrouiller</string>
+   <!--prompt_apn_activity-->
+-  <string name="prompt_apn_activity__textsecure_requires_apn_settings_to_deliver_media_messages_via_your_wireless_carrier">TextSecure nécessite que les paramètres APN distribuent les messages multimédia via votre opérateur mobile. Votre appareil ne rend pas ces informations disponibles, ce qui est parfois le cas des appareils verrouillés et d’autres configurations restrictives.</string>
++  <string name="prompt_apn_activity__textsecure_requires_apn_settings_to_deliver_media_messages_via_your_wireless_carrier">ChatSafe nécessite que les paramètres APN distribuent les messages multimédia via votre opérateur mobile. Votre appareil ne rend pas ces informations disponibles, ce qui est parfois le cas des appareils verrouillés et d’autres configurations restrictives.</string>
+   <string name="prompt_apn_activity__to_send_media_messages_please_complete_the_necessary_apn_information_below">Pour envoyer des messages multimédia, merci de compléter les informations sur l’APN ci-dessous. Les valeurs de votre opérateur peuvent généralement être trouvées en cherchant \'APN &amp;lt;votre opérateur&amp;gt;\'. Vous aurez besoin de faire cela une seule fois.</string>
+   <string name="prompt_apn_activity__mmsc_url_required">URL MMSC (OBLIGATOIRE) :</string>
+   <string name="prompt_apn_activity__mms_proxy_host_optional">HÔTE PROXY MMS (OPTIONNEL) :</string>
+@@ -289,7 +289,7 @@
    <string name="AndroidManifest__create_passphrase">Créer une phrase de passe</string>
    <string name="AndroidManifest__enter_passphrase">Saisir la phrase de passe</string>
    <string name="AndroidManifest__select_contacts">Sélectionner des contacts</string>
@@ -274,7 +360,7 @@ index f0c198e..8089aaa 100644
    <string name="AndroidManifest__public_identity_key">Clef d\'Identité Publique</string>
    <string name="AndroidManifest__change_passphrase">Modifier la phrase de passe</string>
    <string name="AndroidManifest__verify_session">Vérifier la session</string>
-@@ -275,8 +275,8 @@
+@@ -302,8 +302,8 @@
    <string name="preferences__use_settings">Paramètres d’utilisation</string>
    <string name="preferences__pref_all_sms_title">Utiliser pour tous les SMS</string>
    <string name="preferences__pref_all_mms_title">Utiliser pour tous les MMS</string>
@@ -285,7 +371,7 @@ index f0c198e..8089aaa 100644
    <string name="preferences__input_settings">Paramètres de saisie</string>
    <string name="preferences__pref_enter_sends_title">La touche Entrée envoie</string>
    <string name="preferences__pressing_the_enter_key_will_send_text_messages">La touche entrée enverra les messages texte</string>
-@@ -396,6 +396,6 @@
+@@ -423,6 +423,6 @@
    <!--verify_keys-->
    <string name="verify_keys__menu_verified">Vérifié</string>
    <!--Misc. piggybacking-->
@@ -294,7 +380,7 @@ index f0c198e..8089aaa 100644
    <!--EOF-->
  </resources>
 diff --git a/res/values-it/strings.xml b/res/values-it/strings.xml
-index 06dcf11..0ec9b9c 100644
+index 38596f9..a54f12b 100644
 --- a/res/values-it/strings.xml
 +++ b/res/values-it/strings.xml
 @@ -1,16 +1,16 @@
@@ -317,7 +403,7 @@ index 06dcf11..0ec9b9c 100644
    <string name="ApplicationExportManager_exporting_database_and_keys">Sto esportando il Database e le chiavi</string>
    <string name="ApplicationExportManager_exporting_your_sms_database_keys_and_settings">Sto esportando il database degli SMS, le chiavi e le impostazioni...</string>
    <string name="ApplicationExportManager_no_sd_card_found_exclamation">Nessuna memoria SD trovata!</string>
-@@ -171,14 +171,14 @@
+@@ -172,14 +172,14 @@
    <!--MmsSender-->
    <!--ApplicationMigrationService-->
    <!--KeyCachingService-->
@@ -334,7 +420,7 @@ index 06dcf11..0ec9b9c 100644
    <string name="auto_initiate_activity__initiate_exchange">Inizio scambio delle chiavi</string>
    <!--change_passphrase_activity-->
    <string name="change_passphrase_activity__old_passphrase">Vecchia password:</string>
-@@ -233,7 +233,7 @@
+@@ -235,7 +235,7 @@
    <string name="AndroidManifest__create_passphrase">Crea una password</string>
    <string name="AndroidManifest__enter_passphrase">Inserisci la password</string>
    <string name="AndroidManifest__select_contacts">Seleziona i contatti</string>
@@ -343,7 +429,7 @@ index 06dcf11..0ec9b9c 100644
    <string name="AndroidManifest__public_identity_key">Chiave dell\'identità pubblica</string>
    <string name="AndroidManifest__change_passphrase">Cambia password</string>
    <string name="AndroidManifest__verify_session">Verifica sessione</string>
-@@ -246,8 +246,8 @@
+@@ -248,8 +248,8 @@
    <string name="preferences__use_settings">Usa le impostazioni</string>
    <string name="preferences__pref_all_sms_title">Utilizza per tutti gli SMS</string>
    <string name="preferences__pref_all_mms_title">Utilizza per tutti gli MMS</string>
@@ -355,7 +441,7 @@ index 06dcf11..0ec9b9c 100644
    <string name="preferences__pref_enter_sends_title">Inserisci inviati</string>
    <string name="preferences__pressing_the_enter_key_will_send_text_messages">Premere il tasto Invio manderà i messaggi</string>
 diff --git a/res/values-nl/strings.xml b/res/values-nl/strings.xml
-index df692e4..94dc4bd 100644
+index d99539d..17096b8 100644
 --- a/res/values-nl/strings.xml
 +++ b/res/values-nl/strings.xml
 @@ -1,16 +1,16 @@
@@ -378,7 +464,16 @@ index df692e4..94dc4bd 100644
    <string name="ApplicationExportManager_exporting_database_and_keys">Exporteren van Database en Sleutels</string>
    <string name="ApplicationExportManager_exporting_your_sms_database_keys_and_settings">SMS database, sleutels en instellingen aan het exporteren...</string>
    <string name="ApplicationExportManager_no_sd_card_found_exclamation">Geen SD-kaart gevonden!</string>
-@@ -195,7 +195,7 @@
+@@ -107,7 +107,7 @@
+   <!--PromptApnActivity-->
+   <string name="PromptApnActivity_you_must_specify_an_mmsc_url_for_your_carrier">U moet een MMSC URL specificeren voor uw provider.</string>
+   <string name="PromptApnActivity_mms_settings_updated">MMS Instellingen Geupdate</string>
+-  <string name="PromptApnActivity_you_can_modify_these_values_from_the_textsecure_settings_menu_at_any_time_">U kunt deze instellingen op elk gewenst moment wijzigen via het TextSecure instellingen menu.</string>
++  <string name="PromptApnActivity_you_can_modify_these_values_from_the_textsecure_settings_menu_at_any_time_">U kunt deze instellingen op elk gewenst moment wijzigen via het ChatSafe instellingen menu.</string>
+   <!--ReceiveKeyActivity-->
+   <string name="ReceiveKeyActivity_error_you_have_received_a_corrupted_public_key">FOUT: U heeft een corrupte publieke sleutel ontvangen. Deze sleutel kan niet verwerkt worden, herinitiëer alstublieft een beveiligde sessie.</string>
+   <string name="ReceiveKeyActivity_error_you_have_received_a_public_key_from_an_unsupported_version_of_the_protocol">FOUT: U heeft een publieke sleutel ontvangen van een niet ondersteunde versie van het protocol. Deze sleutel kan niet verwerkt worden, herinitiëer alstublieft een beveiligde sessie.</string>
+@@ -199,7 +199,7 @@
    <string name="ApplicationMigrationService_import_in_progress">Bezig met importeren</string>
    <string name="ApplicationMigrationService_importing_text_messages">Tekstberichten aan het importeren</string>
    <!--KeyCachingService-->
@@ -387,7 +482,7 @@ index df692e4..94dc4bd 100644
    <string name="KeyCachingService_passphrase_cached">Wachtwoord In Cache</string>
    <!--MessageNotifier-->
    <string name="MessageNotifier_d_new_messages">(%d) Nieuwe berichten</string>
-@@ -210,7 +210,7 @@
+@@ -214,7 +214,7 @@
    <!--SmsReceiver-->
    <string name="SmsReceiver_currently_unable_to_send_your_sms_message">Momenteel niet in staat om uw SMS bericht te versturen. Zodra de service beschikbaar is zal het verzonden worden .</string>
    <!--auto_initiate_activity-->
@@ -396,7 +491,7 @@ index df692e4..94dc4bd 100644
    <string name="auto_initiate_activity__initiate_exchange">Initieer Uitwisseling</string>
    <!--change_passphrase_activity-->
    <string name="change_passphrase_activity__old_passphrase">Oud wachtwoord:</string>
-@@ -242,7 +242,7 @@
+@@ -246,7 +246,7 @@
    <string name="create_passphrase_activity__continue">Doorgaan</string>
    <string name="create_passphrase_activity__generating_secrets">GEHEIMEN AAN HET GENEREREN</string>
    <!--database_migration_activity-->
@@ -405,7 +500,16 @@ index df692e4..94dc4bd 100644
    <string name="database_migration_activity__the_default_system_database_will_not_be_modified">De standaard systeemdatabase zal niet gewijzigd of aangepast worden op enigerlei wijze.</string>
    <string name="database_migration_activity__skip">Overslaan</string>
    <string name="database_migration_activity__import">Importeer</string>
-@@ -279,7 +279,7 @@
+@@ -256,7 +256,7 @@
+   <string name="prompt_passphrase_activity__textsecure_passphrase">TEXTSECURE WACHTWOORD</string>
+   <string name="prompt_passphrase_activity__unlock">Ontgrendel</string>
+   <!--prompt_apn_activity-->
+-  <string name="prompt_apn_activity__textsecure_requires_apn_settings_to_deliver_media_messages_via_your_wireless_carrier">TextSecure heeft APN instellingen nodig om mediaberichten te kunnen versturen via uw telefoonprovider. Uw toestel heeft deze informatie niet beschikbaar, iets wat vaker voorkomt bij gelockte toestellen en andere beperkende configuraties.</string>
++  <string name="prompt_apn_activity__textsecure_requires_apn_settings_to_deliver_media_messages_via_your_wireless_carrier">ChatSafe heeft APN instellingen nodig om mediaberichten te kunnen versturen via uw telefoonprovider. Uw toestel heeft deze informatie niet beschikbaar, iets wat vaker voorkomt bij gelockte toestellen en andere beperkende configuraties.</string>
+   <string name="prompt_apn_activity__to_send_media_messages_please_complete_the_necessary_apn_information_below">Om mediaberichten te versturen, moet u de benodigde APN informatie hieronder opgeven. De waarden voor uw provider kunnen meestal gevonden worden door te zoeken naar \'&amp;lt;uw provider&amp;gt; APN\'. U hoeft dit maar eenmaal te doen.</string>
+   <string name="prompt_apn_activity__mmsc_url_required">MMSC URL (VEREIST):</string>
+   <string name="prompt_apn_activity__mms_proxy_host_optional">MMS PROXY HOST (OPTIONEEL):</string>
+@@ -289,7 +289,7 @@
    <string name="AndroidManifest__create_passphrase">Creëer Wachtwoord</string>
    <string name="AndroidManifest__enter_passphrase">Voer Wachtwoord In</string>
    <string name="AndroidManifest__select_contacts">Selecteer Contacten</string>
@@ -414,7 +518,7 @@ index df692e4..94dc4bd 100644
    <string name="AndroidManifest__public_identity_key">Publieke Identiteitssleutel</string>
    <string name="AndroidManifest__change_passphrase">Wachtwoord Veranderen</string>
    <string name="AndroidManifest__verify_session">Verifieer Sessie</string>
-@@ -292,8 +292,8 @@
+@@ -302,8 +302,8 @@
    <string name="preferences__use_settings">Gebruiksinstellingen</string>
    <string name="preferences__pref_all_sms_title">Gebruik voor alle SMS</string>
    <string name="preferences__pref_all_mms_title">Gebruik voor alle MMS</string>
@@ -425,7 +529,7 @@ index df692e4..94dc4bd 100644
    <string name="preferences__input_settings">Invoer Instellingen</string>
    <string name="preferences__pref_enter_sends_title">Enter verstuurt</string>
    <string name="preferences__pressing_the_enter_key_will_send_text_messages">De \'Enter\' toets gebruiken voor versturen tekstberichten</string>
-@@ -413,6 +413,6 @@
+@@ -423,6 +423,6 @@
    <!--verify_keys-->
    <string name="verify_keys__menu_verified">Geverifieerd</string>
    <!--Misc. piggybacking-->
@@ -434,7 +538,7 @@ index df692e4..94dc4bd 100644
    <!--EOF-->
  </resources>
 diff --git a/res/values-no/strings.xml b/res/values-no/strings.xml
-index 9ac327c..c90bb42 100644
+index 5ef36af..861817e 100644
 --- a/res/values-no/strings.xml
 +++ b/res/values-no/strings.xml
 @@ -1,16 +1,16 @@
@@ -457,7 +561,16 @@ index 9ac327c..c90bb42 100644
    <string name="ApplicationExportManager_exporting_database_and_keys">Eksporterer database og nøkler</string>
    <string name="ApplicationExportManager_exporting_your_sms_database_keys_and_settings">Eksporterer meldingsdatabasen din, nøkler og instillinger...</string>
    <string name="ApplicationExportManager_no_sd_card_found_exclamation">SD-kort ikke funnet!</string>
-@@ -195,7 +195,7 @@
+@@ -107,7 +107,7 @@
+   <!--PromptApnActivity-->
+   <string name="PromptApnActivity_you_must_specify_an_mmsc_url_for_your_carrier">Du må spesifisere en MMSC URL for din operatør.</string>
+   <string name="PromptApnActivity_mms_settings_updated">MMS konfigurasjon oppdatert</string>
+-  <string name="PromptApnActivity_you_can_modify_these_values_from_the_textsecure_settings_menu_at_any_time_">Du kan forandre disse verdiene når som helst i konfigurasjonsmenyen for TextSecure.</string>
++  <string name="PromptApnActivity_you_can_modify_these_values_from_the_textsecure_settings_menu_at_any_time_">Du kan forandre disse verdiene når som helst i konfigurasjonsmenyen for ChatSafe.</string>
+   <!--ReceiveKeyActivity-->
+   <string name="ReceiveKeyActivity_error_you_have_received_a_corrupted_public_key">EN FEIL HAR OPPSTÅTT:\n\nDu har mottatt en korrupt offentlig nøkkel. Denne nøkkelen kan ikke prosesseres; vær vennlig å gjenoppta en sikker sesjon.</string>
+   <string name="ReceiveKeyActivity_error_you_have_received_a_public_key_from_an_unsupported_version_of_the_protocol">EN FEIL HAR OPPSTÅTT: \n\nDu har mottatt en offentlig nøkkel fra en usupportert versjon av protokollen. Denne nøkkelen kan ikke prosesseres; vær vennlig å gjenoppta en sikker sesjon.</string>
+@@ -199,7 +199,7 @@
    <string name="ApplicationMigrationService_import_in_progress">Import pågår</string>
    <string name="ApplicationMigrationService_importing_text_messages">Importerer SMS meldinger</string>
    <!--KeyCachingService-->
@@ -466,7 +579,7 @@ index 9ac327c..c90bb42 100644
    <string name="KeyCachingService_passphrase_cached">Passord bufret</string>
    <!--MessageNotifier-->
    <string name="MessageNotifier_d_new_messages">(%d) Nye meldinger</string>
-@@ -210,7 +210,7 @@
+@@ -214,7 +214,7 @@
    <!--SmsReceiver-->
    <string name="SmsReceiver_currently_unable_to_send_your_sms_message">Det er ikke mulig å sende SMS meldingen akkurat nå. Den vil sendes når tjenesten blir tilgjengelig igjen.</string>
    <!--auto_initiate_activity-->
@@ -475,7 +588,7 @@ index 9ac327c..c90bb42 100644
    <string name="auto_initiate_activity__initiate_exchange">Start nøkkelutveksling</string>
    <!--change_passphrase_activity-->
    <string name="change_passphrase_activity__old_passphrase">Gammelt passord:</string>
-@@ -242,7 +242,7 @@
+@@ -246,7 +246,7 @@
    <string name="create_passphrase_activity__continue">Gå videre</string>
    <string name="create_passphrase_activity__generating_secrets">GENERER NØKLER</string>
    <!--database_migration_activity-->
@@ -484,7 +597,16 @@ index 9ac327c..c90bb42 100644
    <string name="database_migration_activity__the_default_system_database_will_not_be_modified">Den eksisterende systemdatabasen vil ikke på noen måte bli endret.</string>
    <string name="database_migration_activity__skip">Hopp over</string>
    <string name="database_migration_activity__import">Importer</string>
-@@ -279,7 +279,7 @@
+@@ -256,7 +256,7 @@
+   <string name="prompt_passphrase_activity__textsecure_passphrase">TEXTSECURE PASSORD</string>
+   <string name="prompt_passphrase_activity__unlock">Lås opp</string>
+   <!--prompt_apn_activity-->
+-  <string name="prompt_apn_activity__textsecure_requires_apn_settings_to_deliver_media_messages_via_your_wireless_carrier">En gyldig APN konfigurasjon er nødvendig for at TextSecure kan sende og motta multimedia meldinger via operatøren din. Enheten din tilgjengeliggjør ikke denne konfigurasjonen. Dette er ofte tilfelle for operatørlåste enheter og annen restriktiv konfigurasjon.</string>
++  <string name="prompt_apn_activity__textsecure_requires_apn_settings_to_deliver_media_messages_via_your_wireless_carrier">En gyldig APN konfigurasjon er nødvendig for at ChatSafe kan sende og motta multimedia meldinger via operatøren din. Enheten din tilgjengeliggjør ikke denne konfigurasjonen. Dette er ofte tilfelle for operatørlåste enheter og annen restriktiv konfigurasjon.</string>
+   <string name="prompt_apn_activity__to_send_media_messages_please_complete_the_necessary_apn_information_below">For å sende multimedia meldinger, vær vennlig å fullfør den nødvendige APN informasjonen under. Verdiene for din operatør kan ofte finnes ved å lete etter \'&amp;lt;din operatør&amp;gt; APN\'. Du trenger kun å gjøre dette en gang.</string>
+   <string name="prompt_apn_activity__mmsc_url_required">MMSC URL (PÅKREVD):</string>
+   <string name="prompt_apn_activity__mms_proxy_host_optional">MMS PROXY VERT (IKKE PÅKREVD):</string>
+@@ -289,7 +289,7 @@
    <string name="AndroidManifest__create_passphrase">Opprett passord</string>
    <string name="AndroidManifest__enter_passphrase">Tast inn passord</string>
    <string name="AndroidManifest__select_contacts">Velg kontakter</string>
@@ -493,7 +615,7 @@ index 9ac327c..c90bb42 100644
    <string name="AndroidManifest__public_identity_key">Offentlig ID-nøkkel</string>
    <string name="AndroidManifest__change_passphrase">Bytt passord</string>
    <string name="AndroidManifest__verify_session">Bekreft sesjon</string>
-@@ -292,8 +292,8 @@
+@@ -302,8 +302,8 @@
    <string name="preferences__use_settings">Innstillinger for bruk</string>
    <string name="preferences__pref_all_sms_title">Benytt for all SMS</string>
    <string name="preferences__pref_all_mms_title">Benytt for all MMS</string>
@@ -504,7 +626,7 @@ index 9ac327c..c90bb42 100644
    <string name="preferences__input_settings">Innstillinger for inndata</string>
    <string name="preferences__pref_enter_sends_title">\"Enter\" sender</string>
    <string name="preferences__pressing_the_enter_key_will_send_text_messages">Inntasting av \"Enter\" fører til at meldingen blir sendt</string>
-@@ -413,6 +413,6 @@
+@@ -423,6 +423,6 @@
    <!--verify_keys-->
    <string name="verify_keys__menu_verified">Bekreftet</string>
    <!--Misc. piggybacking-->
@@ -513,7 +635,7 @@ index 9ac327c..c90bb42 100644
    <!--EOF-->
  </resources>
 diff --git a/res/values-pt-rBR/strings.xml b/res/values-pt-rBR/strings.xml
-index 759089c..c0ab798 100644
+index ad9573d..4df3b96 100644
 --- a/res/values-pt-rBR/strings.xml
 +++ b/res/values-pt-rBR/strings.xml
 @@ -1,16 +1,16 @@
@@ -536,7 +658,16 @@ index 759089c..c0ab798 100644
    <string name="ApplicationExportManager_exporting_database_and_keys">Exportar base de dados e chaves</string>
    <string name="ApplicationExportManager_exporting_your_sms_database_keys_and_settings">A exportar a base de dados de SMS, chaves e configurações...</string>
    <string name="ApplicationExportManager_no_sd_card_found_exclamation">Não foi encontrado um cartão SD!</string>
-@@ -195,7 +195,7 @@
+@@ -107,7 +107,7 @@
+   <!--PromptApnActivity-->
+   <string name="PromptApnActivity_you_must_specify_an_mmsc_url_for_your_carrier">Você deve especificar a URL do MMSC da sua operadora.</string>
+   <string name="PromptApnActivity_mms_settings_updated">Configurações MMS Atualizadas</string>
+-  <string name="PromptApnActivity_you_can_modify_these_values_from_the_textsecure_settings_menu_at_any_time_">Você pode modificar estes valores a qualquer momento nas configurações do TextSecure.</string>
++  <string name="PromptApnActivity_you_can_modify_these_values_from_the_textsecure_settings_menu_at_any_time_">Você pode modificar estes valores a qualquer momento nas configurações do ChatSafe.</string>
+   <!--ReceiveKeyActivity-->
+   <string name="ReceiveKeyActivity_error_you_have_received_a_corrupted_public_key">ERRO:⏎ ⏎ Recebeu uma chave pública corrompida. Esta chave não pode ser processada, por favor reinicie uma sessão segura.</string>
+   <string name="ReceiveKeyActivity_error_you_have_received_a_public_key_from_an_unsupported_version_of_the_protocol">ERRO:⏎ ⏎ Recebeu uma chave pública de uma versão do protocolo não suportada. Esta chave não pode ser processada, por favor reinicie uma sessão segura.</string>
+@@ -199,7 +199,7 @@
    <string name="ApplicationMigrationService_import_in_progress">Importação em andamento</string>
    <string name="ApplicationMigrationService_importing_text_messages">Importando mensagens de texto</string>
    <!--KeyCachingService-->
@@ -545,7 +676,7 @@ index 759089c..c0ab798 100644
    <string name="KeyCachingService_passphrase_cached">Frase-chave guardada em cache</string>
    <!--MessageNotifier-->
    <string name="MessageNotifier_d_new_messages">(%d) novas mensagens</string>
-@@ -210,7 +210,7 @@
+@@ -214,7 +214,7 @@
    <!--SmsReceiver-->
    <string name="SmsReceiver_currently_unable_to_send_your_sms_message">Mensagem SMS não pôde ser enviada agora. Será enviada quando o serviço estiver disponível.</string>
    <!--auto_initiate_activity-->
@@ -554,7 +685,7 @@ index 759089c..c0ab798 100644
    <string name="auto_initiate_activity__initiate_exchange">Iniciar intercâmbio</string>
    <!--change_passphrase_activity-->
    <string name="change_passphrase_activity__old_passphrase">Frase-chave anterior:</string>
-@@ -242,14 +242,14 @@
+@@ -246,17 +246,17 @@
    <string name="create_passphrase_activity__continue">Continuar</string>
    <string name="create_passphrase_activity__generating_secrets">Gerando segredos</string>
    <!--database_migration_activity-->
@@ -569,9 +700,13 @@ index 759089c..c0ab798 100644
 -  <string name="prompt_passphrase_activity__textsecure_passphrase">Palavra-chave do TextSecure</string>
 +  <string name="prompt_passphrase_activity__textsecure_passphrase">Palavra-chave do ChatSafe</string>
    <string name="prompt_passphrase_activity__unlock">Desbloquear</string>
-   <!--receive_key_activity-->
-   <string name="receive_key_activity__session">Sessão</string>
-@@ -279,7 +279,7 @@
+   <!--prompt_apn_activity-->
+-  <string name="prompt_apn_activity__textsecure_requires_apn_settings_to_deliver_media_messages_via_your_wireless_carrier">O TextSecure precisa das configurações de APN para entregar mensagens MMS via sua operadora móvel. Seu aparelho não disponibiliza esta informação, o que pode ocorrer em aparelhos bloqueados ou com configurações restritivas.</string>
++  <string name="prompt_apn_activity__textsecure_requires_apn_settings_to_deliver_media_messages_via_your_wireless_carrier">O ChatSafe precisa das configurações de APN para entregar mensagens MMS via sua operadora móvel. Seu aparelho não disponibiliza esta informação, o que pode ocorrer em aparelhos bloqueados ou com configurações restritivas.</string>
+   <string name="prompt_apn_activity__to_send_media_messages_please_complete_the_necessary_apn_information_below">Para enviar mensagens MMS, complete as informações de APN abaixo. Os valores para sua operadora normalmente podem ser localizados procurando por \'&amp;lt;operadora&amp;gt; APN\'. Você só precisará fazer isso uma vez.</string>
+   <string name="prompt_apn_activity__mmsc_url_required">URL MMSC (NECESSÁRIO):</string>
+   <string name="prompt_apn_activity__mms_proxy_host_optional">PROXY MMS (OPCIONAL):</string>
+@@ -289,7 +289,7 @@
    <string name="AndroidManifest__create_passphrase">Criar frase-chave</string>
    <string name="AndroidManifest__enter_passphrase">Introduzir frase-chave</string>
    <string name="AndroidManifest__select_contacts">Seleccionar contactos</string>
@@ -580,7 +715,7 @@ index 759089c..c0ab798 100644
    <string name="AndroidManifest__public_identity_key">Chave de identidade pública</string>
    <string name="AndroidManifest__change_passphrase">Mudar frase-chave</string>
    <string name="AndroidManifest__verify_session">Verificar sessão</string>
-@@ -292,8 +292,8 @@
+@@ -302,8 +302,8 @@
    <string name="preferences__use_settings">Utilizar configurações</string>
    <string name="preferences__pref_all_sms_title">Utilizar para todas as SMS</string>
    <string name="preferences__pref_all_mms_title">Utilizar para todas as MMS</string>
@@ -591,7 +726,7 @@ index 759089c..c0ab798 100644
    <string name="preferences__input_settings">Configurações de introdução</string>
    <string name="preferences__pref_enter_sends_title">Tecla de enter envia</string>
    <string name="preferences__pressing_the_enter_key_will_send_text_messages">Pressionar a tecla Enter envia mensagem de texto</string>
-@@ -413,6 +413,6 @@
+@@ -423,6 +423,6 @@
    <!--verify_keys-->
    <string name="verify_keys__menu_verified">Verificado</string>
    <!--Misc. piggybacking-->
@@ -600,7 +735,7 @@ index 759089c..c0ab798 100644
    <!--EOF-->
  </resources>
 diff --git a/res/values-pt/strings.xml b/res/values-pt/strings.xml
-index 04db5a9..428d165 100644
+index 9b1b4f5..35ba0c6 100644
 --- a/res/values-pt/strings.xml
 +++ b/res/values-pt/strings.xml
 @@ -1,16 +1,16 @@
@@ -623,24 +758,34 @@ index 04db5a9..428d165 100644
    <string name="ApplicationExportManager_exporting_database_and_keys">Exportar base de dados e chaves</string>
    <string name="ApplicationExportManager_exporting_your_sms_database_keys_and_settings">A exportar a base de dados de SMS, chaves e configurações...</string>
    <string name="ApplicationExportManager_no_sd_card_found_exclamation">Não foi encontrado um cartão SD!</string>
-@@ -184,14 +184,14 @@
-   <!--MmsSender-->
-   <!--ApplicationMigrationService-->
+@@ -196,7 +196,7 @@
+   <string name="ApplicationMigrationService_import_in_progress">Importação em progresso</string>
+   <string name="ApplicationMigrationService_importing_text_messages">A importar mensages de texto</string>
    <!--KeyCachingService-->
 -  <string name="KeyCachingService_textsecure_passphrase_cached">Frase-chave TextSecure guardada em memória cache</string>
 +  <string name="KeyCachingService_textsecure_passphrase_cached">Frase-chave ChatSafe guardada em memória cache</string>
    <string name="KeyCachingService_passphrase_cached">Frase-chave guardada em cache</string>
    <!--MessageNotifier-->
    <string name="MessageNotifier_d_new_messages">(%d) novas mensagens</string>
-   <string name="MessageNotifier_most_recent_from_s">Mais recente de: %s</string>
+@@ -211,7 +211,7 @@
    <!--SmsReceiver-->
+   <string name="SmsReceiver_currently_unable_to_send_your_sms_message">Presentemente não é possível remeter a mensagem SMS. Será reenviada assim que o serviço esteja disponível.</string>
    <!--auto_initiate_activity-->
 -  <string name="auto_initiate_activity__you_have_received_a_message_from_someone_who_supports_textsecure_encrypted_sessions_would_you_like_to_initiate_a_secure_session">Recebeu uma mensagem de alguém que suporta sessões cifradas TextSecure. Deseja iniciar uma sessão segura?</string>
 +  <string name="auto_initiate_activity__you_have_received_a_message_from_someone_who_supports_textsecure_encrypted_sessions_would_you_like_to_initiate_a_secure_session">Recebeu uma mensagem de alguém que suporta sessões cifradas ChatSafe. Deseja iniciar uma sessão segura?</string>
    <string name="auto_initiate_activity__initiate_exchange">Iniciar intercâmbio</string>
    <!--change_passphrase_activity-->
    <string name="change_passphrase_activity__old_passphrase">Frase-chave anterior:</string>
-@@ -250,7 +250,7 @@
+@@ -243,7 +243,7 @@
+   <string name="create_passphrase_activity__continue">Continuar</string>
+   <string name="create_passphrase_activity__generating_secrets">A GERAR SEGREDOS</string>
+   <!--database_migration_activity-->
+-  <string name="database_migration_activity__would_you_like_to_import_your_existing_text_messages">Deseja importar as suas mensages de texto para a base de dados TextSecure cifrada?</string>
++  <string name="database_migration_activity__would_you_like_to_import_your_existing_text_messages">Deseja importar as suas mensages de texto para a base de dados ChatSafe cifrada?</string>
+   <string name="database_migration_activity__the_default_system_database_will_not_be_modified">A base de dados de sistema não será modificada ou alterada de nenhuma forma.</string>
+   <string name="database_migration_activity__skip">Saltar</string>
+   <string name="database_migration_activity__import">Importar</string>
+@@ -281,7 +281,7 @@
    <string name="AndroidManifest__create_passphrase">Criar frase-chave</string>
    <string name="AndroidManifest__enter_passphrase">Introduzir frase-chave</string>
    <string name="AndroidManifest__select_contacts">Seleccionar contactos</string>
@@ -649,7 +794,7 @@ index 04db5a9..428d165 100644
    <string name="AndroidManifest__public_identity_key">Chave de identidade pública</string>
    <string name="AndroidManifest__change_passphrase">Mudar frase-chave</string>
    <string name="AndroidManifest__verify_session">Verificar sessão</string>
-@@ -263,8 +263,8 @@
+@@ -294,8 +294,8 @@
    <string name="preferences__use_settings">Utilizar configurações</string>
    <string name="preferences__pref_all_sms_title">Utilizar para todas as SMS</string>
    <string name="preferences__pref_all_mms_title">Utilizar para todas as MMS</string>
@@ -660,7 +805,7 @@ index 04db5a9..428d165 100644
    <string name="preferences__input_settings">Configurações de introdução</string>
    <string name="preferences__pref_enter_sends_title">Tecla de enter envia</string>
    <string name="preferences__pressing_the_enter_key_will_send_text_messages">Pressionar a tecla Enter envia mensagem de texto</string>
-@@ -384,6 +384,6 @@
+@@ -415,6 +415,6 @@
    <!--verify_keys-->
    <string name="verify_keys__menu_verified">Verificado</string>
    <!--Misc. piggybacking-->
@@ -669,7 +814,7 @@ index 04db5a9..428d165 100644
    <!--EOF-->
  </resources>
 diff --git a/res/values-sk/strings.xml b/res/values-sk/strings.xml
-index 14fdb1f..194ded8 100644
+index e791c54..0d856cf 100644
 --- a/res/values-sk/strings.xml
 +++ b/res/values-sk/strings.xml
 @@ -1,16 +1,16 @@
@@ -692,7 +837,7 @@ index 14fdb1f..194ded8 100644
    <string name="ApplicationExportManager_exporting_database_and_keys">Exportujem databázu a kľúče</string>
    <string name="ApplicationExportManager_exporting_your_sms_database_keys_and_settings">Exportujem SMS databázu, kľúče a nastavenia...</string>
    <string name="ApplicationExportManager_no_sd_card_found_exclamation">Nenašiel som SD kartu!</string>
-@@ -184,14 +184,14 @@
+@@ -185,14 +185,14 @@
    <!--MmsSender-->
    <!--ApplicationMigrationService-->
    <!--KeyCachingService-->
@@ -709,7 +854,7 @@ index 14fdb1f..194ded8 100644
    <string name="auto_initiate_activity__initiate_exchange">Začni vzájomnú výmenu</string>
    <!--change_passphrase_activity-->
    <string name="change_passphrase_activity__old_passphrase">Staré heslo:</string>
-@@ -252,7 +252,7 @@
+@@ -254,7 +254,7 @@
    <string name="AndroidManifest__create_passphrase">Vytvor heslo</string>
    <string name="AndroidManifest__enter_passphrase">Zadaj heslo</string>
    <string name="AndroidManifest__select_contacts">Vyber kontakty</string>
@@ -718,7 +863,7 @@ index 14fdb1f..194ded8 100644
    <string name="AndroidManifest__public_identity_key">Kľúč verejnej totožnosti</string>
    <string name="AndroidManifest__change_passphrase">Zmeň heslo</string>
    <string name="AndroidManifest__verify_session">Verifikuj session</string>
-@@ -265,8 +265,8 @@
+@@ -267,8 +267,8 @@
    <string name="preferences__use_settings">Použi nastavenia</string>
    <string name="preferences__pref_all_sms_title">Použi pre všetky SMS</string>
    <string name="preferences__pref_all_mms_title">Použi pre všetky MMS</string>
@@ -729,7 +874,7 @@ index 14fdb1f..194ded8 100644
    <string name="preferences__input_settings">Nastavenia vstupu</string>
    <string name="preferences__pref_enter_sends_title">Enter odošle</string>
    <string name="preferences__pressing_the_enter_key_will_send_text_messages">Stlačením Enter odošlete textové správy</string>
-@@ -386,6 +386,6 @@
+@@ -388,6 +388,6 @@
    <!--verify_keys-->
    <string name="verify_keys__menu_verified">Overené</string>
    <!--Misc. piggybacking-->
@@ -738,7 +883,7 @@ index 14fdb1f..194ded8 100644
    <!--EOF-->
  </resources>
 diff --git a/res/values-sl/strings.xml b/res/values-sl/strings.xml
-index d3fb16c..a8d9913 100644
+index 48f1f35..85ac0d3 100644
 --- a/res/values-sl/strings.xml
 +++ b/res/values-sl/strings.xml
 @@ -1,12 +1,12 @@
@@ -756,7 +901,16 @@ index d3fb16c..a8d9913 100644
    <string name="ApplicationExportManager_importing_database_and_keys">Uvoz podatkovne zbirke in ključev</string>
    <string name="ApplicationExportManager_importing_your_sms_database_keys_and_settings">Uvažam vašo zbirko SMS sporočil, ključe in nastavitve...</string>
    <string name="ApplicationExportManager_export_database_question">Naj izvozim podatkovno zbirko?</string>
-@@ -195,7 +195,7 @@
+@@ -107,7 +107,7 @@
+   <!--PromptApnActivity-->
+   <string name="PromptApnActivity_you_must_specify_an_mmsc_url_for_your_carrier">Navesti morate MMSC URL vašega operaterja.</string>
+   <string name="PromptApnActivity_mms_settings_updated">Nastavitve MMS posodobljene</string>
+-  <string name="PromptApnActivity_you_can_modify_these_values_from_the_textsecure_settings_menu_at_any_time_">Vnešeno lahko kadarkoli popravite v nastavitvah TextSecure.</string>
++  <string name="PromptApnActivity_you_can_modify_these_values_from_the_textsecure_settings_menu_at_any_time_">Vnešeno lahko kadarkoli popravite v nastavitvah ChatSafe.</string>
+   <!--ReceiveKeyActivity-->
+   <string name="ReceiveKeyActivity_error_you_have_received_a_corrupted_public_key">POZOR:\n\nPrejeli ste okvarjen javni ključ.   Ključa ne morem obdelati, prosim ponovno vzpostavite varno sejo.</string>
+   <string name="ReceiveKeyActivity_error_you_have_received_a_public_key_from_an_unsupported_version_of_the_protocol">POZOR:\n\nPrejeli ste javni ključ nepodprte verzije protokola.    Ključa ne morem obdelati, prosim ponovno vzpostavite varno sejo.</string>
+@@ -199,7 +199,7 @@
    <string name="ApplicationMigrationService_import_in_progress">Uvoz v teku</string>
    <string name="ApplicationMigrationService_importing_text_messages">Uvažanje kratkih sporočil</string>
    <!--KeyCachingService-->
@@ -765,7 +919,7 @@ index d3fb16c..a8d9913 100644
    <string name="KeyCachingService_passphrase_cached">Geslo zajeto</string>
    <!--MessageNotifier-->
    <string name="MessageNotifier_d_new_messages">%d novih sporočil</string>
-@@ -210,7 +210,7 @@
+@@ -214,7 +214,7 @@
    <!--SmsReceiver-->
    <string name="SmsReceiver_currently_unable_to_send_your_sms_message">Sporočila SMS trenutno ni mogoče poslati. Poslano bo, takoj ko bo mogoče.</string>
    <!--auto_initiate_activity-->
@@ -774,7 +928,7 @@ index d3fb16c..a8d9913 100644
    <string name="auto_initiate_activity__initiate_exchange">Začni izmenjavo</string>
    <!--change_passphrase_activity-->
    <string name="change_passphrase_activity__old_passphrase">Staro geslo:</string>
-@@ -242,7 +242,7 @@
+@@ -246,7 +246,7 @@
    <string name="create_passphrase_activity__continue">Nadaljuj</string>
    <string name="create_passphrase_activity__generating_secrets">USTVARJAM TAJNE KLJUČE</string>
    <!--database_migration_activity-->
@@ -783,7 +937,16 @@ index d3fb16c..a8d9913 100644
    <string name="database_migration_activity__the_default_system_database_will_not_be_modified">Osnovna SMS podatkovna zbirka bo ostala nespremenjena.</string>
    <string name="database_migration_activity__skip">Preskoči</string>
    <string name="database_migration_activity__import">Uvoz</string>
-@@ -279,7 +279,7 @@
+@@ -256,7 +256,7 @@
+   <string name="prompt_passphrase_activity__textsecure_passphrase">GESLO TEXTSECURE</string>
+   <string name="prompt_passphrase_activity__unlock">Odkleni</string>
+   <!--prompt_apn_activity-->
+-  <string name="prompt_apn_activity__textsecure_requires_apn_settings_to_deliver_media_messages_via_your_wireless_carrier">Za posredovanje sporočil preko vašega mobilnega operaterja potrebuje TextSecure ustrezne nastavitve APN. Pri vaši napravi ti podatki niso na voljo. To je značilno predvsem za zaklenjene naprave ali različne omejene konfiguracije.</string>
++  <string name="prompt_apn_activity__textsecure_requires_apn_settings_to_deliver_media_messages_via_your_wireless_carrier">Za posredovanje sporočil preko vašega mobilnega operaterja potrebuje ChatSafe ustrezne nastavitve APN. Pri vaši napravi ti podatki niso na voljo. To je značilno predvsem za zaklenjene naprave ali različne omejene konfiguracije.</string>
+   <string name="prompt_apn_activity__to_send_media_messages_please_complete_the_necessary_apn_information_below">Za pošiljanje multimedijskih sporočil vnesite ustrezne nastavitve APN. Podatke za vašega operaterja lahko verjetno najdete s poizvedbo za \'&amp;lt;vaš operater&amp;gt; APN\'. To morate storiti le enkrat.</string>
+   <string name="prompt_apn_activity__mmsc_url_required">MMSC URL (ZAHTEVANO):</string>
+   <string name="prompt_apn_activity__mms_proxy_host_optional">GOSTITELJ POSRED. STREŽNIKA MMS (IZBIRNO):</string>
+@@ -289,7 +289,7 @@
    <string name="AndroidManifest__create_passphrase">Ustvari geslo</string>
    <string name="AndroidManifest__enter_passphrase">Vpiši geslo</string>
    <string name="AndroidManifest__select_contacts">Izberi stike</string>
@@ -792,18 +955,18 @@ index d3fb16c..a8d9913 100644
    <string name="AndroidManifest__public_identity_key">Javni identifikacijski ključ</string>
    <string name="AndroidManifest__change_passphrase">Zamenjaj geslo</string>
    <string name="AndroidManifest__verify_session">Preveri sejo</string>
-@@ -292,8 +292,8 @@
-   <string name="preferences__use_settings">Uporabi nastavitve</string>
-   <string name="preferences__pref_all_sms_title">Izberi za vsa SMS sporočila</string>
-   <string name="preferences__pref_all_mms_title">Izberi za vsa MMS sporočila</string>
+@@ -302,8 +302,8 @@
+   <string name="preferences__use_settings">Nastavitve uporabe</string>
+   <string name="preferences__pref_all_sms_title">Uporabljaj za vsa SMS sporočila</string>
+   <string name="preferences__pref_all_mms_title">Uporabljaj za vsa MMS sporočila</string>
 -  <string name="preferences__use_textsecure_for_viewing_and_storing_all_incoming_text_messages">Uporabi TextSecure za ogled in shranjevanje vseh dohodnih SMS sporočil</string>
 -  <string name="preferences__use_textsecure_for_viewing_and_storing_all_incoming_multimedia_messages">Uporabi TextSecure za ogled in shranjevanje vseh dohodnih MMS sporočil</string>
 +  <string name="preferences__use_textsecure_for_viewing_and_storing_all_incoming_text_messages">Uporabi ChatSafe za ogled in shranjevanje vseh dohodnih SMS sporočil</string>
 +  <string name="preferences__use_textsecure_for_viewing_and_storing_all_incoming_multimedia_messages">Uporabi ChatSafe za ogled in shranjevanje vseh dohodnih MMS sporočil</string>
    <string name="preferences__input_settings">Nastavitve vnosa</string>
-   <string name="preferences__pref_enter_sends_title">Naprej/Enter pošlje</string>
-   <string name="preferences__pressing_the_enter_key_will_send_text_messages">Pritisk na tipko naprej/enter bo poslal sporočila</string>
-@@ -413,6 +413,6 @@
+   <string name="preferences__pref_enter_sends_title">Tipka Naprej (Enter) pošlje</string>
+   <string name="preferences__pressing_the_enter_key_will_send_text_messages">S pritiskom na tipko Naprej (Enter) bo sporočilo poslano</string>
+@@ -423,6 +423,6 @@
    <!--verify_keys-->
    <string name="verify_keys__menu_verified">Overjeno</string>
    <!--Misc. piggybacking-->
@@ -812,7 +975,7 @@ index d3fb16c..a8d9913 100644
    <!--EOF-->
  </resources>
 diff --git a/res/values-zh-rCN/strings.xml b/res/values-zh-rCN/strings.xml
-index 7b8b4e9..85a9462 100644
+index 0a7138f..b3fafc9 100644
 --- a/res/values-zh-rCN/strings.xml
 +++ b/res/values-zh-rCN/strings.xml
 @@ -1,16 +1,16 @@
@@ -835,7 +998,7 @@ index 7b8b4e9..85a9462 100644
    <string name="ApplicationExportManager_exporting_database_and_keys">正在导出数据库和密钥</string>
    <string name="ApplicationExportManager_exporting_your_sms_database_keys_and_settings">正在导出您的短信数据库、密钥和设置...</string>
    <string name="ApplicationExportManager_no_sd_card_found_exclamation">未找到 SD 卡！</string>
-@@ -179,14 +179,14 @@
+@@ -180,14 +180,14 @@
    <!--MmsSender-->
    <!--ApplicationMigrationService-->
    <!--KeyCachingService-->
@@ -852,7 +1015,7 @@ index 7b8b4e9..85a9462 100644
    <string name="auto_initiate_activity__initiate_exchange">启动交换</string>
    <!--change_passphrase_activity-->
    <string name="change_passphrase_activity__old_passphrase">旧密码：</string>
-@@ -246,7 +246,7 @@
+@@ -248,7 +248,7 @@
    <string name="AndroidManifest__create_passphrase">创建密码</string>
    <string name="AndroidManifest__enter_passphrase">输入密码</string>
    <string name="AndroidManifest__select_contacts">选择联系人</string>
@@ -861,7 +1024,7 @@ index 7b8b4e9..85a9462 100644
    <string name="AndroidManifest__public_identity_key">身份公钥</string>
    <string name="AndroidManifest__change_passphrase">更改密码</string>
    <string name="AndroidManifest__verify_session">验证会话</string>
-@@ -259,8 +259,8 @@
+@@ -261,8 +261,8 @@
    <string name="preferences__use_settings">使用设置</string>
    <string name="preferences__pref_all_sms_title">用于所有短信</string>
    <string name="preferences__pref_all_mms_title">用于所有彩信</string>
@@ -872,7 +1035,7 @@ index 7b8b4e9..85a9462 100644
    <string name="preferences__input_settings">输入设置</string>
    <string name="preferences__pref_enter_sends_title">输入发送</string>
    <string name="preferences__pressing_the_enter_key_will_send_text_messages">按下 enter 键将发送文本消息</string>
-@@ -363,6 +363,6 @@
+@@ -365,6 +365,6 @@
    <!--verify_keys-->
    <string name="verify_keys__menu_verified">已验证</string>
    <!--Misc. piggybacking-->
@@ -881,7 +1044,7 @@ index 7b8b4e9..85a9462 100644
    <!--EOF-->
  </resources>
 diff --git a/res/values/strings.xml b/res/values/strings.xml
-index eacd477..387584d 100644
+index 0856488..92c0fd8 100644
 --- a/res/values/strings.xml
 +++ b/res/values/strings.xml
 @@ -1,17 +1,17 @@
@@ -905,7 +1068,16 @@ index eacd477..387584d 100644
      <string name="ApplicationExportManager_exporting_database_and_keys">Exporting Database and Keys</string>
      <string name="ApplicationExportManager_exporting_your_sms_database_keys_and_settings">Exporting your SMS database, keys, and settings...</string>
      <string name="ApplicationExportManager_no_sd_card_found_exclamation">No SD card found!</string>
-@@ -224,7 +224,7 @@
+@@ -123,7 +123,7 @@
+     <!-- PromptApnActivity -->
+     <string name="PromptApnActivity_you_must_specify_an_mmsc_url_for_your_carrier">You must specify an MMSC URL for your carrier.</string>
+     <string name="PromptApnActivity_mms_settings_updated">MMS Settings Updated</string>
+-    <string name="PromptApnActivity_you_can_modify_these_values_from_the_textsecure_settings_menu_at_any_time_">You can modify these values from the TextSecure settings menu at any time.</string>    
++    <string name="PromptApnActivity_you_can_modify_these_values_from_the_textsecure_settings_menu_at_any_time_">You can modify these values from the ChatSafe settings menu at any time.</string>    
+     
+     <!-- ReceiveKeyActivity -->
+     <string name="ReceiveKeyActivity_error_you_have_received_a_corrupted_public_key">ERROR:\n\nYou have received a corrupted public key.  This key can not be processed, please re-initiate a secure session.</string>
+@@ -229,7 +229,7 @@
      <string name="ApplicationMigrationService_importing_text_messages">Importing Text Messages</string>
      
      <!-- KeyCachingService -->
@@ -914,7 +1086,7 @@ index eacd477..387584d 100644
      <string name="KeyCachingService_passphrase_cached">Passphrase Cached</string>
      
      <!-- MessageNotifier -->
-@@ -242,7 +242,7 @@
+@@ -247,7 +247,7 @@
      <string name="SmsReceiver_currently_unable_to_send_your_sms_message">Currently unable to send your SMS message. It will be sent once service becomes available.</string>
      
      <!-- auto_initiate_activity -->
@@ -923,7 +1095,7 @@ index eacd477..387584d 100644
      <string name="auto_initiate_activity__initiate_exchange">Initiate Exchange</string>
      
      <!-- change_passphrase_activity -->
-@@ -284,7 +284,7 @@
+@@ -289,7 +289,7 @@
      <string name="create_passphrase_activity__generating_secrets">GENERATING SECRETS</string>
      
      <!-- database_migration_activity -->
@@ -932,7 +1104,16 @@ index eacd477..387584d 100644
      <string name="database_migration_activity__the_default_system_database_will_not_be_modified">The default system database will not be modified or altered in any way.</string>
      <string name="database_migration_activity__skip">Skip</string>
      <string name="database_migration_activity__import">Import</string>
-@@ -332,7 +332,7 @@
+@@ -301,7 +301,7 @@
+     <string name="prompt_passphrase_activity__unlock">Unlock</string>
+     
+     <!-- prompt_apn_activity -->
+-    <string name="prompt_apn_activity__textsecure_requires_apn_settings_to_deliver_media_messages_via_your_wireless_carrier">TextSecure requires APN settings to deliver media messages via your wireless carrier.  Your device does not make this information available, which is occasionally true for locked devices and other restrictive configurations.</string>
++    <string name="prompt_apn_activity__textsecure_requires_apn_settings_to_deliver_media_messages_via_your_wireless_carrier">ChatSafe requires APN settings to deliver media messages via your wireless carrier.  Your device does not make this information available, which is occasionally true for locked devices and other restrictive configurations.</string>
+     <string name="prompt_apn_activity__to_send_media_messages_please_complete_the_necessary_apn_information_below">To send media messages, please complete the necessary APN information below. The values for your carrier can generally be located by searching for \'&amp;lt;your carrier&amp;gt; APN\'.  You will only need to do this once.</string>
+     <string name="prompt_apn_activity__mmsc_url_required">MMSC URL (REQUIRED):</string>
+     <string name="prompt_apn_activity__mms_proxy_host_optional">MMS PROXY HOST (OPTIONAL):</string>
+@@ -344,7 +344,7 @@
      <string name="AndroidManifest__create_passphrase">Create Passphrase</string>
      <string name="AndroidManifest__enter_passphrase">Enter Passphrase</string>
      <string name="AndroidManifest__select_contacts">Select Contacts</string>
@@ -941,7 +1122,7 @@ index eacd477..387584d 100644
      <string name="AndroidManifest__public_identity_key">Public Identity Key</string>
      <string name="AndroidManifest__change_passphrase">Change Passphrase</string>
      <string name="AndroidManifest__verify_session">Verify Session</string>
-@@ -347,8 +347,8 @@
+@@ -359,8 +359,8 @@
      <string name="preferences__use_settings">Use Settings</string>
      <string name="preferences__pref_all_sms_title">Use for all SMS</string>
      <string name="preferences__pref_all_mms_title">Use for all MMS</string> 
@@ -952,7 +1133,7 @@ index eacd477..387584d 100644
      <string name="preferences__input_settings">Input Settings</string>
      <string name="preferences__pref_enter_sends_title">Enter sends</string>
      <string name="preferences__pressing_the_enter_key_will_send_text_messages">Pressing the enter key will send text messages</string>
-@@ -486,7 +486,7 @@
+@@ -498,7 +498,7 @@
      <string name="verify_keys__menu_verified">Verified</string>
  
      <!-- Misc. piggybacking -->
