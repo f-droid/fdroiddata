@@ -1,0 +1,123 @@
+diff --git a/.classpath b/.classpath
+index 4b5d557..46e001d 100644
+--- a/.classpath
++++ b/.classpath
+@@ -5,7 +5,6 @@
+ 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/android-support-v4.jar"/>
+ 	<classpathentry kind="lib" path="libs/sjxp-2.2.jar"/>
+ 	<classpathentry kind="lib" path="libs/android-support-v4.jar"/>
+-	<classpathentry kind="lib" path="libs/crittercism_v2_1_3_crashonly.jar"/>
+ 	<classpathentry kind="src" path="src"/>
+ 	<classpathentry kind="src" path="gen"/>
+ 	<classpathentry kind="con" path="com.android.ide.eclipse.adt.DEPENDENCIES"/>
+diff --git a/AndroidManifest.xml b/AndroidManifest.xml
+index d7b5fa7..9269741 100644
+--- a/AndroidManifest.xml
++++ b/AndroidManifest.xml
+@@ -37,32 +37,6 @@
+             android:label="Open BART Usher" >
+         </service>
+ 
+-        <!-- Start of Crittercism.com Code -->
+-        <activity android:name="com.crittercism.NotificationActivity" />
+-
+-        <!-- For Crittercism's support forum, also include the activities below: -->
+-        <activity
+-            android:name="com.crittercism.NewFeedbackSpringboardActivity"
+-            android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen" >
+-        </activity>
+-        <activity
+-            android:name="com.crittercism.NewFeedbackIssueListActivity"
+-            android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen" >
+-        </activity>
+-        <activity
+-            android:name="com.crittercism.NewFeedbackQuestionListActivity"
+-            android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen" >
+-        </activity>
+-        <activity
+-            android:name="com.crittercism.NewFeedbackItemDetailsActivity"
+-            android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen" >
+-        </activity>
+-        <activity
+-            android:name="com.crittercism.NewFeedbackCreateActivity"
+-            android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen" >
+-        </activity>
+-        <!-- End of Crittercism.com Code -->
+-
+     </application>
+ 
+-</manifest>
+\ No newline at end of file
++</manifest>
+diff --git a/src/pro/dbro/bart/BART.java b/src/pro/dbro/bart/BART.java
+index 0731ff2..168778c 100644
+--- a/src/pro/dbro/bart/BART.java
++++ b/src/pro/dbro/bart/BART.java
+@@ -13,7 +13,7 @@ public class BART {
+ 	public final static String API_ROOT = "http://api.bart.gov/api/";
+ 	// The public BART API key is: MW9S-E7SL-26DU-VV8V
+ 	// To obtain your own key, see http://api.bart.gov/api/register.aspx
+-	public final static String API_KEY = SECRETS.BART_API_KEY;
++	public final static String API_KEY = "MW9S-E7SL-26DU-VV8V";
+ 	
+ 	// *****  BART Route ETA Thresholds  *****
+ 	// After a day's service has concluded, BART will return scheduled trains for the next day 
+diff --git a/src/pro/dbro/bart/BartRouteParser.java b/src/pro/dbro/bart/BartRouteParser.java
+index 88b7625..b2d4f75 100644
+--- a/src/pro/dbro/bart/BartRouteParser.java
++++ b/src/pro/dbro/bart/BartRouteParser.java
+@@ -27,7 +27,6 @@ import java.util.Date;
+ import java.util.Locale;
+ import java.util.TimeZone;
+ 
+-import com.crittercism.app.Crittercism;
+ import com.thebuzzmedia.sjxp.XMLParser;
+ import com.thebuzzmedia.sjxp.XMLParserException;
+ import com.thebuzzmedia.sjxp.rule.DefaultRule;
+@@ -166,9 +165,6 @@ public class BartRouteParser extends AsyncTask<String, String, routeResponse> {
+ 							Log.d("BartRouteParserEndTrip","non-PST coerced parse failed");
+ 							Log.d("BartRouteParserEndTrip_DateString", "origin: " + originDateStr+" , destination: "+destinationDateStr);
+ 							Log.d("BartRouteParserEndTripException",e.getClass().toString() + ": " + e.getMessage());
+-							Crittercism.leaveBreadcrumb(originDateStr+" , "+destinationDateStr);
+-							Crittercism.leaveBreadcrumb(Log.getStackTraceString(e));
+-							Crittercism.logHandledException(e);
+ 							dateError = true;
+ 						//}
+ 					}
+diff --git a/src/pro/dbro/bart/TheActivity.java b/src/pro/dbro/bart/TheActivity.java
+index 2c57dde..8063d81 100644
+--- a/src/pro/dbro/bart/TheActivity.java
++++ b/src/pro/dbro/bart/TheActivity.java
+@@ -45,7 +45,6 @@ import android.view.View.OnTouchListener;
+ import android.view.inputmethod.InputMethodManager;
+ import android.widget.*;
+ import android.widget.AdapterView.OnItemClickListener;
+-import com.crittercism.app.Crittercism;
+ import pro.dbro.bart.DeviceLocation.LocationResult;
+ 
+ import java.io.Serializable;
+@@ -107,9 +106,6 @@ public class TheActivity extends Activity {
+     public void onCreate(Bundle savedInstanceState) {
+         super.onCreate(savedInstanceState);
+         
+-        //TESTING: enable crittercism
+-        Crittercism.init(getApplicationContext(), SECRETS.CRITTERCISM_SECRET);
+-
+         if(Build.VERSION.SDK_INT < 11){
+         	//If API 14+, The ActionBar will be hidden with this call
+         	this.requestWindowFeature(Window.FEATURE_NO_TITLE);
+@@ -475,7 +471,6 @@ public class TheActivity extends Activity {
+     	}
+     	url += "&key="+BART.API_KEY;
+     	Log.d("BART API",url);
+-    	Crittercism.leaveBreadcrumb("BART API: "+ url);
+     	new RequestTask(request, updateUI).execute(url);
+     	// Set loading indicator
+     	// I find this jarring when network latency is low
+@@ -1330,4 +1325,4 @@ public class TheActivity extends Activity {
+         .show();
+ 	}
+     
+-}
+\ No newline at end of file
++}
