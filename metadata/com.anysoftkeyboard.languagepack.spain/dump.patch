@@ -1,0 +1,12 @@
+Index: esbuild.sh
+===================================================================
+--- a/esbuild.sh	(revision 0)
++++ b/esbuild.sh	(working copy)
+@@ -0,0 +1,7 @@
++curl http://dumps.wikimedia.org/eswiki/20130521/eswiki-20130521-pages-articles.xml.bz2 -o eswiki-latest-pages-articles.xml.bz
++bzcat eswiki-latest-pages-articles.xml.bz > eswiki-latest-pages-articles.txt
++cat eswiki-latest-pages-articles.txt | grep -v '<[a-z]*\s' | grep -v '&[a-z0-9]*;' | tr '[:punct:][:blank:][:digit:]' '\n' | tr 'A-Z' 'a-z' | tr 'ÁÉÍÓÚÜÑÇ' 
++'áéíóúüñç' > eswiki-latest-pages-articles.trim.txt
++cat eswiki-latest-pages-articles.trim.txt | uniq > eswiki-latest-pages-articles.unique.txt
++cat eswiki-latest-pages-articles.unique.txt | sort -f -T . | uniq -c | sort -nr -T . > eswiki-latest-pages-articles.sort.txt
++cat eswiki-latest-pages-articles.sort.txt | head -n 200000 | tail -n +2 | awk '{print "<w f=\""$1"\">"$2"</w>"}' > eswiki-latest-pages-articles.dict.txt
