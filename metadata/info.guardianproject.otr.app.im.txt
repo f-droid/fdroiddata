@@ -25,12 +25,15 @@ sed -i 's@\(android.library.reference.1=\).*@\1$$ActionBarSherlock$$@' project.p
 Build Version:0.0.10-RC6,41,0.0.10-RC6,forceversion=yes,forcevercode=yes,\
 srclibs=ActionBarSherlock@4.1.0,prebuild=\
 sed -i 's@\(android.library.reference.1=\).*@\1$$ActionBarSherlock$$@' project.properties
-Build Version:0.0.11-RC2,53,!bash script and private submodules 0.0.11-RC2,submodules=yes,\
-update=external/ActionBarSherlock/library;external/MemorizingTrustManager;external/OnionKit/library,\
-prebuild=sed -i '6 i \\t<uses-sdk android:targetSdkVersion="15" />' \
-external/MemorizingTrustManager/AndroidManifest.xml && \
-echo "sdk-location=$$SDK$$" > external/asmack/local.properties && \
-cd external/asmack && /bin/sh build.bash && cp build/asmack-android-4.jar ../../libs
+# Can't use build.bash script so add the output as a patch and build the jar manually
+Build Version:0.0.11-RC5,57,!mysterious aapt problem at 111494ebe,\
+submodules=yes,patch=otr-asmack.patch,\
+update=.;external/ActionBarSherlock/library;external/\
+MemorizingTrustManager;external/OnionKit/library,prebuild=\
+rm -rf tests/ META-INF/ robo-tests/ gitian/ proguard-project.txt && \
+echo "sdk-location=$$SDK$$" > external/asmack/local.properties,build=\
+ant -Dbuild.all=true -f external/asmack/build.xml && \
+mv external/asmack/build/asmack-android-4.jar libs/
 
 Auto Update Mode:None
 #Seem to bump manifest at beginning and tags doesn't give the latest
