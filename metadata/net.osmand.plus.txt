@@ -29,8 +29,8 @@ Status: We don't have the latest version of this app because it is difficult
 to build. Developer builds are available via the website.
 .
 
-Repo Type:git
-Repo:https://github.com/osmandapp/Osmand.git
+Repo Type:srclib
+Repo:android
 
 Build Version:0.6.5,34,v0.6.5,subdir=OsmAnd,encoding=utf-8,prebuild=mkdir assets && mkdir raw
 Build Version:0.6.6,36,v0.6.6_2,subdir=OsmAnd,encoding=utf-8,prebuild=mkdir raw
@@ -55,22 +55,23 @@ sed -i 's/app_version">[^<]*/app_version">0.8.2-fdroid/' res/values/no_translate
 cp ../DataExtractionOSM/build/OsmAndMapCreator.jar libs/ && \
 zip -d libs/OsmAndMapCreator.jar net/osmand/LogUtil.class && \
 cp -r ../DataExtractionOSM/build/lib/ libs/
-#ndk-r8b doesn't work but ndk-r8d does;ndk-build isn't building all native bits
-Build Version:1.1.2,110,!more WIP: top-level exceptions errors and native bits missing ceff4509a8,\
-subdir=OsmAnd,encoding=utf-8,\
-srclibs=OsmAnd-tools@94486e332d;OsmAnd-core@4759ffbd96,prebuild=\
-sed -i 's/app_version">[^<]*/app_version">1.1.2-fdroid/' res/values/no_translate.xml && \
-sed -i 's@..\/core@$$OsmAnd-core$$@g' $$OsmAnd-tools$$/OsmAndMapCreator/build.xml && \
-sed -i 's@..\/..\/core@$$OsmAnd-core$$@g' build.xml && \
-sed -i 's@..\/..\/core@$$OsmAnd-core$$@g' jni/Android.mk && \
-ant jar -f $$OsmAnd-tools$$/OsmAndMapCreator/build.xml && \
-ant jar -f $$OsmAnd-core$$/OsmAnd-java/build.xml && \
-cp $$OsmAnd-tools$$/OsmAndMapCreator/OsmAndMapCreator.jar libs/ && \
-cp $$OsmAnd-core$$/OsmAnd-java/OsmAnd-core.jar libs/ && \
-zip -d libs/OsmAnd-core.jar net/osmand/PlatformUtil.class && rm ant.properties,\
-buildjni=yes
 
-# Don't use master branch for main app nor srclibs
+# Name srclibs in such a way as to replicate OsmAnd build tree
+# Could try making https://github.com/osmandapp/OsmAnd-external-qtbase a srclib too
+Build Version:1.4-fdroid,145,!WIP at r1.4,\
+rm=SherlockBar/build.xml,subdir=OsmAnd,encoding=utf-8,update.;../SherlockBar,\
+srclibs=tools@9b4c9da995;core@r1.1.4;build@master,prebuild=\
+sed -i 's/"\${aapt.ignore.assets}"/"\${aapt.ignore.assets}" \
+libraryRFileRefid="project.library.bin.r.file.path"/g' build.xml && \
+sed -i 's/app_version">[^<]*/app_version">1.4-fdroid/' \
+res/values/no_translate.xml && sed -i '/keys/d' ant.properties,build=\
+ant build -f $$tools$$/OsmAndMapCreator/build.xml && \
+mv $$tools$$/OsmAndMapCreator/OsmAndMapCreator.jar libs/ && \
+mv $$core$$/OsmAnd-java/OsmAnd-core.jar libs/ && \
+zip -d libs/OsmAnd-core.jar net/osmand/PlatformUtil.class && \
+$$NDK$$/ndk-build,antcommand=build
+
+# see https://github.com/osmandapp/OsmAnd-manifest/blob/master/current_release.xml 
 Auto Update Mode:None
 Update Check Mode:Market
 Current Version:1.4.1
