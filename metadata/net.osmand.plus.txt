@@ -58,19 +58,23 @@ cp -r ../DataExtractionOSM/build/lib/ libs/
 
 # Name srclibs in such a way as to replicate OsmAnd build tree
 # Could try making https://github.com/osmandapp/OsmAnd-external-qtbase a srclib too
-Build Version:1.4-fdroid,145,!WIP at r1.4,\
-rm=SherlockBar/build.xml,subdir=OsmAnd,encoding=utf-8,update=.;../SherlockBar,\
-srclibs=tools@9b4c9da995;core@r1.1.4;build@master,prebuild=\
+# Declare OSMAND_ARM_ONLY=true ndk-build.sh for just ARM
+# Don't really understand what the other build.xmls do: they don't appear to put jars in classpath
+# Jars haven't been verified
+Build Version:1.4-fdroid,145,r1.4,\
+rm=SherlockBar/build.xml,subdir=OsmAnd,encoding=utf-8,\
+srclibs=tools@9b4c9da995;core@r1.1.4;build@86a575b93,prebuild=\
+sed -i 's/debuggable="true"/debuggable="false"/g' AndroidManifest.xml && \
+$$SDK$$/tools/android update project -p ../SherlockBar && \
 sed -i 's/"\${aapt.ignore.assets}"/"\${aapt.ignore.assets}" \
 libraryRFileRefid="project.library.bin.r.file.path"/g' build.xml && \
 sed -i 's/app_version">[^<]*/app_version">1.4-fdroid/' \
 res/values/no_translate.xml && sed -i '/keys/d' ant.properties,build=\
-ant build -f $$tools$$/OsmAndMapCreator/build.xml && \
-mv $$tools$$/OsmAndMapCreator/OsmAndMapCreator.jar libs/ && \
-mv $$core$$/OsmAnd-java/OsmAnd-core.jar libs/ && \
-zip -d libs/OsmAnd-core.jar net/osmand/PlatformUtil.class && \
-$$NDK$$/ndk-build
+ant jar native-libs -f $$tools$$/OsmAndMapCreator/build.xml && \
+ant build -f ../OsmAnd-java/build.xml && \
+ANDROID_SDK=$$SDK$$ ANDROID_NDK=$$NDK$$ ./ndk-build.sh,buildjni=no
 
+# well need to source "resources" srclib for next version
 # see https://github.com/osmandapp/OsmAnd-manifest/blob/master/current_release.xml 
 Auto Update Mode:None
 Update Check Mode:Market
