@@ -9,21 +9,19 @@ Name:OsmAnd~
 Auto Name:
 Summary:Maps & navigation; online and off
 Description:
-Osmand~'s features can be extended by enabling the plugins. All plugins are
-already present and include online
+Osmand~ is the generic name for builds of Osmand not done by the developers.
+Each apk is labelled according to the CPU architecture which it is designed
+to run on. 
+
+Osmand~'s features can be extended by enabling the plugins. 
+All plugins are already present and include online
 maps from many sources, tracking, OSM editing and accessibility enhancements.
 Map data of both vector
 and raster types can be stored on the phone memory card for offline usage, and
-navigation by default uses
-offline methods. Map data packages for many territories are available from
-the Osmand website as well as a
-desktop application for creating your own. Donations by way of PayPal or
-BidforFix are accepted.
-
-Osmand~ is the generic name for builds of Osmand not done by the developers,
-though
-f-droid.org of course tries to be as faithful as possible to the releases.
-x86 and MIPS modules are included in the apk.
+navigation by default uses offline methods. 
+Map data packages for many territories can be downloaded from
+within the app and there is a desktop program available on the website as well
+for creating your own. Donations by way of PayPal or BidforFix are accepted.
 
 Status: We don't have the latest version of this app because it is difficult
 to build. Developer builds are available via the website.
@@ -58,23 +56,48 @@ cp -r ../DataExtractionOSM/build/lib/ libs/
 
 # Name srclibs in such a way as to replicate OsmAnd build tree
 # Could try making https://github.com/osmandapp/OsmAnd-external-qtbase a srclib too
-# Declare OSMAND_ARM_ONLY=true ndk-build.sh for just ARM
 # Don't really understand what the other build.xmls do: they don't appear to put jars in classpath
 # Jars haven't been verified
-Build Version:1.4-fdroid,145,r1.4,\
+Build Version:1.4-MIPS,143,!WIP at r1.4,\
 rm=SherlockBar/build.xml,subdir=OsmAnd,encoding=utf-8,\
-srclibs=tools@9b4c9da995;core@r1.1.4;build@86a575b93,prebuild=\
+srclibs=tools@9b4c9da995;core@r1.1.4,prebuild=\
 sed -i 's/debuggable="true"/debuggable="false"/g' AndroidManifest.xml && \
 $$SDK$$/tools/android update project -p ../SherlockBar && \
 sed -i 's/"\${aapt.ignore.assets}"/"\${aapt.ignore.assets}" \
 libraryRFileRefid="project.library.bin.r.file.path"/g' build.xml && \
-sed -i 's/app_version">[^<]*/app_version">1.4-fdroid/' \
+sed -i 's/app_version">[^<]*/app_version">1.4-MIPS/' \
 res/values/no_translate.xml && sed -i '/keys/d' ant.properties,build=\
+ANDROID_SDK=$$SDK$$ ANDROID_NDK=$$NDK$$ OSMAND_MIPS_ONLY=true ./ndk-build.sh && \
 ant jar native-libs -f $$tools$$/OsmAndMapCreator/build.xml && \
-ant build -f ../OsmAnd-java/build.xml && \
-ANDROID_SDK=$$SDK$$ ANDROID_NDK=$$NDK$$ ./ndk-build.sh,buildjni=no
+ant build -f ../OsmAnd-java/build.xml,buildjni=no
 
-# well need to source "resources" srclib for next version
+Build Version:1.4-x86,144,!WIP at r1.4,\
+rm=SherlockBar/build.xml,subdir=OsmAnd,encoding=utf-8,\
+srclibs=tools@9b4c9da995;core@r1.1.4,prebuild=\
+sed -i 's/debuggable="true"/debuggable="false"/g' AndroidManifest.xml && \
+$$SDK$$/tools/android update project -p ../SherlockBar && \
+sed -i 's/"\${aapt.ignore.assets}"/"\${aapt.ignore.assets}" \
+libraryRFileRefid="project.library.bin.r.file.path"/g' build.xml && \
+sed -i 's/app_version">[^<]*/app_version">1.4-X86/' \
+res/values/no_translate.xml && sed -i '/keys/d' ant.properties,build=\
+ANDROID_SDK=$$SDK$$ ANDROID_NDK=$$NDK$$ OSMAND_X86_ONLY=true ./ndk-build.sh && \
+ant jar native-libs -f $$tools$$/OsmAndMapCreator/build.xml && \
+ant build -f ../OsmAnd-java/build.xml,buildjni=no
+
+Build Version:1.4-ARM,145,!WIP at r1.4,\
+rm=SherlockBar/build.xml,subdir=OsmAnd,encoding=utf-8,\
+srclibs=tools@9b4c9da995;core@r1.1.4,prebuild=\
+sed -i 's/debuggable="true"/debuggable="false"/g' AndroidManifest.xml && \
+$$SDK$$/tools/android update project -p ../SherlockBar && \
+sed -i 's/"\${aapt.ignore.assets}"/"\${aapt.ignore.assets}" \
+libraryRFileRefid="project.library.bin.r.file.path"/g' build.xml && \
+sed -i 's/app_version">[^<]*/app_version">1.4-ARM/' \
+res/values/no_translate.xml && sed -i '/keys/d' ant.properties,build=\
+ANDROID_SDK=$$SDK$$ ANDROID_NDK=$$NDK$$ OSMAND_ARM_ONLY=true ./ndk-build.sh && \
+ant jar native-libs -f $$tools$$/OsmAndMapCreator/build.xml && \
+ant build -f ../OsmAnd-java/build.xml,buildjni=no
+
+# will need to source "resources" srclib for next version
 # see https://github.com/osmandapp/OsmAnd-manifest/blob/master/current_release.xml 
 Auto Update Mode:None
 Update Check Mode:Market
