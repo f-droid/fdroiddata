@@ -1,0 +1,166 @@
+diff --git a/AndroidManifest.xml b/AndroidManifest.xml
+index fab6564..07b7e63 100644
+--- a/AndroidManifest.xml
++++ b/AndroidManifest.xml
+@@ -39,14 +39,6 @@
+ 	<uses-permission android:name="android.permission.READ_PHONE_STATE" />
+ 	<uses-permission android:name="com.android.vending.BILLING" />
+ 
+-	<!-- offercast permissions -->
+-	<uses-permission android:name="com.android.launcher.permission.INSTALL_SHORTCUT" />
+-	<uses-permission android:name="com.android.launcher.permission.UNINSTALL_SHORTCUT" />
+-	<uses-permission
+-		android:name="com.android.browser.permission.WRITE_HISTORY_BOOKMARKS" />
+-	<uses-permission
+-		android:name="com.android.browser.permission.READ_HISTORY_BOOKMARKS" />
+-
+ 	<application android:name="com.frostwire.android.gui.MainApplication"
+ 		android:allowBackup="true" android:icon="@drawable/app_icon"
+ 		android:label="@string/application_label" android:theme="@style/FrostWireTheme">
+@@ -161,34 +153,6 @@
+ 		<activity android:name="com.google.ads.AdActivity"
+ 			android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize" />
+ 
+-		<!-- offercast -->
+-		<activity android:name="com.offercast.android.sdk.TermsAndConditionsActivity"
+-			android:label="@string/application_label" />
+-		<service android:name="com.offercast.android.sdk.OCService" />
+-		<receiver android:name="com.offercast.android.sdk.OCBroadcastReceiver"
+-			android:enabled="true" android:exported="false">
+-			<intent-filter android:priority="1001">
+-				<action android:name="android.intent.action.BOOT_COMPLETED" />
+-			</intent-filter>
+-		</receiver>
+-
+-		<!-- offercast metadata development -->
+-		<!-- 
+-		 <meta-data android:name="application-id" android:value="8"/> <meta-data 
+-			android:name="access-token" android:value="805d0103-c3ab-4421-9708-cdc6328247fb"/> 
+-			<meta-data android:name="store-name" android:value="Google"/> <meta-data 
+-			android:name="store-category" android:value="Media &amp; Video"/>
+-		 -->
+-
+-		<!-- offercast metadata production -->
+-		<!-- -->
+-		<meta-data android:name="application-id" android:value="7" />
+-		<meta-data android:name="access-token"
+-			android:value="5e6c1ceb-2b03-4b2e-a57f-0876395149ad" />
+-		<meta-data android:name="store-name" android:value="Google" />
+-		<meta-data android:name="store-category" android:value="Media &amp; Video" />
+-	   <!-- -->
+-
+ 		<!-- providers -->
+ 
+ 		<provider android:name="com.frostwire.android.core.providers.DocumentsProvider"
+@@ -223,4 +187,4 @@
+ 		</receiver>
+ 	</application>
+ 
+-</manifest>
+\ No newline at end of file
++</manifest>
+diff --git a/src/core/com/frostwire/android/core/ConfigurationDefaults.java b/src/core/com/frostwire/android/core/ConfigurationDefaults.java
+index a4e5bc0..f207a31 100644
+--- a/src/core/com/frostwire/android/core/ConfigurationDefaults.java
++++ b/src/core/com/frostwire/android/core/ConfigurationDefaults.java
+@@ -66,7 +66,6 @@ final class ConfigurationDefaults {
+         defaultValues.put(Constants.PREF_KEY_GUI_SUPPORT_FROSTWIRE, true);
+         defaultValues.put(Constants.PREF_KEY_GUI_SUPPORT_FROSTWIRE_THRESHOLD, true);
+         defaultValues.put(Constants.PREF_KEY_GUI_SHOW_TV_MENU_ITEM,true);
+-        defaultValues.put(Constants.PREF_KEY_GUI_INITIALIZE_OFFERCAST,true);
+ 
+         defaultValues.put(Constants.PREF_KEY_SEARCH_COUNT_DOWNLOAD_FOR_TORRENT_DEEP_SCAN, 20);
+         defaultValues.put(Constants.PREF_KEY_SEARCH_COUNT_ROUNDS_FOR_TORRENT_DEEP_SCAN, 10);
+diff --git a/src/core/com/frostwire/android/core/Constants.java b/src/core/com/frostwire/android/core/Constants.java
+index 8e21b68..26ba5a6 100644
+--- a/src/core/com/frostwire/android/core/Constants.java
++++ b/src/core/com/frostwire/android/core/Constants.java
+@@ -85,7 +85,6 @@ public final class Constants {
+     public static final String PREF_KEY_GUI_SUPPORT_FROSTWIRE = "frostwire.prefs.gui.support_frostwire";
+     public static final String PREF_KEY_GUI_SUPPORT_FROSTWIRE_THRESHOLD = "frostwire.prefs.gui.support_frostwire_threshold";
+     public static final String PREF_KEY_GUI_SHOW_TV_MENU_ITEM = "frostwire.prefs.gui.show_tv_menu_item";
+-    public static final String PREF_KEY_GUI_INITIALIZE_OFFERCAST = "frostwire.prefs.gui.initialize_offercast";
+ 
+     public static final String PREF_KEY_TORRENT_MAX_DOWNLOAD_SPEED = "frostwire.prefs.torrent.max_download_speed";
+     public static final String PREF_KEY_TORRENT_MAX_UPLOAD_SPEED = "frostwire.prefs.torrent.max_upload_speed";
+@@ -151,4 +150,4 @@ public final class Constants {
+     public static final int DEVICE_MAJOR_TYPE_DESKTOP = CommonConstants.DEVICE_MAJOR_TYPE_DESKTOP;
+     public static final int DEVICE_MAJOR_TYPE_PHONE = CommonConstants.DEVICE_MAJOR_TYPE_PHONE;
+     public static final int DEVICE_MAJOR_TYPE_TABLET = CommonConstants.DEVICE_MAJOR_TYPE_TABLET;
+-}
+\ No newline at end of file
++}
+diff --git a/src/gui/com/frostwire/android/gui/activities/MainActivity.java b/src/gui/com/frostwire/android/gui/activities/MainActivity.java
+index fb76e43..1e131dc 100644
+--- a/src/gui/com/frostwire/android/gui/activities/MainActivity.java
++++ b/src/gui/com/frostwire/android/gui/activities/MainActivity.java
+@@ -65,7 +65,6 @@ import com.frostwire.android.gui.views.Refreshable;
+ import com.frostwire.android.gui.views.ShareIndicationDialog;
+ import com.frostwire.android.gui.views.TOS;
+ import com.frostwire.android.gui.views.TOS.OnTOSAcceptListener;
+-import com.offercast.android.sdk.OffercastSDK;
+ import com.slidingmenu.lib.SlidingMenu;
+ import com.slidingmenu.lib.SlidingMenu.CanvasTransformer;
+ import com.slidingmenu.lib.SlidingMenu.OnOpenListener;
+@@ -82,7 +81,6 @@ public class MainActivity extends AbstractSlidingActivity {
+     private static final String FRAGMENT_STACK_TAG = "fragment_stack";
+     private static final String CURRENT_FRAGMENT_KEY = "current_fragment";
+     private static final String DUR_TOKEN_KEY = "dur_token";
+-    private static final String OFFERCAST_STARTED_KEY = "offercast_started";
+ 
+     private static boolean firstTime = true;
+ 
+@@ -97,7 +95,6 @@ public class MainActivity extends AbstractSlidingActivity {
+     // not sure about this variable, quick solution for now
+     private String durToken;
+     
+-    private boolean offercastStarted = false;
+ 
+     public MainActivity() {
+         super(R.layout.activity_main, false, 2);
+@@ -123,7 +120,6 @@ public class MainActivity extends AbstractSlidingActivity {
+ 
+         if (savedInstanceState != null) {
+             durToken = savedInstanceState.getString(DUR_TOKEN_KEY);
+-            offercastStarted = savedInstanceState.getBoolean(OFFERCAST_STARTED_KEY);
+         }
+ 
+         addRefreshable((Refreshable) findView(R.id.activity_main_player_notifier));
+@@ -178,10 +174,6 @@ public class MainActivity extends AbstractSlidingActivity {
+     protected void onResume() {
+         super.onResume();
+         
+-        if (!offercastStarted && ConfigurationManager.instance().getBoolean(Constants.PREF_KEY_GUI_INITIALIZE_OFFERCAST)) {
+-            startOffercast();
+-        }
+-
+         if (ConfigurationManager.instance().getBoolean(Constants.PREF_KEY_GUI_TOS_ACCEPTED)) {
+             if (ConfigurationManager.instance().getBoolean(Constants.PREF_KEY_GUI_INITIAL_SETTINGS_COMPLETE)) {
+                 mainResume();
+@@ -197,18 +189,6 @@ public class MainActivity extends AbstractSlidingActivity {
+         }
+     }
+ 
+-    private void startOffercast() {
+-        try {
+-            OffercastSDK offercast = OffercastSDK.getInstance(getApplicationContext());
+-            offercast.authorize();
+-            offercastStarted = true;
+-            LOG.info("Offercast started.");
+-        } catch (Exception e) {
+-            offercastStarted = false;
+-            LOG.error("Offercast could not start.",e);
+-        }
+-    }
+-
+     @Override
+     protected void onPause() {
+         super.onPause();
+@@ -224,7 +204,6 @@ public class MainActivity extends AbstractSlidingActivity {
+         saveLastFragment(outState);
+ 
+         outState.putString(DUR_TOKEN_KEY, durToken);
+-        outState.putBoolean(OFFERCAST_STARTED_KEY, offercastStarted);
+     }
+ 
+     @Override
