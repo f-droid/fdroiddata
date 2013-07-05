@@ -6,16 +6,35 @@ Issue Tracker:https://code.google.com/p/cryptonite/issues/list
 
 Summary:Encfs and Truecrypt for Android
 Description:
-Cryptonite brings EncFS and TrueCrypt to Android. You can browse, export and open EncFS-encrypted directories and files on your Dropbox and on your phone. On rooted phones that support FUSE (e.g. CyanogenMod) you can also mount EncFS and TrueCrypt volumes. TrueCrypt is only available as a command-line version at this time.
+Cryptonite brings EncFS (no TrueCrypt in this build) to Android. 
+You can browse, export and open EncFS-encrypted directories and files on your 
+Dropbox and on your phone. On rooted phones that support FUSE 
+(e.g. CyanogenMod) you can also mount EncFS and volumes. 
 .
 
 Repo Type:git
-Repo:https://code.google.com/p/cryptonite/
+Repo:https://code.google.com/p/cryptonite.git
+
+# need a better way of supplying path to TOOLCHAIN
+Build Version:0.7.6,75,!WIP at 0.7.6,subdir=cryptonite,\
+srclibs=ActionBarSherlock@4.3.0,extlibs=dropbox-sdk/dropbox-android-sdk-1.5.1.jar;\
+httpmime/httpmime-4.0.3.jar;json-simple/json_simple-1.1.jar,prebuild=\
+sed -i 's@\(reference.1=\).*@\1$$ActionBarSherlock$$@' project.properties && \
+echo "db-xxxxxxxxxxxxxxx" > AndroidManifest.xml.key && \
+echo "db-xxxxxxxxxxxxxxx" > AndroidManifest.xml.key2 && \
+cd ../ && ./insert_key.sh && $$NDK$$/build/tools/make-standalone-toolchain.sh \
+--arch=arm --ndk-dir=$$NDK$$ --install-dir=android-toolchain \
+--platform=android-8 --system=linux-x86 && \
+mkdir -p scripts/ && wget https://neurodroid.googlecode.com/git/nrn/agcc -P scripts/ && \
+wget https://neurodroid.googlecode.com/git/nrn/agcc-vfp -P scripts/ && \
+export PATH=$PATH:scripts && chmod +x scripts/* && sed -i 's/\$HOME/../g' scripts/* && \
+cd boost && ./download.sh && ./build.sh && \
+cd ../openssl && ./download.sh && ./build.sh && \
+cd ../fuse28 && ./download.sh && ./build.sh && \
+cd ../rlog && ./download.sh && ./build.sh && \
+cd ../encfs-1.7.4 && ./download.sh && ./build.sh && \
+cd ../cryptonite && ./jni-build.sh,buildjni=no
 
 Auto Update Mode:None
-Update Check Mode:Market
-Current Version:0.7.6
-Current Version Code:75
+Update Check Mode:Static
 
-#Doesn't build, looks like native source dependencies are required
-#Build Version:0.6.8,59,b13cd6c4d65a,subdir=cryptonite,buildjni=yes
