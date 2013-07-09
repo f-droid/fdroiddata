@@ -1,10 +1,11 @@
-Disabled:Need to build from source
+#Disabled:Need to build from source
 Category:Navigation
 License:GPLv2
 Web Site:http://www.navit-project.org
 Source Code:http://navit.svn.sourceforge.net/viewvc/navit
 Issue Tracker:http://trac.navit-project.org/
 
+Auto Name:
 Summary:Car navigation system
 Description:
 It's modular design is capable of using vector maps of various formats
@@ -25,31 +26,24 @@ Repo Type:svn
 #Don't clone into navit/trunk/navit to leave space for dir required by cmake
 Repo:http://navit.svn.sourceforge.net/svnroot/navit/trunk
 
-#navit/navit is a confusing directory structure...
-Build Version:navit,5197,!WIP with cmake but it is preferred method (at 5419),\
-novcheck=yes,subdir=navit,\
-bindir=android-build/navit/android/bin,\
-init=cp navit/android/AndroidManifest.xml.cmake AndroidManifest.xml,update=no,\
-prebuild=export PATH=$PATH:$$NDK$/toolchains/arm-linux-androideabi-4.4.3/\
-prebuilt/linux-x86/bin:$$SDK$$/tools:$$SDK$$/platform-tools && \
-mkdir -p ../android-build && sed -i 's/cd android && ant debug/cd android/g' navit/Makefile.am,\
-build=cd ../android-build/ && \
-cmake -DCMAKE_TOOLCHAIN_FILE=../navit/Toolchain/arm-eabi.cmake -DCACHE_SIZE="(20*1024*1024)" \
--DAVOID_FLOAT=1 -DANDROID_PERMISSIONS="CAMERA" -DANDROID_API_VERSION=8 ../navit && \
-make && make apkg
+# https://f-droid.org/forums/topic/navit/#post-7852
+Build Version:5532,5532,5532,\
+novcheck=yes,\
+update=no,\
+build=sed -i 's/cd android && ant debug/cd android/g' navit/navit/Makefile.am && \
+      sed -i 's/cd android && ant release/cd android/g' navit/navit/Makefile.am && \
+      mkdir android-build && \
+      cd android-build/ && \
+      cmake -DCMAKE_TOOLCHAIN_FILE=../navit/Toolchain/arm-eabi.cmake -DANDROID_API_VERSION=8 -DDISABLE_QT=true ../navit && \
+      make && \
+      make apkg && \
+      cd .. && \
+      ln -s android-build/navit/android/* . 
 
-#navit/navit is a confusing directory structure...
-Build Version:5197,5197,!WIP with automake. Wrong with Makefile: much is commented out?! (at 5419),\
-forceversion=yes,subdir=navit,bindir=navit/android/bin,\
-init=cp navit/android/AndroidManifest.xml.in AndroidManifest.xml,update=no,\
-prebuild=export PATH=$PATH:$$NDK$/toolchains/arm-linux-androideabi-4.4.3/\
-prebuilt/linux-x86/bin:$$SDK$$/tools:$$SDK$$/platform-tools && \
-./autogen.sh && export ANDROID_NDK=$$NDK$$ && export ANDROID_API_LVL=4 && \
-export ANDROID_PLATFORM=$ANDROID_NDK/platforms/android-$ANDROID_API_LVL/arch-arm && \
-sed -i 's/cd android && ant debug/cd android/g' navit/Makefile.am && ./configure,\
-build=make && cd navit/ && make apkg
-
+# (0-2-0) revision 3708 has build problems
 Auto Update Mode:None
 #Not updated on Market since 08/12 strangely
-Update Check Mode:Static
+Update Check Mode:Market
+Current Version:navit
+Current Version Code:5197
 
