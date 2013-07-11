@@ -25,29 +25,33 @@ cd src/stericson &&\
 svn co -r 133 http://roottools.googlecode.com/svn/trunk/Developmental/RootTools_sdk3_generic/src/com/stericson/RootTools &&\
 cd ../..
 
-# Replace reboot.png etc. in assets and patch src/.../Constants.java
-Build Version:9.6.3,141,!Error building MIPS binary (at 26),subdir=app,srclibs=\
-ViewPagerIndicator@2.2.3;Busybox@1_21_0;RootTools@211;\
-BusyboxConfigs@e71bc43bd0,prebuild=\
-sed -i 's@\(reference.1=\).*@\1$$ViewPagerIndicator$$@' project.properties && \
-rm -f ../binaries/* assets/*.png && mkdir -p libs/ && \
-cp -r $$RootTools$$ .. && cp -r $$Busybox$$ .. && \
-cp -r $$BusyboxConfigs$$/* ../Busybox/configs/ && \
-cd ../Busybox && for i in configs/patches/*.patch; do patch -p1 < $i; done && \
-mv configs/android_ndk_stericson-like .config,build=\
-cd ../RootTools && ant debug && ant -f makejar.ant && \
-mv roottools.jar ../app/libs/ && ant clean && \
-cd ../Busybox && \
-export PATH=$$NDK$$/toolchains/arm-linux-androideabi-4.4.3/prebuilt/linux-x86/bin:\
-$$NDK$$/toolchains/mipsel-linux-android-4.4.3/prebuilt/linux-x86/bin:\
-$$NDK$$/toolchains/x86-4.4.3/prebuilt/linux-x86/bin:$PATH && \
-make CONFIG_SYSROOT="$$NDK$$/platforms/android-9/arch-arm" ARCH=arm ANDROID_NDK=$$NDK$$ && \
-mv busybox ../app/assets/busybox-1.21.0-arm.png && make clean && \
-make CONFIG_SYSROOT="$$NDK$$/platforms/android-9/arch-mips" ARCH=mips ANDROID_NDK=$$NDK$$ && \
-mv busybox ../app/assets/busybox-1.21.0-mips.png && make clean && \
-make CONFIG_SYSROOT="$$NDK$$/platforms/android-9/arch-x86" ARCH=x86 ANDROID_NDK=$$NDK$$ && \
-mv busybox ../app/assets/busybox-1.21.0-x86.png && make clean
+# Replace reboot.png etc. in assets: although they are pulled from a device
+# and don't need to be built from source according to system library exception,
+# we could pull them from Replicant or CM.
+# patch src/.../Constants.java to have exact list of applets
+# x86 and MIPS builds don't work for some reason
+Build Version:9.6.3,141,!WIP at 26,subdir=app,\
+target=android-15,\
+srclibs=ViewPagerIndicator@2.2.3;Busybox@1_21_0;RootTools@211;BusyboxConfigs@e71bc43bd0,\
+prebuild=sed -i 's@\(.1=\).*@\1$$ViewPagerIndicator$$@' project.properties && \
+         rm -f ../binaries/* assets/busybox* && mkdir -p libs/ && \
+         cp -r $$RootTools$$ .. && cp -r $$Busybox$$ .. && \
+         cp -r $$BusyboxConfigs$$/* ../Busybox/configs/ && \
+         cd ../Busybox && for i in configs/patches/*.patch; do patch -p1 < $i; done && \
+         mv configs/android_ndk_stericson-like .config,\
+build=cd ../RootTools && ant release && ant -f makejar.ant && \
+      mv roottools.jar ../app/libs/ && ant clean && cd ../Busybox && \
+      export PATH=$$NDK$$/toolchains/arm-linux-androideabi-4.4.3/prebuilt/linux-x86/bin:$PATH && \
+      make CONFIG_SYSROOT="$$NDK$$/platforms/android-9/arch-arm" ARCH=arm ANDROID_NDK=$$NDK$$ && \
+      mv busybox ../app/assets/busybox-1.21.0-ARM.png && make clean 
 
+#patch=code-141.patch,\
+#export PATH=$$NDK$$/toolchains/mipsel-linux-android-4.4.3/prebuilt/linux-x86/bin:$PATH && \
+#export PATH=$$NDK$$/toolchains/x86-4.4.3/prebuilt/linux-x86/bin:$PATH && \
+#make CONFIG_SYSROOT="$$NDK$$/platforms/android-9/arch-x86" ARCH=x86 ANDROID_NDK=$$NDK$$ && \
+#mv busybox ../app/assets/busybox-1.21.0-x86.png && make clean
+#make CONFIG_SYSROOT="$$NDK$$/platforms/android-9/arch-mips" ARCH=mips ANDROID_NDK=$$NDK$$ && \
+#mv busybox ../app/assets/busybox-1.21.0-MIPS.png && make clean 
 Auto Update Mode:None
 Update Check Mode:Static
 Current Version:9.6.3
