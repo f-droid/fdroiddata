@@ -1,0 +1,48 @@
+diff --git a/Makefile b/Makefile
+index 2dbde39..fa7d6b8 100644
+--- a/Makefile
++++ b/Makefile
+@@ -1,21 +1,18 @@
+-NDK_PATH=$(shell dirname `which ndk-build`)
+-SDK_PATH=$(shell dirname `which android`)
+-SDK_PLATFORM_TOOLS_PATH=$(shell dirname `which adb`)
+ NUMCPUS=$(shell grep -c '^processor' /proc/cpuinfo || echo "4" )
+ TOPDIR=$(shell pwd)
+ PATCH_FFMPEG=$(shell cd submodules/externals/ffmpeg && git status | grep neon)
+ LINPHONE_VERSION=$(shell cd submodules/linphone && git describe --always)
+ LINPHONE_ANDROID_DEBUG_VERSION=$(shell git describe --always)
+-ANDROID_MOST_RECENT_TARGET=$(shell android list target -c | grep android | tail -n1)
++ANDROID_MOST_RECENT_TARGET=$(shell $(SDK_PATH)/android list target -c | grep android | tail -n1)
+ 
+ NDK_DEBUG=0
+ BUILD_UPNP=1
+ BUILD_REMOTE_PROVISIONING=1
+ BUILD_X264=1
+-BUILD_AMRNB=full # 0, light or full
++BUILD_AMRNB=light # 0, light or full
+ BUILD_AMRWB=0
+-BUILD_GPLV3_ZRTP=0
+-BUILD_SILK=1
++BUILD_GPLV3_ZRTP=1
++BUILD_SILK=0
+ BUILD_G729=0
+ BUILD_TUNNEL=0
+ BUILD_WEBRTC_AECM=1
+@@ -24,7 +21,7 @@ USE_JAVAH=1
+ 
+ NDK_BUILD_OPTIONS=NDK_DEBUG=$(NDK_DEBUG) LINPHONE_VERSION=$(LINPHONE_VERSION) BUILD_UPNP=$(BUILD_UPNP) BUILD_REMOTE_PROVISIONING=$(BUILD_REMOTE_PROVISIONING) BUILD_X264=$(BUILD_X264) BUILD_AMRNB=$(BUILD_AMRNB) BUILD_AMRWB=$(BUILD_AMRWB) BUILD_GPLV3_ZRTP=$(BUILD_GPLV3_ZRTP) BUILD_SILK=$(BUILD_SILK) BUILD_G729=$(BUILD_G729) BUILD_TUNNEL=$(BUILD_TUNNEL) BUILD_WEBRTC_AECM=$(BUILD_WEBRTC_AECM) BUILD_FOR_X86=$(BUILD_FOR_X86) USE_JAVAH=$(USE_JAVAH) -j$(NUMCPUS)
+ 
+-all: update-project prepare-sources generate-apk
++all: update-project prepare-sources
+ 
+ install: install-apk run-linphone
+ 
+@@ -98,7 +95,7 @@ prepare-mediastreamer2:
+ 	if ! [ -e yuv2rgb.vs.h ]; then echo "yuv2rgb.vs.h creation error (do you have 'xxd' application installed ?)"; exit 1; fi && \
+ 	if ! [ -e yuv2rgb.fs.h ]; then echo "yuv2rgb.fs.h creation error (do you have 'xxd' application installed ?)"; exit 1; fi
+ 
+-prepare-sources: prepare-ffmpeg prepare-ilbc prepare-vpx prepare-silk prepare-srtp prepare-zrtp prepare-mediastreamer2
++prepare-sources: prepare-ffmpeg prepare-ilbc prepare-vpx prepare-srtp prepare-zrtp prepare-mediastreamer2
+ 
+ generate-libs:
+ 	$(NDK_PATH)/ndk-build $(NDK_BUILD_OPTIONS)

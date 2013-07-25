@@ -1,4 +1,3 @@
-Disabled:v2.0.3 contained non-free codecs and fix doesn't build
 Category:Phone & SMS
 License:GPLv3
 Web Site:http://www.linphone.org
@@ -8,10 +7,13 @@ Issue Tracker:
 Auto Name:Linphone
 Summary:SIP (VOIP) phone
 Description:
-* Audio: speex (narrow- and wide-band); iLBC; G711; GSM; G722. No Silk (?) in this build
+The 2.0.3 version had non-free codecs included by mistake; 
+2.1.2 should work as described.
+
+* Audio: speex; iLBC; G711; GSM; G722. No Silk and AMR-WB depends on device in this build
 * Video with VP8, mpeg4, x264 (ARMv7 only). No h264 in this build
 * Audio multicall and conferencing
-* SRTP/(ZRTP ?) media encryption
+* SRTP/ZRTP media encryption
 * Echo cancellation
 * Address book integration
 * Call history
@@ -34,21 +36,19 @@ res/values/non_localizable_custom.xml,build=\
 make BUILD_SILK=0 BUILD_X264=1 BUILD_GPLV3_ZRTP=1 \
 BUILD_FOR_X86=1 prepare-sources,buildjni=no
 
-#Compile++ thumb  : linphone <= linphonecore_jni.cc
-#jni/..//submodules/linphone/build/android/../../coreapi/linphonecore_jni.cc:21:30: 
-#fatal error: linphonecore_jni.h: No such file or directory
-Build Version:2.1.2-fdroid,2120,!build problems at 2.1.2,\
-submodules=no,\
+# note the custom_rules ; didn't use a tag because of zrtp security fix
+Build Version:2.1.2-fdroid,2120,846a2a3a58,\
+update=no,\
 init=git submodule update --init --recursive,\
-prebuild=rm -rf tests submodules/externals/webrtc/modules/\
+patch=makefile.patch,\
+prebuild=sed -i '1 i NDK_PATH=$$NDK$$\nSDK_PATH=$$SDK$$/tools\n\
+SDK_PLATFORM_TOOLS_PATH=$$SDK$$/platform-tools\n' Makefile && \
+         echo 'version.name=2.1.2-fdroid' > default.properties && \
+         rm -rf tests submodules/externals/webrtc/modules/\
 video_capture/main/source/android/java/org/webrtc/videoengine/* && \
-         echo "version.name=2.1.2-fdroid" > default.properties && \
-         sed -i 's/allowBackup=\"true\"/debuggable=\"false\"/g' AndroidManifest.xml && \
-         sed -i '92s/prepare-silk //g' Makefile && \
-         sed -i 's/markets\">true/markets\">=false/g' \
-         res/values/non_localizable_custom.xml,\
-build=make -e NDK_PATH=$$NDK$$ BUILD_SILK=0 BUILD_X264=1 BUILD_GPLV3_ZRTP=1 \
-      BUILD_AMRNB=light prepare-sources generate-libs,\
+         sed -i 's/allowBackup="true"/debuggable="false"/g' AndroidManifest.xml && \
+         sed -i 's/markets">true/markets">=false/g' res/values/non_localizable_custom.xml,\
+build=make,\
 buildjni=no
 
 Auto Update Mode:None
