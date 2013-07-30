@@ -1,0 +1,107 @@
+diff --git a/Npr/src/org/npr/android/news/NewsStoryActivity.java b/Npr/src/org/npr/android/news/NewsStoryActivity.java
+index f918790..d0dc35b 100644
+--- a/Npr/src/org/npr/android/news/NewsStoryActivity.java
++++ b/Npr/src/org/npr/android/news/NewsStoryActivity.java
+@@ -36,8 +36,6 @@ import android.widget.TextView;
+ import org.npr.android.util.DisplayUtils;
+ import org.npr.android.util.PlaylistEntry;
+ import org.npr.android.util.PlaylistRepository;
+-import org.npr.android.util.Tracker;
+-import org.npr.android.util.Tracker.StoryDetailsMeasurement;
+ import org.npr.android.widget.WorkspaceView;
+ import org.npr.api.Book;
+ import org.npr.api.Story;
+@@ -125,7 +123,7 @@ public class NewsStoryActivity extends RootActivity implements
+ 
+     for (int i = 0; i < storyIds.length; i++) {
+       String storyId = storyIds[i];
+-      Story story = NewsListActivity.getStoryFromCache(storyId);
++      Story story = NewsListActivity.getStoryFromCache(storyId);
+       stories.add(story);
+       layoutStory(story, i, storyIds.length, teaserOnly);
+       if (storyId.equals(currentStoryId)) {
+@@ -144,7 +142,6 @@ public class NewsStoryActivity extends RootActivity implements
+         }
+         trackerItem.title = story.getTitle();
+         trackerItem.storyId = story.getId();
+-        trackNow();
+       }
+     }
+ 
+@@ -282,7 +279,7 @@ public class NewsStoryActivity extends RootActivity implements
+     String textHtml;
+     if (!teaserOnly && text != null) {
+       StringBuilder sb = new StringBuilder();
+-      if (story.getLayout().getItems().size() > 0) {
++      if (story.getLayout() != null && story.getLayout().getItems().size() > 0) {
+ 
+         for (Map.Entry<Integer, Story.Layout.LayoutItem> entry : story.getLayout().getItems().entrySet()) {
+ 
+@@ -386,7 +383,6 @@ public class NewsStoryActivity extends RootActivity implements
+     String url = story.getPlayableUrl();
+ 
+ 
+-    Tracker.LinkEvent e;
+     if (playNow) {
+       PlaylistEntry activeEntry =
+           playlistRepository.getPlaylistItemFromId(getActiveId());
+@@ -398,13 +394,10 @@ public class NewsStoryActivity extends RootActivity implements
+       }
+       PlaylistEntry entry = playlistRepository.getPlaylistItemFromId(playlistId);
+       this.playEntryNow(entry);
+-      e = new Tracker.PlayEvent(url);
+     } else {
+       playlistRepository.add(story);
+-      e = new Tracker.AddToPlaylistEvent(url);
+     }
+ 
+-    Tracker.instance(getApplication()).trackLink(e);
+   }
+ 
+   // WebView is default black text.
+@@ -426,44 +419,11 @@ public class NewsStoryActivity extends RootActivity implements
+           "</body></html>";
+ 
+ 
+-  @Override
+-  public void trackNow() {
+-    if (trackerItem != null) {
+-      StringBuilder pageName = new StringBuilder(trackerItem.storyId).append("-");
+-      pageName.append(trackerItem.title);
+-      Tracker.instance(getApplication()).trackPage(
+-          new StoryDetailsMeasurement(
+-              pageName.toString(),
+-              "News",
+-              trackerItem.orgId,
+-              trackerItem.topicId,
+-              trackerItem.storyId
+-          )
+-      );
+-      trackerItem = null;
+-    }
+-  }
+-
++ 
+ 
+   @Override
+   public void onScreenChanged(int newPosition) {
+-    Story story = stories.get(newPosition);
+-    if (story != null) {
+-      trackerItem = new TrackerItem();
+-
+-      trackerItem.orgId = story.getOrganizations().size() > 0 ?
+-          story.getOrganizations().get(0).getId() : null;
+-
+-      for (Story.Parent p : story.getParents()) {
+-        if (p.isPrimary()) {
+-          trackerItem.topicId = p.getId();
+-          break;
+-        }
+-      }
+-      trackerItem.title = story.getTitle();
+-      trackerItem.storyId = story.getId();
+-      trackNow();
+-    }
++    
+   }
+
