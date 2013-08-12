@@ -1,0 +1,593 @@
+diff --git a/wallet/AndroidManifest.xml b/wallet/AndroidManifest.xml
+index dfc4372..5028875 100644
+--- a/wallet/AndroidManifest.xml
++++ b/wallet/AndroidManifest.xml
+@@ -1,10 +1,10 @@
+ <?xml version="1.0" encoding="utf-8"?>
+ <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+ 	xmlns:tools="http://schemas.android.com/tools"
+-	package="de.schildbach.wallet_test"
++	package="de.schildbach.wallet"
+ 	android:installLocation="internalOnly"
+ 	android:versionCode="135"
+-	android:versionName="3.15-test" >
++	android:versionName="3.14-bitcoinj0.10" >
+ 
+ 	<uses-sdk
+ 		android:minSdkVersion="10"
+@@ -172,11 +172,11 @@
+ 
+ 		<provider
+ 			android:name="de.schildbach.wallet.AddressBookProvider"
+-			android:authorities="de.schildbach.wallet_test.address_book"
++			android:authorities="de.schildbach.wallet.address_book"
+ 			android:exported="false" />
+ 		<provider
+ 			android:name="de.schildbach.wallet.ExchangeRatesProvider"
+-			android:authorities="de.schildbach.wallet_test.exchange_rates"
++			android:authorities="de.schildbach.wallet.exchange_rates"
+ 			android:exported="false" />
+ 
+ 		<receiver
+diff --git a/wallet/pom.xml b/wallet/pom.xml
+index 4bc572d..b955e19 100644
+--- a/wallet/pom.xml
++++ b/wallet/pom.xml
+@@ -6,7 +6,7 @@
+ 
+ 	<artifactId>wallet</artifactId>
+ 	<packaging>apk</packaging>
+-	<version>3.15-test</version>
++	<version>3.14-bitcoinj0.10</version>
+ 	<name>Bitcoin Wallet</name>
+ 
+ 	<parent>
+diff --git a/wallet/res/drawable-hdpi/app_icon.png b/wallet/res/drawable-hdpi/app_icon.png
+index 445c689..e3a30a2 100644
+Binary files a/wallet/res/drawable-hdpi/app_icon.png and b/wallet/res/drawable-hdpi/app_icon.png differ
+diff --git a/wallet/res/drawable-xhdpi/app_icon.png b/wallet/res/drawable-xhdpi/app_icon.png
+index 7a2a494..cf4d174 100644
+Binary files a/wallet/res/drawable-xhdpi/app_icon.png and b/wallet/res/drawable-xhdpi/app_icon.png differ
+diff --git a/wallet/res/drawable-xhdpi/widget_preview.png b/wallet/res/drawable-xhdpi/widget_preview.png
+index 2a75061..0f22562 100644
+Binary files a/wallet/res/drawable-xhdpi/widget_preview.png and b/wallet/res/drawable-xhdpi/widget_preview.png differ
+diff --git a/wallet/res/values/values.xml b/wallet/res/values/values.xml
+index ecc7da8..af9ac13 100644
+--- a/wallet/res/values/values.xml
++++ b/wallet/res/values/values.xml
+@@ -4,7 +4,7 @@
+ 	<string name="symbol_to">→</string>
+ 	<string name="symbol_from">←</string>
+ 	<string name="symbol_internal">⇄</string>
+-	<string name="app_name">Testnet3</string>
++	<string name="app_name">Bitcoin</string>
+ 
+ 	<string-array name="preferences_precision_values">
+ 		<item>8</item>
+@@ -17,4 +17,4 @@
+ 		<item>4 digits</item>
+ 	</string-array>
+ 
+-</resources>
+\ No newline at end of file
++</resources>
+diff --git a/wallet/src/de/schildbach/wallet/Constants.java b/wallet/src/de/schildbach/wallet/Constants.java
+index b3d9a3d..c32b169 100644
+--- a/wallet/src/de/schildbach/wallet/Constants.java
++++ b/wallet/src/de/schildbach/wallet/Constants.java
+@@ -26,7 +26,7 @@ import com.google.bitcoin.core.NetworkParameters;
+ import com.google.bitcoin.params.MainNetParams;
+ import com.google.bitcoin.params.TestNet3Params;
+ 
+-import de.schildbach.wallet_test.R;
++import de.schildbach.wallet.R;
+ 
+ /**
+  * @author Andreas Schildbach
+diff --git a/wallet/src/de/schildbach/wallet/WalletApplication.java b/wallet/src/de/schildbach/wallet/WalletApplication.java
+index 50fa891..9249800 100644
+--- a/wallet/src/de/schildbach/wallet/WalletApplication.java
++++ b/wallet/src/de/schildbach/wallet/WalletApplication.java
+@@ -67,7 +67,7 @@ import de.schildbach.wallet.service.BlockchainServiceImpl;
+ import de.schildbach.wallet.util.CrashReporter;
+ import de.schildbach.wallet.util.LinuxSecureRandom;
+ import de.schildbach.wallet.util.WalletUtils;
+-import de.schildbach.wallet_test.R;
++import de.schildbach.wallet.R;
+ 
+ /**
+  * @author Andreas Schildbach
+diff --git a/wallet/src/de/schildbach/wallet/WalletBalanceWidgetProvider.java b/wallet/src/de/schildbach/wallet/WalletBalanceWidgetProvider.java
+index a14b449..a080613 100644
+--- a/wallet/src/de/schildbach/wallet/WalletBalanceWidgetProvider.java
++++ b/wallet/src/de/schildbach/wallet/WalletBalanceWidgetProvider.java
+@@ -39,7 +39,7 @@ import de.schildbach.wallet.ui.SendCoinsQrActivity;
+ import de.schildbach.wallet.ui.WalletActivity;
+ import de.schildbach.wallet.util.GenericUtils;
+ import de.schildbach.wallet.util.WalletUtils;
+-import de.schildbach.wallet_test.R;
++import de.schildbach.wallet.R;
+ 
+ /**
+  * @author Andreas Schildbach
+diff --git a/wallet/src/de/schildbach/wallet/service/BlockchainService.java b/wallet/src/de/schildbach/wallet/service/BlockchainService.java
+index dba917a..7aec479 100644
+--- a/wallet/src/de/schildbach/wallet/service/BlockchainService.java
++++ b/wallet/src/de/schildbach/wallet/service/BlockchainService.java
+@@ -23,7 +23,7 @@ import com.google.bitcoin.core.Peer;
+ import com.google.bitcoin.core.StoredBlock;
+ import com.google.bitcoin.core.Transaction;
+ 
+-import de.schildbach.wallet_test.R;
++import de.schildbach.wallet.R;
+ 
+ /**
+  * @author Andreas Schildbach
+diff --git a/wallet/src/de/schildbach/wallet/service/BlockchainServiceImpl.java b/wallet/src/de/schildbach/wallet/service/BlockchainServiceImpl.java
+index 3557287..8732f7d 100644
+--- a/wallet/src/de/schildbach/wallet/service/BlockchainServiceImpl.java
++++ b/wallet/src/de/schildbach/wallet/service/BlockchainServiceImpl.java
+@@ -91,7 +91,7 @@ import de.schildbach.wallet.util.GenericUtils;
+ import de.schildbach.wallet.util.HttpGetThread;
+ import de.schildbach.wallet.util.ThrottelingWalletChangeListener;
+ import de.schildbach.wallet.util.WalletUtils;
+-import de.schildbach.wallet_test.R;
++import de.schildbach.wallet.R;
+ 
+ /**
+  * @author Andreas Schildbach
+diff --git a/wallet/src/de/schildbach/wallet/ui/AboutActivity.java b/wallet/src/de/schildbach/wallet/ui/AboutActivity.java
+index c155b4e..3b3f306 100644
+--- a/wallet/src/de/schildbach/wallet/ui/AboutActivity.java
++++ b/wallet/src/de/schildbach/wallet/ui/AboutActivity.java
+@@ -30,7 +30,7 @@ import com.google.bitcoin.core.VersionMessage;
+ 
+ import de.schildbach.wallet.Constants;
+ import de.schildbach.wallet.WalletApplication;
+-import de.schildbach.wallet_test.R;
++import de.schildbach.wallet.R;
+ 
+ /**
+  * @author Andreas Schildbach
+diff --git a/wallet/src/de/schildbach/wallet/ui/AbstractWalletActivity.java b/wallet/src/de/schildbach/wallet/ui/AbstractWalletActivity.java
+index 1f433b4..5b67d41 100644
+--- a/wallet/src/de/schildbach/wallet/ui/AbstractWalletActivity.java
++++ b/wallet/src/de/schildbach/wallet/ui/AbstractWalletActivity.java
+@@ -30,7 +30,7 @@ import com.actionbarsherlock.app.SherlockFragmentActivity;
+ 
+ import de.schildbach.wallet.Constants;
+ import de.schildbach.wallet.WalletApplication;
+-import de.schildbach.wallet_test.R;
++import de.schildbach.wallet.R;
+ 
+ /**
+  * @author Andreas Schildbach
+diff --git a/wallet/src/de/schildbach/wallet/ui/AddressBookActivity.java b/wallet/src/de/schildbach/wallet/ui/AddressBookActivity.java
+index ef3846d..f440177 100644
+--- a/wallet/src/de/schildbach/wallet/ui/AddressBookActivity.java
++++ b/wallet/src/de/schildbach/wallet/ui/AddressBookActivity.java
+@@ -35,7 +35,7 @@ import com.google.bitcoin.core.ECKey;
+ 
+ import de.schildbach.wallet.Constants;
+ import de.schildbach.wallet.util.ViewPagerTabs;
+-import de.schildbach.wallet_test.R;
++import de.schildbach.wallet.R;
+ 
+ /**
+  * @author Andreas Schildbach
+diff --git a/wallet/src/de/schildbach/wallet/ui/BlockListFragment.java b/wallet/src/de/schildbach/wallet/ui/BlockListFragment.java
+index 4e52fdd..c20b321 100644
+--- a/wallet/src/de/schildbach/wallet/ui/BlockListFragment.java
++++ b/wallet/src/de/schildbach/wallet/ui/BlockListFragment.java
+@@ -62,7 +62,7 @@ import de.schildbach.wallet.WalletApplication;
+ import de.schildbach.wallet.service.BlockchainService;
+ import de.schildbach.wallet.service.BlockchainServiceImpl;
+ import de.schildbach.wallet.util.WalletUtils;
+-import de.schildbach.wallet_test.R;
++import de.schildbach.wallet.R;
+ 
+ /**
+  * @author Andreas Schildbach
+diff --git a/wallet/src/de/schildbach/wallet/ui/CurrencyAmountView.java b/wallet/src/de/schildbach/wallet/ui/CurrencyAmountView.java
+index 8a28951..d2bbc01 100644
+--- a/wallet/src/de/schildbach/wallet/ui/CurrencyAmountView.java
++++ b/wallet/src/de/schildbach/wallet/ui/CurrencyAmountView.java
+@@ -47,7 +47,7 @@ import com.google.bitcoin.core.Utils;
+ import de.schildbach.wallet.Constants;
+ import de.schildbach.wallet.util.GenericUtils;
+ import de.schildbach.wallet.util.WalletUtils;
+-import de.schildbach.wallet_test.R;
++import de.schildbach.wallet.R;
+ 
+ /**
+  * @author Andreas Schildbach
+diff --git a/wallet/src/de/schildbach/wallet/ui/CurrencyTextView.java b/wallet/src/de/schildbach/wallet/ui/CurrencyTextView.java
+index 0cac0e6..2b5183e 100644
+--- a/wallet/src/de/schildbach/wallet/ui/CurrencyTextView.java
++++ b/wallet/src/de/schildbach/wallet/ui/CurrencyTextView.java
+@@ -31,7 +31,7 @@ import android.widget.TextView;
+ import de.schildbach.wallet.Constants;
+ import de.schildbach.wallet.util.GenericUtils;
+ import de.schildbach.wallet.util.WalletUtils;
+-import de.schildbach.wallet_test.R;
++import de.schildbach.wallet.R;
+ 
+ /**
+  * @author Andreas Schildbach
+diff --git a/wallet/src/de/schildbach/wallet/ui/EditAddressBookEntryFragment.java b/wallet/src/de/schildbach/wallet/ui/EditAddressBookEntryFragment.java
+index 97e29a5..362deb8 100644
+--- a/wallet/src/de/schildbach/wallet/ui/EditAddressBookEntryFragment.java
++++ b/wallet/src/de/schildbach/wallet/ui/EditAddressBookEntryFragment.java
+@@ -33,7 +33,7 @@ import android.widget.TextView;
+ import de.schildbach.wallet.AddressBookProvider;
+ import de.schildbach.wallet.Constants;
+ import de.schildbach.wallet.util.WalletUtils;
+-import de.schildbach.wallet_test.R;
++import de.schildbach.wallet.R;
+ 
+ /**
+  * @author Andreas Schildbach
+diff --git a/wallet/src/de/schildbach/wallet/ui/ExchangeRatesActivity.java b/wallet/src/de/schildbach/wallet/ui/ExchangeRatesActivity.java
+index eadae13..6dbd6c3 100644
+--- a/wallet/src/de/schildbach/wallet/ui/ExchangeRatesActivity.java
++++ b/wallet/src/de/schildbach/wallet/ui/ExchangeRatesActivity.java
+@@ -22,7 +22,7 @@ import android.os.Bundle;
+ import com.actionbarsherlock.app.ActionBar;
+ import com.actionbarsherlock.view.MenuItem;
+ 
+-import de.schildbach.wallet_test.R;
++import de.schildbach.wallet.R;
+ 
+ /**
+  * @author Andreas Schildbach
+diff --git a/wallet/src/de/schildbach/wallet/ui/ExchangeRatesFragment.java b/wallet/src/de/schildbach/wallet/ui/ExchangeRatesFragment.java
+index e140eaa..1d80ae5 100644
+--- a/wallet/src/de/schildbach/wallet/ui/ExchangeRatesFragment.java
++++ b/wallet/src/de/schildbach/wallet/ui/ExchangeRatesFragment.java
+@@ -55,7 +55,7 @@ import de.schildbach.wallet.ExchangeRatesProvider.ExchangeRate;
+ import de.schildbach.wallet.WalletApplication;
+ import de.schildbach.wallet.service.BlockchainService;
+ import de.schildbach.wallet.util.WalletUtils;
+-import de.schildbach.wallet_test.R;
++import de.schildbach.wallet.R;
+ 
+ /**
+  * @author Andreas Schildbach
+diff --git a/wallet/src/de/schildbach/wallet/ui/FileAdapter.java b/wallet/src/de/schildbach/wallet/ui/FileAdapter.java
+index 89541c4..e138326 100644
+--- a/wallet/src/de/schildbach/wallet/ui/FileAdapter.java
++++ b/wallet/src/de/schildbach/wallet/ui/FileAdapter.java
+@@ -26,7 +26,7 @@ import android.view.View;
+ import android.view.ViewGroup;
+ import android.widget.ArrayAdapter;
+ import android.widget.TextView;
+-import de.schildbach.wallet_test.R;
++import de.schildbach.wallet.R;
+ 
+ /**
+  * @author Andreas Schildbach
+diff --git a/wallet/src/de/schildbach/wallet/ui/ImportKeysActivity.java b/wallet/src/de/schildbach/wallet/ui/ImportKeysActivity.java
+index 4f49cd3..8d05b90 100644
+--- a/wallet/src/de/schildbach/wallet/ui/ImportKeysActivity.java
++++ b/wallet/src/de/schildbach/wallet/ui/ImportKeysActivity.java
+@@ -46,7 +46,7 @@ import com.google.bitcoin.core.Wallet;
+ 
+ import de.schildbach.wallet.util.EncryptionUtils;
+ import de.schildbach.wallet.util.WalletUtils;
+-import de.schildbach.wallet_test.R;
++import de.schildbach.wallet.R;
+ 
+ /**
+  * @author Andreas Schildbach
+diff --git a/wallet/src/de/schildbach/wallet/ui/NetworkMonitorActivity.java b/wallet/src/de/schildbach/wallet/ui/NetworkMonitorActivity.java
+index 95cd206..a77a6e9 100644
+--- a/wallet/src/de/schildbach/wallet/ui/NetworkMonitorActivity.java
++++ b/wallet/src/de/schildbach/wallet/ui/NetworkMonitorActivity.java
+@@ -27,7 +27,7 @@ import com.actionbarsherlock.app.ActionBar;
+ import com.actionbarsherlock.view.MenuItem;
+ 
+ import de.schildbach.wallet.util.ViewPagerTabs;
+-import de.schildbach.wallet_test.R;
++import de.schildbach.wallet.R;
+ 
+ /**
+  * @author Andreas Schildbach
+diff --git a/wallet/src/de/schildbach/wallet/ui/PeerListFragment.java b/wallet/src/de/schildbach/wallet/ui/PeerListFragment.java
+index a0a0c47..6c982b3 100644
+--- a/wallet/src/de/schildbach/wallet/ui/PeerListFragment.java
++++ b/wallet/src/de/schildbach/wallet/ui/PeerListFragment.java
+@@ -49,7 +49,7 @@ import com.google.bitcoin.core.VersionMessage;
+ 
+ import de.schildbach.wallet.service.BlockchainService;
+ import de.schildbach.wallet.service.BlockchainServiceImpl;
+-import de.schildbach.wallet_test.R;
++import de.schildbach.wallet.R;
+ 
+ /**
+  * @author Andreas Schildbach
+diff --git a/wallet/src/de/schildbach/wallet/ui/PreferencesActivity.java b/wallet/src/de/schildbach/wallet/ui/PreferencesActivity.java
+index 949710a..c088720 100644
+--- a/wallet/src/de/schildbach/wallet/ui/PreferencesActivity.java
++++ b/wallet/src/de/schildbach/wallet/ui/PreferencesActivity.java
+@@ -35,7 +35,7 @@ import com.actionbarsherlock.view.MenuItem;
+ import de.schildbach.wallet.Constants;
+ import de.schildbach.wallet.WalletApplication;
+ import de.schildbach.wallet.util.CrashReporter;
+-import de.schildbach.wallet_test.R;
++import de.schildbach.wallet.R;
+ 
+ /**
+  * @author Andreas Schildbach
+diff --git a/wallet/src/de/schildbach/wallet/ui/ReportIssueDialogBuilder.java b/wallet/src/de/schildbach/wallet/ui/ReportIssueDialogBuilder.java
+index 1055cca..3ca57ca 100644
+--- a/wallet/src/de/schildbach/wallet/ui/ReportIssueDialogBuilder.java
++++ b/wallet/src/de/schildbach/wallet/ui/ReportIssueDialogBuilder.java
+@@ -45,7 +45,7 @@ import de.schildbach.wallet.Constants;
+ import de.schildbach.wallet.util.CrashReporter;
+ import de.schildbach.wallet.util.IOUtils;
+ import de.schildbach.wallet.util.WalletUtils;
+-import de.schildbach.wallet_test.R;
++import de.schildbach.wallet.R;
+ 
+ /**
+  * @author Andreas Schildbach
+diff --git a/wallet/src/de/schildbach/wallet/ui/RequestCoinsActivity.java b/wallet/src/de/schildbach/wallet/ui/RequestCoinsActivity.java
+index dc359a7..25131e7 100644
+--- a/wallet/src/de/schildbach/wallet/ui/RequestCoinsActivity.java
++++ b/wallet/src/de/schildbach/wallet/ui/RequestCoinsActivity.java
+@@ -23,7 +23,7 @@ import com.actionbarsherlock.app.ActionBar;
+ import com.actionbarsherlock.view.Menu;
+ import com.actionbarsherlock.view.MenuItem;
+ 
+-import de.schildbach.wallet_test.R;
++import de.schildbach.wallet.R;
+ 
+ /**
+  * @author Andreas Schildbach
+diff --git a/wallet/src/de/schildbach/wallet/ui/RequestCoinsFragment.java b/wallet/src/de/schildbach/wallet/ui/RequestCoinsFragment.java
+index 0ed4ec8..3fdb48a 100644
+--- a/wallet/src/de/schildbach/wallet/ui/RequestCoinsFragment.java
++++ b/wallet/src/de/schildbach/wallet/ui/RequestCoinsFragment.java
+@@ -66,7 +66,7 @@ import de.schildbach.wallet.WalletApplication;
+ import de.schildbach.wallet.util.BitmapFragment;
+ import de.schildbach.wallet.util.NfcTools;
+ import de.schildbach.wallet.util.WalletUtils;
+-import de.schildbach.wallet_test.R;
++import de.schildbach.wallet.R;
+ 
+ /**
+  * @author Andreas Schildbach
+diff --git a/wallet/src/de/schildbach/wallet/ui/ScanActivity.java b/wallet/src/de/schildbach/wallet/ui/ScanActivity.java
+index 39aff31..64c1bdf 100644
+--- a/wallet/src/de/schildbach/wallet/ui/ScanActivity.java
++++ b/wallet/src/de/schildbach/wallet/ui/ScanActivity.java
+@@ -58,7 +58,7 @@ import com.google.zxing.common.HybridBinarizer;
+ import com.google.zxing.qrcode.QRCodeReader;
+ 
+ import de.schildbach.wallet.camera.CameraManager;
+-import de.schildbach.wallet_test.R;
++import de.schildbach.wallet.R;
+ 
+ /**
+  * @author Andreas Schildbach
+diff --git a/wallet/src/de/schildbach/wallet/ui/ScannerView.java b/wallet/src/de/schildbach/wallet/ui/ScannerView.java
+index 92fe6d6..27be934 100644
+--- a/wallet/src/de/schildbach/wallet/ui/ScannerView.java
++++ b/wallet/src/de/schildbach/wallet/ui/ScannerView.java
+@@ -33,7 +33,7 @@ import android.view.View;
+ 
+ import com.google.zxing.ResultPoint;
+ 
+-import de.schildbach.wallet_test.R;
++import de.schildbach.wallet.R;
+ 
+ /**
+  * @author Andreas Schildbach
+diff --git a/wallet/src/de/schildbach/wallet/ui/SendCoinsActivity.java b/wallet/src/de/schildbach/wallet/ui/SendCoinsActivity.java
+index 626296e..edf3dd2 100644
+--- a/wallet/src/de/schildbach/wallet/ui/SendCoinsActivity.java
++++ b/wallet/src/de/schildbach/wallet/ui/SendCoinsActivity.java
+@@ -34,7 +34,7 @@ import com.google.bitcoin.core.Address;
+ import com.google.bitcoin.uri.BitcoinURI;
+ import com.google.bitcoin.uri.BitcoinURIParseException;
+ 
+-import de.schildbach.wallet_test.R;
++import de.schildbach.wallet.R;
+ 
+ /**
+  * @author Andreas Schildbach
+diff --git a/wallet/src/de/schildbach/wallet/ui/SendCoinsFragment.java b/wallet/src/de/schildbach/wallet/ui/SendCoinsFragment.java
+index 9202d9c..15dc336 100644
+--- a/wallet/src/de/schildbach/wallet/ui/SendCoinsFragment.java
++++ b/wallet/src/de/schildbach/wallet/ui/SendCoinsFragment.java
+@@ -85,7 +85,7 @@ import de.schildbach.wallet.service.BlockchainService;
+ import de.schildbach.wallet.service.BlockchainServiceImpl;
+ import de.schildbach.wallet.util.GenericUtils;
+ import de.schildbach.wallet.util.WalletUtils;
+-import de.schildbach.wallet_test.R;
++import de.schildbach.wallet.R;
+ 
+ /**
+  * @author Andreas Schildbach
+diff --git a/wallet/src/de/schildbach/wallet/ui/SendingAddressesFragment.java b/wallet/src/de/schildbach/wallet/ui/SendingAddressesFragment.java
+index 3a60407..f0b7eae 100644
+--- a/wallet/src/de/schildbach/wallet/ui/SendingAddressesFragment.java
++++ b/wallet/src/de/schildbach/wallet/ui/SendingAddressesFragment.java
+@@ -51,7 +51,7 @@ import de.schildbach.wallet.AddressBookProvider;
+ import de.schildbach.wallet.Constants;
+ import de.schildbach.wallet.util.BitmapFragment;
+ import de.schildbach.wallet.util.WalletUtils;
+-import de.schildbach.wallet_test.R;
++import de.schildbach.wallet.R;
+ 
+ /**
+  * @author Andreas Schildbach
+diff --git a/wallet/src/de/schildbach/wallet/ui/TransactionActivity.java b/wallet/src/de/schildbach/wallet/ui/TransactionActivity.java
+index 4cb4a9d..44be746 100644
+--- a/wallet/src/de/schildbach/wallet/ui/TransactionActivity.java
++++ b/wallet/src/de/schildbach/wallet/ui/TransactionActivity.java
+@@ -43,7 +43,7 @@ import de.schildbach.wallet.Constants;
+ import de.schildbach.wallet.WalletApplication;
+ import de.schildbach.wallet.util.Base43;
+ import de.schildbach.wallet.util.NfcTools;
+-import de.schildbach.wallet_test.R;
++import de.schildbach.wallet.R;
+ 
+ /**
+  * @author Andreas Schildbach
+diff --git a/wallet/src/de/schildbach/wallet/ui/TransactionFragment.java b/wallet/src/de/schildbach/wallet/ui/TransactionFragment.java
+index 6f86d51..4ca47bb 100644
+--- a/wallet/src/de/schildbach/wallet/ui/TransactionFragment.java
++++ b/wallet/src/de/schildbach/wallet/ui/TransactionFragment.java
+@@ -56,7 +56,7 @@ import de.schildbach.wallet.util.Base43;
+ import de.schildbach.wallet.util.BitmapFragment;
+ import de.schildbach.wallet.util.GenericUtils;
+ import de.schildbach.wallet.util.WalletUtils;
+-import de.schildbach.wallet_test.R;
++import de.schildbach.wallet.R;
+ 
+ /**
+  * @author Andreas Schildbach
+diff --git a/wallet/src/de/schildbach/wallet/ui/TransactionsListAdapter.java b/wallet/src/de/schildbach/wallet/ui/TransactionsListAdapter.java
+index fb428ec..c5c6519 100644
+--- a/wallet/src/de/schildbach/wallet/ui/TransactionsListAdapter.java
++++ b/wallet/src/de/schildbach/wallet/ui/TransactionsListAdapter.java
+@@ -50,7 +50,7 @@ import de.schildbach.wallet.AddressBookProvider;
+ import de.schildbach.wallet.Constants;
+ import de.schildbach.wallet.util.CircularProgressView;
+ import de.schildbach.wallet.util.WalletUtils;
+-import de.schildbach.wallet_test.R;
++import de.schildbach.wallet.R;
+ 
+ /**
+  * @author Andreas Schildbach
+diff --git a/wallet/src/de/schildbach/wallet/ui/TransactionsListFragment.java b/wallet/src/de/schildbach/wallet/ui/TransactionsListFragment.java
+index dcd0ef0..abd689b 100644
+--- a/wallet/src/de/schildbach/wallet/ui/TransactionsListFragment.java
++++ b/wallet/src/de/schildbach/wallet/ui/TransactionsListFragment.java
+@@ -65,7 +65,7 @@ import de.schildbach.wallet.Constants;
+ import de.schildbach.wallet.WalletApplication;
+ import de.schildbach.wallet.util.ThrottelingWalletChangeListener;
+ import de.schildbach.wallet.util.WalletUtils;
+-import de.schildbach.wallet_test.R;
++import de.schildbach.wallet.R;
+ 
+ /**
+  * @author Andreas Schildbach
+diff --git a/wallet/src/de/schildbach/wallet/ui/WalletActionsFragment.java b/wallet/src/de/schildbach/wallet/ui/WalletActionsFragment.java
+index 4bbc6c6..15a70be 100644
+--- a/wallet/src/de/schildbach/wallet/ui/WalletActionsFragment.java
++++ b/wallet/src/de/schildbach/wallet/ui/WalletActionsFragment.java
+@@ -30,7 +30,7 @@ import android.view.View.OnClickListener;
+ import android.view.ViewGroup;
+ import android.widget.TextView;
+ import de.schildbach.wallet.Constants;
+-import de.schildbach.wallet_test.R;
++import de.schildbach.wallet.R;
+ 
+ /**
+  * @author Andreas Schildbach
+diff --git a/wallet/src/de/schildbach/wallet/ui/WalletActivity.java b/wallet/src/de/schildbach/wallet/ui/WalletActivity.java
+index a47c05d..5bab7f5 100644
+--- a/wallet/src/de/schildbach/wallet/ui/WalletActivity.java
++++ b/wallet/src/de/schildbach/wallet/ui/WalletActivity.java
+@@ -72,7 +72,7 @@ import de.schildbach.wallet.util.EncryptionUtils;
+ import de.schildbach.wallet.util.HttpGetThread;
+ import de.schildbach.wallet.util.Iso8601Format;
+ import de.schildbach.wallet.util.WalletUtils;
+-import de.schildbach.wallet_test.R;
++import de.schildbach.wallet.R;
+ 
+ /**
+  * @author Andreas Schildbach
+diff --git a/wallet/src/de/schildbach/wallet/ui/WalletAddressFragment.java b/wallet/src/de/schildbach/wallet/ui/WalletAddressFragment.java
+index e7f2a53..b7a0be5 100644
+--- a/wallet/src/de/schildbach/wallet/ui/WalletAddressFragment.java
++++ b/wallet/src/de/schildbach/wallet/ui/WalletAddressFragment.java
+@@ -44,7 +44,7 @@ import de.schildbach.wallet.WalletApplication;
+ import de.schildbach.wallet.util.BitmapFragment;
+ import de.schildbach.wallet.util.NfcTools;
+ import de.schildbach.wallet.util.WalletUtils;
+-import de.schildbach.wallet_test.R;
++import de.schildbach.wallet.R;
+ 
+ /**
+  * @author Andreas Schildbach
+diff --git a/wallet/src/de/schildbach/wallet/ui/WalletAddressesAdapter.java b/wallet/src/de/schildbach/wallet/ui/WalletAddressesAdapter.java
+index d882413..f470643 100644
+--- a/wallet/src/de/schildbach/wallet/ui/WalletAddressesAdapter.java
++++ b/wallet/src/de/schildbach/wallet/ui/WalletAddressesAdapter.java
+@@ -39,7 +39,7 @@ import com.google.bitcoin.core.Wallet;
+ import de.schildbach.wallet.AddressBookProvider;
+ import de.schildbach.wallet.Constants;
+ import de.schildbach.wallet.util.WalletUtils;
+-import de.schildbach.wallet_test.R;
++import de.schildbach.wallet.R;
+ 
+ public class WalletAddressesAdapter extends BaseAdapter
+ {
+diff --git a/wallet/src/de/schildbach/wallet/ui/WalletAddressesFragment.java b/wallet/src/de/schildbach/wallet/ui/WalletAddressesFragment.java
+index 869cccd..d051b2b 100644
+--- a/wallet/src/de/schildbach/wallet/ui/WalletAddressesFragment.java
++++ b/wallet/src/de/schildbach/wallet/ui/WalletAddressesFragment.java
+@@ -54,7 +54,7 @@ import de.schildbach.wallet.Constants;
+ import de.schildbach.wallet.WalletApplication;
+ import de.schildbach.wallet.util.BitmapFragment;
+ import de.schildbach.wallet.util.WalletUtils;
+-import de.schildbach.wallet_test.R;
++import de.schildbach.wallet.R;
+ 
+ /**
+  * @author Andreas Schildbach
+diff --git a/wallet/src/de/schildbach/wallet/ui/WalletBalanceFragment.java b/wallet/src/de/schildbach/wallet/ui/WalletBalanceFragment.java
+index b427352..02ca419 100644
+--- a/wallet/src/de/schildbach/wallet/ui/WalletBalanceFragment.java
++++ b/wallet/src/de/schildbach/wallet/ui/WalletBalanceFragment.java
+@@ -50,7 +50,7 @@ import de.schildbach.wallet.ExchangeRatesProvider.ExchangeRate;
+ import de.schildbach.wallet.WalletApplication;
+ import de.schildbach.wallet.service.BlockchainService;
+ import de.schildbach.wallet.util.WalletUtils;
+-import de.schildbach.wallet_test.R;
++import de.schildbach.wallet.R;
+ 
+ /**
+  * @author Andreas Schildbach
+diff --git a/wallet/src/de/schildbach/wallet/ui/WalletTransactionsFragment.java b/wallet/src/de/schildbach/wallet/ui/WalletTransactionsFragment.java
+index 2e95307..539ca04 100644
+--- a/wallet/src/de/schildbach/wallet/ui/WalletTransactionsFragment.java
++++ b/wallet/src/de/schildbach/wallet/ui/WalletTransactionsFragment.java
+@@ -27,7 +27,7 @@ import android.view.View;
+ import android.view.ViewGroup;
+ import de.schildbach.wallet.ui.TransactionsListFragment.Direction;
+ import de.schildbach.wallet.util.ViewPagerTabs;
+-import de.schildbach.wallet_test.R;
++import de.schildbach.wallet.R;
+ 
+ /**
+  * @author Andreas Schildbach
+diff --git a/wallet/src/de/schildbach/wallet/util/BitmapFragment.java b/wallet/src/de/schildbach/wallet/util/BitmapFragment.java
+index 3ba3866..3194de0 100644
+--- a/wallet/src/de/schildbach/wallet/util/BitmapFragment.java
++++ b/wallet/src/de/schildbach/wallet/util/BitmapFragment.java
+@@ -26,7 +26,7 @@ import android.support.v4.app.FragmentManager;
+ import android.view.View;
+ import android.view.Window;
+ import android.widget.ImageView;
+-import de.schildbach.wallet_test.R;
++import de.schildbach.wallet.R;
+ 
+ /**
+  * @author Andreas Schildbach
+diff --git a/wallet/src/de/schildbach/wallet/util/ViewPagerTabs.java b/wallet/src/de/schildbach/wallet/util/ViewPagerTabs.java
+index 60d77cb..1f6280d 100644
+--- a/wallet/src/de/schildbach/wallet/util/ViewPagerTabs.java
++++ b/wallet/src/de/schildbach/wallet/util/ViewPagerTabs.java
+@@ -31,7 +31,7 @@ import android.os.Parcelable;
+ import android.support.v4.view.ViewPager.OnPageChangeListener;
+ import android.util.AttributeSet;
+ import android.view.View;
+-import de.schildbach.wallet_test.R;
++import de.schildbach.wallet.R;
+ 
+ /**
+  * @author Andreas Schildbach
