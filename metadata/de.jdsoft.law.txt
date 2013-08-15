@@ -14,13 +14,19 @@ This app is mostly for German-speaking people.
 Repo Type:git
 Repo:https://github.com/jfreax/OpenLaw.git
 
-Build Version:0.5.1,8,!weird build.xml error at 0b9080bd4492,target=android-18,\
-prebuild=count=1; \
-for dir in extern/*/; do \
-    echo "android.library.reference.$count=$dir" >> project.properties; \
-    count=$(($count+1)); \
-    $$SDK$$/tools/android update project -p $dir -t android-18; \
-done
+Build Version:0.5.1,8,0b9080bd4492,target=android-18,\
+prebuild=printf 'android.library=true\ntarget=android-16' \
+           extern/viewPageIndicator/project.properties && \
+         sed -i 's/Google Inc.:Google APIs:17/android-17/g' \
+           extern/actionBarsherlock/project.properties && \
+         rm extern/android-async-http/build.xml && \
+         rm libs/support-v4-r7.jar && \
+         count=1; \
+         for dir in extern/*/; do \
+           echo "android.library.reference.$count=$dir" >> project.properties; \
+           count=$(($count+1)); \
+           $$SDK$$/tools/android update project -p $dir; \
+         done
 
 Auto Update Mode:Auto
 Update Check Mode:RepoManifest
