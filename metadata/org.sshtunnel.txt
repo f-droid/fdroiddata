@@ -21,11 +21,21 @@ Repo Type:hg
 # possibly https://github.com/madeye/sshtunnel-beta
 Repo:https://code.google.com/p/sshtunnel
 
-# see https://github.com/darkk/redsocks/pull/20 for compiling redsocks
-Build Version:1.5.5,73,!WIP ceffc98a19b1,target=android-17,prebuild=\
-rm assets/iptables assets/redsocks libs/FlurryAgent.jar && \
-make redsocks && make iptables && mv iptables etc. assets/ && \
-echo "reference.1=../extlib/FinfAgent" >> project.properties 
+# see https://github.com/darkk/redsocks/pull/20.patch for compiling redsocks
+Build Version:1.5.5,73,!WIP ceffc98a19b1,\
+target=android-17,\
+srclibs=redsocks@release-0.4;iptables@android-4.2.2_r1;FinfAgent@v0.1,\
+extlibs=redsocks.patch;afwall.patch,\
+prebuild=rm assets/iptables assets/redsocks libs/FlurryAgent.jar && \
+         echo "android.library.reference.1=$$FinfAgent$$" >> project.properties && \
+         mkdir -p external && \
+         cp -r $$iptables$$ external/ && cp -r $$redsocks$$ external/ && \
+         cd external/redsocks/ && git apply ../../libs/redsocks.patch && cd ../../ && \
+         touch external/iptables/extensions/fixinit.py && git apply libs/afwall.patch && \
+         cd external/iptables/ && python extensions/fixinit.py,\
+build=cd external/redsocks/ && make && mv redsocks? ../../assets/ && cd ../../ && \
+      $$NDK$$/ndk-build NDK_PROJECT_PATH=. APP_BUILD_SCRIPT=external/iptables/Android.mk && \
+      mv libs/armeabi/iptables assets/ 
 
 Auto Update Mode:None
 Update Check Mode:RepoManifest
