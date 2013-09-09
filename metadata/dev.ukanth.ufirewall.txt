@@ -128,6 +128,30 @@ build=export PATH=$$NDK$$/toolchains/arm-linux-androideabi-4.4.3/prebuilt/linux-
       mv libs/armeabi/iptables res/raw/iptables_armv5 && \
       $$NDK$$/ndk-build NDK_PROJECT_PATH=. APP_BUILD_SCRIPT=external/nflog/Android.mk && \
       mv libs/armeabi/nflog res/raw/
+Build Version:1.2.6.1,136,v1.2.6.1,\
+srclibs=ActionBarSherlock@4.2.0;LockPattern@1c1307;iptables@android-4.2.2_r1,\
+extlibs=android/android-support-v4.jar;afwall.patch,\
+prebuild=rm -rf external/iptables/* && cp -r $$iptables$$/* external/iptables/ && \
+         mv libs/afwall.patch . && \
+         tr -d '\r' < AndroidManifest.xml > output.file && mv output.file AndroidManifest.xml && \
+         touch external/iptables/extensions/fixinit.py && git apply afwall.patch && \
+         cd external/busybox/ && tar -jxf busybox-1.21.1.tar.bz2 && \
+         cd busybox-1.21.1/ && patch -p1 < ../022-ipv6.patch && \
+         cp ../defconfig .config && cd ../../../ && \
+         rm res/raw/busybox_g2 res/raw/iptables_armv5 res/raw/nflog \
+           external/busybox/busybox-1.21.1.tar.bz2 && \
+         mv libs/android-support-v4.jar $$ActionBarSherlock$$/libs/ && \
+         sed -i 's@\(.1=\).*@\1$$ActionBarSherlock$$@' project.properties && \
+         sed -i 's@\(.2=\).*@\1$$LockPattern$$@' project.properties,\
+build=export PATH=$$NDK$$/toolchains/arm-linux-androideabi-4.4.3/prebuilt/linux-x86/bin:$PATH && \
+      cd external/busybox/busybox-1.21.1/ && \
+      make CONFIG_SYSROOT="$$NDK$$/platforms/android-9/arch-arm" ARCH=arm ANDROID_NDK=$$NDK$$ && \
+      mv busybox ../../../res/raw/busybox_g2 && \
+      cd ../../iptables && python extensions/fixinit.py && cd ../../ && \
+      $$NDK$$/ndk-build NDK_PROJECT_PATH=. APP_BUILD_SCRIPT=external/iptables/Android.mk && \
+      mv libs/armeabi/iptables res/raw/iptables_armv5 && \
+      $$NDK$$/ndk-build NDK_PROJECT_PATH=. APP_BUILD_SCRIPT=external/nflog/Android.mk && \
+      mv libs/armeabi/nflog res/raw/
 
 # iptables patch doesn't work with ndk-r9 (even with legacy toolchains)!
 Auto Update Mode:None
