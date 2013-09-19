@@ -1,0 +1,53 @@
+Antifeatures:NonFreeAdd
+Category:Games
+License:GPLv3+
+# See also:
+# http://notaz.gp2x.de/pcsx_rearmed.php
+# http://byuu.org/higan/
+Web Site:http://www.libretro.com/
+Source Code:https://github.com/libretro/
+Issue Tracker:https://github.com/libretro/RetroArch/issues
+
+Name:RetroArch
+Summary:Modular multi-system emulator
+Description:
+RetroArch is a modular multi-system game/emulator system that is designed to be fast, 
+lightweight, and portable. It allows emulator developers to implement their emulators as special 
+libraries (RetroArch cores) to target wide range of platforms, including game consoles and mobile 
+devices, without writing any platform-specific code.
+
+Latest F-Droid build supports following systems:
+
+* Play Station 1 with PCSX ReARMed core (ARMv7 only)
+* Super Nintendo with bSNES core (ARMv7 and x86 only)
+
+Anti-features: Addons. This build does not include non-free components, but majority of cores, 
+included in official .apk, have non-free licenses or contain proprietary parts.
+.
+
+Repo Type:git
+# There may be newer versions, including ones with support for other CPU architectures, but I
+# have no clue, which commits to build. Tags currently make sense for desktop version only
+# See also:
+# https://github.com/libretro/RetroArch/wiki/Compilation-guide-(android-from-windows)
+# https://github.com/libretro/libretro-super/blob/master/libretro-fetch.sh
+# https://github.com/libretro/libretro-super/blob/master/libretro-build-android-mk.sh
+Repo:git://github.com/libretro/RetroArch.git
+
+Build Version:0.9.9.6,22,7d25e64fb446af37ccc50693e5662d8d48b655e5,target=android-17,\
+subdir=android/phoenix,buildjni=no,srclibs=pcsx_rearmed@c6c27ccd79;bSNES@2b89497415,\
+prebuild=cp -R ../../media/overlays/ assets/,\
+build=ndk-build -C ../native && mv ../native/libs/ . \
+&& ndk-build -C $$pcsx_rearmed$$ APP_ABI=armeabi-v7a \
+&& mv $$pcsx_rearmed$$/libs/armeabi-v7a/libretro.so libs/armeabi-v7a/libretro_pcsx_rearmed-neon.so \
+&& ndk-build -C $$pcsx_rearmed$$ clean APP_ABI=armeabi-v7a \
+&& ndk-build -C $$pcsx_rearmed$$ NO_NEON=1 APP_ABI=armeabi-v7a \
+&& mv $$pcsx_rearmed$$/libs/armeabi-v7a/libretro-noneon.so libs/armeabi-v7a/libretro_pcsx_rearmed.so \
+&& ndk-build -C $$bSNES$$/target-libretro/ APP_ABI="armeabi-v7a x86" \
+&& mv $$bSNES$$/target-libretro/libs/ .
+
+Auto Update Mode:None
+# See http://forum.xda-developers.com/showthread.php?t=2116468 for exact release dates
+Update Check Mode:RepoManifest
+Current Version:0.9.9.6
+Current Version Code:22
