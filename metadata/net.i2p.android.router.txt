@@ -7,43 +7,33 @@ Issue Tracker:http://trac.i2p2.de
 Summary:I2P anonymous network
 Description:
 I2P is an anonymizing network, offering a simple layer that identity-sensitive applications can use to securely communicate. All data is wrapped with several layers of encryption, and the network is both distributed and dynamic, with no trusted parties.
-WARNING - This is ALPHA SOFTWARE. It may crash your phone. Do not rely upon it for strong anonymity. Tunnels may be as short as one hop. There may be serious security holes in the app. It uses a lot of RAM. The app may use a lot of RAM even after the router has stopped and there is no icon in the notification bar. Go to Settings -> Applications -> Running Services and stop the I2P service if necessary. Or Settings -> Applications -> Manage Applications -> Running -> I2P and force stop.
-The app runs on either WIFI or mobile networks. For now, the app is relatively low bandwidth. It allows a max of 20 participating tunnels.
-The app will work best when you are not changing IPs. If you are moving around, changing WIFI nodes, or switching between mobile and WIFI networks, it won't work well.
-
-The browser does not use the outproxy for regular web sites. Javascript is disabled. And there are a lot of other problems
-The app starts an HTTP proxy at localhost port 4444 and transparent IRC proxies at localhost ports 6668 - 6671. These are "shared clients" on the same tunnels. Once you see in and out client tunnels listed on the router status (several minutes after startup), you should be able to connect.
-The HTTP proxy should work with Firefox 4 Mobile and the ProxyMob Firefox plugin, if you have at least 512 MB of RAM. If it works it should avoid all the problems with the embedded web browser listed above. I can't test it as I have a 256 MB Droid.
-
+WARNING - This is ALPHA SOFTWARE. Do not rely upon it for strong anonymity.
+For detailed release notes, security information, and usage examples see the [Release Notes http://zzz.i2p.us/topics/948]
 
 .
 
 Donate:http://www.i2p2.de/donate
-
-
 Repo Type:git
 Repo:https://github.com/i2p/i2p.android.base.git
 
 
-Build Version:0.9.7.1,0,e4c9095626cce668de338fa35f5ea7766f7198a6,update=no,target=android-18,patch=jni.patch,novcheck=yes,prebuild=\
+Build Version:0.9.7.1,0,e4c9095626cce668de338fa35f5ea7766f7198a6,srclibs=I2P@06d2db0046efa1f5bd7667b3fdd63ba931832c68,update=no,target=android-18,patch=jni.patch,novcheck=yes,prebuild=\
 sed -i '41s|#export NDK=$(realpath ../../android-ndk-r5b/)|export NDK=$$NDK$$|' ./routerjars/jni/build.sh &&\
-git clone https://github.com/i2p/i2p.i2p.git &&\
-git --git-dir=./i2p.i2p/.git --work-tree=./i2p.i2p/ checkout 06d2db0046efa1f5bd7667b3fdd63ba931832c68 &&\
+cp -R $$I2P$$* ./i2p.i2p &&\
+echo -e "\nsdk.dir=$$SDK$$" >> ./local.properties &&\
+echo -e "\nsdk.dir=$$SDK$$" >> ./routerjars/local.properties &&\
+echo -e "\nndk.dir=$$NDK$$" >> ./routerjars/local.properties &&\
 echo -e "\ni2psrc=./i2p.i2p" >> ./local.properties &&\
 rm -R ./i2p.i2p/installer/lib/jbigi/* &&\
 rm -R ./i2p.i2p/installer/lib/wrapper/* &&\
 rm -R ./routerjars/jni/libjbigi.so &&\
-echo -e "\nsdk.dir=$$SDK$$" >> ./local.properties &&\
 cp -R $$SDK$$/extras/android/support/v7/appcompat/ appcompat/ &&\
 echo -e "\nandroid.library.reference.2=./appcompat/" >> ./local.properties &&\
 $$SDK$$/tools/android update lib-project --path ./appcompat/ &&\
-echo -e "\nsdk.dir=$$SDK$$" >> ./routerjars/local.properties &&\
-echo -e "\nndk.dir=$$NDK$$" >> ./routerjars/local.properties &&\
 echo -e "\ni2psrc=./../i2p.i2p" >> ./routerjars/local.properties &&\
 wget ftp://ftp.gmplib.org/pub/gmp-4.3.2/gmp-4.3.2.tar.bz2 &&\
 tar xjvf gmp-4.* -C ./i2p.i2p/core/c/jbigi/ &&\
-rm ./gmp-4.* &&\
-ant help
+rm ./gmp-4.*
 
 
 
