@@ -1,24 +1,49 @@
 Category:Games
-License:GPLv2
-Web Site:http://wiki.scummvm.org/index.php/Android
-Source Code:https://github.com/scummvm/scummvm
+License:GPLv3
+Web Site:http://scummvm.org
+Source Code:https://github.com/scummvm/scummvm/
 Issue Tracker:http://sourceforge.net/tracker/?group_id=37116&atid=418820
+Donate:http://sourceforge.net/donate/index.php?group_id=37116
 
-Auto Name:ScummVM
-Summary:Game emulator
+Summary:Adventure game player
 Description:
+ScummVM is a program which allows you to run certain classic graphical point-and-click adventure 
+games, provided you already have their data files. List of supported engines include:
 
+* SCUMM (Classic 2D [http://wiki.scummvm.org/index.php/LucasArts LucasArts] games: Full Throttle, Day of the Tentacle, etc.)
+* AGI (Early [http://wiki.scummvm.org/index.php/Sierra Sierra] adventure games: King's Quest, Leisure Suit Larry etc.)
+* SCI (Newer Sierra adventure games: Space Quest, Police Quest etc.)
+* Kyra (Eye of the Beholder, The Legend of Kyrandia etc.)
+* Gob (Urban Runner, Gobliiins series)
+* SwordX (Broken Sword series)
+* Sky (Beneath a Steel Sky)
+
+and numerous others.
+
+[https://raw.github.com/scummvm/scummvm/master/README Documentation]
+[https://raw.github.com/scummvm/scummvm/master/dists/android/README.Android README of Android port]
+
+Unlike upstream build, this one has all plugins bundled together in single apk. External plugin apks 
+(e.g. from Google Play) won't work with this version and must be removed before installing it.
 .
 
 Repo Type:git
-Repo:https://github.com/scummvm/scummvm.git
+Repo:git://github.com/scummvm/scummvm.git
 
-#No sound in this so far. Need to stop make from running ant
-Build Version:1.6.0,13,!needs work 6387e3bca7,forcerversion=yes,forcevercode=yes,subdir=dists/android,\
-prebuild=export ANDROID_SDK="$$SDK$$ && export ANDROID_NDK="$$NDK$$" && \
-export PATH=${PATH}:$$NDK$$/toolchains/arm-linux-androideabi-4.4.3/prebuilt/linux-x86/bin && \
-./configure --host=android && make
+Build Version:1.5.0,6,v1.5.0,extlibs=libmad/libmad-0.15.1b.tar.gz,srclibs=FLAC@1.2.1;Tremor@b31465b840,\
+update=no,target=android-17,patch=fdroid_build.patch;latest_sdk.patch,bindir=.,antcommand="-p",\
+init=echo -e '<project>\n<target name="Creating scummvm.apk for release..."/>\n</project>' > build.xml,\
+build=export ANDROID_SDK="$$SDK$$" && export ANDROID_NDK="$$NDK$$" \
+&& chmod +x fdroid_build \
+&& ./fdroid_build tremor $$Tremor$$ \
+&& ./fdroid_build mad \
+&& ./fdroid_build flac $$FLAC$$ \
+&& ./fdroid_build scummvm
 
+# Releases are tagged, but according to backends/platform/android/android.mk (which also contains 
+# version codes), Market uploads take priority. They may lag notably behind general development, 
+# so checking http://sourceforge.net/projects/scummvm/files/scummvm/ is advisable as well.
 Auto Update Mode:None
-Update Check Mode:Static
-
+Update Check Mode:None
+Current Version:1.5.0
+Current Version Code:6

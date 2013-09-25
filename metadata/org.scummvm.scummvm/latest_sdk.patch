@@ -1,0 +1,34 @@
+diff --git a/backends/platform/android/android.mk b/backends/platform/android/android.mk
+index e24d797..ec63b91 100644
+--- a/backends/platform/android/android.mk
++++ b/backends/platform/android/android.mk
+@@ -40,10 +40,10 @@ PLUGIN_RESOURCES = \
+ #LDFLAGS += -Wl,--gc-sections
+ #CXXFLAGS += -ffunction-sections -fdata-sections -fvisibility=hidden -fvisibility-inlines-hidden
+ 
+-AAPT = $(ANDROID_SDK)/platform-tools/aapt
++AAPT = $(ANDROID_SDK)/build-tools/*/aapt
+ ADB = $(ANDROID_SDK)/platform-tools/adb
+-DX = $(ANDROID_SDK)/platform-tools/dx
+-APKBUILDER = $(ANDROID_SDK)/tools/apkbuilder
++DX = $(ANDROID_SDK)/build-tools/*/dx
++APKBUILDER = java -cp $(ANDROID_SDK)/tools/lib/sdklib.jar com.android.sdklib.build.ApkBuilderMain
+ JAVAC ?= javac
+ JAVACFLAGS = -source 1.5 -target 1.5
+ 
+@@ -154,13 +154,13 @@ $(APK_MAIN): $(EXECUTABLE) $(FILE_RESOURCES_MAIN) $(FILE_DEX)
+ 	$(INSTALL) -d $(PATH_STAGE_MAIN)/common/mylib/armeabi
+ 	$(INSTALL) -c -m 644 libscummvm.so $(PATH_STAGE_MAIN)/common/mylib/armeabi/
+ 	$(STRIP) $(PATH_STAGE_MAIN)/common/mylib/armeabi/libscummvm.so
+-	$(APKBUILDER) $@ -z $(FILE_RESOURCES_MAIN) -f $(FILE_DEX) -rf $(PATH_STAGE_MAIN)/common || { $(RM) $@; exit 1; }
++	$(APKBUILDER) $@ -u -z $(FILE_RESOURCES_MAIN) -f $(FILE_DEX) -rf $(PATH_STAGE_MAIN)/common || { $(RM) $@; exit 1; }
+ 
+ scummvm-engine-%.apk: plugins/lib%.so $(PATH_BUILD)/%/$(FILE_RESOURCES) $(FILE_DEX_PLUGIN)
+ 	$(INSTALL) -d $(PATH_STAGE_PREFIX).$*/apk/mylib/armeabi/
+ 	$(INSTALL) -c -m 644 plugins/lib$*.so $(PATH_STAGE_PREFIX).$*/apk/mylib/armeabi/
+ 	$(STRIP) $(PATH_STAGE_PREFIX).$*/apk/mylib/armeabi/lib$*.so
+-	$(APKBUILDER) $@ -z $(PATH_BUILD)/$*/$(FILE_RESOURCES) -f $(FILE_DEX_PLUGIN) -rf $(PATH_STAGE_PREFIX).$*/apk || { $(RM) $@; exit 1; }
++	$(APKBUILDER) $@ -u -z $(PATH_BUILD)/$*/$(FILE_RESOURCES) -f $(FILE_DEX_PLUGIN) -rf $(PATH_STAGE_PREFIX).$*/apk || { $(RM) $@; exit 1; }
+ 
+ all: $(APK_MAIN) $(APK_PLUGINS)
+ 
