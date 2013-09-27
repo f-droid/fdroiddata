@@ -24,15 +24,20 @@ descriptors and firmware for nonexisting configurations, such as so called
 of drivers and have good (virtual) hardware capabilities.
 .
 
-# Note: version code and name are generated from git history in launch_anddev_build.sh
-Repo Type:git
-Repo:git://git.code.sf.net/p/openmsx/openmsx
+# Note: OpenMSX version code and name are generated from it's VCS history by launch_anddev_build.sh
+Repo Type:srclib
+Repo:libsdl-android
 
-Build Version:0.9.1-584,11527,!patch doesn't apply 728325a472,\
-target=android-15,update=no,srclibs=libsdl-android@3c7a9b79ec,\
-subdir=build/android,patch=tcl_quickfix.patch,\
-prebuild=./setup_anddev.sh `realpath $$libsdl-android$$`,\
-build=cd openmsx && declare -rx VERSION_NAME=0.9.1-584 && ./launch_anddev_build.sh
+# setup_anddev.sh downloads TCL sources and builds them in one go
+Build Version:0.9.1-584,11527,openttd-1.2.3.25,update=no,srclibs=OpenMSX@728325a472,buildjni=no,\
+subdir=project,patch=tcl.patch,scanignore=build/srclib/libsdl-android/project/jni/tcl8.5/lib,\
+init=ln -s ../../OpenMSX openmsx && find . -name "*.so" -delete &&\
+ sed -ri 's/ant debug|ant release/exit/' ../build.sh &&\
+ export SDL_ANDROID_PORT_PATH=`readlink -f ..` && cd openmsx/build/android && ./setup_anddev.sh,\
+prebuild=sed -ri 's/(debuggable)="true"/\1="false"/' AndroidManifest.xml,\
+build=cd $$OpenMSX$$/build/android/openmsx &&\
+ declare -rx VERSION_NAME=0.9.1-584 &&\
+ ./launch_anddev_build.sh
 
 Auto Update Mode:None
 # Tags and AndroidManifest are unusable. See http://openmsx.fixato.net/builds/android/
