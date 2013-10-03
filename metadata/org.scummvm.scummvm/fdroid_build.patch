@@ -1,0 +1,83 @@
+commit 9dc92cd51b3f93d58709f1c5758d1f4b240de5e2
+Author: AlexanderR <alexander.r@gmx.com>
+Date:   Sat Sep 21 19:59:26 2013 +1100
+
+    Added fdroid_build
+
+diff --git a/fdroid_build b/fdroid_build
+new file mode 100755
+index 0000000..f9a86f4
+--- /dev/null
++++ b/fdroid_build
+@@ -0,0 +1,71 @@
++#!/bin/sh
++
++BIN="$ANDROID_NDK/toolchains/arm-linux-androideabi-4.6/prebuilt/linux-x86/bin"
++
++export PATH="$BIN:$PATH"
++export SYSROOT="$ANDROID_NDK/platforms/android-4/arch-arm/"
++export PREFIX="$BIN/arm-linux-androideabi-"
++export CC="${PREFIX}gcc --sysroot=$SYSROOT"
++export CXX="${PREFIX}g++ --sysroot=$SYSROOT"
++#export CPP="${PREFIX}cpp"
++export AS=${PREFIX}gcc
++export LD=${PREFIX}gcc
++export AR=${PREFIX}ar cru
++export RANLIB=${PREFIX}ranlib
++export STRIP=${PREFIX}strip
++export OBJCOPY=${PREFIX}objcopy
++
++#export BOOTCLASSPATH="$$SDK$$/opt/android-sdk/platforms/android-10/android.jar"
++#export BOOTCLASSPATH="$$SDK$$/opt/android-sdk/platforms/android-17/android.jar"
++
++export MACHDEP="--sysroot=$SYSROOT -mandroid -mthumb-interwork -D GL_GLEXT_PROTOTYPES"
++export CFLAGS="${MACHDEP} -Os -Wall -msoft-float -march=armv5te -mtune=xscale  -D GL_GLEXT_PROTOTYPES"
++export CXXFLAGS="${CFLAGS}"
++export LDFLAGS="${MACHDEP}"
++
++mkdir -p scummvm_libs && export PREF=`readlink -f ./scummvm_libs`
++
++mad() {
++tar xfz libs/libmad-0.15.1b.tar.gz
++cd libmad-0.15.1b/
++./configure --host=arm --prefix="$PREF" --enable-speed --enable-fpm=arm --disable-aso
++# They use some really old GCC options..
++CFLAGS="$CFLAGS -Wno-error=unknown-warning" make
++make install
++}
++
++flac() {
++cd $1
++cp /usr/share/gettext/config.rpath .
++./autogen.sh --prefix="$PREF" --host=arm-linux-androideabi \
++--disable-largefile  \
++--disable-thorough-tests \
++--disable-doxygen-docs \
++--disable-xmms-plugin \
++--disable-cpplibs \
++--disable-ogg \
++--disable-oggtest \
++--disable-rpath
++make -C src/libFLAC
++make -C src/libFLAC install
++make -C include install
++}
++
++tremor() {
++cd $1
++./autogen.sh --prefix="$PREF" --host=arm-linux-androideabi \
++--enable-low-accuracy \
++--enable-64kHz-limit \
++--disable-sanity-checks
++make
++make install
++}
++
++# "--default-dynamic" is too much of pain to distribute, so all plugins are bundled together
++scummvm() {
++./configure --host=android  --enable-plugins \
++--with-tremor-prefix="$PREF" --with-mad-prefix="$PREF" --with-flac-prefix="$PREF"
++make
++}
++
++$1 $2

@@ -4,14 +4,15 @@ Web Site:https://dev.guardianproject.info/projects/gibberbot
 Source Code:https://github.com/guardianproject/Gibberbot
 Issue Tracker:https://dev.guardianproject.info/projects/gibberbot
 
-Auto Name:Gibberbot
+Auto Name:ChatSecure
 Summary:Instant Messaging client with OTR
 Description:
-Gibber is an XMPP (Jabber) client. 
-It can do end-to-end encryption using the 
+XMPP (Jabber) client that can do end-to-end encryption using the 
 [http://en.wikipedia.org/wiki/Off-the-Record_Messaging Off-the-Record Messaging]
 protocol and can anonymize your chats via the [[org.torproject.android]] app 
 (root not required).
+
+The app used to be called GibberBot.
 .
 
 Repo Type:git
@@ -26,7 +27,6 @@ sed -i 's@\(android.library.reference.1=\).*@\1$$ActionBarSherlock$$@' project.p
 Build Version:0.0.10-RC6,41,0.0.10-RC6,forceversion=yes,forcevercode=yes,\
 srclibs=ActionBarSherlock@4.1.0,prebuild=\
 sed -i 's@\(android.library.reference.1=\).*@\1$$ActionBarSherlock$$@' project.properties
-
 # Can't use build.bash (fdroid is dash only) script so add the output as a 
 #   patch and build the jar manually
 Build Version:0.0.11-RC5,57,92db4fe01571,\
@@ -38,16 +38,17 @@ prebuild=rm -rf tests/ META-INF/ robo-tests/ gitian/ proguard-project.txt && \
          echo "sdk-location=$$SDK$$" > external/asmack/local.properties,\
 build=ant -Dbuild.all=true -f external/asmack/build.xml && \
       mv external/asmack/build/asmack-android-4.jar libs/
+Build Version:12.4.1,82,!binaries ee9e3dcc07134,submodules=yes,\
+prebuild=\
+    ./update-ant-build.sh && \
+    echo "android.library=true" >> external/MessageBar/library/project.properties && \
+    echo "sdk-location=$$SDK$$" >> external/asmack/local.properties && \
+    rm -f external/SlidingMenu/example/libs/crittercism*,\
+build=\
+    (cd external/asmack && ./build.bash && cp build/asmack-android-4.jar ../../libs)
 
-# Note the name changes to Chatsecure so reference old name in description.
-# Run the update-ant-build.sh script to update projects easier.
-# Fdroid does bash now so the script in external/asmack can be used for 
-#  building asmack instead of the patch in 57; alternatively patch the patch 
-#  to use the new smack build-rev.
 Auto Update Mode:None
-# Seem to bump manifest at beginning; tags are erratic and are used for betas
-# Also on gplay
-Update Check Mode:None
-Current Version:0.0.11-RC5
-Current Version Code:57
+Update Check Mode:Tags
+Current Version:12.4.1
+Current Version Code:82
 
