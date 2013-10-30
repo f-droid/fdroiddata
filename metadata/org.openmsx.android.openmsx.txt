@@ -32,10 +32,12 @@ Repo:libsdl-android
 # 1) setup_anddev.sh downloads TCL sources, unpacks and builds them in one go
 # 2) AndroidManifest.xml is only generated after TCL compilation
 Build Version:0.9.1-584,11527,openttd-1.2.3.25,update=no,srclibs=OpenMSX@728325a472,buildjni=no,\
-subdir=project,patch=tcl.patch,scanignore=libsdl-android/project/jni/tcl8.5/lib,\
+subdir=project,patch=tcl.patch,scanignore=project/jni/tcl8.5,\
 init=\
-  ln -s ../../OpenMSX openmsx && find . -name "*.so" -delete &&\
-  sed -ri 's/ant debug|ant release/exit/' ../build.sh,\
+  ln -s ../../OpenMSX openmsx && \
+  sed -ri 's/ant debug|ant release/exit/' ../build.sh && \
+  find -L -regex ".+\.\(a\|dll\|so\|exe\|lib\)" -type f -delete && cd jni && \
+  rm -rf ffmpeg/lib/* python/src/pythonp python/src/Parser/pgen ../themes/converter/converter && \
 prebuild=\
   export SDL_ANDROID_PORT_PATH=`readlink -f ..` && cd openmsx/build/android && ./setup_anddev.sh,\
 build=\
