@@ -99,6 +99,25 @@ Build:0.9.1,91
     build=NDK=$$NDK$$ ./ab.sh
     buildjni=no
 
+Build:0.9.5-armv7,953
+    commit=v0.9.5
+    subdir=android
+    submodules=yes
+	forceversion=yes
+	rm=dx9sdk;pspautotests;android/custom_rules.xml
+    update=.;../native/android
+	srclibs=NoAnalytics@d38ae535b5
+	scandelete=ffmpeg
+    prebuild=\
+		echo 'APP_ABI=armeabi-v7a' >> jni/Application.mk && \
+		rm libs/libGoogleAnalytics* && \
+		echo "android.library.reference.2=$$NoAnalytics$$" >> project.properties
+    build=\
+		declare -rx NDK=$$NDK$$ && cd ../ffmpeg && \
+		sed -i -e 's@^NDK.*@NDK=$$NDK$$@' -e 's/windows.*/linux-x86*/' -e '/^build_ARMv6/d' android-build.sh && \
+		./android-build.sh && cd ../android && NDK=$$NDK$$ ./ab.sh
+    buildjni=no
+
 # +0: - (upstream)
 # +1: x86
 # +2: arm
