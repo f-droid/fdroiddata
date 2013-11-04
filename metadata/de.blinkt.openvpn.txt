@@ -42,20 +42,18 @@ Build:0.5.35,63
     buildjni=no
 
 Build:0.5.47,80
-    disable=doesn't build at v0.5.47
     commit=v0.5.47
+    rm=assets
+    prebuild=sed -i '/google-breakpad/d' jni/Android.mk && \
+        sed -i -e '/+=.*breakpad/d' -e 's/ [^ ]*breakpad[^ ]*//' openvpn/Android.mk && \
+        find openvpn/src -type f -print0 | xargs -0 sed -i '/breakpad/d' && \
+        rm -f openvpn/src/openvpn/breakpad.*
     build=echo WITH_BREAKPAD=0 >> jni/Android.mk && \
-        sed -i '/google-breakpad/d' jni/Android.mk && \
-        sed -i 's/-j 8/-j 2/g' misc/build-native.sh && \
+        sed -i 's/-j 8/-j 4/g' misc/build-native.sh && \
         ./misc/build-native.sh
     buildjni=no
     gradle=yes
 
-# +0: - (upstream)
-# +1: mips
-# +2: x86
-# +3: arm
-# +4: armv7 (CV)
 Auto Update Mode:None
 Update Check Mode:Tags
 Current Version:0.5.47
