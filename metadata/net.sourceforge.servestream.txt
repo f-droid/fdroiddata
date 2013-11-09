@@ -1,4 +1,4 @@
-Category:Multimedia
+Categories:Multimedia
 License:Apache2
 Web Site:http://sourceforge.net/projects/servestream
 Source Code:http://sourceforge.net/p/servestream/code/commit_browser
@@ -24,69 +24,76 @@ if you find an audio file on a web page, share the link to Servestream.
 .
 
 #Repo:https://servestream.svn.sourceforge.net/svnroot/servestream/trunk; old url prior to r1160
+Repo Type:git-svn
+Repo:http://svn.code.sf.net/p/servestream/code;trunk=trunk;tags=tags
 
-#Repo Type:git-svn
-#Repo:http://svn.code.sf.net/p/servestream/code;trunk=trunk;tags=tags
+Build:0.5.4,69
+    commit=1354
+    srclibs=ActionBarSherlock@4.2.0
+    prebuild=rm custom_rules.xml && \
+        echo "android.library.reference.1=$$ActionBarSherlock$$" >> project.properties && \
+        wget http://sourceforge.net/p/servestream/code/1175/tree/ffmpeg/ffmpeg-0.11.1-android-2012-09-18.tar.gz?format=raw --output-document=ffmpeg-0.11.1-android-2012-09-18.tar.gz && \
+        wget http://sourceforge.net/p/servestream/code/1311/tree/ffmpeg/scripts/arm-build.sh?format=raw --output-document=arm-build.sh && \
+        tar -xvf ffmpeg-0.11.1-android-2012-09-18.tar.gz && \
+        chmod +x arm-build.sh && \
+        mv arm-build.sh ffmpeg-0.11.1-android-2012-09-18 && \
+        sed -i 's/armeabi armeabi-v7a x86 mips/armeabi/g' jni/Application.mk && \
+        cd ffmpeg-0.11.1-android-2012-09-18 && \
+        ./extract.sh && \
+        sed -i 's/make -j4/make -j1/g' arm-build.sh && \
+        sed -i 's/bash/sh/g' arm-build.sh && \
+        sed -i '/PIPESTATUS/d' arm-build.sh && \
+        NDK=$$NDK$$ ./arm-build.sh && \
+        cp -r build/ffmpeg/* ../jni/ffmpeg/ffmpeg
+    buildjni=yes
 
-Repo Type:svn
-Repo:http://svn.code.sf.net/p/servestream/code/trunk
+Build:0.6.0,72
+    commit=v0.6.0
+    srclibs=ActionBarSherlock@4.2.0;DragSort@0.6.1
+    prebuild=sed -i 's/make -j4/make -j2/g' scripts/* && \
+        rm custom_rules.xml && \
+        chmod +x scripts/build-ffmpeg.sh && \
+        cp -f $$ActionBarSherlock$$/libs/android-support-v4.jar $$DragSort$$/libs/ && \
+        echo "android.library.reference.1=$$ActionBarSherlock$$" >> project.properties && \
+        echo "android.library.reference.2=$$DragSort$$" >> project.properties
+    build=./scripts/build-ffmpeg.sh
+    buildjni=yes
 
-#Build Version:0.1,35,374,prebuild=mv lib/ libs/
-#Build Version:0.2.5,40,!source has wrong version code at r442,prebuild=mv lib/ libs/
-#The following is a guess at the correct revision. Most of the commits in
-#this project don't even have any comment at all!?
-#Build Version:0.2.11,46,614,prebuild=mv lib/ libs/
-#Still guessing, see previous comment
-#Build Version:0.3.1,48,659,prebuild=mv lib/ libs/
-#Build Version:0.4.4,54,957,prebuild=mv lib/ libs/
-#Build Version:0.4.6,56,999,prebuild=mv lib/ libs/
-#Build Version:0.4.7,57,1013,prebuild=mv lib/ libs/
-#Build Version:0.4.8,58,1031,prebuild=mv lib/ libs/
-#Build Version:0.4.9,59,1049,buildjni=no
-#Build Version:0.4.12,62,1160,buildjni=no
-Build Version:0.5.4,69,1354,srclibs=ActionBarSherlock@4.2.0,prebuild=\
-rm custom_rules.xml && echo "android.library.reference.1=$$ActionBarSherlock$$" >> project.properties && \
-wget http://sourceforge.net/p/servestream/code/1175/tree/ffmpeg/ffmpeg-0.11.1-android-2012-09-18.tar.gz?\
-format=raw --output-document=ffmpeg-0.11.1-android-2012-09-18.tar.gz && \
-wget http://sourceforge.net/p/servestream/code/1311/tree/ffmpeg/scripts/arm-build.sh?\
-format=raw --output-document=arm-build.sh && \
-tar -xvf ffmpeg-0.11.1-android-2012-09-18.tar.gz && \
-chmod +x arm-build.sh && \
-mv arm-build.sh ffmpeg-0.11.1-android-2012-09-18 && \
-sed -i 's/armeabi armeabi-v7a x86 mips/armeabi/g' jni/Application.mk && \
-cd ffmpeg-0.11.1-android-2012-09-18 && ./extract.sh && \
-sed -i 's/make -j4/make -j1/g' arm-build.sh && \
-sed -i 's/bash/sh/g' arm-build.sh && \
-sed -i '/PIPESTATUS/d' arm-build.sh && \
-NDK=$$NDK$$ ./arm-build.sh && cp -r build/ffmpeg/* ../jni/ffmpeg/ffmpeg,buildjni=yes
+Build:0.6.3,78
+    commit=v0.6.3
+    srclibs=ActionBarSherlock@4.2.0;DragSort@0.6.1;Streamscraper@f01d9ac64629;Jericho@3.2
+    prebuild=cp -f $$ActionBarSherlock$$/libs/android-support-v4.jar $$DragSort$$/libs/ && \
+        rm libs/streamscraper.jar && \
+        cp -r $$Streamscraper$$/src/net/moraleboost/ src/net/ && \
+        cp -r $$Jericho$$/src/java/net/htmlparser/ src/net/ && \
+        cp $$Jericho$$/compile-time-dependencies/* libs/ && \
+        sed -i 's/make -j4/make -j2/g' scripts/* && \
+        rm custom_rules.xml && \
+        chmod +x scripts/build-ffmpeg.sh && \
+        sed -i 's@\(reference.1=\).*@\1$$ActionBarSherlock$$@' project.properties && \
+        sed -i 's@\(reference.2=\).*@\1$$DragSort$$@' project.properties
+    build=./scripts/build-ffmpeg.sh
+    buildjni=yes
 
-Build Version:0.6.0,72,v0.6.0,\
-srclibs=ActionBarSherlock@4.2.0;DragSort@0.6.1,prebuild=\
-sed -i 's/make -j4/make -j2/g' scripts/* && \
-rm custom_rules.xml && chmod +x scripts/build-ffmpeg.sh && \
-cp -f $$ActionBarSherlock$$/libs/android-support-v4.jar $$DragSort$$/libs/ && \
-echo "android.library.reference.1=$$ActionBarSherlock$$" >> project.properties && \
-echo "android.library.reference.2=$$DragSort$$" >> project.properties,\
-build=./scripts/build-ffmpeg.sh,buildjni=yes
+Build:0.6.4,82
+    commit=v0.6.4
+    srclibs=ActionBarSherlock@4.2.0;DragSort@0.6.1;Streamscraper@f01d9ac64629;Jericho@3.2
+    prebuild=rm libs/android-support-v4.jar && \
+        cp -r $$SDK$$/extras/android/support/v7/appcompat/ appcompat/ && \
+        rm libs/streamscraper.jar && \
+        cp -r $$Streamscraper$$/src/net/moraleboost/ src/net/ && \
+        cp -r $$Jericho$$/src/java/net/htmlparser/ src/net/ && \
+        cp $$Jericho$$/compile-time-dependencies/* libs/ && \
+        sed -i 's/make -j4/make -j2/g' scripts/* && \
+        rm custom_rules.xml && \
+        chmod +x scripts/build-ffmpeg.sh && \
+        sed -i 's@\(reference.1=\).*@\1$$ActionBarSherlock$$@' project.properties && \
+        sed -i 's@\(reference.2=\).*@\1$$DragSort$$@' project.properties
+    build=./scripts/build-ffmpeg.sh
+    buildjni=yes
 
-Build Version:0.6.3,78,r1502,\
-srclibs=ActionBarSherlock@4.2.0;DragSort@0.6.1;Streamscraper@f01d9ac64629;Jericho@3.2,\
-prebuild=cp -f $$ActionBarSherlock$$/libs/android-support-v4.jar $$DragSort$$/libs/ && \
-         rm libs/streamscraper.jar && \
-         cp -r $$Streamscraper$$/src/net/moraleboost/ src/net/ && \
-         cp -r $$Jericho$$/src/java/net/htmlparser/ src/net/ && \
-         cp $$Jericho$$/compile-time-dependencies/* libs/ && \
-         sed -i 's/make -j4/make -j2/g' scripts/* && \
-         rm custom_rules.xml && chmod +x scripts/build-ffmpeg.sh && \
-         sed -i 's@\(reference.1=\).*@\1$$ActionBarSherlock$$@' project.properties && \
-         sed -i 's@\(reference.2=\).*@\1$$DragSort$$@' project.properties,\
-build=./scripts/build-ffmpeg.sh,\
-buildjni=yes
-
-# sed -i 's/x86 mips/mips/g' jni/Application.mk && \
 Auto Update Mode:None
-# Tags not working and e.g. v0.6.3 doesn't even check out
-Update Check Mode:None
-Current Version:0.6.3
-Current Version Code:78
+Update Check Mode:Tags
+Current Version:0.6.4
+Current Version Code:82
 
