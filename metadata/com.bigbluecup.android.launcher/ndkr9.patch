@@ -1,0 +1,72 @@
+From fe3d87c86b830c5e6d7b7e990de5ec5ef68483e7 Mon Sep 17 00:00:00 2001
+From: jjsat <jjs@jjs.at>
+Date: Sun, 25 Aug 2013 11:39:02 +0200
+Subject: [PATCH] Android: Fix building with NDK r9.
+
+---
+ Android/library/jni/pe_jni.c        | 2 +-
+ Engine/platform/android/acpland.cpp | 6 +++---
+ Engine/platform/util/libc.c         | 2 +-
+ 3 files changed, 5 insertions(+), 5 deletions(-)
+
+diff --git a/Android/library/jni/pe_jni.c b/Android/library/jni/pe_jni.c
+index ac5b359..c24681b 100644
+--- a/Android/library/jni/pe_jni.c
++++ b/Android/library/jni/pe_jni.c
+@@ -13,7 +13,7 @@ void android_debug_printf(char* format, ...)
+   vsprintf(buffer, format, ap);
+   va_end(ap);
+ 
+-  __android_log_print(ANDROID_LOG_DEBUG, "Allegro", buffer);
++  __android_log_print(ANDROID_LOG_DEBUG, "Allegro", "%s", buffer);
+ }
+ 
+ int IsDataFile(version_info_t* version_info)
+diff --git a/Engine/platform/android/acpland.cpp b/Engine/platform/android/acpland.cpp
+index 3aa1668..244d595 100644
+--- a/Engine/platform/android/acpland.cpp
++++ b/Engine/platform/android/acpland.cpp
+@@ -675,7 +675,7 @@ void AGSAndroid::WriteDebugString(const char* texx, ...)
+     va_start(ap,texx);
+     vsprintf(&displbuf[5],texx,ap);
+     va_end(ap);
+-    __android_log_print(ANDROID_LOG_DEBUG, "AGSNative", displbuf);
++    __android_log_print(ANDROID_LOG_DEBUG, "AGSNative", "%s", displbuf);
+   }
+ }
+ 
+@@ -712,7 +712,7 @@ void AGSAndroid::DisplayAlert(const char *text, ...) {
+   JNIEnv* thread_env;
+   android_jni_vm->AttachCurrentThread(&thread_env, NULL);
+ 
+-  __android_log_print(ANDROID_LOG_DEBUG, "AGSNative", displbuf);
++  __android_log_print(ANDROID_LOG_DEBUG, "AGSNative", "%s", displbuf);
+ 
+   jstring java_string = thread_env->NewStringUTF(displbuf);
+   thread_env->CallVoidMethod(java_object, java_messageCallback, java_string);
+@@ -765,7 +765,7 @@ void AGSAndroid::WriteConsole(const char *text, ...) {
+   va_start(ap, text);
+   vsprintf(displbuf, text, ap);
+   va_end(ap);
+-  __android_log_print(ANDROID_LOG_DEBUG, "AGSNative", displbuf);  
++  __android_log_print(ANDROID_LOG_DEBUG, "AGSNative", "%s", displbuf);  
+ }
+ 
+ void AGSAndroid::ShutdownCDPlayer() {
+diff --git a/Engine/platform/util/libc.c b/Engine/platform/util/libc.c
+index e201d2b..e3820af 100644
+--- a/Engine/platform/util/libc.c
++++ b/Engine/platform/util/libc.c
+@@ -19,7 +19,7 @@
+ #include <string.h>
+ 
+ // Only a dummy. It is used in a function of alfont, but never called in AGS.
+-size_t malloc_usable_size(void* allocation)
++size_t malloc_usable_size(const void* allocation)
+ {
+   return 0;
+ }
+-- 
+1.8.4
+
+
