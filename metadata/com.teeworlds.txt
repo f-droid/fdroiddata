@@ -1,0 +1,51 @@
+Categories:Games
+License:GPLv2+
+Web Site:https://www.teeworlds.com/
+Source Code:https://github.com/pelya/commandergenius
+Issue Tracker:https://github.com/pelya/commandergenius/issues
+
+Name:Teeworlds
+Summary:Fast-paced 2D arcade shooter
+Description:
+Teeworlds is a free online multiplayer game, available for all major operating systems. Battle with up 
+to 16 players in a variety of game modes, including Team Deathmatch and Capture The Flag. You can even 
+design your own maps!
+.
+
+# Upstream isn't particulary happy about "custom clients", so it is likely to be forever
+# buried in depths of commandergenius repository..
+Repo Type:srclib
+Repo:libsdl-android
+
+# some libraries, such as libandroid.so can't be rebuilt from included sources;
+# others, such as python.so may be recompiled (probably, better from srclibs)
+Build:0.6.2.15,6215
+    disable=build fails - submodules using ssh?
+    commit=a7d9626282f
+    subdir=project
+    submodules=yes
+    init=ln -fs teeworlds jni/application/src && \
+        sed -ri 's/ant debug|ant release/exit 0/' ../build.sh && \
+        sed -ri 's/exit 0//' ../copyAssets.sh && \
+        find -regex ".+\.\(a\|dll\|so\|exe\|lib\)" -type f -delete && \
+        cd jni && \
+        rm -rf android/ ffmpeg/ avcodec/ python/ boost* ../themes/converter/converter && \
+        cd ../.. && \
+        ./changeAppSettings.sh -a
+    target=android-17
+    rm=project/jni/application/commandergenius/commandergenius/icotool
+    build=sed -ri 's/(debuggable)="true"/\1="false"/' AndroidManifest.xml && \
+        cd .. && \
+        ./build.sh release
+    buildjni=no
+
+Maintainer Notes:
+Tags and AndroidManifest are unusable. See website for upstream Teeworlds
+releases and look up Git history for actual updates.
+.
+
+Auto Update Mode:None
+Update Check Mode:None
+Current Version:0.6.2.15
+Current Version Code:6215
+

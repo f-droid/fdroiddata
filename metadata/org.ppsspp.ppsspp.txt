@@ -1,3 +1,4 @@
+AntiFeatures:UpstreamNonFree
 Categories:Games
 License:GPLv2+
 Web Site:http://ppsspp.org/
@@ -10,11 +11,16 @@ Description:
 PPSSPP is a PSP emulator for Android and other platforms. It is being
 developed at a rapid speed and compatibility is increasing quickly, but there
 are many games it doesn't run yet and it doesn't run fast on Android yet.
+
 Please go to http://www.ppsspp.org for more information.
+
 No games are included with this download, you will have to dump your own PSP
 games and turn them into .ISO or .CSO files, or simply play free homebrew
 games, which are available online.
+
 * PSP is a trademark of Sony, Inc.
+
+A proprietary analytics library has been removed from this build.
 .
 
 Repo Type:git
@@ -97,6 +103,26 @@ Build:0.9.1,91
     forcevercode=yes
     prebuild=rm -rf ../pspautotests/demos*/ custom_rules.xml
     build=NDK=$$NDK$$ ./ab.sh
+    buildjni=no
+
+Build:0.9.5-x86,951
+    commit=v0.9.5
+    subdir=android
+    submodules=yes
+    forceversion=yes
+    forcevercode=yes
+    rm=dx9sdk;pspautotests;android/custom_rules.xml
+    srclibs=NoAnalytics@d38ae535b5
+    prebuild=echo 'APP_ABI=x86' >> jni/Application.mk && \
+        rm libs/libGoogleAnalytics* && \
+        echo "android.library.reference.2=$$NoAnalytics$$" >> project.properties
+    scandelete=ffmpeg
+    build=declare -rx NDK=$$NDK$$ && \
+        cd ../ffmpeg && \
+        sed -i -e 's@^NDK.*@NDK=$$NDK$$@' -e 's/windows.*/linux-x86*/' ax86-build.sh && \
+        ./ax86-build.sh && \
+        cd ../android && \
+        NDK=$$NDK$$ ./ab.sh
     buildjni=no
 
 Build:0.9.5-armv7,953
