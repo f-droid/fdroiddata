@@ -1,29 +1,45 @@
 Categories:Multimedia
 License:GPLv3
 Web Site:http://code.google.com/p/clementine-remote-android/
-Source Code:http://code.google.com/p/clementine-remote-android/source/checkout
-Issue Tracker:http://code.google.com/p/clementine-remote-android/issues/list
+Source Code:https://github.com/clementine-player/Android-Remote
+Issue Tracker:https://github.com/clementine-player/Android-Remote/issues
 
 Auto Name:Clementine Remote
 Summary:Music player remote control
 Description:
-Control the music player "Clementine" - access your playlists, read the lyrics while listening to your favourite song, enjoy the cover art and more.
+You need [http://www.clementine-player.org/downloads Clementine]
+1.2.1 (quite recent) for this to work and to enable the remote Control 
+in Clementine settings first.
 
-If you receive a call or want to make one, you don't have pause the current track, Clementine Remote can lower the volume for you. It also has many more features, for example exchange of music and playlists with a computer.
+Control the music player "Clementine" - access your playlists, 
+browse the library, download files, change the volume via hardware buttons,
+read the lyrics while listening to your favourite song, enjoy the cover art and more.
+
+If you receive a call or want to make one, you don't have pause the current 
+track, Clementine Remote can lower the volume for you. 
+It also has many more features, for example exchange of music and playlists with a computer.
+
+[https://raw.github.com/clementine-player/Android-Remote/master/changelog.txt Changelog]
 .
 
 Repo Type:git
-Repo:https://code.google.com/p/clementine-remote-android/
+Repo:https://github.com/clementine-player/Android-Remote
 
-Build:8,21
-    disable=crashes
-    commit=9c7bb3eadcdf
-    srclibs=1:ActionBarSherlock@4.4.0;protobuf@201d572f787a
-    prebuild=cp libs/android-support-v4.jar $$ActionBarSherlock$$/libs/ && \
-        cp -r $$protobuf$$/src/ . 
+Build:8.2,25
+    commit=v8.2
+    srclibs=ClementineDeps@737bf
+    extlibs=jmdns-build.xml
+    prebuild=echo 'source.dir=src;$$ClementineDeps$$/clementine-remote-android.dep-protocolbuffer/src' > ant.properties && \
+             sed -i 's@\(reference.1=\).*@\1$$ClementineDeps$$/clementine-remote-android.dep-abs@' project.properties && \
+             mkdir unjar/ && \
+             cp -r $$ClementineDeps$$/clementine-remote-android.dep-jmdns/src/javax/ libs/ && \
+             rm -rf libs/javax/jmdns/test/
+    build=ant jar -f libs/jmdns-build.xml && \
+          cd unjar/ && jar xf ../libs/jmdns.jar && \
+          jar cfm ../libs/jmdns.jar META-INF/MANIFEST.MF javax/
 
 Auto Update Mode:None
-Update Check Mode:RepoManifest
-Current Version:8.1
-Current Version Code:24
+Update Check Mode:Tags
+Current Version:8.2
+Current Version Code:25
 
