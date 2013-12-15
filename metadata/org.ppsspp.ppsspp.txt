@@ -145,6 +145,46 @@ Build:0.9.5-armv7,953
         NDK=$$NDK$$ ./ab.sh
     buildjni=no
 
+Build:0.9.6-x86,961
+    commit=v0.9.6
+    subdir=android
+    submodules=yes
+    forceversion=yes
+    forcevercode=yes
+    rm=dx9sdk;pspautotests;android/custom_rules.xml
+    srclibs=2:NoAnalytics@d38ae535b5
+    prebuild=echo 'APP_ABI=x86' >> jni/Application.mk && \
+        rm libs/libGoogleAnalytics*
+    scandelete=ffmpeg
+    scanignore=android/android-ndk-profiler
+    build=declare -rx NDK=$$NDK$$ && \
+        cd ../ffmpeg && \
+        sed -i -e 's@^NDK.*@NDK=$$NDK$$@' -e 's/windows.*/linux-x86*/' ax86-build.sh && \
+        ./ax86-build.sh && \
+        cd ../android && \
+        NDK=$$NDK$$ ./ab.sh
+    buildjni=no
+
+Build:0.9.6-armv7,963
+    commit=v0.9.6
+    subdir=android
+    submodules=yes
+    forceversion=yes
+    forcevercode=yes
+    rm=dx9sdk;pspautotests;android/custom_rules.xml
+    srclibs=2:NoAnalytics@d38ae535b5
+    prebuild=echo 'APP_ABI=armeabi-v7a' >> jni/Application.mk && \
+        rm libs/libGoogleAnalytics*
+    scandelete=ffmpeg
+    scanignore=android/android-ndk-profiler
+    build=declare -rx NDK=$$NDK$$ && \
+        cd ../ffmpeg && \
+        sed -i -e 's@^NDK.*@NDK=$$NDK$$@' -e 's/windows.*/linux-x86*/' -e '/^build_ARMv6/d' android-build.sh && \
+        ./android-build.sh && \
+        cd ../android && \
+        NDK=$$NDK$$ ./ab.sh
+    buildjni=no
+
 # +0: - (upstream)
 # +1: x86
 # +2: arm
@@ -152,6 +192,6 @@ Build:0.9.5-armv7,953
 Auto Update Mode:None
 Update Check Mode:Tags
 Vercode Operation:%c*10 + 3
-Current Version:0.9.5
-Current Version Code:953
+Current Version:0.9.6
+Current Version Code:963
 
