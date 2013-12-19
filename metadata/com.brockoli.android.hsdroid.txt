@@ -19,12 +19,12 @@ Repo:https://bitbucket.org/brockoli/hsdroid.git
 Build:1.6,9
     commit=127e76
     gradle=yes
-    srclibs=SlidingMenu@d929476bee72
-    patch=build.gradle_9.patch
+    srclibs=SlidingMenu@9b3d8c15c1b0fbd;ActionBarSherlock@4.4.0
+    patch=build.gradle_9.patch;build-fix_9.patch
     prebuild=echo -e "include ':SlidingMenu'\nproject(':SlidingMenu').projectDir = new File('$(readlink -f $$SlidingMenu$$)')" > settings.gradle && \
-        find . -type f -print0 | xargs -0 sed -i 's/com.slidingmenu/com.jeremyfeinstein.slidingmenu/g' && \
-        sed -i '202d' src/com/brockoli/android/hsdroid/MainActivity.java && \
-        sed -i 's/17.0.0/18.1.1/' $$SlidingMenu$$/build.gradle 
+             sed -i 's/targetSdkVersion="17"/targetSdkVersion="16"/g' $$SlidingMenu$$/AndroidManifest.xml && \
+             cp $$ActionBarSherlock$$/build.gradle $$SlidingMenu$$/ && \
+             sed -i -e 's/compileSdkVersion 14/compileSdkVersion 16/g' -e "s/buildToolsVersion '17.0.0'/buildToolsVersion '18.1.1'/g" $$SlidingMenu$$/build.gradle
 
 Auto Update Mode:None
 Update Check Mode:RepoManifest
