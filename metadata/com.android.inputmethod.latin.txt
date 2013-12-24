@@ -1,0 +1,45 @@
+Categories:System
+License:Apache2
+Source Code:https://android.googlesource.com/platform/packages/inputmethods/LatinIME
+Issue Tracker:http://code.google.com/p/android/issues/list?can=2&q=keyboard&colspec=ID+Type+Status+Owner+Summary+Stars&cells=tiles
+
+Summary:Stock keyboard
+Description:
+The current version comes with English, Spanish, Russian, Brazilian, Italian, 
+German, French, dictionaries; there are twenty more language word lists 
+in the repository but they need to be compiled.
+The version name corresponds to the Android version.
+.
+
+Repo Type:git
+Repo:https://android.googlesource.com/platform/packages/inputmethods/LatinIME
+
+Build:4.2.1,1
+    commit=android-4.2.1_r1
+    subdir=java
+    target=android-17
+    extlibs=android/android-support-v4r13.jar
+    srclibs=Inputmethodcommon@android-4.2.1_r1
+    patch=build.xml_1.patch
+    prebuild=echo 'package.name=com.android.inputmethod.latin' >> ant.properties && \
+             sed -i '/subtypeId/d' res/xml/method.xml && \
+             sed -i '19 i android:versionName="4.2.1" android:versionCode="1"' AndroidManifest.xml && \
+             cp -r $$Inputmethodcommon$$/java/com/android/inputmethodcommon src/com/android/
+    build=$$NDK$$/ndk-build -C ../native && mv ../native/libs/armeabi libs/
+
+Maintainer Notes:
+This version uses the prebuilt dictionaries in the repo; 
+you could have a lot of fun building your own.
+
+Use the ant.properties to change the package name if you wish: it works fine.
+
+4.3 or 4.4 don't build with NDK 9:
+jni/src/suggest/core/layout/proximity_info_utils.h:41:88:   instantiated from here
+/home/gerry/android-ndk-r9c/sources/cxx-stl/stlport/stlport/stl/_function_base.h:141:8: error: base class 'struct std::unary_function<std::pair<int const, int>, int const>' has a non-virtual destructor [-Werror=effc++]
+.
+
+Auto Update Mode:None
+Update Check Mode:None
+Current Version:4.2.1
+Current Version Code:1
+
