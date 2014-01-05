@@ -1,0 +1,90 @@
+diff --git a/AndroidManifest.xml b/AndroidManifest.xml
+index 1b4af04..b01f6a2 100644
+--- a/AndroidManifest.xml
++++ b/AndroidManifest.xml
+@@ -68,14 +68,6 @@
+                 android:value="com.piratebay.activities.AboutActivity" />
+         </activity>
+         
+-        <!-- Google Play -->
+-    	<meta-data android:name="com.google.android.gms.version"
+-             android:value="@integer/google_play_services_version" />
+-    	
+-    	<activity android:name="com.google.android.gms.ads.AdActivity"
+-             android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize" />
+-
+-    
+         
+     </application>
+ 
+diff --git a/src/com/piratebayfree/activities/MainActivity.java b/src/com/piratebayfree/activities/MainActivity.java
+index eccd3a1..41a2256 100644
+--- a/src/com/piratebayfree/activities/MainActivity.java
++++ b/src/com/piratebayfree/activities/MainActivity.java
+@@ -1,10 +1,7 @@
+ package com.piratebayfree.activities;
+ 
+-import com.newrelic.agent.android.NewRelic;
+-
+ import com.google.analytics.tracking.android.EasyTracker;
+ 
+-import com.google.android.gms.ads.*;
+ import com.piratebayfree.Category;
+ import com.piratebayfree.Database;
+ import com.piratebayfree.Proxy;
+@@ -72,7 +69,6 @@ public class MainActivity extends Activity implements TextWatcher, OnKeyListener
+ 	private ImageView statusicon;
+ 	private TextView statustext;
+ 	private ImageView advert;
+-	private AdView admob;
+ 	private ProgressBar loading;
+ 	private DrawerLayout drawer;
+ 	private ListView categorylist;
+@@ -166,10 +162,6 @@ public class MainActivity extends Activity implements TextWatcher, OnKeyListener
+     	
+         db.deleteLogs();
+ 		
+-		loadAds();
+-		
+-		loadTracking();
+-        
+ 	}
+ 	  
+ 	@Override
+@@ -194,36 +186,6 @@ public class MainActivity extends Activity implements TextWatcher, OnKeyListener
+ 	}
+ 
+ 	// Ads
+-	private void loadAds() {
+-		
+-	    admob = new AdView(this);
+-	    
+-	    admob.setAdUnitId(ADMOB);
+-	    admob.setAdSize(AdSize.BANNER);
+-	    
+-	    RelativeLayout layout = (RelativeLayout) findViewById(R.id.main_activity);
+-	    
+-	    RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
+-	    	    RelativeLayout.LayoutParams.WRAP_CONTENT, 
+-	    	    RelativeLayout.LayoutParams.WRAP_CONTENT);
+-	    
+-	    params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+-
+-	    layout.addView(admob, params);
+-
+-	    AdRequest request = new AdRequest.Builder().build();
+-
+-	    admob.loadAd(request);
+-
+-
+-	}
+-	
+-	// Tracking
+-	private void loadTracking() {
+-	
+-		NewRelic.withApplicationToken(NEWRELIC).start(this.getApplication());
+-
+-	}
+ 
+ 	@Override
+ 	public void onStart() {
