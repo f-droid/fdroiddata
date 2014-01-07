@@ -15,10 +15,17 @@ Repo Type:git
 Repo:git://github.com/chrisboyle/sgtpuzzles.git
 
 Build:9561.1,72
-	commit=9561.1
-	buildjni=yes
-	init=rm -f build.xml
-	disable=bad c code
+    commit=9561.1
+    init=sed -i 's/android-8/android-15/g' build.properties
+    update=force
+    prebuild=echo -e 'APP_ABI=armeabi x86\nAPP_CFLAGS += -Wno-error=format-security' > jni/Application.mk && \
+             sed -i '261 i \\t\tpaint.setStyle(Paint.Style.FILL);' src/name/boyle/chris/sgtpuzzles/GameView.java
+    buildjni=yes
+
+Maintainer Notes:
+I've built binaries for x86 but haven't run it on a device; mips doesn't build with ndk-r9c
+One line sed patch is to fix issue #77; shouldn't be needed in next version
+.
 
 Auto Update Mode:None
 Update Check Mode:Tags
