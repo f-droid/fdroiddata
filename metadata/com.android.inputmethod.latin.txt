@@ -6,43 +6,70 @@ Issue Tracker:http://code.google.com/p/android/issues
 Summary:Stock keyboard
 Description:
 The current version comes with English, Spanish, Russian, Brazilian, Italian, 
-German, French, dictionaries; there are twenty more language word lists 
+German, French, dictionaries; there are more language word lists 
 in the repository but they'd need to be compiled.
+There is the ability to input Emoji characters.
 
-Remember, you can use these very dictionary files for [[org.pocketworkstation.pckeyboard]],
-either built into the main apk or as addon packs.
-
-The version name corresponds to the Android version.
+Note that you can't install this if you have a ROM that already has LatinIME.
+The build recipe contains a package name change variable, but on Android 4.3
+it still couldn't be installed as a user app; you'd have to 
+remove the original from /system/app via root, before installing this.
 .
 
 Repo Type:git
 Repo:https://android.googlesource.com/platform/packages/inputmethods/LatinIME
 
-Build:4.2.1,1
-    disable=Results in an apk with '${package.name}' as the package ID
-    commit=android-4.2.1_r1
+Build:4.4.2-MIPS,4421
+    commit=android-sdk-4.4.2_r1
     subdir=java
-    target=android-17
+    target=android-19
+    srclibs=Inputmethodcommon@android-4.4.2_r1
     extlibs=android/android-support-v4r13.jar
-    srclibs=Inputmethodcommon@android-4.2.1_r1
-    patch=build.xml_1.patch
-    prebuild=sed -i '19 i android:versionName="4.2.1" android:versionCode="1"' AndroidManifest.xml && \
-             cp -r $$Inputmethodcommon$$/java/com/android/inputmethodcommon src/com/android/
-    build=$$NDK$$/ndk-build -e "APP_ABI=all" -C ../native && mv ../native/libs/armeabi libs/
+    patch=custom_rules.xml_1.patch
+    prebuild=echo -e 'package.name=com.android.inputmethod.latin\nversion.name=4.4.2-MIPS\nversion.code=4421' >> ant.properties && \
+        cp -r $$Inputmethodcommon$$/java/com/android/inputmethodcommon src/com/android/
+    build=$$NDK$$/ndk-build -e "APP_ABI=mips" -e "APP_CFLAGS += -w" -C ../native && mv ../native/libs/* libs/
+
+Build:4.4.2-x86,4422
+    commit=android-sdk-4.4.2_r1
+    subdir=java
+    target=android-19
+    srclibs=Inputmethodcommon@android-4.4.2_r1
+    extlibs=android/android-support-v4r13.jar
+    patch=custom_rules.xml_1.patch
+    prebuild=echo -e 'package.name=com.android.inputmethod.latin\nversion.name=4.4.2-x86\nversion.code=4422' >> ant.properties && \
+        cp -r $$Inputmethodcommon$$/java/com/android/inputmethodcommon src/com/android/
+    build=$$NDK$$/ndk-build -e "APP_ABI=x86" -e "APP_CFLAGS += -w" -C ../native && mv ../native/libs/* libs/
+
+Build:4.4.2-ARM,4423
+    commit=android-sdk-4.4.2_r1
+    subdir=java
+    target=android-19
+    srclibs=Inputmethodcommon@android-4.4.2_r1
+    extlibs=android/android-support-v4r13.jar
+    patch=custom_rules.xml_1.patch
+    prebuild=echo -e 'package.name=com.android.inputmethod.latin\nversion.name=4.4.2-ARM\nversion.code=4423' >> ant.properties && \
+        cp -r $$Inputmethodcommon$$/java/com/android/inputmethodcommon src/com/android/
+    build=$$NDK$$/ndk-build -e "APP_ABI=armeabi" -e "APP_CFLAGS += -w" -C ../native && mv ../native/libs/* libs/
+
+Build:4.4.2-ARMv7,4424
+    commit=android-sdk-4.4.2_r1
+    subdir=java
+    target=android-19
+    srclibs=Inputmethodcommon@android-4.4.2_r1
+    extlibs=android/android-support-v4r13.jar
+    patch=custom_rules.xml_1.patch
+    prebuild=echo -e 'package.name=com.android.inputmethod.latin\nversion.name=4.4.2-ARMv7\nversion.code=4424' >> ant.properties && \
+        cp -r $$Inputmethodcommon$$/java/com/android/inputmethodcommon src/com/android/
+    build=$$NDK$$/ndk-build -e "APP_ABI=armeabi-v7a" -e "APP_CFLAGS += -w" -C ../native && mv ../native/libs/* libs/
 
 Maintainer Notes:
-This version uses the prebuilt dictionaries in the repo; 
-you could have a lot of fun building your own.
-
-Use the ant.properties to change the package name if you wish: it works fine.
-
-4.3 or 4.4 don't build with NDK 9:
-jni/src/suggest/core/layout/proximity_info_utils.h:41:88:   instantiated from here
-/home/gerry/android-ndk-r9c/sources/cxx-stl/stlport/stlport/stl/_function_base.h:141:8: error: base class 'struct std::unary_function<std::pair<int const, int>, int const>' has a non-virtual destructor [-Werror=effc++]
+Note that, like other AOSP apps, there are now special tags with 'sdk' in them; 
+not sure what the difference is.
 .
 
 Auto Update Mode:None
 Update Check Mode:None
-Current Version:4.2.1
-Current Version Code:1
+Current Version:4.4.2
+Current Version Code:4420
 
