@@ -1,0 +1,84 @@
+diff --git a/reicast/android/src/com/reicast/emulator/GL2JNIActivity.java b/reicast/android/src/com/reicast/emulator/GL2JNIActivity.java
+index 9809109..e32c965 100644
+--- a/reicast/android/src/com/reicast/emulator/GL2JNIActivity.java
++++ b/reicast/android/src/com/reicast/emulator/GL2JNIActivity.java
+@@ -3,8 +3,6 @@ package com.reicast.emulator;
+ import java.io.IOException;
+ import java.io.InputStream;
+ 
+-import tv.ouya.console.api.OuyaController;
+-
+ import com.reicast.emulator.GL2JNIView.EmuThread;
+ import com.example.newdc.JNIdc;
+ 
+@@ -161,22 +159,6 @@ public class GL2JNIActivity extends Activity
+ 		  //Get all the axis for the KeyEvent
+ 
+ 		//Joystick
+-	    if((event.getSource() & InputDevice.SOURCE_CLASS_JOYSTICK) != 0) {
+-	        
+-	        //do other things with joystick
+-	        float LS_X = event.getAxisValue(OuyaController.AXIS_LS_X);
+-		    float LS_Y = event.getAxisValue(OuyaController.AXIS_LS_Y);
+-		    float RS_X = event.getAxisValue(OuyaController.AXIS_RS_X);
+-		    float RS_Y = event.getAxisValue(OuyaController.AXIS_RS_Y);
+-		    float L2 = event.getAxisValue(OuyaController.AXIS_L2);
+-		    float R2 = event.getAxisValue(OuyaController.AXIS_R2);
+-
+-		    GL2JNIView.lt = (int)(L2 * 255);
+-		    GL2JNIView.rt = (int)(R2 * 255);
+-
+-		    GL2JNIView.jx = (int)(LS_X * 126);
+-		    GL2JNIView.jy =  (int)(LS_Y * 126);
+-	    }
+ 
+ 
+ 		return true;
+@@ -194,35 +176,9 @@ public class GL2JNIActivity extends Activity
+   private static final int key_CONT_Y          = 0x0200;
+   private static final int key_CONT_X          = 0x0400;
+   
+-  int map[] = new int[] { 
+-		  OuyaController.BUTTON_O, 	key_CONT_A,
+-		  OuyaController.BUTTON_A, 	key_CONT_B,
+-		  OuyaController.BUTTON_Y, 	key_CONT_Y,
+-		  OuyaController.BUTTON_U, 	key_CONT_X,
+-		  
+-		  OuyaController.BUTTON_DPAD_UP, 		key_CONT_DPAD_UP,
+-		  OuyaController.BUTTON_DPAD_DOWN, 		key_CONT_DPAD_DOWN,
+-		  OuyaController.BUTTON_DPAD_LEFT, 		key_CONT_DPAD_LEFT,
+-		  OuyaController.BUTTON_DPAD_RIGHT, 	key_CONT_DPAD_RIGHT,
+-		  
+-		  OuyaController.BUTTON_MENU, key_CONT_START,
+-		  OuyaController.BUTTON_L1, key_CONT_START
+-		  
+-  };
+   
+   boolean handle_key(int kc, boolean down) {
+ 	  boolean rav = false;
+-	  for (int i=0;i<map.length;i+=2) {
+-		  if (map[i + 0] == kc) {
+-			  if (down)
+-				  this.rv &= ~map[i + 1];
+-			  else
+-				  this.rv |= map[i + 1];
+-			  
+-			  rav = true;
+-			  break;
+-		  }
+-	  }
+ 	  
+ 	  GL2JNIView.kcode_raw = rv;
+ 	  
+diff --git a/reicast/android/src/com/reicast/emulator/MainActivity.java b/reicast/android/src/com/reicast/emulator/MainActivity.java
+index 3944fc7..be071f8 100644
+--- a/reicast/android/src/com/reicast/emulator/MainActivity.java
++++ b/reicast/android/src/com/reicast/emulator/MainActivity.java
+@@ -29,7 +29,6 @@ import android.widget.TextView;
+ import android.widget.Toast;
+ import android.support.v4.app.NavUtils;
+ 
+-import tv.ouya.console.api.OuyaController;
+ import java.io.*;
+ 
+ public class MainActivity extends Activity {
