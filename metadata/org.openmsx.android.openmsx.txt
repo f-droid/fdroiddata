@@ -31,20 +31,29 @@ Repo:libsdl-android
 # this looks so ugly because:
 # 1) setup_anddev.sh downloads TCL sources, unpacks and builds them in one go
 # 2) AndroidManifest.xml is only generated after TCL compilation
-Build Version:0.9.1-584,11527,openttd-1.2.3.25,update=no,srclibs=OpenMSX@728325a472,buildjni=no,\
-subdir=project,patch=tcl.patch,scanignore=project/jni/tcl8.5,\
-init=\
-  ln -s ../../OpenMSX/ openmsx && \
-  sed -ri 's/ant debug|ant release/exit/' ../build.sh && \
-  find -regex ".+\.\(a\|dll\|so\|exe\|lib\)" -type f -delete && cd jni && \
-  rm -rf android/ ffmpeg/ avcodec/ python/ boost* ../themes/converter/converter,\
-build=\
-  export SDL_ANDROID_PORT_PATH=`readlink -f ..` && cd openmsx/build/android && \
-  sed 's/android-15/android-17/' -i setup_anddev.sh && ./setup_anddev.sh && \
-  cd ../../../ && sed -ri 's/(debuggable)="true"/\1="false"/' AndroidManifest.xml && \
-  cd openmsx/build/android/openmsx && \
-  declare -rx VERSION_NAME=0.9.1-584 && \
- ./launch_anddev_build.sh
+Build:0.9.1-584,11527
+    disable=fails - libsdl needs a local.properties file preferably via android update project
+    commit=openttd-1.2.3.25
+    subdir=project
+    init=ln -s ../../OpenMSX/ openmsx && \
+        sed -ri 's/ant debug|ant release/exit/' ../build.sh && \
+        find -regex ".+\.\(a\|dll\|so\|exe\|lib\)" -type f -delete && \
+        cd jni && \
+        rm -rf android/ ffmpeg/ avcodec/ python/ boost* ../themes/converter/converter
+    update=no
+    srclibs=OpenMSX@728325a472
+    patch=tcl.patch
+    scanignore=project/jni/tcl8.5
+    build=export SDL_ANDROID_PORT_PATH=`readlink -f ..` && \
+        cd openmsx/build/android && \
+        sed 's/android-15/android-17/' -i setup_anddev.sh && \
+        ./setup_anddev.sh && \
+        cd ../../../ && \
+        sed -ri 's/(debuggable)="true"/\1="false"/' AndroidManifest.xml && \
+        cd openmsx/build/android/openmsx && \
+        declare -rx VERSION_NAME=0.9.1-584 && \
+        ./launch_anddev_build.sh
+    buildjni=no
 
 Auto Update Mode:None
 # Tags and AndroidManifest are unusable. See http://openmsx.fixato.net/builds/android/
