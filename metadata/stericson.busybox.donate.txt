@@ -37,6 +37,7 @@ Repo Type:git-svn
 Repo:http://busybox-android.googlecode.com/svn/trunk
 
 Build:10.3,161
+    disable=build 162 instead
     commit=32
     subdir=app/Pro
     target=android-15
@@ -51,10 +52,27 @@ Build:10.3,161
            make CONFIG_SYSROOT="$$NDK$$/platforms/android-9/arch-arm" ARCH=arm ANDROID_NDK=$$NDK$$ && \
            mv busybox-git.arm/busybox ../Pro/assets/busybox1.21.1.png 
 
+Build:10.3.1,162
+    commit=37
+    subdir=deprecated/Pro
+    forceversion=yes
+    forcevercode=yes
+    target=android-15
+    srclibs=1:ViewPagerIndicator@8cd549;RootTools@3.4;BusyboxConfigs-linusyang@63dc
+    rm=binaries;patches;app;deprecated/Free;deprecated/Pro/assets
+    prebuild=mkdir assets && \
+        cp -r $$RootTools$$/src/com/ src/ && \
+        cp -r $$BusyboxConfigs-linusyang$$ ../BB && \
+        sed -i 's/darwin-x86_64/linux-x86/g;s/4.4.3/4.6/;/android_ndk_config-w-patches/d;s/#CONFIG_FILE/CONFIG_FILE/' ../BB/Makefile
+     build=cd ../BB && \
+           export PATH=$$NDK$$/toolchains/arm-linux-androideabi-4.6/prebuilt/linux-x86/bin:$PATH && \
+           make CONFIG_SYSROOT="$$NDK$$/platforms/android-9/arch-arm" ARCH=arm ANDROID_NDK=$$NDK$$ && \
+           mv busybox-git.arm/busybox ../Pro/assets/busybox1.21.1.png 
+
 Build:10.7,180
     commit=37
     subdir=application/Busybox
-    disable=busybox builds but java app isn't functional; need to rename busybox binaries sensibly so they are made available in the UI
+    disable=busybox builds but java app isn't functional; if building for multiple architectures, need to rename busybox binaries sensibly so they are made available in the UI
     forceversion=yes
     forcevercode=yes
     gradle=pro
@@ -70,7 +88,7 @@ Build:10.7,180
 
 Build:10.7,200
     commit=37
-    disable=using Tias repo:sed: invalid option -- 'D' -- 'z' after patching; need to rename busybox binaries sensibly so they are made available in the UI
+    disable=using Tias repo:sed: invalid option -- 'D' -- 'z' after patching; if building for multiple architectures, need to rename busybox binaries sensibly so they are made available in the UI
     forceversion=yes
     forcevercode=yes
     subdir=application/Busybox
@@ -94,19 +112,23 @@ Build:10.7,200
 Maintainer Notes:
 The Java app is hard to figure out as things keep moving around and there are 
 no commit descriptions.
-It's now using gradle but it's half baked at time of writing.
+It's now using gradle but it's half baked at r40.
 
-Busybox x86 and MIPS hang for me with linusyang setup with stericson and basic configs.
+Busybox x86 and MIPS don't build for me with linusyang setup with stericson and basic configs.
 The Tias setup won't patch properly; maybe it's my version of sed.
 
-The busybox binary was tested with toolchain 4.6; I don't have toolchain 4.4.3 installed.
-So if it doesn't build just sed 4.6 in ../BB/Makefile.
+Recommended toolchain is 4.4.3, but f-droid doesn't have that.
 
 For 10.3 I just ripped out the prebuilts; it seems to be OK but somebody should verify.
+This is all I had to go on: https://f-droid.org/forums/topic/busybox-installer/page/2/#post-10075,
+but the source code is so messed up and the blobs are still there :\
+
+Could consider use of standalone toolchains for compatibility with older NDKs:
+https://github.com/cernekee/openconnect/commit/9df6672d7c80ceef2ed41
 .
 
 Auto Update Mode:None
 Update Check Mode:None
 Current Version:10.3
-Current Version Code:161
+Current Version Code:162
 
