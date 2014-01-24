@@ -1,4 +1,4 @@
-Categories:Internet
+Caategories:Internet
 License:GPLv2
 Web Site:http://code.google.com/p/ics-openvpn
 Source Code:http://code.google.com/p/ics-openvpn/source
@@ -83,21 +83,35 @@ Build:0.6.1,82
     buildjni=no
 
 Build:0.6.4,85
-    disable=binaries didn't get included in APK
     commit=v0.6.4
     gradle=yes
     prebuild=sed -i '/google-breakpad/d' jni/Android.mk && \
-        sed -i -e '/+=.*breakpad/d' -e 's/ [^ ]*breakpad[^ ]*//' openvpn/Android.mk && \
+        sed -i -e '/+=.*breakpad/d' -e 's/ [^ ]*breakpad[^ ]*//g' openvpn/Android.mk && \
         find openvpn/src -type f -print0 | xargs -0 sed -i '/breakpad/d' && \
         rm -f openvpn/src/openvpn/breakpad.*
     scandelete=assets
     build=echo WITH_BREAKPAD=0 >> jni/Android.mk && \
         sed -i 's/-j 8/-j 4/g' misc/build-native.sh && \
+        sed -e '/HAVE_CONFIG_VERSION_H/ d' -i openvpn/config.h && \
+        ./misc/build-native.sh
+    buildjni=no
+
+Build:0.6.5,86
+    commit=v0.6.5
+    gradle=yes
+    prebuild=sed -i '/google-breakpad/d' jni/Android.mk && \
+        sed -i -e '/+=.*breakpad/d' -e 's/ [^ ]*breakpad[^ ]*//g' openvpn/Android.mk && \
+        find openvpn/src -type f -print0 | xargs -0 sed -i '/breakpad/d' && \
+        rm -f openvpn/src/openvpn/breakpad.*
+    scandelete=assets
+    build=echo WITH_BREAKPAD=0 >> jni/Android.mk && \
+        sed -i 's/-j 8/-j 4/g' misc/build-native.sh && \
+        sed -e '/HAVE_CONFIG_VERSION_H/ d' -i openvpn/config.h && \
         ./misc/build-native.sh
     buildjni=no
 
 Auto Update Mode:Version v%v
 Update Check Mode:Tags
-Current Version:0.6.4
-Current Version Code:85
+Current Version:0.6.5
+Current Version Code:86
 
