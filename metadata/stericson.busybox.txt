@@ -1,0 +1,78 @@
+Categories:System
+License:Apache2
+Web Site:
+Source Code:https://github.com/Stericson/busybox-free
+Issue Tracker:https://github.com/Stericson/busybox-free/issues
+
+Auto Name:BusyBox Free
+Name:Busybox Installer
+Summary:System tools installer
+Description:
+Interface to install one version only of BusyBox (1.21.1) and its symlinks.
+For now, the binary is only for ARM architecture as the others couldn't be built.
+
+BusyBox combines tiny versions of many common UNIX utilities into a single
+small executable. It provides replacements for most of the utilities you
+usually find in GNU fileutils, shellutils, etc. 
+Android comes with a very limited multi-tool called Toolbox
+and sometimes it is crippled even more, so a standard Busybox is often needed
+by root apps that need to do different jobs.
+If you run a custom ROM you probably have most of the applets
+that you would ever need, though this binary has a few more.
+
+The range of applets 
+[https://raw2.github.com/linusyang/android-busybox-ndk/master/android_ndk_stericson-like available]
+isn't identical to the upstream version.
+Therefore, the applet manager doesn't have information about all the installed applets.
+.
+
+Requires Root:Yes
+
+Repo Type:git
+Repo:https://github.com/Stericson/busybox-free
+
+Build:10.9,157
+    commit=6c3dbbee
+    init=sed -i 's@\(reference.1=\).*@\1view_pager_JW@' project.properties 
+    target=android-18
+    rm=assets/busybox1.21.1.png;assets/busybox1.22.1.png;assets/reboot.png;build;out;view_pager_JW/build;RootTools.jar
+    srclibs=RootTools@3.4;BusyboxConfigs-linusyang@63dc
+    extlibs=toolbox
+    prebuild=cp -r $$RootTools$$/src/com/ src/ && \
+        sed -i 's/"Busybox 1.22.1", //g' src/stericson/busybox/Constants.java && \
+        mv libs/toolbox assets/toolbox.png && \
+        cp -r $$BusyboxConfigs-linusyang$$ BB && \
+        sed -i 's/darwin-x86_64/linux-x86/g;s/4.4.3/4.6/;/android_ndk_config-w-patches/d;s/#CONFIG_FILE/CONFIG_FILE/' BB/Makefile
+    scanignore=assets/toolbox.png
+    build=cd BB && \
+        export PATH=$$NDK$$/toolchains/arm-linux-androideabi-4.6/prebuilt/linux-x86/bin:$PATH && \
+        make CONFIG_SYSROOT="$$NDK$$/platforms/android-9/arch-arm" ARCH=arm ANDROID_NDK=$$NDK$$ && \
+        mv busybox-git.arm/busybox ../assets/busybox1.21.1.png 
+
+Maintainer Notes:
+Toolchain 4.4.3 is recommended but buildserver doesn't have access to that.
+Toolbox.png can stay in the apk under system library exception, but it's taken
+from my CM10.1 install to minimze use of developer's prebuilts.
+
+Todo: Make MIPS and x86 binaries and adapt the Java code so that they are made available for 
+      installation. Apparently, future (stericson-)upstream versions will include MIPS and x86.
+
+    disable=using Tias repo:sed: invalid option -- 'D' -- 'z' after patching; need to rename busybox binaries sensibly so they are made available in the UI
+    prebuild=sed -i 's/i686-android-linux/i686-linux-android/g;/android_ndk_config-w-patches/d;s/#CONFIG_FILE/CONFIG_FILE/' BB/Makefile
+    build=cd BB && \
+        export PATH=$$NDK$$/toolchains/arm-linux-androideabi-4.6/prebuilt/linux-x86/bin:$PATH && \
+        make CONFIG_SYSROOT="$$NDK$$/platforms/android-9/arch-arm" ARCH=arm ANDROID_NDK=$$NDK$$ && \
+        mv busybox-git.arm/busybox ../assets/busybox-1.21.0-ARM.png && \
+        export PATH=$$NDK$$/toolchains/x86-4.6/prebuilt/linux-x86/bin:$PATH && \
+        make CONFIG_SYSROOT="$$NDK$$/platforms/android-9/arch-x86" ARCH=x86 ANDROID_NDK=$$NDK$$ && \
+        mv busybox-git.x86/busybox ../assets/busybox-1.21.0-x86.png && \
+        export PATH=$$NDK$$/toolchains/mipsel-linux-android-4.6/prebuilt/linux-x86/bin:$PATH && \
+        make CONFIG_SYSROOT="$$NDK$$/platforms/android-9/arch-mips" ARCH=mips ANDROID_NDK=$$NDK$$ && \
+        mv busybox-git.mips/busybox ../assets/busybox-1.21.0-MIPS.png
+.
+
+Auto Update Mode:None
+Update Check Mode:RepoManifest
+Current Version:10.9
+Current Version Code:157
+
