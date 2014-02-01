@@ -6,7 +6,7 @@
 # alternate, backup method of verifying the download, but also greatly reduces
 # meta data leaks.
 
-for f in *.txt; do
+for f in metadata/*.txt; do
     printf `echo $f | cut -b1`
     sed -i 's,http://dl.google.com,https://dl.google.com,g' $f
     sed -i 's,http://pypi,https://pypi,g' $f
