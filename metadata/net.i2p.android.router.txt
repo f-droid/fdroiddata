@@ -1,6 +1,6 @@
 Categories:Security,Internet
 License:Apache2
-Web Site:http://i2p2.de
+Web Site:http://geti2p.com/
 Source Code:https://github.com/i2p
 Issue Tracker:http://trac.i2p2.de
 Bitcoin:1HkJCceXf7of1sTNRVJbXiZHfDTLL71Siy
@@ -14,10 +14,11 @@ applications can use to securely communicate. All data is wrapped with several
 layers of encryption, and the network is both distributed and dynamic, with no
 trusted parties.
 
+A new user interface will be published soon!
 WARNING - This is ALPHA SOFTWARE. Do not rely upon it for strong anonymity.
 
-For detailed information, security information, and usage examples see the [Release Notes http://zzz.i2p.us/topics/948]
 .
+
 
 Repo Type:git
 Repo:https://github.com/i2p/i2p.android.base.git
@@ -43,11 +44,13 @@ srclibs=I2P@d7c3ffa4def637f1c18dbd316f9e06093b113e09,update=no,patch=build.sh.pa
 	tar xjvf gmp-4.* -C ./i2p.i2p/core/c/jbigi/ && \
 	rm ./gmp-4.*
 
+
+
 Build:0.9.9-0_b1-API8,4737024
-    commit=97037fe1d88342807ea3179c552a7c49c6ce426c
-    srclibs=I2P@f8a54bde19d7a6b87c5c192dd9a45950e739242a
-    update=no
-    prebuild=\
+   commit=97037fe1d88342807ea3179c552a7c49c6ce426c
+   srclibs=I2P@f8a54bde19d7a6b87c5c192dd9a45950e739242a
+   update=no
+   prebuild=\
         sed -i '41s|#export NDK=$(realpath ../../android-ndk-r5b/)|export NDK=$$NDK$$|' ./routerjars/jni/build.sh && \
         sed -i '46,47d' ./routerjars/jni/build.sh && \
         cp -R $$I2P$$* ./i2p.i2p && \
@@ -68,14 +71,42 @@ Build:0.9.9-0_b1-API8,4737024
         tar xjvf gmp-4.* -C ./i2p.i2p/core/c/jbigi/ && \
         rm ./gmp-4.*
 
+
+Build:0.9.11-0_b1-API8,4741120
+   commit=d47bdf85d20d406c3b6bfaa85500a48381343c40
+   srclibs=I2P@2e918904010d8acd91c9686ef259155d4b5315b3
+   update=no
+   prebuild=\
+        sed -i '41s|#export NDK=$(realpath ../../android-ndk-r5b/)|export NDK=$$NDK$$|' ./routerjars/jni/build.sh && \
+        sed -i '46,47d' ./routerjars/jni/build.sh && \
+        cp -R $$I2P$$* ./i2p.i2p && \
+        echo -e "\nsdk.dir=$$SDK$$" >> ./local.properties && \
+        echo -e "\nsdk.dir=$$SDK$$" >> ./routerjars/local.properties && \
+        echo -e "\nndk.dir=$$NDK$$" >> ./routerjars/local.properties && \
+        echo -e "\ni2psrc=./i2p.i2p" >> ./local.properties && \
+        rm -R ./i2p.i2p/installer/lib/jbigi/* &&\
+        rm -R ./i2p.i2p/installer/lib/wrapper/* && \
+        rm -R ./i2p.i2p/installer/lib/launch4j/bin* && \
+        rm -R ./i2p.i2p/installer/lib/launch4j/w32api* && \
+        rm -R ./routerjars/jni/libjbigi.so && \
+        cp -R $$SDK$$/extras/android/support/v7/appcompat/ appcompat/ && \
+        echo -e "\nandroid.library.reference.2=./appcompat/" >> ./local.properties && \
+        $$SDK$$/tools/android update lib-project --path ./appcompat/ && \
+        echo -e "\ni2psrc=./../i2p.i2p" >> ./routerjars/local.properties && \
+        wget ftp://ftp.gmplib.org/pub/gmp-4.3.2/gmp-4.3.2.tar.bz2 && \
+        tar xjvf gmp-4.* -C ./i2p.i2p/core/c/jbigi/ && \
+        rm ./gmp-4.*
+
+
 # Android version code is an integer. So we have 31 bits.
 # MAJOR         4 bits 0-15
 # MINOR         8 bits 0-255
 # RELEASE       8 bits 0-255
 # ROUTERBUILD   7 bits 0-127
 # ANDROIDBUILD  4 bits 0-15
+# see custom_rules.xml
+# increment build number, for updates between router releases.
 
 Auto Update Mode:None
 Update Check Mode:None
-Current Version:0.9.9
-Current Version Code:4737024
+
