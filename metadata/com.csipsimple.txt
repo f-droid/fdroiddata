@@ -1,4 +1,3 @@
-Disabled:Need to build recent version from source
 Categories:Phone & SMS
 License:GPLv3
 Web Site:https://code.google.com/p/csipsimple
@@ -17,26 +16,33 @@ Description:
 * Fancy UI
 * Many codecs (HD codecs, optimized codecs)
 * Supported crypto : TLS for SIP and SRTP/ZRTP for media
-* Themes.
+* Themes
 
-N.B This apk is form ARMv7 only. Other ABIs are available from the website
+This build doesn't include SILK (Skype) support.
 .
 
 Repo Type:git-svn
-Repo:https://csipsimple.googlecode.com/svn/branches/stable-01.00
+Repo:https://csipsimple.googlecode.com/svn/trunk
 
-# svn update to different revision will break repo so may as well use the stable branch
-# Requires quilt and swig as described here: https://code.google.com/p/csipsimple/wiki/HowToBuild
-# See https://code.google.com/p/csipsimple/issues/detail?id=2035 for more
-# Contains bash scripts ; Dexclassloaders in webrtc source
-# Docs say package name can be changed by renaming it in Manifest!
-# Probably should be patched to fix path problems in the various Makefiles
-Build Version:1.00.00,2200,!WIP at 2236,\
-srclibs=ActionBarSherlock@4.2.0,prebuild=\
-sed -i 's/com.csipsimple/org.fdroid.csipsimple/g' AndroidManifest.xml && \
-sed -i 's@\(reference.1=\).*@\1$$ActionBarSherlock$$@' project.properties,build=\
-make SWIG=swig ANDROID_NDK=$$NDK$$ ANDROID_SDK=$$SDK$$,buildjni=no
+Build:1.02.00,2353
+    disable=patches to pjsip don't apply
+    commit=2354
+    subdir=CSipSimple
+    prebuild=sed -i 's/MY_USE_SILK := 1/MY_USE_SILK := 0/' jni/Application.mk && \
+        sed -i 's/ silk//' Makefile && \
+        sed -i '/silk/d' jni/Android.mk
+    build=make SWIG=swig ANDROID_NDK=$$NDK$$ ANDROID_SDK=$$SDK$$
+    buildjni=no
+    scanignore=CSipSimple/src/org/webrtc/videoengine/VideoCaptureDeviceInfoAndroid.java
+
+Maintainer Notes:
+DexClassLoader used to load htc front-facing camera jar on HTC Evo devices.
+Does not break the app on other devices nor on HTC Evo devices that don't have
+the jar shipped with the device from HTC.
+.
 
 Auto Update Mode:None
-Update Check Mode:Static
+Update Check Mode:RepoManifest
+Current Version:1.02.00
+Current Version Code:2353
 
