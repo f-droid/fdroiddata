@@ -114,6 +114,7 @@ Build:1.1.4,286
     commit=1.1.4
     disable=blobs in jni
     srclibs=RootTools@1.7;iptables@android-4.2.2_r1
+    scanignore=jni/v8
     prebuild=rm libs/RootTools-1.7.jar && \
         cp -r $$iptables$$ . && \
         echo "source.dir=src;$$RootTools$$/src" >> ant.properties && \
@@ -129,16 +130,23 @@ Build:1.2,307
     commit=1.2
     disable=blobs in jni
     srclibs=RootTools@1.7
+    scanignore=jni/v8
     extlibs=iptables-script_1.4.20.zip
     rm=buildtools;libs/RootTools-1.7.jar;assets/install/iptables
     prebuild=sed -i 's/android-7/android-8/' build.xml && \
         echo "source.dir=src;$$RootTools$$/src" >> ant.properties && \
+	echo "ndk.dir=$$NDK$$" >> local.properties && \
         unzip libs/iptables-script_1.4.20.zip && \
         sed -i 's/arm x86 mips/arm/g' external/Makefile && \
         rm libs/iptables-script_1.4.20.zip
     build=make -C external NDK=$$NDK$$ && \
           mv external/iptables_arm assets/install/iptables
     buildjni=no
+
+Maintainer Notes:
+We should really be rebuilding the libraries in jni/v8 (they're from the
+platform) to verify them properly.
+.
 
 Auto Update Mode:None
 Update Check Mode:Tags
