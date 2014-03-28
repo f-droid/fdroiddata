@@ -1,0 +1,71 @@
+diff --git a/.gitignore b/.gitignore
+index 4824f92..f3fb750 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -1,16 +1,11 @@
+-external/bin/
+-external/include/
+-external/jtorctl-build-stamp
+-external/lib/
+-external/libevent-build-stamp
+-external/obfsproxy-build-stamp
+-external/openssl-static-build-stamp
+-external/privoxy-build-stamp
+-external/privoxy/
+-external/test.c
+-external/test.h.gch
+-external/tor-build-stamp
+-external/translation/
++/external/bin/
++/external/include/
++/external/*-build-stamp
++/external/lib/
++/external/privoxy/
++/external/test.c
++/external/test.h.gch
++/external/translation/
+ bin
+ gen
+ native
+diff --git a/external/Makefile b/external/Makefile
+index 71b2a73..4be749e 100644
+--- a/external/Makefile
++++ b/external/Makefile
+@@ -81,17 +81,15 @@ all: assets
+ 
+ lib/libcrypto.a:
+ 	cd openssl && \
+-		CC="$(CC)" \
+ 		./Configure android -DL_ENDIAN && \
+-		ANDROID_DEV=$(NDK_BASE)/platforms/android-8/arch-arm/usr make build_libs
++		make CC="$(CC)" ANDROID_DEV=$(NDK_BASE)/platforms/android-8/arch-arm /usr build_libs
+ 
+ lib/libssl.a:
+ 	cp config.sub openssl
+ 	cp config.guess openssl
+ 	cd openssl && \
+-		CC="$(CC)"\
+ 		./Configure android -DL_ENDIAN && \
+-		ANDROID_DEV=$(NDK_BASE)/platforms/android-8/arch-arm/usr make build_libs
++		make CC="$(CC)" ANDROID_DEV=$(NDK_BASE)/platforms/android-8/arch-arm /usr build_libs
+ 
+ openssl-build-stamp: lib/libcrypto.a lib/libssl.a
+ 	touch openssl-build-stamp
+@@ -115,6 +113,8 @@ openssl-clean:
+ # libevent
+ 
+ libevent/Makefile:
++	sed -i 's@\(SUBDIRS = . include\) sample test@\1@' libevent/Makefile.am
++	sed -i 's@\(AC_OUTPUT(Makefile include/Makefile\) test/Makefile sample/Makefile)@\1)@' libevent/configure.in
+ 	cd libevent && ./autogen.sh
+ 	cp config.sub libevent
+ 	cp config.guess libevent
+@@ -125,7 +125,7 @@ libevent/Makefile:
+ 				--disable-shared
+ 
+ libevent-build-stamp: libevent/Makefile
+-	$(MAKE) -C libevent
++	$(MAKE) -C libevent ./include/event2/event-config.h all-am
+ 	touch libevent-build-stamp
+ 
+ libevent: openssl libevent-build-stamp
