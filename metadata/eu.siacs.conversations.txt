@@ -21,24 +21,39 @@ Noteable XEPs:
 * XEP-0198: Stream Management
 * XEP-0280: Message Carbons
 * XEP-0237: Roster Versioning
+
+This app uses precompiled binary libraries verified to match their
+upstream hashes.
 .
 
 Repo Type:git
 Repo:https://github.com/siacs/Conversations.git
 
 Build:0.1.3,9
-    srclibs=Otr4j-jitsi@6d879761605dba48c80c0d3f44a6555b522d0c2e,BouncyCastle@r1rv50
+    srclibs=Otr4j-jitsi@33d95bb3710986d048fb4cbe42dc991f9ddd9de2,BouncyCastle@r1rv50
     commit=0.1.3
     submodules=yes
-    rm=libs/*jar
-    prebuild=pushd $$BouncyCastle$$ && gradle jar && popd && cp $$BouncyCastle$$/prov/build/libs/* libs/ && cp -r $$Otr4j-jitsi$$/src/main src/
+    rm=libs/android-support-v4.jar
+    extlibs=android/android-support-v4.jar
+    scanignore=libs/otr4j-0.10.jar,libs/bcprov-jdk15on-150.jar
 
 Maintainer Notes:
-    prebuild=pushd libs && rm android-support-v4.jar bcprov-jdk15on-150.jar && \
-        git clone https://github.com/bcgit/bc-java.git && pushd bc-java && \
-        gradle jar && cp prov/build/libs/* ../ && popd && rm -fR bc-java && popd
 
-(Note: don't run git clone manually, use another srclib)
+This app uses precompiled open-source jars that have been verified to
+match hashes from upstream. 
+
+HASHES MUST BE RE-CHECKED ON CHANGE!
+
+However, we should built thoses jars from sourc asap, like:
+
+    rm=libs/android-support-v4.jar,libs/otr4j-0.10.jar,libs/bcprov-jdk15on-150.jar
+    prebuild=pushd $$BouncyCastle$$ && gradle jar && popd && cp $$BouncyCastle$$/prov/build/libs/* libs/ && \
+         cp -r $$Otr4j-jitsi$$/src/main src/
+
+Commits for otr4j:
+otr4j-0.10 33d95bb3710986d048fb4cbe42dc991f9ddd9de2
+otr4j-HEAD 6d879761605dba48c80c0d3f44a6555b522d0c2e
+
 .
 
 Auto Update Mode:None
