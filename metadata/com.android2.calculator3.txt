@@ -73,46 +73,32 @@ Build:v3.4.2,49
     target=android-17
 
 Build:4.3,63
-    disable=testing
     commit=7ad3de71422a75b7c3865835b53cf1f6ca64a6ce
     subdir=Calculator
     patch=glassless-manifest.patch
     gradle=yes
     srclibs=EJML@v0.25,Google-Gson@gson-2.2.4,Slider@00020deb7fa5499bb33cc4471af2bd5256d10e78,ArityXlythe@459535ba5005c6f3a03101b15354e44df161a637
-    rm=Calculator/libs/slider.jar,Calculator/libs/ejml*jar,Calculator/libs/gson*jar,Calculator/libs/wearable-preview-support.jar,Calculator/libs/gdk.jar,Calculator/libs/arity-2.1.6.jar
-    prebuild=pushd $$EJML$$ && \
-        $$MVN3$$ package && \
-        popd && \
-        cp $$EJML$$/target/ejml-0.25.jar libs/ && \
-        pushd $$Google-Gson$$ && \
-        $$MVN3$$ package && \
-        popd && \
-        cp $$Google-Gson$$/target/gson-2.2.4.jar libs/ && \
-        pushd $$Slider$$ && \
-        android update project -p ./ && \
-        ant release && \
-        popd && \
-        cp $$Slider$$/bin/classes.jar libs/slider.jar && \
-        pushd $$ArityXlythe$$ && \
-        rm -fR bin && \
-        mkdir bin && \
-        find -name "*.java" > sources.txt && \
-        javac -d bin @sources.txt && \
-        cd bin && \
-        jar cf arity.jar org && \
-        popd && \
-        cp $$ArityXlythe$$/bin/arity.jar libs/ && \
-        echo cp $$SDK$$/add-ons/addon-google_gdk-google-19/libs/gdk.jar libs/ && \
-        rm src/main/java/com/android2/calculator3/GlassHomeActivity.java src/main/java/com/android2/calculator3/GlassResultActivity.java
+    rm=Calculator/libs/*jar
+    prebuild=pushd $$EJML$$ && $$MVN3$$ package && popd && \
+        pushd $$Google-Gson$$ && $$MVN3$$ package && popd && \
+        pushd $$Slider$$ && android update project -p ./ && ant release && popd && \
+        pushd $$ArityXlythe$$ && rm -fR bin/* && find -name "*.java" > sources.txt && \
+        javac -d bin @sources.txt && cd bin && jar cf arity.jar org && popd && \
+        rm src/main/java/com/android2/calculator3/GlassHomeActivity.java src/main/java/com/android2/calculator3/GlassResultActivity.java && \
+        cp $$EJML$$/target/ejml-0.25.jar $$Google-Gson$$/target/gson-2.2.4.jar $$Slider$$/bin/classes.jar $$ArityXlythe$$/bin/arity.jar libs/
 
 Maintainer Notes:
-* REPLACED gson-2.2.4.jar with source-build 2.2.4 from upstream.
-* REPLACED ejml-0.21.jar with source-build 0.25 from upsteam.
-* REPLACED arity-2.1.6.jar with source-build from app author as upstream is no longer available.
-# REPLACED gdk.jar with file from Android Glass Development Kit.
-* REMOVED gdk.jar and removed references from source.
-* REPLACED slider.jar with source-build latest from upstream
-* REMOVED wearable-preview-support.jar -- builds, but does it run?
+The JAR files slider.jar, gson-2.2.4.jar and ejml-0.21.jar have been replaced
+by a version build from upstream sources. As arity-2.1.6.jar is no longer
+available from upstream, it has been replaced by a repo-copy of the author
+of this app.
+
+Google's Glass Development Kit is currently not available under a free license,
+so $$SDK$$/add-ons/addon-google_gdk-google-19/libs/gdk.jar cannot be used. It
+hhas been removed and the code has been patched to not use it.
+
+Google's wearable-preview-support.jar is currently not available under a free
+license. It seems like it's not used in this version, so it has been removed.
 .
 
 Auto Update Mode:None
