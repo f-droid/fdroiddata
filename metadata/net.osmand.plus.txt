@@ -1,3 +1,4 @@
+AntiFeatures:Tracking
 Categories:Navigation
 License:GPLv3
 Web Site:http://osmand.net
@@ -13,7 +14,7 @@ which include online maps from many sources, tracking, OSM editing and
 accessibility enhancements.
 
 Map data of both vector and raster types can be stored on the phone memory
-card for offline usage, and navigation by default uses offline methods.  Map
+card for offline usage, and navigation by default uses offline methods. Map
 data packages for many territories can be downloaded from within the app and
 there is a desktop program available on the website as well for creating your
 own.
@@ -97,28 +98,35 @@ Repo:https://github.com/mvdan/OsmAnd-submodules
 #        zip -d libs/OsmAndMapCreator.jar net/osmand/LogUtil.class && \
 #        cp -r ../DataExtractionOSM/build/lib/ libs/
 #    buildjni=yes
-Build:1.6.5,165
-    disable=WIP
-    commit=1.6.5
+
+Build:1.7.5,175
+    disable=rendering fails for some reason, see maintainer notes.
+    commit=f4407c708f1bba2455c600855e65e879b2f45d3e
     subdir=android/OsmAnd
     submodules=yes
-    init=rm -f ../SherlockBar/build.xml build.xml
     forcevercode=yes
-    patch=analytics_165.diff
-    prebuild=sed -i 's/app_version">[^<]*/app_version">1.6.5/' res/values/no_translate.xml && \
-        echo -e 'NDK_TOOLCHAIN_VERSION := 4.8\nAPP_ABI := armeabi armeabi-v7a x86 mips\nOSMAND_SKIP_NEON_SUPPORT := false\nOSMAND_FORCE_NEON_SUPPORT := false\nAPP_OPTIM := release' >> jni/Application.mk
-    build=sed -i 's/EXTERNAL_DEPENDENCIES=(/EXTERNAL_DEPENDENCIES=(boost-android /' full-ndk-build.sh && \
-        ./full-ndk-build.sh && \
+    init=rm -f ../SherlockBar/build.xml build.xml
+    prebuild=for dpi in mdpi hdpi xhdpi; do for icon in h_arrow mx_user_defined; do cp ../../resources/rendering_styles/style-icons/drawable-$dpi/$icon.png res/drawable-$dpi/$icon.png; done; done && \
+        sed -i 's/app_version">[^<]*/app_version">1.7.5/' res/values/no_translate.xml
+    build=./full-ndk-build.sh && \
         ant jar native-libs -f ../../tools/OsmAndMapCreator/build.xml && \
-        ant build -f ../OsmAnd-java/build.xml
+        ant build -f ../OsmAnd-java/build.xml && \
+        mv ../OsmAnd-java/OsmAnd-core-* libs/
     buildjni=no
 
 Maintainer Notes:
 No UCMs apply because git never contains actual releases, only pre-releses.
+
+Rendering failure log:
+    E/net.osmand(25914): MapRenderRepositories Runtime memory exception
+    E/net.osmand(25914): java.lang.NullPointerException
+    E/net.osmand(25914):    at net.osmand.render.RenderingRuleSearchRequest.<init>(RenderingRuleSearchRequest.java:24)
+    E/net.osmand(25914):    at net.osmand.plus.render.MapRenderRepositories.loadMap(MapRenderRepositories.java:579)
+    E/net.osmand(25914):    at net.osmand.plus.resources.AsyncLoadingThread.run(AsyncLoadingThread.java:126)
 .
 
 Auto Update Mode:None
 Update Check Mode:None
-Current Version:1.6.5
-Current Version Code:165
+Current Version:1.7.5
+Current Version Code:175
 
