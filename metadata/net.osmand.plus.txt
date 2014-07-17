@@ -6,7 +6,7 @@ Source Code:https://github.com/osmandapp/Osmand
 Issue Tracker:https://github.com/osmandapp/Osmand/issues
 Donate:https://code.google.com/p/osmand/#Please_support_the_project
 
-Auto Name:OsmAnd~
+Name:OsmAnd~
 Summary:Offline/online maps and navigation
 Description:
 Osmand~'s features can be extended by enabling the plugins via the settings,
@@ -99,34 +99,22 @@ Repo:https://github.com/mvdan/OsmAnd-submodules
 #        cp -r ../DataExtractionOSM/build/lib/ libs/
 #    buildjni=yes
 
-Build:1.7.5,175
-    disable=rendering fails for some reason, see maintainer notes.
-    commit=f4407c708f1bba2455c600855e65e879b2f45d3e
+Build:1.8.2,182
+    commit=76ada6c8a08afe69acb755503373ac36328ef665
     subdir=android/OsmAnd
     submodules=yes
-    forcevercode=yes
-    init=rm -f ../SherlockBar/build.xml build.xml
-    prebuild=for dpi in mdpi hdpi xhdpi; do for icon in h_arrow mx_user_defined; do cp ../../resources/rendering_styles/style-icons/drawable-$dpi/$icon.png res/drawable-$dpi/$icon.png; done; done && \
-        sed -i 's/app_version">[^<]*/app_version">1.7.5/' res/values/no_translate.xml
-    build=./full-ndk-build.sh && \
-        ant jar native-libs -f ../../tools/OsmAndMapCreator/build.xml && \
-        ant build -f ../OsmAnd-java/build.xml && \
-        mv ../OsmAnd-java/OsmAnd-core-* libs/
+    output=bin/OsmAnd-release-unsigned.apk
+    prebuild=sed -i 's/"OsmAnd+"/"OsmAnd~"/g' build.xml
+    build=./old-ndk-build.sh && \
+        ant -Dsdk.dir="$ANDROID_SDK" -Dndk.dir="$ANDROID_NDK" -DBLACKBERRY_BUILD=false -DBUILD_SUFFIX= -DAPK_NUMBER_VERSION=182 "-DFEATURES=+play_market +gps_status -parking_plugin -blackberry -amazon -route_nav" -DCLEAN_CPP=false -DPACKAGE_TO_BUILT=net.osmand.plus -DAPK_VERSION=1.8.2 -Dnet.osmand.plus= -Dbuild.version=1.8.2 -Dbuild.version.code=182 -Dnativeoff=false "-DversionFeatures=+play_market +gps_status -parking_plugin -blackberry -amazon -route_nav" clean release
     buildjni=no
 
 Maintainer Notes:
 No UCMs apply because git never contains actual releases, only pre-releses.
-
-Rendering failure log:
-    E/net.osmand(25914): MapRenderRepositories Runtime memory exception
-    E/net.osmand(25914): java.lang.NullPointerException
-    E/net.osmand(25914):    at net.osmand.render.RenderingRuleSearchRequest.<init>(RenderingRuleSearchRequest.java:24)
-    E/net.osmand(25914):    at net.osmand.plus.render.MapRenderRepositories.loadMap(MapRenderRepositories.java:579)
-    E/net.osmand(25914):    at net.osmand.plus.resources.AsyncLoadingThread.run(AsyncLoadingThread.java:126)
 .
 
 Auto Update Mode:None
 Update Check Mode:None
-Current Version:1.7.5
-Current Version Code:175
+Current Version:1.8.2
+Current Version Code:182
 
