@@ -27,6 +27,7 @@ Repo Type:git
 Repo:https://github.com/siacs/Conversations.git
 
 Build:0.1.3,9
+    disable=prebuild jars
     commit=0.1.3
     submodules=yes
     srclibs=Otr4j-jitsi@33d95bb3710986d048fb4cbe42dc991f9ddd9de2,BouncyCastle@r1rv50
@@ -130,13 +131,25 @@ Build:0.4.1,19
         cp $$Otr4j-jitsi$$/target/otr4j-0.10.jar libs/
     scanignore=libs/otr4j-0.10.jar,libs/bcprov-jdk15on-150.jar
 
-Maintainer Notes:
-0.1.3 should be disabled some time after source-built 0.2.1 is deployed and
-known-good.
-.
+Build:0.5-beta,20
+    disable=builds fine, but pre-release
+    commit=0.5-beta
+    submodules=yes
+    srclibs=Otr4j-jitsi@30fbaea9388616b268de82be0267acf2441b218b,BouncyCastle@r1rv50
+    rm=libs/bcprov-jdk15on-150.jar,libs/otr4j-0.10.jar
+    prebuild=pushd $$BouncyCastle$$ && \
+        ant -f ant/jdk15+.xml build-provider && \
+        popd && \
+        cp $$BouncyCastle$$/build/artifacts/jdk1.5/jars/bcprov-jdk15on-150.jar libs/ && \
+        pushd $$Otr4j-jitsi$$ && \
+        $$MVN3$$ clean && \
+        $$MVN3$$ package && \
+        popd && \
+        cp $$Otr4j-jitsi$$/target/otr4j-0.10.jar libs/
+    scanignore=libs/otr4j-0.10.jar,libs/bcprov-jdk15on-150.jar
 
 Auto Update Mode:None
 Update Check Mode:Tags
-Current Version:0.4.1
-Current Version Code:19
+Current Version:0.5-beta
+Current Version Code:20
 
