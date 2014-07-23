@@ -24,20 +24,22 @@ This build doesn't include SILK (Skype) support.
 .
 
 Repo Type:git-svn
-Repo:https://csipsimple.googlecode.com/svn/trunk
+Repo:https://csipsimple.googlecode.com/svn/trunk/CSipSimple
 
-Build:1.02.00-2423,2423
-    disable=build broken at an early stage
-    commit=2423
-    subdir=CSipSimple
+Build:1.02.01-2417,2417
+    commit=2418
     forceversion=yes
-    forcevercode=yes
+    srclibs=codec2-dev@1486,pjsip@4862,portaudio@1433,webrtc@2948,libyuv@426,1:ActionBarSherlock@4.1.0
     prebuild=sed -i 's/MY_USE_SILK := 1/MY_USE_SILK := 0/' jni/Application.mk && \
         sed -i 's/ silk//' Makefile && \
-        sed -i '/silk/d' jni/Android.mk
-    scanignore=CSipSimple/jni/webrtc/sources/modules/video_capture/main/source/android/java/org/webrtc/videoengine/VideoCaptureDeviceInfoAndroid.java,CSipSimple/src/org/webrtc/videoengine/VideoCaptureDeviceInfoAndroid.java
-    scandelete=CSipSimple/obj,CSipSimple/libs
-    build=make SWIG=swig
+        sed -i '/silk/d' jni/Android.mk && \
+        ln -s $(readlink -f $$codec2$$) jni/codec2/sources && \
+        ln -s $(readlink -f $$pjsip$$) jni/pjsip/sources && \
+        ln -s $(readlink -f $$portaudio$$) jni/pjsip/sources/third_party/portaudio && \
+        ln -s $(readlink -f $$webrtc$$) jni/webrtc/sources && \
+        ln -s $(readlink -f $$libyuv$$) jni/third_party/libyuv
+    scanignore=jni/webrtc/sources/modules/video_capture/main/source/android/java/org/webrtc/videoengine/VideoCaptureDeviceInfoAndroid.java,src/org/webrtc/videoengine/VideoCaptureDeviceInfoAndroid.java
+    build=make
     buildjni=no
 
 Maintainer Notes:
@@ -45,11 +47,11 @@ DexClassLoader used to load htc front-facing camera jar on HTC Evo devices.
 Does not break the app on other devices nor on HTC Evo devices that don't have
 the jar shipped with the device from HTC.
 
-No UCM applies since no tags are used and version bumps are for nightlies.
+To get the srclib revisions, run 'git svn show-externals'. One is nested inside pjsip.
 .
 
 Auto Update Mode:None
-Update Check Mode:None
-Current Version:1.01.00
-Current Version Code:2336
+Update Check Mode:RepoManifest
+Current Version:1.02.01
+Current Version Code:2417
 
