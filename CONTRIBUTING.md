@@ -3,12 +3,11 @@
 Thanks so much for contributing to [F-Droid](https://f-droid.org)! Please take your time to read carefully through this document:
 
 ## Issue Tracker
+Please note that the tracker is not for app submissions, use the [submission queue](https://f-droid.org/forums/forum/submission-queue/) instead.
 
-The issue tracker is used both for app submissions and problem reports.
+For error reports please provide detailed system (e.g. Android version, used ROM, hardware specifications) and error information (e.g. What happened? When did it happen?) and provide the [logcat](https://developer.android.com/tools/help/logcat.html) -- either by file upload or by inclduing it with the appropriated [markdown](https://github.com/gitlabhq/gitlabhq/blob/master/doc/markdown/markdown.md).
 
-For the latter one please provide detailed system (e.g. Android version, used ROM, hardware specifications) and error information (e.g. What happened? When did it happen?) and provide the [logcat](https://developer.android.com/tools/help/logcat.html) -- either by file upload or by inclduing it with the appropriated [markdown](https://github.com/gitlabhq/gitlabhq/blob/master/doc/markdown/markdown.md).
-
-For submissions or update/change requests, please make sure they meet our [inclusion policy](https://f-droid.org/wiki/page/Inclusion_Policy) and are not already handled by our [submission queue](https://f-droid.org/forums/forum/submission-queue/) (or are [held](https://f-droid.org/forums/forum/submission-held/) for some reason). Keep discussions to a minimum or use the forum instead.
+For update/change requests, please make sure they meet our [inclusion policy](https://f-droid.org/wiki/page/Inclusion_Policy) and are not already handled by our [submission queue](https://f-droid.org/forums/forum/submission-queue/) (or are [held](https://f-droid.org/forums/forum/submission-held/) for some reason). Keep discussions to a minimum or use the forum instead.
 
 However, the easiest way to get an app included, updated or an error fixed is to provide the required metadata yourself by opening a merge request.
 
