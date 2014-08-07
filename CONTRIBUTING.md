@@ -18,10 +18,7 @@ Please read through the [inclusion howto](https://f-droid.org/wiki/page/Inclusio
 This section includes some information on the fdroidserver repository as the tools contained in there can be used standalone to check and build local metadata files.
 
 ### Setting up fdroidserver and build tools
-* Install [dependencies](https://gitlab.com/fdroid/fdroidserver/blob/master/buildserver/cookbooks/fdroidbuild-general/recipes/default.rb).
-* Clone the [fdroidserver repo](https://gitlab.com/fdroid/fdroidserver/).
-* Of course you also need to have the [Android SDK](https://developer.android.com/sdk/) and the [Android NDK](https://developer.android.com/tools/sdk/ndk/) installed, upated and in your PATH environment variable.
-* For gradle, you should download [recent and older versions](http://www.gradle.org/downloads) and set them up via [our gradle wrapper](https://gitlab.com/fdroid/fdroidserver/tree/master/buildserver/cookbooks/gradle/recipes).
+* Follow the instructions in [the manual](https://f-droid.org/manual)
 
 ### Setting up fdroiddata and submitting apps
 * [Register on GitLab](http://gitlab.com)
