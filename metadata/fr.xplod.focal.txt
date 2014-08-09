@@ -7,23 +7,62 @@ Issue Tracker:https://github.com/xplodwild/android_packages_apps_Focal/issues
 Auto Name:Focal
 Summary:Advanced camera
 Description:
-Advanced camera with Photosphere replacement.
+Focal is a fully featured camera app looking to provide the most features on
+the most phones possible, including device-specific features on some devices.
+
+*** THIS IS BETA: It has high chances of NOT WORKING PROPERLY - Instead of
+rating 1-star because something doesn't work, just WAIT FOR AN UPDATE - This
+is FREE! If it doesn't work on your device then REPORT THE BUG, then WAIT AND
+SEE -- If you don't want to test it, don't install it. ***
+
+It features:
+- A photo and video mode, supporting many features (burst mode, timer mode,
+	scene mode, shutter speed on Sony devices, ...)
+- A panorama mode, currently semi-broken
+- A PicSphere mode, open-source replacement of Google's PhotoSphere, to do
+	360° sphere shots
+- A review drawer, by sliding from the top of the screen (in portrait). It
+	shows your latest pictures.
+
+In photo mode, you also have access to a few tools, such as automatic
+picture enhancement (auto-awesome), or a rule of thirds overlay. On some
+devices, settings such as Color adjustment, HDR and a manual light measure
+point are also available. Double tapping the screen will put your in quick
+shot mode, where tapping the screen anywhere will take a picture.
+In video mode, high-framerate video is also possible.
+
 .
 
 Repo Type:git
 Repo:https://github.com/xplodwild/android_packages_apps_Focal.git
 
 Build:1.0-37a5749f31,8
-    disable=binaries
     commit=d9cc873f3aa67ec26738cd000e9e17b5e87c8709
-    target=android-19
-    srclibs=Focal@29840057bf8912c854750f1bf5d9737341df2c86
+    srclibs=MetadataExtractor@8ad9693,Xmp@004d494,AndroidFocal@2984005
+    rm=assets,libs
+    extlibs=android/android-support-v4.jar
+    target=android-18
+    build=pushd $$MetadataExtractor$$ && \
+        sed -i 's/name="dist-binaries" depends="clean, compile, test"/name="dist-binaries" depends="clean, compile"/g' build.xml && \
+        sed -i '/delete file="${bin-jar}"/d' build.xml && \
+        ant dist-binaries && \
+        popd && \
+        pushd $$Xmp$$ && \
+        gradle jar && \
+        popd && \
+        pushd $$AndroidFocal$$ && \
+        sed -i '/__android_log_print (pri, log_domain == NULL ? "GLib-NULL"/d' glib/glib/gmessages.c && \
+        $$NDK$$/ndk-build && \
+        popd && \
+        mkdir -p assets/picsphere libs && \
+        cp $$MetadataExtractor$$/Releases/metadata-extractor-2.6.4.jar libs/ && \
+        cp $$Xmp$$/build/libs/Xmp.jar libs/xmpcore.jar && \
+        for f in assets/libxmptoolkit.so assets/libpopen_helper_jni.so assets/libjni_mosaic2.so assets/libxmphelper_jni.so assets/picsphere/libvigraimpex.so assets/picsphere/enfuse assets/picsphere/nona assets/picsphere/libjpeg.so assets/picsphere/pano_modify assets/picsphere/ptclean assets/picsphere/libglib-2.0.so assets/picsphere/cpfind assets/picsphere/libpano13.so assets/picsphere/libgmodule-2.0.so assets/picsphere/pto_gen assets/picsphere/align_image_stack assets/picsphere/libgobject-2.0.so assets/picsphere/tiffinfo assets/picsphere/autooptimiser assets/picsphere/pto_var assets/picsphere/libtiffdecoder.so assets/picsphere/libgthread-2.0.so assets/picsphere/libtiff.so assets/picsphere/libexiv2.so assets/picsphere/multiblend; do cp $$AndroidFocal$$/libs/armeabi-v7a/$(basename $f) $f; done
 
-Maintainer Notes:
-Source for prebuilt libraries should be in the srclib, just 
-have to be merged and build...
-.
-
+# Maintainer Notes:
+# Here go the notes to take into account for future updates, builds, etc.
+# Will be published in the wiki if present.
+# .
 Auto Update Mode:None
 Update Check Mode:RepoManifest
 Current Version:1.0-37a5749f31
