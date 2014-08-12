@@ -32,14 +32,15 @@ THIS IS A DEVELOPMENT BUILD -- DO NOT INSTALL
 Build:31.0,2014071712
     commit=FENNEC_31_0_RELEASE
     prebuild=mkdir fdroid && \
+        sed -i -e 's/android:debuggable="true"/android:debuggable="false"/g' -e 's/@ANDROID_VERSION_CODE@/2014071712/g' mobile/android/base/AndroidManifest.xml.in && \
         echo "ac_add_options --with-android-ndk=\"$$NDK$$\"" > .mozconfig && \
         echo "ac_add_options --with-android-sdk=\"$$SDK$$/platforms/android-20\"" >> .mozconfig && \
         echo "ac_add_options --enable-application=mobile/android" >> .mozconfig && \
         echo "ac_add_options --target=arm-linux-androideabi" >> .mozconfig && \
-        sed -i -e 's/android:debuggable="true"/android:debuggable="false"/g' -e 's/@ANDROID_VERSION_CODE@/2014071712/g' mobile/android/base/AndroidManifest.xml.in && \
-        sed -i -e '/ANDROID_PACKAGE_NAME/d' -e '/MOZ_APP_DISPLAYNAME/d' mobile/android/branding/unofficial/configure.sh && \
-        echo "ANDROID_PACKAGE_NAME=org.mozilla.fennec.fdroid" >> mobile/android/branding/unofficial/configure.sh && \
-        echo "MOZ_APP_DISPLAYNAME=FennecFDroid" >> mobile/android/branding/unofficial/configure.sh
+        echo "ac_add_options --with-branding=mobile/android/branding/official" >> .mozconfig && \
+        echo "ac_add_options --enable-official-branding" >> .mozconfig && \
+        echo "export MOZILLA_OFFICIAL=1" >> .mozconfig && \
+        sed -i -e 's/org.mozilla.firefox/org.mozilla.fennec.fdroid/g' mobile/android/branding/official/configure.sh
     build=./mach build && ./mach package && \
         fxarch=`grep "ac_add_options --target=" .mozconfig | cut -d '=' -f2` && \
         mv obj-${fxarch}/dist/fennec-*.apk fdroid/fennec-unsigned.apk && \
