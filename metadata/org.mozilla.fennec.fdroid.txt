@@ -32,11 +32,13 @@ THIS IS A DEVELOPMENT BUILD -- DO NOT INSTALL
 Build:31.0,2014071712
     commit=FENNEC_31_0_RELEASE
     prebuild=mkdir fdroid && \
-        sed -i -e 's/android:debuggable="true"/android:debuggable="false"/g' -e 's/@ANDROID_VERSION_CODE@/2014071712/g' mobile/android/base/AndroidManifest.xml.in && \
+        sed -i -e 's/android:debuggable="true"//g' -e 's/@ANDROID_VERSION_CODE@/2014071712/g' mobile/android/base/AndroidManifest.xml.in && \
         echo "ac_add_options --with-android-ndk=\"$$NDK$$\"" > .mozconfig && \
         echo "ac_add_options --with-android-sdk=\"$$SDK$$/platforms/android-20\"" >> .mozconfig && \
         echo "ac_add_options --enable-application=mobile/android" >> .mozconfig && \
         echo "ac_add_options --target=arm-linux-androideabi" >> .mozconfig && \
+        echo "ac_add_options --disable-tests" >> .mozconfig && \
+        echo "ac_add_options --disable-crashreporter" >> .mozconfig && \
         echo "ac_add_options --with-branding=mobile/android/branding/official" >> .mozconfig && \
         echo "ac_add_options --enable-official-branding" >> .mozconfig && \
         echo "export MOZILLA_OFFICIAL=1" >> .mozconfig && \
@@ -45,21 +47,44 @@ Build:31.0,2014071712
         fxarch=`grep "ac_add_options --target=" .mozconfig | cut -d '=' -f2` && \
         mv obj-${fxarch}/dist/fennec-*.apk fdroid/fennec-unsigned.apk && \
         zip -d fdroid/fennec-unsigned.apk "META-INF*"
-    scanignore=*
     output=fdroid/fennec-unsigned.apk
+    rm=xpcom/tests/unit/data/SmallApp.app/Contents/MacOS/SmallApp
+    scandelete=xpcom/tests/unit/data/SmallApp.app/Contents/MacOS/SmallApp,dom/tests/mochitest/dom-level2-html/files/applets/org/w3c/domts/DOMTSApplet.class,toolkit/crashreporter/google-breakpad/src/third_party/linux/lib/glog/libglog.a,toolkit/crashreporter/google-breakpad/src/third_party/linux/lib/gflags/libgflags.a,toolkit/crashreporter/google-breakpad/src/client/mac/gcov/libgcov.a,toolkit/crashreporter/google-breakpad/src/tools/solaris/dump_syms/testdata/dump_syms_regtest.o,security/nss/cmd/bltest/tests/aes_gcm/iv*
+    scanignore=mobile/android/base/JavaAddonManager.java,media/webrtc/trunk/webrtc/modules/video_capture/android/java/src/org/webrtc/videoengine/VideoCaptureDeviceInfoAndroid.java
+
+Build:31.0,2014071713
+    commit=FENNEC_31_0_RELEASE
+    prebuild=mkdir fdroid && \
+        sed -i -e 's/android:debuggable="true"//g' -e 's/@ANDROID_VERSION_CODE@/2014071713/g' mobile/android/base/AndroidManifest.xml.in && \
+        echo "ac_add_options --with-android-ndk=\"$$NDK$$\"" > .mozconfig && \
+        echo "ac_add_options --with-android-sdk=\"$$SDK$$/platforms/android-20\"" >> .mozconfig && \
+        echo "ac_add_options --enable-application=mobile/android" >> .mozconfig && \
+        echo "ac_add_options --target=i386-linux-android" >> .mozconfig && \
+        echo "ac_add_options --disable-tests" >> .mozconfig && \
+        echo "ac_add_options --disable-crashreporter" >> .mozconfig && \
+        echo "ac_add_options --with-branding=mobile/android/branding/official" >> .mozconfig && \
+        echo "ac_add_options --enable-official-branding" >> .mozconfig && \
+        echo "export MOZILLA_OFFICIAL=1" >> .mozconfig && \
+        sed -i -e 's/org.mozilla.firefox/org.mozilla.fennec.fdroid/g' mobile/android/branding/official/configure.sh
+    build=./mach build && ./mach package && \
+        fxarch=`grep "ac_add_options --target=" .mozconfig | cut -d '=' -f2` && \
+        mv obj-${fxarch}/dist/fennec-*.apk fdroid/fennec-unsigned.apk && \
+        zip -d fdroid/fennec-unsigned.apk "META-INF*"
+    output=fdroid/fennec-unsigned.apk
+    scandelete=xpcom/tests/unit/data/SmallApp.app/Contents/MacOS/SmallApp,dom/tests/mochitest/dom-level2-html/files/applets/org/w3c/domts/DOMTSApplet.class,toolkit/crashreporter/google-breakpad/src/third_party/linux/lib/glog/libglog.a,toolkit/crashreporter/google-breakpad/src/third_party/linux/lib/gflags/libgflags.a,toolkit/crashreporter/google-breakpad/src/client/mac/gcov/libgcov.a,toolkit/crashreporter/google-breakpad/src/tools/solaris/dump_syms/testdata/dump_syms_regtest.o,security/nss/cmd/bltest/tests/aes_gcm/iv*
+    scanignore=mobile/android/base/JavaAddonManager.java,media/webrtc/trunk/webrtc/modules/video_capture/android/java/src/org/webrtc/videoengine/VideoCaptureDeviceInfoAndroid.java
 
 Maintainer Notes:
 
 Dependencies:
  * apt-get build-dep firefox
 
-Flavours:
- * x86: echo "ac_add_options --target=i386-linux-android" >> .mozconfig
- * arm: echo "ac_add_options --target=arm-linux-androideabi" >> .mozconfig
-
-Branding and Debug:
- * mobile/android/config/mozconfigs/android/release
- * MOZILLA_OFFICIAL, especially in mobile/android/base/AndroidManifest.xml.in
+Scanner:
+ * 2073 warnings
+ * 17 errors
+    * Ignoring two DexLoaders
+    * Remove all other erros and disable functions that might be
+      affected: --disable-tests --disable-crashreporter 
 
 Updating/Versioning:
  * Update Check Mode:Tags ^FENNEC_[1-9][0-9]*_[0-9]*_RELEASE$
@@ -90,5 +115,4 @@ done
 Auto Update Mode:None
 Update Check Mode:None
 Current Version:31.0
-Current Version Code:2014071712
-
+Current Version Code:2014071713
