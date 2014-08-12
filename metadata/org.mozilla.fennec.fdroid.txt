@@ -1,4 +1,3 @@
-Disabled:wip
 AntiFeatures:NonFreeAdd,Tracking
 Categories:Internet
 #mostly...
@@ -11,6 +10,7 @@ Donate:https://sendto.mozilla.org/page/contribute/openwebfund
 Repo Type:hg
 Repo:https://hg.mozilla.org/releases/mozilla-release/
 
+Name:Firefox
 Summary:Web browser
 Description:
 Mobile version of the Firefox web browser. Uses the Gecko layout engine to
@@ -35,8 +35,7 @@ Build:31.0,2014071712
         echo "ac_add_options --with-android-sdk=\"$$SDK$$/platforms/android-20\"" >> .mozconfig && \
         echo "ac_add_options --enable-application=mobile/android" >> .mozconfig && \
         echo "ac_add_options --target=arm-linux-androideabi" >> .mozconfig && \
-        echo "STRIP_FLAGS=\"--strip-debug\"" >> .mozconfig && \
-        sed -i -e 's/android:debuggable="true"/android:debuggable="false"/g' mobile/android/base/AndroidManifest.xml.in && \
+        sed -i -e 's/android:debuggable="true"/android:debuggable="false"/g' -e 's/@ANDROID_VERSION_CODE@/2014071712/g' mobile/android/base/AndroidManifest.xml.in && \
         sed -i -e '/ANDROID_PACKAGE_NAME/d' -e '/MOZ_APP_DISPLAYNAME/d' mobile/android/branding/unofficial/configure.sh && \
         echo "ANDROID_PACKAGE_NAME=org.mozilla.fennec.fdroid" >> mobile/android/branding/unofficial/configure.sh && \
         echo "MOZ_APP_DISPLAYNAME=FennecFDroid" >> mobile/android/branding/unofficial/configure.sh
@@ -45,9 +44,7 @@ Build:31.0,2014071712
         mv obj-${fxarch}/dist/fennec-*.apk fdroid/fennec-unsigned.apk && \
         zip -d fdroid/fennec-unsigned.apk "META-INF*"
     scanignore=*
-    update=no
     output=fdroid/fennec-unsigned.apk
-    novcheck=yes
 
 Maintainer Notes:
 
@@ -60,15 +57,32 @@ Flavours:
 
 Branding and Debug:
  * mobile/android/config/mozconfigs/android/release
- * ac_add_options --enable-debug
- * STRIP_FLAGS="--strip-debug"
  * MOZILLA_OFFICIAL, especially in mobile/android/base/AndroidManifest.xml.in
-   => sets android:debuggable="false" / "true"
 
 Updating/Versioning:
  * Update Check Mode:Tags ^FENNEC_[1-9][0-9]*_[0-9]*_RELEASE$
  * versionCode via ANDROID_VERSION_CODE is datestring with some magic applied
    and changes every build!
+ * Half-automated way of getting current VC:
+
+android_sdk=/home/krt/tmp/fdroid/android-sdk-linux
+build_tools=20.0.0
+
+lftp -e 'mget *apk;quit' ftp://ftp.mozilla.org/pub/mozilla.org/mobile/releases/latest/android/en-US/
+lftp -e 'mget *apk;quit' ftp://ftp.mozilla.org/pub/mozilla.org/mobile/releases/latest/android-x86/en-US/
+
+for apk in `ls *apk`
+do
+    verarch=`basename ${apk} .apk | cut -d '-' -f '4-'`
+    verinfo=`${android_sdk}/build-tools/${build_tools}/aapt dump badging ${apk} | grep ^package`
+    vercode=`echo ${verinfo} | sed -e 's/ versionCode=/\n/g' -e 's/ versionName=/\n/g' | tail -n2 | head -n1 | tr -d \'`
+    vername=`echo ${verinfo} | sed -e 's/ versionCode=/\n/g' -e 's/ versionName=/\n/g' | tail -n2 | tail -n1 | tr -d \'`
+    echo $verarch
+    echo $vercode
+    echo $vername
+    rm ${apk}
+done
+
 .
 
 Auto Update Mode:None
