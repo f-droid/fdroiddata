@@ -1,0 +1,51 @@
+Categories:Office
+License:MIT
+Web Site:https://github.com/numixproject/com.numix.calculator/blob/HEAD/README.md
+Source Code:https://github.com/numixproject/com.numix.calculator
+Issue Tracker:https://github.com/numixproject/com.numix.calculator/issues
+
+Auto Name:Numix Calculator
+Summary:Calculator
+Description:
+Simple calculator that follows the new material design guidelines as much as
+possible, which results in a modern day looking colourful interface. Swipe
+from the left and right to get advanced functions panes or use the three dots
+button below the sliders in the top left of the input box to do the same. Use
+the buttons on the left of the input box to open advanced functions panes and
+preferences.
+
+The calculator support all the basic functions (+, -, * and /), but it also
+has advanced pane that allows thing like trigonometric functions and more
+advanced functions.
+.
+
+Repo Type:git
+Repo:https://github.com/numixproject/com.numix.calculator
+
+Build:2.2,5
+    disable=wait for upstream
+    commit=e1e3992774dcdadadf4fdeb0620fb35ec26d438f
+    subdir=app
+    gradle=yes
+    rm=app/libs/*
+    srclibs=Slider@00020deb7fa5499bb33cc4471af2bd5256d10e78,ArityXlythe@459535ba5005c6f3a03101b15354e44df161a637,AChartEngine@r567
+    prebuild=sed -i -e '/svg-android/d' build.gradle && \
+        pushd $$AChartEngine$$ && $$MVN3$$ package && popd && \
+        pushd $$Slider$$ && android update project -p ./ && ant release && popd && \
+        pushd $$ArityXlythe$$ && rm -fR bin/* && find -name "*.java" > sources.txt && \
+        javac -d bin @sources.txt && cd bin && jar cf arity.jar org && popd && \
+        cp $$AChartEngine$$/target/achartengine-1.2.0.jar libs/achartengine.jar && \
+        cp $$Slider$$/bin/classes.jar libs/slider.jar && \
+        cp $$ArityXlythe$$/bin/arity.jar libs/arity-2.1.6.jar && \
+        sed -i -e '$d' -e '/androidsvg/d' -e '/ejml/d' -e '/acra/d' build.gradle && \
+        echo -e "compile 'ch.acra:acra:4.5.0'\n    compile 'com.googlecode.efficient-java-matrix-library:ejml:0.21'\n    compile 'com.caverock:androidsvg:1.2.1'\n}" >>  build.gradle
+
+Maintainer Notes:
+* Doesn't build; maybe they use AChartengineXlythe instead of AChartEngine.
+* Wait for upstream to clean up on their end: https://github.com/numixproject/com.numix.calculator/issues/14 
+.
+
+Update Check Mode:Tags
+Current Version:2.1
+Current Version Code:4
+
