@@ -108,18 +108,31 @@ Build:20131101,114
     buildjni=yes
 
 Build:1.2.20140705,125
-    disable=see maintainer notes
+    disable=won't build without words_1.dict binary
     commit=v125
     gradle=yes
-    forceversion=yes
-    prebuild=sed -i -e 's/version utils.Utils.buildVersionName(1, 2, false)/version "1.2.20140705"/g' build.gradle
-    scanignore=buildSrc/build/libs/buildSrc.jar,buildSrc/build/classes/main/localproperties/LocalPropertiesFile.class,buildSrc/build/classes/main/utils/Utils.class
-    rm=src/main/jniLibs/mips/*.so,src/main/jniLibs/armeabi-v7a/*.so,src/main/jniLibs/x86/*.so,src/main/jniLibs/armeabi/*.so
+    patch=gradle_cleanup_125.diff
+    prebuild=sed -i -e 's/version utils\.Utils\..*$/version "1.2.20140705"/g' build.gradle
+    rm=res/raw/words_1.dict
+    build=rm -r buildSrc/build && \
+        mv temp_jni jni && \
+        sed -i 's/BUILD_STATIC_LIBRARY/BUILD_SHARED_LIBRARY/' jni/*/Android.mk && \
+        $$NDK$$/ndk-build && \
+        mv libs src/main/jniLibs
+    scandelete=buildSrc,src/main/jniLibs
 
 Maintainer Notes:
-* Scanignored jars/classes are compiled from groovy source files.
-* The jniLibs are not generated while build; they should come from temp_jni.
-* Uses sonatype.org repository.
+Patch gets rid of:
+* sonatype.org repo
+* testCompile stuff that we don't need and which would be pulled from sonatype
+* missing property files that would break the build
+* Usage of completely unnecessary plugins like idea and android-sdk-manager
+
+Stuff we have to take care of manually:
+* jni is in temp_jni for some reason
+* upstream clearly built src/main/jniLibs/*.so with BUILD_SHARED_LIBRARY
+* For some reason he put the binaries in src/main/jniLibs, so we have to move them
+* "gradle clean" builds all the groovy stuff for some reason, so we have to clean up after it
 .
 
 Auto Update Mode:None
