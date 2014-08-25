@@ -246,24 +246,42 @@ Build:1.8.2-Honeycomb+,108022
     buildjni=yes
 
 Build:2.0.6,2000610
-    disable=wip
+    disable=missing source files
     commit=2.0.6
     buildjni=yes
-    target=android-19
+    forceversion=yes
+    target=android-14
+    srclibs=PDFParseLib@36d7479ce85638eb4f0ff9c875ec77680177da5d,ApacheHttpClient@4.2.5,NanoHttpd@Release-2.0.5,JsonSimple@tag_release_1_1_1
+    rm=libs/*jar,obsolete/lib/*.jar
     update=third-party/AmbilWarna,third-party/android-filechooser/code,third-party/drag-sort-listview/library,.
     prebuild=echo -e "sdk.dir=$$SDK$$\nndk.dir=$$NDK$$\n" >> local.properties && \
         cp local.properties third-party/AmbilWarna/ && \
         cp local.properties third-party/android-filechooser/code/ && \
-        cp local.properties third-party/drag-sort-listview/library/
+        cp local.properties third-party/drag-sort-listview/library/ && \
+        pushd $$ApacheHttpClient$$/httpmime/ && \
+        $$MVN3$$ package && \
+        popd && \
+        cp $$ApacheHttpClient$$/httpmime/target/httpmime-4.2.5.jar libs/ && \
+        pushd $$NanoHttpd$$ && $$MVN3$$ package && popd && cp $$NanoHttpd$$/core/target/nanohttpd-2.0.5.jar libs/ && \
+        cp -fR $$JsonSimple$$/src/main/java/org src/ && \
+        cp -fR $$PDFParseLib$$/pdfparse-lib/src/main/java/org src/ 
 
 Maintainer Notes:
-* jars, jars everywhere!
-* build flavors
-* UCM: Tags
+* LingvoIntegration_2.5.2.12.jar: can't find source
+* open-dictionary-api-1.2.1.jar: can't find source
+* UCM: We don't care for target or device specific releases.
+* build more flavors
+* 2.0.6-ics requires yotaphone-sdk
+* 2.0.6 is missing resources with android-9 target
+* 2.0.6 is meant for gingerbread (2.3.*), however it might be
+  the only "free" one, since the readme states: "Version for
+  old (2.*) devices does not use google services API" -- so
+  if everything else uses gplay services...
 .
 
+Archive Policy:6 versions
 Auto Update Mode:None
-Update Check Mode:None
+Update Check Mode:Tags ^[0-9.]$
 Current Version:1.8.2
 Current Version Code:108022
 
