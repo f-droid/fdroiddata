@@ -112,20 +112,23 @@ Build:3.0a7,33
     disable=Skip alpha
 
 Build:3.0b1,34
-    disable=wait for release, see notes
-    commit=f99f4530d424a78d339263100ca4660e0344ff26
+    disable=wait for release
+    commit=2e32a5a820ef047c5e7f773b5fa2ea8c8d8cd4a0
     gradle=basic
     subdir=app
-    srclibs=KontalkCommon@7d3831bf487c225de9f2ef969708ddabb4973376,KontalkEmojicon@ea3026abfa4e680aac9217dcea9d2fc85a00eea2
+    submodules=yes
+    srclibs=Smack@master
     prebuild=sed -i -e "/googleplayCompile/d" build.gradle && \
-        cp -fR $$KontalkCommon$$ ../client-common-java && \
-        cp -fR $$KontalkEmojicon$$ ../emojicon
+        sed -i -e 's@https://oss.sonatype.org/content/repositories/snapshots@@g' ../client-common-java/build.gradle ../build.gradle && \
+        sed -i -e '/raw.github.com/d' ../emojicon/build.gradle && \
+        sed -i -e 's/mavenCentral()/mavenCentral()\n        mavenLocal()/g' ../client-common-java/build.gradle ../build.gradle && \
+        sed -i -e 's/jcenter()/jcenter()\n        mavenLocal()/g' ../client-common-java/build.gradle ../build.gradle && \
+        pushd $$Smack$$ && sed -i -e 's/gradle.gradleVersion/"1.12"/g' build.gradle && gradle install && popd
 
 Maintainer Notes:
-* submodules are currently not set up, but cloned by running ./setup -- for
-  now I use srclibs. upstream will tag corresponding releases in all repos
-  (beta1 should be "20140831") and will switch to submodules in b2/b3.
-* uses sonatype
+* make sure mavenLocal works on build server
+* replace Smack@master with commit tested by upstream
+* replace commit with tag once released
 .
 
 Auto Update Mode:None
