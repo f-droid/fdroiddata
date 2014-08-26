@@ -31,7 +31,6 @@ Build:0.12.0,28
     gradle=yes
     srclibs=dnsjava@1692,zxing@zxing-3.1.0,JSoup@jsoup-1.7.3,libsodium@0.6.1,toxcore@9a74e5d0581e2ce954e365aec470551785dbb844,jToxcore@e95246c0d06ea4fe472ec88c22c014b844d9f05c
     rm=app/libs/jsoup-1.7.3.jar,app/libs/core.jar,app/libs/dnsjava-2.1.6.jar,app/libs/wearable-preview-support.jar
-    scanignore=app/src/main/jniLibs/*/*.so,android-toolchain/*,sysroot/*,build-toxcore/*,build-sodium/*
     prebuild=pushd $$JSoup$$ && \
         $$MVN3$$ package && \
         popd && \
@@ -48,27 +47,14 @@ Build:0.12.0,28
         $$NDK$$/build/tools/make-standalone-toolchain.sh --arch=arm --ndk-dir=$$NDK$$ --toolchain=arm-linux-androideabi-4.6 --install-dir=android-toolchain --platform=android-9 --system=linux-x86_64 && \
         mkdir -p build-sodium && \
         cd build-sodium && \
-        $$libsodium$$/configure --host="arm-linux-androideabi" \
-             --prefix=$SYSROOT/usr \
-             --with-sysroot=$SYSROOT \
-             --disable-soname-versions && \
+        $$libsodium$$/configure --host="arm-linux-androideabi" --prefix=$SYSROOT/usr --with-sysroot=$SYSROOT --disable-soname-versions && \
         make -j4  && \
         make install && \
         popd && \
         pushd .. && \
         mkdir -p build-toxcore && \
         cd build-toxcore && \
-        $$toxcore$$/configure --host="arm-linux-androideabi" \
-             --prefix=$SYSROOT/usr \
-             --with-sysroot=$SYSROOT \
-             --with-libsodium-headers=$SYSROOT/usr/include \
-             --with-libsodium-libs=$SYSROOT/usr/lib \
-             --disable-soname-versions \
-             --disable-av \
-             --disable-rt \
-             --disable-ntox \
-             --disable-daemon \
-             --disable-phone && \
+        $$toxcore$$/configure --host="arm-linux-androideabi" --prefix=$SYSROOT/usr --with-sysroot=$SYSROOT --with-libsodium-headers=$SYSROOT/usr/include --with-libsodium-libs=$SYSROOT/usr/lib --disable-soname-versions --disable-av --disable-rt --disable-ntox --disable-daemon --disable-phone && \
         make -j4  && \
         make install && \
         popd && \
@@ -84,6 +70,7 @@ Build:0.12.0,28
         mkdir -p src/main/jniLibs/armeabi-v7a && \
         cp $SYSROOT/usr/lib/*.so src/main/jniLibs/armeabi-v7a/ && \
         cp $$jToxcore$$/jni/libjtoxcore.so src/main/jniLibs/armeabi-v7a/
+    scanignore=app/src/main/jniLibs/*/*.so,android-toolchain/*,sysroot/*,build-toxcore/*,build-sodium/*
 
 Maintainer Notes:
 * Removed wearable-preview-support.jar since it seems to be usused, and I cant
@@ -95,3 +82,4 @@ Auto Update Mode:None
 Update Check Mode:Static
 Current Version:0.12.0
 Current Version Code:28
+
