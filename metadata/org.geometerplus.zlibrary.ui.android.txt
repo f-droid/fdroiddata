@@ -246,11 +246,12 @@ Build:1.8.2-Honeycomb+,108022
     buildjni=yes
 
 Build:2.0.6,2000610
-    disable=missing source files
+    disable=needs testing
     commit=2.0.6
     srclibs=PDFParseLib@36d7479ce85638eb4f0ff9c875ec77680177da5d,ApacheHttpClient@4.2.5,NanoHttpd@Release-2.0.5,JsonSimple@tag_release_1_1_1
     forceversion=yes
     rm=libs/*jar,obsolete/lib/*.jar
+    patch=fbreader-2.0.6.patch
     prebuild=echo -e "sdk.dir=$$SDK$$\nndk.dir=$$NDK$$\n" >> local.properties && \
         cp local.properties third-party/AmbilWarna/ && \
         cp local.properties third-party/android-filechooser/code/ && \
@@ -264,7 +265,8 @@ Build:2.0.6,2000610
         popd && \
         cp $$NanoHttpd$$/core/target/nanohttpd-2.0.5.jar libs/ && \
         cp -fR $$JsonSimple$$/src/main/java/org src/ && \
-        cp -fR $$PDFParseLib$$/pdfparse-lib/src/main/java/org src/ 
+        cp -fR $$PDFParseLib$$/pdfparse-lib/src/main/java/org src/ && \
+        rm -fR src/com/paragon
     update=third-party/AmbilWarna,third-party/android-filechooser/code,third-party/drag-sort-listview/library,.
     target=android-14
     buildjni=yes
@@ -279,7 +281,8 @@ Maintainer Notes:
 * 2.0.6 is meant for gingerbread (2.3.*), however it might be
   the only "free" one, since the readme states: "Version for
   old (2.*) devices does not use google services API" -- so
-  if everything else uses gplay services...
+  if everything else uses gplay services...      
+* sed -i -e '/MinicardContract/d' src/org/geometerplus/android/fbreader/DictionaryUtil.java
 .
 
 Archive Policy:6 versions
