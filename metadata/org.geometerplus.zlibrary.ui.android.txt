@@ -271,6 +271,34 @@ Build:2.0.6-gb,2000610
     target=android-14
     buildjni=yes
 
+Build:2.0.6-ics,2000620
+    commit=b1dd70ff149560889e7548762046da4933e51e94
+    patch=fbreader-2.0.6.patch
+    srclibs=PDFParseLib@36d7479ce85638eb4f0ff9c875ec77680177da5d,ApacheHttpClient@4.2.5,NanoHttpd@Release-2.0.5,JsonSimple@tag_release_1_1_1
+    forceversion=yes
+    rm=libs/*jar,obsolete/lib/*.jar
+    prebuild=echo -e "sdk.dir=$$SDK$$\nndk.dir=$$NDK$$\n" >> local.properties && \
+        cp local.properties third-party/AmbilWarna/ && \
+        cp local.properties third-party/android-filechooser/code/ && \
+        cp local.properties third-party/drag-sort-listview/library/ && \
+        pushd $$ApacheHttpClient$$/httpmime/ && \
+        $$MVN3$$ package && \
+        popd && \
+        cp $$ApacheHttpClient$$/httpmime/target/httpmime-4.2.5.jar libs/ && \
+        pushd $$NanoHttpd$$ && \
+        $$MVN3$$ package && \
+        popd && \
+        cp $$NanoHttpd$$/core/target/nanohttpd-2.0.5.jar libs/ && \
+        cp -fR $$JsonSimple$$/src/main/java/org src/ && \
+        cp -fR $$PDFParseLib$$/pdfparse-lib/src/main/java/org src/ && \
+        rm -fR src/com/paragon && \
+        sed -i -e '/com.google.android.gms.version/d' -e '/google_play_services/d'  AndroidManifest.xml  && \
+        sed -i -e '/google.services.lib.dir/d' project.properties && \
+        pushd src/org/geometerplus/android/fbreader/network/auth && git checkout master -- *java
+    update=third-party/AmbilWarna,third-party/android-filechooser/code,third-party/drag-sort-listview/library,.
+    target=android-14
+    buildjni=yes
+
 Build:2.1-ics,2010020
     disable=testing
     commit=33139e2b04ae36388956a57373ba74e8cc0ef23c
