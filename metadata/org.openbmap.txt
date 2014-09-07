@@ -46,18 +46,21 @@ Build:0.7.8,7
     subdir=android
     prebuild=sed -i '/proguard/d' project.properties
 
-Build:0.8.0,8
-    disable=mapsforge fails
+Build:0.7.9,8
     commit=v0.8.0
     subdir=android
-    srclibs=ApacheHttpClient@4.2.3,CommonsLang@LANG_3_3_1,MapsforgeMirror@560eaa8725d1,GraphView@v3.1.3,1:ActionBarSherlock@4.4.0
+    srclibs=ApacheHttpClient@4.2.3,CommonsLang@LANG_3_3_1,MapsforgeMirror@0.4.3,GraphView@v3.1.3,1:ActionBarSherlock@4.4.0
     rm=android/libs/*jar
     extlibs=android/android-support-v4.jar
-    prebuild=sed -i '/proguard/d' project.properties && \
+    prebuild=echo -e 'java.source=1.7\njava.target=1.7\n' ant.properties && \
+        sed -i '/proguard/d' project.properties && \
         cp libs/android-support-v4.jar $$ActionBarSherlock$$/libs/ && \
         cp -fR $$GraphView$$/src/main/java/com src/ && \
-        $$MVN3$$ clean package -DskipTests -f $$Mapsforge$$/pom.xml && \
-        mv $$Mapsforge$$/mapsforge-map/target/mapsforge-map-0.5.0-SNAPSHOT-jar-with-dependencies.jar libs/ && \
+        pushd $$MapsforgeMirror$$ && gradle jar && cd mapsforge-map-android && gradle jar && popd && \
+        cp $$MapsforgeMirror$$/mapsforge-map-android/build/libs/mapsforge-map-android-*.jar \
+           $$MapsforgeMirror$$/mapsforge-core/build/libs/mapsforge-core-*.jar \
+           $$MapsforgeMirror$$/mapsforge-map-reader/build/libs/mapsforge-map-reader-*.jar \
+           $$MapsforgeMirror$$/mapsforge-map/build/libs/mapsforge-map-*.jar libs/ && \
         pushd $$CommonsLang$$ && \
         $$MVN3$$ package && \
         popd && \
