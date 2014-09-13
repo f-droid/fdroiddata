@@ -106,26 +106,45 @@ Build:13.1.2,107
 #    commit=14.0.1
 #    submodules=yes
 #    target=android-19
-#    srclibs=CommonsIO@2.4,CommonsCodec@1.9,JSoup@jsoup-1.7.3,Google-Gson@gson-2.2.4
-#    rm=libs/*,external/cacheword/cachewordtest/libs/*
-#    prebuild=echo \
+#    extlibs=android/android-support-v4.jar
+#    srclibs=ApacheHttpClient@4.3.3,ApacheHttpCore@4.3.2,CommonsIO@2.4,CommonsCodec@1.9,JSoup@jsoup-1.7.3,Google-Gson@gson-2.2.4,HockeySDK@3.0.2
+#    rm=libs/*,external/cacheword/cachewordtest/libs/*,external/asmack/lib/*.jar
+#    prebuild=echo "== fdroid: use always the same android-support-v4.jar ==" && \
+#        echo \
 #        external/SlidingMenu/library/libs/android-support-v4.jar \
 #        external/cacheword/cachewordlib/libs/android-support-v4.jar \
 #        external/AndroidEmojiInput/library/libs/android-support-v4.jar \
 #        external/ViewPagerIndicator/library/libs/android-support-v4.jar \
 #        external/appcompat/libs/android-support-v4.jar \
 #        | xargs -n 1 cp libs/android-support-v4.jar && \
+#        echo "== fdroid: build commons-io.jar" && \
 #        pushd $$CommonsIO$$ && $$MVN3$$ package && popd && cp $$CommonsIO$$/target/commons-io-2.4.jar libs/ && \
+#        echo "== fdroid: build commons-codec.jar" && \
 #        pushd $$CommonsCodec$$ && $$MVN3$$ package && popd && cp $$CommonsCodec$$/target/commons-codec-1.9.jar libs/ && \
 #        cp libs/commons-codec-*.jar external/cacheword/cachewordtest/libs/commons-codec.jar && \
+#        echo "== fdroid: build jsoup.jar" && \
 #        pushd $$JSoup$$ && $$MVN3$$ package && popd && cp $$JSoup$$/target/jsoup-1.7.3.jar libs/ && \
-#        cp -fR $$Google-Gson$$/src/main/java/com external/AndroidEmojiInput/library/src/
-#    scanremove=external/ViewPagerIndicator/sample/,external/AndroidEmojiInput/samples/,external/AndroidEmojiInput/stickerpack/
-#
+#        echo "== fdroid: copy source for gson.jar" && \
+#        cp -fR $$Google-Gson$$/src/main/java/com external/AndroidEmojiInput/library/src/ && \
+#        echo "== fdroid: build httpclient.jar" && \
+#        pushd $$ApacheHttpClient$$/httpclient/ && $$MVN3$$ package && popd && \
+#        cp $$ApacheHttpClient$$/httpclient/target/httpclient-4.3.3.jar external/asmack/lib/ && \
+#        echo "== fdroid: build httpcore.jar" && \
+#        pushd $$ApacheHttpCore$$/httpcore && $$MVN3$$ package && popd && \
+#        cp $$ApacheHttpCore$$/httpcore/target/httpcore-4.3.2.jar external/asmack/lib/ && \
+#        echo "== fdroid: build hockeysdk.jar" && \
+#        $$MVN3$$ install:install-file \
+#            -Dfile=$$SDK$$/platforms/android-19/android.jar \
+#            -DgroupId=com.google.android \
+#            -DartifactId=android \
+#            -Dversion=4.2.2_r2 \
+#            -Dpackaging=jar \
+#            -DgeneratePom=true && \
+#        pushd $$HockeySDK$$ && $$MVN3$$ package && popd && $$HockeySDK$$/target/*.jar libs/ && exit 1
+#    scandelete=external/ViewPagerIndicator/sample/,external/AndroidEmojiInput/samples/,external/AndroidEmojiInput/stickerpack/,external/SlidingMenu/example/
 #
 #Maintainer Notes:
 #WARNING: Found ZIP file at assets/icudt46l.zip
-#WARNING: Found JAR file at libs/android-support-v4.jar
 #WARNING: Found JAR file at libs/iocipher.jar
 #WARNING: Found JAR file at libs/asmack-android-8.jar
 #WARNING: Found JAR file at libs/guava-11.0.2.jar
@@ -144,8 +163,6 @@ Build:13.1.2,107
 #ERROR: Found shared library at libs/armeabi/libdatabase_sqlcipher.so
 #WARNING: Found unknown compressed or binary file at external/AndroidPinning/res/raw/cacerts
 #WARNING: Found JAR file at external/asmack/lib/xmlpull_1_1_3_4c.jar
-#WARNING: Found JAR file at external/asmack/lib/httpclient-4.0.jar
-#WARNING: Found JAR file at external/asmack/lib/httpcore-4.0.1.jar
 #WARNING: Found unknown compressed or binary file at external/IOCipher/external/openssl/crypto/pkcs7/p7/a1
 #WARNING: Found unknown compressed or binary file at external/IOCipher/external/openssl/crypto/pkcs7/p7/smime.p7s
 #WARNING: Found unknown compressed or binary file at external/IOCipher/external/openssl/crypto/pkcs7/p7/cert.p7c
@@ -174,7 +191,6 @@ Build:13.1.2,107
 #ERROR: Found shared library at external/cacheword/cachewordtest/libs/armeabi/libstlport_shared.so
 #ERROR: Found shared library at external/cacheword/cachewordtest/libs/armeabi/libdatabase_sqlcipher.so
 #WARNING: Found JAR file at external/cacheword/cachewordhelpers/libs/sqlcipher.jar
-#ERROR: Found usual supect at external/SlidingMenu/example/libs/crittercism_v3_0_3_sdkonly.jar
 #.
 
 Auto Update Mode:None
