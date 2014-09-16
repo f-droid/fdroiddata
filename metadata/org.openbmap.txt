@@ -52,11 +52,11 @@ Build:0.7.9,8
     srclibs=ApacheHttpClient@4.2.3,CommonsLang@LANG_3_3_1,MapsforgeMirror@0.4.3,GraphView@v3.1.3,1:ActionBarSherlock@4.4.0
     rm=android/libs/*jar
     extlibs=android/android-support-v4.jar
-    prebuild=echo -e 'java.source=1.7\njava.target=1.7\n' ant.properties && \
+    build=echo -e 'java.source=1.7\njava.target=1.7\n' >> ant.properties && \
         sed -i '/proguard/d' project.properties && \
         cp libs/android-support-v4.jar $$ActionBarSherlock$$/libs/ && \
-        cp -fR $$GraphView$$/src/main/java/com src/ && \
-        pushd $$MapsforgeMirror$$/mapsforge-map-android && gradle build && popd && \
+        cp -R $$GraphView$$/src/main/java/com src/ && \
+        pushd $$MapsforgeMirror$$/mapsforge-map-android && gradle build && sed -i -e 's/19.0.3/20.0.0/g' ../build.gradle && popd && \
         cp $$MapsforgeMirror$$/mapsforge-map-android/build/libs/mapsforge-map-android-*.jar \
            $$MapsforgeMirror$$/mapsforge-core/build/libs/mapsforge-core-*.jar \
            $$MapsforgeMirror$$/mapsforge-map-reader/build/libs/mapsforge-map-reader-*.jar \
@@ -69,11 +69,16 @@ Build:0.7.9,8
         pushd $$ApacheHttpClient$$/httpmime/ && \
         $$MVN3$$ package && \
         popd && \
-        cp $$ApacheHttpClient$$/httpmime/target/httpmime-4.2.3.jar libs/
+        cp $$ApacheHttpClient$$/httpmime/target/httpmime-4.2.3.jar libs/ && \
+        ant release
 
 Maintainer Notes:
-Due to https://code.google.com/p/support/issues/detail?id=31571
-we are using a semi official mapsforge git repo.
+* Due to https://code.google.com/p/support/issues/detail?id=31571
+  we are using a semi official mapsforge git repo.
+* We force build tools version. This has to be removed (and/or moved to
+  the srclib).
+* Move as much preparation back to prebuild as possible.
+* Include directly if build fails again.
 .
 
 Auto Update Mode:Version v%v
