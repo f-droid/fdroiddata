@@ -15,20 +15,21 @@ Repo Type:git
 Repo:https://github.com/zeapo/Android-Password-Store
 
 Build:1.1-b3,8
-    disable=swipelist not in central
     commit=a44a38783c5e6aa7d99d18d620231998cd1c5e53
     subdir=app
     submodules=yes
     gradle=yes
     srclibs=Swipelist@de441bf662770acf64df9051727aa5dcd159a16d
-    prebuild=pushd $$Swipelist$$ && \
-        sed -i -e '52,88d' build.gradle && \
-        sed -i -e '/clinker/d' -e '/android-maven/d' -e 's@ { url "${System.env.HOME}/.m2/repository" }@Central()@g' build.gradle && \
+    prebuild=cp -fR $$Swipelist$$/swipelistview/src/main ../libraries/swipelistview && pushd ../libraries/swipelistview/ && \
+        mv java src && mkdir libs && android update lib-project -p . --target "android-19" && \
+        echo "android.library=true" >> project.properties && \
+        cp ../openpgp-api-lib/build.gradle ./ && \
+        echo -e 'repositories {\nmavenCentral()\n}\n\ndependencies {\ncompile "com.nineoldandroids:library:2.4.0+"\ncompile "com.android.support:appcompat-v7:19.0.+"\n}' >> build.gradle && \
         popd && \
-        cp -fR $$Swipelist$$ ../libraries/ && \
-        echo "include ':libraries:Swipelist'" >> ../settings.gradle && \
-        sed -i -e "/libraries:openpgp-api-lib/acompile project(':libraries:Swipelist')" build.gradle && \
-        sed -i -e '/clinker/d' -e '/repositories/amavenCentral()' build.gradle
+        echo "include ':libraries:swipelistview'" >> ../settings.gradle && \
+        sed -i -e '30,32d' build.gradle && \
+        sed -i -e "/libraries:openpgp-api-lib/acompile project\(':libraries:swipelistview'\)" build.gradle && \
+        sed -i -e '/clinker/d' -e '/repositories/amavenCentral\(\)' build.gradle
 
 Auto Update Mode:None
 Update Check Mode:RepoManifest
