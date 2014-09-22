@@ -49,36 +49,16 @@ Build:0.7.8,7
 Build:0.7.9,8
     commit=v0.8.0
     subdir=android
-    srclibs=ApacheHttpClient@4.2.3,CommonsLang@LANG_3_3_1,MapsforgeMirror@0.4.3,GraphView@v3.1.3,1:ActionBarSherlock@4.4.0
     rm=android/libs/*jar
-    extlibs=android/android-support-v4.jar
-    build=echo -e 'java.source=1.7\njava.target=1.7\n' >> ant.properties && \
-        sed -i '/proguard/d' project.properties && \
-        cp libs/android-support-v4.jar $$ActionBarSherlock$$/libs/ && \
-        cp -R $$GraphView$$/src/main/java/com src/ && \
-        pushd $$MapsforgeMirror$$/mapsforge-map-android && gradle build && sed -i -e 's/19.0.3/20.0.0/g' ../build.gradle && popd && \
-        cp $$MapsforgeMirror$$/mapsforge-map-android/build/libs/mapsforge-map-android-*.jar \
-           $$MapsforgeMirror$$/mapsforge-core/build/libs/mapsforge-core-*.jar \
-           $$MapsforgeMirror$$/mapsforge-map-reader/build/libs/mapsforge-map-reader-*.jar \
-           $$MapsforgeMirror$$/svg-android/build/bundles/release/classes.jar \
-           $$MapsforgeMirror$$/mapsforge-map/build/libs/mapsforge-map-*.jar libs/ && \
-        pushd $$CommonsLang$$ && \
-        $$MVN3$$ package && \
-        popd && \
-        cp $$CommonsLang$$/target/commons-lang3-3.3.1.jar libs/ && \
-        pushd $$ApacheHttpClient$$/httpmime/ && \
-        $$MVN3$$ package && \
-        popd && \
-        cp $$ApacheHttpClient$$/httpmime/target/httpmime-4.2.3.jar libs/ && \
-        ant release
+    patch=openbmap-gradle.patch
+    gradle=yes
 
 Maintainer Notes:
-* Due to https://code.google.com/p/support/issues/detail?id=31571
-  we are using a semi official mapsforge git repo.
-* We force build tools version. This has to be removed (and/or moved to
-  the srclib).
-* Move as much preparation back to prebuild as possible.
-* Include directly if build fails again.
+Upstream is using ant, but building mapsforge from source requires gradle, which fails
+on the build server if called in an ant or maven project (or when called multiple times).
+
+The patch migrates upstream's ant build to gradle which includes all dependencies from
+mavenCentral. Can be removed if upstream accepts our gradle patches.
 .
 
 Auto Update Mode:Version v%v
