@@ -76,6 +76,26 @@ Build:1.1-b5,11
         sed -i -e '/clinker/d' -e '/repositories/amavenCentral\(\)' build.gradle && \
         sed -i -e '518d' src/main/java/com/zeapo/pwdstore/crypto/PgpHandler.java
 
+Build:1.1-b6,13
+    commit=2f757f515903eb5cf46b7ebc490e906686bac6c4
+    subdir=app
+    submodules=yes
+    gradle=yes
+    srclibs=Swipelist@de441bf662770acf64df9051727aa5dcd159a16d
+    prebuild=cp -fR $$Swipelist$$/swipelistview/src/main ../libraries/swipelistview && \
+        pushd ../libraries/swipelistview/ && \
+        mv java src && \
+        mkdir libs && \
+        android update lib-project -p . --target "android-19" && \
+        echo "android.library=true" >> project.properties && \
+        cp ../openpgp-api-lib/build.gradle ./ && \
+        echo -e 'repositories {\nmavenCentral()\n}\n\ndependencies {\ncompile "com.nineoldandroids:library:2.4.0+"\ncompile "com.android.support:appcompat-v7:19.0.+"\n}' >> build.gradle && \
+        popd && \
+        echo "include ':libraries:swipelistview'" >> ../settings.gradle && \
+        sed -i -e '30,32d' build.gradle && \
+        sed -i -e "/libraries:openpgp-api-lib/acompile project\(':libraries:swipelistview'\)" build.gradle && \
+        sed -i -e '/clinker/d' -e '/repositories/amavenCentral\(\)' build.gradle
+
 Maintainer Notes:
 Upstream is clean and should build without modifications when swipelistview is
 deployed to jcenter/central.
