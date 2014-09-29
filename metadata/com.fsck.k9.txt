@@ -18,12 +18,6 @@ achieve this.
 If you would like to contribute financially to k9mail, consider donating to
 the local SPCA (Societies for the prevention of cruelty to animals).
 
-INFORMATION:
-
-5.000 requires call_log read/write permissions on builds unsing the gradle
-build system. Until this issue is resolved, we wont star this release; it
-will not prompt for auto-update.
-
 [https://github.com/k9mail/k-9/wiki/ReleaseNotes Major version notes]
 .
 
@@ -102,12 +96,13 @@ Build:4.804,20005
         mv HtmlCleaner/target/htmlcleaner-2.2.jar libs/
 
 Build:5.000,22000
+    disable=wait for re-roll
     commit=5.000
     gradle=yes
     rm=libs/*
     srclibs=Jutf7@20
     prebuild=sed -i \
-            -e "/buildToolsVersion/apackagingOptions {\n exclude 'META-INF/LICENSE.txt'\n  exclude 'META-INF/NOTICE.txt'\n}" \
+            -e "/buildToolsVersion/adefaultConfig {\nminSdkVersion 17\ntargetSdkVersion 17\n}\n\npackagingOptions {\n exclude 'META-INF/LICENSE.txt'\n  exclude 'META-INF/NOTICE.txt'\n}" \
             -e "/com.android.application/arepositories {\n  mavenCentral()\n  mavenLocal()\n}" \
             -e "/fileTree/acompile 'net.sourceforge.htmlcleaner:htmlcleaner:2.2'" \
             -e "/fileTree/acompile 'org.apache.james:apache-mime4j-core:0.7.2'" \
@@ -118,13 +113,12 @@ Build:5.000,22000
         pushd $$Jutf7$$ && $$MVN3$$ install && popd
 
 Maintainer Notes:
-* AUM disabled: Don't use 5.0xx builds as template for 4.8-MAINT releases.
-* UCM stays at 4.8-MAINT so 5.000 doesn't get starred.
-* Update AUM and UCM once 5.000 has been tested/dogfed.
+* Force minSdk and targetSdk via gradle, to avoid erroneous call_log
+  permission requests.
 .
 
-#Auto Update Mode:Version %v
-Update Check Mode:RepoManifest/4.8-MAINT
+Auto Update Mode:Version %v
+Update Check Mode:RepoManifest/5.0-MAINT
 Current Version:4.804
 Current Version Code:20005
 
