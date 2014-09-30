@@ -1,5 +1,5 @@
 diff --git a/qBittorrentClient/AndroidManifest.xml b/qBittorrentClient/AndroidManifest.xml
-index 66b74b3..09b6f95 100644
+index 40f46ae..fe7b0ea 100644
 --- a/qBittorrentClient/AndroidManifest.xml
 +++ b/qBittorrentClient/AndroidManifest.xml
 @@ -145,16 +145,6 @@
@@ -21,6 +21,15 @@ index 66b74b3..09b6f95 100644
 -</manifest>
 \ No newline at end of file
 +</manifest>
+diff --git a/qBittorrentClient/project.properties b/qBittorrentClient/project.properties
+index 745e472..7472fc8 100644
+--- a/qBittorrentClient/project.properties
++++ b/qBittorrentClient/project.properties
+@@ -22,4 +22,3 @@
+ 
+ # Project target.
+ target=android-19
+-android.library.reference.1=../../../Projects/Android/extras/google/google_play_services/libproject/google-play-services_lib
 diff --git a/qBittorrentClient/res/layout-large/activity_main.xml b/qBittorrentClient/res/layout-large/activity_main.xml
 index c6e4215..462c7c3 100644
 --- a/qBittorrentClient/res/layout-large/activity_main.xml
@@ -86,7 +95,7 @@ index 29b0445..b5b87f8 100644
 \ No newline at end of file
 +</android.support.v4.widget.DrawerLayout>
 diff --git a/qBittorrentClient/src/com/lgallardo/qbittorrentclient/MainActivity.java b/qBittorrentClient/src/com/lgallardo/qbittorrentclient/MainActivity.java
-index 93bd612..39c72fd 100644
+index 147d00d..a55edf2 100644
 --- a/qBittorrentClient/src/com/lgallardo/qbittorrentclient/MainActivity.java
 +++ b/qBittorrentClient/src/com/lgallardo/qbittorrentclient/MainActivity.java
 @@ -48,9 +48,6 @@ import android.widget.ListView;
@@ -99,17 +108,17 @@ index 93bd612..39c72fd 100644
  public class MainActivity extends FragmentActivity {
  
  	// Params to get JSON Array
-@@ -159,8 +156,6 @@ public class MainActivity extends FragmentActivity {
- 
- 	private boolean okay = false;
+@@ -168,8 +165,6 @@ public class MainActivity extends FragmentActivity {
+ 	private Handler handler;
+ 	private boolean canrefresh = true;
  
 -	private AdView adView;
 -
- 	@Override
- 	protected void onCreate(Bundle savedInstanceState) {
- 		super.onCreate(savedInstanceState);
-@@ -318,18 +313,6 @@ public class MainActivity extends FragmentActivity {
+ 	// For checking if the app is visible
+ 	private boolean activityIsVisible = true;
  
+@@ -347,18 +342,6 @@ public class MainActivity extends FragmentActivity {
+ 		activityIsVisible = false;
  	}
  
 -	// Load Banner
@@ -124,26 +133,26 @@ index 93bd612..39c72fd 100644
 -		adView.loadAd(adRequest);
 -	}
 -
- 	// Drawer's method
- 
- 	@Override
-@@ -403,9 +386,6 @@ public class MainActivity extends FragmentActivity {
+ 	// Auto-refresh runnable
+ 	private final Runnable m_Runnable = new Runnable() {
+ 		public void run()
+@@ -489,9 +472,6 @@ public class MainActivity extends FragmentActivity {
  
  			qtt.execute(params);
  
 -			// Load banner
 -			loadBanner();
 -
- 			// Connecting message
- 			Toast.makeText(getApplicationContext(), R.string.connecting, Toast.LENGTH_SHORT).show();
- 
+ 			// If activity is visible, Connecting message
+ 			if (activityIsVisible) {
+ 				// Connecting message
 diff --git a/qBittorrentClient/src/com/lgallardo/qbittorrentclient/TorrentDetailsFragment.java b/qBittorrentClient/src/com/lgallardo/qbittorrentclient/TorrentDetailsFragment.java
-index af9d1bd..656461d 100644
+index 28aa42f..a12a937 100644
 --- a/qBittorrentClient/src/com/lgallardo/qbittorrentclient/TorrentDetailsFragment.java
 +++ b/qBittorrentClient/src/com/lgallardo/qbittorrentclient/TorrentDetailsFragment.java
-@@ -10,10 +10,6 @@
-  ******************************************************************************/
- package com.lgallardo.qbittorrentclient;
+@@ -12,10 +12,6 @@ package com.lgallardo.qbittorrentclient;
+ 
+ import org.json.JSONObject;
  
 -import com.google.android.gms.ads.AdRequest;
 -import com.google.android.gms.ads.AdSize;
@@ -151,28 +160,30 @@ index af9d1bd..656461d 100644
 -
  import android.app.Fragment;
  import android.content.pm.ActivityInfo;
- import android.os.Bundle;
-@@ -45,7 +41,6 @@ public class TorrentDetailsFragment extends Fragment {
+ import android.os.AsyncTask;
+@@ -50,7 +46,6 @@ public class TorrentDetailsFragment extends Fragment {
  
- 	int position;
+ 	JSONObject json2;
  
 -	private AdView adView;
  	private View rootView;
  
  	public TorrentDetailsFragment() {
-@@ -143,8 +138,6 @@ public class TorrentDetailsFragment extends Fragment {
+@@ -204,9 +199,6 @@ public class TorrentDetailsFragment extends Fragment {
+ 			// TODO Auto-generated catch block
  			Log.e("TorrentDetailsFragment - onCreateView", e.toString());
  		}
- 
+-
 -		// Load banner
 -		loadBanner();
- 		return rootView;
- 	}
+ 		
+ 		
+ 		// Execute the task in background
+@@ -244,33 +236,6 @@ public class TorrentDetailsFragment extends Fragment {
  
-@@ -177,31 +170,4 @@ public class TorrentDetailsFragment extends Fragment {
  		}
  	}
- 
+-
 -	// Load Banner
 -	public void loadBanner() {
 -
@@ -199,14 +210,6 @@ index af9d1bd..656461d 100644
 -		adView.loadAd(adRequest);
 -
 -	}
--
- }
-diff --git a/qBittorrentClient/project.properties b/qBittorrentClient/project.properties
-index 745e472..7472fc8 100644
---- a/qBittorrentClient/project.properties
-+++ b/qBittorrentClient/project.properties
-@@ -22,4 +22,3 @@
- 
- # Project target.
- target=android-19
--android.library.reference.1=../../../Projects/Android/extras/google/google_play_services/libproject/google-play-services_lib
+ 	
+ 	// Here is where the action happens
+ 	private class qBittorrentGeneralInfoTask extends AsyncTask<View, View, View[]> {
