@@ -1,0 +1,215 @@
+diff --git a/qBittorrentClient/AndroidManifest.xml b/qBittorrentClient/AndroidManifest.xml
+index 40f46ae..fe7b0ea 100644
+--- a/qBittorrentClient/AndroidManifest.xml
++++ b/qBittorrentClient/AndroidManifest.xml
+@@ -145,16 +145,6 @@
+             android:name="com.lgallardo.qbittorrentclient.OptionsActivity"
+             android:label="Options" >
+         </activity>
+-        <activity
+-            android:name="com.google.android.gms.ads.AdActivity"
+-            android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"
+-            android:theme="@android:style/Theme.Translucent" >
+-        </activity>
+-
+-        <meta-data
+-            android:name="com.google.android.gms.version"
+-            android:value="@integer/google_play_services_version" />
+-             />
+     </application>
+ 
+-</manifest>
+\ No newline at end of file
++</manifest>
+diff --git a/qBittorrentClient/project.properties b/qBittorrentClient/project.properties
+index 745e472..7472fc8 100644
+--- a/qBittorrentClient/project.properties
++++ b/qBittorrentClient/project.properties
+@@ -22,4 +22,3 @@
+ 
+ # Project target.
+ target=android-19
+-android.library.reference.1=../../../Projects/Android/extras/google/google_play_services/libproject/google-play-services_lib
+diff --git a/qBittorrentClient/res/layout-large/activity_main.xml b/qBittorrentClient/res/layout-large/activity_main.xml
+index c6e4215..462c7c3 100644
+--- a/qBittorrentClient/res/layout-large/activity_main.xml
++++ b/qBittorrentClient/res/layout-large/activity_main.xml
+@@ -21,20 +21,10 @@
+         android:layout_height="wrap_content"
+         android:orientation="vertical" >
+ 
+-        <com.google.android.gms.ads.AdView
+-            android:id="@+id/adView"
+-            android:layout_width="match_parent"
+-            android:layout_height="wrap_content"
+-            android:layout_alignParentBottom="true"
+-            ads:adSize="SMART_BANNER"
+-            ads:adUnitId="ca-app-pub-1035265933040074/6449288097"
+-            android:gravity="bottom" />
+-
+         <LinearLayout
+             android:id="@+id/linearLayout1"
+             android:layout_width="fill_parent"
+             android:layout_height="match_parent"
+-            android:layout_above="@+id/adView"
+             android:orientation="horizontal"
+             android:baselineAligned="false" >
+ 
+@@ -62,4 +52,4 @@
+         android:divider="@android:color/transparent"
+         android:dividerHeight="0dp" />
+ 
+-</android.support.v4.widget.DrawerLayout>
+\ No newline at end of file
++</android.support.v4.widget.DrawerLayout>
+diff --git a/qBittorrentClient/res/layout/activity_main.xml b/qBittorrentClient/res/layout/activity_main.xml
+index 29b0445..b5b87f8 100644
+--- a/qBittorrentClient/res/layout/activity_main.xml
++++ b/qBittorrentClient/res/layout/activity_main.xml
+@@ -21,20 +21,10 @@
+         android:layout_height="wrap_content"
+         android:orientation="vertical" >
+ 
+-        <com.google.android.gms.ads.AdView
+-            android:id="@+id/adView"
+-            android:layout_width="match_parent"
+-            android:layout_height="wrap_content"
+-            android:layout_alignParentBottom="true"
+-            ads:adSize="SMART_BANNER"
+-            ads:adUnitId="ca-app-pub-1035265933040074/6449288097"
+-            android:gravity="bottom" />
+-
+         <LinearLayout
+             android:id="@+id/linearLayout1"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent"
+-            android:layout_above="@+id/adView"
+             android:orientation="horizontal" >
+ 
+             <FrameLayout
+@@ -55,4 +45,4 @@
+         android:divider="@android:color/transparent"
+         android:dividerHeight="0dp" />
+ 
+-</android.support.v4.widget.DrawerLayout>
+\ No newline at end of file
++</android.support.v4.widget.DrawerLayout>
+diff --git a/qBittorrentClient/src/com/lgallardo/qbittorrentclient/MainActivity.java b/qBittorrentClient/src/com/lgallardo/qbittorrentclient/MainActivity.java
+index 147d00d..a55edf2 100644
+--- a/qBittorrentClient/src/com/lgallardo/qbittorrentclient/MainActivity.java
++++ b/qBittorrentClient/src/com/lgallardo/qbittorrentclient/MainActivity.java
+@@ -48,9 +48,6 @@ import android.widget.ListView;
+ import android.widget.TextView;
+ import android.widget.Toast;
+ 
+-import com.google.android.gms.ads.AdRequest;
+-import com.google.android.gms.ads.AdView;
+-
+ public class MainActivity extends FragmentActivity {
+ 
+ 	// Params to get JSON Array
+@@ -168,8 +165,6 @@ public class MainActivity extends FragmentActivity {
+ 	private Handler handler;
+ 	private boolean canrefresh = true;
+ 
+-	private AdView adView;
+-
+ 	// For checking if the app is visible
+ 	private boolean activityIsVisible = true;
+ 
+@@ -347,18 +342,6 @@ public class MainActivity extends FragmentActivity {
+ 		activityIsVisible = false;
+ 	}
+ 
+-	// Load Banner
+-
+-	public void loadBanner() {
+-
+-		// Look up the AdView as a resource and load a request.
+-		adView = (AdView) this.findViewById(R.id.adView);
+-		AdRequest adRequest = new AdRequest.Builder().build();
+-
+-		// Start loading the ad in the background.
+-		adView.loadAd(adRequest);
+-	}
+-
+ 	// Auto-refresh runnable
+ 	private final Runnable m_Runnable = new Runnable() {
+ 		public void run()
+@@ -489,9 +472,6 @@ public class MainActivity extends FragmentActivity {
+ 
+ 			qtt.execute(params);
+ 
+-			// Load banner
+-			loadBanner();
+-
+ 			// If activity is visible, Connecting message
+ 			if (activityIsVisible) {
+ 				// Connecting message
+diff --git a/qBittorrentClient/src/com/lgallardo/qbittorrentclient/TorrentDetailsFragment.java b/qBittorrentClient/src/com/lgallardo/qbittorrentclient/TorrentDetailsFragment.java
+index 28aa42f..a12a937 100644
+--- a/qBittorrentClient/src/com/lgallardo/qbittorrentclient/TorrentDetailsFragment.java
++++ b/qBittorrentClient/src/com/lgallardo/qbittorrentclient/TorrentDetailsFragment.java
+@@ -12,10 +12,6 @@ package com.lgallardo.qbittorrentclient;
+ 
+ import org.json.JSONObject;
+ 
+-import com.google.android.gms.ads.AdRequest;
+-import com.google.android.gms.ads.AdSize;
+-import com.google.android.gms.ads.AdView;
+-
+ import android.app.Fragment;
+ import android.content.pm.ActivityInfo;
+ import android.os.AsyncTask;
+@@ -50,7 +46,6 @@ public class TorrentDetailsFragment extends Fragment {
+ 
+ 	JSONObject json2;
+ 
+-	private AdView adView;
+ 	private View rootView;
+ 
+ 	public TorrentDetailsFragment() {
+@@ -204,9 +199,6 @@ public class TorrentDetailsFragment extends Fragment {
+ 			// TODO Auto-generated catch block
+ 			Log.e("TorrentDetailsFragment - onCreateView", e.toString());
+ 		}
+-
+-		// Load banner
+-		loadBanner();
+ 		
+ 		
+ 		// Execute the task in background
+@@ -244,33 +236,6 @@ public class TorrentDetailsFragment extends Fragment {
+ 
+ 		}
+ 	}
+-
+-	// Load Banner
+-	public void loadBanner() {
+-
+-		// LinearLayout linearLayout = null;
+-
+-		// linearLayout.removeView(adView);
+-		//
+-		// LinearLayout.LayoutParams adsParams = new
+-		// LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
+-		// LinearLayout.LayoutParams.WRAP_CONTENT,
+-		// android.view.Gravity.BOTTOM |
+-		// android.view.Gravity.CENTER_HORIZONTAL);
+-		//
+-		//
+-		// linearLayout.addView(adView, adsParams);
+-		//
+-
+-		// Get the adView.
+-		adView = (AdView) getActivity().findViewById(R.id.adView);
+-
+-		AdRequest adRequest = new AdRequest.Builder().build();
+-
+-		// Start loading the ad in the background.
+-		adView.loadAd(adRequest);
+-
+-	}
+ 	
+ 	// Here is where the action happens
+ 	private class qBittorrentGeneralInfoTask extends AsyncTask<View, View, View[]> {
