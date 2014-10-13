@@ -9,13 +9,12 @@ Source Code:http://hg.mozilla.org
 Issue Tracker:https://bugzilla.mozilla.org
 Donate:https://sendto.mozilla.org/page/contribute/openwebfund
 
-Name:Firefox
+Name:Fennec Fdroid
 Summary:Web browser
 Description:
-Mobile version of the Firefox web browser. Uses the Gecko layout engine to
-render web pages, which implements current and anticipated web standards.
-Features include: bookmark sync, custom search engines, support for addons
-and the ability to enable or disable the search suggestions.
+Browser using the Gecko layout engine to render web pages, which implements
+current and anticipated web standards. This is a developer build based on
+the latest Firefox release.
 
 Anti-features: Non-free Addons: The license of the addons/modules on
 addons.mozilla.org may be seen in the version notes of the addon and often the
@@ -23,8 +22,6 @@ license is Custom or other non-free.
 However there is no such license info for most apps from the marketplace.
 Tracking: Stats are sent back regularly to the developers, but that can
 be disabled via settings.
-
-THIS IS A DEVELOPMENT BUILD -- DO NOT INSTALL
 .
 
 Repo Type:hg
@@ -76,6 +73,32 @@ Build:31.0,2014071713
         mv obj-${fxarch}/dist/fennec-*.apk fdroid/fennec-unsigned.apk && \
         zip -d fdroid/fennec-unsigned.apk "META-INF*"
 
+Build:33.0,2014101300
+    disable=play-services
+    commit=FENNEC_33_0_RELEASE
+    output=fdroid/fennec-unsigned.apk
+    prebuild=mkdir fdroid && \
+        sed -i -e 's/android:debuggable="true"//g' -e 's/@ANDROID_VERSION_CODE@/2014101300/g' mobile/android/base/AndroidManifest.xml.in && \
+        echo "ac_add_options --with-android-ndk=\"$$NDK$$\"" > .mozconfig && \
+        echo "ac_add_options --with-android-sdk=\"$$SDK$$/platforms/android-20\"" >> .mozconfig && \
+        echo "ac_add_options --enable-application=mobile/android" >> .mozconfig && \
+        echo "ac_add_options --target=arm-linux-androideabi" >> .mozconfig && \
+        echo "ac_add_options --disable-tests" >> .mozconfig && \
+        echo "ac_add_options --disable-crashreporter" >> .mozconfig && \
+        echo "ac_add_options --with-branding=mobile/android/branding/unofficial" >> .mozconfig && \
+        pushd mobile/android/branding/unofficial/ && \
+        sed -i -e '/ANDROID_PACKAGE_NAME/d' -e '/MOZ_APP_DISPLAYNAME/d' configure.sh && \
+        echo 'ANDROID_PACKAGE_NAME=org.mozilla.fennec.fdroid' >> configure.sh && \
+        echo 'MOZ_APP_DISPLAYNAME=Fennec FDroid' >> configure.sh && \
+        popd && \
+        sed -i -e '/MOZ_DEVICES/d' -e '/MOZ_NATIVE_DEVICES/d' mobile/android/confvars.sh && \
+        echo -e 'MOZ_DEVICES=0\nMOZ_NATIVE_DEVICES=0\n' >> mobile/android/confvars.sh
+    build=./mach build && \
+        ./mach package && \
+        fxarch=`grep "ac_add_options --target=" .mozconfig | cut -d '=' -f2` && \
+        mv obj-${fxarch}/dist/fennec-*.apk fdroid/fennec-unsigned.apk && \
+        zip -d fdroid/fennec-unsigned.apk "META-INF*"
+
 Maintainer Notes:
 
 Issues:
@@ -89,6 +112,12 @@ Issues:
      * https://hg.mozilla.org/mozilla-central/rev/f8fb26b28dea
      * https://bugzilla.mozilla.org/show_bug.cgi?id=1055909
      * https://bugzilla.mozilla.org/show_bug.cgi?id=1033560
+     * Building FENNEC_33_0_RELEASE:
+       0:09.21 configure: error: You must download Google Play Services to build
+               with native video casting support enabled.  Run the Android SDK
+               tool and install Google Play Services under Extras.  See
+               http://developer.android.com/google/play-services/setup.html for
+               more info.
 
 Dependencies:
  * apt-get build-dep firefox
@@ -104,26 +133,7 @@ Updating/Versioning:
  * Update Check Mode:Tags ^FENNEC_[1-9][0-9]*_[0-9]*_RELEASE$
  * versionCode via ANDROID_VERSION_CODE is datestring with some magic applied
    and changes every build!
- * Half-automated way of getting current VC:
-
-android_sdk=/home/krt/tmp/fdroid/android-sdk-linux
-build_tools=20.0.0
-
-lftp -e 'mget *apk;quit' ftp://ftp.mozilla.org/pub/mozilla.org/mobile/releases/latest/android/en-US/
-lftp -e 'mget *apk;quit' ftp://ftp.mozilla.org/pub/mozilla.org/mobile/releases/latest/android-x86/en-US/
-
-for apk in `ls *apk`
-do
-    verarch=`basename ${apk} .apk | cut -d '-' -f '4-'`
-    verinfo=`${android_sdk}/build-tools/${build_tools}/aapt dump badging ${apk} | grep ^package`
-    vercode=`echo ${verinfo} | sed -e 's/ versionCode=/\n/g' -e 's/ versionName=/\n/g' | tail -n2 | head -n1 | tr -d \'`
-    vername=`echo ${verinfo} | sed -e 's/ versionCode=/\n/g' -e 's/ versionName=/\n/g' | tail -n2 | tail -n1 | tr -d \'`
-    echo $verarch
-    echo $vercode
-    echo $vername
-    rm ${apk}
-done
-
+ * Since we no longer target a official build, we are free to use any VC.
 .
 
 Auto Update Mode:None
