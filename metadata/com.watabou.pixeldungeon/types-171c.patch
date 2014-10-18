@@ -1,0 +1,39 @@
+From cc0431581cf8b290357675b1c5964640c8850285 Mon Sep 17 00:00:00 2001
+From: Lertsenem <lertsenem@yahoo.fr>
+Date: Wed, 30 Jul 2014 00:12:43 +0200
+Subject: [PATCH] Cast error in RegularLevel and Heap
+
+The (Collection<? extends Item>) bundle.getCollection(ITEM) cast fails
+at compile time because Item extends (well, implements) Bundlable, not
+the opposite.
+---
+ src/com/watabou/pixeldungeon/items/Heap.java          | 2 +-
+ src/com/watabou/pixeldungeon/levels/RegularLevel.java | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/src/com/watabou/pixeldungeon/items/Heap.java b/src/com/watabou/pixeldungeon/items/Heap.java
+index 59325bc..6f4fa6d 100644
+--- a/src/com/watabou/pixeldungeon/items/Heap.java
++++ b/src/com/watabou/pixeldungeon/items/Heap.java
+@@ -324,7 +324,7 @@ public void destroy() {
+ 	public void restoreFromBundle( Bundle bundle ) {
+ 		pos = bundle.getInt( POS );
+ 		type = Type.valueOf( bundle.getString( TYPE ) );
+-		items = new LinkedList<Item>( (Collection<? extends Item>) bundle.getCollection( ITEMS ) ); 
++		items = new LinkedList<Item>( (Collection<Item>) ((Collection<?>) bundle.getCollection( ITEMS )) ); 
+ 	}
+ 
+ 	@Override
+diff --git a/src/com/watabou/pixeldungeon/levels/RegularLevel.java b/src/com/watabou/pixeldungeon/levels/RegularLevel.java
+index 450dd8a..e7badb9 100644
+--- a/src/com/watabou/pixeldungeon/levels/RegularLevel.java
++++ b/src/com/watabou/pixeldungeon/levels/RegularLevel.java
+@@ -682,7 +682,7 @@ public void storeInBundle( Bundle bundle ) {
+ 	public void restoreFromBundle( Bundle bundle ) {
+ 		super.restoreFromBundle( bundle );
+ 
+-		rooms = new HashSet<Room>( (Collection<? extends Room>) bundle.getCollection( "rooms" ) );
++		rooms = new HashSet<Room>( (Collection<Room>) ((Collection<?>) bundle.getCollection( "rooms" )) );
+ 		for (Room r : rooms) {
+ 			if (r.type == Type.WEAK_FLOOR) {
+ 				weakFloorCreated = true;
