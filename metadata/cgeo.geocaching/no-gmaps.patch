@@ -1,0 +1,1014 @@
+From a327f7edcbe0e8496e3f1a21f1196e6285b57ae8 Mon Sep 17 00:00:00 2001
+From: Wolfgang Wiedmeyer <wreg@wiedmeyer.de>
+Date: Sat, 11 Oct 2014 13:46:50 +0200
+Subject: [PATCH 1/2] google maps removed
+
+---
+ main/project.properties                            |   2 +-
+ .../cgeo/geocaching/maps/MapProviderFactory.java   |   8 +-
+ .../maps/google/v1/GoogleCacheOverlay.java         | 120 ------------
+ .../maps/google/v1/GoogleCacheOverlayItem.java     |  30 ---
+ .../geocaching/maps/google/v1/GoogleGeoPoint.java  |  19 --
+ .../maps/google/v1/GoogleMapActivity.java          | 129 -------------
+ .../maps/google/v1/GoogleMapController.java        |  42 -----
+ .../maps/google/v1/GoogleMapItemFactory.java       |  20 --
+ .../maps/google/v1/GoogleMapProjection.java        |  29 ---
+ .../maps/google/v1/GoogleMapProvider.java          |  92 ----------
+ .../geocaching/maps/google/v1/GoogleMapView.java   | 202 ---------------------
+ .../geocaching/maps/google/v1/GoogleOverlay.java   |  54 ------
+ main/src/cgeo/geocaching/settings/Settings.java    |  62 +++----
+ 13 files changed, 36 insertions(+), 773 deletions(-)
+ delete mode 100644 main/src/cgeo/geocaching/maps/google/v1/GoogleCacheOverlay.java
+ delete mode 100644 main/src/cgeo/geocaching/maps/google/v1/GoogleCacheOverlayItem.java
+ delete mode 100644 main/src/cgeo/geocaching/maps/google/v1/GoogleGeoPoint.java
+ delete mode 100644 main/src/cgeo/geocaching/maps/google/v1/GoogleMapActivity.java
+ delete mode 100644 main/src/cgeo/geocaching/maps/google/v1/GoogleMapController.java
+ delete mode 100644 main/src/cgeo/geocaching/maps/google/v1/GoogleMapItemFactory.java
+ delete mode 100644 main/src/cgeo/geocaching/maps/google/v1/GoogleMapProjection.java
+ delete mode 100644 main/src/cgeo/geocaching/maps/google/v1/GoogleMapProvider.java
+ delete mode 100644 main/src/cgeo/geocaching/maps/google/v1/GoogleMapView.java
+ delete mode 100644 main/src/cgeo/geocaching/maps/google/v1/GoogleOverlay.java
+
+diff --git a/main/project.properties b/main/project.properties
+index a228075..b341d6c 100644
+--- a/main/project.properties
++++ b/main/project.properties
+@@ -11,7 +11,7 @@
+ proguard.config=${sdk.dir}/tools/proguard/proguard-android.txt:proguard-project.txt
+ 
+ # Project target.
+-target=Google Inc.:Google APIs:19
++target=android-19
+ android.library.reference.1=../mapswithme-api
+ android.library.reference.2=../android-support-v7-appcompat
+ java.source=1.7
+diff --git a/main/src/cgeo/geocaching/maps/MapProviderFactory.java b/main/src/cgeo/geocaching/maps/MapProviderFactory.java
+index dd4ff0f..8685d94 100644
+--- a/main/src/cgeo/geocaching/maps/MapProviderFactory.java
++++ b/main/src/cgeo/geocaching/maps/MapProviderFactory.java
+@@ -2,7 +2,7 @@ package cgeo.geocaching.maps;
+ 
+ import cgeo.geocaching.CgeoApplication;
+ import cgeo.geocaching.R;
+-import cgeo.geocaching.maps.google.v1.GoogleMapProvider;
++//import cgeo.geocaching.maps.google.v1.GoogleMapProvider;
+ import cgeo.geocaching.maps.interfaces.MapProvider;
+ import cgeo.geocaching.maps.interfaces.MapSource;
+ import cgeo.geocaching.maps.mapsforge.MapsforgeMapProvider;
+@@ -25,9 +25,9 @@ public class MapProviderFactory {
+ 
+     static {
+         // add GoogleMapProvider only if google api is available in order to support x86 android emulator
+-        if (isGoogleMapsInstalled()) {
+-            GoogleMapProvider.getInstance();
+-        }
++//        if (isGoogleMapsInstalled()) {
++//            GoogleMapProvider.getInstance();
++//        }
+         MapsforgeMapProvider.getInstance();
+     }
+ 
+diff --git a/main/src/cgeo/geocaching/maps/google/v1/GoogleCacheOverlay.java b/main/src/cgeo/geocaching/maps/google/v1/GoogleCacheOverlay.java
+deleted file mode 100644
+index 9b18c2d..0000000
+--- a/main/src/cgeo/geocaching/maps/google/v1/GoogleCacheOverlay.java
++++ /dev/null
+@@ -1,120 +0,0 @@
+-package cgeo.geocaching.maps.google.v1;
+-
+-import cgeo.geocaching.maps.CachesOverlay;
+-import cgeo.geocaching.maps.interfaces.ItemizedOverlayImpl;
+-import cgeo.geocaching.maps.interfaces.MapProjectionImpl;
+-import cgeo.geocaching.maps.interfaces.MapViewImpl;
+-
+-import com.google.android.maps.ItemizedOverlay;
+-import com.google.android.maps.MapView;
+-
+-import android.content.Context;
+-import android.graphics.Canvas;
+-import android.graphics.Point;
+-import android.graphics.drawable.Drawable;
+-
+-import java.util.concurrent.locks.Lock;
+-import java.util.concurrent.locks.ReentrantLock;
+-
+-/**
+- * Google specific implementation of the itemized cache overlay
+- */
+-public class GoogleCacheOverlay extends ItemizedOverlay<GoogleCacheOverlayItem> implements ItemizedOverlayImpl {
+-
+-    private CachesOverlay base;
+-    private Lock lock = new ReentrantLock();
+-
+-    public GoogleCacheOverlay(Context contextIn, Drawable markerIn) {
+-        super(boundCenterBottom(markerIn));
+-        base = new CachesOverlay(this, contextIn);
+-    }
+-
+-    @Override
+-    public CachesOverlay getBase() {
+-        return base;
+-    }
+-
+-    @Override
+-    protected GoogleCacheOverlayItem createItem(int i) {
+-        if (base == null) {
+-            return null;
+-        }
+-
+-        return (GoogleCacheOverlayItem) base.createItem(i);
+-    }
+-
+-    @Override
+-    public int size() {
+-        if (base == null) {
+-            return 0;
+-        }
+-
+-        return base.size();
+-    }
+-
+-    @Override
+-    protected boolean onTap(int arg0) {
+-        if (base == null) {
+-            return false;
+-        }
+-
+-        return base.onTap(arg0);
+-    }
+-
+-    @Override
+-    public void draw(Canvas canvas, MapView mapView, boolean shadow) {
+-        base.draw(canvas, castMapViewImpl(mapView), shadow);
+-    }
+-
+-    private static MapViewImpl castMapViewImpl(MapView mapView) {
+-        assert mapView instanceof MapViewImpl;
+-        return (MapViewImpl) mapView;
+-    }
+-
+-    @Override
+-    public void superPopulate() {
+-        populate();
+-    }
+-
+-    @Override
+-    public Drawable superBoundCenterBottom(Drawable marker) {
+-        return ItemizedOverlay.boundCenterBottom(marker);
+-    }
+-
+-    @Override
+-    public void superSetLastFocusedItemIndex(int i) {
+-        super.setLastFocusedIndex(i);
+-    }
+-
+-    @Override
+-    public boolean superOnTap(int index) {
+-        return super.onTap(index);
+-    }
+-
+-    @Override
+-    public void superDraw(Canvas canvas, MapViewImpl mapView, boolean shadow) {
+-        super.draw(canvas, (MapView) mapView, shadow);
+-    }
+-
+-    @Override
+-    public void superDrawOverlayBitmap(Canvas canvas, Point drawPosition,
+-            MapProjectionImpl projection, byte drawZoomLevel) {
+-        // Nothing to do here...
+-    }
+-
+-    @Override
+-    public void lock() {
+-        lock.lock();
+-    }
+-
+-    @Override
+-    public void unlock() {
+-        lock.unlock();
+-    }
+-
+-    @Override
+-    public MapViewImpl getMapViewImpl() {
+-        throw new UnsupportedOperationException();
+-    }
+-
+-}
+diff --git a/main/src/cgeo/geocaching/maps/google/v1/GoogleCacheOverlayItem.java b/main/src/cgeo/geocaching/maps/google/v1/GoogleCacheOverlayItem.java
+deleted file mode 100644
+index 463aae9..0000000
+--- a/main/src/cgeo/geocaching/maps/google/v1/GoogleCacheOverlayItem.java
++++ /dev/null
+@@ -1,30 +0,0 @@
+-package cgeo.geocaching.maps.google.v1;
+-
+-import cgeo.geocaching.IWaypoint;
+-import cgeo.geocaching.maps.interfaces.CachesOverlayItemImpl;
+-
+-import com.google.android.maps.GeoPoint;
+-import com.google.android.maps.OverlayItem;
+-
+-public class GoogleCacheOverlayItem extends OverlayItem implements CachesOverlayItemImpl {
+-    final private IWaypoint coord;
+-    final private boolean applyDistanceRule;
+-
+-    public GoogleCacheOverlayItem(final IWaypoint coordinate, boolean applyDistanceRule) {
+-        super(new GeoPoint(coordinate.getCoords().getLatitudeE6(), coordinate.getCoords().getLongitudeE6()), coordinate.getName(), "");
+-
+-        this.coord = coordinate;
+-        this.applyDistanceRule = applyDistanceRule;
+-    }
+-
+-    @Override
+-    public IWaypoint getCoord() {
+-        return coord;
+-    }
+-
+-    @Override
+-    public boolean applyDistanceRule() {
+-        return applyDistanceRule;
+-    }
+-
+-}
+diff --git a/main/src/cgeo/geocaching/maps/google/v1/GoogleGeoPoint.java b/main/src/cgeo/geocaching/maps/google/v1/GoogleGeoPoint.java
+deleted file mode 100644
+index 2f540ad..0000000
+--- a/main/src/cgeo/geocaching/maps/google/v1/GoogleGeoPoint.java
++++ /dev/null
+@@ -1,19 +0,0 @@
+-package cgeo.geocaching.maps.google.v1;
+-
+-import cgeo.geocaching.geopoint.Geopoint;
+-import cgeo.geocaching.maps.interfaces.GeoPointImpl;
+-
+-import com.google.android.maps.GeoPoint;
+-
+-public class GoogleGeoPoint extends GeoPoint implements GeoPointImpl {
+-
+-    public GoogleGeoPoint(int latitudeE6, int longitudeE6) {
+-        super(latitudeE6, longitudeE6);
+-    }
+-
+-    @Override
+-    public Geopoint getCoords() {
+-        return new Geopoint(getLatitudeE6() / 1e6, getLongitudeE6() / 1e6);
+-    }
+-
+-}
+diff --git a/main/src/cgeo/geocaching/maps/google/v1/GoogleMapActivity.java b/main/src/cgeo/geocaching/maps/google/v1/GoogleMapActivity.java
+deleted file mode 100644
+index 374e7b0..0000000
+--- a/main/src/cgeo/geocaching/maps/google/v1/GoogleMapActivity.java
++++ /dev/null
+@@ -1,129 +0,0 @@
+-package cgeo.geocaching.maps.google.v1;
+-
+-import cgeo.geocaching.activity.ActivityMixin;
+-import cgeo.geocaching.activity.FilteredActivity;
+-import cgeo.geocaching.maps.AbstractMap;
+-import cgeo.geocaching.maps.CGeoMap;
+-import cgeo.geocaching.maps.interfaces.MapActivityImpl;
+-
+-import com.google.android.maps.MapActivity;
+-
+-import android.app.Activity;
+-import android.os.Bundle;
+-import android.view.Menu;
+-import android.view.MenuItem;
+-import android.view.View;
+-
+-public class GoogleMapActivity extends MapActivity implements MapActivityImpl, FilteredActivity {
+-
+-    private AbstractMap mapBase;
+-
+-    public GoogleMapActivity() {
+-        mapBase = new CGeoMap(this);
+-    }
+-
+-    @Override
+-    protected boolean isRouteDisplayed() {
+-        return false;
+-    }
+-
+-    @Override
+-    public Activity getActivity() {
+-        return this;
+-    }
+-
+-    @Override
+-    protected void onCreate(Bundle icicle) {
+-        mapBase.onCreate(icicle);
+-    }
+-
+-    @Override
+-    protected void onSaveInstanceState(final Bundle outState) {
+-        mapBase.onSaveInstanceState(outState);
+-    }
+-
+-    @Override
+-    protected void onDestroy() {
+-        mapBase.onDestroy();
+-    }
+-
+-    @Override
+-    protected void onPause() {
+-        mapBase.onPause();
+-    }
+-
+-    @Override
+-    protected void onResume() {
+-        mapBase.onResume();
+-    }
+-
+-    @Override
+-    public boolean onCreateOptionsMenu(Menu menu) {
+-        return mapBase.onCreateOptionsMenu(menu);
+-    }
+-
+-    @Override
+-    public boolean onOptionsItemSelected(MenuItem item) {
+-        return mapBase.onOptionsItemSelected(item);
+-    }
+-
+-    @Override
+-    public boolean onPrepareOptionsMenu(Menu menu) {
+-        return mapBase.onPrepareOptionsMenu(menu);
+-    }
+-
+-    @Override
+-    protected void onStop() {
+-        mapBase.onStop();
+-    }
+-
+-    @Override
+-    public void superOnCreate(Bundle savedInstanceState) {
+-        super.onCreate(savedInstanceState);
+-    }
+-
+-    @Override
+-    public boolean superOnCreateOptionsMenu(Menu menu) {
+-        return super.onCreateOptionsMenu(menu);
+-    }
+-
+-    @Override
+-    public void superOnDestroy() {
+-        super.onDestroy();
+-    }
+-
+-    @Override
+-    public boolean superOnOptionsItemSelected(MenuItem item) {
+-        return super.onOptionsItemSelected(item);
+-    }
+-
+-    @Override
+-    public void navigateUp(View view) {
+-        ActivityMixin.navigateUp(this);
+-    }
+-
+-    @Override
+-    public void superOnResume() {
+-        super.onResume();
+-    }
+-
+-    @Override
+-    public void superOnStop() {
+-        super.onStop();
+-    }
+-
+-    @Override
+-    public void superOnPause() {
+-        super.onPause();
+-    }
+-
+-    @Override
+-    public boolean superOnPrepareOptionsMenu(Menu menu) {
+-        return super.onPrepareOptionsMenu(menu);
+-    }
+-
+-    @Override
+-    public void showFilterMenu(View view) {
+-        // do nothing, the filter bar only shows the global filter
+-    }
+-}
+diff --git a/main/src/cgeo/geocaching/maps/google/v1/GoogleMapController.java b/main/src/cgeo/geocaching/maps/google/v1/GoogleMapController.java
+deleted file mode 100644
+index ea95676..0000000
+--- a/main/src/cgeo/geocaching/maps/google/v1/GoogleMapController.java
++++ /dev/null
+@@ -1,42 +0,0 @@
+-package cgeo.geocaching.maps.google.v1;
+-
+-import cgeo.geocaching.maps.interfaces.GeoPointImpl;
+-import cgeo.geocaching.maps.interfaces.MapControllerImpl;
+-
+-import com.google.android.maps.GeoPoint;
+-import com.google.android.maps.MapController;
+-
+-public class GoogleMapController implements MapControllerImpl {
+-
+-    private MapController mapController;
+-
+-    public GoogleMapController(MapController mapControllerIn) {
+-        mapController = mapControllerIn;
+-    }
+-
+-    @Override
+-    public void animateTo(GeoPointImpl geoPoint) {
+-        mapController.animateTo(castToGeoPointImpl(geoPoint));
+-    }
+-
+-    private static GeoPoint castToGeoPointImpl(GeoPointImpl geoPoint) {
+-        assert geoPoint instanceof GeoPoint;
+-        return (GeoPoint) geoPoint;
+-    }
+-
+-    @Override
+-    public void setCenter(GeoPointImpl geoPoint) {
+-        mapController.setCenter(castToGeoPointImpl(geoPoint));
+-    }
+-
+-    @Override
+-    public void setZoom(int mapzoom) {
+-        mapController.setZoom(mapzoom);
+-    }
+-
+-    @Override
+-    public void zoomToSpan(int latSpanE6, int lonSpanE6) {
+-        mapController.zoomToSpan(latSpanE6, lonSpanE6);
+-    }
+-
+-}
+diff --git a/main/src/cgeo/geocaching/maps/google/v1/GoogleMapItemFactory.java b/main/src/cgeo/geocaching/maps/google/v1/GoogleMapItemFactory.java
+deleted file mode 100644
+index d7e9380..0000000
+--- a/main/src/cgeo/geocaching/maps/google/v1/GoogleMapItemFactory.java
++++ /dev/null
+@@ -1,20 +0,0 @@
+-package cgeo.geocaching.maps.google.v1;
+-
+-import cgeo.geocaching.IWaypoint;
+-import cgeo.geocaching.geopoint.Geopoint;
+-import cgeo.geocaching.maps.interfaces.CachesOverlayItemImpl;
+-import cgeo.geocaching.maps.interfaces.GeoPointImpl;
+-import cgeo.geocaching.maps.interfaces.MapItemFactory;
+-
+-public class GoogleMapItemFactory implements MapItemFactory {
+-
+-    @Override
+-    public GeoPointImpl getGeoPointBase(final Geopoint coords) {
+-        return new GoogleGeoPoint(coords.getLatitudeE6(), coords.getLongitudeE6());
+-    }
+-
+-    @Override
+-    public CachesOverlayItemImpl getCachesOverlayItem(final IWaypoint coordinate, boolean applyDistanceRule) {
+-        return new GoogleCacheOverlayItem(coordinate, applyDistanceRule);
+-    }
+-}
+diff --git a/main/src/cgeo/geocaching/maps/google/v1/GoogleMapProjection.java b/main/src/cgeo/geocaching/maps/google/v1/GoogleMapProjection.java
+deleted file mode 100644
+index 901a369..0000000
+--- a/main/src/cgeo/geocaching/maps/google/v1/GoogleMapProjection.java
++++ /dev/null
+@@ -1,29 +0,0 @@
+-package cgeo.geocaching.maps.google.v1;
+-
+-import cgeo.geocaching.maps.interfaces.GeoPointImpl;
+-import cgeo.geocaching.maps.interfaces.MapProjectionImpl;
+-
+-import com.google.android.maps.GeoPoint;
+-import com.google.android.maps.Projection;
+-
+-import android.graphics.Point;
+-
+-public class GoogleMapProjection implements MapProjectionImpl {
+-
+-    private Projection projection;
+-
+-    public GoogleMapProjection(Projection projectionIn) {
+-        projection = projectionIn;
+-    }
+-
+-    @Override
+-    public void toPixels(GeoPointImpl leftGeo, Point left) {
+-        projection.toPixels((GeoPoint) leftGeo, left);
+-    }
+-
+-    @Override
+-    public Object getImpl() {
+-        return projection;
+-    }
+-
+-}
+diff --git a/main/src/cgeo/geocaching/maps/google/v1/GoogleMapProvider.java b/main/src/cgeo/geocaching/maps/google/v1/GoogleMapProvider.java
+deleted file mode 100644
+index 884e076..0000000
+--- a/main/src/cgeo/geocaching/maps/google/v1/GoogleMapProvider.java
++++ /dev/null
+@@ -1,92 +0,0 @@
+-package cgeo.geocaching.maps.google.v1;
+-
+-import cgeo.geocaching.CgeoApplication;
+-import cgeo.geocaching.R;
+-import cgeo.geocaching.maps.AbstractMapProvider;
+-import cgeo.geocaching.maps.AbstractMapSource;
+-import cgeo.geocaching.maps.interfaces.MapItemFactory;
+-import cgeo.geocaching.maps.interfaces.MapProvider;
+-import cgeo.geocaching.maps.interfaces.MapSource;
+-
+-import com.google.android.maps.MapActivity;
+-
+-import android.content.res.Resources;
+-
+-public final class GoogleMapProvider extends AbstractMapProvider {
+-
+-    public static final String GOOGLE_MAP_ID = "GOOGLE_MAP";
+-    public static final String GOOGLE_SATELLITE_ID = "GOOGLE_SATELLITE";
+-
+-    private final MapItemFactory mapItemFactory;
+-
+-    private GoogleMapProvider() {
+-        final Resources resources = CgeoApplication.getInstance().getResources();
+-
+-        registerMapSource(new GoogleMapSource(this, resources.getString(R.string.map_source_google_map)));
+-        registerMapSource(new GoogleSatelliteSource(this, resources.getString(R.string.map_source_google_satellite)));
+-
+-        mapItemFactory = new GoogleMapItemFactory();
+-    }
+-
+-    private static class Holder {
+-        private static final GoogleMapProvider INSTANCE = new GoogleMapProvider();
+-    }
+-
+-    public static GoogleMapProvider getInstance() {
+-        return Holder.INSTANCE;
+-    }
+-
+-    public static boolean isSatelliteSource(final MapSource mapSource) {
+-        return mapSource instanceof GoogleSatelliteSource;
+-    }
+-
+-    @Override
+-    public Class<? extends MapActivity> getMapClass() {
+-        return GoogleMapActivity.class;
+-    }
+-
+-    @Override
+-    public int getMapViewId() {
+-        return R.id.map;
+-    }
+-
+-    @Override
+-    public int getMapLayoutId() {
+-        return R.layout.map_google;
+-    }
+-
+-    @Override
+-    public MapItemFactory getMapItemFactory() {
+-        return mapItemFactory;
+-    }
+-
+-    @Override
+-    public boolean isSameActivity(final MapSource source1, final MapSource source2) {
+-        return true;
+-    }
+-
+-    private static abstract class AbstractGoogleMapSource extends AbstractMapSource {
+-
+-        protected AbstractGoogleMapSource(final String id, final MapProvider mapProvider, final String name) {
+-            super(id, mapProvider, name);
+-        }
+-
+-    }
+-
+-    private static final class GoogleMapSource extends AbstractGoogleMapSource {
+-
+-        public GoogleMapSource(final MapProvider mapProvider, final String name) {
+-            super(GOOGLE_MAP_ID, mapProvider, name);
+-        }
+-
+-    }
+-
+-    private static final class GoogleSatelliteSource extends AbstractGoogleMapSource {
+-
+-        public GoogleSatelliteSource(MapProvider mapProvider, String name) {
+-            super(GOOGLE_SATELLITE_ID, mapProvider, name);
+-        }
+-
+-    }
+-
+-}
+diff --git a/main/src/cgeo/geocaching/maps/google/v1/GoogleMapView.java b/main/src/cgeo/geocaching/maps/google/v1/GoogleMapView.java
+deleted file mode 100644
+index c611790..0000000
+--- a/main/src/cgeo/geocaching/maps/google/v1/GoogleMapView.java
++++ /dev/null
+@@ -1,202 +0,0 @@
+-package cgeo.geocaching.maps.google.v1;
+-
+-import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
+-
+-import cgeo.geocaching.geopoint.Viewport;
+-import cgeo.geocaching.maps.CachesOverlay;
+-import cgeo.geocaching.maps.PositionAndScaleOverlay;
+-import cgeo.geocaching.maps.interfaces.GeneralOverlay;
+-import cgeo.geocaching.maps.interfaces.GeoPointImpl;
+-import cgeo.geocaching.maps.interfaces.MapControllerImpl;
+-import cgeo.geocaching.maps.interfaces.MapProjectionImpl;
+-import cgeo.geocaching.maps.interfaces.MapViewImpl;
+-import cgeo.geocaching.maps.interfaces.OnMapDragListener;
+-import cgeo.geocaching.settings.Settings;
+-import cgeo.geocaching.utils.Log;
+-
+-import com.google.android.maps.GeoPoint;
+-import com.google.android.maps.MapView;
+-
+-import org.apache.commons.lang3.reflect.MethodUtils;
+-import org.eclipse.jdt.annotation.NonNull;
+-
+-import android.content.Context;
+-import android.graphics.Canvas;
+-import android.graphics.drawable.Drawable;
+-import android.util.AttributeSet;
+-import android.view.GestureDetector;
+-import android.view.GestureDetector.SimpleOnGestureListener;
+-import android.view.Gravity;
+-import android.view.MotionEvent;
+-import android.widget.FrameLayout;
+-import android.widget.ZoomButtonsController;
+-
+-public class GoogleMapView extends MapView implements MapViewImpl {
+-    private GestureDetector gestureDetector;
+-    private OnMapDragListener onDragListener;
+-    private final GoogleMapController mapController = new GoogleMapController(getController());
+-
+-    public GoogleMapView(Context context, AttributeSet attrs) {
+-        super(context, attrs);
+-        initialize(context);
+-    }
+-
+-    public GoogleMapView(Context context, AttributeSet attrs, int defStyle) {
+-        super(context, attrs, defStyle);
+-        initialize(context);
+-    }
+-
+-    public GoogleMapView(Context context, String apiKey) {
+-        super(context, apiKey);
+-        initialize(context);
+-    }
+-
+-    private void initialize(Context context) {
+-        if (isInEditMode()) {
+-            return;
+-        }
+-        gestureDetector = new GestureDetector(context, new GestureListener());
+-    }
+-
+-    @Override
+-    public void draw(final Canvas canvas) {
+-        try {
+-            if (getMapZoomLevel() > 22) { // to avoid too close zoom level (mostly on Samsung Galaxy S series)
+-                getController().setZoom(22);
+-            }
+-
+-            super.draw(canvas);
+-        } catch (Exception e) {
+-            Log.e("GoogleMapView.draw", e);
+-        }
+-    }
+-
+-    @Override
+-    public void displayZoomControls(boolean takeFocus) {
+-        try {
+-            // Push zoom controls to the right
+-            FrameLayout.LayoutParams zoomParams = new FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT);
+-            zoomParams.gravity = Gravity.RIGHT;
+-            // The call to retrieve the zoom buttons controller is undocumented and works so far on all devices
+-            // supported by Google Play, but fails at least on one Jolla.
+-            final ZoomButtonsController controller = (ZoomButtonsController) MethodUtils.invokeMethod(this, "getZoomButtonsController");
+-            controller.getZoomControls().setLayoutParams(zoomParams);
+-
+-            super.displayZoomControls(takeFocus);
+-        } catch (NoSuchMethodException e) {
+-            Log.w("GoogleMapView.displayZoomControls: unable to explicitly place the zoom buttons");
+-        } catch (Exception e) {
+-            Log.e("GoogleMapView.displayZoomControls", e);
+-        }
+-    }
+-
+-    @Override
+-    public MapControllerImpl getMapController() {
+-        return mapController;
+-    }
+-
+-    @Override
+-    @NonNull
+-    public GeoPointImpl getMapViewCenter() {
+-        GeoPoint point = getMapCenter();
+-        return new GoogleGeoPoint(point.getLatitudeE6(), point.getLongitudeE6());
+-    }
+-
+-    @Override
+-    public Viewport getViewport() {
+-        return new Viewport(getMapViewCenter(), getLatitudeSpan() / 1e6, getLongitudeSpan() / 1e6);
+-    }
+-
+-    @Override
+-    public void clearOverlays() {
+-        getOverlays().clear();
+-    }
+-
+-    @Override
+-    public MapProjectionImpl getMapProjection() {
+-        return new GoogleMapProjection(getProjection());
+-    }
+-
+-    @Override
+-    public CachesOverlay createAddMapOverlay(Context context, Drawable drawable) {
+-
+-        GoogleCacheOverlay ovl = new GoogleCacheOverlay(context, drawable);
+-        getOverlays().add(ovl);
+-        return ovl.getBase();
+-    }
+-
+-    @Override
+-    public PositionAndScaleOverlay createAddPositionAndScaleOverlay() {
+-
+-        GoogleOverlay ovl = new GoogleOverlay();
+-        getOverlays().add(ovl);
+-        return (PositionAndScaleOverlay) ovl.getBase();
+-    }
+-
+-    @Override
+-    public int getMapZoomLevel() {
+-        return getZoomLevel();
+-    }
+-
+-    @Override
+-    public void setMapSource() {
+-        setSatellite(GoogleMapProvider.isSatelliteSource(Settings.getMapSource()));
+-    }
+-
+-    @Override
+-    public void repaintRequired(GeneralOverlay overlay) {
+-        invalidate();
+-    }
+-
+-    @Override
+-    public void setOnDragListener(OnMapDragListener onDragListener) {
+-        this.onDragListener = onDragListener;
+-    }
+-
+-    @Override
+-    public boolean onTouchEvent(MotionEvent ev) {
+-        try {
+-            gestureDetector.onTouchEvent(ev);
+-            return super.onTouchEvent(ev);
+-        } catch (Exception e) {
+-            Log.e("GoogleMapView.onTouchEvent", e);
+-        }
+-        return false;
+-    }
+-
+-    private class GestureListener extends SimpleOnGestureListener {
+-        @Override
+-        public boolean onDoubleTap(MotionEvent e) {
+-            getController().zoomInFixing((int) e.getX(), (int) e.getY());
+-            if (onDragListener != null) {
+-                onDragListener.onDrag();
+-            }
+-            return true;
+-        }
+-
+-        @Override
+-        public boolean onScroll(MotionEvent e1, MotionEvent e2,
+-                float distanceX, float distanceY) {
+-            if (onDragListener != null) {
+-                onDragListener.onDrag();
+-            }
+-            return super.onScroll(e1, e2, distanceX, distanceY);
+-        }
+-    }
+-
+-    @Override
+-    public boolean needsInvertedColors() {
+-        return false;
+-    }
+-
+-    @Override
+-    public boolean hasMapThemes() {
+-        // Not supported
+-        return false;
+-    }
+-
+-    @Override
+-    public void setMapTheme() {
+-        // Not supported
+-    }
+-}
+diff --git a/main/src/cgeo/geocaching/maps/google/v1/GoogleOverlay.java b/main/src/cgeo/geocaching/maps/google/v1/GoogleOverlay.java
+deleted file mode 100644
+index 40a5539..0000000
+--- a/main/src/cgeo/geocaching/maps/google/v1/GoogleOverlay.java
++++ /dev/null
+@@ -1,54 +0,0 @@
+-package cgeo.geocaching.maps.google.v1;
+-
+-import cgeo.geocaching.maps.PositionAndScaleOverlay;
+-import cgeo.geocaching.maps.interfaces.GeneralOverlay;
+-import cgeo.geocaching.maps.interfaces.MapViewImpl;
+-import cgeo.geocaching.maps.interfaces.OverlayImpl;
+-
+-import com.google.android.maps.MapView;
+-import com.google.android.maps.Overlay;
+-
+-import android.graphics.Canvas;
+-
+-import java.util.concurrent.locks.Lock;
+-import java.util.concurrent.locks.ReentrantLock;
+-
+-public class GoogleOverlay extends Overlay implements OverlayImpl {
+-
+-    private PositionAndScaleOverlay overlayBase = null;
+-    private Lock lock = new ReentrantLock();
+-
+-    public GoogleOverlay() {
+-        overlayBase = new PositionAndScaleOverlay(this);
+-    }
+-
+-    @Override
+-    public void draw(Canvas canvas, MapView mapView, boolean shadow) {
+-        super.draw(canvas, mapView, shadow);
+-
+-        if (overlayBase != null) {
+-            assert mapView instanceof MapViewImpl;
+-            overlayBase.draw(canvas, (MapViewImpl) mapView, shadow);
+-        }
+-    }
+-
+-    public GeneralOverlay getBase() {
+-        return overlayBase;
+-    }
+-
+-    @Override
+-    public void lock() {
+-        lock.lock();
+-    }
+-
+-    @Override
+-    public void unlock() {
+-        lock.unlock();
+-    }
+-
+-    @Override
+-    public MapViewImpl getMapViewImpl() {
+-        throw new UnsupportedOperationException();
+-    }
+-
+-}
+diff --git a/main/src/cgeo/geocaching/settings/Settings.java b/main/src/cgeo/geocaching/settings/Settings.java
+index aaaf64a..d93f83f 100644
+--- a/main/src/cgeo/geocaching/settings/Settings.java
++++ b/main/src/cgeo/geocaching/settings/Settings.java
+@@ -13,7 +13,7 @@ import cgeo.geocaching.enumerations.LogType;
+ import cgeo.geocaching.geopoint.Geopoint;
+ import cgeo.geocaching.list.StoredList;
+ import cgeo.geocaching.maps.MapProviderFactory;
+-import cgeo.geocaching.maps.google.v1.GoogleMapProvider;
++//import cgeo.geocaching.maps.google.v1.GoogleMapProvider;
+ import cgeo.geocaching.maps.interfaces.GeoPointImpl;
+ import cgeo.geocaching.maps.interfaces.MapProvider;
+ import cgeo.geocaching.maps.interfaces.MapSource;
+@@ -52,7 +52,7 @@ public class Settings {
+     private static final char HISTORY_SEPARATOR = ',';
+     public static final int SHOW_WP_THRESHOLD_DEFAULT = 10;
+     public static final int SHOW_WP_THRESHOLD_MAX = 50;
+-    private static final int MAP_SOURCE_DEFAULT = GoogleMapProvider.GOOGLE_MAP_ID.hashCode();
++//    private static final int MAP_SOURCE_DEFAULT = GoogleMapProvider.GOOGLE_MAP_ID.hashCode();
+ 
+     public static final boolean HW_ACCEL_DISABLED_BY_DEFAULT =
+             Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1 ||
+@@ -126,7 +126,7 @@ public class Settings {
+             e.putString(getKey(R.string.pref_webDeviceCode), old.getString(getKey(R.string.pref_webDeviceCode), null));
+             e.putString(getKey(R.string.pref_webDeviceName), old.getString(getKey(R.string.pref_webDeviceName), null));
+             e.putBoolean(getKey(R.string.pref_maplive), old.getInt(getKey(R.string.pref_maplive), 1) != 0);
+-            e.putInt(getKey(R.string.pref_mapsource), old.getInt(getKey(R.string.pref_mapsource), MAP_SOURCE_DEFAULT));
++//            e.putInt(getKey(R.string.pref_mapsource), old.getInt(getKey(R.string.pref_mapsource), MAP_SOURCE_DEFAULT));
+             e.putBoolean(getKey(R.string.pref_twitter), 0 != old.getInt(getKey(R.string.pref_twitter), 0));
+             e.putBoolean(getKey(R.string.pref_showaddress), 0 != old.getInt(getKey(R.string.pref_showaddress), 1));
+             e.putBoolean(getKey(R.string.pref_showcaptcha), old.getBoolean(getKey(R.string.pref_showcaptcha), false));
+@@ -192,9 +192,9 @@ public class Settings {
+             e.putInt(getKey(R.string.pref_showwaypointsthreshold), wpThreshold);
+ 
+             // KEY_MAP_SOURCE must be string, because it is the key for a ListPreference now
+-            final int ms = sharedPrefs.getInt(getKey(R.string.pref_mapsource), MAP_SOURCE_DEFAULT);
++//            final int ms = sharedPrefs.getInt(getKey(R.string.pref_mapsource), MAP_SOURCE_DEFAULT);
+             e.remove(getKey(R.string.pref_mapsource));
+-            e.putString(getKey(R.string.pref_mapsource), String.valueOf(ms));
++//            e.putString(getKey(R.string.pref_mapsource), String.valueOf(ms));
+ 
+             // navigation tool ids must be string, because ListPreference uses strings as keys
+             final int dnt1 = sharedPrefs.getInt(getKey(R.string.pref_defaultNavigationTool), NavigationAppsEnum.COMPASS.id);
+@@ -623,8 +623,8 @@ public class Settings {
+         if (mapSource != null) {
+             return mapSource;
+         }
+-        final int id = getConvertedMapId();
+-        mapSource = MapProviderFactory.getMapSource(id);
++//        final int id = getConvertedMapId();
++//        mapSource = MapProviderFactory.getMapSource(id);
+         if (mapSource != null) {
+             // don't use offline maps if the map file is not valid
+             if ((!(mapSource instanceof OfflineMapSource)) || (isValidMapFile())) {
+@@ -650,30 +650,30 @@ public class Settings {
+      *
+      * @return
+      */
+-    private static int getConvertedMapId() {
+-        final int id = Integer.parseInt(getString(R.string.pref_mapsource,
+-                String.valueOf(MAP_SOURCE_DEFAULT)));
+-        switch (id) {
+-            case GOOGLEMAP_BASEID + MAP:
+-                return GoogleMapProvider.GOOGLE_MAP_ID.hashCode();
+-            case GOOGLEMAP_BASEID + SATELLITE:
+-                return GoogleMapProvider.GOOGLE_SATELLITE_ID.hashCode();
+-            case MFMAP_BASEID + MAPNIK:
+-                return MapsforgeMapProvider.MAPSFORGE_MAPNIK_ID.hashCode();
+-            case MFMAP_BASEID + CYCLEMAP:
+-                return MapsforgeMapProvider.MAPSFORGE_CYCLEMAP_ID.hashCode();
+-            case MFMAP_BASEID + OFFLINE: {
+-                final String mapFile = Settings.getMapFile();
+-                if (StringUtils.isNotEmpty(mapFile)) {
+-                    return mapFile.hashCode();
+-                }
+-                break;
+-            }
+-            default:
+-                break;
+-        }
+-        return id;
+-    }
++//    private static int getConvertedMapId() {
++//        final int id = Integer.parseInt(getString(R.string.pref_mapsource,
++//                String.valueOf(MAP_SOURCE_DEFAULT)));
++//        switch (id) {
++//            case GOOGLEMAP_BASEID + MAP:
++//                return GoogleMapProvider.GOOGLE_MAP_ID.hashCode();
++//            case GOOGLEMAP_BASEID + SATELLITE:
++//                return GoogleMapProvider.GOOGLE_SATELLITE_ID.hashCode();
++//            case MFMAP_BASEID + MAPNIK:
++//                return MapsforgeMapProvider.MAPSFORGE_MAPNIK_ID.hashCode();
++//            case MFMAP_BASEID + CYCLEMAP:
++//                return MapsforgeMapProvider.MAPSFORGE_CYCLEMAP_ID.hashCode();
++//            case MFMAP_BASEID + OFFLINE: {
++//                final String mapFile = Settings.getMapFile();
++//                if (StringUtils.isNotEmpty(mapFile)) {
++//                    return mapFile.hashCode();
++//                }
++//                break;
++//            }
++//            default:
++//                break;
++//        }
++//        return id;
++//    }
+ 
+     public static void setMapSource(final MapSource newMapSource) {
+         putString(R.string.pref_mapsource, String.valueOf(newMapSource.getNumericalId()));
+-- 
+2.1.1
+
+
+From e6a5c04aee4d3efff9eccbe98ed9734a57dfef1d Mon Sep 17 00:00:00 2001
+From: wiewo <wreg@wiedmeyer.de>
+Date: Sun, 12 Oct 2014 03:50:26 +0200
+Subject: [PATCH 2/2] also change build.gradle
+
+---
+ main/build.gradle | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/main/build.gradle b/main/build.gradle
+index 7ad61d4..e809018 100644
+--- a/main/build.gradle
++++ b/main/build.gradle
+@@ -32,8 +32,8 @@ group = 'cgeo.geocaching'
+ version = '0.0.1'
+ 
+ android {
+-    compileSdkVersion "Google Inc.:Google APIs:19"
+-    //compileSdkVersion 19
++    //compileSdkVersion "Google Inc.:Google APIs:19"
++    compileSdkVersion 19
+     buildToolsVersion "19.1.0"
+ 
+      compileOptions {
+@@ -358,4 +358,4 @@ task addTest {
+ // always do the addtest on prebuild
+ gradle.projectsEvaluated {
+     preBuild.dependsOn(addTest)
+-}*/
+\ No newline at end of file
++}*/
+-- 
+2.1.1
+

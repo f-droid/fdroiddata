@@ -15,23 +15,23 @@ is an unnofficial client to access geocaching.com's list of caches, search and
 save them to the device.
 
 Older builds of this application no longer work due to reliance on third party
-services that have changed. Newer builds cannot be built without proprietary
-software, and in any case have proprietary dependencies and 'secret' keys missing
-from the source code.
+services that have changed.
 .
 
 Repo Type:git
-#Repo:https://github.com/cgeo/c-geo-opensource.git
-Repo:https://github.com/wiewo/cgeo
+Repo:https://github.com/cgeo/cgeo
 
 Build:1,1
     disable=wip
     forceversion=yes
     forcevercode=yes
-    commit=e6a5c04aee4d3efff9eccbe98ed9734a57dfef1d
+    commit=market_20140918
     subdir=main
     gradle=yes
-    srclibs=LocusAPI@40cade8,LocusAPIAndroid@6c77cf0,ApacheHttpCore@4.3.2,ApacheHttpClient@4.3.2,HttpClientAndroid@f7c5537aa724
+    init=cp templates/keys.xml res/values/ && mkdir repackageMapsforge0.2/ && \
+       mv libs/mapsforge-map-0.2.4.jar repackageMapsforge0.2/ 
+    patch=no-gmaps.patch, dummykeys.patch
+    srclibs=ApacheHttpCore@4.2.3,ApacheHttpClient@4.2.3,HttpClientAndroid@46874342a6b7,MapsforgeCgeo@cbd01e8,LocusMap@6:08dee4be1444
     rm=main/libs/*.jar,main/libs/*.properties,main/libs/src/*
     prebuild=mv $$ApacheHttpCore$$/httpcore $$HttpClientAndroid$$/script/httpcore && \
         mv $$ApacheHttpClient$$/httpclient $$HttpClientAndroid$$/script/httpclient && \
@@ -41,23 +41,20 @@ Build:1,1
         sed -i -e '/checkout/d' convert_stock_httpclient && \
         bash convert_stock_httpclient && \
         popd && \
-        cp $$HttpClientAndroid$$/script/httpclientandroidlib-1.2.1.jar libs/ && \
+        cp $$HttpClientAndroid$$/script/httpclientandroidlib-1.1.2.jar libs/ && \
         echo "==== HttpClientAndroid done ====" && \
-        sed -i -e '/mavenCentral/amavenLocal()\n' ../build.gradle && \
-        sed -i -e '/mapsforge-map/d' build.gradle && \
-        sed -i -e '/appcompat/acompile "org.mapsforge:svg-android:0.4.3"' build.gradle && \
-        sed -i -e '/appcompat/acompile "org.mapsforge:mapsforge:0.4.3"' build.gradle && \
-        sed -i -e '/appcompat/acompile "org.mapsforge:mapsforge-map:0.4.3"' build.gradle && \
-        sed -i -e '/appcompat/acompile "org.mapsforge:mapsforge-map-android:0.4.3"' build.gradle && \
-        sed -i -e '/appcompat/acompile "org.mapsforge:mapsforge-core:0.4.3"' build.gradle && \
-        sed -i -e '/appcompat/acompile "org.mapsforge:mapsforge-map-writer:0.4.3"' build.gradle && \
-        sed -i -e '/appcompat/acompile "org.mapsforge:mapsforge-map-reader:0.4.3"' build.gradle && \
-        sed -i -e 's/httpclientandroidlib-1.1.2.jar/httpclientandroidlib-1.2.1.jar/g' build.gradle && \
-        sed -i -e '/locus-api/d' build.gradle && \
-        cp -fR $$LocusAPI$$ ../locusAPI && \
-        cp -fR $$LocusAPIAndroid$$ ../locusAPIAndroid && \
-        echo "include ':locusAPIAndroid'" >> ../settings.gradle && \
-        echo "include ':locusAPI'" >> ../settings.gradle 
-
+        pushd $$LocusMap$$/LocusAddonPublicLib && ant release && popd && \
+        cp $$LocusMap$$/LocusAddonPublicLib/bin/classes.jar libs/locus-api-4.0.jar && \
+        $$MVN3$$ clean package -DskipTests -f $$MapsforgeCgeo$$/pom.xml && \
+        mv $$MapsforgeCgeo$$/mapsforge-map/target/mapsforge-map-0.3.0-jar-with-dependencies.jar libs/ && \
+        pushd repackageMapsforge0.2 && jar xf mapsforge-map-0.2.4.jar && \
+        rm org/mapsforge/android/mapsold/*.class && mkdir src && mv org src/ && \
+        printf '<?xml version="1.0" encoding="utf-8"?>\n<manifest xmlns:android="http://schemas.android.com/apk/res/android"\n\tpackage="org.mapsforge.android.mapsold"\n\tandroid:versionCode="1"\nandroid:versionName="1.0"/>\n' > AndroidManifest.xml && \
+        android update project --path . --target android-19 && \
+        echo "android.library=true" >> project.properties && ant release && \
+        cp bin/classes.jar ../libs/mapsforge-map-0.2.4.jar && popd && \
+        sed -i -e 's/debuggable true/debuggable false/' build.gradle && \
+        sed -i -e '/versionCode/d' build.gradle && \
+        sed -i -e '/versionName/d' build.gradle 
 Auto Update Mode:None
 Update Check Mode:Static
