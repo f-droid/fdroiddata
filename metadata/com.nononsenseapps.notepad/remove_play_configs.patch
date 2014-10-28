@@ -1,0 +1,82 @@
+From 138239b76870e1297d205679a4ff26b6e16eb552 Mon Sep 17 00:00:00 2001
+From: Jonas Kalderstam <jonas@kalderstam.se>
+Date: Wed, 29 Oct 2014 15:34:42 +0100
+Subject: [PATCH] Remove play configs for fdroid
+
+Signed-off-by: Jonas Kalderstam <jonas@kalderstam.se>
+---
+ app/build.gradle | 45 ---------------------------------------------
+ 1 file changed, 45 deletions(-)
+
+diff --git a/app/build.gradle b/app/build.gradle
+index 94f54fe..7ca8a43 100644
+--- a/app/build.gradle
++++ b/app/build.gradle
+@@ -83,27 +83,6 @@ android {
+ 
+     productFlavors {
+         free {}
+-      play {
+-          // If Non-Free libraries are to be used
+-          buildConfigField "boolean", "NONFREE", "true"
+-      }
+-      playBeta {
+-        // Beta runs at +1
+-        versionCode versionMajor * 10000 + versionMinor * 1000 + versionPatch * 100 + versionBuild * 10 + 1
+-
+-        buildConfigField "boolean", "DROPBOX_ENABLED", "true"
+-        // If Non-Free libraries are to be used
+-        buildConfigField "boolean", "NONFREE", "true"
+-      }
+-    }
+-
+-    sourceSets {
+-        playBeta {
+-            // Include play sources
+-            java.srcDirs = ['src/play/java']
+-            res.srcDirs = ['src/play/res', 'src/playBeta/res']
+-            manifest.srcFile 'src/play/AndroidManifest.xml'
+-        }
+     }
+ 
+     if (project.hasProperty('STORE_FILE')) {
+@@ -143,20 +122,6 @@ apt {
+     }
+ }
+ 
+-// Dropbox
+-task nativeLibsToJar(type: Zip) {
+-    destinationDir file("$buildDir/native-libs")
+-    baseName 'native-libs'
+-    extension 'jar'
+-    from fileTree(dir: 'src/playBeta/libs', include: '**/*.so')
+-    into 'lib/'
+-}
+-
+-// If non-free, depend on dropbox
+-tasks.withType(JavaCompile) {
+-    compileTask -> if (compileTask.toString().contains("Play")) compileTask.dependsOn(nativeLibsToJar)
+-}
+-
+ dependencies {
+     compile fileTree(dir: 'libs', include: '*.jar')
+     compile 'com.android.support:support-v4:19.0.1+'
+@@ -170,14 +135,4 @@ dependencies {
+     // annotations
+     apt "org.androidannotations:androidannotations:$AAVersion"
+     compile "org.androidannotations:androidannotations-api:$AAVersion"
+-    // Dropbox and non-free stuff
+-    playCompile fileTree(dir: 'src/play/libs', include: '*.jar')
+-    playBetaCompile fileTree(dir: 'src/play/libs', include: '*.jar')
+-    playCompile fileTree(dir: "$buildDir/native-libs", include: "*.jar")
+-    playCompile 'com.google.android.gms:play-services:+'
+-    playBetaCompile fileTree(dir: "$buildDir/native-libs", include: "*.jar")
+-    playBetaCompile 'com.google.android.gms:play-services:+'
+-    // Tests
+-    androidTestCompile 'com.squareup.spoon:spoon-client:1.1.1+'
+-
+ }
+\ No newline at end of file
+-- 
+2.1.1
+
