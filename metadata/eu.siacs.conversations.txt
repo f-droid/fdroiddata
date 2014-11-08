@@ -280,7 +280,6 @@ Build:0.8,32
     scanignore=libs/otr4j-0.10.jar,libs/bcprov-jdk15on-150.jar
 
 Build:0.8.2,34
-    disable=fdroid breaks output variant
     commit=0.8.2
     srclibs=Otr4j-jitsi@6d879761605dba48c80c0d3f44a6555b522d0c2e
     gradle=yes
@@ -289,11 +288,12 @@ Build:0.8.2,34
         $$MVN3$$ clean && \
         $$MVN3$$ install && \
         popd && \
-        sed -i -e '/mavenCentral/amavenLocal()\n' -e '/maven {/d' -e '/jitsi.github.com/,+1d' build.gradle
+        sed -i -e '/mavenCentral/amavenLocal()\n' -e '/maven {/d' -e '/jitsi.github.com/,+1d' -e '/buildTypes {/i/*' -e '/subprojects/i*/' build.gradle
 
 Maintainer Notes:
-Build succeeds now, but fdroid strips a line required for output variants. I am not sure how to
-circumvent this.
+Build succeeds now, but fdroid strips a line required for output variants.
+The current solution is to comment out buildTypes {} and lintOptions {}, but
+we should fix this or at least narrow it down. Enabling for now.
 .
 
 Auto Update Mode:Version %v
