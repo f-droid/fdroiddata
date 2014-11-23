@@ -37,8 +37,8 @@ donations.
 .
 
 Repo Type:git
-#Repo:https://github.com/TwidereProject/Twidere-Android
-Repo:https://github.com/mariotaku/twidere.git
+Repo:https://github.com/TwidereProject/Twidere-Android
+#Repo:https://github.com/mariotaku/twidere.git
 
 Build:0.2.9.5,81
     disable=repo changed
@@ -105,6 +105,7 @@ Build:0.2.9.10,92
         cp $$HoloAccent$$/libs/android-support-v4.jar $$AndroidStaggeredGrid$$/libs/
     target=android-19
 
+#old repo
 Build:0.2.9.12,94
     commit=503153f4ec
     patch=HomeActivity.patch
@@ -119,27 +120,25 @@ Build:0.2.9.12,94
         cp libs/android-support-v4.jar $$ViewPagerIndicator$$/libs/
     target=android-19
 
-Build:0.3.0-dev,98
-    disable=wip
+#new repo
+Build:0.3.0-dev-fdroid,98
     commit=49742e744692a213668a7855f75148b5f00877a0
     subdir=twidere
-    srclibs=dnsjava@dnsjava-2.1.6,CWACMerge@v1.0.1,CWACSacklist@v1.0.1,MariotakuJsonSerializer@accef1652fddc3ee965dfc7a2d334e2463f1afb5
+    srclibs=CWACMerge@v1.0.1,CWACSacklist@v1.0.1
     submodules=yes
     gradle=fdroid
     rm=twidere.wear,libraries/SlidingMenu/example
     prebuild=sed -i -e '/googleCompile/d' build.gradle && \
         cp -fR $$CWACMerge$$/merge/src/com src/main/java/ && \
         cp -fR $$CWACSacklist$$/sacklist/src/com src/main/java && \
-        cp -fR $$dnsjava$$/org src/main/java/ && \
-        echo -fR $$MariotakuJsonSerializer$$/src/org src/main/java/ && \
-        pushd libs && jar xf jsonserializer-*.jar && rm -fR *.jar && find -regex ".+\.\(a\|dll\|so\|exe\|lib\|class\)" -type f -delete && mv org ../src/main/java/
+        pushd libs && jar xf jsonserializer-*.jar && jar xf dnsjava-ipv6-1.0-with-sources.jar && find -regex ".+\.\(a\|dll\|so\|exe\|lib\|class\)" -type f -delete && cp -fR org ../src/main/java/ && popd && rm -fR libs && \
+        echo -e "allprojects {\nsourceCompatibility = 1.7\ntargetCompatibility = 1.7\n}" >> ../build.gradle
+
 
 Maintainer Notes:
-* Tags are for the 'dev' branch, not the 'fdroid' branch that we want to use.
-* JavaNetDns issue: package sun.net.spi.nameservice does not exist
-* JonSerializer issues: https://github.com/TwidereProject/Twidere-Android/issues/37
+* JavaNetDns issue when using dnsjava srclib: package sun.net.spi.nameservice does not exist
+* JonSerializer issues when using srclib, see: https://github.com/TwidereProject/Twidere-Android/issues/37
 * We might want to install CWAC into mavenLocal. Use this instead of copying:
-
 sed -i -e '/googleCompile/d' -e "/twitter-text/acompile 'com.commonsware.cwac:merge:1.0.1'\ncompile 'com.commonsware.cwac:sacklist:1.0.0'" build.gradle && \
 .
 
