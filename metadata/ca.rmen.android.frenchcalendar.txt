@@ -32,6 +32,13 @@ Build:1.4.0,140
     commit=release-1.4.0
     subdir=handheld
     gradle=foss
+    srclibs=FrenchRevolutionaryCalendar@release-1.0.6
+    prebuild=pushd $$FrenchRevolutionaryCalendar$$ && \
+        $$MVN3$$ install -Dmaven.test.skip=true && \
+        popd && \
+        sed -i -e '/wearCompile/d' -e '/wearWearApp/d' build.gradle && \
+        sed -i -e 's@http://dl.bintray.com/caarmen/maven@https://repo1.maven.org/maven2@g' -e '/jcenter/imavenLocal()' ../build.gradle && \
+        echo "include ':handheld', ':common'" > ../settings.gradle
 
 Auto Update Mode:None
 Update Check Mode:Tags ^release-
