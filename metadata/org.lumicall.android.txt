@@ -124,10 +124,25 @@ Build:1.10.6,154
         cp $$libphonenumber$$/target/*jar libs/
     buildjni=yes
 
+Build:1.11.6,161
+    disable=builds, submodules have jars
+    commit=1.11.6
+    submodules=yes
+    rm=libs/*.jar
+    srclibs=dnsjava@dnsjava-2.1.6,RemoteTea@release-1.1.0,libphonenumber@53794af89c54549b71a3db1f326e1bfd7c914832
+    prebuild=echo "project.target.apilevel=8" > ant.properties && \
+        sed -i '/<dependency/,/\/>/d' custom_rules.xml && \
+        pushd $$dnsjava$$ && ant jar && popd && cp $$dnsjava$$/dnsjava-*.jar libs/ && \
+        pushd $$RemoteTea$$ && ant -Dant.build.javac.target=1.5 -Dant.build.javac.source=1.5 jar && popd && cp $$RemoteTea$$/classes/oncrpc*jar libs/oncrpc-1.0.7.jar && cp libs/oncrpc-1.0.7.jar gmetric4j/lib/oncrpc-1.0.7.jar && \
+        pushd $$libphonenumber$$/java/ && \
+        $$MVN3$$ package && \
+        popd && \
+        cp $$libphonenumber$$/java/libphonenumber/target/libphonenumber-6.2.3-SNAPSHOT.jar libs/
+   buildjni=yes
+
 Maintainer Notes:
-TODO: dnsjava (see other metadata)
-TODO: libphonenumber (doesn't build atm)
-TODO: oncrpc (?)
+TODO: libphonenumber: should we always build HEAD? switch back to googles repo? do we need geocoder-jar?
+TODO: oncrpc 1.0.7 is 7dda2ba52e7d999c52648ead1e747dd7ca64325c ; last/only tag is release-1.1.0
 .
 
 Auto Update Mode:None
