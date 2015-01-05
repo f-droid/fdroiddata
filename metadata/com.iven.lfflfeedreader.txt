@@ -14,11 +14,15 @@ Repo Type:git
 Repo:https://github.com/enricocid/lffl-feed-reader
 
 Build:1.0,1
-    disable=wait for https://github.com/enricocid/lffl-feed-reader/issues/1
-    commit=1.1
-    extlibs=android/android-support-v4.jar
-    srclibs=Crouton@1.8.1,FadingActionBar@parent-2.2.2,3:LazyList@be926df2ec5ff81693251629748ed38655075393,JSoup@jsoup-1.6.3
-    prebuild=sed -i -e '/library/d' project.properties && mkdir -p libs && pushd $$Crouton$$ && $$MVN3$$ package && popd && pushd $$JSoup$$ && $$MVN3$$ package && popd && pushd $$FadingActionBar$$ && $$MVN3$$ package && popd && cp $$FadingActionBar$$/target/*.jar $$JSoup$$/target/jsoup-1.6.3.jar $$Crouton$$/target/*.jar libs/
+    commit=1.9
+    extlibs=android/android-support-v4r11.jar
+    srclibs=Crouton@1.8.1,2:FadingActionBar@parent-3.0.0,3:LazyList@be926df2ec5ff81693251629748ed38655075393,JSoup@jsoup-1.8.1.a
+    prebuild=sed -i -e '/Crouton/d' project.properties && \
+        $$MVN3$$ install:install-file -DgroupId=com.google.android -DartifactId=support-v4 -Dversion=r11 -Dpackaging=jar -Dfile=libs/android-support-v4r11.jar && \
+        pushd $$Crouton$$ && $$MVN3$$ package && popd && \
+        pushd $$JSoup$$ && $$MVN3$$ package && popd && \
+        pushd $$FadingActionBar$$ && ant release && popd && \
+        cp $$JSoup$$/target/jsoup-1.8.1.jar $$Crouton$$/target/*.jar $$FadingActionBar$$/bin/classes.jar libs/
 
 Auto Update Mode:None
 Update Check Mode:Tags
