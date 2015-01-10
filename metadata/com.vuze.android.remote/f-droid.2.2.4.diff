@@ -1,0 +1,175 @@
+Index: VuzeRemoteProject/project.properties
+===================================================================
+--- a/VuzeRemoteProject/project.properties	(revision 41381)
++++ b/VuzeRemoteProject/project.properties	(working copy)
+@@ -17,8 +17,7 @@
+ android.library.reference.2=../android-pull-to-refresh
+ # https://github.com/astuetz/PagerSlidingTabStrip
+ android.library.reference.3=../PagerSlidingTabStrip
+-android.library.reference.4=../google-play-services_lib
++android.library.reference.4=../MaterialEditText/library/src/main
+ # https://github.com/rengwuxian/MaterialEditText
+-android.library.reference.5=../MaterialEditText/library/src/main
++android.library.reference.5=../android-switch-backport/library
+ # https://github.com/BoD/android-switch-backport
+-android.library.reference.6=../android-switch-backport/library
+Index: src/com/vuze/android/remote/VuzeEasyTracker.java
+===================================================================
+--- a/VuzeRemoteProject/src/com/vuze/android/remote/VuzeEasyTracker.java	(revision 41381)
++++ a/VuzeRemoteProject/src/com/vuze/android/remote/VuzeEasyTracker.java	(working copy)
+@@ -17,12 +17,11 @@
+ 
+ package com.vuze.android.remote;
+ 
++import java.util.Map;
++
++import android.app.Activity;
+ import android.content.Context;
+ import android.support.v4.app.Fragment;
+-import android.util.Log;
+-
+-import com.google.android.gms.common.ConnectionResult;
+-import com.google.android.gms.common.GooglePlayServicesUtil;
+ 
+ public class VuzeEasyTracker 
+ {
+@@ -31,18 +30,76 @@
+ 	public static IVuzeEasyTracker getInstance(Context ctx) {
+ 		synchronized (VuzeEasyTracker.class) {
+ 			if (vuzeEasyTracker == null) {
+-				int available = GooglePlayServicesUtil.isGooglePlayServicesAvailable(ctx);
+-				if (available == ConnectionResult.SUCCESS) {
+-					if (AndroidUtils.DEBUG) {
+-						Log.d("VET", "Using GooglePlay GA");
++				// GA SDK License is ???, so disable it.
++				// You should also delete the following:
++				// * /src/com/vuze/android/remote/VuzeEasyTrackerNew.java
++				// * /src/com/vuze/android/remote/VuzeEasyTrackerOld.java
++				// * /src/com/vuze/android/remote/CampaignTrackingReceiver.java
++				// * /libs/libGoogleAnalyticsServices.jar
++				// * Link to google-play-services_lib
++				vuzeEasyTracker = new IVuzeEasyTracker() {
++					
++					@Override
++					public void setPage(String rt) {
++					}
++					
++					@Override
++					public void setClientID(String rt) {
++					}
++					
++					@Override
++					public void set(String key, String value) {
++					}
++					
++					@Override
++					public void sendEvent(String category, String action, String label, Long value) {
++					}
++					
++					@Override
++					public void send(Map<String, String> params) {
++					}
++					
++					@Override
++					public void screenStart(String name) {
+ 					}
+-					vuzeEasyTracker = new VuzeEasyTrackerNew(ctx);
+-				} else {
+-					if (AndroidUtils.DEBUG) {
+-						Log.d("VET", "Using old GA API");
++					
++					@Override
++					public void registerExceptionReporter(Context applicationContext) {
+ 					}
+-					vuzeEasyTracker = new VuzeEasyTrackerOld(ctx);
+-				}
++					
++					@Override
++					public void logErrorNoLines(Throwable e) {
++					}
++					
++					@Override
++					public void logError(Throwable e) {
++					}
++					
++					@Override
++					public void logError(String s, String page) {
++					}
++					
++					@Override
++					public String get(String key) {
++						return "";
++					}
++					
++					@Override
++					public void fragmentStop(Fragment fragment) {
++					}
++					
++					@Override
++					public void fragmentStart(Fragment fragment, String name) {
++					}
++					
++					@Override
++					public void activityStop(Activity activity) {
++					}
++					
++					@Override
++					public void activityStart(Activity activity) {
++					}
++				};
+ 			}
+ 		}
+ 		return vuzeEasyTracker;
+Index: AndroidManifest.xml
+===================================================================
+--- a/VuzeRemoteProject/AndroidManifest.xml	(revision 41381)
++++ a/VuzeRemoteProject/AndroidManifest.xml	(working copy)
+@@ -38,15 +38,6 @@
+ 		android:icon="@drawable/ic_launcher"
+ 		android:label="@string/app_name"
+ 		android:theme="@style/AppTheme" >
+-		<meta-data
+-			android:name="com.google.android.gms.version"
+-			android:value="@integer/google_play_services_version" />
+-		<!--
+-      BROKEN: See https://code.google.com/p/android/issues/detail?id=82157
+-		  meta-data
+-			android:name="com.google.android.gms.analytics.globalConfigResource"
+-			android:resource="@xml/analytics_global" /
+-		-->
+ 
+ 		<activity
+ 			android:name="com.vuze.android.remote.activity.LoginActivity"
+@@ -992,19 +983,6 @@
+ 			</intent-filter>
+ 		</activity>
+ 
+-		<!-- Used for install referral measurement -->
+-		<service android:name="com.google.analytics.tracking.android.CampaignTrackingService" />
+-
+-		<receiver
+-			android:name="com.vuze.android.remote.CampaignTrackingReceiver"
+-			android:exported="true"
+-			tools:ignore="ExportedReceiver" >
+-			<intent-filter>
+-				<action android:name="com.android.vending.INSTALL_REFERRER" />
+-			</intent-filter>
+-		</receiver>
+-
+-		<service android:name="com.google.android.gms.analytics.CampaignTrackingService" />
+ 	</application>
+ 
+ </manifest>
+Index: src/com/vuze/android/remote/AppPreferences.java
+===================================================================
+--- a/VuzeRemoteProject/src/com/vuze/android/remote/AppPreferences.java	(revision 41381)
++++ a/VuzeRemoteProject/src/com/vuze/android/remote/AppPreferences.java	(working copy)
+@@ -403,7 +403,7 @@
+ 	}
+ 
+ 	public boolean getNeverAskRatingAgain() {
+-		return preferences.getBoolean("neverAskRatingAgain", false);
++		return true;
+ 	}
+ 
+ 	public boolean shouldShowRatingReminder() {
