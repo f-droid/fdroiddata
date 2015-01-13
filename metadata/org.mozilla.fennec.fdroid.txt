@@ -28,6 +28,7 @@ Repo Type:hg
 Repo:https://hg.mozilla.org/releases/mozilla-release/
 
 Build:31.0,2014071712
+    disable=builds
     commit=FENNEC_31_0_RELEASE
     output=fdroid/fennec-unsigned.apk
     prebuild=mkdir fdroid && \
@@ -51,6 +52,7 @@ Build:31.0,2014071712
         zip -d fdroid/fennec-unsigned.apk "META-INF*"
 
 Build:31.0,2014071713
+    disable=builds
     commit=FENNEC_31_0_RELEASE
     output=fdroid/fennec-unsigned.apk
     prebuild=mkdir fdroid && \
@@ -99,25 +101,40 @@ Build:33.0,2014101300
         mv obj-${fxarch}/dist/fennec-*.apk fdroid/fennec-unsigned.apk && \
         zip -d fdroid/fennec-unsigned.apk "META-INF*"
 
+Build:35.0,2015011200
+    disable=compile error
+    commit=FENNEC_35_0_RELEASE
+    output=fdroid/fennec-unsigned.apk
+    forcevercode=yes
+    ndk=r10d
+    prebuild=mkdir fdroid && \
+        sed -i -e 's/android:debuggable="true"//g' -e 's/@ANDROID_VERSION_CODE@/2015011200/g' mobile/android/base/AndroidManifest.xml.in && \
+        sed -i -e '/MOZ_ANDROID_GOOGLE_PLAY_SERVICES/d' configure.in && \
+        sed -i -e 's/android:debuggable="true"//g' mobile/android/base/AndroidManifest.xml.in && \
+        echo "ac_add_options --with-android-ndk=\"$$NDK$$\"" > .mozconfig && \
+        echo "ac_add_options --with-android-sdk=\"$$SDK$$/platforms/android-21\"" >> .mozconfig && \
+        echo "ac_add_options --enable-application=mobile/android" >> .mozconfig && \
+        echo "ac_add_options --target=arm-linux-androideabi" >> .mozconfig && \
+        echo "ac_add_options --disable-tests" >> .mozconfig && \
+        echo "ac_add_options --disable-crashreporter" >> .mozconfig && \
+        echo "ac_add_options --with-branding=mobile/android/branding/unofficial" >> .mozconfig && \
+        pushd mobile/android/branding/unofficial/ && \
+        sed -i -e '/ANDROID_PACKAGE_NAME/d' -e '/MOZ_APP_DISPLAYNAME/d' configure.sh && \
+        echo 'ANDROID_PACKAGE_NAME=org.mozilla.fennec.fdroid' >> configure.sh && \
+        echo 'MOZ_APP_DISPLAYNAME=Fennec FDroid' >> configure.sh && \
+        popd && \
+        sed -i -e '/MOZ_DEVICES/d' -e '/MOZ_NATIVE_DEVICES/d' mobile/android/confvars.sh && \
+        echo -e 'MOZ_DEVICES=0\nMOZ_NATIVE_DEVICES=0\nMOZ_ANDROID_GOOGLE_PLAY_SERVICES=0\n' >> mobile/android/confvars.sh
+    build=./mach build && \
+        ./mach package && \
+        fxarch=`grep "ac_add_options --target=" .mozconfig | cut -d '=' -f2` && \
+        mv obj-${fxarch}/dist/fennec-*.apk fdroid/fennec-unsigned.apk && \
+        zip -d fdroid/fennec-unsigned.apk "META-INF*"
+
 Maintainer Notes:
 
 Issues:
- * Entering settings crashes when build with android-19, see
-   https://bugzilla.mozilla.org/show_bug.cgi?id=1013870 . This
-   is resolved in upstream's aurora channel.
- * Recent nightlies include PlayServices; disable MOZ_DEVICES
-   and/or MOZ_NATIVE_DEVICES in confvars.sh (which will only
-   work in Fx35+):
-     * https://hg.mozilla.org/mozilla-central/file/5e9826980be5/mobile/android/confvars.sh
-     * https://hg.mozilla.org/mozilla-central/rev/f8fb26b28dea
-     * https://bugzilla.mozilla.org/show_bug.cgi?id=1055909
-     * https://bugzilla.mozilla.org/show_bug.cgi?id=1033560
-     * Building FENNEC_33_0_RELEASE:
-       0:09.21 configure: error: You must download Google Play Services to build
-               with native video casting support enabled.  Run the Android SDK
-               tool and install Google Play Services under Extras.  See
-               http://developer.android.com/google/play-services/setup.html for
-               more info.
+ * Fx35: compilatin error
 
 Dependencies:
  * apt-get build-dep firefox
@@ -133,7 +150,7 @@ Updating/Versioning:
  * Update Check Mode:Tags ^FENNEC_[1-9][0-9]*_[0-9]*_RELEASE$
  * versionCode via ANDROID_VERSION_CODE is datestring with some magic applied
    and changes every build!
- * Since we no longer target a official build, we are free to use any VC.
+ * Since we no longer target a official build, we are free to use any VC. (Fx35)
 .
 
 Auto Update Mode:None
