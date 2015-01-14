@@ -14,8 +14,12 @@ Summary:Web browser
 Description:
 Browser using the Gecko layout engine to render web pages, which implements
 current and anticipated web standards. This is a developer build based on
-the latest [[org.mozilla.firefox]] release. DO NOT INSTALL unless you know
-what you are doing!
+the latest [[org.mozilla.firefox]] release.
+
+There might still be binaries left. The app (or some of the builds) might get
+removed or re-pushed at anytime:
+
+DO NOT INSTALL unless you know what you are doing!
 
 Currently following features are being stripped at build time:
 * Tests
@@ -29,11 +33,25 @@ Repo:https://hg.mozilla.org/releases/mozilla-release/
 Build:35.0,350000
     commit=FENNEC_35_0_RELEASE
     output=fdroid/fennec-unsigned.apk
-    forcevercode=yes
+    init=\
+        rm -R docshell/test/ && \
+        rm -R dom/tests/ && \
+        rm -R modules/libjar/test/ && \
+        rm -R security/manager/ssl/tests/*test/ && \
+        rm -R security/nss/cmd/bltest/tests/ && \
+        rm -R security/nss/tests/ && \
+        rm toolkit/crashreporter/moz.build && \
+        rm -R toolkit/crashreporter/client/ && \
+        rm -R toolkit/crashreporter/google-breakpad/src/tools/ && \
+        rm -R toolkit/crashreporter/google-breakpad/src/client/ && \
+        rm -R toolkit/crashreporter/google-breakpad/src/processor/testdata/ && \
+        rm -R toolkit/crashreporter/google-breakpad/src/third_party/linux/ && \
+        rm -R toolkit/mozapps/extensions/test/ && \
+        rm -R xpcom/tests/
+    scanignore=mobile/android/base/JavaAddonManager.java
     prebuild=mkdir fdroid && \
         sed -i -e 's/android:debuggable="true"//g' -e 's/@ANDROID_VERSION_CODE@/350000/g' mobile/android/base/AndroidManifest.xml.in && \
         sed -i -e '/MOZ_ANDROID_GOOGLE_PLAY_SERVICES/d' configure.in && \
-        sed -i -e 's/android:debuggable="true"//g' mobile/android/base/AndroidManifest.xml.in && \
         echo "ac_add_options --with-android-ndk=\"$$NDK$$\"" > .mozconfig && \
         echo "ac_add_options --with-android-sdk=\"$$SDK$$/platforms/android-21\"" >> .mozconfig && \
         echo "ac_add_options --enable-application=mobile/android" >> .mozconfig && \
@@ -57,11 +75,25 @@ Build:35.0,350000
 Build:35.0,350010
     commit=FENNEC_35_0_RELEASE
     output=fdroid/fennec-unsigned.apk
-    forcevercode=yes
+    init=\
+        rm -R docshell/test/ && \
+        rm -R dom/tests/ && \
+        rm -R modules/libjar/test/ && \
+        rm -R security/manager/ssl/tests/*test/ && \
+        rm -R security/nss/cmd/bltest/tests/ && \
+        rm -R security/nss/tests/ && \
+        rm toolkit/crashreporter/moz.build && \
+        rm -R toolkit/crashreporter/client/ && \
+        rm -R toolkit/crashreporter/google-breakpad/src/tools/ && \
+        rm -R toolkit/crashreporter/google-breakpad/src/client/ && \
+        rm -R toolkit/crashreporter/google-breakpad/src/processor/testdata/ && \
+        rm -R toolkit/crashreporter/google-breakpad/src/third_party/linux/ && \
+        rm -R toolkit/mozapps/extensions/test/ && \
+        rm -R xpcom/tests/
+    scanignore=mobile/android/base/JavaAddonManager.java
     prebuild=mkdir fdroid && \
         sed -i -e 's/android:debuggable="true"//g' -e 's/@ANDROID_VERSION_CODE@/350010/g' mobile/android/base/AndroidManifest.xml.in && \
         sed -i -e '/MOZ_ANDROID_GOOGLE_PLAY_SERVICES/d' configure.in && \
-        sed -i -e 's/android:debuggable="true"//g' mobile/android/base/AndroidManifest.xml.in && \
         echo "ac_add_options --with-android-ndk=\"$$NDK$$\"" > .mozconfig && \
         echo "ac_add_options --with-android-sdk=\"$$SDK$$/platforms/android-21\"" >> .mozconfig && \
         echo "ac_add_options --enable-application=mobile/android" >> .mozconfig && \
@@ -88,13 +120,6 @@ Dependencies:
  * apt-get build-dep firefox
  * We need to narrow this down.
 
-Scanner:
- * 2000+ warnings
- * 17 errors
-    * Ignoring two DexLoaders
-    * Remove all other erros and disable functions that might be
-      affected: --disable-tests --disable-crashreporter
-
 Updating/Versioning:
  * Update Check Mode:Tags ^FENNEC_[1-9][0-9]*_[0-9]*_RELEASE$
  * versionCode via ANDROID_VERSION_CODE is datestring with some magic applied
@@ -105,7 +130,7 @@ Updating/Versioning:
 
 Roadmap/TODO:
  * Build arm and x86 builds regulary for every Fx35+ release (local)
- * Switch to Iceweasel?
+ * Build more locales: http://160.twinql.com/building-and-testing-multi-locale-firefox-for-android/
  * Clean up.
  * Description/Summary etc.
  * Change package id (no mozilla reference).
