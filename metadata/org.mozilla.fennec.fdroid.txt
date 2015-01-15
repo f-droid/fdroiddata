@@ -32,6 +32,7 @@ Repo:https://hg.mozilla.org/releases/mozilla-release/
 
 Build:35.0,350000
     commit=FENNEC_35_0_RELEASE
+    srclibs=MozLocales@73695c0b79ff7d7684fb29debb7d89b324b4f23a
     output=fdroid/fennec-unsigned.apk
     init=\
         rm -R docshell/test/ && \
@@ -50,6 +51,7 @@ Build:35.0,350000
         rm -R xpcom/tests/
     scanignore=mobile/android/base/JavaAddonManager.java
     prebuild=mkdir fdroid && \
+        l10ndir=`readlink -f $$MozLocales$$` && \
         sed -i -e 's/android:debuggable="true"//g' -e 's/@ANDROID_VERSION_CODE@/350000/g' mobile/android/base/AndroidManifest.xml.in && \
         sed -i -e '/MOZ_ANDROID_GOOGLE_PLAY_SERVICES/d' configure.in && \
         echo "ac_add_options --with-android-ndk=\"$$NDK$$\"" > .mozconfig && \
@@ -59,6 +61,9 @@ Build:35.0,350000
         echo "ac_add_options --disable-tests" >> .mozconfig && \
         echo "ac_add_options --disable-crashreporter" >> .mozconfig && \
         echo "ac_add_options --with-branding=mobile/android/branding/unofficial" >> .mozconfig && \
+        echo "ac_add_options --with-l10n-base=${l10ndir}" >> .mozconfig && \
+        echo "mk_add_options 'export L10NBASEDIR=${l10ndir}'" >> .mozconfig && \
+        echo "mk_add_options 'export MOZ_CHROME_MULTILOCALE=$(tr '\n' ' ' <  mobile/android/locales/maemo-locales)'" >> .mozconfig && \
         pushd mobile/android/branding/unofficial/ && \
         sed -i -e '/ANDROID_PACKAGE_NAME/d' -e '/MOZ_APP_DISPLAYNAME/d' configure.sh && \
         echo 'ANDROID_PACKAGE_NAME=org.mozilla.fennec.fdroid' >> configure.sh && \
@@ -69,11 +74,16 @@ Build:35.0,350000
     build=./mach build && \
         ./mach package && \
         fxarch=`grep "ac_add_options --target=" .mozconfig | cut -d '=' -f2` && \
+        pushd obj-${fxarch}/mobile/android/locales && \
+          for loc in $(cat ../../../../mobile/android/locales/maemo-locales); do LOCALE_MERGEDIR=$PWD/merge-$loc make merge-$loc LOCALE_MERGEDIR=$PWD/merge-$loc; make LOCALE_MERGEDIR=$PWD/merge-$loc chrome-$loc LOCALE_MERGEDIR=$PWD/merge-$loc; done && \
+        popd && \
         mv obj-${fxarch}/dist/fennec-*.apk fdroid/fennec-unsigned.apk && \
         zip -d fdroid/fennec-unsigned.apk "META-INF*"
 
 Build:35.0,350010
+    disable=123
     commit=FENNEC_35_0_RELEASE
+    srclibs=MozLocales@73695c0b79ff7d7684fb29debb7d89b324b4f23a
     output=fdroid/fennec-unsigned.apk
     init=\
         rm -R docshell/test/ && \
@@ -92,6 +102,7 @@ Build:35.0,350010
         rm -R xpcom/tests/
     scanignore=mobile/android/base/JavaAddonManager.java
     prebuild=mkdir fdroid && \
+        l10ndir=`readlink -f $$MozLocales$$` && \
         sed -i -e 's/android:debuggable="true"//g' -e 's/@ANDROID_VERSION_CODE@/350010/g' mobile/android/base/AndroidManifest.xml.in && \
         sed -i -e '/MOZ_ANDROID_GOOGLE_PLAY_SERVICES/d' configure.in && \
         echo "ac_add_options --with-android-ndk=\"$$NDK$$\"" > .mozconfig && \
@@ -101,6 +112,9 @@ Build:35.0,350010
         echo "ac_add_options --disable-tests" >> .mozconfig && \
         echo "ac_add_options --disable-crashreporter" >> .mozconfig && \
         echo "ac_add_options --with-branding=mobile/android/branding/unofficial" >> .mozconfig && \
+        echo "ac_add_options --with-l10n-base=${l10ndir}" >> .mozconfig && \
+        echo "mk_add_options 'export L10NBASEDIR=${l10ndir}'" >> .mozconfig && \
+        echo "mk_add_options 'export MOZ_CHROME_MULTILOCALE=$(tr '\n' ' ' <  mobile/android/locales/maemo-locales)'" >> .mozconfig && \
         pushd mobile/android/branding/unofficial/ && \
         sed -i -e '/ANDROID_PACKAGE_NAME/d' -e '/MOZ_APP_DISPLAYNAME/d' configure.sh && \
         echo 'ANDROID_PACKAGE_NAME=org.mozilla.fennec.fdroid' >> configure.sh && \
@@ -111,6 +125,9 @@ Build:35.0,350010
     build=./mach build && \
         ./mach package && \
         fxarch=`grep "ac_add_options --target=" .mozconfig | cut -d '=' -f2` && \
+        pushd obj-${fxarch}/mobile/android/locales && \
+          for loc in $(cat ../../../../mobile/android/locales/maemo-locales); do LOCALE_MERGEDIR=$PWD/merge-$loc make merge-$loc LOCALE_MERGEDIR=$PWD/merge-$loc; make LOCALE_MERGEDIR=$PWD/merge-$loc chrome-$loc LOCALE_MERGEDIR=$PWD/merge-$loc; done && \
+        popd && \
         mv obj-${fxarch}/dist/fennec-*.apk fdroid/fennec-unsigned.apk && \
         zip -d fdroid/fennec-unsigned.apk "META-INF*"
 
@@ -130,7 +147,6 @@ Updating/Versioning:
 
 Roadmap/TODO:
  * Build arm and x86 builds regulary for every Fx35+ release (local)
- * Build more locales: http://160.twinql.com/building-and-testing-multi-locale-firefox-for-android/
  * Clean up.
  * Description/Summary etc.
  * Change package id (no mozilla reference).
