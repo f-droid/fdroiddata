@@ -14,7 +14,8 @@ Summary:Web browser
 Description:
 Browser using the Gecko layout engine to render web pages, which implements
 current and anticipated web standards. This is a developer build based on
-the latest [[org.mozilla.firefox]] release.
+the latest [[org.mozilla.firefox]] release. It's focused on removing any
+proprietary binaries used in the official builds.
 
 There might still be binaries left. The app (or some of the builds) might get
 removed or re-pushed at anytime:
@@ -25,13 +26,14 @@ Currently following features are being stripped at build time:
 * Tests
 * Crashreporter
 * Mediastreaming (requires non-free library: play-services)
+
+For further information, please look at the [https://gitlab.com/fdroid/fdroiddata/tree/master/metadata/org.mozilla.fennec.fdroid.txt build recipe].
 .
 
 Repo Type:hg
 Repo:https://hg.mozilla.org/releases/mozilla-release/
 
 Build:35.0,350000
-    disable=rm
     commit=FENNEC_35_0_RELEASE
     srclibs=MozLocales@214c475d
     output=fdroid/fennec-unsigned.apk
@@ -67,8 +69,8 @@ Build:35.0,350000
         echo "mk_add_options 'export MOZ_CHROME_MULTILOCALE=$(tr '\n' ' ' <  mobile/android/locales/maemo-locales)'" >> .mozconfig && \
         pushd mobile/android/branding/unofficial/ && \
         sed -i -e '/ANDROID_PACKAGE_NAME/d' -e '/MOZ_APP_DISPLAYNAME/d' configure.sh && \
-        echo 'ANDROID_PACKAGE_NAME=org.mozilla.fennec.fdroid' >> configure.sh && \
-        echo 'MOZ_APP_DISPLAYNAME=Fennec FDroid' >> configure.sh && \
+        echo 'ANDROID_PACKAGE_NAME=org.mozilla.fennec_fdroid' >> configure.sh && \
+        echo 'MOZ_APP_DISPLAYNAME="Fennec FDroid"' >> configure.sh && \
         popd && \
         sed -i -e '/MOZ_DEVICES/d' -e '/MOZ_NATIVE_DEVICES/d' mobile/android/confvars.sh && \
         echo -e 'MOZ_DEVICES=0\nMOZ_NATIVE_DEVICES=0\nMOZ_ANDROID_GOOGLE_PLAY_SERVICES=0\n' >> mobile/android/confvars.sh
@@ -82,7 +84,6 @@ Build:35.0,350000
         zip -d fdroid/fennec-unsigned.apk "META-INF*"
 
 Build:35.0,350010
-    disable=rm
     commit=FENNEC_35_0_RELEASE
     srclibs=MozLocales@214c475d
     output=fdroid/fennec-unsigned.apk
@@ -118,8 +119,8 @@ Build:35.0,350010
         echo "mk_add_options 'export MOZ_CHROME_MULTILOCALE=$(tr '\n' ' ' <  mobile/android/locales/maemo-locales)'" >> .mozconfig && \
         pushd mobile/android/branding/unofficial/ && \
         sed -i -e '/ANDROID_PACKAGE_NAME/d' -e '/MOZ_APP_DISPLAYNAME/d' configure.sh && \
-        echo 'ANDROID_PACKAGE_NAME=org.mozilla.fennec.fdroid' >> configure.sh && \
-        echo 'MOZ_APP_DISPLAYNAME=Fennec FDroid' >> configure.sh && \
+        echo 'ANDROID_PACKAGE_NAME=org.mozilla.fennec_fdroid' >> configure.sh && \
+        echo 'MOZ_APP_DISPLAYNAME="Fennec FDroid"' >> configure.sh && \
         popd && \
         sed -i -e '/MOZ_DEVICES/d' -e '/MOZ_NATIVE_DEVICES/d' mobile/android/confvars.sh && \
         echo -e 'MOZ_DEVICES=0\nMOZ_NATIVE_DEVICES=0\nMOZ_ANDROID_GOOGLE_PLAY_SERVICES=0\n' >> mobile/android/confvars.sh
@@ -135,28 +136,20 @@ Build:35.0,350010
 Maintainer Notes:
 
 Dependencies:
- * apt-get build-dep firefox
- * We need to narrow this down.
- * See COMMON_PACKAGES and MOBILE_ANDROID_COMMON_PACKAGES:
-    * https://hg.mozilla.org/mozilla-central/raw-file/default/python/mozboot/mozboot/debian.py
-    * https://hg.mozilla.org/mozilla-central/raw-file/default/python/mozboot/mozboot/android.py
- * pip install compare-locales
-    * http://hg.mozilla.org/l10n/compare-locales/
- * autoconf
+ * https://gitlab.com/fdroid/fdroidserver/issues/65
 
 Updating/Versioning:
  * Update Check Mode:Tags ^FENNEC_[1-9][0-9]*_[0-9]*_RELEASE$
  * versionCode via ANDROID_VERSION_CODE is datestring with some magic applied
    and changes every build!
- * Since we no longer target a official build, we are free to use any VC. (Fx35)
+ * Since we no longer target an official build, we are free to use any VC. (Fx35)
     * Current scheme: major version & minor version & arch & revision
     * Example: 350010 = Firefox 35.00, x86, revision (= if we need to re-release) 0
+    * Maybe we should stay in sync with upstream?
 
 Roadmap/TODO:
  * Build arm and x86 builds regulary for every Fx35+ release (local)
  * Clean up.
- * Description/Summary etc.
- * Change package id (no mozilla reference).
  * Enable beta builds to get dependencies right.
  * Release
 .
