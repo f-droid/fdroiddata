@@ -128,40 +128,52 @@ Build:1.5.6,1546
         $$MVN3$$ install:install-file -DgroupId=android -DartifactId=android -Dversion=4.4_r1 -Dpackaging=jar -Dfile=$$SDK$$/platforms/android-19/android.jar
 
 Build:1.5.8,1550
-    disable=app crash, k9lib 
     commit=1.5.8
     maven=yes
     srclibs=whassup@0.0.7,PayMe@0.0.4,k9lib@f7b2f260265e230ba74be11469f4cf3db4c5745e
-    prebuild=pushd $$k9lib$$/k9mail-library && \
-        gradle build && \
-        $$MVN3$$ install:install-file -DgroupId=com.fsck.k9.mail -DartifactId=lib -Dversion=0.0.1.f7b2f26 -Dpackaging=aar -Dfile=build/outputs/aar/k9mail-library-release.aar && \
+    prebuild=\
+        $$MVN3$$ install:install-file -DgroupId=android -DartifactId=android -Dversion=4.4_r1 -Dpackaging=jar -Dfile=$$SDK$$/platforms/android-19/android.jar && \
+        pushd $$k9lib$$/k9mail-library && \
+        sed -i -e '/mavenDeployer/a/*' -e '/pom.project/i*/' build.gradle && \
+        sed -i -e '/mavenDeployer/adef sha = "git rev-parse --short HEAD".execute().text' build.gradle && \
+        sed -i -e '/mavenDeployer/arepository(url: mavenLocal().url) {' build.gradle && \
+        gradle uploadArchives && \
         popd && \
         pushd $$whassup$$ && \
         $$MVN3$$ -Dmaven.test.skip=true install && \
         popd && \
         pushd $$PayMe$$ && \
         $$MVN3$$ -Dmaven.test.skip=true install && \
+        popd
+
+Build:1.5.9,1551
+    disable=unreleased
+    commit=1.5.9
+    maven=yes
+    srclibs=whassup@0.0.7,PayMe@0.0.4,k9lib@f7b2f260265e230ba74be11469f4cf3db4c5745e
+    prebuild=\
+        $$MVN3$$ install:install-file -DgroupId=android \
+                                      -DartifactId=android \
+                                      -Dversion=4.4_r1 \
+                                      -Dpackaging=jar \
+                                      -Dfile=$$SDK$$/platforms/android-19/android.jar && \
+        pushd $$k9lib$$/k9mail-library && \
+        sed -i -e '/mavenDeployer/a/*' -e '/pom.project/i*/' build.gradle && \
+        sed -i -e '/mavenDeployer/adef sha = "git rev-parse --short HEAD".execute().text' build.gradle && \
+        sed -i -e '/mavenDeployer/arepository(url: mavenLocal().url) {' build.gradle && \
+        gradle uploadArchives && \
         popd && \
-        $$MVN3$$ install:install-file -DgroupId=android -DartifactId=android -Dversion=4.4_r1 -Dpackaging=jar -Dfile=$$SDK$$/platforms/android-19/android.jar && \
-	sed -i 's;<dependencies>;<dependencies>\n<dependency>\n<groupId>commons-io</groupId>\n<artifactId>commons-io</artifactId>\n<version>2.4</version>\n</dependency>\n;' pom.xml && \
-        sed -i 's;<dependencies>;<dependencies>\n<dependency>\n<groupId>org.apache.james</groupId>\n<artifactId>apache-mime4j-core</artifactId>\n<version>0.7.2</version>\n</dependency>\n;' pom.xml
+        pushd $$whassup$$ && \
+        $$MVN3$$ -Dmaven.test.skip=true install && \
+        popd && \
+        pushd $$PayMe$$ && \
+        $$MVN3$$ -Dmaven.test.skip=true install && \
+        popd
 
 Maintainer Notes:
-* App crash because not building the k9lib from source (https://github.com/jberkel/sms-backup-plus/issues/525)
-* Instead of using maven to deploy to .m2 repo, we can modify upstream's build.gradle:
-
-uploadArchives {
-    repositories {
-        mavenDeployer {
-            def sha = ...
-            repository{ mavenLocal() }
-        }
-        pom.project {
-            ...
-        }
-    }
-}
-
+We try to repurpose the official mavendeployer (which deploys to bintray) for a
+mavenLocal() deployment. I don't know if this will work on the BS. It builds
+locally, though.
 .
 
 Auto Update Mode:None
