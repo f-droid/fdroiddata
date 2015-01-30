@@ -33,15 +33,13 @@ Build:1.33,33
     gradle=production
     srclibs=AutobahnSW-greenaddress@fb1223083dc6e9dfddc0daad3b76dae277765b51
     rm=app/libs/*.jar
-    prebuild=echo "ANDROID_NDK in prebuild (not setting it): $ANDROID_NDK" && \
+    prebuild=\
         pushd $$AutobahnSW-greenaddress$$ && \
         $$MVN3$$ package && \
         popd && \
         cp $$AutobahnSW-greenaddress$$/target/autobahn-android-sw-0.5.2-SNAPSHOT.jar libs/
     scandelete=app/src/main/jniLibs/armeabi/libscrypt.so,app/src/main/jniLibs/mips/libscrypt.so,app/src/main/jniLibs/x86/libscrypt.so,app/scrypt/src
-    build=echo "ANDROID_NDK in build before setting: $ANDROID_NDK" && \
-        ANDROID_NDK=$$NDK$$ sh -c 'echo "ANDROID_NDK in build after setting: $ANDROID_NDK"' && \
-        ANDROID_NDK=$$NDK$$ ./prepare_fdroid.sh
+    build=ANDROID_NDK=$$NDK$$ ./prepare_fdroid.sh
 
 Maintainer Notes:
 scandelete libscrypt.so - it is built by F-Droid via prepare_fdroid.sh,
@@ -51,9 +49,7 @@ prebuild rm autobahn android jar - as above, still in repo for users who
 don't want to be bothered with building Autobahn-SW from source.
 
 * Set AUM when everything works and doesn't break for some releases.
-* Disabled since prepare_fdroid doesn't work as expected (move its content to prebuild?): 
-    * arm-linux-androideabi-gcc: Command not found
-    * cannot stat ‘target/libscrypt.so’: No such file or directory
+* Check prepare_fdroid.sh for changes.
 .
 
 Auto Update Mode:None
