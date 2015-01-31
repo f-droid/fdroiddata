@@ -63,6 +63,27 @@ Build:3.2.5,106
     commit=v3.2.5
     subdir=SmartReceiptsPRO
 
+Build:3.3.2,112
+    disable=WIP (upstream issue?)
+    commit=v3.3.2
+    subdir=SmartReceiptsPRO
+    extlibs=android/android-support-v4.jar
+    srclibs=Support/v7/appcompat@android-4.4.2_r2,AChartEngine@r533,MuPDF@1.6
+    scandelete=.,..
+    rm=../Common/libs/android-support-v4.jar,../SmartReceiptsPRO/libs/test/*.jar,../wbMiniLibrary/libs/android-support-v4.jar,libs/android-support-v4.jar,../AndroidCamera/libs/android-support-v4.jar,../SmartReceiptsLibrary/libs/*.jar
+    prebuild=cp libs/android-support-v4.jar ../Common/libs/ && cp libs/android-support-v4.jar ../wbMiniLibrary/libs/ && \
+        cp libs/android-support-v4.jar ../AndroidCamera/libs/ && mkdir ../Common/src && \
+	sed -i 's@../appcompat@$$Support$$@g' ../SmartReceiptsLibrary/project.properties && \
+	sed -i 's@\.\.\/\.\.@$$MuPDF$$@g' ../mupdf/jni/*.mk
+    build=pushd $$MuPDF$$ && make generate && popd && \
+        pushd ../mupdf && $$NDK$$/ndk-build && popd && \
+        pushd $$AChartEngine$$
+
+Maintainer Notes:
+Build is currently failing. Upstream issue is created:
+https://github.com/wbaumann/SmartReceiptsLibrary/issues/8
+.
+
 Auto Update Mode:None
 Update Check Mode:Tags
 Current Version:3.3.2
