@@ -31,15 +31,15 @@ Build:0.9.6,3
 
 Build:0.10.0,4
     commit=1.0
-    extlibs=android/android-support-v4.jar
-    srclibs=JSoup@jsoup-1.8.1.a,1:PagerSlidingTabStrip@v1.0.1,2:Support/v7/appcompat@android-5.0.1_r1,Support/v7/recyclerview@android-5.0.1_r1
-    prebuild=mkdir -p $$Support$$/libs && cp libs/android-support-v4.jar $$Support$$/libs && \
-        echo -e "java.source=7\njava.target=7" >> $$Support$$/local.properties && \
-        cp -fR $$Support$$/../recyclerview/src src/ && \
-        mkdir -p $$PagerSlidingTabStrip$$/libs && \
-        mv libs/android-support-v4.jar $$PagerSlidingTabStrip$$/libs
-    build=pushd $$JSoup$$ && $$MVN3$$ package && popd && \
-        cp $$JSoup$$/target/jsoup-1.8.1.jar libs/
+    srclibs=JSoup@jsoup-1.8.1.a,1:PagerSlidingTabStrip@v1.0.1,Support@android-5.0.1_r1
+    prebuild=echo -e "java.source=7\njava.target=7" >> $$Support$$/v7/appcompat/local.properties && \
+        cp -fR $$Support$$/v7/recyclerview/src ./ && \
+        cp -fR $$Support$$/annotations/src $$Support$$/v7/appcompat/ && \
+        echo android.library.reference.1=../../Support/v7/appcompat >> $$PagerSlidingTabStrip$$/project.properties && \
+        pushd $$Support$$/v4 &&  find ./ -maxdepth 2 -type d -name 'android' -exec cp -fR {} ../v7/appcompat/src/ \; && popd
+    build=mkdir libs && \
+        pushd $$JSoup$$ && $$MVN3$$ package && popd && \
+        mv $$JSoup$$/target/jsoup-1.8.1.jar libs/
     target=android-21
 
 Auto Update Mode:None
