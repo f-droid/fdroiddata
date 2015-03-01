@@ -12,6 +12,8 @@ over 90 mainstream and obscure module formats from Amiga, Atari, Acorn,
 Apple IIgs and PC. All module formats are supported, but external file
 compressors are not. Some examples are provided and can be seen when you
 browse /sdcard/mod from the app and sites that distribute more are listed on the website.
+
+[http://sourceforge.net/p/xmp/xmp-android/ci/master/tree/res/values/strings.xml Changelog]
 .
 
 Repo Type:git
@@ -117,19 +119,73 @@ Build:3.10.0,57
         cp jni/* ./ && \
         autoconf && \
         ./configure && \
-        ndk-build
+        $$NDK$$/ndk-build
     target=android-19
     scanignore=jni/Libxmp/obj/local/armeabi-v7a/libxmp.a,jni/Libxmp/obj/local/x86/libxmp.a,jni/Libxmp/obj/local/armeabi/libxmp.a
     buildjni=yes
 
-Maintainer Notes:
-See changelog (in res/values/strings.xml) to determine libxmp version.
+Build:4.3.1,73
+    disable=WIP, see maintainer notes
+    commit=android-4.3.1
+    srclibs=Libxmp@libxmp-4.3.3,1:Support/v7/appcompat@android-5.0.1_r1,2:Support/v7/gridlayout@android-5.0.1_r1,3:Volley@android-5.0.1_r1,Groundy@0f16c8e30e543d3a017a884530e179a0de65db50
+    rm=libs/*.jar,doc/xmp-android.asta
+    extlibs=android/android-support-v4.jar
+    prebuild=sed -i 's;../../../libxmp;../$$Libxmp$$;' jni/Android.mk && \
+        pushd $$Libxmp$$ && \
+        autoconf && \
+        ./configure && \
+        popd && \
+        mkdir -p $$Support$$/libs && \
+        cp libs/android-support-v4.jar $$Support$$/libs && \
+        mv libs/android-support-v4.jar $$Support$$/../gridlayout/libs && \
+        echo -e "java.source=7\njava.target=7" >> $$Support$$/local.properties
+    target=android-21
+    build=pushd $$Libxmp$$ && \
+        $$NDK$$/ndk-build && \
+        popd && \
+        pushd $$Groundy$$ && \
+        gradle jar && \
+        popd && \
+        mv $$Groundy$$/build/libs/groundy-1.5.jar libs/
+    buildjni=yes
+    ndk=r10d
 
-Running ndk-build in prebuild is awkward. Please simplify prebuild.
+Build:4.4.1,75
+    disable=app crash on startup
+    commit=android-4.4.1
+    srclibs=Libxmp@libxmp-4.3.5,Support@android-5.0.1_r1,1:Volley@android-5.0.1_r1,Groundy@0f16c8e30e543d3a017a884530e179a0de65db50
+    rm=libs/*.jar,doc/xmp-android.asta
+    extlibs=android/android-support-v4.jar
+    prebuild=sed -i 's;../../../libxmp;../$$Libxmp$$;' jni/Android.mk && \
+        pushd $$Libxmp$$ && \
+        autoconf && \
+        ./configure && \
+        popd && \
+        mkdir -p $$Support$$/v7/appcompat/libs && \
+        mkdir -p $$Support$$/v7/gridlayout/libs && \
+        cp libs/android-support-v4.jar $$Support$$/v7/appcompat/libs && \
+        mv libs/android-support-v4.jar $$Support$$/v7/gridlayout/libs && \
+        echo -e "java.source=7\njava.target=7" >> $$Support$$/v7/appcompat/local.properties && \
+	echo android.library.reference.2=$$Support$$/v7/appcompat >> project.properties && \
+	echo android.library.reference.3=$$Support$$/v7/gridlayout >> project.properties 
+    target=android-21
+    build=pushd $$Libxmp$$ && \
+        $$NDK$$/ndk-build && \
+        popd && \
+        pushd $$Groundy$$ && \
+        gradle jar && \
+        popd && \
+        mv $$Groundy$$/build/libs/groundy-1.5.jar libs/ && \
+	$$NDK$$/ndk-build TARGET_PLATFORM=android-21
+    buildjni=no
+    ndk=r10d
+
+Maintainer Notes:
+The most recent libxmp version should be fine for all builds.
 .
 
 Auto Update Mode:None
 Update Check Mode:Tags
-Current Version:4.0.0.1
-Current Version Code:61
+Current Version:4.4.1
+Current Version Code:75
 

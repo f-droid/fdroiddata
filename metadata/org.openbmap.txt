@@ -1,15 +1,15 @@
 Categories:Internet
 License:AGPLv3
 Web Site:http://openbmap.org
-Source Code:https://code.google.com/p/openbmap
-Issue Tracker:http://code.google.com/p/openbmap/issues/list
+Source Code:https://code.google.com/p/openbmap/source
+Issue Tracker:https://code.google.com/p/openbmap/issues
 
 Auto Name:Radiobeacon
 Summary:Contribute to coverage maps
 Description:
-Map wireless networks and cell towers for the [http://openbmap.org openbmap.org] database. 
+Map wireless networks and cell towers for the [http://openbmap.org openbmap.org] database.
 
-openBmap is a free and open wifi and cells database. The website offers a coverage maps of wifis and cells. Collected data can be downloaded from the website and used for many purposes, 
+openBmap is a free and open wifi and cells database. The website offers a coverage maps of wifis and cells. Collected data can be downloaded from the website and used for many purposes,
 such as determining your own location without GPS or creating network coverage maps.
 
 Status: Testing
@@ -46,21 +46,39 @@ Build:0.7.8,7
     subdir=android
     prebuild=sed -i '/proguard/d' project.properties
 
-Build:0.8.0,8
+Build:0.7.9,8
     commit=v0.8.0
     subdir=android
-    prebuild=sed -i '/proguard/d' project.properties
-    srclibs=Mapsforge@560eaa8725d1,GraphView@72976fb5b2
-    
-Build:0.8.1,9
-    commit=v0.8.1
+    patch=openbmap-gradle.patch
+    gradle=yes
+    rm=android/libs/*jar
+
+Build:0.8.3,11
+    commit=v0.8.3
     subdir=android
-    prebuild=sed -i '/proguard/d' project.properties
-    srclibs=Mapsforge@5d317a232e1b,GraphView@72976fb5b2
+    patch=openbmap-gradle.patch
+    gradle=yes
+    rm=android/libs/*jar
+    prebuild=sed -i -e 's/0.4.3/0.5.0-rc1/g' -e '/svg-android/d' build.gradle
+
+Build:0.8.4,12
+    commit=v0.8.4
+    subdir=android
+    patch=openbmap-gradle.patch
+    gradle=yes
+    rm=android/libs/*jar
+    prebuild=sed -i -e 's/0.4.3/0.5.0-rc1/g' -e '/svg-android/d' build.gradle
+
+Maintainer Notes:
+Upstream is using ant, but building mapsforge from source requires gradle, which fails
+on the build server if called in an ant or maven project (or when called multiple times).
+
+The patch migrates upstream's ant build to gradle which includes all dependencies from
+mavenCentral. Can be removed if upstream accepts our gradle patches.
+.
 
 Auto Update Mode:Version v%v
 Update Check Mode:Tags
-Current Version:0.8.1
-Current Version Code:9
-
+Current Version:0.8.4
+Current Version Code:12
 

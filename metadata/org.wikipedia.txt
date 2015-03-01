@@ -1,3 +1,4 @@
+AntiFeatures:Tracking
 Categories:Internet
 License:GPLv2
 Web Site:http://meta.wikimedia.org/wiki/Mobile_Projects
@@ -10,13 +11,11 @@ Summary:Wikipedia.org client
 Description:
 Official Wikipedia application.
 
-[https://github.com/wikimedia/WikipediaMobile/blob/HEAD/CHANGELOG.md CHANGELOG]
+[https://github.com/wikimedia/WikipediaMobile/blob/HEAD/CHANGELOG.md Changelog]
 .
 
-#Releases are in their own branch
 Repo Type:git
-#Repo:https://github.com/wikimedia/apps-android-wikipedia.git
-Repo:https://github.com/wikimedia/WikipediaMobile.git
+Repo:https://github.com/wikimedia/apps-android-wikipedia.git
 
 Build:1.0,1
     disable=repo change
@@ -49,6 +48,9 @@ Build:1.3,20
     commit=178a72271b9f
     submodules=yes
 
+Build:1.4beta1,21
+    disable=Skip beta
+
 Build:1.3.1,22
     disable=repo change
     commit=2392caf4
@@ -60,33 +62,48 @@ Build:1.3.2,23
     submodules=yes
 
 Build:1.3.4,25
+    disable=repo change
     commit=8e7d8a932
     submodules=yes
     scanignore=Cordova.framework/Cordova
 
-Build:1.4beta1,21
-    disable=Skip beta
-
 Build:dev,76
     disable=see notes
     commit=releasesprod/2.0-releasesprod-2014-08-13
+
+Build:2.0-r-2014-10-14,84
+    commit=r/2.0-r-2014-10-14
     subdir=wikipedia
-    maven=yes
-    prebuild=sed -i -e 's@<version>3.8.2</version>@<version>3.7.0</version>@g' pom.xml ../pom.xml
+    gradle=prod
+    srclibs=MediaWikiApi@32b5b87d0a57900eaa5d7e78d5623cd76f8951b3
+    forceversion=yes
+    prebuild=sed -i -e '/wmflabs/d' -e '/jcenter/amavenLocal()' ../build.gradle && \
+        pushd $$MediaWikiApi$$ && \
+        sed -i -e '/<plugins>/a<plugin><artifactId>maven-compiler-plugin</artifactId><version>3.0</version><configuration><source>1.7</source><target>1.7</target></configuration></plugin>' pom.xml && \
+        $$MVN3$$ install && \
+        popd
+
+Build:2.0-r-2014-10-30,87
+    disable=doesn't compile
+    commit=r/2.0-r-2014-10-30
+    subdir=wikipedia
+    gradle=prod
+    srclibs=MediaWikiApi@32b5b87d0a57900eaa5d7e78d5623cd76f8951b3
+    forceversion=yes
+    prebuild=sed -i -e '/wmflabs/d' -e '/jcenter/amavenLocal()' ../build.gradle && \
+        pushd $$MediaWikiApi$$ && \
+        sed -i -e '/<plugins>/a<plugin><artifactId>maven-compiler-plugin</artifactId><version>3.0</version><configuration><source>1.7</source><target>1.7</target></configuration></plugin>' pom.xml && \
+        $$MVN3$$ install && \
+        popd
 
 Maintainer Notes:
-
-1.3.4,25:
-Reenabled old repo and scanignore things that we weren't looking back then.
-
-dev,76:
-* tagging/branching is ridiculous
-* maven > 3.1 required; sed-forcing to 3.0.5 ; check on every release!
-* uses custom maven repo https://tools.wmflabs.org/android-maven-repo/
+* replaced custom maven repo https://tools.wmflabs.org/android-maven-repo/
+* versionname is timebased and generated on build; force it.
+* rework updatechecks
 .
 
 Auto Update Mode:None
-Update Check Mode:Tags ^release
-Current Version:dev
-Current Version Code:76
+Update Check Mode:Tags ^r
+Current Version:${versionStart}-dev-${date}
+Current Version Code:89
 

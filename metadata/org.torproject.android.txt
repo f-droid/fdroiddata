@@ -27,9 +27,19 @@ There is also a proxy configurator addon for [[org.mozilla.firefox]] called
 [https://github.com/guardianproject/ProxyMob/downloads ProxyMob] (not yet
 available from the Mozilla addon site).
 
-Requires root: No, but you will need to use apps that allow proxies if root
-is not granted.
+This app will use root access if you have it, but it is not required. Root
+access is used to transparently proxy apps, which allows you to force any app
+to use Tor.
+
+Currently there are two build falvors available, PIE and noPIE. "Position
+independent executable" is a technique that got introduced somewhere in the
+Android 4.x cycle and the PIE builds should be default for Android 5+. For
+technical details see [https://en.wikipedia.org/wiki/Position-independent_code Wikipedia].
+
+Basically you should use PIE builds when they are available for your device.
 .
+
+Requires Root:Yes
 
 Repo Type:git
 Repo:https://git.torproject.org/orbot.git
@@ -157,8 +167,70 @@ Build:14.0.7.1,120
     prebuild=echo 'target=android-17' >> external/superuser-commands/RootCommands-Library/project.properties
     build=NDK_BASE=$$NDK$$ make -C external
 
-Auto Update Mode:Version %v
-Update Check Mode:Tags ^[^-]*$
-Current Version:14.0.7.1
-Current Version Code:120
+Build:14.0.7.2,121
+    commit=14.0.7.2
+    submodules=yes
+    rm=libs/jtorctl.jar,external/superuser-commands/RootCommands-Demo
+    prebuild=echo 'target=android-17' >> external/superuser-commands/RootCommands-Library/project.properties
+    build=NDK_BASE=$$NDK$$ make -C external
+
+Build:14.0.8,123
+    commit=14.0.8
+    submodules=yes
+    rm=libs/jtorctl.jar,external/superuser-commands/RootCommands-Demo
+    prebuild=echo 'target=android-17' >> external/superuser-commands/RootCommands-Library/project.properties
+    build=NDK_BASE=$$NDK$$ make -C external
+
+Build:14.0.8.1,124
+    commit=14.0.8.1
+    submodules=yes
+    rm=libs/jtorctl.jar,external/superuser-commands/RootCommands-Demo
+    prebuild=echo 'target=android-17' >> external/superuser-commands/RootCommands-Library/project.properties
+    build=NDK_BASE=$$NDK$$ make -C external
+
+Build:14.1.1,128
+    disable=build changed
+    commit=14.1.1
+    submodules=yes
+    rm=libs/jtorctl.jar,external/superuser-commands/RootCommands-Demo
+    prebuild=echo 'target=android-17' >> external/superuser-commands/RootCommands-Library/project.properties
+    build=NDK_BASE=$$NDK$$ make -C external
+
+Build:14.1.3-PIE,130
+    disable=no tag
+    commit=14.1.3-PIE
+    submodules=yes
+    rm=libs/jtorctl.jar,external/superuser-commands/RootCommands-Demo
+    prebuild=echo 'target=android-17' >> external/superuser-commands/RootCommands-Library/project.properties
+    build=NDK_BASE=$$NDK$$ make -C external
+
+Build:14.1.4-noPIE,132
+    commit=v14.1.4
+    init=git cherry-pick -n 7ee0622a5eaafba284dac81fe58aeb15a478c9c2 && git submodule update --init
+    submodules=yes
+    rm=libs/jtorctl.jar,external/superuser-commands/RootCommands-Demo
+    prebuild=mv AndroidManifest.KITKAT_AND_LOWER.xml AndroidManifest.xml && echo 'target=android-17' >> external/superuser-commands/RootCommands-Library/project.properties
+    build=NDK_BASE=$$NDK$$ make -C external
+    buildjni=no
+
+Build:14.1.4-PIE,133
+    commit=v14.1.4
+    init=git cherry-pick -n 7ee0622a5eaafba284dac81fe58aeb15a478c9c2 && git submodule update --init
+    submodules=yes
+    rm=libs/jtorctl.jar,external/superuser-commands/RootCommands-Demo
+    prebuild=echo 'target=android-17' >> external/superuser-commands/RootCommands-Library/project.properties
+    build=NDK_BASE=$$NDK$$ make -C external PIEFLAGS="-fPIE -pie"
+    buildjni=no
+    forcevercode=yes
+
+Maintainer Notes:
+UCM only picks up the noPIE version with lower VC. Also AUM will only build
+the default flavor.
+.
+
+Archive Policy:6 versions
+#Auto Update Mode:Version %v
+#Update Check Mode:Tags ^[^-]*$
+Current Version:14.1.4-PIE
+Current Version Code:133
 

@@ -1,0 +1,70 @@
+diff --git c/app/build.gradle w/app/build.gradle
+index 438147e..3258181 100644
+--- c/app/build.gradle
++++ w/app/build.gradle
+@@ -78,27 +78,6 @@ android {
+ 
+     productFlavors {
+         free {}
+-      play {
+-          // If Non-Free libraries are to be used
+-          buildConfigField "boolean", "NONFREE", "true"
+-      }
+-      playBeta {
+-        // Beta runs at +1
+-        versionCode versionMajor * 10000 + versionMinor * 1000 + versionPatch * 100 + versionBuild * 10 + 1
+-
+-        buildConfigField "boolean", "DROPBOX_ENABLED", "true"
+-        // If Non-Free libraries are to be used
+-        buildConfigField "boolean", "NONFREE", "true"
+-      }
+-    }
+-
+-    sourceSets {
+-        playBeta {
+-            // Include play sources
+-            java.srcDirs = ['src/play/java']
+-            res.srcDirs = ['src/play/res', 'src/playBeta/res']
+-            manifest.srcFile 'src/play/AndroidManifest.xml'
+-        }
+     }
+ 
+     if (project.hasProperty('STORE_FILE')) {
+@@ -129,20 +108,6 @@ apt {
+     }
+ }
+ 
+-// Dropbox
+-task nativeLibsToJar(type: Zip) {
+-    destinationDir file("$buildDir/native-libs")
+-    baseName 'native-libs'
+-    extension 'jar'
+-    from fileTree(dir: 'src/playBeta/libs', include: '**/*.so')
+-    into 'lib/'
+-}
+-
+-// If non-free, depend on dropbox
+-tasks.withType(JavaCompile) {
+-    compileTask -> if (compileTask.toString().contains("Play")) compileTask.dependsOn(nativeLibsToJar)
+-}
+-
+ dependencies {
+     compile fileTree(dir: 'libs', include: '*.jar')
+     compile 'com.android.support:support-v4:19.0.1+'
+@@ -158,14 +123,4 @@ dependencies {
+     // annotations
+     apt "org.androidannotations:androidannotations:$AAVersion"
+     compile "org.androidannotations:androidannotations-api:$AAVersion"
+-    // Dropbox and non-free stuff
+-    playCompile fileTree(dir: 'src/play/libs', include: '*.jar')
+-    playBetaCompile fileTree(dir: 'src/play/libs', include: '*.jar')
+-    playCompile fileTree(dir: "$buildDir/native-libs", include: "*.jar")
+-    playCompile 'com.google.android.gms:play-services:+'
+-    playBetaCompile fileTree(dir: "$buildDir/native-libs", include: "*.jar")
+-    playBetaCompile 'com.google.android.gms:play-services:+'
+-    // Tests
+-    androidTestCompile 'com.squareup.spoon:spoon-client:1.1.1+'
+-
+-}
++}
+\ No newline at end of file

@@ -1,0 +1,98 @@
+diff --git a/src/org/geometerplus/android/fbreader/DictionaryUtil.java b/src/org/geometerplus/android/fbreader/DictionaryUtil.java
+index b5e9874..a2e4250 100644
+--- a/src/org/geometerplus/android/fbreader/DictionaryUtil.java
++++ b/src/org/geometerplus/android/fbreader/DictionaryUtil.java
+@@ -27,11 +27,6 @@ import android.net.Uri;
+ import android.os.Looper;
+ import android.util.DisplayMetrics;
+ 
+-import com.abbyy.mobile.lingvo.api.MinicardContract;
+-import com.paragon.dictionary.fbreader.OpenDictionaryFlyout;
+-import com.paragon.open.dictionary.api.Dictionary;
+-import com.paragon.open.dictionary.api.OpenDictionaryAPI;
+-
+ import org.geometerplus.zlibrary.core.filesystem.ZLFile;
+ import org.geometerplus.zlibrary.core.language.Language;
+ import org.geometerplus.zlibrary.core.options.ZLStringOption;
+@@ -122,14 +117,8 @@ public abstract class DictionaryUtil {
+ 			final Intent intent = getDictionaryIntent(text);
+ 			try {
+ 				if ("ABBYY Lingvo".equals(Id)) {
+-					intent.putExtra(MinicardContract.EXTRA_GRAVITY, frameMetrics.Gravity);
+-					intent.putExtra(MinicardContract.EXTRA_HEIGHT, frameMetrics.Height);
+-					intent.putExtra(MinicardContract.EXTRA_FORCE_LEMMATIZATION, true);
+-					intent.putExtra(MinicardContract.EXTRA_TRANSLATE_VARIANTS, true);
+-					intent.putExtra(MinicardContract.EXTRA_LIGHT_THEME, true);
+ 					final String targetLanguage = TargetLanguageOption.getValue();
+ 					if (!Language.ANY_CODE.equals(targetLanguage)) {
+-						intent.putExtra(MinicardContract.EXTRA_LANGUAGE_TO, targetLanguage);
+ 					}
+ 				} else if ("ColorDict".equals(Id)) {
+ 					intent.putExtra(ColorDict3.HEIGHT, frameMetrics.Height);
+@@ -144,29 +133,6 @@ public abstract class DictionaryUtil {
+ 		}
+ 	}
+ 
+-	private static class OpenDictionaryPackageInfo extends PackageInfo {
+-		final OpenDictionaryFlyout Flyout;
+-
+-		OpenDictionaryPackageInfo(Dictionary dictionary) {
+-			super(
+-				dictionary.getUID(),
+-				dictionary.getApplicationPackageName(),
+-				".Start",
+-				dictionary.getName(),
+-				null,
+-				null,
+-				"%s",
+-				false
+-			);
+-			Flyout = new OpenDictionaryFlyout(dictionary);
+-		}
+-
+-		@Override
+-		void open(String text, Activity context, PopupFrameMetric frameMetrics) {
+-			Flyout.showTranslation(context, text, frameMetrics);
+-		}
+-	}
+-
+ 	private static class InfoReader extends ZLXMLReaderAdapter {
+ 		@Override
+ 		public boolean dontCacheAttributeValues() {
+@@ -253,25 +219,6 @@ public abstract class DictionaryUtil {
+ 		String FULLSCREEN = "EXTRA_FULLSCREEN";
+ 	}
+ 
+-	private static void collectOpenDictionaries(Context context) {
+-		final SortedSet<Dictionary> dictionariesTreeSet =
+-			new TreeSet<Dictionary>(new Comparator<Dictionary>() {
+-				@Override
+-				public int compare(Dictionary lhs, Dictionary rhs) {
+-					return lhs.toString().compareTo(rhs.toString());
+-				}
+-			}
+-		);
+-		dictionariesTreeSet.addAll(
+-			new OpenDictionaryAPI(context).getDictionaries()
+-		);
+-
+-		for (Dictionary dict : dictionariesTreeSet) {
+-			final PackageInfo info = new OpenDictionaryPackageInfo(dict);
+-			ourInfos.put(info, FLAG_SHOW_AS_DICTIONARY);
+-		}
+-	}
+-
+ 	private static final class Initializer implements Runnable {
+ 		private final Activity myActivity;
+ 		private final Runnable myPostAction;
+@@ -293,10 +240,6 @@ public abstract class DictionaryUtil {
+ 				new BitKnightsInfoReader(myActivity).readQuietly(ZLFile.createFileByPath("dictionaries/bitknights.xml"));
+ 				myActivity.runOnUiThread(new Runnable() {
+ 					public void run() {
+-						collectOpenDictionaries(myActivity);
+-						if (myPostAction != null) {
+-							myPostAction.run();
+-						}
+ 					}
+ 				});
+ 			}
