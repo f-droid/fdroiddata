@@ -79,10 +79,22 @@ Build:3.3.2,112
         pushd ../mupdf && $$NDK$$/ndk-build && popd && \
         pushd $$AChartEngine$$
 
-Maintainer Notes:
-Build is currently failing. Upstream issue is created:
-https://github.com/wbaumann/SmartReceiptsLibrary/issues/8
-.
+Build:3.3.3,120
+    commit=4bce295fc2b6e9403052b57f3722b24c62630636
+    subdir=SmartReceiptsPRO
+    srclibs=AChartEngine@r534,MuPDF@1.6,itextg@5.5.0
+    scandelete=.,..
+    gradle=yes
+    prebuild=sed -i 's@\.\.\/\.\.@$$MuPDF$$@g' ../mupdf/jni/*.mk && \
+        sed -i -e 's/:smartReceiptsLibrary/:SmartReceiptsLibrary/' build.gradle ../settings.gradle && \
+        sed -i -e 's/:androidCamera/:AndroidCamera/' ../SmartReceiptsLibrary/build.gradle ../settings.gradle
+    rm=../SmartReceiptsLibrary/libs/*.jar,libs/test/*.jar
+    build=pushd $$MuPDF$$ && make generate && popd && \
+        pushd ../mupdf && $$NDK$$/ndk-build && popd && \
+        pushd $$AChartEngine$$ && $$MVN3$$ package && popd && \
+	cp $$AChartEngine$$/target/achartengine-1.1.0.jar ../SmartReceiptsLibrary/libs && \
+	pushd $$itextg$$ && $$MVN3$$ package -DskipTests && popd && \
+	cp $$itextg$$/target/itextg-5.5.0.jar ../SmartReceiptsLibrary/libs
 
 Auto Update Mode:None
 Update Check Mode:Tags
