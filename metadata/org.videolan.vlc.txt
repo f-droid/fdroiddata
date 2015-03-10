@@ -433,62 +433,41 @@ Build:1.0.1,10104
     buildjni=no
 
 Build:1.1.3,1010302
-    disable=crash
+    disable=needs testing
     commit=1.1.3
     subdir=vlc-android
     srclibs=VLC@a9b19e4
-    prebuild=sed -i -e '/^TARGET/aPASSWORD_KEYSTORE="$PASSWORD_KEYSTORE" gradle $TARGET\nexit 0' -e 's@\-d \"gradle\/wrapper\"@1@g' ../compile.sh && \
-        ln -s vlc-android/$$VLC$$ ../vlc && \
-        sed -i -e 's/01010300/01010302/g' AndroidManifest.xml && \
-        sed -i -e 's/getString(R.string.build_time)/"20150308"/g' \
-               -e 's/getString(R.string.build_host)/"localhost"/g' \
-               -e 's/getString(R.string.build_revision)/"rev"/g' \
-               -e 's/BuildConfig.APPLICATION_ID/"org.videlan.vlc"/g' \
-               -e 's/BuildConfig.VERSION_NAME/"1.1.3"/g' \
-               -e 's/BuildConfig.VERSION_CODE/1010302/g' \
-                  src/org/videolan/vlc/widget/VLCAppWidgetProvider.java src/org/videolan/vlc/gui/audio/AudioUtil.java src/org/videolan/vlc/gui/NativeCrashActivity.java src/org/videolan/vlc/widget/SlidingPaneLayout.java src/org/videolan/vlc/gui/MainActivity.java src/org/videolan/vlc/gui/AboutFragment.java src/org/videolan/vlc/audio/AudioService.java
+    prebuild=sed -i -e '/^TARGET/aexit 0\ngradle clean\nPASSWORD_KEYSTORE="$PASSWORD_KEYSTORE" gradle $TARGET\nexit 0' -e 's@\-d \"gradle\/wrapper\"@1@g' ../compile.sh && \
+        ln -s vlc-android/$$VLC$$ ../vlc
     build=cd ../ && \
         ./compile.sh -a "x86" --release
+    gradle=Vanillax86
     buildjni=no
     ndk=r10d
 
 Build:1.1.3,1010303
-    disable=crash
+    disable=needs testing
     commit=1.1.3
     subdir=vlc-android
     srclibs=VLC@a9b19e4
-    prebuild=sed -i -e '/^TARGET/aPASSWORD_KEYSTORE="$PASSWORD_KEYSTORE" gradle $TARGET\nexit 0' -e 's@\-d \"gradle\/wrapper\"@1@g' ../compile.sh && \
-        ln -s vlc-android/$$VLC$$ ../vlc && \
-        sed -i -e 's/01010300/01010303/g' AndroidManifest.xml && \
-        sed -i -e 's/getString(R.string.build_time)/"20150308"/g' \
-               -e 's/getString(R.string.build_host)/"localhost"/g' \
-               -e 's/getString(R.string.build_revision)/"rev"/g' \
-               -e 's/BuildConfig.APPLICATION_ID/"org.videlan.vlc"/g' \
-               -e 's/BuildConfig.VERSION_NAME/"1.1.3"/g' \
-               -e 's/BuildConfig.VERSION_CODE/1010303/g' \
-                  src/org/videolan/vlc/widget/VLCAppWidgetProvider.java src/org/videolan/vlc/gui/audio/AudioUtil.java src/org/videolan/vlc/gui/NativeCrashActivity.java src/org/videolan/vlc/widget/SlidingPaneLayout.java src/org/videolan/vlc/gui/MainActivity.java src/org/videolan/vlc/gui/AboutFragment.java src/org/videolan/vlc/audio/AudioService.java
+    prebuild=sed -i -e '/^TARGET/aexit 0\ngradle clean\nPASSWORD_KEYSTORE="$PASSWORD_KEYSTORE" gradle $TARGET\nexit 0' -e 's@\-d \"gradle\/wrapper\"@1@g' ../compile.sh && \
+        ln -s vlc-android/$$VLC$$ ../vlc
     build=cd ../ && \
         ./compile.sh -a "armeabi" --release
+    gradle=VanillaARMv6fpu
     buildjni=no
     ndk=r10d
 
 Build:1.1.3,1010304
-    disable=crash
+    disable=builds, needs testing
     commit=1.1.3
     subdir=vlc-android
     srclibs=VLC@a9b19e4
-    prebuild=sed -i -e '/^TARGET/agradle clean\nPASSWORD_KEYSTORE="$PASSWORD_KEYSTORE" gradle $TARGET\nexit 0' -e 's@\-d \"gradle\/wrapper\"@1@g' ../compile.sh && \
-        ln -s vlc-android/$$VLC$$ ../vlc && \
-        sed -i -e 's/01010300/01010304/g' AndroidManifest.xml && \
-        sed -i -e 's/getString(R.string.build_time)/"20150308"/g' \
-               -e 's/getString(R.string.build_host)/"localhost"/g' \
-               -e 's/getString(R.string.build_revision)/"rev"/g' \
-               -e 's/BuildConfig.APPLICATION_ID/"org.videlan.vlc"/g' \
-               -e 's/BuildConfig.VERSION_NAME/"1.1.3"/g' \
-               -e 's/BuildConfig.VERSION_CODE/1010304/g' \
-                  src/org/videolan/vlc/widget/VLCAppWidgetProvider.java src/org/videolan/vlc/gui/audio/AudioUtil.java src/org/videolan/vlc/gui/NativeCrashActivity.java src/org/videolan/vlc/widget/SlidingPaneLayout.java src/org/videolan/vlc/gui/MainActivity.java src/org/videolan/vlc/gui/AboutFragment.java src/org/videolan/vlc/audio/AudioService.java
+    prebuild=sed -i -e '/^TARGET/aexit 0\ngradle clean\nPASSWORD_KEYSTORE="$PASSWORD_KEYSTORE" gradle $TARGET\nexit 0' -e 's@\-d \"gradle\/wrapper\"@1@g' ../compile.sh && \
+        ln -s vlc-android/$$VLC$$ ../vlc
     build=cd ../ && \
         ./compile.sh -a "armeabi-v7a" --release
+    gradle=VanillaARMv7
     buildjni=no
     ndk=r10d
 
@@ -496,16 +475,6 @@ Maintainer Notes:
 Instructions and dependencies here: http://wiki.videolan.org/AndroidCompile
 see http://buildbot.videolan.org/builders/ for version code scheme
 The VLC srclib commit can be found out from TESTED_HASH value in compile.sh
-
-Issues:
-* Builds locally, but might break on the BS, since we call gradle directly:
-  We might have to move config etc. out  of the two .sh files into our
-  prebuild and then use fdroid's own gradle= field.
-* The sed magic for BuildConfig. and R. should not be necessary. I don't
-  know what is causing this issue, but maybe running gradle clean properly
-  will do the trick.
-* Switching to a gradle= field should also enable us to use forcevercode
-  instead of sed.
 .
 
 # +0: - (upstream)
