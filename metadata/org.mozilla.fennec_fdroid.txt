@@ -253,7 +253,7 @@ Build:36.0,360010
         zip -d fdroid/fennec-unsigned.apk "META-INF*"
 
 Build:36.0.1,360011
-    disable=builds, but dont have time for tests
+    disable=wip
     commit=FENNEC_36_0_1_RELEASE
     srclibs=MozLocales@11c8e4b7b332e466f72df2fb7a340ec8143b1135
     output=fdroid/fennec-unsigned.apk
@@ -275,21 +275,23 @@ Build:36.0.1,360011
         rm -R xpcom/tests/
     scanignore=mobile/android/base/JavaAddonManager.java
     prebuild=mkdir fdroid && \
+        vercode=360011 && \
+        fxarch=i386-linux-android && \
         l10ndir=`readlink -f $$MozLocales$$` && \
-        sed -i -e 's/android:debuggable="true"//g' \
-               -e 's/@ANDROID_VERSION_CODE@/360011/g' \
-               mobile/android/base/AndroidManifest.xml.in && \
+        sed -i -e 's/android:debuggable="true"//g' mobile/android/base/AndroidManifest.xml.in && \
         sed -i -e '/MOZ_ANDROID_GOOGLE_PLAY_SERVICES/d' configure.in && \
         echo "ac_add_options --with-android-ndk=\"$$NDK$$\"" > .mozconfig && \
         echo "ac_add_options --with-android-sdk=\"$$SDK$$/platforms/android-21\"" >> .mozconfig && \
         echo "ac_add_options --enable-application=mobile/android" >> .mozconfig && \
-        echo "ac_add_options --target=i386-linux-android" >> .mozconfig && \
+        echo "ac_add_options --target=${fxarch}" >> .mozconfig && \
         echo "ac_add_options --disable-tests" >> .mozconfig && \
         echo "ac_add_options --disable-updater" >> .mozconfig && \
         echo "ac_add_options --disable-crashreporter" >> .mozconfig && \
+        echo "ac_add_options --disable-debug" >> .mozconfig && \
         echo "ac_add_options --with-branding=mobile/android/branding/unofficial" >> .mozconfig && \
         echo "ac_add_options --with-l10n-base=${l10ndir}" >> .mozconfig && \
         echo "mk_add_options 'export L10NBASEDIR=${l10ndir}'" >> .mozconfig && \
+        echo "mk_add_options 'export ANDROID_VERSION_CODE=${vercode}'" >> .mozconfig && \
         echo "mk_add_options 'export MOZ_CHROME_MULTILOCALE=$(tr '\n' ' ' <  mobile/android/locales/maemo-locales)'" >> .mozconfig && \
         pushd mobile/android/branding/unofficial/ && \
         sed -i -e '/ANDROID_PACKAGE_NAME/d' -e '/MOZ_APP_DISPLAYNAME/d' configure.sh && \
