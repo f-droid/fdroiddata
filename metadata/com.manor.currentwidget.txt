@@ -72,6 +72,23 @@ Build:0.39a,39
     disable=Proprietary dependencies just so you can 'rate' the widget!?
     commit=290
 
+Build:0.4a,46
+    commit=310
+    subdir=CurrentWidget
+    target=android-19
+    extlibs=android/android-support-v4.jar
+    srclibs=AChartEngine@r534,DashClock@d043bbca9ca7,Color-Picker-2@61a1f01e404b
+    rm=CurrentWidgetLibrary/libs/*,CurrentWidgetLibrary/src/com/manor/currentwidget/library/PlusOnePreference.java
+    prebuild=mv libs/android-support-v4.jar ../CurrentWidgetLibrary/libs/ && \
+        printf "android.library=true\ntarget=19\nandroid.library.reference.1=$$Color-Picker-2$$" > ../CurrentWidgetLibrary/project.properties && \
+	cp -R $$DashClock$$/api/src/main/java/* ../CurrentWidgetLibrary/src/ && \
+	cp -R $$DashClock$$/api/src/main/aidl/* ../CurrentWidgetLibrary/src/ && \
+	mkdir -p src/
+    update=.,../CurrentWidgetLibrary
+    patch=rm_one_plus.patch
+    build=pushd $$AChartEngine$$ && $$MVN3$$ package && popd && \
+        cp $$AChartEngine$$/target/achartengine-1.1.0.jar ../CurrentWidgetLibrary/libs
+
 Auto Update Mode:None
 Update Check Mode:RepoManifest
 Current Version:0.4a
