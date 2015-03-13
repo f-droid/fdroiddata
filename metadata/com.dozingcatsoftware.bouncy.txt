@@ -39,6 +39,22 @@ Build:1.4.2,14
         cp $$libgdx$$/dist/gdx.jar libs/ && \
         cp -r $$libgdx$$/dist/extensions/gdx-box2d/* libs/
 
+Build:1.5,15
+    commit=9e2f2feacff19d0df8cf46994b236ce4994b934e
+    srclibs=libgdx@1.4.1
+    rm=libs/*
+    prebuild=pushd $$libgdx$$ && \
+        rm gdx/jni/build.xml && \
+        sed -i 's@<target name="compile-natives">@<target name="compile-natives">\n<ant antfile="build-android32.xml"/>\n</target>\n<target name="compile-natives-old">@g' extensions/gdx-box2d/gdx-box2d/jni/build.xml && \
+        sed -i 's@<target name="all" depends="compile-natives,pack-natives"/>@<target name="all" depends="compile-natives"/>@g' extensions/gdx-box2d/gdx-box2d/jni/build.xml && \
+        popd
+    build=export NDK_HOME=$$NDK$$ && \
+        pushd $$libgdx$$ && \
+        ant -f build.xml -Dbuild-natives=true gdx-box2d && \
+        popd && \
+        cp $$libgdx$$/dist/gdx.jar libs/ && \
+        cp -r $$libgdx$$/dist/extensions/gdx-box2d/* libs/
+
 Maintainer Notes:
 sed replaces needed as libgdx upstream currently don't provide a way to only build the android native bins only.
 If more apps start to depend on libgdx consider to create a feature request to change this.
