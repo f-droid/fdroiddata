@@ -15,8 +15,6 @@ I2P is an anonymizing network, offering a simple layer that identity-sensitive
 applications can use to securely communicate. All data is wrapped with several
 layers of encryption, and the network is both distributed and dynamic, with no
 trusted parties.
-
-WARNING - This is ALPHA SOFTWARE. Do not rely upon it for strong anonymity.
 .
 
 Repo Type:git
@@ -115,25 +113,41 @@ Build:0.9.13-0_b1-API8,4745216
     update=../srclib/Support/v7/appcompat
     scandelete=i2p.i2p,routerjars/jni
 
-Maintainer Notes:
-Android version code is an integer. So we have 31 bits.
+Build:0.9.18,4745226
+    commit=17ab043a4bdd18b9bbe45aabd38b699b44e620e1
+    extlibs=android/android-support-v4.jar
+    srclibs=I2P@ce041dfbc1cfa406b7fbb418695086940700469d,Support/v7/appcompat@android-4.4.2_r2,GradleWitness@10f1269c0aafdc1d478efc005ed48f3a47d44278
+    prebuild=cp -R $$I2P$$ ../i2p.i2p && \
+        cp -R $$GradleWitness$$ ../witness && \
+        cd ../witness && \
+        gradle build && \
+        cd ../app && \
+        echo -e "sdk.dir=$$SDK$$\ni2psrc=../i2p.i2p" >> ./local.properties && \
+        echo -e "sdk.dir=$$SDK$$\nndk.dir=$$NDK$$\ni2psrc=../i2p.i2p" >> ../routerjars/local.properties && \
+        wget https://gmplib.org/download/gmp/gmp-4.3.2.tar.xz && \
+        tar xJvf gmp-4.* -C ../i2p.i2p/core/c/jbigi/ && \
+        rm ./gmp-4.* && \
+        sed -i 's|gradle/libs/gradle-witness.jar|witness/build/libs/witness.jar|' ../build.gradle && \
+        sed -i '50,61d' ../client/build.gradle
+    scandelete=i2p.i2p,routerjars/jni,client/src/main/jniLibs/armeabi,witness/build/classes
+    gradle=legacy
+    subdir=app/
 
+Maintainer Notes:
+The version code and name is in app/build.gradle
+Android version code is an integer. So we have 31 bits.
 MAJOR         4 bits 0-15
 MINOR         8 bits 0-255
 RELEASE       8 bits 0-255
 ROUTERBUILD   7 bits 0-127
 ANDROIDBUILD  4 bits 0-15
-
 See custom_rules.xml for more info.
 
 Increment build number with 'ant incrementBuild' for updates between router releases. (see ./custom_rules.xml)
-
-Can't use neither update=auto (the default) nor any Update Check Mode, since
-it uses a weird ant setup that breaks any 'android update' runs.
 .
 
 Auto Update Mode:None
 Update Check Mode:None
-Current Version:0.9.13-0_b1-API8
-Current Version Code:4745216
+Current Version:0.9.18
+Current Version Code:4745226
 
