@@ -140,19 +140,30 @@ Build:0.3.0-dev-fdroid,98
         rm -fR libs && \
         echo -e "allprojects {\nsourceCompatibility = 1.7\ntargetCompatibility = 1.7\n}" >> ../build.gradle
 
-Build:0.3.0,103
-    disable=needs dependency fixing
-    commit=ac58c878a976abada319407a5c0be0059c621899
+Build:0.3.0-dev-fdroid,106
+    commit=8eb4ee994bd3671ba698c48d3d69df39f5513508
     subdir=twidere
     submodules=yes
     gradle=fdroid
-    srclibs=CWACMerge@v1.0.1,CWACSacklist@v1.0.1,MariotakuDragSort@0.6.1,MariotakuSlidingMenu@501a9988a4d95958fe634fc09d5dc332de7830b9
+    srclibs=CWACMerge@v1.0.1,CWACSacklist@v1.0.1,MariotakuDragSort@0.6.1,MariotakuMessageBubbleView@1.0,MariotakuSlidingMenu@501a9988a4d95958fe634fc09d5dc332de7830b9,ColorPicker-uucky@0.9.1
     rm=twidere.wear,twidere.extension.push.xiaomi,twidere.donate.nyanwp.wear,libraries/SlidingMenu/example
     prebuild=sed -i -e '/googleCompile/d' -e '/amazonaws/d' -e '/jitpack/d'  build.gradle && \
         cp -fR $$CWACMerge$$/merge/src/com src/main/java/ && \
         cp -fR $$CWACSacklist$$/sacklist/src/com src/main/java && \
         sed -i -e '/xujiaao/d' ../build.gradle && \
-        sed -i -e '/wearApp/d' ../twidere.donate.nyanwp/build.gradle
+        sed -i -e '/wearApp/d' ../twidere.donate.nyanwp/build.gradle && \
+        mkdir -p ../libraries/colorpicker && cp -fR $$ColorPicker-uucky$$ ../libraries/colorpicker && \
+        mkdir -p ../libraries/dragsort && cp -fR $$MariotakuDragSort$$ ../libraries/dragsort && \
+        mkdir -p ../libraries/slidingmenu && cp -fR $$MariotakuSlidingMenu$$ ../libraries/slidingmenu && \
+        mkdir -p ../libraries/messagebubbleview && cp -fR $$MariotakuMessageBubbleView$$ ../libraries/messagebubbleview && \
+        echo -e "\ninclude ':libraries:colorpicker:library'\ninclude ':libraries:dragsort:library'\ninclude ':libraries:slidingmenu:library'\ninclude ':libraries:messagebubbleview:library'" >> ../settings.gradle && \
+        sed -i -e '/ColorPicker/acompile project(":libraries:colorpicker:library")' \
+               -e '/DragSortListView/acompile project(":libraries:dragsort:library")' \
+               -e '/SlidingMenu/acompile project(":libraries:slidingmenu:library")' build.gradle \
+               -e '/MessageBubbleView/acompile project(":libraries:messagebubbleview:library")' && \
+        sed -i -e '/ColorPicker/d' -e '/DragSortListView/d' -e '/SlidingMenu/d' -e '/MessageBubbleView/d' -e '/commonsware/d' build.gradle && \
+        sed -i -e '/versionNameSuffix String/aversionNameSuffix "-dev-fdroid"' build.gradle && \
+        sed -i -e '/versionNameSuffix String/d' build.gradle
 
 Maintainer Notes:
 * JonSerializer issues when using srclib, see: https://github.com/TwidereProject/Twidere-Android/issues/37
