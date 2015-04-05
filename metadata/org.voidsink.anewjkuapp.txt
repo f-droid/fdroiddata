@@ -1,8 +1,10 @@
 Categories:Science & Education
 License:GPLv3
-Name:JKU App
+Web Site:
 Source Code:https://github.com/marunjar/anewjkuapp
 Issue Tracker:https://github.com/marunjar/anewjkuapp/issues
+
+Auto Name:JKU App
 Summary:Provides information for the students of JKU Linz
 Description:
 This is an app for the students of JKU Linz that
@@ -13,11 +15,27 @@ provides most of the data from KUSSS and also information from ÖH and the JKU i
 * get notifications for new exams, grades and changed course dates
 * included campus map for "navigation"
 * shows menu for JKU Mensa, Raab Mensa and KHG Mensa
+.
+
 Repo Type:git
 Repo:https://github.com/marunjar/anewjkuapp.git
-Archive Policy:3 versions
-Update Check Mode:Tags
-Auto Update Mode:Version v%v
+
 Build:0.38,140038
-	commit=v0.38
-	gradle=fdroid
+    disable=scanner warns on tools dir
+    commit=v0.38
+    subdir=aNewJKUApp
+    gradle=fdroid
+    srclibs=MPAndroidChart@d9ae5fae0a07bdbd526e9e89d32ba99cc7501935
+    prebuild=sed -i -e '/jitpack/d' ../build.gradle && \
+        sed -i -e '/applicationVariants/,+2d' -e '/def appendVersionNameVersionCode/,+7d' -e 's|googleCompile|//googleCompile|g' build.gradle && \
+        cp -fR $$MPAndroidChart$$ ../ && \
+        echo -e 'include ":MPChartLib"' >> ../settings.gradle && \
+        sed -i -e '/MPAndroidChart/acompile project(":MPChartLib")' build.gradle && \
+        sed -i -e '/MPAndroidChart/d' build.gradle && \
+        sed -i -e '/android-maven/d' ../MPChartLib/build.gradle
+
+#Auto Update Mode:Version v%v
+Update Check Mode:Tags
+Current Version:0.38
+Current Version Code:140038
+
