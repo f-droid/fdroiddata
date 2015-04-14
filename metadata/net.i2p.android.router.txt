@@ -134,6 +134,27 @@ Build:0.9.18,4745226
     gradle=legacy
     subdir=app/
 
+Build:0.9.19,4745227
+    commit=234bc6e5a0edcd94c19c62ef5dce8fdbe69c43f1
+    extlibs=android/android-support-v4.jar
+    srclibs=I2P@dd99978b196181106926c73fbfcbf717b19c7000,Support/v7/appcompat@android-4.4.2_r2,GradleWitness@10f1269c0aafdc1d478efc005ed48f3a47d44278
+    prebuild=cp -R $$I2P$$ ../i2p.i2p && \
+        cp -R $$GradleWitness$$ ../witness && \
+        cd ../witness && \
+        gradle build && \
+        cd ../app && \
+        echo -e "sdk.dir=$$SDK$$\ni2psrc=../i2p.i2p" >> ./local.properties && \
+        echo -e "sdk.dir=$$SDK$$\nndk.dir=$$NDK$$\ni2psrc=../i2p.i2p" >> ../routerjars/local.properties && \
+        wget https://gmplib.org/download/gmp/gmp-4.3.2.tar.xz && \
+        tar xJvf gmp-4.* -C ../i2p.i2p/core/c/jbigi/ && \
+        rm ./gmp-4.* && \
+        sed -i 's|gradle/libs/gradle-witness.jar|witness/build/libs/witness.jar|' ../build.gradle && \
+        sed -i '50,61d' ../client/build.gradle &&\
+        sed -i 's|ANDROID_BUILD_TOOLS_VERSION=21.1.2|ANDROID_BUILD_TOOLS_VERSION=22.0.0|' ../gradle.properties
+    scandelete=i2p.i2p,routerjars/jni,client/src/main/jniLibs/armeabi,witness/build/classes
+    gradle=legacy
+    subdir=app/
+
 Maintainer Notes:
 The version code and name is in app/build.gradle
 Android version code is an integer. So we have 31 bits.
@@ -149,6 +170,6 @@ Increment build number with 'ant incrementBuild' for updates between router rele
 
 Auto Update Mode:None
 Update Check Mode:None
-Current Version:0.9.18
-Current Version Code:4745226
+Current Version:0.9.19
+Current Version Code:4745227
 
