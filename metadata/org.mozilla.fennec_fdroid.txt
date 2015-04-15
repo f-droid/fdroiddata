@@ -654,15 +654,105 @@ Build:37.0.1,370110
         mv obj-${fxarch}/dist/fennec-*.apk fdroid/fennec-unsigned.apk && \
         zip -d fdroid/fennec-unsigned.apk "META-INF*"
 
+Build:37.0.2,370200
+    commit=FENNEC_37_0_2_RELEASE
+    srclibs=MozLocales@a7219763 
+    output=fdroid/fennec-unsigned.apk
+    ndk=r10d
+    init=rm -R docshell/test/ dom/tests/ modules/libjar/test/ security/manager/ssl/tests/*test/ security/nss/cmd/bltest/tests/ security/nss/tests/ toolkit/crashreporter/moz.build toolkit/crashreporter/client/ toolkit/crashreporter/google-breakpad/src/tools/ toolkit/crashreporter/google-breakpad/src/client/ toolkit/crashreporter/google-breakpad/src/processor/testdata/ toolkit/crashreporter/google-breakpad/src/third_party/linux/ toolkit/mozapps/extensions/test/ xpcom/tests/
+    patch=36.0.4-android-22-a.patch,36.0.4-android-22-b.patch
+    scanignore=mobile/android/base/JavaAddonManager.java
+    prebuild=mkdir fdroid && \
+        vercode=370200 && \
+        fxarch=arm-linux-androideabi && \
+        l10ndir=`readlink -f $$MozLocales$$` && \
+        sed -i -e 's/android:debuggable="true"//g' mobile/android/base/AndroidManifest.xml.in && \
+        sed -i -e '/MOZ_ANDROID_GOOGLE_PLAY_SERVICES/d' configure.in && \
+        echo "ac_add_options --with-android-ndk=\"$$NDK$$\"" > .mozconfig && \
+        echo "ac_add_options --with-android-sdk=\"$$SDK$$/platforms/android-22\"" >> .mozconfig && \
+        echo "ac_add_options --enable-application=mobile/android" >> .mozconfig && \
+        echo "ac_add_options --target=${fxarch}" >> .mozconfig && \
+        echo "ac_add_options --disable-tests" >> .mozconfig && \
+        echo "ac_add_options --disable-updater" >> .mozconfig && \
+        echo "ac_add_options --disable-crashreporter" >> .mozconfig && \
+        echo "ac_add_options --disable-debug" >> .mozconfig && \
+        echo "ac_add_options --with-branding=mobile/android/branding/unofficial" >> .mozconfig && \
+        echo "ac_add_options --with-l10n-base=${l10ndir}" >> .mozconfig && \
+        echo "mk_add_options 'export L10NBASEDIR=${l10ndir}'" >> .mozconfig && \
+        echo "mk_add_options 'export ANDROID_VERSION_CODE=${vercode}'" >> .mozconfig && \
+        echo "mk_add_options 'export MOZ_CHROME_MULTILOCALE=$(tr '\n' ' ' <  mobile/android/locales/maemo-locales)'" >> .mozconfig && \
+        pushd mobile/android/branding/unofficial/ && \
+        sed -i -e '/ANDROID_PACKAGE_NAME/d' -e '/MOZ_APP_DISPLAYNAME/d' configure.sh && \
+        echo 'ANDROID_PACKAGE_NAME=org.mozilla.fennec_fdroid' >> configure.sh && \
+        echo 'MOZ_APP_DISPLAYNAME="Fennec FDroid"' >> configure.sh && \
+        popd && \
+        echo -e 'MOZ_DEVICES=0\nMOZ_NATIVE_DEVICES=0\nMOZ_ANDROID_GOOGLE_PLAY_SERVICES=0\nMOZ_SERVICES_HEALTHREPORTER=0\n' >> mobile/android/confvars.sh && \
+        sed -i -e 's/size_impl(v/size_impl(const v/g' memory/mozjemalloc/jemalloc.c && \
+        sed -i -e '/MOZ_WIDGET_TOOLKIT/,+2d' build/stlport/moz.build && \
+        rm -R mobile/android/gradle/ && \
+        sed -i -e '/gradle/d' mobile/android/moz.build
+    build=./mach build && \
+        fxarch=`grep "ac_add_options --target=" .mozconfig | cut -d '=' -f2` && \
+        pushd obj-${fxarch}/mobile/android/locales && \
+          for loc in $(cat ../../../../mobile/android/locales/maemo-locales); do LOCALE_MERGEDIR=$PWD/merge-$loc make merge-$loc LOCALE_MERGEDIR=$PWD/merge-$loc; make LOCALE_MERGEDIR=$PWD/merge-$loc chrome-$loc LOCALE_MERGEDIR=$PWD/merge-$loc; done && \
+        popd && \
+        ./mach package && \
+        mv obj-${fxarch}/dist/fennec-*.apk fdroid/fennec-unsigned.apk && \
+        zip -d fdroid/fennec-unsigned.apk "META-INF*"
+
+Build:37.0.2,370210
+    commit=FENNEC_37_0_2_RELEASE
+    srclibs=MozLocales@a7219763 
+    output=fdroid/fennec-unsigned.apk
+    ndk=r10d
+    init=rm -R docshell/test/ dom/tests/ modules/libjar/test/ security/manager/ssl/tests/*test/ security/nss/cmd/bltest/tests/ security/nss/tests/ toolkit/crashreporter/moz.build toolkit/crashreporter/client/ toolkit/crashreporter/google-breakpad/src/tools/ toolkit/crashreporter/google-breakpad/src/client/ toolkit/crashreporter/google-breakpad/src/processor/testdata/ toolkit/crashreporter/google-breakpad/src/third_party/linux/ toolkit/mozapps/extensions/test/ xpcom/tests/
+    patch=36.0.4-android-22-a.patch,36.0.4-android-22-b.patch
+    scanignore=mobile/android/base/JavaAddonManager.java
+    prebuild=mkdir fdroid && \
+        vercode=370210 && \
+        fxarch=i386-linux-android && \
+        l10ndir=`readlink -f $$MozLocales$$` && \
+        sed -i -e 's/android:debuggable="true"//g' mobile/android/base/AndroidManifest.xml.in && \
+        sed -i -e '/MOZ_ANDROID_GOOGLE_PLAY_SERVICES/d' configure.in && \
+        echo "ac_add_options --with-android-ndk=\"$$NDK$$\"" > .mozconfig && \
+        echo "ac_add_options --with-android-sdk=\"$$SDK$$/platforms/android-22\"" >> .mozconfig && \
+        echo "ac_add_options --enable-application=mobile/android" >> .mozconfig && \
+        echo "ac_add_options --target=${fxarch}" >> .mozconfig && \
+        echo "ac_add_options --disable-tests" >> .mozconfig && \
+        echo "ac_add_options --disable-updater" >> .mozconfig && \
+        echo "ac_add_options --disable-crashreporter" >> .mozconfig && \
+        echo "ac_add_options --disable-debug" >> .mozconfig && \
+        echo "ac_add_options --with-branding=mobile/android/branding/unofficial" >> .mozconfig && \
+        echo "ac_add_options --with-l10n-base=${l10ndir}" >> .mozconfig && \
+        echo "mk_add_options 'export L10NBASEDIR=${l10ndir}'" >> .mozconfig && \
+        echo "mk_add_options 'export ANDROID_VERSION_CODE=${vercode}'" >> .mozconfig && \
+        echo "mk_add_options 'export MOZ_CHROME_MULTILOCALE=$(tr '\n' ' ' <  mobile/android/locales/maemo-locales)'" >> .mozconfig && \
+        pushd mobile/android/branding/unofficial/ && \
+        sed -i -e '/ANDROID_PACKAGE_NAME/d' -e '/MOZ_APP_DISPLAYNAME/d' configure.sh && \
+        echo 'ANDROID_PACKAGE_NAME=org.mozilla.fennec_fdroid' >> configure.sh && \
+        echo 'MOZ_APP_DISPLAYNAME="Fennec FDroid"' >> configure.sh && \
+        popd && \
+        echo -e 'MOZ_DEVICES=0\nMOZ_NATIVE_DEVICES=0\nMOZ_ANDROID_GOOGLE_PLAY_SERVICES=0\nMOZ_SERVICES_HEALTHREPORTER=0\n' >> mobile/android/confvars.sh && \
+        sed -i -e 's/size_impl(v/size_impl(const v/g' memory/mozjemalloc/jemalloc.c && \
+        sed -i -e '/MOZ_WIDGET_TOOLKIT/,+2d' build/stlport/moz.build && \
+        rm -R mobile/android/gradle/ && \
+        sed -i -e '/gradle/d' mobile/android/moz.build
+    build=./mach build && \
+        fxarch=`grep "ac_add_options --target=" .mozconfig | cut -d '=' -f2` && \
+        pushd obj-${fxarch}/mobile/android/locales && \
+          for loc in $(cat ../../../../mobile/android/locales/maemo-locales); do LOCALE_MERGEDIR=$PWD/merge-$loc make merge-$loc LOCALE_MERGEDIR=$PWD/merge-$loc; make LOCALE_MERGEDIR=$PWD/merge-$loc chrome-$loc LOCALE_MERGEDIR=$PWD/merge-$loc; done && \
+        popd && \
+        ./mach package && \
+        mv obj-${fxarch}/dist/fennec-*.apk fdroid/fennec-unsigned.apk && \
+        zip -d fdroid/fennec-unsigned.apk "META-INF*"
+
 Maintainer Notes:
 
-Take a look at ./configure --help
-
-MOZ_CRASHREPORTER
-
-MOZ_SERVICES_HEALTHREPORTER
-
-https://hg.mozilla.org/mozilla-central/annotate/tip/mobile/android/config/mozconfigs/common
+TODO:
+ * clean up
+ * MOZ_CRASHREPORTER
+ * MOZ_HEALTHREPORTER => only UI?
+ * https://hg.mozilla.org/mozilla-central/annotate/tip/mobile/android/config/mozconfigs/common
 
 Issues:
  * Permissions:
@@ -680,12 +770,6 @@ Updating/Versioning:
     * Example: 350010 = Firefox 35.00, x86, revision (= if we need to re-release) 0
     * Example: 360103 = Firefox 36.01, arm, revision (= if we need to re-release) 3
     * Maybe we should stay in sync with upstream?
-
-Roadmap/TODO:
- * Build arm and x86 builds regulary for every Fx35+ release
- * Maybe (~> would require another checkout of moz-central!) do build betas, so
-   we can fix issues before release?
- * Clean up!
 .
 
 Archive Policy:4 versions
