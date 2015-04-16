@@ -155,6 +155,27 @@ Build:0.9.19,4745227
     gradle=legacy
     subdir=app/
 
+Build:0.9.19.1,4745229
+    commit=8f302e6eebeec8735a30961553e804b737fb5958
+    extlibs=android/android-support-v4.jar
+    srclibs=I2P@dd99978b196181106926c73fbfcbf717b19c7000,Support/v7/appcompat@android-4.4.2_r2,GradleWitness@10f1269c0aafdc1d478efc005ed48f3a47d44278
+    prebuild=cp -R $$I2P$$ ../i2p.i2p && \
+        cp -R $$GradleWitness$$ ../witness && \
+        cd ../witness && \
+        gradle build && \
+        cd ../app && \
+        echo -e "sdk.dir=$$SDK$$\ni2psrc=../i2p.i2p" >> ./local.properties && \
+        echo -e "sdk.dir=$$SDK$$\nndk.dir=$$NDK$$\ni2psrc=../i2p.i2p" >> ../routerjars/local.properties && \
+        wget https://gmplib.org/download/gmp/gmp-4.3.2.tar.xz && \
+        tar xJvf gmp-4.* -C ../i2p.i2p/core/c/jbigi/ && \
+        rm ./gmp-4.* && \
+        sed -i 's|gradle/libs/gradle-witness.jar|witness/build/libs/witness.jar|' ../build.gradle && \
+        sed -i '50,61d' ../client/build.gradle
+    scandelete=i2p.i2p,routerjars/jni,client/src/main/jniLibs/armeabi,witness/build/classes
+    gradle=legacy
+    subdir=app/
+
+
 Maintainer Notes:
 The version code and name is in app/build.gradle
 Android version code is an integer. So we have 31 bits.
