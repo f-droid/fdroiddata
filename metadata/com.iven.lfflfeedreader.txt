@@ -103,8 +103,32 @@ Build:2.0.2,12
         popd && \
         sed -i -e '/reference\.3/d' project.properties
 
+Build:2.0.3,13
+    commit=2.0.3
+    srclibs=Crouton@1.8.1,1:FadingActionBar@1c148b91867259ea43e6343d8afb69d106168b46,2:LazyList@be926df2ec5ff81693251629748ed38655075393,JSoup@jsoup-1.8.1.a
+    extlibs=android/android-support-v4r11.jar
+    prebuild=sed -i -e '/Crouton/d' project.properties && \
+        $$MVN3$$ install:install-file -DgroupId=com.google.android -DartifactId=support-v4 -Dversion=r11 -Dpackaging=jar -Dfile=libs/android-support-v4r11.jar && \
+        pushd $$Crouton$$ && \
+        $$MVN3$$ package && \
+        popd && \
+        pushd $$JSoup$$ && \
+        $$MVN3$$ package && \
+        popd && \
+        cp $$JSoup$$/target/jsoup-1.8.1.jar $$Crouton$$/target/crouton-1.8.1.jar libs/ && \
+        pushd $$FadingActionBar$$ && \
+        android update lib-project -t android-21 -p ./ && \
+        sed -i -e 's/name="library"/name="FadingActionBar"/g' build.xml && \
+        echo "android.library=true" >> project.properties && \
+        popd && \
+        pushd $$LazyList$$ && \
+        android update lib-project -t android-21 -p ./ && \
+        echo "android.library=true" >> project.properties && \
+        popd && \
+        sed -i -e '/reference\.3/d' project.properties
+
 Auto Update Mode:Version %v
 Update Check Mode:Tags
-Current Version:2.0.2
-Current Version Code:12
+Current Version:2.0.3
+Current Version Code:13
 
