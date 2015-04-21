@@ -363,6 +363,28 @@ Build:6084,6084
         cp $$ACRA$$/target/acra-4.3.1.jar libs/
     novcheck=yes
 
+Build:6085,6085
+    commit=6085
+    srclibs=ACRA@acra-4.3.1
+    rm=navit/navit/android/libs/acra-4.3.0b2.jar
+    prebuild=echo '<project name="Navit"><target name="clean"/></project>' > build.xml
+    update=no
+    build=export PATH=$PATH:$$SDK$$/tools:$$SDK$$/platform-tools:$$NDK$$/toolchains/arm-linux-androideabi-4.8/prebuilt/linux-x86/bin && \
+        rm build.xml && \
+        mkdir android-build && \
+        cd android-build/ && \
+        cmake -DCMAKE_TOOLCHAIN_FILE=../navit/Toolchain/arm-eabi.cmake -DDISABLE_QT=true ../navit && \
+        make && \
+        make android_resources && \
+        cd .. && \
+        rm android-build/navit/android/local.properties && \
+        ln -s android-build/navit/android/* . && \
+        pushd $$ACRA$$ && \
+        $$MVN3$$ package && \
+        popd && \
+        cp $$ACRA$$/target/acra-4.3.1.jar libs/
+    novcheck=yes
+
 Maintainer Notes:
 Found JAR file at navit/navit/android/libs/TTS_library_stub.jar
 .
