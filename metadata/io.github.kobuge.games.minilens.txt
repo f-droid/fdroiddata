@@ -1,0 +1,49 @@
+Categories:Games
+License:GPLv3+
+Web Site:http://kobuge-games.github.io/minilens/
+Source Code:https://github.com/KOBUGE-Games/minilens
+Issue Tracker:https://github.com/KOBUGE-Games/minilens/issues
+
+Summary:Free Puzzle Platform Game
+Description:
+1000 years after apocalipsis on earth, many forms of life were extinct, including humans.
+As aliens discovered earth, they built a robot series, called Minilens, to clean up earth and collect surviving flora for cultivation.
+The game is won when all radioactive barrels are destroyed and all flora is collected. The alien builders of the Minilens forgot that earth has gravity, therefore Minilens can't jump.
+
+You have 7 level packs, including a Tutorial.
+.
+
+Repo Type:git
+Repo:https://github.com/KOBUGE-Games/minilens.git
+
+Build:1.1,1
+    disable=wait for release
+    commit=189369e7c45325ee5656aa4214e62b0a9b0f1829
+    output=minilens.apk
+    srclibs=Godot@7a646031282afaf206663852ee4fff049ece829f
+    prebuild=mkdir minilens && \
+        bash -O extglob -c "mv !(minilens) minilens" && \
+        cp -R $$Godot$$ godot
+    target=android-19
+    scandelete=godot/platform/flash/lib/libGL.a,godot/platform/android/libs/google_play_services/libs/google-play-services.jar
+    build=cd godot && \
+        scons -j 8 p=server && \
+        for libname in apk_expansion downloader_library google_play_services play_licensing; do \
+            sed -i 's/android-15/android-19/' platform/android/libs/${libname}/project.properties; done && \
+        export ANDROID_NDK_ROOT=$$NDK$$ && \
+        scons -j 8 p=android target=release && \
+        mkdir -p platform/android/java/libs/armeabi && \
+        cp bin/libgodot.android.opt.so platform/android/java/libs/armeabi/libgodot_android.so && \
+        pushd platform/android/java/ && \
+        ant release && \
+        popd && \
+        export HOME=$PWD && \
+        mkdir -p ~/.godot/templates/ && \
+        cp platform/android/java/bin/Godot-release-unsigned.apk ~/.godot/templates/android_release.apk && \
+        cd ../minilens && \
+        ../godot/bin/godot_server.server.tools.64 -export Android ../minilens.apk
+    buildjni=no
+
+Auto Update Mode:None
+Update Check Mode:None
+
