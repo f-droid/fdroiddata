@@ -30,11 +30,17 @@ Build:1.9.2,58
         sed -i -e '/appcompat-v7/d' build.gradle && \
         sed -i -e '/fileTree/acompile "com.android.support:appcompat-v7:21.0.0"' build.gradle
 
-Maintainer Notes:
-Upstream uses the latest appcompat version (+), he has installed, but
-that differs from fdroid's build and breaks the app. This incompatibility
-was introduced with appcompat-v7:22.x.x iirc.
-.
+Build:1.9.3,59
+    commit=92e83112440141bb0c892002901f8fde4274a60b
+    subdir=mobile
+    gradle=floss
+    srclibs=TextDrawable@558677ea316e60346948b381e5e274f49b00d370
+    rm=mobile/src/main/java/net/fred/feedex/wear/,wear/
+    prebuild=sed -i -e '/maven {/,+2d' -e '/gms/d' -e '/textdrawable/d' build.gradle && \
+        mkdir -p ../libs && \
+        cp -fR $$TextDrawable$$ ../libs/textdrawable && \
+        echo -e '\n\ninclude ":libs:textdrawable"' >> ../settings.gradle && \
+        sed -i -e '/fileTree/acompile project(":libs:textdrawable")' build.gradle
 
 Auto Update Mode:None
 Update Check Mode:RepoManifest
