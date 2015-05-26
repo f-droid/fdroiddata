@@ -1,0 +1,51 @@
+Categories:Games
+License:MIT
+Web Site:http://w84death.itch.io/tanks-of-freedom
+Source Code:https://github.com/w84death/Tanks-of-Freedom
+Issue Tracker:https://github.com/w84death/Tanks-of-Freedom/issues
+Bitcoin:18oHovhxpevALZFcjH3mgNKB1yLi3nNFRY
+
+
+Summary:Indie Turn Based Strategy in Isometric Pixel Art
+Description:
+Push the frontline with your tanks, support with your helicopters, and claim
+strategic buildings with your infantry! Issue orders and fight for freedom!
+
+Use roads to move the front forward with your armed forces. Break through the
+enemy lines and take control of your opponent's bunker to win the battle.
+.
+
+Repo Type:git
+Repo:https://github.com/w84death/Tanks-of-Freedom.git
+
+Build:0.1,1
+    commit=425f5328dba8414afabf72fcab6d572e0dbbebb4
+    output=tof.apk
+    srclibs=Godot@d3b42e41b0e446938d6634c8783e575de3d0b60f
+    prebuild=mkdir tof && \
+        bash -O extglob -c "mv !(tof) tof" && \
+        printf "[platform:Android]\n\npackage/icon=\"res://icon.png\"\npackage/name=\"Tanks of Freedom\"\npackage/unique_name=\"in.p1x.tanks_of_freedom\"\nversion/code=\"1\"\nversion/name=\"0.1\"\n" > tof/export.cfg && \
+        cp -R $$Godot$$ godot
+    target=android-19
+    scandelete=godot/platform/flash/lib/libGL.a,godot/platform/android/libs/google_play_services/libs/google-play-services.jar
+    build=cd godot && \
+        scons -j 8 p=server && \
+        for libname in apk_expansion downloader_library google_play_services play_licensing; do \
+            sed -i 's/android-15/android-19/' platform/android/libs/${libname}/project.properties; done && \
+        export ANDROID_NDK_ROOT=$$NDK$$ && \
+        scons -j 8 p=android target=release && \
+        mkdir -p platform/android/java/libs/armeabi && \
+        cp bin/libgodot.android.opt.so platform/android/java/libs/armeabi/libgodot_android.so && \
+        pushd platform/android/java/ && \
+        ant release && \
+        popd && \
+        export HOME=$PWD && \
+        mkdir -p ~/.godot/templates/ && \
+        cp platform/android/java/bin/Godot-release-unsigned.apk ~/.godot/templates/android_release.apk && \
+        cd ../tof && \
+        ../godot/bin/godot_server.server.tools.* -export Android ../tof.apk
+    buildjni=no
+
+Auto Update Mode:None
+Update Check Mode:None
+
