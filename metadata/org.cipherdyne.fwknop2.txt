@@ -17,6 +17,7 @@ Repo Type:git
 Repo:https://github.com/oneru/fwknop2.git
 
 Build:1.0,3
+    disable=pre-release
     commit=83416b654afd17c1e35d3f4b82fd109d8a8cf32c
     subdir=app
     gradle=yes
@@ -34,12 +35,13 @@ Build:1.0,4
     subdir=app
     gradle=yes
     srclibs=juicessh-plugin-library@cf1a9c3494f15c324fbb1e373b49b1b3a79b1926
-    prebuild=sed -i -e '/raw.github.com\/Sonelli\/maven/d' build.gradle && \
+    prebuild=sed -i -e '/raw.github.com\/Sonelli\/maven/d' -e '/juicessh/d' build.gradle && \
         sed -i -e '/jcenter/amavenLocal()' ../build.gradle && \
-        pushd $$juicessh-plugin-library$$ && \
-        sed -i -e '/Dropbox/d' -e '/groupId/irepository(url: mavenLocal().url)' build.gradle && \
-        gradle uploadArchives && \
-        popd
+        mkdir -p ../libs/ && \
+        pushd $$juicessh-plugin-library$$ && sed -i -e '/Dropbox/d' -e '/groupId/irepository(url: mavenLocal().url)' build.gradle && popd && \
+        cp -fR $$juicessh-plugin-library$$ ../libs/ && \
+        echo -e "\ninclude ':libs:juicessh-plugin-library'" >> ../settings.gradle && \
+        sed -i -e '/support-v4/acompile project(":libs:juicessh-plugin-library")' build.gradle
     buildjni=no
 
 Auto Update Mode:Version %v-release
