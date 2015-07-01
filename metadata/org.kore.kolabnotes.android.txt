@@ -36,6 +36,20 @@ Build:0.1.0-alpha4,4
         popd && \
         sed -i -e 's/com.github.konradrenner/org.kore.kolab.notes/g' build.gradle 
 
+Build:0.1.0-alpha6,6
+    disable=depency issue
+    commit=8ca21e22077ec0a21e6f3512763c30414d5ca5b7
+    subdir=app
+    gradle=yes
+    srclibs=KolabNotesLib@0.6.3,ColorPicker-ambilwarna@a8d92e310f7b7419852b5367c1560f5db2b4fb98
+    prebuild=mkdir -p ../libs/ && sed -i -e '/jitpack/,+1d' -e '/maven {/d' -e '//amavenLocal()' ../build.gradle && \
+        pushd $$KolabNotesLib$$ && \
+        $$MVN3$$ install && \
+        popd && \
+        sed -i -e 's/com.github.konradrenner/org.kore.kolab.notes/g' -e '/ambilwarna/d' -e '/support-v4/acompile project(":libs:colorpicker:library")\n' build.gradle && \
+        cp -fR $$ColorPicker-ambilwarna$$ ../libs/colorpicker && \
+        echo -e "\ninclude ':libs:colorpicker:library'" >> ../settings.gradle
+
 Auto Update Mode:None
 Update Check Mode:Tags
 Current Version:0.1.0-alpha6
