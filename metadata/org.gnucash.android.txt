@@ -143,8 +143,38 @@ Build:1.5.5,48
     prebuild=mv java src
     target=android-21
 
+Build:1.6.0,16006
+    commit=v1.6.0
+    subdir=app
+    gradle=production
+    rm=app/libs/*.jar;app/src/main/jniLibs/*/*
+    patch=disable_gms_dropbox.diff
+    srclibs=CWACMerge@v1.1.1,CWACSacklist@v1.0.2,MPAndroidChart@v2.1.0,ViewPagerIndicator@2.4.1
+    prebuild=sed -e "/\<Crashlytics\>/ d" -i `grep -lr "\<Crashlytics\>" src/main/java/` && \
+        sed -e "/crashlytics/ d" -i build.gradle ../build.gradle && \
+        sed -e "/gms/ d" -i build.gradle && \
+        sed -e "/cwac/ d" -i build.gradle && \
+        sed -e "/maven\s*{\s*url.*}/ d" -i ../build.gradle && \
+        cp -fR $$CWACMerge$$/merge/src/com src/main/java/ && \
+        cp -fR $$CWACSacklist$$/sacklist/src/com src/main/java/ && \
+        cp -fR $$MPAndroidChart$$/src/com/ src/main/java/ && \
+        cp -fR $$ViewPagerIndicator$$ ../ViewPagerIndicator && \
+        rm -f ../ViewPagerIndicator/libs/*.jar && \
+        echo "include ':ViewPagerIndicator'" >> ../settings.gradle && \
+        echo -e "apply plugin: 'com.android.library' \
+              \nandroid { compileSdkVersion 21 \n buildToolsVersion \"22.0.1\"" >  ../ViewPagerIndicator/build.gradle && \
+        echo -e "lintOptions.abortOnError = false \
+                \n sourceSets{main{ \
+           \n manifest.srcFile 'AndroidManifest.xml' \
+           \n java.srcDirs = ['src'] \
+            \n res.srcDirs = ['res'] }}} \
+        \n dependencies {compile 'com.android.support:support-v4:22.1.1'}" >> ../ViewPagerIndicator/build.gradle && \
+        sed -i -e "s/.*viewpagerindicator.*/project(':ViewPagerIndicator'),/" build.gradle && \
+        sed -i -e "/MPAndroidChart/d" build.gradle && \
+        sed -i -e '/variant.outputs.each/,/ }/ d' build.gradle
+
 Auto Update Mode:Version v%v
-Update Check Mode:Tags v[0-9.]*$
-Current Version:1.5.5
-Current Version Code:48
+Update Check Mode:Tags v[0-9.]*
+Current Version:1.6.0
+Current Version Code:16006
 
