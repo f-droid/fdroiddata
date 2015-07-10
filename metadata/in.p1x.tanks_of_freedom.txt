@@ -106,6 +106,34 @@ Build:0.3.4-beta,3
         ../godot/bin/godot_server.server.tools.* -export Android ../tof.apk
     buildjni=no
 
+Build:0.3.5-beta,4
+    commit=71af1792c2cdfea088f3dd77012c814d755ff790
+    output=tof.apk
+    srclibs=Godot@d3b42e41b0e446938d6634c8783e575de3d0b60f
+    prebuild=mkdir tof && \
+        bash -O extglob -c "mv !(tof) tof" && \
+        printf "[platform:Android]\n\npackage/icon=\"res://icon.png\"\npackage/name=\"Tanks of Freedom\"\npackage/unique_name=\"in.p1x.tanks_of_freedom\"\nversion/code=\"4\"\nversion/name=\"0.3.5-beta\"\n" > tof/export.cfg && \
+        cp -R $$Godot$$ godot
+    target=android-19
+    scandelete=godot/platform/flash/lib/libGL.a,godot/platform/android/libs/google_play_services/libs/google-play-services.jar
+    build=cd godot && \
+        scons -j 8 p=server && \
+        for libname in apk_expansion downloader_library google_play_services play_licensing; do \
+            sed -i 's/android-15/android-19/' platform/android/libs/${libname}/project.properties; done && \
+        export ANDROID_NDK_ROOT=$$NDK$$ && \
+        scons -j 8 p=android target=release && \
+        mkdir -p platform/android/java/libs/armeabi && \
+        cp bin/libgodot.android.opt.so platform/android/java/libs/armeabi/libgodot_android.so && \
+        pushd platform/android/java/ && \
+        ant release && \
+        popd && \
+        export HOME=$PWD && \
+        mkdir -p ~/.godot/templates/ && \
+        cp platform/android/java/bin/Godot-release-unsigned.apk ~/.godot/templates/android_release.apk && \
+        cd ../tof && \
+        ../godot/bin/godot_server.server.tools.* -export Android ../tof.apk
+    buildjni=no
+
 Auto Update Mode:None
 Update Check Mode:None
 
