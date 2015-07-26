@@ -65,6 +65,22 @@ Build:0.4.1,37
         $$MVN3$$ install && \
         popd
 
+Build:0.4.2,38
+    commit=0.4.2
+    gradle=yes
+    srclibs=ActionBarSherlock@4.4.0,ViewPagerIndicator@2.4.1
+    rm=libs/*
+    prebuild=sed -i -e '/populov/d' -e '/mavenCentral/amavenLocal()' build.gradle && \
+        sed -i "s;compile 'com.viewpagerindicator:library:2.4.1@aar';compile fileTree(dir: 'libs', include: ['*.jar']);" build.gradle && \
+        pushd $$ViewPagerIndicator$$ && \
+        sed -i 's;<android-maven.version>3.3.0</android-maven.version>;<android-maven.version>3.6.1</android-maven.version>;' ../pom.xml && \
+        $$MVN3$$ package && \
+        popd && \
+        cp $$ViewPagerIndicator$$/target/library-2.4.1.jar libs/ && \
+        pushd $$ActionBarSherlock$$ && \
+        $$MVN3$$ install && \
+        popd
+
 Auto Update Mode:None
 Update Check Mode:Tags
 Current Version:0.4.2
