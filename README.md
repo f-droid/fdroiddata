@@ -1,5 +1,5 @@
-F-Droid Client
-==============
+F-Droid Data
+============
 
 [![Build status](https://ci.gitlab.com/projects/5274/status.png?ref=master)](https://ci.gitlab.com/projects/5274?ref=master)
 
@@ -10,8 +10,7 @@ Quickstart
 ----------
 
 First, you need [fdroidserver](https://gitlab.com/fdroid/fdroidserver). Once
-you have `fdroid` in your path, you can start using it in your fdroiddata
-clone.
+you have `fdroid` installed, you can start using it.
 
 For most setups, an empty config.py will be sufficient - `touch config.py`.
 
