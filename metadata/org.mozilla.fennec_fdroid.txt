@@ -1738,6 +1738,7 @@ Build:39.0.2,390200
     prebuild=mkdir fdroid && \
         fxarch=arm-linux-androideabi && \
         l10ndir=`readlink -f $$MozLocales$$` && \
+        sed -i -e 's|about:feedback|https://gitlab.com/fdroid/fdroiddata/issues|g' mobile/android/base/resources/xml/preferences_vendor.xml && \
         sed -i -e 's/android:debuggable="true"//g' mobile/android/base/AndroidManifest.xml.in && \
         sed -i -e '/MOZ_ANDROID_GOOGLE_PLAY_SERVICES/d' configure.in && \
         echo "ac_add_options --with-android-ndk=\"$$NDK$$\"" > .mozconfig && \
@@ -1861,6 +1862,7 @@ Build:39.0.2,390210
     prebuild=mkdir fdroid && \
         fxarch=i386-linux-androideabi && \
         l10ndir=`readlink -f $$MozLocales$$` && \
+        sed -i -e 's|about:feedback|https://gitlab.com/fdroid/fdroiddata/issues|g' mobile/android/base/resources/xml/preferences_vendor.xml && \
         sed -i -e 's/android:debuggable="true"//g' mobile/android/base/AndroidManifest.xml.in && \
         sed -i -e '/MOZ_ANDROID_GOOGLE_PLAY_SERVICES/d' configure.in && \
         echo "ac_add_options --with-android-ndk=\"$$NDK$$\"" > .mozconfig && \
@@ -1931,6 +1933,15 @@ Updating/Versioning:
     * Example: 350010 = Firefox 35.00, x86, revision (= if we need to re-release) 0
     * Example: 360103 = Firefox 36.01, arm, revision (= if we need to re-release) 3
     * Maybe we should stay in sync with upstream?
+
+Reroute Feedback:
+* about:feedback links to the PlayStore for rating the app. While with FDroid
+  installed, we can intercept the intent and open the page in FDroid client
+  instead, there is no way to rate the app. If FDroid is not installed (or Play
+  is configured to be used always), no app info page is displayed at all: Our
+  package id is not in Play! Some options:
+* sed -i -e '/OpenPlayStore/,+4s/getPackageName()/"org.mozilla.fennec"/g' mobile/android/base/BrowserApp.java
+* sed -i -e 's|about:feedback|https://gitlab.com/fdroid/fdroiddata/issues|g' mobile/android/base/resources/xml/preferences_vendor.xml
 .
 
 Archive Policy:4 versions
