@@ -60,7 +60,24 @@ Build:1.2.04,1204
         gradle makeDiagrams && \
         popd
 
+Build:1.2.06,1206
+    disable=builds with scaningore
+    commit=v1.2.06
+    subdir=app
+    gradle=yes
+    submodules=yes
+    rm=app/libs/*.jar
+    prebuild=sed -i -e '/commandLine/s|mvn|$$MVN3$$|g' ../other.gradle && \
+        pushd ../ && gradle -b other.gradle clean && gradle -b other.gradle makeNetSpeechApi && popd
+
 Maintainer Notes:
+We shouldn't build the net-speech-lib in prebuild, however build= will perform
+gradle checks _BEFORE_ building the lib. This will break for the main project,
+because it already requires the lib being in mavenlocal.
+
+Building the lib in prebuild is wrong and leaves jars and class files which
+makes the scanner complain.
+
 The makeIcons and makeDiagrams tasks don't provide `cleaning`, hence we cannot
 use preassemble= here.
 .
