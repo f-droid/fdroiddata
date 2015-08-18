@@ -1,70 +1,93 @@
 # Contributing to F-Droid
 
-Thanks so much for contributing to [F-Droid](https://f-droid.org)! Please take
-your time to read carefully through this document:
-
 ## Issue Tracker
 
-Please note that the tracker is not for app submissions, use the
-[submission queue](https://f-droid.org/forums/forum/submission-queue/) instead.
+You may use the issue tracker to report issues on app metadata and issues with
+the packages distributed through our repository.
 
-For error reports please provide detailed system (e.g. Android version, used
-ROM, hardware specifications) and error information (e.g. What happened? When
-did it happen?) and provide the [logcat](https://developer.android.com/tools/help/logcat.html)
--- either by file upload or by inclduing it with the appropriated
-[markdown](https://github.com/gitlabhq/gitlabhq/blob/master/doc/markdown/markdown.md).
+Please note that app submissions belong in the
+[submission queue](https://f-droid.org/forums/forum/submission-queue/).
 
-For update/change requests, please make sure they meet our
-[inclusion policy](https://f-droid.org/wiki/page/Inclusion_Policy) and are not already
-handled by our [submission queue](https://f-droid.org/forums/forum/submission-queue/),
-are not [held](https://f-droid.org/forums/forum/submission-held/) for some reason or already
-[marked for an update](https://f-droid.org/wiki/page/Category:Apps_to_Update).
-Keep discussions to a minimum or use the forum instead.
-
-However, the easiest way to get an app included, updated or an error fixed is
-to provide the required metadata yourself by opening a merge request.
+Before opening an issue about an outdated app, have a look at its metadata
+file and make sure that updating the app is actually possible. Issues opened
+about apps that can no longer be built will be closed.
 
 ## Merge Requests
 
-Please read through the [inclusion howto](https://f-droid.org/wiki/page/Inclusion_How-To),
-the [inclusion policy](https://f-droid.org/wiki/page/Inclusion_Policy) and our
-[fdroid manual](https://f-droid.org/manual/fdroid.html).
+### General recommendations
 
-This section includes some information on the fdroidserver repository as the
-tools contained in there can be used standalone to check and build local
-metadata files.
+* [Squash](http://gitready.com/advanced/2009/02/10/squashing-commits-with-rebase.html) your commits
 
-### Setting up fdroidserver and build tools
+### Setting up fdroidserver
 
-* Follow the instructions in [the manual](https://f-droid.org/manual).
+* Clone [fdroidserver](https://gitlab.com/fdroid/fdroidserver):
 
-### Setting up fdroiddata and submitting apps
+	git clone https://gitlab.com/fdroid/fdroidserver
+
+* Add the cloned dir to your `PATH`:
+
+	export PATH="$PATH:~/fdroidserver
+
+### Setting up fdroiddata for merge requests
 
 * [Register on GitLab](http://gitlab.com)
 
 * Visit and fork the [fdroiddata repository](https://gitlab.com/fdroid/fdroiddata/)
 
-* Clone your fdroiddata fork
+* Clone your fdroiddata fork:
 
-* Copy fdroiddata/metadata/template or fdroiddata/metadata/template-minimal to
-  fdroiddata/metadata/app.id.txt
+	git clone git@gitlab.com:username/fdroiddata.git
 
-* Update metadata/app.id.txt according to the [manual](https://f-droid.org/manual/html_node/Metadata.html)
+* Enter it:
 
-* If you have fdroidserver installed:
+	cd fdroiddata
 
- * Copy and adjust fdroidserver/examples/config.py to fdroiddata/config.py
+* An empty configuration file should work as a start:
 
- * Instead of copying a template you can run `fdroid import -u github-url` if
-   the app is hosted on GitHub
+	touch config.py
 
- * Run `fdroid checkupdates app.id`, `fdroid rewritemeta app.id` and `fdroid
-   build -v -t -l app.id` before opening a merge request!
+* Make sure fdroid works and reads the metadata files properly:
 
-* Use `git add`, `git commit` and `git push` to update your fork on GitLab.
-  Please squash multiple commits into a single one per app. It's a good style
-  to use a separate branch for each app and prefix commit messages with
-  "Appname:". For this you might also want to look at the `fd-commit` command
-  in the server repo
+	fdroid readmeta
 
-* Open a merge request via GitLab
+### Adding a new app
+
+If you want to add a new app you will have to add a new metadata file to the
+repository, like `metadata/app.id.txt`. Here is how to write that file.
+
+* If the app is on GitHub, GitLab or Bitbucket, use `fdroid import`:
+
+	fdroid import --url https://github.com/foo/bar --subdir app
+
+* Alternatively, start the metadata file from scratch:
+
+	cp templates/app-minimal metadata/app.id.txt
+
+Now that the file is created, you need to fill up all the app information and
+add a working build recipe.
+
+You can use the [metadata section](https://f-droid.org/manual/html_node/Metadata.html)
+in the manual for reference, or the full template at `templates/app-full` for
+some suggestions.
+
+As for the build recipe, you can have a look at the build templates at
+`templates/build-*` for some quick suggestions. Otherwise, follow the manual
+and look at how other apps are built.
+
+* Once you're done, see if `fdroid readmeta` runs without any errors. If it
+  doesn't, there are syntax errors in your metadata file.
+
+* Run `fdroid rewritemeta app.id` to clean up your file
+
+* Run `fdroid checkupdates app.id` to fill automated fields like `Auto Name`
+  and `Current Version`
+
+* Make sure that `fdroid lint app.id` doesn't report any warnings. If it does,
+  fix them.
+
+* Test your build recipe with `fdroid build -v -l app.id`
+
+Congratulations! You can now open a merge request to add your app.
+
+Our buildserver runs builds once a day, so it may take up to 24h for your app
+to appear in our repository.
