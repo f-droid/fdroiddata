@@ -21,4 +21,4 @@ for f in metadata/*.txt; do
 		-e 's,http://gitorious.org,https://gitorious.org,g' \
 		-e 's,git://gitorious.org,https://gitorious.org,g' $f
 done
-echo 
+echo
