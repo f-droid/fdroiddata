@@ -43,12 +43,19 @@ You can use the [metadata section](https://f-droid.org/manual/html_node/Metadata
 in the manual for reference, or the full template at `templates/app-full` for
 some suggestions.
 
-As for the build recipe, you can have a look at the build templates at
-`templates/build-*` for some quick suggestions. Otherwise, follow the manual
-and look at how other apps are built.
-
 * Once you're done, see if `fdroid readmeta` runs without any errors. If it
   doesn't, there are syntax errors in your metadata file.
+
+### Building it
+
+We build apps from source, so a new app must have at least one working build.
+
+You can have a look at the build templates at `templates/build-*` for some
+quick suggestions. You may also follow the manual or look at how other apps
+are built for working examples.
+
+* Run `fdroid readmeta` again to make sure there still aren't any syntax
+  errors
 
 * Run `fdroid rewritemeta app.id` to clean up your file
 
@@ -68,3 +75,8 @@ to appear in our repository.
 ### General recommendations
 
 * [Squash](http://gitready.com/advanced/2009/02/10/squashing-commits-with-rebase.html) your commits
+
+* Make sure you've ran `fdroid lint` and `fdroid rewritemeta` before opening a
+  merge request
+
+* If you haven't tested your build, say so in the merge request.
