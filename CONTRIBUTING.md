@@ -14,10 +14,6 @@ about apps that can no longer be built will be closed.
 
 ## Merge Requests
 
-### General recommendations
-
-* [Squash](http://gitready.com/advanced/2009/02/10/squashing-commits-with-rebase.html) your commits
-
 ### Setting up fdroiddata for merge requests
 
 * [Register on GitLab](http://gitlab.com)
@@ -68,3 +64,7 @@ Congratulations! You can now open a merge request to add your app.
 
 Our buildserver runs builds once a day, so it may take up to 24h for your app
 to appear in our repository.
+
+### General recommendations
+
+* [Squash](http://gitready.com/advanced/2009/02/10/squashing-commits-with-rebase.html) your commits
