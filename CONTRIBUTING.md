@@ -18,37 +18,14 @@ about apps that can no longer be built will be closed.
 
 * [Squash](http://gitready.com/advanced/2009/02/10/squashing-commits-with-rebase.html) your commits
 
-### Setting up fdroidserver
-
-* Clone [fdroidserver](https://gitlab.com/fdroid/fdroidserver):
-
-	git clone https://gitlab.com/fdroid/fdroidserver
-
-* Add the cloned dir to your `PATH`:
-
-	export PATH="$PATH:~/fdroidserver
-
 ### Setting up fdroiddata for merge requests
 
 * [Register on GitLab](http://gitlab.com)
 
-* Visit and fork the [fdroiddata repository](https://gitlab.com/fdroid/fdroiddata/)
+* Visit and fork the [fdroiddata repository](https://gitlab.com/fdroid/fdroiddata)
 
-* Clone your fdroiddata fork:
-
-	git clone git@gitlab.com:username/fdroiddata.git
-
-* Enter it:
-
-	cd fdroiddata
-
-* An empty configuration file should work as a start:
-
-	touch config.py
-
-* Make sure fdroid works and reads the metadata files properly:
-
-	fdroid readmeta
+* Follow the [Quickstart](README.md#quickstart), but using the url
+  `git@gitlab.com:yourusername/fdroiddata.git` when cloning
 
 ### Adding a new app
 

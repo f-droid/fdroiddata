@@ -1,25 +1,36 @@
-F-Droid Data
-============
+# F-Droid Data
 
 [![Build status](https://ci.gitlab.com/projects/5274/status.png?ref=master)](https://ci.gitlab.com/projects/5274?ref=master)
 
 This repository holds general and build information for all the apps on our
 main repo on f-droid.org.
 
-Quickstart
-----------
+## Quickstart
 
-First, you need [fdroidserver](https://gitlab.com/fdroid/fdroidserver). Once
-you have `fdroid` installed, you can start using it.
+* Clone [fdroidserver](https://gitlab.com/fdroid/fdroidserver):
 
-For most setups, an empty config.py will be sufficient - `touch config.py`.
+	git clone https://gitlab.com/fdroid/fdroidserver
 
-Contributing
-------------
+* Add the cloned dir to your `PATH`:
 
-See the [contributing guidelines](CONTRIBUTING.md).
+	export PATH="$PATH:$PWD/fdroidserver
 
-More information
-----------------
+* Enter it:
+
+	cd fdroiddata
+
+* An empty configuration file should work as a start:
+
+	touch config.py
+
+* Make sure fdroid works and reads the metadata files properly:
+
+	fdroid readmeta
+
+## Contributing
+
+See the [Contributing](CONTRIBUTING.md) doc.
+
+## More information
 
 You can find more details on [the manual](https://f-droid.org/manual/).
