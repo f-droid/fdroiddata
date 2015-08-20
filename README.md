@@ -9,7 +9,7 @@ main repo on f-droid.org.
 
 * Clone [fdroidserver](https://gitlab.com/fdroid/fdroidserver):
 
-	git clone https://gitlab.com/fdroid/fdroidserver
+	git clone https://gitlab.com/fdroid/fdroidserver.git
 
 * Add the cloned dir to your `PATH`:
 
