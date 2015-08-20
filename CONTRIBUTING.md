@@ -28,11 +28,11 @@ about apps that can no longer be built will be closed.
 If you want to add a new app you will have to add a new metadata file to the
 repository, like `metadata/app.id.txt`. Here is how to write that file.
 
-* If the app is on GitHub, GitLab or Bitbucket, use `fdroid import`:
+If the app is on GitHub, GitLab or Bitbucket, use `fdroid import`:
 
 	fdroid import --url https://github.com/foo/bar --subdir app
 
-* Alternatively, start the metadata file from scratch:
+Alternatively, start the metadata file from scratch:
 
 	cp templates/app-minimal metadata/app.id.txt
 
@@ -43,8 +43,8 @@ You can use the [metadata section](https://f-droid.org/manual/html_node/Metadata
 in the manual for reference, or the full template at `templates/app-full` for
 some suggestions.
 
-* Once you're done, see if `fdroid readmeta` runs without any errors. If it
-  doesn't, there are syntax errors in your metadata file.
+Once you're done, see if `fdroid readmeta` runs without any errors. If it
+doesn't, there are syntax errors in your metadata file.
 
 ### Building it
 
