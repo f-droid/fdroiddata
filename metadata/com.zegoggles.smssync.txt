@@ -195,6 +195,21 @@ Build:1.5.9,1553
         $$MVN3$$ -Dmaven.test.skip=true install && \
         popd
 
+Build:1.5.10,1554
+    commit=1.5.10
+    maven=yes
+    srclibs=PayMe@0.0.4,k9lib@96a00c1802845f26e5febcb3d4a6cc39d7fb0dd0
+    prebuild=$$MVN3$$ install:install-file -DgroupId=android -DartifactId=android -Dversion=4.4_r1 -Dpackaging=jar -Dfile=$$SDK$$/platforms/android-19/android.jar && \
+        pushd $$k9lib$$/k9mail-library && \
+        sed -i -e '/mavenDeployer/a/*' -e '/pom.project/i*/' build.gradle && \
+        sed -i -e '/mavenDeployer/adef sha = "git rev-parse --short HEAD".execute().text' build.gradle && \
+        sed -i -e '/mavenDeployer/arepository(url: mavenLocal().url) {' build.gradle && \
+        gradle uploadArchives && \
+        popd && \
+        pushd $$PayMe$$ && \
+        $$MVN3$$ -Dmaven.test.skip=true install && \
+        popd
+
 Maintainer Notes:
 We try to repurpose the official mavendeployer (which deploys to bintray) for a
 mavenLocal() deployment. I don't know if this will work on the BS. It builds
