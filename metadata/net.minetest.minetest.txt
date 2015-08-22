@@ -11,15 +11,16 @@ Description:
 Minetest is an infinite-world block sandbox game and a game engine, inspired by InfiniMiner, Minecraft and the like.
 
 Features:
-- Explore, dig and build in a voxel world, and craft stuff from raw materials to help you along the way.
-- Play with your friends on public servers or self hosted servers
-- Easy plugin based Modding API used to add blocks, tools and features to the game.
-- Voxel based lighting with gameplay consequences (light caves and buildings with torches)
-- Almost infinite world and several beautiful map generators.
-- Runs natively on Windows, Linux, OS X, FreeBSD and Android
-- Supports multiple languages, translated by the community.
-- A constant development to add new functionalities for end-users
+* Explore, dig and build in a voxel world, and craft stuff from raw materials to help you along the way.
+* Play with your friends on public servers or self hosted servers
+* Easy plugin based Modding API used to add blocks, tools and features to the game.
+* Voxel based lighting with gameplay consequences (light caves and buildings with torches)
+* Almost infinite world and several beautiful map generators.
+* Runs natively on Windows, Linux, OS X, FreeBSD and Android
+* Supports multiple languages, translated by the community.
+* A constant development to add new functionalities for end-users
 .
+
 Repo Type:git
 Repo:https://github.com/minetest/minetest.git
 
@@ -31,12 +32,25 @@ Build:0.4.12.12,12
     subdir=build/android
     srclibs=MinetestGame@03c00a831d5c2fd37096449bee49557879068af1
     buildjni=no
-    ndk=r10d
     build=printf "%s\n%s\n%s" \
             "ANDROID_NDK = $$NDK$$" \
             "NDK_MODULE_PATH = $$NDK$$/toolchains" \
             "SDKFOLDER = $$SDK$$" > path.cfg && \
         for n in 1 2 3; do make release && break; done
+
+Build:0.4.13.13,13
+    commit=d44fceac7e1237b00c6431ee1bb5805b602d0dcd
+    prebuild=mkdir ../../games/minetest_game && cp -R $$MinetestGame$$/* ../../games/minetest_game && \
+        sed -i 's/VERS_MAJOR/VERSION_MAJOR/;s/VERS_MINOR/VERSION_MINOR/;s/VERS_PATCH/VERSION_PATCH/' Makefile
+    output=bin/Minetest-release-unsigned.apk
+    subdir=build/android
+    srclibs=MinetestGame@2392842948b114670334eabbb593b66e1427747c
+    buildjni=no
+    build=printf "%s\n%s\n%s" \
+            "ANDROID_NDK = $$NDK$$" \
+            "NDK_MODULE_PATH = $$NDK$$/toolchains" \
+            "SDKFOLDER = $$SDK$$" > path.cfg && \
+        make release
 
 Maintainer Notes:
 Needs a 64bit machine for building. We circumvent this right now,

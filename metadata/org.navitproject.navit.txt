@@ -9,7 +9,9 @@ Summary:Car navigation system
 Description:
 Its modular design is capable of using vector maps of various formats
 for routing and rendering of the displayed map. It's even possible to
-use multiple maps at a time.
+use multiple maps at a time. While Navit supports all major platforms,
+there is a fork specializing on an easy-to-use, Android-only solution:
+[[com.zoffcc.applications.zanavi]].
 
 The routing engine not only calculates an optimal route to your
 destination, but also generates directions and even speaks to you.
@@ -517,12 +519,35 @@ Build:6095,6095
         cp $$ACRA$$/target/acra-4.3.1.jar libs/
     novcheck=yes
 
+Build:6118,6118
+    disable=build fail
+    commit=6118
+    srclibs=ACRA@acra-4.3.1
+    rm=navit/navit/android/libs/acra-4.3.0b2.jar
+    prebuild=echo '<project name="Navit"><target name="clean"/></project>' > build.xml
+    update=no
+    build=export PATH=$PATH:$$SDK$$/tools:$$SDK$$/platform-tools:$$NDK$$/toolchains/arm-linux-androideabi-4.8/prebuilt/linux-x86/bin && \
+        rm build.xml && \
+        mkdir android-build && \
+        cd android-build/ && \
+        cmake -DCMAKE_TOOLCHAIN_FILE=../navit/Toolchain/arm-eabi.cmake -DDISABLE_QT=true ../navit && \
+        make && \
+        make android_resources && \
+        cd .. && \
+        rm android-build/navit/android/local.properties && \
+        ln -s android-build/navit/android/* . && \
+        pushd $$ACRA$$ && \
+        $$MVN3$$ package && \
+        popd && \
+        cp $$ACRA$$/target/acra-4.3.1.jar libs/
+    novcheck=yes
+
 Maintainer Notes:
 Found JAR file at navit/navit/android/libs/TTS_library_stub.jar
 .
 
 Auto Update Mode:None
 Update Check Mode:RepoTrunk
-Current Version:6095
-Current Version Code:6095
+Current Version:6135
+Current Version Code:6135
 

@@ -1,0 +1,509 @@
+diff --git a/app/src/main/java/org/gnucash/android/ui/export/ExportDialogFragment.java b/app/src/main/java/org/gnucash/android/ui/export/ExportDialogFragment.java
+index 6df927c..6b8da42 100644
+--- a/app/src/main/java/org/gnucash/android/ui/export/ExportDialogFragment.java
++++ b/app/src/main/java/org/gnucash/android/ui/export/ExportDialogFragment.java
+@@ -39,7 +39,6 @@ import android.widget.TextView;
+ import com.doomonafireball.betterpickers.recurrencepicker.EventRecurrence;
+ import com.doomonafireball.betterpickers.recurrencepicker.EventRecurrenceFormatter;
+ import com.doomonafireball.betterpickers.recurrencepicker.RecurrencePickerDialog;
+-import com.dropbox.sync.android.DbxAccountManager;
+ 
+ import org.gnucash.android.R;
+ import org.gnucash.android.app.GnuCashApplication;
+@@ -215,23 +214,6 @@ public class ExportDialogFragment extends DialogFragment implements RecurrencePi
+ 						mExportTarget = ExportParams.ExportTarget.SD_CARD;
+ 						recurrenceOptionsView.setVisibility(View.VISIBLE);
+ 						break;
+-					case 1:
+-						recurrenceOptionsView.setVisibility(View.VISIBLE);
+-						mExportTarget = ExportParams.ExportTarget.DROPBOX;
+-                        String dropboxAppKey = getString(R.string.dropbox_app_key, SettingsActivity.DROPBOX_APP_KEY);
+-                        String dropboxAppSecret = getString(R.string.dropbox_app_secret, SettingsActivity.DROPBOX_APP_SECRET);
+-						DbxAccountManager mDbxAccountManager = DbxAccountManager.getInstance(getActivity().getApplicationContext(),
+-								dropboxAppKey, dropboxAppSecret);
+-						if (!mDbxAccountManager.hasLinkedAccount()){
+-							mDbxAccountManager.startLink(getActivity(), 0);
+-						}
+-						break;
+-					case 2:
+-						recurrenceOptionsView.setVisibility(View.VISIBLE);
+-						mExportTarget = ExportParams.ExportTarget.GOOGLE_DRIVE;
+-						SettingsActivity.mGoogleApiClient = SettingsActivity.getGoogleApiClient(getActivity());
+-						SettingsActivity.mGoogleApiClient.connect();
+-						break;
+ 					case 3:
+ 						mExportTarget = ExportParams.ExportTarget.SHARING;
+ 						recurrenceOptionsView.setVisibility(View.GONE);
+@@ -344,9 +326,6 @@ public class ExportDialogFragment extends DialogFragment implements RecurrencePi
+ 	 */
+ 	@Override
+ 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+-		if (requestCode == SettingsActivity.REQUEST_RESOLVE_CONNECTION && resultCode == Activity.RESULT_OK) {
+-			SettingsActivity.mGoogleApiClient.connect();
+-		}
+ 	}
+ 
+ }
+diff --git a/app/src/main/java/org/gnucash/android/ui/settings/BackupPreferenceFragment.java b/app/src/main/java/org/gnucash/android/ui/settings/BackupPreferenceFragment.java
+index 4c7dc24..9d5101f 100644
+--- a/app/src/main/java/org/gnucash/android/ui/settings/BackupPreferenceFragment.java
++++ b/app/src/main/java/org/gnucash/android/ui/settings/BackupPreferenceFragment.java
+@@ -77,14 +77,6 @@ public class BackupPreferenceFragment extends PreferenceFragment implements OnPr
+ 
+ 		pref = findPreference(getString(R.string.key_create_backup));
+ 		pref.setOnPreferenceClickListener((SettingsActivity)getActivity());
+-
+-		pref = findPreference(getString(R.string.key_dropbox_sync));
+-		pref.setOnPreferenceClickListener((SettingsActivity)getActivity());
+-		((SettingsActivity)getActivity()).toggleDropboxPreference(pref);
+-
+-		pref = findPreference(getString(R.string.key_google_drive_sync));
+-		pref.setOnPreferenceClickListener((SettingsActivity) getActivity());
+-		((SettingsActivity)getActivity()).toggleGoogleDrivePreference(pref);
+ 	}
+ 
+     /**
+diff --git a/app/src/main/java/org/gnucash/android/ui/settings/SettingsActivity.java b/app/src/main/java/org/gnucash/android/ui/settings/SettingsActivity.java
+index a4ef751..7c4f2c7 100644
+--- a/app/src/main/java/org/gnucash/android/ui/settings/SettingsActivity.java
++++ b/app/src/main/java/org/gnucash/android/ui/settings/SettingsActivity.java
+@@ -40,15 +40,6 @@ import android.widget.Toast;
+ import com.actionbarsherlock.app.ActionBar;
+ import com.actionbarsherlock.app.SherlockPreferenceActivity;
+ import com.actionbarsherlock.view.MenuItem;
+-import com.crashlytics.android.Crashlytics;
+-import com.dropbox.sync.android.DbxAccountManager;
+-import com.google.android.gms.common.ConnectionResult;
+-import com.google.android.gms.common.GooglePlayServicesUtil;
+-import com.google.android.gms.common.api.GoogleApiClient;
+-import com.google.android.gms.common.api.ResultCallback;
+-import com.google.android.gms.drive.Drive;
+-import com.google.android.gms.drive.DriveFolder;
+-import com.google.android.gms.drive.MetadataChangeSet;
+ 
+ import org.gnucash.android.R;
+ import org.gnucash.android.app.GnuCashApplication;
+@@ -125,11 +116,6 @@ public class SettingsActivity extends SherlockPreferenceActivity implements OnPr
+      * Only useful on devices with API level < 11
+      */
+     private int mDeleteTransactionsClickCount;
+-    private DbxAccountManager mDbxAccountManager;
+-    /**
+-     * Client for Google Drive Sync
+-     */
+-    public static GoogleApiClient mGoogleApiClient;
+ 
+     /**
+ 	 * Constructs the headers to display in the header list when the Settings activity is first opened
+@@ -146,13 +132,6 @@ public class SettingsActivity extends SherlockPreferenceActivity implements OnPr
+ 	protected void onCreate(Bundle savedInstanceState) {		
+ 		super.onCreate(savedInstanceState);
+ 
+-        String dropboxAppKey = getString(R.string.dropbox_app_key, DROPBOX_APP_KEY);
+-        String dropboxAppSecret = getString(R.string.dropbox_app_secret, DROPBOX_APP_SECRET);
+-        mDbxAccountManager = DbxAccountManager.getInstance(getApplicationContext(),
+-                dropboxAppKey, dropboxAppSecret);
+-
+-        mGoogleApiClient = getGoogleApiClient(this);
+-
+ 		//retrieve version from Manifest and set it
+ 		ActionBar actionBar = getSupportActionBar();
+ 		actionBar.setTitle(R.string.title_settings);
+@@ -189,14 +168,6 @@ public class SettingsActivity extends SherlockPreferenceActivity implements OnPr
+             pref = findPreference(getString(R.string.key_change_passcode));
+             pref.setOnPreferenceClickListener(this);
+ 
+-            pref = findPreference(getString(R.string.key_dropbox_sync));
+-            toggleDropboxPreference(pref);
+-            pref.setOnPreferenceClickListener(this);
+-
+-            pref = findPreference(getString(R.string.key_google_drive_sync));
+-            pref.setOnPreferenceClickListener(this);
+-            toggleGoogleDrivePreference(pref);
+-
+             pref = findPreference(getString(R.string.key_create_backup));
+             pref.setOnPreferenceClickListener(this);
+ 
+@@ -317,16 +288,6 @@ public class SettingsActivity extends SherlockPreferenceActivity implements OnPr
+             return true;
+         }
+ 
+-        if (key.equals(getString(R.string.key_dropbox_sync))){
+-            toggleDropboxSync();
+-            toggleDropboxPreference(preference);
+-        }
+-
+-        if (key.equals(getString(R.string.key_google_drive_sync))){
+-            toggleGoogleDriveSync();
+-            toggleGoogleDrivePreference(preference);
+-        }
+-
+         if (key.equals(getString(R.string.key_create_backup))){
+             boolean result = GncXmlExporter.createBackup();
+             int msg = result ? R.string.toast_backup_successful : R.string.toast_backup_failed;
+@@ -385,110 +346,6 @@ public class SettingsActivity extends SherlockPreferenceActivity implements OnPr
+     }
+ 
+     /**
+-     * Toggles the authorization state of a DropBox account.
+-     * If a link exists, it is removed else DropBox authorization is started
+-     */
+-    private void toggleDropboxSync() {
+-        if (mDbxAccountManager.hasLinkedAccount()){
+-            mDbxAccountManager.unlink();
+-        } else {
+-            mDbxAccountManager.startLink(this, REQUEST_LINK_TO_DBX);
+-        }
+-    }
+-
+-    /**
+-     * Toggles synchronization with Google Drive on or off
+-     */
+-    private void toggleGoogleDriveSync(){
+-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+-        final String appFolderId = sharedPreferences.getString(getString(R.string.key_google_drive_app_folder_id), null);
+-        if (appFolderId != null){
+-            sharedPreferences.edit().remove(getString(R.string.key_google_drive_app_folder_id)).commit(); //commit (not apply) because we need it to be saved *now*
+-            mGoogleApiClient.disconnect();
+-        } else {
+-            mGoogleApiClient.connect();
+-        }
+-    }
+-
+-    /**
+-     * Toggles the checkbox of the DropBox Sync preference if a DropBox account is linked
+-     * @param pref DropBox Sync preference
+-     */
+-    public void toggleDropboxPreference(Preference pref) {
+-        ((CheckBoxPreference)pref).setChecked(mDbxAccountManager.hasLinkedAccount());
+-    }
+-
+-    /**
+-     * Toggles the checkbox of the GoogleDrive Sync preference if a Google Drive account is linked
+-     * @param pref Google Drive Sync preference
+-     */
+-    public void toggleGoogleDrivePreference(Preference pref){
+-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+-        String appFolderId = sharedPreferences.getString(getString(R.string.key_google_drive_app_folder_id),null);
+-        ((CheckBoxPreference)pref).setChecked(appFolderId != null);
+-    }
+-
+-
+-    public static GoogleApiClient getGoogleApiClient(final Context context) {
+-        return new GoogleApiClient.Builder(context)
+-                .addApi(Drive.API)
+-                .addScope(Drive.SCOPE_APPFOLDER)
+-                .addScope(Drive.SCOPE_FILE)
+-                .addConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
+-                    @Override
+-                    public void onConnected(Bundle bundle) {
+-                        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+-                        String appFolderId = sharedPreferences.getString(context.getString(R.string.key_google_drive_app_folder_id), null);
+-                        if (appFolderId == null) {
+-                            MetadataChangeSet changeSet = new MetadataChangeSet.Builder()
+-                                    .setTitle(context.getString(R.string.app_name)).build();
+-                            Drive.DriveApi.getRootFolder(mGoogleApiClient).createFolder(
+-                                    mGoogleApiClient, changeSet).setResultCallback(new ResultCallback<DriveFolder.DriveFolderResult>() {
+-                                @Override
+-                                public void onResult(DriveFolder.DriveFolderResult result) {
+-                                    if (!result.getStatus().isSuccess()) {
+-                                        Log.e(LOG_TAG, "Error creating the application folder");
+-                                        return;
+-                                    }
+-
+-                                    String folderId = result.getDriveFolder().getDriveId().toString();
+-                                    PreferenceManager.getDefaultSharedPreferences(context)
+-                                            .edit().putString(context.getString(R.string.key_google_drive_app_folder_id),
+-                                            folderId).commit(); //commit because we need it to be saved *now*
+-                                }
+-                            });
+-
+-                        }
+-                        Toast.makeText(context, "Connected to Google Drive", Toast.LENGTH_SHORT).show();
+-                    }
+-
+-                    @Override
+-                    public void onConnectionSuspended(int i) {
+-                        Toast.makeText(context, "Connection to Google Drive suspended!", Toast.LENGTH_LONG).show();
+-                    }
+-                })
+-                .addOnConnectionFailedListener(new GoogleApiClient.OnConnectionFailedListener() {
+-                    @Override
+-                    public void onConnectionFailed(ConnectionResult connectionResult) {
+-                        Log.e(SettingsActivity.class.getName(), "Connection to Google Drive failed");
+-                        if (connectionResult.hasResolution() && context instanceof Activity) {
+-                            try {
+-                                Log.e(SettingsActivity.class.getName(), "Trying resolution of Google API connection failure");
+-                                connectionResult.startResolutionForResult((Activity) context, REQUEST_RESOLVE_CONNECTION);
+-                            } catch (IntentSender.SendIntentException e) {
+-                                Log.e(SettingsActivity.class.getName(), e.getMessage());
+-                                Toast.makeText(context, "Unable to link to Google Drive", Toast.LENGTH_LONG).show();
+-                            }
+-                        } else {
+-                            if (context instanceof Activity)
+-                                GooglePlayServicesUtil.getErrorDialog(connectionResult.getErrorCode(), (Activity) context, 0).show();
+-                        }
+-                    }
+-                })
+-                .build();
+-    }
+-
+-    /**
+      * Resets the tap counter for preferences which need to be double-tapped
+      */
+     private class ResetCounter extends TimerTask {
+@@ -631,20 +484,9 @@ public class SettingsActivity extends SherlockPreferenceActivity implements OnPr
+                 break;
+ 
+             case REQUEST_LINK_TO_DBX:
+-                Preference preference = findPreference(getString(R.string.key_dropbox_sync));
+-                if (preference == null) //if we are in a preference header fragment, this may return null
+-                    break;
+-                toggleDropboxPreference(preference);
+                 break;
+ 
+             case REQUEST_RESOLVE_CONNECTION:
+-                if (resultCode == RESULT_OK) {
+-                    mGoogleApiClient.connect();
+-                    Preference pref = findPreference(getString(R.string.key_dropbox_sync));
+-                    if (pref == null) //if we are in a preference header fragment, this may return null
+-                        break;
+-                    toggleDropboxPreference(pref);
+-                }
+                 break;
+         }
+     }
+diff --git a/app/src/main/java/org/gnucash/android/export/ExportAsyncTask.java b/app/src/main/java/org/gnucash/android/export/ExportAsyncTask.java
+index ba20e61..0833f79 100644
+--- a/app/src/main/java/org/gnucash/android/export/ExportAsyncTask.java
++++ b/app/src/main/java/org/gnucash/android/export/ExportAsyncTask.java
+@@ -30,21 +30,6 @@ import android.preference.PreferenceManager;
+ import android.util.Log;
+ import android.widget.Toast;
+ 
+-import com.crashlytics.android.Crashlytics;
+-import com.dropbox.sync.android.DbxAccountManager;
+-import com.dropbox.sync.android.DbxException;
+-import com.dropbox.sync.android.DbxFile;
+-import com.dropbox.sync.android.DbxFileSystem;
+-import com.dropbox.sync.android.DbxPath;
+-import com.google.android.gms.common.api.GoogleApiClient;
+-import com.google.android.gms.common.api.ResultCallback;
+-import com.google.android.gms.drive.Drive;
+-import com.google.android.gms.drive.DriveApi;
+-import com.google.android.gms.drive.DriveContents;
+-import com.google.android.gms.drive.DriveFolder;
+-import com.google.android.gms.drive.DriveId;
+-import com.google.android.gms.drive.MetadataChangeSet;
+-
+ import org.gnucash.android.R;
+ import org.gnucash.android.app.GnuCashApplication;
+ import org.gnucash.android.db.AccountsDbAdapter;
+@@ -178,14 +162,6 @@ public class ExportAsyncTask extends AsyncTask<ExportParams, Void, Boolean> {
+                 shareFile(mExportParams.getTargetFilepath());
+                 return true;
+ 
+-            case DROPBOX:
+-                copyExportToDropbox();
+-                return true;
+-
+-            case GOOGLE_DRIVE:
+-                copyExportToGoogleDrive();
+-                return true;
+-
+             case SD_CARD:
+                 copyExportToSDCard();
+                 return true;
+@@ -212,12 +188,6 @@ public class ExportAsyncTask extends AsyncTask<ExportParams, Void, Boolean> {
+                     case SD_CARD:
+                         targetLocation = "SD card";
+                         break;
+-                    case DROPBOX:
+-                        targetLocation = "DropBox -> Apps -> GnuCash";
+-                        break;
+-                    case GOOGLE_DRIVE:
+-                        targetLocation = "Google Drive -> " + mContext.getString(R.string.app_name);
+-                        break;
+                     default:
+                         targetLocation = "external service";
+                 }
+@@ -246,68 +216,6 @@ public class ExportAsyncTask extends AsyncTask<ExportParams, Void, Boolean> {
+         }
+     }
+ 
+-    private void copyExportToGoogleDrive(){
+-        Log.i(TAG, "Moving exported file to Google Drive");
+-        final GoogleApiClient googleApiClient = SettingsActivity.getGoogleApiClient(GnuCashApplication.getAppContext());
+-        googleApiClient.blockingConnect();
+-        final ResultCallback<DriveFolder.DriveFileResult> fileCallback = new
+-                ResultCallback<DriveFolder.DriveFileResult>() {
+-                    @Override
+-                    public void onResult(DriveFolder.DriveFileResult result) {
+-                        if (!result.getStatus().isSuccess()) {
+-                            Log.e(TAG, "Error while trying to sync to Google Drive");
+-                            return;
+-                        }
+-                        Log.i(TAG, "Created a file with content: " + result.getDriveFile().getDriveId());
+-                    }
+-                };
+-
+-        Drive.DriveApi.newDriveContents(googleApiClient).setResultCallback(new ResultCallback<DriveApi.DriveContentsResult>() {
+-            @Override
+-            public void onResult(DriveApi.DriveContentsResult result) {
+-                if (!result.getStatus().isSuccess()) {
+-                    Log.e(TAG, "Error while trying to create new file contents");
+-                    return;
+-                }
+-                final DriveContents driveContents = result.getDriveContents();
+-                try {
+-                    // write content to DriveContents
+-                    OutputStream outputStream = driveContents.getOutputStream();
+-                    List<String> exportedFilePaths = getExportedFiles();
+-                    for (String exportedFilePath : exportedFilePaths) {
+-                        File exportedFile = new File(exportedFilePath);
+-                        FileInputStream fileInputStream = new FileInputStream(exportedFile);
+-                        byte[] buffer = new byte[1024];
+-                        int count = 0;
+-
+-                        while ((count = fileInputStream.read(buffer)) >= 0) {
+-                            outputStream.write(buffer, 0, count);
+-                        }
+-                        fileInputStream.close();
+-                        outputStream.flush();
+-                        exportedFile.delete();
+-
+-                        MetadataChangeSet changeSet = new MetadataChangeSet.Builder()
+-                                .setTitle(exportedFile.getName())
+-                                .setMimeType(getExportMimeType())
+-                                .build();
+-
+-                        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+-                        String folderId = sharedPreferences.getString(mContext.getString(R.string.key_google_drive_app_folder_id), "");
+-                        DriveFolder folder = Drive.DriveApi.getFolder(googleApiClient, DriveId.decodeFromString(folderId));
+-                        // create a file on root folder
+-                        folder.createFile(googleApiClient, changeSet, driveContents)
+-                                .setResultCallback(fileCallback);
+-                    }
+-
+-                } catch (IOException e) {
+-                    Crashlytics.logException(e);
+-                    Log.e(TAG, e.getMessage());
+-                }
+-            }
+-        });
+-    }
+-
+     /**
+      * Returns the mime type for the configured export format
+      * @return MIME type as string
+@@ -323,36 +231,6 @@ public class ExportAsyncTask extends AsyncTask<ExportParams, Void, Boolean> {
+         }
+     }
+ 
+-    private void copyExportToDropbox() {
+-        Log.i(TAG, "Copying exported file to DropBox");
+-        String dropboxAppKey = mContext.getString(R.string.dropbox_app_key, SettingsActivity.DROPBOX_APP_KEY);
+-        String dropboxAppSecret = mContext.getString(R.string.dropbox_app_secret, SettingsActivity.DROPBOX_APP_SECRET);
+-        DbxAccountManager mDbxAcctMgr = DbxAccountManager.getInstance(mContext.getApplicationContext(),
+-                dropboxAppKey, dropboxAppSecret);
+-        DbxFile dbExportFile = null;
+-        try {
+-            DbxFileSystem dbxFileSystem = DbxFileSystem.forAccount(mDbxAcctMgr.getLinkedAccount());
+-            List<String> exportedFilePaths = getExportedFiles();
+-            for (String exportedFilePath : exportedFilePaths) {
+-                File exportedFile = new File(exportedFilePath);
+-                dbExportFile = dbxFileSystem.create(new DbxPath(exportedFile.getName()));
+-                dbExportFile.writeFromExistingFile(exportedFile, false);
+-                exportedFile.delete();
+-            }
+-        } catch (DbxException.Unauthorized unauthorized) {
+-            Crashlytics.logException(unauthorized);
+-            Log.e(TAG, unauthorized.getMessage());
+-            throw new Exporter.ExporterException(mExportParams);
+-        } catch (IOException e) {
+-            Crashlytics.logException(e);
+-            Log.e(TAG, e.getMessage());
+-        } finally {
+-            if (dbExportFile != null) {
+-                dbExportFile.close();
+-            }
+-        }
+-    }
+-
+     /**
+      * Returns the list of files generated by one export session.
+      * <p>Typically it is one file. But QIF export generate multiple files per currency.</p>
+diff --git a/app/src/main/java/org/gnucash/android/export/ExportParams.java b/app/src/main/java/org/gnucash/android/export/ExportParams.java
+index 120d052..b69aa01 100644
+--- a/app/src/main/java/org/gnucash/android/export/ExportParams.java
++++ b/app/src/main/java/org/gnucash/android/export/ExportParams.java
+@@ -33,7 +33,7 @@ public class ExportParams {
+      * Options for the destination of the exported transctions file.
+      * It could be stored on the {@link #SD_CARD} or exported through another program via {@link #SHARING}
+      */
+-    public enum ExportTarget {SD_CARD, SHARING, DROPBOX, GOOGLE_DRIVE }
++    public enum ExportTarget {SD_CARD, SHARING}
+ 
+     /**
+      * Format to use for the exported transactions
+diff --git a/app/src/main/res/xml/fragment_backup_preferences.xml b/app/src/main/res/xml/fragment_backup_preferences.xml
+index 0b03b98..0dbe4f4 100644
+--- a/app/src/main/res/xml/fragment_backup_preferences.xml
++++ b/app/src/main/res/xml/fragment_backup_preferences.xml
+@@ -23,17 +23,6 @@
+         <Preference android:title="@string/title_restore_backup"
+             android:key="@string/key_restore_backup"
+             android:summary="@string/summary_restore_backup_pref" />
+-        <CheckBoxPreference android:title="@string/title_dropbox_sync_preference"
+-            android:summary="@string/summary_dropbox_sync"
+-            android:checked="false"
+-            android:key="@string/key_dropbox_sync"
+-            android:icon="@drawable/ic_dropbox_android" />
+-
+-        <CheckBoxPreference android:title="@string/title_google_drive_sync_pref"
+-            android:summary="@string/summary_google_drive_sync"
+-            android:checked="false"
+-            android:key="@string/key_google_drive_sync"
+-            android:icon="@drawable/ic_google_drive" />
+     </PreferenceCategory>
+     <PreferenceCategory android:title="@string/title_export_preference_category">
+ 
+diff --git a/app/src/main/AndroidManifest.xml b/app/src/main/AndroidManifest.xml
+index 3448ead..4090d50 100644
+--- a/app/src/main/AndroidManifest.xml
++++ b/app/src/main/AndroidManifest.xml
+@@ -43,9 +43,6 @@
+     <uses-permission android:name="android.permission.WAKE_LOCK" />
+     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"
+         android:label="Schedule repeating transactions when device is rebooted"/>
+-    <uses-permission android:name="android.permission.INTERNET"
+-        android:label="Export and backup to 3rd party hosting services" />
+-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+ 
+     <application android:name="org.gnucash.android.app.GnuCashApplication"
+         android:icon="@drawable/ic_launcher"
+@@ -100,24 +100,6 @@
+         <activity android:name=".ui.chart.PieChartActivity" />
+         <activity android:name=".ui.chart.LineChartActivity" />
+         <activity android:name=".ui.chart.BarChartActivity" />
+-        <activity android:name="com.dropbox.sync.android.DbxAuthActivity" />
+-        <activity
+-            android:name="com.dropbox.client2.android.AuthActivity"
+-            android:launchMode="singleTask"
+-            android:configChanges="orientation|keyboard">
+-            <intent-filter>
+-                <!-- Change this to be db- followed by your app key -->
+-                <data android:scheme="@string/manifest_dropbox_app_key" />
+-                <action android:name="android.intent.action.VIEW" />
+-                <category android:name="android.intent.category.BROWSABLE"/>
+-                <category android:name="android.intent.category.DEFAULT" />
+-            </intent-filter>
+-        </activity>
+-        <service
+-            android:name="com.dropbox.sync.android.DbxSyncService"
+-            android:enabled="true"
+-            android:exported="false"
+-            android:label="Dropbox Sync" />
+         <service android:name=".service.SchedulerService"
+             android:exported="false"
+             android:label="GnuCash Android Scheduler Execution Service"/>

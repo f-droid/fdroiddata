@@ -3,6 +3,7 @@ License:Apache2
 Web Site:
 Source Code:https://github.com/codinguser/gnucash-android
 Issue Tracker:https://github.com/codinguser/gnucash-android/issues
+Changelog:https://github.com/codinguser/gnucash-android/blob/HEAD/CHANGELOG.md
 
 Auto Name:GnuCash
 Summary:Money management
@@ -12,8 +13,6 @@ transactions on-the-go and export them in the OFX format and later import the
 data into GnuCash for the desktop. You can create multiple accounts for
 transactions in GnuCash. You can't open your GnuCash (for desktop) XML files,
 however.
-
-[https://github.com/codinguser/gnucash-android/blob/HEAD/CHANGELOG.md Changelog]
 .
 
 Repo Type:git
@@ -144,8 +143,139 @@ Build:1.5.5,48
     prebuild=mv java src
     target=android-21
 
-Auto Update Mode:Version v%v
-Update Check Mode:Tags v[0-9.]*$
-Current Version:1.5.5
-Current Version Code:48
+Build:1.6.0,16006
+    commit=v1.6.0
+    subdir=app
+    gradle=production
+    rm=app/libs/*.jar;app/src/main/jniLibs/*/*
+    patch=disable_gms_dropbox.diff
+    srclibs=CWACMerge@v1.1.1,CWACSacklist@v1.0.2,MPAndroidChart@v2.1.0,ViewPagerIndicator@2.4.1
+    prebuild=sed -e "/\<Crashlytics\>/ d" -i `grep -lr "\<Crashlytics\>" src/main/java/` && \
+        sed -e "/crashlytics/ d" -i build.gradle ../build.gradle && \
+        sed -e "/USE_CRASHLYTICS/ d" -i src/main/java/org/gnucash/android/app/GnuCashApplication.java && \
+        sed -e "/gms/ d" -i build.gradle && \
+        sed -e "/cwac/ d" -i build.gradle && \
+        sed -e "/maven\s*{\s*url.*}/ d" -i ../build.gradle && \
+        sed -e "/<item>\(Drop\|Google\)/ d" -i src/main/res/values*/strings.xml && \
+        cp -fR $$CWACMerge$$/merge/src/com src/main/java/ && \
+        cp -fR $$CWACSacklist$$/sacklist/src/com src/main/java/ && \
+        cp -fR $$MPAndroidChart$$/src/com/ src/main/java/ && \
+        cp -fR $$ViewPagerIndicator$$ ../ViewPagerIndicator && \
+        rm -f ../ViewPagerIndicator/libs/*.jar && \
+        echo "include ':ViewPagerIndicator'" >> ../settings.gradle && \
+        echo -e "apply plugin: 'com.android.library' \
+              \nandroid { compileSdkVersion 21 \n buildToolsVersion \"22.0.1\"" >  ../ViewPagerIndicator/build.gradle && \
+        echo -e "lintOptions.abortOnError = false \
+                \n sourceSets{main{ \
+           \n manifest.srcFile 'AndroidManifest.xml' \
+           \n java.srcDirs = ['src'] \
+            \n res.srcDirs = ['res'] }}} \
+        \n dependencies {compile 'com.android.support:support-v4:22.1.1'}" >> ../ViewPagerIndicator/build.gradle && \
+        sed -i -e "s/.*viewpagerindicator.*/project(':ViewPagerIndicator'),/" build.gradle && \
+        sed -i -e "/MPAndroidChart/d" build.gradle && \
+        sed -i -e '/variant.outputs.each/,/ }/ d' build.gradle
+
+Build:1.6.1,16100
+    commit=v1.6.1
+    subdir=app
+    gradle=production
+    target=android-19
+    rm=app/libs/*.jar;app/src/main/jniLibs/*/*
+    patch=disable_gms_dropbox.diff
+    srclibs=CWACMerge@v1.1.1,CWACSacklist@v1.0.2,MPAndroidChart@v2.1.0,ViewPagerIndicator@2.4.1
+    prebuild=sed -e "/\<Crashlytics\>/ d" -i `grep -lr "\<Crashlytics\>" src/main/java/` && \
+        sed -e "/crashlytics/ d" -i build.gradle ../build.gradle && \
+        sed -e "/USE_CRASHLYTICS/ d" -i src/main/java/org/gnucash/android/app/GnuCashApplication.java build.gradle && \
+        sed -e "/gms/ d" -i build.gradle && \
+        sed -e "/cwac/ d" -i build.gradle && \
+        sed -e "/maven\s*{\s*url.*}/ d" -i ../build.gradle && \
+        sed -e "/<item>\(Drop\|Google\)/ d" -i src/main/res/values*/strings.xml && \
+        cp -fR $$CWACMerge$$/merge/src/com src/main/java/ && \
+        cp -fR $$CWACSacklist$$/sacklist/src/com src/main/java/ && \
+        cp -fR $$MPAndroidChart$$/src/com/ src/main/java/ && \
+        cp -fR $$ViewPagerIndicator$$ ../ViewPagerIndicator && \
+        rm -f ../ViewPagerIndicator/libs/*.jar && \
+        echo "include ':ViewPagerIndicator'" >> ../settings.gradle && \
+        echo -e "apply plugin: 'com.android.library' \
+              \nandroid { compileSdkVersion 21 \n buildToolsVersion \"22.0.1\"" >  ../ViewPagerIndicator/build.gradle && \
+        echo -e "lintOptions.abortOnError = false \
+                \n sourceSets{main{ \
+           \n manifest.srcFile 'AndroidManifest.xml' \
+           \n java.srcDirs = ['src'] \
+            \n res.srcDirs = ['res'] }}} \
+        \n dependencies {compile 'com.android.support:support-v4:22.1.1'}" >> ../ViewPagerIndicator/build.gradle && \
+        sed -i -e "s/.*viewpagerindicator.*/project(':ViewPagerIndicator'),/" build.gradle && \
+        sed -i -e "/MPAndroidChart/d" build.gradle && \
+        sed -i -e '/variant.outputs.each/,/ }/ d' build.gradle
+
+Build:1.6.2,16200
+    commit=v1.6.2
+    subdir=app
+    gradle=production
+    target=android-19
+    rm=app/libs/*.jar;app/src/main/jniLibs/*/*
+    patch=disable_gms_dropbox.diff
+    srclibs=CWACMerge@v1.1.1,CWACSacklist@v1.0.2,MPAndroidChart@v2.1.0,ViewPagerIndicator@2.4.1
+    prebuild=sed -e "/\<Crashlytics\>/ d" -i `grep -lr "\<Crashlytics\>" src/main/java/` && \
+        sed -e "/crashlytics/ d" -i build.gradle ../build.gradle && \
+        sed -e "/USE_CRASHLYTICS/ d" -i src/main/java/org/gnucash/android/app/GnuCashApplication.java build.gradle && \
+        sed -e "/gms/ d" -i build.gradle && \
+        sed -e "/cwac/ d" -i build.gradle && \
+        sed -e "/maven\s*{\s*url.*}/ d" -i ../build.gradle && \
+        sed -e "/<item>\(Drop\|Google\)/ d" -i src/main/res/values*/strings.xml && \
+        cp -fR $$CWACMerge$$/merge/src/com src/main/java/ && \
+        cp -fR $$CWACSacklist$$/sacklist/src/com src/main/java/ && \
+        cp -fR $$MPAndroidChart$$/src/com/ src/main/java/ && \
+        cp -fR $$ViewPagerIndicator$$ ../ViewPagerIndicator && \
+        rm -f ../ViewPagerIndicator/libs/*.jar && \
+        echo "include ':ViewPagerIndicator'" >> ../settings.gradle && \
+        echo -e "apply plugin: 'com.android.library' \
+              \nandroid { compileSdkVersion 21 \n buildToolsVersion \"22.0.1\"" >  ../ViewPagerIndicator/build.gradle && \
+        echo -e "lintOptions.abortOnError = false \
+                \n sourceSets{main{ \
+           \n manifest.srcFile 'AndroidManifest.xml' \
+           \n java.srcDirs = ['src'] \
+            \n res.srcDirs = ['res'] }}} \
+        \n dependencies {compile 'com.android.support:support-v4:22.1.1'}" >> ../ViewPagerIndicator/build.gradle && \
+        sed -i -e "s/.*viewpagerindicator.*/project(':ViewPagerIndicator'),/" build.gradle && \
+        sed -i -e "/MPAndroidChart/d" build.gradle && \
+        sed -i -e '/variant.outputs.each/,/ }/ d' build.gradle
+
+Build:1.6.3,16300
+    commit=v1.6.3
+    subdir=app
+    gradle=production
+    target=android-19
+    rm=app/libs/*.jar;app/src/main/jniLibs/*/*
+    patch=disable_gms_dropbox.diff
+    srclibs=CWACMerge@v1.1.1,CWACSacklist@v1.0.2,MPAndroidChart@v2.1.0,ViewPagerIndicator@2.4.1
+    prebuild=sed -e "/\<Crashlytics\>/ d" -i `grep -lr "\<Crashlytics\>" src/main/java/` && \
+        sed -e "/crashlytics/ d" -i build.gradle ../build.gradle && \
+        sed -e "/USE_CRASHLYTICS/ d" -i src/main/java/org/gnucash/android/app/GnuCashApplication.java build.gradle && \
+        sed -e "/gms/ d" -i build.gradle && \
+        sed -e "/cwac/ d" -i build.gradle && \
+        sed -e "/maven\s*{\s*url.*}/ d" -i ../build.gradle && \
+        sed -e "/<item>\(Drop\|Google\)/ d" -i src/main/res/values*/strings.xml && \
+        cp -fR $$CWACMerge$$/merge/src/com src/main/java/ && \
+        cp -fR $$CWACSacklist$$/sacklist/src/com src/main/java/ && \
+        cp -fR $$MPAndroidChart$$/src/com/ src/main/java/ && \
+        cp -fR $$ViewPagerIndicator$$ ../ViewPagerIndicator && \
+        rm -f ../ViewPagerIndicator/libs/*.jar && \
+        echo "include ':ViewPagerIndicator'" >> ../settings.gradle && \
+        echo -e "apply plugin: 'com.android.library' \
+              \nandroid { compileSdkVersion 21 \n buildToolsVersion \"22.0.1\"" >  ../ViewPagerIndicator/build.gradle && \
+        echo -e "lintOptions.abortOnError = false \
+                \n sourceSets{main{ \
+           \n manifest.srcFile 'AndroidManifest.xml' \
+           \n java.srcDirs = ['src'] \
+            \n res.srcDirs = ['res'] }}} \
+        \n dependencies {compile 'com.android.support:support-v4:22.1.1'}" >> ../ViewPagerIndicator/build.gradle && \
+        sed -i -e "s/.*viewpagerindicator.*/project(':ViewPagerIndicator'),/" build.gradle && \
+        sed -i -e "/MPAndroidChart/d" build.gradle && \
+        sed -i -e '/variant.outputs.each/,/ }/ d' build.gradle
+
+#Auto Update Mode:Version v%v
+Update Check Mode:Tags v[0-9.]*
+Current Version:1.6.3
+Current Version Code:16300
 

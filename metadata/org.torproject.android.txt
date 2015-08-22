@@ -21,7 +21,7 @@ you can choose which apps go via the proxy in the settings.
 
 If you don't have root access, there are some apps that are designed to work
 closely with tor or allow proxied connections:
-[[info.guardianproject.otr.app.im]], [[info.guardianproject.browser]] and
+[[info.guardianproject.otr.app.im]], [[acr.browser.lightning]] and
 [[org.mariotaku.twidere]].
 There is also a proxy configurator addon for [[org.mozilla.firefox]] called
 [https://github.com/guardianproject/ProxyMob/downloads ProxyMob] (not yet
@@ -206,31 +206,376 @@ Build:14.1.3-PIE,130
 
 Build:14.1.4-noPIE,132
     commit=v14.1.4
-    init=git cherry-pick -n 7ee0622a5eaafba284dac81fe58aeb15a478c9c2 && git submodule update --init
     submodules=yes
+    init=git cherry-pick -n 7ee0622a5eaafba284dac81fe58aeb15a478c9c2 && \
+        git submodule update --init
     rm=libs/jtorctl.jar,external/superuser-commands/RootCommands-Demo
-    prebuild=mv AndroidManifest.KITKAT_AND_LOWER.xml AndroidManifest.xml && echo 'target=android-17' >> external/superuser-commands/RootCommands-Library/project.properties
+    prebuild=mv AndroidManifest.KITKAT_AND_LOWER.xml AndroidManifest.xml && \
+        echo 'target=android-17' >> external/superuser-commands/RootCommands-Library/project.properties
     build=NDK_BASE=$$NDK$$ make -C external
     buildjni=no
 
 Build:14.1.4-PIE,133
     commit=v14.1.4
-    init=git cherry-pick -n 7ee0622a5eaafba284dac81fe58aeb15a478c9c2 && git submodule update --init
     submodules=yes
+    init=git cherry-pick -n 7ee0622a5eaafba284dac81fe58aeb15a478c9c2 && \
+        git submodule update --init
+    forcevercode=yes
     rm=libs/jtorctl.jar,external/superuser-commands/RootCommands-Demo
     prebuild=echo 'target=android-17' >> external/superuser-commands/RootCommands-Library/project.properties
     build=NDK_BASE=$$NDK$$ make -C external PIEFLAGS="-fPIE -pie"
     buildjni=no
+
+Build:15.0.1-RC-1-noPIE,15012101
+    disable=archive policy
+    commit=15.0.1-RC-1
+    submodules=yes
+    patch=nobridge.diff
+    forceversion=yes
     forcevercode=yes
+    rm=libs/,external/superuser-commands/RootCommands-Demo,external/pluto/plugins/meek/assets/meek-client,external/pluto/plugins/obfs4/assets/obfs4proxy,res/raw/meek.mp3,res/raw/obfs4proxy.mp3
+    prebuild=echo 'target=android-17' >> external/superuser-commands/RootCommands-Library/project.properties && \
+        sed -i -e '/APP_ABI/ s/:=.*/:= armeabi armeabi-v7a/' jni/Application.mk && \
+        sed -i -e 's#uses-sdk.*#uses-sdk android:minSdkVersion="9" android:maxSdkVersion="15" android:targetSdkVersion="15"/>#' AndroidManifest.xml
+    build=NDK_BASE=$$NDK$$ make -C external APP_ABI=armeabi PIEFLAGS=""
+    buildjni=yes
+
+Build:15.0.1-RC-1-noPIE,15012102
+    disable=archive policy
+    commit=15.0.1-RC-1
+    submodules=yes
+    patch=nobridge.diff
+    forceversion=yes
+    forcevercode=yes
+    rm=libs/,external/superuser-commands/RootCommands-Demo,external/pluto/plugins/meek/assets/meek-client,external/pluto/plugins/obfs4/assets/obfs4proxy,res/raw/meek.mp3,res/raw/obfs4proxy.mp3
+    prebuild=echo 'target=android-17' >> external/superuser-commands/RootCommands-Library/project.properties && \
+        sed -i -e '/APP_ABI/ s/:=.*/:= x86/' jni/Application.mk && \
+        sed -i -e 's#uses-sdk.*#uses-sdk android:minSdkVersion="9" android:maxSdkVersion="15" android:targetSdkVersion="15"/>#' AndroidManifest.xml
+    build=NDK_BASE=$$NDK$$ make -C external APP_ABI=x86 PIEFLAGS=""
+    buildjni=yes
+
+Build:15.0.1-RC-1-noPIE,15012103
+    disable=archive policy
+    commit=15.0.1-RC-1
+    submodules=yes
+    patch=nobridge.diff,mipsfix.diff
+    forceversion=yes
+    forcevercode=yes
+    rm=libs/,external/superuser-commands/RootCommands-Demo,external/pluto/plugins/meek/assets/meek-client,external/pluto/plugins/obfs4/assets/obfs4proxy,res/raw/meek.mp3,res/raw/obfs4proxy.mp3
+    prebuild=echo 'target=android-17' >> external/superuser-commands/RootCommands-Library/project.properties && \
+        sed -i -e '/APP_ABI/ s/:=.*/:= mips/' jni/Application.mk && \
+        sed -i -e 's#uses-sdk.*#uses-sdk android:minSdkVersion="9" android:maxSdkVersion="15" android:targetSdkVersion="15"/>#' AndroidManifest.xml
+    build=NDK_BASE=$$NDK$$ make -C external APP_ABI=mips PIEFLAGS=""
+    buildjni=yes
+
+Build:15.0.1-RC-1-PIE,15012111
+    disable=archive policy
+    commit=15.0.1-RC-1
+    submodules=yes
+    forcevercode=yes
+    rm=libs/,external/superuser-commands/RootCommands-Demo,external/pluto/plugins/meek/assets/meek-client,external/pluto/plugins/obfs4/assets/obfs4proxy
+    prebuild=echo 'target=android-17' >> external/superuser-commands/RootCommands-Library/project.properties && \
+        sed -i -e '/APP_ABI/ s/:=.*/:= armeabi armeabi-v7a/' jni/Application.mk
+    build=NDK_BASE=$$NDK$$ make -C external APP_ABI=armeabi PIEFLAGS="-fPIE -pie"
+    buildjni=yes
+
+Build:15.0.1-RC-1-PIE,15012112
+    disable=archive policy
+    commit=15.0.1-RC-1
+    submodules=yes
+    patch=nobridge.diff
+    forcevercode=yes
+    rm=libs/,external/superuser-commands/RootCommands-Demo,external/pluto/plugins/meek/assets/meek-client,external/pluto/plugins/obfs4/assets/obfs4proxy,res/raw/meek.mp3,res/raw/obfs4proxy.mp3
+    prebuild=echo 'target=android-17' >> external/superuser-commands/RootCommands-Library/project.properties && \
+        sed -i -e '/APP_ABI/ s/:=.*/:= x86/' jni/Application.mk
+    build=NDK_BASE=$$NDK$$ make -C external APP_ABI=x86 PIEFLAGS="-fPIE -pie"
+    buildjni=yes
+
+Build:15.0.1-RC-1-PIE,15012113
+    disable=archive policy
+    commit=15.0.1-RC-1
+    submodules=yes
+    patch=nobridge.diff,mipsfix.diff
+    forcevercode=yes
+    rm=libs/,external/superuser-commands/RootCommands-Demo,external/pluto/plugins/meek/assets/meek-client,external/pluto/plugins/obfs4/assets/obfs4proxy,res/raw/meek.mp3,res/raw/obfs4proxy.mp3
+    prebuild=echo 'target=android-17' >> external/superuser-commands/RootCommands-Library/project.properties && \
+        sed -i -e '/APP_ABI/ s/:=.*/:= mips/' jni/Application.mk
+    build=NDK_BASE=$$NDK$$ make -C external APP_ABI=mips PIEFLAGS="-fPIE -pie"
+    buildjni=yes
+
+Build:15.0.1-RC-1-PIE,15012114
+    disable=archive policy
+    commit=15.0.1-RC-1
+    submodules=yes
+    patch=nobridge.diff
+    forcevercode=yes
+    rm=libs/,external/superuser-commands/RootCommands-Demo,external/pluto/plugins/meek/assets/meek-client,external/pluto/plugins/obfs4/assets/obfs4proxy,res/raw/meek.mp3,res/raw/obfs4proxy.mp3
+    prebuild=echo 'target=android-17' >> external/superuser-commands/RootCommands-Library/project.properties && \
+        sed -i -e '/APP_ABI/ s/:=.*/:= arm64-v8a/' jni/Application.mk
+    build=NDK_BASE=$$NDK$$ make -C external APP_ABI=arm64-v8a PIEFLAGS="-fPIE -pie" NDK_PLATFORM_LEVEL=21 NDK_TOOLCHAIN_VERSION=4.9
+    buildjni=yes
+
+Build:15.0.1-RC-1-PIE,15012115
+    disable=libcrypto.a(eng_rsax.o):eng_rsax.c:function e_rsax_bn_mod_exp: error: undefined reference to 'mod_exp_512'
+    commit=15.0.1-RC-1
+    submodules=yes
+    patch=nobridge.diff
+    forcevercode=yes
+    rm=libs/,external/superuser-commands/RootCommands-Demo,external/pluto/plugins/meek/assets/meek-client,external/pluto/plugins/obfs4/assets/obfs4proxy,res/raw/meek.mp3,res/raw/obfs4proxy.mp3
+    prebuild=echo 'target=android-17' >> external/superuser-commands/RootCommands-Library/project.properties && \
+        sed -i -e '/APP_ABI/ s/:=.*/:= x86_64/' jni/Application.mk
+    build=NDK_BASE=$$NDK$$ make -C external APP_ABI=x86_64 PIEFLAGS="-fPIE -pie" NDK_PLATFORM_LEVEL=21 NDK_TOOLCHAIN_VERSION=4.9
+    buildjni=yes
+
+Build:15.0.1-RC-1-PIE,15012116
+    disable=archive policy
+    commit=15.0.1-RC-1
+    submodules=yes
+    patch=nobridge.diff
+    forcevercode=yes
+    rm=libs/,external/superuser-commands/RootCommands-Demo,external/pluto/plugins/meek/assets/meek-client,external/pluto/plugins/obfs4/assets/obfs4proxy,res/raw/meek.mp3,res/raw/obfs4proxy.mp3
+    prebuild=echo 'target=android-17' >> external/superuser-commands/RootCommands-Library/project.properties && \
+        sed -i -e '/APP_ABI/ s/:=.*/:= mips64/' jni/Application.mk
+    build=NDK_BASE=$$NDK$$ make -C external APP_ABI=mips64 PIEFLAGS="-fPIE -pie" NDK_PLATFORM_LEVEL=21 NDK_TOOLCHAIN_VERSION=4.9
+    buildjni=yes
+
+Build:15.0.1-RC-2-noPIE,15012201
+    commit=15.0.1-RC-2
+    submodules=yes
+    patch=nobridge.diff
+    forceversion=yes
+    forcevercode=yes
+    rm=libs/,external/superuser-commands/RootCommands-Demo,external/pluto/plugins/meek/assets/meek-client,external/pluto/plugins/obfs4/assets/obfs4proxy,res/raw/meek.mp3,res/raw/obfs4proxy.mp3
+    prebuild=echo 'target=android-17' >> external/superuser-commands/RootCommands-Library/project.properties && \
+        sed -i -e '/APP_ABI/ s/:=.*/:= armeabi armeabi-v7a/' jni/Application.mk && \
+        sed -i -e 's#uses-sdk.*#uses-sdk android:minSdkVersion="9" android:maxSdkVersion="15" android:targetSdkVersion="15"/>#' AndroidManifest.xml
+    build=NDK_BASE=$$NDK$$ make -C external APP_ABI=armeabi PIEFLAGS=""
+    buildjni=yes
+
+Build:15.0.1-RC-2-noPIE,15012202
+    commit=15.0.1-RC-2
+    submodules=yes
+    patch=nobridge.diff
+    forceversion=yes
+    forcevercode=yes
+    rm=libs/,external/superuser-commands/RootCommands-Demo,external/pluto/plugins/meek/assets/meek-client,external/pluto/plugins/obfs4/assets/obfs4proxy,res/raw/meek.mp3,res/raw/obfs4proxy.mp3
+    prebuild=echo 'target=android-17' >> external/superuser-commands/RootCommands-Library/project.properties && \
+        sed -i -e '/APP_ABI/ s/:=.*/:= x86/' jni/Application.mk && \
+        sed -i -e 's#uses-sdk.*#uses-sdk android:minSdkVersion="9" android:maxSdkVersion="15" android:targetSdkVersion="15"/>#' AndroidManifest.xml
+    build=NDK_BASE=$$NDK$$ make -C external APP_ABI=x86 PIEFLAGS=""
+    buildjni=yes
+
+Build:15.0.1-RC-2-noPIE,15012203
+    commit=15.0.1-RC-2
+    submodules=yes
+    patch=nobridge.diff
+    forceversion=yes
+    forcevercode=yes
+    rm=libs/,external/superuser-commands/RootCommands-Demo,external/pluto/plugins/meek/assets/meek-client,external/pluto/plugins/obfs4/assets/obfs4proxy,res/raw/meek.mp3,res/raw/obfs4proxy.mp3
+    prebuild=echo 'target=android-17' >> external/superuser-commands/RootCommands-Library/project.properties && \
+        sed -i -e '/APP_ABI/ s/:=.*/:= mips/' jni/Application.mk && \
+        sed -i -e 's#uses-sdk.*#uses-sdk android:minSdkVersion="9" android:maxSdkVersion="15" android:targetSdkVersion="15"/>#' AndroidManifest.xml
+    build=NDK_BASE=$$NDK$$ make -C external APP_ABI=mips PIEFLAGS=""
+    buildjni=yes
+
+Build:15.0.1-RC-2-PIE,15012211
+    commit=15.0.1-RC-2
+    submodules=yes
+    forcevercode=yes
+    rm=libs/,external/superuser-commands/RootCommands-Demo,external/pluto/plugins/meek/assets/meek-client,external/pluto/plugins/obfs4/assets/obfs4proxy
+    prebuild=echo 'target=android-17' >> external/superuser-commands/RootCommands-Library/project.properties && \
+        sed -i -e '/APP_ABI/ s/:=.*/:= armeabi armeabi-v7a/' jni/Application.mk
+    build=NDK_BASE=$$NDK$$ make -C external APP_ABI=armeabi PIEFLAGS="-fPIE -pie"
+    buildjni=yes
+
+Build:15.0.1-RC-2-PIE,15012212
+    commit=15.0.1-RC-2
+    submodules=yes
+    patch=nobridge.diff
+    forcevercode=yes
+    rm=libs/,external/superuser-commands/RootCommands-Demo,external/pluto/plugins/meek/assets/meek-client,external/pluto/plugins/obfs4/assets/obfs4proxy,res/raw/meek.mp3,res/raw/obfs4proxy.mp3
+    prebuild=echo 'target=android-17' >> external/superuser-commands/RootCommands-Library/project.properties && \
+        sed -i -e '/APP_ABI/ s/:=.*/:= x86/' jni/Application.mk
+    build=NDK_BASE=$$NDK$$ make -C external APP_ABI=x86 PIEFLAGS="-fPIE -pie"
+    buildjni=yes
+
+Build:15.0.1-RC-2-PIE,15012213
+    commit=15.0.1-RC-2
+    submodules=yes
+    patch=nobridge.diff
+    forcevercode=yes
+    rm=libs/,external/superuser-commands/RootCommands-Demo,external/pluto/plugins/meek/assets/meek-client,external/pluto/plugins/obfs4/assets/obfs4proxy,res/raw/meek.mp3,res/raw/obfs4proxy.mp3
+    prebuild=echo 'target=android-17' >> external/superuser-commands/RootCommands-Library/project.properties && \
+        sed -i -e '/APP_ABI/ s/:=.*/:= mips/' jni/Application.mk
+    build=NDK_BASE=$$NDK$$ make -C external APP_ABI=mips PIEFLAGS="-fPIE -pie"
+    buildjni=yes
+
+Build:15.0.1-RC-2-PIE,15012214
+    commit=15.0.1-RC-2
+    submodules=yes
+    patch=nobridge.diff
+    forcevercode=yes
+    rm=libs/,external/superuser-commands/RootCommands-Demo,external/pluto/plugins/meek/assets/meek-client,external/pluto/plugins/obfs4/assets/obfs4proxy,res/raw/meek.mp3,res/raw/obfs4proxy.mp3
+    prebuild=echo 'target=android-17' >> external/superuser-commands/RootCommands-Library/project.properties && \
+        sed -i -e '/APP_ABI/ s/:=.*/:= arm64-v8a/' jni/Application.mk
+    build=NDK_BASE=$$NDK$$ make -C external APP_ABI=arm64-v8a PIEFLAGS="-fPIE -pie" NDK_PLATFORM_LEVEL=21 NDK_TOOLCHAIN_VERSION=4.9
+    buildjni=yes
+
+Build:15.0.1-RC-2-PIE,15012215
+    disable=libcrypto.a(eng_rsax.o):eng_rsax.c:function e_rsax_bn_mod_exp: error: undefined reference to 'mod_exp_512'
+    commit=15.0.1-RC-2
+    submodules=yes
+    patch=nobridge.diff
+    forcevercode=yes
+    rm=libs/,external/superuser-commands/RootCommands-Demo,external/pluto/plugins/meek/assets/meek-client,external/pluto/plugins/obfs4/assets/obfs4proxy,res/raw/meek.mp3,res/raw/obfs4proxy.mp3
+    prebuild=echo 'target=android-17' >> external/superuser-commands/RootCommands-Library/project.properties && \
+        sed -i -e '/APP_ABI/ s/:=.*/:= x86_64/' jni/Application.mk
+    build=NDK_BASE=$$NDK$$ make -C external APP_ABI=x86_64 PIEFLAGS="-fPIE -pie" NDK_PLATFORM_LEVEL=21 NDK_TOOLCHAIN_VERSION=4.9
+    buildjni=yes
+
+Build:15.0.1-RC-2-PIE,15012216
+    commit=15.0.1-RC-2
+    submodules=yes
+    patch=nobridge.diff
+    forcevercode=yes
+    rm=libs/,external/superuser-commands/RootCommands-Demo,external/pluto/plugins/meek/assets/meek-client,external/pluto/plugins/obfs4/assets/obfs4proxy,res/raw/meek.mp3,res/raw/obfs4proxy.mp3
+    prebuild=echo 'target=android-17' >> external/superuser-commands/RootCommands-Library/project.properties && \
+        sed -i -e '/APP_ABI/ s/:=.*/:= mips64/' jni/Application.mk
+    build=NDK_BASE=$$NDK$$ make -C external APP_ABI=mips64 PIEFLAGS="-fPIE -pie" NDK_PLATFORM_LEVEL=21 NDK_TOOLCHAIN_VERSION=4.9
+    buildjni=yes
+
+Build:15.0.1-RC-3-noPIE,15012301
+    commit=15.0.1-RC-3
+    submodules=yes
+    patch=nobridge.diff
+    forceversion=yes
+    forcevercode=yes
+    rm=libs/,external/superuser-commands/RootCommands-Demo,external/pluto/plugins/meek/assets/meek-client,external/pluto/plugins/obfs4/assets/obfs4proxy,res/raw/meek.mp3,res/raw/obfs4proxy.mp3
+    prebuild=echo 'target=android-17' >> external/superuser-commands/RootCommands-Library/project.properties && \
+        sed -i -e '/APP_ABI/ s/:=.*/:= armeabi armeabi-v7a/' jni/Application.mk && \
+        sed -i -e 's#uses-sdk.*#uses-sdk android:minSdkVersion="9" android:maxSdkVersion="15" android:targetSdkVersion="15"/>#' AndroidManifest.xml
+    build=NDK_BASE=$$NDK$$ make -C external APP_ABI=armeabi PIEFLAGS=""
+    buildjni=yes
+
+Build:15.0.1-RC-3-noPIE,15012302
+    commit=15.0.1-RC-3
+    submodules=yes
+    patch=nobridge.diff
+    forceversion=yes
+    forcevercode=yes
+    rm=libs/,external/superuser-commands/RootCommands-Demo,external/pluto/plugins/meek/assets/meek-client,external/pluto/plugins/obfs4/assets/obfs4proxy,res/raw/meek.mp3,res/raw/obfs4proxy.mp3
+    prebuild=echo 'target=android-17' >> external/superuser-commands/RootCommands-Library/project.properties && \
+        sed -i -e '/APP_ABI/ s/:=.*/:= x86/' jni/Application.mk && \
+        sed -i -e 's#uses-sdk.*#uses-sdk android:minSdkVersion="9" android:maxSdkVersion="15" android:targetSdkVersion="15"/>#' AndroidManifest.xml
+    build=NDK_BASE=$$NDK$$ make -C external APP_ABI=x86 PIEFLAGS=""
+    buildjni=yes
+
+Build:15.0.1-RC-3-noPIE,15012303
+    commit=15.0.1-RC-3
+    submodules=yes
+    patch=nobridge.diff
+    forceversion=yes
+    forcevercode=yes
+    rm=libs/,external/superuser-commands/RootCommands-Demo,external/pluto/plugins/meek/assets/meek-client,external/pluto/plugins/obfs4/assets/obfs4proxy,res/raw/meek.mp3,res/raw/obfs4proxy.mp3
+    prebuild=echo 'target=android-17' >> external/superuser-commands/RootCommands-Library/project.properties && \
+        sed -i -e '/APP_ABI/ s/:=.*/:= mips/' jni/Application.mk && \
+        sed -i -e 's#uses-sdk.*#uses-sdk android:minSdkVersion="9" android:maxSdkVersion="15" android:targetSdkVersion="15"/>#' AndroidManifest.xml
+    build=NDK_BASE=$$NDK$$ make -C external APP_ABI=mips PIEFLAGS=""
+    buildjni=yes
+
+Build:15.0.1-RC-3-PIE,15012311
+    commit=15.0.1-RC-3
+    submodules=yes
+    forceversion=yes
+    forcevercode=yes
+    rm=libs/,external/superuser-commands/RootCommands-Demo,external/pluto/plugins/meek/assets/meek-client,external/pluto/plugins/obfs4/assets/obfs4proxy
+    prebuild=echo 'target=android-17' >> external/superuser-commands/RootCommands-Library/project.properties && \
+        sed -i -e '/APP_ABI/ s/:=.*/:= armeabi armeabi-v7a/' jni/Application.mk
+    build=NDK_BASE=$$NDK$$ make -C external APP_ABI=armeabi PIEFLAGS="-fPIE -pie"
+    buildjni=yes
+
+Build:15.0.1-RC-3-PIE,15012312
+    commit=15.0.1-RC-3
+    submodules=yes
+    patch=nobridge.diff
+    forceversion=yes
+    forcevercode=yes
+    rm=libs/,external/superuser-commands/RootCommands-Demo,external/pluto/plugins/meek/assets/meek-client,external/pluto/plugins/obfs4/assets/obfs4proxy,res/raw/meek.mp3,res/raw/obfs4proxy.mp3
+    prebuild=echo 'target=android-17' >> external/superuser-commands/RootCommands-Library/project.properties && \
+        sed -i -e '/APP_ABI/ s/:=.*/:= x86/' jni/Application.mk
+    build=NDK_BASE=$$NDK$$ make -C external APP_ABI=x86 PIEFLAGS="-fPIE -pie"
+    buildjni=yes
+
+Build:15.0.1-RC-3-PIE,15012313
+    commit=15.0.1-RC-3
+    submodules=yes
+    patch=nobridge.diff
+    forceversion=yes
+    forcevercode=yes
+    rm=libs/,external/superuser-commands/RootCommands-Demo,external/pluto/plugins/meek/assets/meek-client,external/pluto/plugins/obfs4/assets/obfs4proxy,res/raw/meek.mp3,res/raw/obfs4proxy.mp3
+    prebuild=echo 'target=android-17' >> external/superuser-commands/RootCommands-Library/project.properties && \
+        sed -i -e '/APP_ABI/ s/:=.*/:= mips/' jni/Application.mk
+    build=NDK_BASE=$$NDK$$ make -C external APP_ABI=mips PIEFLAGS="-fPIE -pie"
+    buildjni=yes
+
+Build:15.0.1-RC-3-PIE,15012314
+    commit=15.0.1-RC-3
+    submodules=yes
+    patch=nobridge.diff
+    forceversion=yes
+    forcevercode=yes
+    rm=libs/,external/superuser-commands/RootCommands-Demo,external/pluto/plugins/meek/assets/meek-client,external/pluto/plugins/obfs4/assets/obfs4proxy,res/raw/meek.mp3,res/raw/obfs4proxy.mp3
+    prebuild=echo 'target=android-17' >> external/superuser-commands/RootCommands-Library/project.properties && \
+        sed -i -e '/APP_ABI/ s/:=.*/:= arm64-v8a/' jni/Application.mk
+    build=NDK_BASE=$$NDK$$ make -C external APP_ABI=arm64-v8a PIEFLAGS="-fPIE -pie" NDK_PLATFORM_LEVEL=21 NDK_TOOLCHAIN_VERSION=4.9
+    buildjni=yes
+
+Build:15.0.1-RC-3-PIE,15012315
+    commit=15.0.1-RC-3
+    submodules=yes
+    patch=nobridge.diff
+    forceversion=yes
+    forcevercode=yes
+    rm=libs/,external/superuser-commands/RootCommands-Demo,external/pluto/plugins/meek/assets/meek-client,external/pluto/plugins/obfs4/assets/obfs4proxy,res/raw/meek.mp3,res/raw/obfs4proxy.mp3
+    prebuild=echo 'target=android-17' >> external/superuser-commands/RootCommands-Library/project.properties && \
+        sed -i -e '/APP_ABI/ s/:=.*/:= x86_64/' jni/Application.mk
+    build=NDK_BASE=$$NDK$$ make -C external APP_ABI=x86_64 PIEFLAGS="-fPIE -pie" NDK_PLATFORM_LEVEL=21 NDK_TOOLCHAIN_VERSION=4.9
+    buildjni=yes
+
+Build:15.0.1-RC-3-PIE,15012316
+    commit=15.0.1-RC-3
+    submodules=yes
+    patch=nobridge.diff
+    forceversion=yes
+    forcevercode=yes
+    rm=libs/,external/superuser-commands/RootCommands-Demo,external/pluto/plugins/meek/assets/meek-client,external/pluto/plugins/obfs4/assets/obfs4proxy,res/raw/meek.mp3,res/raw/obfs4proxy.mp3
+    prebuild=echo 'target=android-17' >> external/superuser-commands/RootCommands-Library/project.properties && \
+        sed -i -e '/APP_ABI/ s/:=.*/:= mips64/' jni/Application.mk
+    build=NDK_BASE=$$NDK$$ make -C external APP_ABI=mips64 PIEFLAGS="-fPIE -pie" NDK_PLATFORM_LEVEL=21 NDK_TOOLCHAIN_VERSION=4.9
+    buildjni=yes
 
 Maintainer Notes:
-UCM only picks up the noPIE version with lower VC. Also AUM will only build
-the default flavor.
+* meekclient & ofbs4proxy are prebuilt with PIE for arm archs only. Hence remove them for other archs & for non-PIE builds.
+* AUM will only build the default flavor.
+* Bump archive policy on each release to match all new builds + all build of the previous version (during RC builds, also add builds for last stable version)
+* Bump CV/CVC when all builds have finished and we have tested whats possible...
 .
 
-Archive Policy:6 versions
+# +0: vanilla
+# +1: arm (noPIE)
+# +2: x86 (noPIE)
+# +3: mips (noPIE)
+# +11: arm (PIE)
+# +12: x86 (PIE)
+# +13: mips (PIE)
+# +14: arm64-v8a
+# +15: x86_64
+# +16: mips64
+#Archive Policy:6 versions
 #Auto Update Mode:Version %v
-#Update Check Mode:Tags ^[^-]*$
+Archive Policy:19 versions
+Auto Update Mode:None
+Update Check Mode:Tags ^[^-]*$
 Current Version:14.1.4-PIE
-Current Version Code:133
+Current Version Code:132
 

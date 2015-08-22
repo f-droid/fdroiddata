@@ -4,6 +4,7 @@ License:GPLv3
 Web Site:http://osmand.net
 Source Code:https://github.com/osmandapp/Osmand
 Issue Tracker:https://github.com/osmandapp/Osmand/issues
+Changelog:http://osmand.net/help/changes.html
 Donate:https://code.google.com/p/osmand/#Please_support_the_project
 
 Name:OsmAnd~
@@ -21,8 +22,6 @@ own.
 
 Anti-Features: Tracking - It will send your device and application specs to an
 Analytics server upon downloading the list of maps you can download.
-
-[http://osmand.net/help/changes.html Changelog]
 .
 
 Repo Type:git
@@ -127,7 +126,6 @@ Build:1.9.4,196
     output=bin/OsmAnd-release-unsigned.apk
     build=../../build
     buildjni=no
-    ndk=r10d
 
 Build:1.9.5,197
     commit=1.9.5
@@ -136,7 +134,6 @@ Build:1.9.5,197
     output=bin/OsmAnd-release-unsigned.apk
     build=../../build
     buildjni=no
-    ndk=r10d
 
 Build:2.0.2,201
     disable=builds and works, disable for further restructuring
@@ -147,7 +144,6 @@ Build:2.0.2,201
     build=../../build
     gradle=fullLegacyFat
     buildjni=no
-    ndk=r10d
 
 Build:2.0.3,205
     disable=builds with slow rendering
@@ -163,7 +159,6 @@ Build:2.0.3,205
         sed -i -e '/sourceSets/icompileOptions {\nsourceCompatibility = JavaVersion.VERSION_1_7\ntargetCompatibility = JavaVersion.VERSION_1_7\n}\n' ../eclipse-compile/appcompat/build.gradle build.gradle
     gradle=full,legacy,fat
     buildjni=no
-    ndk=r10d
 
 Build:2.0.4,206
     disable=builds with slow rendering
@@ -179,7 +174,6 @@ Build:2.0.4,206
         sed -i -e '/sourceSets/icompileOptions {\nsourceCompatibility = JavaVersion.VERSION_1_7\ntargetCompatibility = JavaVersion.VERSION_1_7\n}\n' ../eclipse-compile/appcompat/build.gradle build.gradle
     gradle=full,legacy,fat
     buildjni=no
-    ndk=r10d
 
 Build:2.0.4,207
     commit=6c290d170b00119df2771b1509221b46212947e9
@@ -195,7 +189,19 @@ Build:2.0.4,207
         sed -i -e '1 iAPP_PLATFORM := android-14' jni/Application.mk
     gradle=full,legacy,fat
     buildjni=no
-    ndk=r10d
+
+Build:2.1.1,212
+    commit=2.1.1
+    subdir=android/OsmAnd
+    submodules=yes
+    prebuild=sed -i -e '/qt.*Compile/d' build.gradle && \
+        sed -i -e "s/System.getenv(\"APK_VERSION\")/\"$$VERSION$$\"/g" build.gradle && \
+        sed -i -e "s/System.getenv(\"APK_NUMBER_VERSION\")/\"$$VERCODE$$\"/g" build.gradle && \
+        sed -i -e "s/System.getenv(\"APP_FEATURES\")/\"-play_market +gps_status -parking_plugin -blackberry -amazon -route_nav\"/g" build.gradle && \
+        sed -i -e "s/System.getenv(\"APP_NAME\")/\"OsmAnd~\"/g" build.gradle && \
+        sed -i -e "s/System.getenv(\"TARGET_APP_NAME\")/\"OsmAnd~\"/g" build.gradle
+    gradle=full,legacy,fat
+    buildjni=no
 
 Maintainer Notes:
 No UCMs apply because git never contains actual releases, only pre-releses.
@@ -208,10 +214,14 @@ Upstream now uses gradle. We do some preparations in ../../build but try to
 keep the main build within the recipe via `gradle=`.
 
 Update CV only after sucessfully built and tested.
+
+= TODO =
+* On next release test with `sed -i -e '/com.android.vending.BILLING/d' AndroidManifest.xml`
+* On next release maybe remove Tracking due to https://github.com/osmandapp/Osmand/commit/513024eac7ceca812ddc94056fc0ac0d5d2772ec
 .
 
 Auto Update Mode:None
 Update Check Mode:None
-Current Version:2.0.4
-Current Version Code:207
+Current Version:2.1.1
+Current Version Code:212
 

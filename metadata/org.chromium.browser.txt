@@ -1,0 +1,50 @@
+Categories:Internet
+License:BSD
+Web Site:https://www.chromium.org/
+Source Code:https://code.google.com/p/chromium/
+Issue Tracker:https://code.google.com/p/chromium/issues/list
+
+Name:Chromium
+Summary:Browser based on Google's Chrome
+Description:
+Web browser based on Google's Chrome.
+.
+
+Repo Type:git
+Repo:https://chromium.googlesource.com/chromium/src.git
+
+Build:45.0,1
+    disable=wip
+    commit=45.0.2422.4
+    srclibs=DepotTools@ffc888e
+    build=\
+        export PATH=$PATH:`readlink -f $$DepotTools$$` && \
+        echo "target_os = ['android']" >> .gclient && gclient sync && \
+        echo "{ 'GYP_DEFINES': 'OS=android target_arch=arm', }" > chromium.gyp_env && \
+        gclient runhooks && \
+        gclient sync && \
+        ninja -C out/Release chrome_public_apk
+
+Maintainer Notes:
+
+#target_arch:
+#ia32, mipsel, x64, arm, arm64, mips64el
+
+
+#fetch --no-hooks --no-history android && \
+sudo apt-get -y install lighttpd python-pexpect xvfb x11-utils
+
+
+"{ 'GYP_DEFINES': 'chromeos=1 component=shared_library' }" > ../chromium.gyp_env
+#'gyp_managed_install%': 0,
+#'fastbuild%': 1,
+
+# branding=Chrome
+branding=Chromium
+buildtype=Official
+
+$ ./build/gyp_chromium -Dcomponent=shared_library
+$ ./build/gyp_chromium -Goutput_dir=out_cros
+.
+
+Update Check Mode:None
