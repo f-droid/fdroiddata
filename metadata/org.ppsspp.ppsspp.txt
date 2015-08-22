@@ -323,6 +323,42 @@ Build:1.0.0.0,10003
         ./ab.sh
     buildjni=no
 
+Build:1.0.1.0,10101
+    commit=v1.0.1
+    subdir=android
+    submodules=yes
+    srclibs=2:NoAnalytics@d38ae535b5
+    forcevercode=yes
+    rm=dx9sdk,pspautotests,android/custom_rules.xml
+    prebuild=echo 'APP_ABI=x86' >> jni/Application.mk && \
+        rm libs/libGoogleAnalytics*
+    scanignore=android/android-ndk-profiler
+    scandelete=ffmpeg
+    build=cd ../ffmpeg && \
+        sed -i -e 's@^NDK.*@NDK=$$NDK$$@' -e 's/windows.*/linux-x86*/' ax86-build.sh && \
+        ./ax86-build.sh && \
+        cd ../android && \
+        ./ab.sh
+    buildjni=no
+
+Build:1.0.1.0,10103
+    commit=v1.0.1
+    subdir=android
+    submodules=yes
+    srclibs=2:NoAnalytics@d38ae535b5
+    forcevercode=yes
+    rm=dx9sdk,pspautotests,android/custom_rules.xml
+    prebuild=echo 'APP_ABI=armeabi-v7a' >> jni/Application.mk && \
+        rm libs/libGoogleAnalytics*
+    scanignore=android/android-ndk-profiler
+    scandelete=ffmpeg
+    build=cd ../ffmpeg && \
+        sed -i -e 's@^NDK.*@NDK=$$NDK$$@' -e 's/windows.*/linux-x86*/' -e '/^build_ARMv6/d' android-build.sh && \
+        ./android-build.sh && \
+        cd ../android && \
+        ./ab.sh
+    buildjni=no
+
 # +0: - (upstream)
 # +1: x86
 # +2: arm
