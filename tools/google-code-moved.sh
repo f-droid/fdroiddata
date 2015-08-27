@@ -5,7 +5,12 @@
 
 set -e
 
-sed -n 's@Source Code:\(.*code\.google\.com.*/source\)@\1@p' metadata/*.txt | sort -u | shuf | while read url; do
+all=$(sed -n 's@Source Code:\(.*code\.google\.com.*/source\)@\1@p' metadata/*.txt | sort -u)
+len=$(echo "$all" | wc -l)
+
+echo "$len apps left"
+
+echo "$all" | sort -u | shuf | while read url; do
 	echo $url
 	
 	found=$(curl -s $url/checkout | sed -n 's/.*<A HREF="\(.*\)">here<\/A>.*/\1/p')
