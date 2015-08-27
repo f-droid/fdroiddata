@@ -5,7 +5,7 @@
 
 set -e
 
-sed -n 's@Source Code:\(.*code\.google\.com.*/source\)@\1@p' metadata/*.txt | sort -u | while read url; do
+sed -n 's@Source Code:\(.*code\.google\.com.*/source\)@\1@p' metadata/*.txt | sort -u | shuf | while read url; do
 	echo $url
 	
 	found=$(curl -s $url/checkout | sed -n 's/.*<A HREF="\(.*\)">here<\/A>.*/\1/p')
