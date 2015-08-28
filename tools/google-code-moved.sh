@@ -11,10 +11,11 @@ len=$(echo "$all" | wc -l)
 echo "$len apps left"
 
 echo "$all" | sort -u | shuf | while read url; do
-	echo $url
+	printf "."
 	
 	found=$(curl -s $url/checkout | sed -n 's/.*<A HREF="\(.*\)">here<\/A>.*/\1/p')
 	if [ -n "$found" ]; then
+		printf "\n%s\n" $url
 		printf "\tProject moved: %s\n" $found
 	fi
 done
