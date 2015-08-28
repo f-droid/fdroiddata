@@ -11,6 +11,9 @@ len=$(echo "$all" | wc -l)
 echo "$len apps left"
 
 moved() {
+	if echo $2 | grep -q accounts/ServiceLogin; then
+		return
+	fi
 	printf "\n%s\n" $1
 	printf "\tProject moved: %s\n" $2
 }
