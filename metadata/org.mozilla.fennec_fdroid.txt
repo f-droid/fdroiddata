@@ -2126,6 +2126,264 @@ Build:40.0,400010
         mv obj-${fxarch}/dist/fennec-*.apk fdroid/fennec-unsigned.apk && \
         zip -d fdroid/fennec-unsigned.apk "META-INF*"
 
+Build:40.0.3,400300
+    disable=-Werror
+    commit=FENNEC_40_0_3_RELEASE
+    init=find toolkit/crashreporter/ -mindepth 1 -maxdepth 1 ! -name "crashreporter.mozbuild" ! -name "google-breakpad" -exec rm -R '{}' \; && \
+        find toolkit/crashreporter/google-breakpad/ -mindepth 1 -maxdepth 1 ! -name "src" -exec rm -R '{}' \; && \
+        rm -R toolkit/crashreporter/google-breakpad/src/tools/ && \
+        rm -R toolkit/crashreporter/google-breakpad/src/client/ && \
+        rm -R toolkit/crashreporter/google-breakpad/src/processor/testdata/ && \
+        rm -R toolkit/crashreporter/google-breakpad/src/third_party/linux/ && \
+        find dom/html/test/ -type f -exec rm '{}' \; && \
+        rm -R accessible/tests/ && \
+        rm -R addon-sdk/source/test/ && \
+        rm -R browser/devtools/debugger/test/ && \
+        rm -R browser/devtools/webide/test/ && \
+        rm -R build/mobile/robocop/ && \
+        rm -R build/mobile/sutagent/ && \
+        rm -R chrome/test/ && \
+        rm -R content/ && \
+        rm -R docshell/test/ && \
+        rm -R dom/apps/tests/ && \
+        rm -R dom/base/crashtests/ && \
+        rm -R dom/base/test/ && \
+        rm -R dom/html/test/ && \
+        rm -R dom/indexedDB/test/ && \
+        rm -R dom/tests/ && \
+        rm -R layout/base/crashtests/ && \
+        rm -R layout/generic/crashtests/ && \
+        rm -R layout/generic/test/ && \
+        rm -R layout/reftests/ && \
+        rm -R mobile/android/build/classycle/ && \
+        rm -R mobile/android/tests/ && \
+        rm -R modules/libmar/tests/ && \
+        rm -R modules/libjar/test/ && \
+        rm -R modules/libjar/zipwriter/test/ && \
+        rm -R mozglue/linker/tests/ && \
+        rm -R security/manager/ssl/tests/compiled/ && \
+        rm -R security/manager/ssl/tests/*test/ && \
+        rm -R security/nss/cmd/bltest/tests/ && \
+        rm -R security/nss/tests/ && \
+        rm -R services/sync/tests/ && \
+        rm -R testing/crashtest/ && \
+        rm -R testing/mozbase/mozinstall/tests/ && \
+        rm -R testing/mozbase/mozprofile/tests/ && \
+        rm -R testing/web-platform/ && \
+        rm -R toolkit/devtools/apps/tests/ && \
+        rm -R toolkit/components/search/tests/ && \
+        rm -R toolkit/modules/tests/ && \
+        rm -R toolkit/mozapps/extensions/test/ && \
+        rm -R toolkit/mozapps/update/tests/ && \
+        rm -R toolkit/webapps/tests/ && \
+        rm -R widget/crashtests/ && \
+        rm -R xpcom/tests/ && \
+        sed -i -e '/nsExceptionHandler/d' ipc/glue/GeckoChildProcessHost.cpp && \
+        sed -i -e '/nsExceptionHandler/d' toolkit/xre/nsAndroidStartup.cpp && \
+        sed -i -e '/nsExceptionHandler/d' toolkit/xre/nsEmbedFunctions.cpp && \
+        sed -i -e '/source\/test\//d' addon-sdk/moz.build && \
+        sed -i -e '/testing\/web-platform\/mach_commands.py/d' build/mach_bootstrap.py && \
+        sed -i -e '/TESTS_MANIFESTS/,+19d' docshell/moz.build && \
+        sed -i -e '/tests\//d' dom/apps/moz.build && \
+        sed -i -e '/test\//d' dom/html/moz.build && \
+        sed -i -e '/test\//d' dom/indexedDB/moz.build && \
+        sed -i -e '/MOCHITEST/d' layout/generic/moz.build && \
+        sed -i -e '/reftests\//d'  -e '/crashtest\//d' layout/moz.build && \
+        sed -i -e '/classycle_jar/,+7d' -e 's/.geckoview.deps ././g' -e 's/PROGUARD_PASSES=1/PROGUARD_PASSES=3/g' mobile/android/base/Makefile.in && \
+        sed -i -e '/TEST/d' modules/libjar/moz.build && \
+        sed -i -e '/TEST/d' modules/libjar/zipwriter/moz.build && \
+        sed -i -e '/\/content/d' toolkit/toolkit.mozbuild && \
+        sed -i -e '/xpcshell.ini/d' toolkit/components/search/moz.build && \
+        sed -i -e '/MOCHITEST/,+5d' toolkit/devtools/apps/moz.build && \
+        sed -i -e '/tests\//d' toolkit/modules/moz.build && \
+        sed -i -e '/tests/d' toolkit/mozapps/update/moz.build
+    output=fdroid/fennec-unsigned.apk
+    srclibs=MozLocales@f4abaa2ece7fb6c56cb75222c9df7355010ff661
+    prebuild=mkdir fdroid && \
+        fxarch=arm-linux-androideabi && \
+        l10ndir=`readlink -f $$MozLocales$$` && \
+        sed -i -e 's|about:feedback|https://gitlab.com/fdroid/fdroiddata/issues|g' mobile/android/base/resources/xml/preferences_vendor.xml && \
+        sed -i -e 's/android:debuggable="true"//g' mobile/android/base/AndroidManifest.xml.in && \
+        sed -i -e '/MOZ_SERVICES_HEALTHREPORT/d' -e '/MOZ_DEVICES/d' -e '/MOZ_SAFE_BROWSING/d' -e '/MOZ_ANDROID_RESOURCE_CONSTRAINED/,+2d' mobile/android/confvars.sh && \
+        echo -e 'MOZ_DEVICES=\nMOZ_NATIVE_DEVICES=\nMOZ_SERVICES_HEALTHREPORT=\nMOZ_SAFE_BROWSING=\n' >> mobile/android/confvars.sh && \
+        sed -i -e '/MOZ_ANDROID_GOOGLE_PLAY_SERVICES/d' configure.in && \
+        echo "ac_add_options --with-android-ndk=\"$$NDK$$\"" > .mozconfig && \
+        echo "ac_add_options --with-android-sdk=\"$$SDK$$/platforms/android-23\"" >> .mozconfig && \
+        echo "ac_add_options --enable-application=mobile/android" >> .mozconfig && \
+        echo "ac_add_options --target=${fxarch}" >> .mozconfig && \
+        echo "ac_add_options --disable-tests" >> .mozconfig && \
+        echo "ac_add_options --disable-updater" >> .mozconfig && \
+        echo "ac_add_options --disable-eme" >> .mozconfig && \
+        echo "ac_add_options --disable-mochitest" >> .mozconfig && \
+        echo "ac_add_options --disable-crashreporter" >> .mozconfig && \
+        echo "ac_add_options --disable-debug" >> .mozconfig && \
+        echo "ac_add_options --with-branding=mobile/android/branding/unofficial" >> .mozconfig && \
+        echo "ac_add_options --with-l10n-base=${l10ndir}" >> .mozconfig && \
+        echo "mk_add_options 'export L10NBASEDIR=${l10ndir}'" >> .mozconfig && \
+        echo "mk_add_options 'export ANDROID_VERSION_CODE=$$VERCODE$$'" >> .mozconfig && \
+        echo "mk_add_options 'export MOZ_CHROME_MULTILOCALE=$(tr '\n' ' ' <  mobile/android/locales/maemo-locales)'" >> .mozconfig && \
+        pushd mobile/android/branding/unofficial/ && \
+        sed -i -e '/ANDROID_PACKAGE_NAME/d' -e '/MOZ_APP_DISPLAYNAME/d' configure.sh && \
+        echo 'ANDROID_PACKAGE_NAME=org.mozilla.fennec_fdroid' >> configure.sh && \
+        echo 'MOZ_APP_DISPLAYNAME="Fennec F-Droid"' >> configure.sh && \
+        popd && \
+        sed -i -e 's/size_impl(v/size_impl(const v/g' memory/mozjemalloc/jemalloc.c && \
+        rm -R mobile/android/gradle/ && \
+        sed -i -e '/gradle/d' mobile/android/moz.build && \
+        sed -i -e '/gmp-provider/d' mobile/android/app/mobile.js && \
+        echo 'pref("media.gmp-provider.enabled", false);' >> mobile/android/app/mobile.js && \
+        echo 'pref("media.gmp-manager.url.override", "data:text/plain,");' >> mobile/android/app/mobile.js && \
+        echo 'pref("media.gmp-gmpopenh264.enabled", false);' >> mobile/android/app/mobile.js && \
+        sed -i -e '/casting.enabled/d' mobile/android/app/mobile.js && \
+        echo 'pref("browser.casting.enabled", false);' >> mobile/android/app/mobile.js && \
+        mkdir -p layout/reftests/ && \
+        touch layout/reftests/moz.build && \
+        echo "==HEALTHREPORTER==" && \
+        sed -i -e '/datareporting.healthreport.uploadEnabled/s/true/false/g' -e '/datareporting.healthreport.service.enabled/s/true/false/g' ./services/healthreport/healthreport-prefs.js && \
+        sed -i -e '/android.not_a_preference.healthreport.uploadEnabled/,+3s/android:defaultValue="true"/android:defaultValue="false"/g' mobile/android/base/resources/xml/preferences_vendor.xml && \
+        rm mobile/android/base/health/* && \
+        rm -R mobile/android/base/background/*report* && \
+        rm mobile/android/services/manifests/HealthReport* && \
+        patch -p1 <$$MozLocales$$/Remove_FHR.patch
+    scanignore=mobile/android/base/JavaAddonManager.java
+    build=./mach build && \
+        fxarch=`grep "ac_add_options --target=" .mozconfig | cut -d '=' -f2` && \
+        pushd obj-${fxarch}/mobile/android/locales && \
+        for loc in $(cat ../../../../mobile/android/locales/maemo-locales); do LOCALE_MERGEDIR=$PWD/merge-$loc make merge-$loc LOCALE_MERGEDIR=$PWD/merge-$loc; make LOCALE_MERGEDIR=$PWD/merge-$loc chrome-$loc LOCALE_MERGEDIR=$PWD/merge-$loc; done && \
+        popd && \
+        ./mach package && \
+        mv obj-${fxarch}/dist/fennec-*.apk fdroid/fennec-unsigned.apk && \
+        zip -d fdroid/fennec-unsigned.apk "META-INF*"
+
+Build:40.0.3,400310
+    disable=-Werror 
+    commit=FENNEC_40_0_3_RELEASE
+    init=find toolkit/crashreporter/ -mindepth 1 -maxdepth 1 ! -name "crashreporter.mozbuild" ! -name "google-breakpad" -exec rm -R '{}' \; && \
+        find toolkit/crashreporter/google-breakpad/ -mindepth 1 -maxdepth 1 ! -name "src" -exec rm -R '{}' \; && \
+        rm -R toolkit/crashreporter/google-breakpad/src/tools/ && \
+        rm -R toolkit/crashreporter/google-breakpad/src/client/ && \
+        rm -R toolkit/crashreporter/google-breakpad/src/processor/testdata/ && \
+        rm -R toolkit/crashreporter/google-breakpad/src/third_party/linux/ && \
+        find dom/html/test/ -type f -exec rm '{}' \; && \
+        rm -R accessible/tests/ && \
+        rm -R addon-sdk/source/test/ && \
+        rm -R browser/devtools/debugger/test/ && \
+        rm -R browser/devtools/webide/test/ && \
+        rm -R build/mobile/robocop/ && \
+        rm -R build/mobile/sutagent/ && \
+        rm -R chrome/test/ && \
+        rm -R content/ && \
+        rm -R docshell/test/ && \
+        rm -R dom/apps/tests/ && \
+        rm -R dom/base/crashtests/ && \
+        rm -R dom/base/test/ && \
+        rm -R dom/html/test/ && \
+        rm -R dom/indexedDB/test/ && \
+        rm -R dom/tests/ && \
+        rm -R layout/base/crashtests/ && \
+        rm -R layout/generic/crashtests/ && \
+        rm -R layout/generic/test/ && \
+        rm -R layout/reftests/ && \
+        rm -R mobile/android/build/classycle/ && \
+        rm -R mobile/android/tests/ && \
+        rm -R modules/libmar/tests/ && \
+        rm -R modules/libjar/test/ && \
+        rm -R modules/libjar/zipwriter/test/ && \
+        rm -R mozglue/linker/tests/ && \
+        rm -R security/manager/ssl/tests/compiled/ && \
+        rm -R security/manager/ssl/tests/*test/ && \
+        rm -R security/nss/cmd/bltest/tests/ && \
+        rm -R security/nss/tests/ && \
+        rm -R services/sync/tests/ && \
+        rm -R testing/crashtest/ && \
+        rm -R testing/mozbase/mozinstall/tests/ && \
+        rm -R testing/mozbase/mozprofile/tests/ && \
+        rm -R testing/web-platform/ && \
+        rm -R toolkit/devtools/apps/tests/ && \
+        rm -R toolkit/components/search/tests/ && \
+        rm -R toolkit/modules/tests/ && \
+        rm -R toolkit/mozapps/extensions/test/ && \
+        rm -R toolkit/mozapps/update/tests/ && \
+        rm -R toolkit/webapps/tests/ && \
+        rm -R widget/crashtests/ && \
+        rm -R xpcom/tests/ && \
+        sed -i -e '/nsExceptionHandler/d' ipc/glue/GeckoChildProcessHost.cpp && \
+        sed -i -e '/nsExceptionHandler/d' toolkit/xre/nsAndroidStartup.cpp && \
+        sed -i -e '/nsExceptionHandler/d' toolkit/xre/nsEmbedFunctions.cpp && \
+        sed -i -e '/source\/test\//d' addon-sdk/moz.build && \
+        sed -i -e '/testing\/web-platform\/mach_commands.py/d' build/mach_bootstrap.py && \
+        sed -i -e '/TESTS_MANIFESTS/,+19d' docshell/moz.build && \
+        sed -i -e '/tests\//d' dom/apps/moz.build && \
+        sed -i -e '/test\//d' dom/html/moz.build && \
+        sed -i -e '/test\//d' dom/indexedDB/moz.build && \
+        sed -i -e '/MOCHITEST/d' layout/generic/moz.build && \
+        sed -i -e '/reftests\//d'  -e '/crashtest\//d' layout/moz.build && \
+        sed -i -e '/classycle_jar/,+7d' -e 's/.geckoview.deps ././g' -e 's/PROGUARD_PASSES=1/PROGUARD_PASSES=3/g' mobile/android/base/Makefile.in && \
+        sed -i -e '/TEST/d' modules/libjar/moz.build && \
+        sed -i -e '/TEST/d' modules/libjar/zipwriter/moz.build && \
+        sed -i -e '/\/content/d' toolkit/toolkit.mozbuild && \
+        sed -i -e '/xpcshell.ini/d' toolkit/components/search/moz.build && \
+        sed -i -e '/MOCHITEST/,+5d' toolkit/devtools/apps/moz.build && \
+        sed -i -e '/tests\//d' toolkit/modules/moz.build && \
+        sed -i -e '/tests/d' toolkit/mozapps/update/moz.build
+    output=fdroid/fennec-unsigned.apk
+    srclibs=MozLocales@f4abaa2ece7fb6c56cb75222c9df7355010ff661
+    prebuild=mkdir fdroid && \
+        fxarch=i386-linux-androideabi && \
+        l10ndir=`readlink -f $$MozLocales$$` && \
+        sed -i -e 's|about:feedback|https://gitlab.com/fdroid/fdroiddata/issues|g' mobile/android/base/resources/xml/preferences_vendor.xml && \
+        sed -i -e 's/android:debuggable="true"//g' mobile/android/base/AndroidManifest.xml.in && \
+        sed -i -e '/MOZ_SERVICES_HEALTHREPORT/d' -e '/MOZ_DEVICES/d' -e '/MOZ_SAFE_BROWSING/d' -e '/MOZ_ANDROID_RESOURCE_CONSTRAINED/,+2d' mobile/android/confvars.sh && \
+        echo -e 'MOZ_DEVICES=\nMOZ_NATIVE_DEVICES=\nMOZ_SERVICES_HEALTHREPORT=\nMOZ_SAFE_BROWSING=\n' >> mobile/android/confvars.sh && \
+        sed -i -e '/MOZ_ANDROID_GOOGLE_PLAY_SERVICES/d' configure.in && \
+        echo "ac_add_options --with-android-ndk=\"$$NDK$$\"" > .mozconfig && \
+        echo "ac_add_options --with-android-sdk=\"$$SDK$$/platforms/android-23\"" >> .mozconfig && \
+        echo "ac_add_options --enable-application=mobile/android" >> .mozconfig && \
+        echo "ac_add_options --target=${fxarch}" >> .mozconfig && \
+        echo "ac_add_options --disable-tests" >> .mozconfig && \
+        echo "ac_add_options --disable-updater" >> .mozconfig && \
+        echo "ac_add_options --disable-eme" >> .mozconfig && \
+        echo "ac_add_options --disable-mochitest" >> .mozconfig && \
+        echo "ac_add_options --disable-crashreporter" >> .mozconfig && \
+        echo "ac_add_options --disable-debug" >> .mozconfig && \
+        echo "ac_add_options --with-branding=mobile/android/branding/unofficial" >> .mozconfig && \
+        echo "ac_add_options --with-l10n-base=${l10ndir}" >> .mozconfig && \
+        echo "mk_add_options 'export L10NBASEDIR=${l10ndir}'" >> .mozconfig && \
+        echo "mk_add_options 'export ANDROID_VERSION_CODE=$$VERCODE$$'" >> .mozconfig && \
+        echo "mk_add_options 'export MOZ_CHROME_MULTILOCALE=$(tr '\n' ' ' <  mobile/android/locales/maemo-locales)'" >> .mozconfig && \
+        pushd mobile/android/branding/unofficial/ && \
+        sed -i -e '/ANDROID_PACKAGE_NAME/d' -e '/MOZ_APP_DISPLAYNAME/d' configure.sh && \
+        echo 'ANDROID_PACKAGE_NAME=org.mozilla.fennec_fdroid' >> configure.sh && \
+        echo 'MOZ_APP_DISPLAYNAME="Fennec F-Droid"' >> configure.sh && \
+        popd && \
+        sed -i -e 's/size_impl(v/size_impl(const v/g' memory/mozjemalloc/jemalloc.c && \
+        rm -R mobile/android/gradle/ && \
+        sed -i -e '/gradle/d' mobile/android/moz.build && \
+        sed -i -e '/gmp-provider/d' mobile/android/app/mobile.js && \
+        echo 'pref("media.gmp-provider.enabled", false);' >> mobile/android/app/mobile.js && \
+        echo 'pref("media.gmp-manager.url.override", "data:text/plain,");' >> mobile/android/app/mobile.js && \
+        echo 'pref("media.gmp-gmpopenh264.enabled", false);' >> mobile/android/app/mobile.js && \
+        sed -i -e '/casting.enabled/d' mobile/android/app/mobile.js && \
+        echo 'pref("browser.casting.enabled", false);' >> mobile/android/app/mobile.js && \
+        mkdir -p layout/reftests/ && \
+        touch layout/reftests/moz.build && \
+        echo "==HEALTHREPORTER==" && \
+        sed -i -e '/datareporting.healthreport.uploadEnabled/s/true/false/g' -e '/datareporting.healthreport.service.enabled/s/true/false/g' ./services/healthreport/healthreport-prefs.js && \
+        sed -i -e '/android.not_a_preference.healthreport.uploadEnabled/,+3s/android:defaultValue="true"/android:defaultValue="false"/g' mobile/android/base/resources/xml/preferences_vendor.xml && \
+        rm mobile/android/base/health/* && \
+        rm -R mobile/android/base/background/*report* && \
+        rm mobile/android/services/manifests/HealthReport* && \
+        patch -p1 <$$MozLocales$$/Remove_FHR.patch
+    scanignore=mobile/android/base/JavaAddonManager.java
+    build=./mach build && \
+        fxarch=`grep "ac_add_options --target=" .mozconfig | cut -d '=' -f2` && \
+        pushd obj-${fxarch}/mobile/android/locales && \
+        for loc in $(cat ../../../../mobile/android/locales/maemo-locales); do LOCALE_MERGEDIR=$PWD/merge-$loc make merge-$loc LOCALE_MERGEDIR=$PWD/merge-$loc; make LOCALE_MERGEDIR=$PWD/merge-$loc chrome-$loc LOCALE_MERGEDIR=$PWD/merge-$loc; done && \
+        popd && \
+        ./mach package && \
+        mv obj-${fxarch}/dist/fennec-*.apk fdroid/fennec-unsigned.apk && \
+        zip -d fdroid/fennec-unsigned.apk "META-INF*"
+
 Maintainer Notes:
 
 TODO:
