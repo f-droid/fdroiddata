@@ -25,6 +25,97 @@ Latest F-Droid build supports following systems:
 * Cave Story aka Dōkutsu Monogatari pseudo-system with NxEngine
 .
 
+Repo Type:git
+Repo:https://github.com/libretro/RetroArch.git
+
+# removed Play Services, fixed build and tackled intro dialog
+Build:1.0.0.2,37
+    disable=crash
+    commit=9a66975589c5d2544bdfdae2e965b3a27e7149a5
+    subdir=android/phoenix
+    patch=fdroid-rarch.patch
+    srclibs=libretro-super@9c8997ecc,libretro-overlays@fc92b86be,rarch-common-shaders@cd3175237,pcsx_rearmed@9c79adfd3,bSNES@033e25b1b,vba-m@9a3b3f36a,nxengine@3ad46418b,stella-libretro@618c90ecc
+    forcevercode=yes
+    prebuild=mkdir -p assets/{cores,overlays,shaders_glsl} && \
+        cp -R $$libretro-overlays$$/* assets/overlays/ && \
+        cp -R $$libretro-super$$/dist/info assets/ && \
+        ../../tools/cg2glsl.py $$rarch-common-shaders$$ assets/shaders_glsl && \
+        sed 's/\$(SRCDIR)/..\/../' -i $$bSNES$$/target-libretro/jni/Android.mk && \
+        sed -i "s|RARCH_DIR := ../../..|RARCH_DIR := $(realpath ../../)|" jni/Android.mk && \
+        build=CFLAGS="-D_ANDROID_KEYCODES_H" $$NDK$$/ndk-build -C . APP_ABI=armeabi-v7a && \
+        $$NDK$$/ndk-build -C $$stella-libretro$$/jni APP_ABI=armeabi-v7a && \
+        mv $$stella-libretro$$/libs/armeabi-v7a/* assets/cores/stella_libretro_android.so && \
+        $$NDK$$/ndk-build -C $$vba-m$$/src/libretro/jni APP_ABI=armeabi-v7a && \
+        mv $$vba-m$$/src/libretro/libs/armeabi-v7a/* assets/cores/vbam_libretro_android.so && \
+        $$NDK$$/ndk-build -C $$nxengine$$/jni APP_ABI=armeabi-v7a && \
+        mv $$nxengine$$/libs/armeabi-v7a/* assets/cores/nxengine_libretro_android.so && \
+        $$NDK$$/ndk-build -C $$pcsx_rearmed$$ APP_ABI=armeabi-v7a && \
+        mv $$pcsx_rearmed$$/libs/armeabi-v7a/* assets/cores/pcsx_rearmed_libretro_neon_android.so && \
+        $$NDK$$/ndk-build -C $$bSNES$$/target-libretro APP_ABI=armeabi-v7a && \
+        mv $$bSNES$$/target-libretro/libs/armeabi-v7a/* assets/cores/bsnes_performance_libretro_android.so
+    update=.,libs/appcompat
+    target=android-21
+    scanignore=libs/appcompat/libs
+    scandelete=.,..
+    buildjni=no
+
+Build:1.0.0.2,38
+    disable=crash
+    commit=9a66975589c5d2544bdfdae2e965b3a27e7149a5
+    subdir=android/phoenix
+    patch=fdroid-rarch.patch
+    srclibs=libretro-super@9c8997ecc,libretro-overlays@fc92b86be,rarch-common-shaders@cd3175237,vba-m@9a3b3f36a,nxengine@3ad46418b,stella-libretro@618c90ecc,mednafen-psx@af0ce6574
+    forcevercode=yes
+    prebuild=mkdir -p assets/{cores,overlays,shaders_glsl} && \
+        cp -R $$libretro-overlays$$/* assets/overlays/ && \
+        cp -R $$libretro-super$$/dist/info assets/ && \
+        ../../tools/cg2glsl.py $$rarch-common-shaders$$ assets/shaders_glsl && \
+        sed -i "s|RARCH_DIR := ../../..|RARCH_DIR := $(realpath ../../)|" jni/Android.mk
+    update=.,libs/appcompat
+    target=android-21
+    scanignore=libs/appcompat/libs
+    scandelete=.,..
+    build=CFLAGS="-D_ANDROID_KEYCODES_H" $$NDK$$/ndk-build -C . APP_ABI=mips && \
+        $$NDK$$/ndk-build -C $$stella-libretro$$/jni APP_ABI=mips && \
+        mv $$stella-libretro$$/libs/mips/* assets/cores/stella_libretro_android.so && \
+        $$NDK$$/ndk-build -C $$vba-m$$/src/libretro/jni APP_ABI=mips && \
+        mv $$vba-m$$/src/libretro/libs/mips/* assets/cores/vbam_libretro_android.so && \
+        $$NDK$$/ndk-build -C $$nxengine$$/jni APP_ABI=mips && \
+        mv $$nxengine$$/libs/mips/* assets/cores/nxengine_libretro_android.so && \
+        $$NDK$$/ndk-build -C $$mednafen-psx$$/jni APP_ABI=mips && \
+        mv $$mednafen-psx$$/libs/mips/* assets/cores/mednafen_psx_libretro_android.so
+    buildjni=no
+
+Build:1.0.0.2,39
+    disable=crash
+    commit=9a66975589c5d2544bdfdae2e965b3a27e7149a5
+    subdir=android/phoenix
+    patch=fdroid-rarch.patch
+    srclibs=libretro-super@9c8997ecc,libretro-overlays@fc92b86be,rarch-common-shaders@cd3175237,vba-m@9a3b3f36a,nxengine@3ad46418b,stella-libretro@618c90ecc,mednafen-psx@af0ce6574,bSNES@033e25b1b
+    forcevercode=yes
+    prebuild=mkdir -p assets/{cores,overlays,shaders_glsl} && \
+        cp -R $$libretro-overlays$$/* assets/overlays/ && \
+        cp -R $$libretro-super$$/dist/info assets/ && \
+        ../../tools/cg2glsl.py $$rarch-common-shaders$$ assets/shaders_glsl && \
+        sed 's/\$(SRCDIR)/..\/../' -i $$bSNES$$/target-libretro/jni/Android.mk && \
+        sed -i "s|RARCH_DIR := ../../..|RARCH_DIR := $(realpath ../../)|" jni/Android.mk
+    update=.,libs/appcompat
+    target=android-21
+    scanignore=libs/appcompat/libs
+    scandelete=.,..
+    build=CFLAGS="-D_ANDROID_KEYCODES_H" $$NDK$$/ndk-build -C . APP_ABI=x86 && \
+        $$NDK$$/ndk-build -C $$stella-libretro$$/jni APP_ABI=x86 && \
+        mv $$stella-libretro$$/libs/x86/* assets/cores/stella_libretro_android.so && \
+        $$NDK$$/ndk-build -C $$vba-m$$/src/libretro/jni APP_ABI=x86 && \
+        mv $$vba-m$$/src/libretro/libs/x86/* assets/cores/vbam_libretro_android.so && \
+        $$NDK$$/ndk-build -C $$nxengine$$/jni APP_ABI=x86 && \
+        mv $$nxengine$$/libs/x86/* assets/cores/nxengine_libretro_android.so && \
+        $$NDK$$/ndk-build -C $$bSNES$$/target-libretro APP_ABI=x86 && \
+        mv $$bSNES$$/target-libretro/libs/x86/* assets/cores/bsnes_performance_libretro_android.so && \
+        $$NDK$$/ndk-build -C $$mednafen-psx$$/jni APP_ABI=x86 && \
+        mv $$mednafen-psx$$/libs/x86/* assets/cores/mednafen_psx_libretro_android.so
+    buildjni=no
+
 Maintainer Notes:
 
 Releases are hard to pinpoint. Tags currently make sense for desktop version only.
@@ -45,101 +136,10 @@ Version codes:
  +3: x86 (CV)
 .
 
-Repo Type:git
-Repo:https://github.com/libretro/RetroArch.git
-
-# removed Play Services, fixed build and tackled intro dialog
-Build:1.0.0.2,37
-    disable=crash
-    commit=9a66975589c5d2544bdfdae2e965b3a27e7149a5
-    patch=fdroid-rarch.patch
-    target=android-21
-    subdir=android/phoenix
-    forcevercode=yes
-    update=.,libs/appcompat
-    scanignore=libs/appcompat/libs
-    scandelete=.,..
-    srclibs=libretro-super@9c8997ecc,libretro-overlays@fc92b86be,rarch-common-shaders@cd3175237,pcsx_rearmed@9c79adfd3,bSNES@033e25b1b,vba-m@9a3b3f36a,nxengine@3ad46418b,stella-libretro@618c90ecc
-    prebuild=mkdir -p assets/{cores,overlays,shaders_glsl} && \
-        cp -R $$libretro-overlays$$/* assets/overlays/ && \
-	cp -R $$libretro-super$$/dist/info assets/ && \
-	../../tools/cg2glsl.py $$rarch-common-shaders$$ assets/shaders_glsl && \
-	sed 's/\$(SRCDIR)/..\/../' -i $$bSNES$$/target-libretro/jni/Android.mk && \
-	sed -i "s|RARCH_DIR := ../../..|RARCH_DIR := $(realpath ../../)|" jni/Android.mk && \
-    build=CFLAGS="-D_ANDROID_KEYCODES_H" $$NDK$$/ndk-build -C . APP_ABI=armeabi-v7a && \
-	$$NDK$$/ndk-build -C $$stella-libretro$$/jni APP_ABI=armeabi-v7a && \
-	mv $$stella-libretro$$/libs/armeabi-v7a/* assets/cores/stella_libretro_android.so && \
-	$$NDK$$/ndk-build -C $$vba-m$$/src/libretro/jni APP_ABI=armeabi-v7a && \
-	mv $$vba-m$$/src/libretro/libs/armeabi-v7a/* assets/cores/vbam_libretro_android.so && \
-	$$NDK$$/ndk-build -C $$nxengine$$/jni APP_ABI=armeabi-v7a && \
-	mv $$nxengine$$/libs/armeabi-v7a/* assets/cores/nxengine_libretro_android.so && \
-	$$NDK$$/ndk-build -C $$pcsx_rearmed$$ APP_ABI=armeabi-v7a && \
-	mv $$pcsx_rearmed$$/libs/armeabi-v7a/* assets/cores/pcsx_rearmed_libretro_neon_android.so && \
-	$$NDK$$/ndk-build -C $$bSNES$$/target-libretro APP_ABI=armeabi-v7a && \
-	mv $$bSNES$$/target-libretro/libs/armeabi-v7a/* assets/cores/bsnes_performance_libretro_android.so
-    buildjni=no
-
-Build:1.0.0.2,38
-    disable=crash
-    commit=9a66975589c5d2544bdfdae2e965b3a27e7149a5
-    patch=fdroid-rarch.patch
-    target=android-21
-    subdir=android/phoenix
-    forcevercode=yes
-    update=.,libs/appcompat
-    scanignore=libs/appcompat/libs
-    scandelete=.,..
-    srclibs=libretro-super@9c8997ecc,libretro-overlays@fc92b86be,rarch-common-shaders@cd3175237,vba-m@9a3b3f36a,nxengine@3ad46418b,stella-libretro@618c90ecc,mednafen-psx@af0ce6574
-    prebuild=mkdir -p assets/{cores,overlays,shaders_glsl} && \
-        cp -R $$libretro-overlays$$/* assets/overlays/ && \
-        cp -R $$libretro-super$$/dist/info assets/ && \
-        ../../tools/cg2glsl.py $$rarch-common-shaders$$ assets/shaders_glsl && \
-        sed -i "s|RARCH_DIR := ../../..|RARCH_DIR := $(realpath ../../)|" jni/Android.mk
-    build=CFLAGS="-D_ANDROID_KEYCODES_H" $$NDK$$/ndk-build -C . APP_ABI=mips && \
-	$$NDK$$/ndk-build -C $$stella-libretro$$/jni APP_ABI=mips && \
-	mv $$stella-libretro$$/libs/mips/* assets/cores/stella_libretro_android.so && \
-	$$NDK$$/ndk-build -C $$vba-m$$/src/libretro/jni APP_ABI=mips && \
-	mv $$vba-m$$/src/libretro/libs/mips/* assets/cores/vbam_libretro_android.so && \
-	$$NDK$$/ndk-build -C $$nxengine$$/jni APP_ABI=mips && \
-	mv $$nxengine$$/libs/mips/* assets/cores/nxengine_libretro_android.so && \
-	$$NDK$$/ndk-build -C $$mednafen-psx$$/jni APP_ABI=mips && \
-	mv $$mednafen-psx$$/libs/mips/* assets/cores/mednafen_psx_libretro_android.so
-    buildjni=no
-
-Build:1.0.0.2,39
-    disable=crash
-    commit=9a66975589c5d2544bdfdae2e965b3a27e7149a5
-    patch=fdroid-rarch.patch
-    target=android-21
-    subdir=android/phoenix
-    forcevercode=yes
-    update=.,libs/appcompat
-    scanignore=libs/appcompat/libs
-    scandelete=.,..
-    srclibs=libretro-super@9c8997ecc,libretro-overlays@fc92b86be,rarch-common-shaders@cd3175237,vba-m@9a3b3f36a,nxengine@3ad46418b,stella-libretro@618c90ecc,mednafen-psx@af0ce6574,bSNES@033e25b1b
-    prebuild=mkdir -p assets/{cores,overlays,shaders_glsl} && \
-        cp -R $$libretro-overlays$$/* assets/overlays/ && \
-        cp -R $$libretro-super$$/dist/info assets/ && \
-        ../../tools/cg2glsl.py $$rarch-common-shaders$$ assets/shaders_glsl && \
-	sed 's/\$(SRCDIR)/..\/../' -i $$bSNES$$/target-libretro/jni/Android.mk && \
-        sed -i "s|RARCH_DIR := ../../..|RARCH_DIR := $(realpath ../../)|" jni/Android.mk
-    build=CFLAGS="-D_ANDROID_KEYCODES_H" $$NDK$$/ndk-build -C . APP_ABI=x86 && \
-        $$NDK$$/ndk-build -C $$stella-libretro$$/jni APP_ABI=x86 && \
-        mv $$stella-libretro$$/libs/x86/* assets/cores/stella_libretro_android.so && \
-        $$NDK$$/ndk-build -C $$vba-m$$/src/libretro/jni APP_ABI=x86 && \
-        mv $$vba-m$$/src/libretro/libs/x86/* assets/cores/vbam_libretro_android.so && \
-        $$NDK$$/ndk-build -C $$nxengine$$/jni APP_ABI=x86 && \
-        mv $$nxengine$$/libs/x86/* assets/cores/nxengine_libretro_android.so && \
-	$$NDK$$/ndk-build -C $$bSNES$$/target-libretro APP_ABI=x86 && \
-        mv $$bSNES$$/target-libretro/libs/x86/* assets/cores/bsnes_performance_libretro_android.so && \
-        $$NDK$$/ndk-build -C $$mednafen-psx$$/jni APP_ABI=x86 && \
-        mv $$mednafen-psx$$/libs/x86/* assets/cores/mednafen_psx_libretro_android.so
-    buildjni=no
-
-Auto Update Mode:None
 Archive Policy:6 versions
+Auto Update Mode:None
 Update Check Mode:None
-Current Version:1.0.0.2
 Vercode Operation:%c + 3
+Current Version:1.0.0.2
 Current Version Code:39
 

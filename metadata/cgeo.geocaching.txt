@@ -23,15 +23,16 @@ Repo:https://github.com/cgeo/cgeo
 
 Build:1,1
     disable=wip
-    forceversion=yes
-    forcevercode=yes
     commit=market_20140918
     subdir=main
+    init=cp templates/keys.xml res/values/ && \
+        mkdir repackageMapsforge0.2/ && \
+        mv libs/mapsforge-map-0.2.4.jar repackageMapsforge0.2/
+    patch=no-gmaps.patch,dummykeys.patch
     gradle=yes
-    init=cp templates/keys.xml res/values/ && mkdir repackageMapsforge0.2/ && \
-       mv libs/mapsforge-map-0.2.4.jar repackageMapsforge0.2/
-    patch=no-gmaps.patch, dummykeys.patch
     srclibs=ApacheHttpCore@4.2.3,ApacheHttpClient@4.2.3,HttpClientAndroid@46874342a6b7,MapsforgeCgeo@cbd01e8,LocusMap@6:08dee4be1444
+    forceversion=yes
+    forcevercode=yes
     rm=main/libs/*.jar,main/libs/*.properties,main/libs/src/*
     prebuild=mv $$ApacheHttpCore$$/httpcore $$HttpClientAndroid$$/script/httpcore && \
         mv $$ApacheHttpClient$$/httpclient $$HttpClientAndroid$$/script/httpclient && \
@@ -43,18 +44,27 @@ Build:1,1
         popd && \
         cp $$HttpClientAndroid$$/script/httpclientandroidlib-1.1.2.jar libs/ && \
         echo "==== HttpClientAndroid done ====" && \
-        pushd $$LocusMap$$/LocusAddonPublicLib && ant release && popd && \
+        pushd $$LocusMap$$/LocusAddonPublicLib && \
+        ant release && \
+        popd && \
         cp $$LocusMap$$/LocusAddonPublicLib/bin/classes.jar libs/locus-api-4.0.jar && \
         $$MVN3$$ clean package -DskipTests -f $$MapsforgeCgeo$$/pom.xml && \
         mv $$MapsforgeCgeo$$/mapsforge-map/target/mapsforge-map-0.3.0-jar-with-dependencies.jar libs/ && \
-        pushd repackageMapsforge0.2 && jar xf mapsforge-map-0.2.4.jar && \
-        rm org/mapsforge/android/mapsold/*.class && mkdir src && mv org src/ && \
+        pushd repackageMapsforge0.2 && \
+        jar xf mapsforge-map-0.2.4.jar && \
+        rm org/mapsforge/android/mapsold/*.class && \
+        mkdir src && \
+        mv org src/ && \
         printf '<?xml version="1.0" encoding="utf-8"?>\n<manifest xmlns:android="http://schemas.android.com/apk/res/android"\n\tpackage="org.mapsforge.android.mapsold"\n\tandroid:versionCode="1"\nandroid:versionName="1.0"/>\n' > AndroidManifest.xml && \
         android update project --path . --target android-19 && \
-        echo "android.library=true" >> project.properties && ant release && \
-        cp bin/classes.jar ../libs/mapsforge-map-0.2.4.jar && popd && \
+        echo "android.library=true" >> project.properties && \
+        ant release && \
+        cp bin/classes.jar ../libs/mapsforge-map-0.2.4.jar && \
+        popd && \
         sed -i -e 's/debuggable true/debuggable false/' build.gradle && \
         sed -i -e '/versionCode/d' build.gradle && \
         sed -i -e '/versionName/d' build.gradle
+
 Auto Update Mode:None
 Update Check Mode:Static
+
