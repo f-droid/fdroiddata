@@ -9,14 +9,17 @@ Name:Transdrone
 Auto Name:ColorPickerPreference
 Summary:Manage BitTorrent clients
 Description:
-Allows you to manage the torrents you run on your home server or seedbox.
-You can add torrents, start/stop them, assign labels, view trackers and individual
+Allows you to manage the torrents you run on your home server or seedbox. You
+can add torrents, start/stop them, assign labels, view trackers and individual
 files, set priorities and much more!
+
 Most popular clients are supported, including uTorrent, Transmission, rTorrent,
 BitTorrent 6, Deluge, Vuze, Bitflu, BitComet, Qbittorrent, Ktorrent and
 Torrentflux-b4rt. Plus Synology, D-Link and Buffalo NAS clients.
+
 Transdrone is the little brother to Transdroid. Looking for integrated torrent
-search or RSS feeds? Then you might check out the full [[org.transdroid.full]] version.
+search or RSS feeds? Then you might check out the full [[org.transdroid.full]]
+version.
 
 See also [[org.transdroid.search]].
 .
@@ -31,6 +34,20 @@ Build:2.3.0,217
     prebuild=sed -i 's;<bool name="updatecheck_available">true</bool>;<bool name="updatecheck_available">false</bool>;' src/lite/res/values/bools.xml && \
         sed -i 's;<bool name="updatecheck_available">true</bool>;<bool name="updatecheck_available">false</bool>;' src/main/res/values/bools.xml && \
         sed -i "s;apply from: '../signing.gradle';;" build.gradle
+
+Build:2.5.1,221
+    commit=v2.5.1
+    subdir=app
+    gradle=lite
+    srclibs=Material-Dialogs@v0.6.3.3
+    prebuild=sed -i 's;<bool name="updatecheck_available">true</bool>;<bool name="updatecheck_available">false</bool>;' src/full/res/values/bools.xml && \
+        sed -i 's;<bool name="updatecheck_available">true</bool>;<bool name="updatecheck_available">false</bool>;' src/main/res/values/bools.xml && \
+        pushd $$Material-Dialogs$$ && \
+        echo "sdk.dir=$ANDROID_HOME" > local.properties && \
+        sed -i 's;21.1.2;23;' build.gradle && \
+        gradle assembleRelease && \
+        gradle publishToMavenLocal && \
+        popd
 
 Auto Update Mode:None
 Update Check Mode:Tags

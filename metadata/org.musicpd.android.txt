@@ -16,21 +16,31 @@ Repo:https://github.com/eisnerd/mupeace.git
 Build:3.0-g02f0b38,1850320
     disable=mdns dependency fails
     commit=v3
-    forceversion=yes
-    forcevercode=yes
     subdir=main
     init=rm -rf Screenshots/ Website/ icons/
+    srclibs=ACRA@acra-4.5.0,dnsjava@dnsjava-2.1.6,mdnsjava@mdnsjava-2.1.6-SNAPSHOT
+    forceversion=yes
+    forcevercode=yes
+    extlibs=android/android-support-v4.jar
     prebuild=echo -e "proguard.dir=$$SDK$$/tools/proguard\nscala.dir=${SCALA_PATH}\nant.android.scala.dir=../ant-android-scala\nscala.library.installed=false" >> local.properties && \
         sed -i -e 's/src://g' ant.properties && \
         cp libs/android-support-v4.jar ../ActionBarSherlock/libs/ && \
-        pushd $$ACRA$$ && $$MVN3$$ package && popd && cp $$ACRA$$/target/acra-4.5.0.jar libs/ && \
-        pushd $$dnsjava$$ && ant jar && popd && cp $$dnsjava$$/dnsjava-*.jar libs/ && \
+        pushd $$ACRA$$ && \
+        $$MVN3$$ package && \
+        popd && \
+        cp $$ACRA$$/target/acra-4.5.0.jar libs/ && \
+        pushd $$dnsjava$$ && \
+        ant jar && \
+        popd && \
+        cp $$dnsjava$$/dnsjava-*.jar libs/ && \
         $$MVN3$$ install:install-file -Dfile=$$dnsjava/dnsjava-2.1.6.jar -DgroupId=org.xbill -DartifactId=dns -Dversion=2.1.6 -Dpackaging=jar && \
         cp $$dnsjava$$/dnsjava*.jar $$mdnsjava$$/lib/org.xbill.dns_2.1.6.jar && \
-        pushd $$mdnsjava$$ && rm org.xbill.mdns*.jar && $$MVN3$$ package && popd && cp $$mdnsjava$$/target/org.xbill.mdns*.jar libs/ && \
-    rm=libs/*,ActionBarSherlock/libs/*
-    extlibs=android/android-support-v4.jar
-    srclibs=ACRA@acra-4.5.0,dnsjava@dnsjava-2.1.6,mdnsjava@mdnsjava-2.1.6-SNAPSHOT
+        pushd $$mdnsjava$$ && \
+        rm org.xbill.mdns*.jar && \
+        $$MVN3$$ package && \
+        popd && \
+        cp $$mdnsjava$$/target/org.xbill.mdns*.jar libs/ && \
+        rm=libs/*,ActionBarSherlock/libs/*
 
 Maintainer Notes:
 * versionCode: echo $((($(date +%s)-$(date -d 2013-1-1 +%s))/30))

@@ -1,4 +1,4 @@
-Categories:Games,Internet
+Categories:Games
 License:LGPLv2.1+,CC-BY-SA 3.0
 Web Site:http://minetest.net
 Source Code:https://github.com/minetest/minetest
@@ -8,9 +8,11 @@ Donate:http://minetest.net/donate
 Name:Minetest
 Summary:Infinite-world block sandbox game
 Description:
-Minetest is an infinite-world block sandbox game and a game engine, inspired by InfiniMiner, Minecraft and the like.
+Minetest is an infinite-world block sandbox game and a game engine, inspired by
+InfiniMiner, Minecraft and the like.
 
 Features:
+
 * Explore, dig and build in a voxel world, and craft stuff from raw materials to help you along the way.
 * Play with your friends on public servers or self hosted servers
 * Easy plugin based Modding API used to add blocks, tools and features to the game.
@@ -26,31 +28,28 @@ Repo:https://github.com/minetest/minetest.git
 
 Build:0.4.12.12,12
     commit=315b00d15081d1f56f0e2de22a4ff1a393ab7f22
-    prebuild=mkdir ../../games/minetest_game && cp -R $$MinetestGame$$/* ../../games/minetest_game && \
-        sed -i 's/ --system=linux-x86_64//' Makefile
-    output=bin/Minetest-release-unsigned.apk
     subdir=build/android
+    output=bin/Minetest-release-unsigned.apk
     srclibs=MinetestGame@03c00a831d5c2fd37096449bee49557879068af1
+    prebuild=mkdir ../../games/minetest_game && \
+        cp -R $$MinetestGame$$/* ../../games/minetest_game && \
+        sed -i 's/ --system=linux-x86_64//' Makefile
+    build=printf "%s\n%s\n%s" "ANDROID_NDK = $$NDK$$" "NDK_MODULE_PATH = $$NDK$$/toolchains" "SDKFOLDER = $$SDK$$" > path.cfg && \
+        for n in 1 2 3; do make release && \
+        break; done
     buildjni=no
-    build=printf "%s\n%s\n%s" \
-            "ANDROID_NDK = $$NDK$$" \
-            "NDK_MODULE_PATH = $$NDK$$/toolchains" \
-            "SDKFOLDER = $$SDK$$" > path.cfg && \
-        for n in 1 2 3; do make release && break; done
 
 Build:0.4.13.13,13
     commit=d44fceac7e1237b00c6431ee1bb5805b602d0dcd
-    prebuild=mkdir ../../games/minetest_game && cp -R $$MinetestGame$$/* ../../games/minetest_game && \
-        sed -i 's/VERS_MAJOR/VERSION_MAJOR/;s/VERS_MINOR/VERSION_MINOR/;s/VERS_PATCH/VERSION_PATCH/' Makefile
-    output=bin/Minetest-release-unsigned.apk
     subdir=build/android
+    output=bin/Minetest-release-unsigned.apk
     srclibs=MinetestGame@2392842948b114670334eabbb593b66e1427747c
-    buildjni=no
-    build=printf "%s\n%s\n%s" \
-            "ANDROID_NDK = $$NDK$$" \
-            "NDK_MODULE_PATH = $$NDK$$/toolchains" \
-            "SDKFOLDER = $$SDK$$" > path.cfg && \
+    prebuild=mkdir ../../games/minetest_game && \
+        cp -R $$MinetestGame$$/* ../../games/minetest_game && \
+        sed -i 's/VERS_MAJOR/VERSION_MAJOR/;s/VERS_MINOR/VERSION_MINOR/;s/VERS_PATCH/VERSION_PATCH/' Makefile
+    build=printf "%s\n%s\n%s" "ANDROID_NDK = $$NDK$$" "NDK_MODULE_PATH = $$NDK$$/toolchains" "SDKFOLDER = $$SDK$$" > path.cfg && \
         make release
+    buildjni=no
 
 Maintainer Notes:
 Needs a 64bit machine for building. We circumvent this right now,
@@ -58,6 +57,8 @@ so remove the sed script when upstream fixed this or we have a
 64bit VM for the buildserver.
 .
 
+Auto Update Mode:None
 Update Check Mode:None
 Current Version:0.4.12.12
 Current Version Code:12
+

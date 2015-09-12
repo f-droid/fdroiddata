@@ -7,33 +7,35 @@ Issue Tracker:http://sourceforge.net/p/kiwix/bugs
 Auto Name:Kiwix
 Summary:Offline Wikipedia reader
 Description:
-Kiwix lets you read Wikipedia and other websites without an Internet
-connection. It uses the highly compressed [http://www.openzim.org/ ZIM format]
-to store webpages for quick and easy reading.
+Kiwix lets you read Wikipedia and other websites without an Internet connection.
+It uses the highly compressed [http://www.openzim.org/ ZIM format] to store
+webpages for quick and easy reading.
 .
 
 Repo Type:git
 Repo:git://git.code.sf.net/p/kiwix/kiwix
 
-Build:1.6,1
-    disable=Doesn't build - lots of errors
-    commit=78a24139f13f2d73ba601e54a393bdc437cbeccb
+Build:1.96,26
+    disable=HEAD commit, wait for release
+    commit=14bfa38fffc62074016ad93b49303d13b607de9f
     subdir=android
-    prebuild=rm -rf ../src/sugar && \
-        cd .. && \
+    gradle=yes
+    rm=ios,src/sugar,android/libs/*/*.so
+    build=cd .. && \
         ./autogen.sh && \
-        ./configure --enable-android && \
-        cd src/dependencies && \
-        make all
-    build=NDK_PATH=$$NDK$$ && \
-        ./build-android-with-native.py --toolchain --lzma --zim --kiwix --strip
+        ./configure --disable-staticbins --disable-manager --disable-server --disable-launcher --disable-indexer --disable-installer --disable-searcher --disable-reader --disable-components --enable-android --enable-compileall && \
+        pushd src/dependencies && \
+        make icudt49l.dat xz icu zimlib-1.2 zimlib-1.2/build/lib/libzim.so && \
+        popd && \
+        cd android && \
+        NDK_PATH=$$NDK$$ ./build-android-with-native.py --toolchain --lzma --icu --zim --kiwix --strip
 
 Maintainer Notes:
-Used to be tagged, but none are recent. RepoManifest is newer than current release.
+Don't run `make android-deps` as that will download the SDK and NDK.
 .
 
 Auto Update Mode:None
-Update Check Mode:Static
-Current Version:1.6
-Current Version Code:1
+Update Check Mode:RepoManifest
+Current Version:1.96
+Current Version Code:26
 

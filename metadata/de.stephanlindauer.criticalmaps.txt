@@ -9,8 +9,8 @@ Auto Name:Critical Maps
 Summary:Critical mass location sharing and chat
 Description:
 This app tracks your location and shares it via a [http://criticalmaps.net map]
-with all other participants of the critical mass bicycle protest.
-You can use the chat to communicate with all other participants.
+with all other participants of the critical mass bicycle protest. You can use
+the chat to communicate with all other participants.
 
 Location sharing and chat relies on [http://criticalmaps.net criticalmaps.net].
 The communication is unencrypted at the moment.
@@ -52,8 +52,24 @@ Build:1.7.3,17
         popd && \
         cp $$Twitter4J$$/twitter4j-*/target/twitter4j-*-4.0.2.jar libs/
 
+Build:2.0.3,21
+    commit=6660c17
+    subdir=app
+    gradle=yes
+    srclibs=OSMBonusPack@v5.3
+    rm=app/libs
+    prebuild=cp -r $$OSMBonusPack$$/src/main/java/org src/main/java &&cp -r $$OSMBonusPack$$/src/main/res src/main && \
+        sed -n -e "27,28p" $$OSMBonusPack$$/build.gradle > temp.txt && \
+        sed -i '/dependencies/ r temp.txt' build.gradle && \
+        find . -name *.java -exec sed -i 's/org\.osmdroid\.bonuspack\.R/de\.stephanlindauer\.criticalmaps\.R/g' {} \; && \
+        sed -i -e '/com.squareup.picasso/acompile "com.android.support:support-v4:23.0.0"' build.gradle
+
+Maintainer Notes:
+* Remove support-lib stuff once https://github.com/stephanlindauer/criticalmaps-android/issues/25 is fixed
+.
+
 Auto Update Mode:None
-Update Check Mode:Tags
-Current Version:1.7.3
-Current Version Code:17
+Update Check Mode:RepoManifest
+Current Version:2.0.3
+Current Version Code:21
 
