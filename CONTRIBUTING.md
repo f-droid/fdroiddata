@@ -80,3 +80,5 @@ to appear in our repository.
   merge request
 
 * If you haven't tested your build, say so in the merge request.
+
+* Check for CI errors once you have opened your Merge Request
