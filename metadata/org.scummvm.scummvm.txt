@@ -51,6 +51,23 @@ Build:1.5.0,6
         ./fdroid_build scummvm
     antcommands="-p"
 
+Build:1.7.0,7
+    disable=patches, flac issues
+    commit=v1.7.0
+    init=echo -e '<project>\n<target name="Creating scummvm.apk for release..."/>\n</project>' > build.xml
+    patch=fdroid_build.patch,jdk7.patch
+    srclibs=FLAC@1.2.1,Tremor@18154
+    extlibs=libmad/libmad-0.15.1b.tar.gz
+    prebuild=set -- $$SDK$$/build-tools/*/aapt && \
+        sed -e "s|\$(ANDROID_SDK)/build-tools/\*/aapt|$1|" -i backends/platform/android/android.mk
+    update=no
+    build=chmod +x fdroid_build && \
+        ./fdroid_build tremor $$Tremor$$ && \
+        ./fdroid_build mad && \
+        ./fdroid_build flac $$FLAC$$ && \
+        ./fdroid_build scummvm
+    antcommands="-p"
+
 Maintainer Notes:
 Releases are tagged, but according to backends/platform/android/android.mk (which also contains
 version codes -- however, it hasn't been raised in a while), Market uploads take priority. They
