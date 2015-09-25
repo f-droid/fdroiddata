@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Verify that rewritemeta has been run.
 
