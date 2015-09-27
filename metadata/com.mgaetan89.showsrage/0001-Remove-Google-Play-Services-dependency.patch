@@ -1,0 +1,77 @@
+From ca7f6e68c56097c6d4d33ea394681c7c1e5270fa Mon Sep 17 00:00:00 2001
+From: Olivier Mehani <shtrom@ssji.net>
+Date: Sun, 27 Sep 2015 21:27:14 +1000
+Subject: [PATCH] Remove Google Play Services dependency
+
+This disables the abitily to do Casting, though...
+
+Signed-off-by: Olivier Mehani <shtrom@ssji.net>
+---
+ app/build.gradle                                          |  1 -
+ app/src/main/AndroidManifest.xml                          |  4 ----
+ .../showsrage/fragment/EpisodeDetailFragment.java         | 15 +--------------
+ 3 files changed, 1 insertion(+), 19 deletions(-)
+
+diff --git a/app/build.gradle b/app/build.gradle
+index cc29feb..e78e620 100644
+--- a/app/build.gradle
++++ b/app/build.gradle
+@@ -116,7 +116,6 @@ dependencies {
+ 	compile 'com.android.support:support-v4:23.0.1'
+ 	compile 'com.github.bumptech.glide:glide:3.6.1'
+ 	compile 'com.github.bumptech.glide:okhttp-integration:1.3.1'
+-	compile 'com.google.android.gms:play-services-cast:7.5.0'
+ 	compile 'com.squareup.okhttp:okhttp:2.5.0'
+ 	compile 'com.squareup.okhttp:okhttp-urlconnection:2.5.0'
+ 	compile 'com.squareup.retrofit:retrofit:1.9.0'
+diff --git a/app/src/main/AndroidManifest.xml b/app/src/main/AndroidManifest.xml
+index 4b57473..13098f9 100644
+--- a/app/src/main/AndroidManifest.xml
++++ b/app/src/main/AndroidManifest.xml
+@@ -61,10 +61,6 @@
+ 			android:name="com.mgaetan89.showsrage.helper.OkHttpGlideModule"
+ 			android:value="GlideModule"/>
+ 
+-		<meta-data
+-			android:name="com.google.android.gms.version"
+-			android:value="@integer/google_play_services_version"/>
+-
+ 		<service
+ 			android:name=".service.UpdateService"
+ 			android:exported="false"/>
+diff --git a/app/src/main/java/com/mgaetan89/showsrage/fragment/EpisodeDetailFragment.java b/app/src/main/java/com/mgaetan89/showsrage/fragment/EpisodeDetailFragment.java
+index 3dd2e49..e5b6e55 100644
+--- a/app/src/main/java/com/mgaetan89/showsrage/fragment/EpisodeDetailFragment.java
++++ b/app/src/main/java/com/mgaetan89/showsrage/fragment/EpisodeDetailFragment.java
+@@ -349,9 +349,6 @@ public class EpisodeDetailFragment extends MediaRouteDiscoveryFragment implement
+ 	}
+ 
+ 	private void displayStreamingMenus(Episode episode) {
+-		if (this.castMenu != null) {
+-			this.castMenu.setVisible(this.isCastMenuVisible(episode));
+-		}
+ 
+ 		if (this.playVideoMenu != null) {
+ 			this.playVideoMenu.setVisible(this.isPlayMenuVisible(episode));
+@@ -393,17 +390,7 @@ public class EpisodeDetailFragment extends MediaRouteDiscoveryFragment implement
+ 	}
+ 
+ 	private boolean isCastMenuVisible(@Nullable Episode episode) {
+-		FragmentActivity activity = this.getActivity();
+-
+-		if (activity == null) {
+-			return false;
+-		}
+-
+-		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(activity);
+-		boolean episodeDownloaded = this.isEpisodeDownloaded(episode);
+-		boolean viewInExternalVideoPlayer = preferences.getBoolean("stream_in_chromecast", false);
+-
+-		return episodeDownloaded && viewInExternalVideoPlayer;
++		return false;
+ 	}
+ 
+ 	private boolean isEpisodeDownloaded(@Nullable Episode episode) {
+-- 
+2.5.3
+
