@@ -1,15 +1,18 @@
 #!/bin/bash
 
-# Verify that rewritemeta has been run.
+# Check that there are no errors in the metadata files and that they are
+# formatted correctly.
 
-set -e
+set -o errexit
+set -o nounset
+set -o pipefail
+
+# Redirect output to stderr.
+exec 1>&2
 
 files=$(fdroid rewritemeta -l)
-
 if [[ -n "$files" ]]; then
-	echo "Run fdroid rewritemeta to fix formatting on these files:"
+	echo "ERROR: Run rewritemeta to fix formatting on these files:"
 	echo "$files"
 	exit 1
 fi
-
-exit 0
