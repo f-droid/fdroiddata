@@ -7,9 +7,6 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-# Redirect output to stderr.
-exec 1>&2
-
 files=$(fdroid rewritemeta -l)
 if [[ -n "$files" ]]; then
 	echo "ERROR: Run rewritemeta to fix formatting on these files:"
