@@ -1,0 +1,79 @@
+AntiFeatures:NonFreeDep
+Categories:Phone & SMS
+License:GPLv3
+Web Site:https://www.surespot.me/
+Source Code:https://github.com/surespot/android
+Issue Tracker:https://github.com/surespot/android/issues
+
+Name:Surespot
+Summary:Send encrypted text messages
+Description:
+Use surespot and everything you send can only be read by the person you sent it to. Period.
+Everything sent using surespot is end-to-end encrypted with symmetric-key encryption (256 bit AES-GCM) using keys
+created with 521 bit ECDH shared secret derivation, but you wont notice because security in surespot is built-in,
+not a layer over something else. Be confident sending private information and pictures, you have control over your messages,
+when you delete a sent message it will be removed from the receiver's phone and images are not shareable unless
+you make them so. Multiple identities allow you to be who you want with just who you want, and if anyone
+gets annoying you can block them. Surespot does not require or store your phone number or email address and we don't
+mine your data, no advertisements here!
+.
+
+Repo Type:git
+Repo:https://github.com/surespot/android.git
+
+Build:61-fdroid,61
+    commit=4b9219e86c62208ebe1ca0cf48afa0cf15c34251
+    gradle=yes
+    prebuild=pwd && \
+        rm '._.DS_Store' && \
+        rm 'surespot/src/main/res/raw/ffmpegpie' && \
+        rm 'surespot/src/main/res/raw/ffmpeg' && \
+        touch 'surespot/src/main/res/raw/ffmpegpie' && \
+        touch 'surespot/src/main/res/raw/ffmpeg' && \
+        cp build.gradle build.gradle__BAK && \
+        echo " " >> build.gradle && \
+        cat surespot/build.gradle >> build.gradle && \
+        ln -s surespot/libs libs && \
+        sed -i -e 's#jcenter()#maven { url "https://jcenter.bintray.com" }#g' build.gradle && \
+        sed -i -e 's#com.google.android.gms:play-services-drive:7.5.0#com.android.support:support-v4:22.2.0#' surespot/build.gradle && \
+        sed -i -e 's#com.google.android.gms:play-services-drive:7.5.0#com.android.support:support-v4:22.2.0#' build.gradle && \
+        cat build.gradle && \
+        mkdir -p src/main && \
+        mkdir -p surespotcommon/src/main/res/raw && \
+        sed -i -e 's#Build.VERSION_CODES.M#23#' surespot/src/main/java/com/twofours/surespot/identity/IdentityController.java && \
+        printf 'ssl_strict=true\nbaseUrl=https://server.surespot.me:443\n' > surespotcommon/src/main/res/raw/configuration.properties && \
+        sed -i -e 's#import java.util.Properties;#import java.util.Properties;\nimport com.twofours.surespot.common.R;\n#g' surespotcommon/src/main/java/com/twofours/surespot/common/SurespotConfiguration.java && \
+        ln -s ../../surespot/src/main/AndroidManifest.xml src/main/AndroidManifest.xml && \
+        ln -s ../../surespot/src/main/aidl src/main/aidl && \
+        ln -s ../../surespot/src/main/java src/main/java && \
+        ln -s ../../surespot/src/main/res src/main/res && \
+        ln -s surespot/src/main/res && \
+        echo cp /tmp/I1.java surespot/src/main/java/com/twofours/surespot/backup/ImportIdentityActivity.java && \
+        echo cp /tmp/E1.java surespot/src/main/java/com/twofours/surespot/backup/ExportIdentityActivity.java && \
+        sed -i -e 's#import com.google.android.gms.auth.GoogleAuthUtil;##' surespot/src/main/java/com/twofours/surespot/backup/ImportIdentityActivity.java && \
+        sed -i -e 's#import com.google.android.gms.common.AccountPicker;##' surespot/src/main/java/com/twofours/surespot/backup/ImportIdentityActivity.java && \
+        sed -i -e 's#import com.google.android.gms.auth.GoogleAuthUtil;##' surespot/src/main/java/com/twofours/surespot/backup/ExportIdentityActivity.java && \
+        sed -i -e 's#import com.google.android.gms.common.AccountPicker;##' surespot/src/main/java/com/twofours/surespot/backup/ExportIdentityActivity.java && \
+        sed -i -e 's#GoogleAuthUtil.GOOGLE_ACCOUNT_TYPE#"dummy"#' surespot/src/main/java/com/twofours/surespot/backup/ExportIdentityActivity.java && \
+        sed -i -e 's#GoogleAuthUtil.GOOGLE_ACCOUNT_TYPE#"dummy"#' surespot/src/main/java/com/twofours/surespot/backup/ImportIdentityActivity.java && \
+        cat surespot/src/main/java/com/twofours/surespot/backup/ImportIdentityActivity.java |grep -v 'AccountPicker.newChooseAccountIntent' > surespot/src/main/java/com/twofours/surespot/backup/ImportIdentityActivity.java_ && \
+        mv surespot/src/main/java/com/twofours/surespot/backup/ImportIdentityActivity.java_ surespot/src/main/java/com/twofours/surespot/backup/ImportIdentityActivity.java && \
+        cat surespot/src/main/java/com/twofours/surespot/backup/ImportIdentityActivity.java |grep -v '\snull);' > surespot/src/main/java/com/twofours/surespot/backup/ImportIdentityActivity.java_ && \
+        mv surespot/src/main/java/com/twofours/surespot/backup/ImportIdentityActivity.java_ surespot/src/main/java/com/twofours/surespot/backup/ImportIdentityActivity.java && \
+        cat surespot/src/main/java/com/twofours/surespot/backup/ExportIdentityActivity.java |grep -v 'AccountPicker.newChooseAccountIntent' > surespot/src/main/java/com/twofours/surespot/backup/ExportIdentityActivity.java_ && \
+        mv surespot/src/main/java/com/twofours/surespot/backup/ExportIdentityActivity.java_ surespot/src/main/java/com/twofours/surespot/backup/ExportIdentityActivity.java && \
+        sed -i -e 's#ActivityNotFoundException e#Exception e#' surespot/src/main/java/com/twofours/surespot/backup/ExportIdentityActivity.java && \
+        sed -i -e 's#ActivityNotFoundException e#Exception e#' surespot/src/main/java/com/twofours/surespot/backup/ImportIdentityActivity.java && \
+        sed -i -e 's#startActivityForResult(accountPickerIntent, SurespotConstants.IntentRequestCodes.CHOOSE_GOOGLE_ACCOUNT);#System.out.println("dummy");#' surespot/src/main/java/com/twofours/surespot/backup/ExportIdentityActivity.java && \
+        sed -i -e 's#startActivityForResult(accountPickerIntent, SurespotConstants.IntentRequestCodes.CHOOSE_GOOGLE_ACCOUNT);#System.out.println("dummy");#' surespot/src/main/java/com/twofours/surespot/backup/ImportIdentityActivity.java && \
+        sed -i -e 's#android {#android {\nlintOptions {\nabortOnError false\n}\n#' build.gradle
+    novcheck=yes
+
+Maintainer Notes:
+* Voice function removed
+.
+
+Auto Update Mode:None
+Update Check Mode:Tags
+Current Version:61-fdroid
+Current Version Code:61
