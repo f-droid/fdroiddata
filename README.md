@@ -13,7 +13,7 @@ Clone [fdroidserver](https://gitlab.com/fdroid/fdroidserver):
 
 Add the cloned dir to your `PATH`:
 
-	export PATH="$PATH:$PWD/fdroidserver
+	export PATH="$PATH:$PWD/fdroidserver"
 
 Enter it:
 
