@@ -1,0 +1,125 @@
+diff --git a/app/build.gradle b/app/build.gradle
+index 7204bf2..5411c52 100644
+--- a/app/build.gradle
++++ b/app/build.gradle
+@@ -1,18 +1,4 @@
+-buildscript {
+-    repositories {
+-        maven { url 'http://download.crashlytics.com/maven' }
+-    }
+-
+-    dependencies {
+-        classpath 'com.crashlytics.tools.gradle:crashlytics-gradle:1.+'
+-    }
+-}
+ apply plugin: 'com.android.application'
+-apply plugin: 'crashlytics'
+-
+-repositories {
+-    maven { url 'http://download.crashlytics.com/maven' }
+-}
+ 
+ 
+ android {
+@@ -30,10 +16,13 @@ android {
+             minifyEnabled false
+             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+         }
++
+     }
++      lintOptions {
++          abortOnError false
++      }
+ }
+ 
+ dependencies {
+-    compile 'com.crashlytics.android:crashlytics:1.+'
+     compile project(':PebbleAndroidCommons')
+ }
+diff --git a/app/src/main/AndroidManifest.xml b/app/src/main/AndroidManifest.xml
+index a64c44b..361868d 100644
+--- a/app/src/main/AndroidManifest.xml
++++ b/app/src/main/AndroidManifest.xml
+@@ -11,7 +11,6 @@
+     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+     <uses-permission android:name="android.permission.PROCESS_OUTGOING_CALLS" />
+     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+-    <uses-permission android:name="android.permission.INTERNET" />
+     <uses-permission android:name="android.permission.ACCESS_SUPERUSER" />
+     <uses-permission android:name="android.permission.READ_CALL_LOG" />
+     <uses-permission android:name="android.permission.RECORD_AUDIO" />
+diff --git a/app/src/main/java/com/matejdro/pebbledialer/PebbleDialerApplication.java b/app/src/main/java/com/matejdro/pebbledialer/PebbleDialerApplication.java
+index 8c503f6..ad5d212 100644
+--- a/app/src/main/java/com/matejdro/pebbledialer/PebbleDialerApplication.java
++++ b/app/src/main/java/com/matejdro/pebbledialer/PebbleDialerApplication.java
+@@ -4,7 +4,6 @@ import android.content.SharedPreferences;
+ import android.content.pm.ApplicationInfo;
+ import android.preference.PreferenceManager;
+ 
+-import com.crashlytics.android.Crashlytics;
+ import com.matejdro.pebblecommons.PebbleCompanionApplication;
+ import com.matejdro.pebblecommons.pebble.PebbleTalkerService;
+ import com.matejdro.pebblecommons.util.LogWriter;
+@@ -26,10 +25,6 @@ public class PebbleDialerApplication extends PebbleCompanionApplication
+         Timber.setAppTag("PebbleDialer");
+         LogWriter.init(preferences, "PebbleDialer");
+ 
+-        boolean isDebuggable =  ( 0 != ( getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE ) );
+-        if (!isDebuggable)
+-            Crashlytics.start(this);
+-
+         super.onCreate();
+     }
+ 
+diff --git a/app/src/main/java/com/matejdro/pebbledialer/callactions/EndCallAction.java b/app/src/main/java/com/matejdro/pebbledialer/callactions/EndCallAction.java
+index ab5e289..3e71047 100644
+--- a/app/src/main/java/com/matejdro/pebbledialer/callactions/EndCallAction.java
++++ b/app/src/main/java/com/matejdro/pebbledialer/callactions/EndCallAction.java
+@@ -5,7 +5,6 @@ import android.content.Context;
+ import android.telephony.TelephonyManager;
+ 
+ import com.android.internal.telephony.ITelephony;
+-import com.crashlytics.android.Crashlytics;
+ import com.matejdro.pebbledialer.modules.CallModule;
+ 
+ import java.io.IOException;
+@@ -29,7 +28,6 @@ public class EndCallAction extends CallAction
+             getITelephonyMethod.setAccessible(true);
+         } catch (Exception e) {
+             Timber.e(e, "Error while acquiring iTelephony");
+-            Crashlytics.logException(e);
+         }
+ 
+     }
+@@ -72,7 +70,6 @@ public class EndCallAction extends CallAction
+             iTelephony.endCall();
+         } catch (Exception e) {
+             Timber.e(e, "Error while invoking iTelephony.endCall()");
+-            Crashlytics.logException(e);
+         }
+ 
+     }
+diff --git a/app/src/main/java/com/matejdro/pebbledialer/callactions/SMSReplyAction.java b/app/src/main/java/com/matejdro/pebbledialer/callactions/SMSReplyAction.java
+index d3242cd..339059c 100644
+--- a/app/src/main/java/com/matejdro/pebbledialer/callactions/SMSReplyAction.java
++++ b/app/src/main/java/com/matejdro/pebbledialer/callactions/SMSReplyAction.java
+@@ -5,7 +5,6 @@ import android.content.Context;
+ import android.telephony.TelephonyManager;
+ 
+ import com.android.internal.telephony.ITelephony;
+-import com.crashlytics.android.Crashlytics;
+ import com.matejdro.pebbledialer.modules.CallModule;
+ import com.matejdro.pebbledialer.modules.SMSReplyModule;
+ 
+diff --git a/build.gradle b/build.gradle
+index af1b6c6..16c28df 100644
+--- a/build.gradle
++++ b/build.gradle
+@@ -11,6 +11,6 @@ buildscript {
+ allprojects {
+     repositories {
+         jcenter()
+-        maven { url "https://oss.sonatype.org/content/groups/public/" }
+     }
+ }
++
