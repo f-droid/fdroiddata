@@ -55,55 +55,33 @@ Build:61-fdroid,61
         sed -i -e 's#android {#android {\nlintOptions {\nabortOnError false\n}\n#' build.gradle
 
 Build:63-fdroid,63
-    disable=builds, wait for comments
+    disable=builds, test apk!
     commit=aa83369736b7533cb8ab824ee36be032b40271bf
+    subdir=surespot
     patch=Ex-63.patch,Im-63.patch
     gradle=yes
     srclibs=gcm@7f647288103bac2c5552af881f0e217c5b95d78a
     rm=.google_apis/._.DS_Store,._.DS_Store,surespot/libs/*,surespot/src/main/res/raw/ffmpegpie,surespot/src/main/res/raw/ffmpeg,surespotcommon/libs/*.jar
     prebuild=pwd && \
-        touch 'surespot/src/main/res/raw/ffmpegpie' && \
-        touch 'surespot/src/main/res/raw/ffmpeg' && \
-        cp build.gradle build.gradle__BAK && \
-        echo " " >> build.gradle && \
-        cat surespot/build.gradle >> build.gradle && \
-        ln -s surespot/libs libs && \
-        sed -i -e 's#jcenter()#maven { url "https://jcenter.bintray.com" }#g' build.gradle && \
-        sed -i -e 's#com.google.android.gms:play-services-drive:7.8.0#com.android.support:support-v4:19.0.1#' surespot/build.gradle && \
+        touch src/main/res/raw/ffmpegpie src/main/res/raw/ffmpeg && \
         sed -i -e 's#com.google.android.gms:play-services-drive:7.8.0#com.android.support:support-v4:19.0.1#' build.gradle && \
-        mkdir -p src/main && \
-        mkdir -p surespotcommon/src/main/res/raw && \
-        sed -i -e 's#Build.VERSION_CODES.M#23#' surespot/src/main/java/com/twofours/surespot/identity/IdentityController.java && \
-        printf 'ssl_strict=true\nbaseUrl=https://server.surespot.me:443\n' > surespotcommon/src/main/res/raw/configuration.properties && \
-        sed -i -e 's#import java.util.Properties;#import java.util.Properties;\nimport com.twofours.surespot.common.R;\n#g' surespotcommon/src/main/java/com/twofours/surespot/common/SurespotConfiguration.java && \
-        ln -s ../../surespot/src/main/AndroidManifest.xml src/main/AndroidManifest.xml && \
+        mkdir -p ../surespotcommon/src/main/res/raw && \
+        sed -i -e 's#Build.VERSION_CODES.M#23#' src/main/java/com/twofours/surespot/identity/IdentityController.java && \
+        printf 'ssl_strict=true\nbaseUrl=https://server.surespot.me:443\n' > ../surespotcommon/src/main/res/raw/configuration.properties && \
+        sed -i -e 's#import java.util.Properties;#import java.util.Properties;\nimport com.twofours.surespot.common.R;\n#g' ../surespotcommon/src/main/java/com/twofours/surespot/common/SurespotConfiguration.java && \
         sed -i -e 's#@integer/google_play_services_version#4030500#' src/main/AndroidManifest.xml && \
-        sed -i -e 's#@integer/google_play_services_version#4030500#' surespot/src/main/AndroidManifest.xml && \
-        ln -s ../../surespot/src/main/aidl src/main/aidl && \
-        ln -s ../../surespot/src/main/java src/main/java && \
-        ln -s ../../surespot/src/main/res src/main/res && \
-        sed -i -e 's#@integer/google_play_services_version#4030500#' src/main/AndroidManifest.xml && \
-        sed -i -e 's#@integer/google_play_services_version#4030500#' surespot/src/main/AndroidManifest.xml && \
-        ln -s surespot/src/main/res && \
-        ln -s surespot/proguard-project.txt && \
         awk 'NR<=21||NR>=62' proguard-project.txt > proguard-project.txt_ && \
         mv proguard-project.txt_ proguard-project.txt && \
-        ln -s surespot/proguard-google-api-client.txt && \
-        sed -i -e 's#import org.acra.ACRA;##' androidasynchttp/src/main/java/com/loopj/android/http/AsyncHttpRequest.java && \
-        sed -i -e 's#import org.acra.ACRA;##' surespot/src/main/java/com/twofours/surespot/SurespotApplication.java && \
-        sed -i -e 's#import org.acra.ReportingInteractionMode;##' surespot/src/main/java/com/twofours/surespot/SurespotApplication.java && \
-        sed -i -e 's#import org.acra.annotation.ReportsCrashes;##' surespot/src/main/java/com/twofours/surespot/SurespotApplication.java && \
-        sed -i -e 's#ACRA.init(this);##' surespot/src/main/java/com/twofours/surespot/SurespotApplication.java && \
-        sed -i -e 's#@ReportsCrashes#// @ReportsCrashes#' surespot/src/main/java/com/twofours/surespot/SurespotApplication.java && \
-        sed -i -e 's#formUri = "ht#// formUri = "ht#' surespot/src/main/java/com/twofours/surespot/SurespotApplication.java && \
-        sed -i -e 's#compile files(.libs/gcm.jar.)##' build.gradle && \
-        sed -i -e 's#compile files(.*libs.*)##' build.gradle && \
-        rm surespot/src/main/java/com/twofours/surespot/backup/DriveHelper.java && \
-        sed -i -e 's#android {#android {\nlintOptions {\nabortOnError false\n}\n#' build.gradle && \
-        cp -av $$gcm$$/gcm-client-deprecated/src/com surespot/src/main/java/ && \
+        sed -i -e 's#import org.acra.ACRA;##' ../androidasynchttp/src/main/java/com/loopj/android/http/AsyncHttpRequest.java src/main/java/com/twofours/surespot/SurespotApplication.java && \
+        sed -i -e 's#import org.acra.ReportingInteractionMode;##' -e 's#import org.acra.annotation.ReportsCrashes;##' -e 's#ACRA.init(this);##' -e 's#@ReportsCrashes#// @ReportsCrashes#' -e 's#formUri = "ht#// formUri = "ht#' src/main/java/com/twofours/surespot/SurespotApplication.java && \
+        sed -i -e 's#compile files(.libs/gcm.jar.)##' -e 's#compile files(.*libs.*)##' -e 's#android {#android {\nlintOptions {\nabortOnError false\n}\n#' build.gradle && \
+        rm src/main/java/com/twofours/surespot/backup/DriveHelper.java && \
+        cp -av $$gcm$$/gcm-client-deprecated/src/com src/main/java/ && \
+        pushd ../ && \
         find .google_apis -name '*.jar' -exec rm {} \; && \
+        popd && \
         sed -i -e '/support-v4/acompile "com.madgag:scprov-jdk15on:1.47.0.3"\ncompile "com.madgag:sc-light-jdk15on:1.47.0.3"' -e '/compile files/d' build.gradle && \
-        sed -i -e '/surespotcommon/acompile "com.madgag:scprov-jdk15on:1.47.0.3"\ncompile "com.madgag:sc-light-jdk15on:1.47.0.3"' -e '/compile files/d' androidkeystore/build.gradle
+        sed -i -e '/surespotcommon/acompile "com.madgag:scprov-jdk15on:1.47.0.3"\ncompile "com.madgag:sc-light-jdk15on:1.47.0.3"' -e '/compile files/d' ../androidkeystore/build.gradle
     novcheck=yes
 
 Maintainer Notes:
