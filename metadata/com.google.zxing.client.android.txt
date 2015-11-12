@@ -104,6 +104,7 @@ Build:4.7.3,103
     build=$$MVN3$$ package -f ../core/pom.xml
 
 Build:4.7.4,104
+    disable=fails
     commit=BS-4.7.4
     subdir=android
     prebuild=echo -e "java.source=7\njava.target=7" >> local.properties && \
@@ -113,15 +114,19 @@ Build:4.7.4,104
     build=$$MVN3$$ package -f ../core/pom.xml
 
 Build:4.7.5,105
+    disable=requires recent maven, seemingly no way around it
     commit=BS-4.7.5
     subdir=android
-    prebuild=echo -e "java.source=7\njava.target=7" >> local.properties && \
-        echo 'source.dir=src;../android-core/src' >> project.properties
-    target=android-19
+    maven=yes
     scanignore=core/src/test
-    build=$$MVN3$$ package -f ../core/pom.xml
+    build=$$MVN3$$ install -f ../core/pom.xml -Dmaven.test.skip=true && \
+        $$MVN3$$ install -f ../android-core/pom.xml -Dmaven.test.skip=true
 
-Auto Update Mode:Version BS-%v
+Maintainer Notes:
+Enable AUM again once they switch to a sane build system, possibly gradle.
+.
+
+Auto Update Mode:None
 Update Check Mode:Tags ^BS-
 Current Version:4.7.5
 Current Version Code:105
