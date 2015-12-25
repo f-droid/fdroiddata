@@ -47,8 +47,22 @@ Build:1.1.0,2100
         $$MVN3$$ -f pom-jar.xml clean install && \
         popd
 
+Build:1.1.1,2110
+    disable=uses snapshot dependencies; failing to build
+    commit=ForkHub-v1.1.1
+    subdir=app
+    gradle=yes
+    srclibs=Wishlist@c5aa973d2d3504e72b0665d95d0b81f3d7609d6d,egit-github@fbfc22880fff5fde22ef96bfce0f6497199e6895
+    rm=app/libs/*
+    prebuild=sed -i -e '/compile(name/d' -e 's/com.viewpagerindicator/fr.avianey.com.viewpagerindicator/g' -e '/egit-github/s/-SNAPSHOT/.201512141825-rc1/g' build.gradle && \
+        cp -fR $$Wishlist$$/lib/src/main/java/com src/main/java/ && \
+        sed -i -e '/populov/d' -e '/repo.eclipse.org/d' -e '/jcenter/imavenCentral()\nmavenLocal()' ../build.gradle && \
+        pushd $$egit-github$$/org.eclipse.egit.github.core/ && \
+        $$MVN3$$ -f pom-jar.xml clean install && \
+        popd
+
 Auto Update Mode:None
-Update Check Mode:RepoManifest
+Update Check Mode:Tags
 Update Check Name:com.github.mobile
 Current Version:1.1.1
 Current Version Code:2110
