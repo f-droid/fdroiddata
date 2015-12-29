@@ -2127,9 +2127,9 @@ Build:40.0,400010
         zip -d fdroid/fennec-unsigned.apk "META-INF*"
 
 # testing, requires skip-scan, doesnt build
-Build:42.0,420010
-    disable=wants to configure mach and hg interactively
-    commit=FENNEC_42_0_RELEASE
+Build:43.0,430010
+    disable=1error,4 warnings
+    commit=FENNEC_43_0_1_RELEASE
     output=fdroid/fennec-unsigned.apk
     srclibs=MozLocales@dd882b1c1881b9f3c43a23b0a9412a49d8c53505
     prebuild=mkdir fdroid && \
@@ -2144,12 +2144,13 @@ Build:42.0,420010
         echo "mk_add_options 'export L10NBASEDIR=${l10ndir}'" >> .mozconfig && \
         echo "mk_add_options 'export ANDROID_VERSION_CODE=$$VERCODE$$'" >> .mozconfig && \
         echo "mk_add_options 'export MOZ_CHROME_MULTILOCALE=$(tr '\n' ' ' <  mobile/android/locales/maemo-locales)'" >> .mozconfig && \
+        sed -i -e '/MOZ_ANDROID_GOOGLE_PLAY_SERVICES/d' configure.in && \
         pushd mobile/android/branding/unofficial/ && \
         sed -i -e '/ANDROID_PACKAGE_NAME/d' -e '/MOZ_APP_DISPLAYNAME/d' configure.sh && \
         echo 'ANDROID_PACKAGE_NAME=org.mozilla.fennec_fdroid' >> configure.sh && \
         echo 'MOZ_APP_DISPLAYNAME="Fennec F-Droid"' >> configure.sh && \
-        popd && \
-        build=./mach build && \
+        popd
+    build=./mach build && \
         fxarch=`grep "ac_add_options --target=" .mozconfig | cut -d '=' -f2` && \
         pushd obj-${fxarch}/mobile/android/locales && \
         for loc in $(cat ../../../../mobile/android/locales/maemo-locales); do LOCALE_MERGEDIR=$PWD/merge-$loc make merge-$loc LOCALE_MERGEDIR=$PWD/merge-$loc; make LOCALE_MERGEDIR=$PWD/merge-$loc chrome-$loc LOCALE_MERGEDIR=$PWD/merge-$loc; done && \
