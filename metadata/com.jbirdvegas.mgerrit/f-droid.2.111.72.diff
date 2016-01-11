@@ -1,0 +1,265 @@
+diff --git a/app/build.gradle b/app/build.gradle
+index 2967568..a7ca1c1 100644
+--- a/app/build.gradle
++++ b/app/build.gradle
+@@ -4,7 +4,7 @@ buildscript {
+         jcenter()
+     }
+     dependencies {
+-        classpath 'com.android.tools.build:gradle:2.0.0-alpha1'
++        classpath 'com.android.tools.build:gradle:1.5.0'
+         classpath 'com.jakewharton.hugo:hugo-plugin:1.2.1'
+         classpath 'org.ajoberstar:gradle-git:1.1.0'
+         classpath 'org.apache.commons:commons-lang3:3.4'
+@@ -29,8 +29,8 @@ repositories {
+ }
+ 
+ dependencies {
+-    compile files('libs/libGoogleAnalyticsServices.jar')
+-    compile files('libs/annotations.jar')
++
++    compile 'org.jetbrains:annotations:13.0'
+ 
+     compile 'com.android.support:appcompat-v7:23.1.1'
+     compile 'com.android.support:design:23.1.1'
+@@ -49,15 +49,9 @@ dependencies {
+     }
+     compile 'de.hdodenhof:circleimageview:1.2.2'
+ 
+-/*  TODO: Enable this when the Android variant of the Gerrit Rest Java Client is officially released
+-       The corresponding jar can then be removed
+-    compile('com.urswolfer.gerrit.client.rest:gerrit-rest-java-client:0.8.6-android') {
++    compile('com.urswolfer.gerrit.client.rest:gerrit-rest-java-client:0.8.6') {
+         exclude module: 'httpclient'
+-    }*/
+-    compile files('libs/gerrit-rest-java-client-0.8.6-android.jar')
+-    // These are dependencies of the gerrit-rest-java-client library above
+-    compile 'com.google.guava:guava:18.0'
+-    compile 'org.apache.httpcomponents:httpclient-android:4.3.5.1'
++    }
+ 
+     // We have too many methods including the appcompat library
+     compile 'com.android.support:multidex:1.0.1'
+@@ -165,7 +159,7 @@ android {
+         multiDexEnabled true
+     }
+     dexOptions {
+-        javaMaxHeapSize "2g"
++        javaMaxHeapSize "1g"
+     }
+ 
+     sourceSets {
+@@ -195,28 +189,28 @@ android {
+         versionProps.load(new FileInputStream(versionPropsFile))
+         String full = versionProps['version'].toString()
+         projectVersionName = full
+-        if (project.hasProperty('incrementVersion') && incrementVersion) {
+-            // find version parts
+-            String[] parts = full.split('\\.')
+-            println("Original version: " + parts.toString())
++        // find version parts
++        String[] parts = full.split('\\.')
++        println("Original version: " + parts.toString())
+ 
++        if (project.hasProperty('incrementVersion') && incrementVersion) {
+             // increment last version part
+             parts[parts.length - 1] = parts[parts.length - 1].toInteger() + 1
+             // set new incremented projectVersionName
+             projectVersionName = StringUtils.join(Arrays.asList(parts), '.')
+             println("Incremented version: " + parts.toString())
++        }
+ 
+-            // Build projectVersionCode from parts
+-            StringBuilder builder = new StringBuilder()
+-            for (int i = 0; i < parts.length; i++) {
+-                if (i == 0) {
+-                    builder.append(parts[i])
+-                } else {
+-                    builder.append(String.format("%03d", parts[i].toInteger()))
+-                }
++        // Build projectVersionCode from parts
++        StringBuilder builder = new StringBuilder()
++        for (int i = 0; i < parts.length; i++) {
++            if (i == 0) {
++                builder.append(parts[i])
++            } else {
++                builder.append(String.format("%03d", parts[i].toInteger()))
+             }
+-            projectVersionCode = builder.toString().toInteger()
+         }
++        projectVersionCode = builder.toString().toInteger()
+         defaultConfig {
+             versionName projectVersionName
+             versionCode projectVersionCode
+diff --git a/app/src/main/java/com/jbirdvegas/mgerrit/activities/GerritControllerActivity.java b/app/src/main/java/com/jbirdvegas/mgerrit/activities/GerritControllerActivity.java
+index f4ce5b8..32ff025 100755
+--- a/app/src/main/java/com/jbirdvegas/mgerrit/activities/GerritControllerActivity.java
++++ b/app/src/main/java/com/jbirdvegas/mgerrit/activities/GerritControllerActivity.java
+@@ -35,11 +35,6 @@ import android.view.MenuItem;
+ import android.view.View;
+ import android.widget.Toast;
+ 
+-import com.google.analytics.tracking.android.EasyTracker;
+-import com.google.analytics.tracking.android.GoogleAnalytics;
+-import com.google.analytics.tracking.android.Logger;
+-import com.google.analytics.tracking.android.MapBuilder;
+-import com.google.analytics.tracking.android.Tracker;
+ import com.jbirdvegas.mgerrit.R;
+ import com.jbirdvegas.mgerrit.TheApplication;
+ import com.jbirdvegas.mgerrit.database.SelectedChange;
+@@ -74,7 +69,6 @@ public class GerritControllerActivity extends BaseDrawerActivity {
+     @Override
+     protected void onStart() {
+         super.onStart();
+-        EasyTracker.getInstance(this).activityStart(this);
+ 
+         EventBus.getDefault().register(this);
+     }
+@@ -82,7 +76,6 @@ public class GerritControllerActivity extends BaseDrawerActivity {
+     @Override
+     protected void onStop() {
+         super.onStop();
+-        EasyTracker.getInstance(this).activityStop(this);
+ 
+         EventBus.getDefault().unregister(this);
+     }
+@@ -104,13 +97,8 @@ public class GerritControllerActivity extends BaseDrawerActivity {
+             PrefsFragment.setCurrentGerrit(this, suppliedGerritInstance, null);
+         }
+ 
+-        GoogleAnalytics googleAnalytics = GoogleAnalytics.getInstance(this);
+ 
+         String trackingId = getString(R.string.ga_trackingId);
+-        Tracker tracker = googleAnalytics.getTracker(trackingId);
+-        googleAnalytics.getLogger().setLogLevel(Logger.LogLevel.VERBOSE);
+-        tracker.send(MapBuilder
+-                .createAppView().build());
+ 
+         // keep a log of what ROM our users run
+         AnalyticsHelper.sendAnalyticsEvent(this, AnalyticsHelper.GA_APP_OPEN,
+diff --git a/app/src/main/java/com/jbirdvegas/mgerrit/fragments/CardsFragment.java b/app/src/main/java/com/jbirdvegas/mgerrit/fragments/CardsFragment.java
+index 2e8978b..4993662 100644
+--- a/app/src/main/java/com/jbirdvegas/mgerrit/fragments/CardsFragment.java
++++ b/app/src/main/java/com/jbirdvegas/mgerrit/fragments/CardsFragment.java
+@@ -37,7 +37,6 @@ import android.widget.BaseAdapter;
+ 
+ import com.android.volley.RequestQueue;
+ import com.android.volley.toolbox.Volley;
+-import com.google.analytics.tracking.android.EasyTracker;
+ import com.jbirdvegas.mgerrit.R;
+ import com.jbirdvegas.mgerrit.activities.BaseDrawerActivity;
+ import com.jbirdvegas.mgerrit.adapters.ChangeListAdapter;
+@@ -216,7 +215,6 @@ public abstract class CardsFragment extends Fragment
+             mListView.setOnScrollListener(mEndlessAdapter);
+         } else toggleAnimations(mHeaderAdapter);
+ 
+-        EasyTracker.getInstance(getActivity()).activityStart(getActivity());
+ 
+         mEventBus.registerSticky(this);
+ 
+@@ -229,7 +227,6 @@ public abstract class CardsFragment extends Fragment
+     @Override
+     public void onStop() {
+         super.onStop();
+-        EasyTracker.getInstance(getActivity()).activityStop(getActivity());
+ 
+         mEventBus.unregister(this);
+     }
+diff --git a/app/src/main/java/com/jbirdvegas/mgerrit/fragments/PatchSetViewerFragment.java b/app/src/main/java/com/jbirdvegas/mgerrit/fragments/PatchSetViewerFragment.java
+index 29f0a62..a63b114 100644
+--- a/app/src/main/java/com/jbirdvegas/mgerrit/fragments/PatchSetViewerFragment.java
++++ b/app/src/main/java/com/jbirdvegas/mgerrit/fragments/PatchSetViewerFragment.java
+@@ -41,7 +41,6 @@ import android.widget.ImageButton;
+ import android.widget.TextView;
+ import android.widget.Toast;
+ 
+-import com.google.analytics.tracking.android.EasyTracker;
+ import com.jbirdvegas.mgerrit.R;
+ import com.jbirdvegas.mgerrit.activities.ReviewActivity;
+ import com.jbirdvegas.mgerrit.activities.GerritControllerActivity;
+@@ -394,13 +393,11 @@ public class PatchSetViewerFragment extends Fragment
+     @Override
+     public void onStart() {
+         super.onStart();
+-        EasyTracker.getInstance(mParent).activityStart(mParent);
+     }
+ 
+     @Override
+     public void onStop() {
+         super.onStop();
+-        EasyTracker.getInstance(mParent).activityStop(mParent);
+     }
+ 
+     @Override
+diff --git a/app/src/main/java/com/jbirdvegas/mgerrit/helpers/AnalyticsHelper.java b/app/src/main/java/com/jbirdvegas/mgerrit/helpers/AnalyticsHelper.java
+index 62600fe..9031666 100644
+--- a/app/src/main/java/com/jbirdvegas/mgerrit/helpers/AnalyticsHelper.java
++++ b/app/src/main/java/com/jbirdvegas/mgerrit/helpers/AnalyticsHelper.java
+@@ -19,9 +19,6 @@ package com.jbirdvegas.mgerrit.helpers;
+ 
+ import android.content.Context;
+ 
+-import com.google.analytics.tracking.android.EasyTracker;
+-import com.google.analytics.tracking.android.MapBuilder;
+-
+ public class AnalyticsHelper {
+     public static final String GA_PERFORMANCE = "performance";
+     public static final String GA_TIME_TO_LOAD = "time_to_load";
+@@ -42,12 +39,6 @@ public class AnalyticsHelper {
+ 
+     public static void sendAnalyticsEvent(Context context,
+                                           String category, String action, String label, Long value) {
+-        EasyTracker easyTracker = EasyTracker.getInstance(context);
+-        easyTracker.send(MapBuilder
+-                .createEvent(category, action, label, value)
+-                .build());
+-        // note this screen as viewed
+-        easyTracker.send(MapBuilder.createAppView().build());
+     }
+ 
+ }
+diff --git a/app/src/main/java/com/jbirdvegas/mgerrit/views/GerritSearchView.java b/app/src/main/java/com/jbirdvegas/mgerrit/views/GerritSearchView.java
+index e71823a..badbe9d 100644
+--- a/app/src/main/java/com/jbirdvegas/mgerrit/views/GerritSearchView.java
++++ b/app/src/main/java/com/jbirdvegas/mgerrit/views/GerritSearchView.java
+@@ -26,8 +26,6 @@ import android.view.View;
+ import android.widget.ImageView;
+ import android.widget.SearchView;
+ 
+-import com.google.analytics.tracking.android.EasyTracker;
+-import com.google.analytics.tracking.android.MapBuilder;
+ import com.jbirdvegas.mgerrit.fragments.PrefsFragment;
+ import com.jbirdvegas.mgerrit.message.SearchQueryChanged;
+ import com.jbirdvegas.mgerrit.search.OwnerSearch;
+@@ -179,11 +177,6 @@ public class GerritSearchView extends SearchView
+                 }
+             });
+         } catch (Exception e) {
+-            EasyTracker.getInstance(mContext).send(MapBuilder.createEvent(
+-                    "GerritSearchView",
+-                    "setupCancelButton",
+-                    "search_button_reflection_visibility",
+-                    null).build());
+             e.printStackTrace();
+         }
+     }
+diff --git a/build.gradle b/build.gradle
+index 8d532a9..33b29df 100755
+--- a/build.gradle
++++ b/build.gradle
+@@ -4,7 +4,7 @@ buildscript {
+         jcenter()
+     }
+     dependencies {
+-        classpath 'com.android.tools.build:gradle:2.0.0-alpha1'
++        classpath 'com.android.tools.build:gradle:1.5.0'
+     }
+ }
+ 
+@@ -12,4 +12,4 @@ allprojects {
+     repositories {
+         mavenCentral()
+     }
+-}
+\ No newline at end of file
++}
