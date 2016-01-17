@@ -20,8 +20,13 @@ about apps that can no longer be built will be closed.
 
 * Visit and fork the [fdroiddata repository](https://gitlab.com/fdroid/fdroiddata)
 
-* Follow the [Quickstart](README.md#quickstart), but using the url
-  `git@gitlab.com:yourusername/fdroiddata.git` when cloning
+* Clone your fork
+
+* Follow the [Quickstart](README.md#quickstart)
+
+Note that to use the master branch of fdroiddata you will need the
+master branch of fdroidserver. Using the latest stable release of
+fdroidserver would probably work, but it is not guaranteed.
 
 ### Adding a new app
 
