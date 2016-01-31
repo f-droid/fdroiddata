@@ -83,6 +83,23 @@ Build:2.2.3,168
         popd && \
         cp $$JSword$$/target/jsword-*.jar libs/jsword.jar
 
+Build:2.3.0,180
+    disable=gradle requires android sdk maven repo to be set manually
+    commit=build-02.03.00
+    subdir=AndBible
+    init=sed -i "/android {/a compileOptions {\nsourceCompatibility JavaVersion.VERSION_1_7\ntargetCompatibility JavaVersion.VERSION_1_7\n}" build.gradle
+    gradle=yes
+    srclibs=JSword@d7ad5ef
+    rm=IgnoreAndBibleExperiments,AndBible/libs/*,AndBible/libs,AndBible/libs-src
+    prebuild=cp -r ../jsword-tweaks/src/main/. $$JSword$$/src/main && \
+        sed -i "/<repositories>/,/<\/repositories>/d" $$JSword$$/pom.xml && \
+        sed -i "/<dependencies>/a <dependency><groupId>com.chenlb.mmseg4j</groupId><artifactId>mmseg4j-all</artifactId><version>1.8.6</version></dependency>" $$JSword$$/pom.xml && \
+        sed -i -e '/ANDROID_HOME/' build.gradle
+    build=pushd $$JSword$$ && \
+        $$MVN3$$ package -Dmaven.test.skip=true && \
+        popd && \
+        cp $$JSword$$/target/jsword-*.jar libs/jsword.jar
+
 Auto Update Mode:None
 Update Check Mode:Tags
 Current Version:2.3.0
