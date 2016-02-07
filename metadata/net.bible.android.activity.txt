@@ -94,7 +94,23 @@ Build:2.3.0,180
     prebuild=cp -r ../jsword-tweaks/src/main/. $$JSword$$/src/main && \
         sed -i "/<repositories>/,/<\/repositories>/d" $$JSword$$/pom.xml && \
         sed -i "/<dependencies>/a <dependency><groupId>com.chenlb.mmseg4j</groupId><artifactId>mmseg4j-all</artifactId><version>1.8.6</version></dependency>" $$JSword$$/pom.xml && \
-        sed -i -e '/ANDROID_HOME/' build.gradle
+        sed -i -e '/ANDROID_HOME/d' build.gradle
+    build=pushd $$JSword$$ && \
+        $$MVN3$$ package -Dmaven.test.skip=true && \
+        popd && \
+        cp $$JSword$$/target/jsword-*.jar libs/jsword.jar
+
+Build:2.3.2,186
+    disable=gradle issue
+    commit=build-02.03.02
+    subdir=AndBible
+    gradle=yes
+    srclibs=JSword@d7ad5ef
+    rm=IgnoreAndBibleExperiments,AndBible/libs/*,AndBible/libs,AndBible/libs-src
+    prebuild=cp -r ../jsword-tweaks/src/main/. $$JSword$$/src/main && \
+        sed -i "/<repositories>/,/<\/repositories>/d" $$JSword$$/pom.xml && \
+        sed -i "/<dependencies>/a <dependency><groupId>com.chenlb.mmseg4j</groupId><artifactId>mmseg4j-all</artifactId><version>1.8.6</version></dependency>" $$JSword$$/pom.xml && \
+        sed -i -e '/ANDROID_HOME/d' -e '/repositories {/ajcenter()' -e 's/com.android.tools.build:gradle:0.11+/com.android.tools.build:gradle:1.2.2/g' -e '/apply plugin/s/android/com.android.application/g' build.gradle
     build=pushd $$JSword$$ && \
         $$MVN3$$ package -Dmaven.test.skip=true && \
         popd && \
