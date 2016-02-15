@@ -7,19 +7,17 @@ main repo on f-droid.org.
 
 ## Quickstart
 
-Clone [fdroidserver](https://gitlab.com/fdroid/fdroidserver):
+Install [fdroidserver](https://gitlab.com/fdroid/fdroidserver), or just
+use it directly from master:
 
 	git clone https://gitlab.com/fdroid/fdroidserver.git
-
-Add the cloned dir to your `PATH`:
-
 	export PATH="$PATH:$PWD/fdroidserver"
 
-Enter it:
+Enter your fdroiddata clone:
 
 	cd fdroiddata
 
-An empty configuration file should work as a start:
+An empty config file should work for most setups:
 
 	touch config.py
 
