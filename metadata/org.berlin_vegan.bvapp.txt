@@ -52,20 +52,21 @@ Build:1.9,21
         cd ../../ && \
         ant prod.android
 
-Build:2.0.3-fdroid,24
-    disable=remove apk to get in sync with upstream VC
-    commit=2.0.3
+Build:2.0.3,24
+    commit=8605e55d229f7d29fb93d3d865c02702c1a41966
     subdir=app
     gradle=foss
-    prebuild=sed -i -e 's/versionName gitTag ?: gitBranch/versionName \"$$VERSION$$\"/g' -e 's/def gitDescription = dirtyWorkingCopy .*/def gitDescription = gitHash/g' -e '/playstoreCompile/d' build.gradle
 
 Maintainer Notes:
 * Versions <= 2.0 do not build from the current repo, but one needs to use the old repo <https://github.com/smeir/Berlin-Vegan-Guide>
-* AUM wont work, since we rely on the versionname, which yet cannot be parsed from gradle: 
-     Auto Update Mode:Version +-fdroid %v
+* Auto Update Mode is working, but only with a hack: with commit dd0b38a in fdroidserver the tag is used as versionname, if the versionname could not be parse from the manifest or gradle files.
+* Archive Policy: 'Currently the only supported format is "n versions", where n is the number of versions to keep.'
+* Auto Update Mode: '... if an app always has a tag "2.7.2" corresponding to version 2.7.2, you would simply specify "Version %v"'
+* Update Check Mode: '... when apps tag non-release versions such as X.X-alpha, so you can filter them out with something like .*[0-9]$ which requires tag names to end with a digit.'
 .
 
-Auto Update Mode:None
-Update Check Mode:Tags
-Current Version:Unknown
+Archive Policy:1 versions
+Auto Update Mode:Version %v
+Update Check Mode:Tags .*[0-9]$
+Current Version:2.0.3
 Current Version Code:24
