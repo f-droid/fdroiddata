@@ -1,6 +1,6 @@
 # F-Droid Data
 
-[![build status](https://gitlab.com/ci/projects/5274/status.png?ref=master)](https://gitlab.com/ci/projects/5274?ref=master)
+[![build status](https://gitlab.com/ci/projects/5274/status.png?ref=HEAD)](https://gitlab.com/fdroid/fdroiddata/builds)
 
 This repository holds general and build information for all the apps on our
 main repo on f-droid.org.
