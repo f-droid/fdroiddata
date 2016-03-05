@@ -2,8 +2,8 @@ AntiFeatures:NonFreeDep
 Categories:Phone & SMS
 License:GPLv3
 Web Site:https://www.surespot.me/
-Source Code:https://github.com/surespot/android
-Issue Tracker:https://github.com/surespot/android/issues
+Source Code:https://github.com/zoff99/surespot-android
+Issue Tracker:https://github.com/zoff99/surespot-android/issues
 
 Name:Surespot
 Auto Name:surespot
@@ -23,12 +23,11 @@ don't mine your data, no advertisements here!
 
 '''WARNING'''
 
-This build recipe is complex and error-prone and might include unchecked
-binaries. Use it only at your own risk.
+This build recipe is complex and error-prone. Use it only at your own risk.
 .
 
 Repo Type:git
-Repo:https://github.com/surespot/android.git
+Repo:https://github.com/zoff99/surespot-android.git
 
 Build:61-fdroid,61
     disable=builds, but includes jars
@@ -84,14 +83,30 @@ Build:63-fdroid,63
         sed -i -e '/surespotcommon/acompile "com.madgag:scprov-jdk15on:1.47.0.3"\ncompile "com.madgag:sc-light-jdk15on:1.47.0.3"' -e '/compile files/d' ../androidkeystore/build.gradle
     novcheck=yes
 
+Build:64-fdroid,64
+    commit=f41ea9459e76d4e99b34610835a2060f6e9797a6
+    subdir=surespot
+    gradle=yes
+    prebuild=pwd && \
+        pushd ../ && \
+        git clone https://github.com/zoff99/gcm-client-old.git && \
+        popd && \
+        mkdir -p src/main/java/com/ && \
+        cp -av ../gcm-client-old/com src/main/java/ && \
+        mkdir -p ../surespotcommon/src/main/res/raw && \
+        printf 'ssl_strict=true\nbaseUrl=https://server.surespot.me:443\n' > ../surespotcommon/src/main/res/raw/configuration.properties && \
+        pushd ../ && \
+        find .google_apis -name '*.jar' -exec rm {} \; && \
+        popd
+    scanignore=surespot/src/main/res/raw/ffmpeg
+    novcheck=yes
+
 Maintainer Notes:
 * Voice function removed
-* Export/Import of Identityfile removed (for now)
-* Enable build for testing purpose
 .
 
-Archive Policy:0 versions
+Archive Policy:2 versions
 Auto Update Mode:None
 Update Check Mode:Tags
-Current Version:63-fdroid
-Current Version Code:63
+Current Version:64-fdroid
+Current Version Code:64
