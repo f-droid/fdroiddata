@@ -1,8 +1,8 @@
 Categories:Security,Internet
 License:Apache2
-Web Site:http://geti2p.net
-Source Code:https://github.com/i2p
-Issue Tracker:http://trac.i2p2.de
+Web Site:https://geti2p.net
+Source Code:https://gitlab.com/i2p
+Issue Tracker:https://trac.i2p2.de
 Donate:https://geti2p.net/en/get-involved/donate
 FlattrID:13523
 Bitcoin:1BPdWwovytfGdBwUDVgqbMZ8omcPQzshpX
@@ -18,7 +18,7 @@ trusted parties.
 .
 
 Repo Type:git
-Repo:https://github.com/i2p/i2p.android.base.git
+Repo:https://gitlab.com/I2P/i2p.android.base.git
 
 Build:0.9.8.1,4734976
     commit=788445f6ceb0d0c165e98b9b7d1aa732c98d37ac
@@ -175,6 +175,27 @@ Build:0.9.19.1,4745229
         sed -i '50,61d' ../client/build.gradle
     scandelete=i2p.i2p,routerjars/jni,client/src/main/jniLibs/armeabi,witness/build/classes
 
+Build:0.9.22,4745231
+    commit=ab6f4799c93407b1ad34a33a4b0976107c592aa
+    subdir=app
+    gradle=legacy
+    srclibs=I2P@fd606064d910fac026d6a72ebdda6c68e573d53a,GradleWitness@10f1269c0aafdc1d478efc005ed48f3a47d44278,PreferenceFragment@717a45433b927d2f0dfc5328f79e77c9682c37bc
+    prebuild=sed -i -e '87d' -e '83d' ./build.gradle && \
+        sed -i -e '16,18d' -e '$d' ../build.gradle && \
+        sed -i '$d' ../build.gradle && \
+        echo $'flatDir {dirs \'$$PreferenceFragment$$/maven-repository/com/android/support/support-v4-preferencefragment/1.0.0\'}}}' >> ../build.gradle && \
+        echo -e "sdk.dir=$$SDK$$\ni2psrc=$$I2P$$" >> ./local.properties && \
+        echo -e "sdk.dir=$$SDK$$\nndk.dir=$$NDK$$\ni2psrc=$$I2P$$" >> ../routerjars/local.properties && \
+        curl https://gmplib.org/download/gmp/gmp-5.0.2.tar.xz | tar xJv -C $$I2P$$/core/c/jbigi/
+    scandelete=client/src/main/jniLibs/
+    build=pushd $$PreferenceFragment$$ && \
+        ./gradlew uploadArchives && \
+        popd && \
+        pushd $$GradleWitness$$ && \
+        gradle build && \
+        popd && \
+        cp $$GradleWitness$$/build/libs/GradleWitness.jar ../gradle/libs/gradle-witness.jar
+
 Maintainer Notes:
 The version code and name is in app/build.gradle
 Android version code is an integer. So we have 31 bits.
@@ -190,5 +211,5 @@ Increment build number with 'ant incrementBuild' for updates between router rele
 
 Auto Update Mode:None
 Update Check Mode:None
-Current Version:0.9.19
-Current Version Code:4745227
+Current Version:0.9.22
+Current Version Code:4745231
