@@ -256,13 +256,14 @@ Build:0.4.0.3-beta,10
         ../godot/bin/godot_server.server.tools.* -export Android ../tof.apk
 
 Build:0.4.2-beta,12
-    disable=Disable in order to re-publish fixed APK more close to stock config
     commit=744e97c57ece7c708ffd42a15829a39e5f6a5030
     output=tof.apk
     srclibs=Godot@53aa9cd51ab2551d67a71729ff61ae6668abda74
     prebuild=mkdir tof && \
         bash -O extglob -c "mv !(tof) tof" && \
-        printf "[platform:Android]\n\npackage/icon=\"res://icon.png\"\npackage/name=\"Tanks of Freedom\"\npackage/unique_name=\"in.p1x.tanks_of_freedom\"\nversion/code=\"$$VERCODE$$\"\nversion/name=\"$$VERSION$$\"\n" > tof/export.cfg && \
+        cp tof/buildConfig/engine_android.cfg tof/engine.cfg && \
+        cp tof/buildConfig/export_android.cfg.dist tof/export.cfg && \
+        sed -i 's,\(package/unique_name=\).*$,\1"in.p1x.tanks_of_freedom",;s,\(version/code\).*$,\1=$$VERCODE$$,;s,\(version/name=\).*$,\1"$$VERSION$$",;s/\(package/signed\).*$/\1=false/' tof/export.cfg && \
         cp -R $$Godot$$ godot
     target=android-19
     scandelete=godot/drivers/builtin_openssl2/crypto/pkcs7/p7,godot/platform/flash
