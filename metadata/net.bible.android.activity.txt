@@ -124,6 +124,21 @@ Build:2.4.1,189
     prebuild=sed -i -e '/ANDROID_HOME/d' -e '/repositories {/ajcenter()' -e 's/com.android.tools.build:gradle:0.11+/com.android.tools.build:gradle:1.5.0/g' -e '/apply plugin/s/android/com.android.application/g' -e '/appcompat-v7/s/19.+/23.0.1/g' -e '/instrumentTest/,+1d' -e '/packagingOptions/i}\n' build.gradle && \
         sed -i -e '/\/\*\*/,$d' build.gradle
 
+Build:2.5.0,192
+    commit=build-02.05.00
+    subdir=and-bible/app
+    gradle=yes
+    srclibs=JSword@8fe1d0a
+    rm=IgnoreAndBibleExperiments,and-bible/app/libs/*,and-bible/libs-src,ReadingPlanCreator/libs,jsword-tweaks/libs,AndBibleTest/libs,tests/TableKeyboard/libs,AndBackendTest/libs
+    prebuild=cp -r ../../jsword-tweaks/src/main/. $$JSword$$/src/main && \
+        sed -i "/<repositories>/,/<\/repositories>/d" $$JSword$$/pom.xml && \
+        rm -rf $$JSword$$/src/main/java/org/crosswire/jsword/examples && \
+        sed -i "/<dependencies>/a <dependency><groupId>com.chenlb.mmseg4j</groupId><artifactId>mmseg4j-all</artifactId><version>1.8.6</version></dependency>" $$JSword$$/pom.xml
+    build=pushd $$JSword$$ && \
+        $$MVN3$$ package -Dmaven.test.skip=true && \
+        popd && \
+        cp $$JSword$$/target/jsword-*.jar libs/jsword.jar
+
 Auto Update Mode:None
 Update Check Mode:Tags
 Current Version:2.5.0
