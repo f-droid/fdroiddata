@@ -47,5 +47,29 @@ Build:1.1,1
         cd ../minilens && \
         ../godot/bin/godot_server.server.tools.* -export Android ../minilens.apk
 
+Build:1.2,2
+    commit=fd38f0983f9115ac9fe7a7314604fdeee61e9f09
+    output=minilens.apk
+    srclibs=Godot@53aa9cd51ab2551d67a71729ff61ae6668abda74
+    prebuild=mkdir minilens && \
+        bash -O extglob -c "mv !(minilens) minilens" && \
+        cp -R $$Godot$$ godot
+    target=android-19
+    scandelete=godot/drivers/builtin_openssl2/crypto/pkcs7/p7,godot/platform/flash
+    build=cd godot && \
+        scons -j 4 p=server unix_global_settings_path=".." && \
+        export ANDROID_NDK_ROOT=$$NDK$$ && \
+        scons -j 4 p=android target=release && \
+        mkdir -p platform/android/java/libs/armeabi && \
+        cp bin/libgodot.android.opt.armv7.neon.so platform/android/java/libs/armeabi/libgodot_android.so && \
+        pushd platform/android/java/ && \
+        gradle assembleRelease && \
+        popd && \
+        export HOME=$PWD && \
+        mkdir -p ../templates/ && \
+        cp platform/android/java/build/outputs/apk/java-release-unsigned.apk ../templates/android_release.apk && \
+        cd ../minilens && \
+        ../godot/bin/godot_server.server.tools.* -export Android ../minilens.apk
+
 Auto Update Mode:None
 Update Check Mode:None
