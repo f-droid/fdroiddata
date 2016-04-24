@@ -2456,6 +2456,74 @@ Build:45.0.2,450210
         mv obj-${fxarch}/dist/fennec-*.apk fdroid/fennec-unsigned.apk && \
         zip -d fdroid/fennec-unsigned.apk "META-INF*"
 
+Build:46.0,460000
+    disable=fails to build
+    commit=FENNEC_46_0_RELEASE
+    output=fdroid/fennec-unsigned.apk
+    srclibs=MozLocales@c096a331
+    prebuild=mkdir fdroid && \
+        fxarch=`echo $$VERCODE$$ | cut -c 5 | sed -e 's/0/arm-linux-androideabi/g' -e 's/1/i386-linux-androideabi/g'` && \
+        l10ndir=`readlink -f $$MozLocales$$` && \
+        bash $$MozLocales$$/prebuild.sh && \
+        echo "ac_add_options --with-android-ndk=\"$$NDK$$\"" >> .mozconfig && \
+        echo "ac_add_options --with-android-sdk=\"$$SDK$$\"" >> .mozconfig && \
+        echo "ac_add_options --enable-application=mobile/android" >> .mozconfig && \
+        echo "ac_add_options --target=${fxarch}" >> .mozconfig && \
+        echo "ac_add_options --with-branding=mobile/android/branding/unofficial" >> .mozconfig && \
+        echo "ac_add_options --with-l10n-base=${l10ndir}" >> .mozconfig && \
+        echo "mk_add_options 'export L10NBASEDIR=${l10ndir}'" >> .mozconfig && \
+        echo "mk_add_options 'export ANDROID_VERSION_CODE=$$VERCODE$$'" >> .mozconfig && \
+        echo "mk_add_options 'export MOZ_CHROME_MULTILOCALE=$(tr '\n' ' ' <  mobile/android/locales/maemo-locales)'" >> .mozconfig && \
+        pushd mobile/android/branding/unofficial/ && \
+        sed -i -e '/ANDROID_PACKAGE_NAME/d' -e '/MOZ_APP_DISPLAYNAME/d' configure.sh && \
+        echo 'ANDROID_PACKAGE_NAME=org.mozilla.fennec_fdroid' >> configure.sh && \
+        echo 'MOZ_APP_DISPLAYNAME="Fennec F-Droid"' >> configure.sh && \
+        popd
+    scanignore=mobile/android/base/java/org/mozilla/gecko/javaaddons/JavaAddonManager.java,mobile/android/base/java/org/mozilla/gecko/javaaddons/JavaAddonManagerV1.java
+    build=export I_PREFER_A_SUBOPTIMAL_MERCURIAL_EXPERIENCE=1 && \
+        ./mach build && \
+        fxarch=`grep "ac_add_options --target=" .mozconfig | cut -d '=' -f2` && \
+        pushd obj-${fxarch}/mobile/android/locales && \
+        for loc in $(cat ../../../../mobile/android/locales/maemo-locales); do LOCALE_MERGEDIR=$PWD/merge-$loc make merge-$loc LOCALE_MERGEDIR=$PWD/merge-$loc; make LOCALE_MERGEDIR=$PWD/merge-$loc chrome-$loc LOCALE_MERGEDIR=$PWD/merge-$loc; done && \
+        popd && \
+        ./mach package && \
+        mv obj-${fxarch}/dist/fennec-*.apk fdroid/fennec-unsigned.apk && \
+        zip -d fdroid/fennec-unsigned.apk "META-INF*"
+
+Build:46.0,460010
+    disable=fails to build
+    commit=FENNEC_46_0_RELEASE
+    output=fdroid/fennec-unsigned.apk
+    srclibs=MozLocales@c096a331
+    prebuild=mkdir fdroid && \
+        fxarch=`echo $$VERCODE$$ | cut -c 5 | sed -e 's/0/arm-linux-androideabi/g' -e 's/1/i386-linux-androideabi/g'` && \
+        l10ndir=`readlink -f $$MozLocales$$` && \
+        bash $$MozLocales$$/prebuild.sh && \
+        echo "ac_add_options --with-android-ndk=\"$$NDK$$\"" >> .mozconfig && \
+        echo "ac_add_options --with-android-sdk=\"$$SDK$$\"" >> .mozconfig && \
+        echo "ac_add_options --enable-application=mobile/android" >> .mozconfig && \
+        echo "ac_add_options --target=${fxarch}" >> .mozconfig && \
+        echo "ac_add_options --with-branding=mobile/android/branding/unofficial" >> .mozconfig && \
+        echo "ac_add_options --with-l10n-base=${l10ndir}" >> .mozconfig && \
+        echo "mk_add_options 'export L10NBASEDIR=${l10ndir}'" >> .mozconfig && \
+        echo "mk_add_options 'export ANDROID_VERSION_CODE=$$VERCODE$$'" >> .mozconfig && \
+        echo "mk_add_options 'export MOZ_CHROME_MULTILOCALE=$(tr '\n' ' ' <  mobile/android/locales/maemo-locales)'" >> .mozconfig && \
+        pushd mobile/android/branding/unofficial/ && \
+        sed -i -e '/ANDROID_PACKAGE_NAME/d' -e '/MOZ_APP_DISPLAYNAME/d' configure.sh && \
+        echo 'ANDROID_PACKAGE_NAME=org.mozilla.fennec_fdroid' >> configure.sh && \
+        echo 'MOZ_APP_DISPLAYNAME="Fennec F-Droid"' >> configure.sh && \
+        popd
+    scanignore=mobile/android/base/java/org/mozilla/gecko/javaaddons/JavaAddonManager.java,mobile/android/base/java/org/mozilla/gecko/javaaddons/JavaAddonManagerV1.java
+    build=export I_PREFER_A_SUBOPTIMAL_MERCURIAL_EXPERIENCE=1 && \
+        ./mach build && \
+        fxarch=`grep "ac_add_options --target=" .mozconfig | cut -d '=' -f2` && \
+        pushd obj-${fxarch}/mobile/android/locales && \
+        for loc in $(cat ../../../../mobile/android/locales/maemo-locales); do LOCALE_MERGEDIR=$PWD/merge-$loc make merge-$loc LOCALE_MERGEDIR=$PWD/merge-$loc; make LOCALE_MERGEDIR=$PWD/merge-$loc chrome-$loc LOCALE_MERGEDIR=$PWD/merge-$loc; done && \
+        popd && \
+        ./mach package && \
+        mv obj-${fxarch}/dist/fennec-*.apk fdroid/fennec-unsigned.apk && \
+        zip -d fdroid/fennec-unsigned.apk "META-INF*"
+
 Maintainer Notes:
 
 Issues:
