@@ -69,16 +69,18 @@ Build:20160315,34
         popd
 
 Build:20160427,42
-    disable=use srclib for daemon
+    disable=builds
     commit=00e089c75376e4c27536cb6a8e900b9a16466002
-    subdir=ring-android/app/src/main
-    output=../../build/outputs/apk/app-universal-release-unsigned.apk
-    build=pushd ../../../../ && \
-        echo -e '#!/bin/sh\ngradle "$@"' > ring-android/gradlew && \
+    subdir=ring-android/app
+    output=build/outputs/apk/app-universal-release-unsigned.apk
+    srclibs=ringd@HEAD
+    build=sed -i -e "/MissingTranslation/adisable 'ExtraTranslation'\n" build.gradle && \
+        export DAEMON_DIR=`readlink -f $$ringd$$` && \
+        echo -e '#!/bin/sh\ngradle "$@"' > ../gradlew && \
         export ANDROID_NDK_ROOT=$ANDROID_NDK && \
         export ANDROID_ABI="armeabi-v7a" && \
-        ./compile.sh release && \
-        popd
+        cd ../../ && \
+        ./compile.sh release
 
 Auto Update Mode:None
 Update Check Mode:RepoManifest
