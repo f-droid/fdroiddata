@@ -76,6 +76,42 @@ Build:38.7.1,380711
         popd && \
         ./mach package
 
+Build:38.8.0,380800
+    commit=FIREFOX_38_8_0esr_RELEASE
+    output=obj-android/dist/gecko-unsigned-unaligned.apk
+    srclibs=MozLocales@96b78c77,IceCat@d3384a83
+    prebuild=fxarch=`echo $$VERCODE$$ | cut -c 5 | sed -e 's/0/arm-linux-androideabi/g' -e 's/1/i386-linux-androideabi/g'` && \
+        bash $$IceCat$$/makeicecat --skip-compare-locales --skip-l10n --no-debian --no-tarball --with-sourcedir=$PWD && \
+        bash $$MozLocales$$/prebuild-icecat.sh  && \
+        echo "ac_add_options --with-android-ndk=$$NDK$$" >> .mozconfig && \
+        echo "ac_add_options --with-android-sdk=$$SDK$$/platforms/android-22" >> .mozconfig && \
+        echo "ac_add_options --target=${fxarch}" >> .mozconfig && \
+        echo "mk_add_options 'export ANDROID_VERSION_CODE=$$VERCODE$$'" >> .mozconfig
+    scanignore=mobile/android/base/JavaAddonManager.java
+    build=./mach build && \
+        pushd obj-android/mobile/android/locales && \
+        for loc in $(cat ../../../../used-locales); do LOCALE_MERGEDIR=$PWD/merge-$loc make merge-$loc LOCALE_MERGEDIR=$PWD/merge-$loc; make LOCALE_MERGEDIR=$PWD/merge-$loc chrome-$loc LOCALE_MERGEDIR=$PWD/merge-$loc; done && \
+        popd && \
+        ./mach package
+
+Build:38.8.0,380810
+    commit=FIREFOX_38_8_0esr_RELEASE
+    output=obj-android/dist/gecko-unsigned-unaligned.apk
+    srclibs=MozLocales@96b78c77,IceCat@d3384a83
+    prebuild=fxarch=`echo $$VERCODE$$ | cut -c 5 | sed -e 's/0/arm-linux-androideabi/g' -e 's/1/i386-linux-androideabi/g'` && \
+        bash $$IceCat$$/makeicecat --skip-compare-locales --skip-l10n --no-debian --no-tarball --with-sourcedir=$PWD && \
+        bash $$MozLocales$$/prebuild-icecat.sh  && \
+        echo "ac_add_options --with-android-ndk=$$NDK$$" >> .mozconfig && \
+        echo "ac_add_options --with-android-sdk=$$SDK$$/platforms/android-22" >> .mozconfig && \
+        echo "ac_add_options --target=${fxarch}" >> .mozconfig && \
+        echo "mk_add_options 'export ANDROID_VERSION_CODE=$$VERCODE$$'" >> .mozconfig
+    scanignore=mobile/android/base/JavaAddonManager.java
+    build=./mach build && \
+        pushd obj-android/mobile/android/locales && \
+        for loc in $(cat ../../../../used-locales); do LOCALE_MERGEDIR=$PWD/merge-$loc make merge-$loc LOCALE_MERGEDIR=$PWD/merge-$loc; make LOCALE_MERGEDIR=$PWD/merge-$loc chrome-$loc LOCALE_MERGEDIR=$PWD/merge-$loc; done && \
+        popd && \
+        ./mach package
+
 Maintainer Notes:
 
 Dependencies:
@@ -86,5 +122,5 @@ Dependencies:
 Archive Policy:3 versions
 Auto Update Mode:None
 Update Check Mode:None
-Current Version:38.6.0
-Current Version Code:380600
+Current Version:38.8.0
+Current Version Code:380810
