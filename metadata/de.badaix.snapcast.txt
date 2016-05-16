@@ -23,14 +23,21 @@ Repo:https://github.com/badaix/snapcast
 Build:0.7.0,6
     commit=v0.7.0
     subdir=android/Snapcast
+    submodules=yes
     gradle=yes
-    prebuild=sed -i 's@NDK_DIR=.*@NDK_DIR="$$NDK$$/toolchains/arm-linux-androideabi-4.7/prebuilt/linux-x86/"@' ../../client/build_android.sh && \
-        sh ../../client/build_android.sh
-
-Maintainer Notes:
-Once ready do
-Auto Update Mode:Version v%v
-.
+    prebuild=pushd ../.. && \
+        ndkdir="`readlink -f ./`/ndk" && \
+        sed -i "s@NDK_DIR=.*@NDK_DIR='${ndkdir}'@" client/build_android.sh externals/build_flac_android.sh && \
+        pushd $$NDK$$/build/tools && \
+        ./make-standalone-toolchain.sh --arch=arm --platform=android-14 --install-dir=${ndkdir} --ndk-dir=$$NDK$$ --system=linux-x86 && \
+        popd && \
+        pushd externals && \
+        sh build_flac_android.sh && \
+        pushd ../client && \
+        sh build_android.sh && \
+        popd && \
+        popd
+    scanignore=ndk,client/snapclient,android/Snapcast/src/main/assets/bin/armeabi-v7a/snapclient,android/Snapcast/src/main/assets/bin/armeabi/snapclient
 
 Auto Update Mode:None
 Update Check Mode:Tags
