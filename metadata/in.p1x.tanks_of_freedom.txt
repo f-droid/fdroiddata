@@ -282,5 +282,31 @@ Build:0.4.2-beta,12
         cd ../tof && \
         ../godot/bin/godot_server.server.tools.* -export Android ../tof.apk
 
+Build:0.5.0-beta,13
+    commit=0.5.0-beta-0-g6c9acfd34a3087dded3c329fb12be46baa80168d
+    output=tof.apk
+    srclibs=Godot@2.0.3-stable-0-g9ed2084b420ef39d1ed2330047def39224b8a3ce
+    prebuild=mkdir tof && \
+        bash -O extglob -c "mv !(tof) tof" && \
+        cp tof/buildConfig/engine_android.cfg tof/engine.cfg && \
+        cp tof/buildConfig/export_android.cfg.dist tof/export.cfg && \
+        sed -i 's,\(package/unique_name=\).*$,\1"in.p1x.tanks_of_freedom",;s,\(version/code\).*$,\1=$$VERCODE$$,;s,\(version/name=\).*$,\1"$$VERSION$$",;s,\(package/signed\).*$,\1=false,' tof/export.cfg && \
+        cp -R $$Godot$$ godot
+    target=android-19
+    build=cd godot && \
+        scons -j 4 p=server unix_global_settings_path=".." && \
+        export ANDROID_NDK_ROOT=$$NDK$$ && \
+        scons -j 4 p=android target=release && \
+        mkdir -p platform/android/java/libs/armeabi && \
+        cp bin/libgodot.android.opt.armv7.neon.so platform/android/java/libs/armeabi/libgodot_android.so && \
+        pushd platform/android/java/ && \
+        gradle assembleRelease && \
+        popd && \
+        export HOME=$PWD && \
+        mkdir -p ../templates/ && \
+        cp platform/android/java/build/outputs/apk/java-release-unsigned.apk ../templates/android_release.apk && \
+        cd ../tof && \
+        ../godot/bin/godot_server.server.tools.* -export Android ../tof.apk
+
 Auto Update Mode:None
 Update Check Mode:None
