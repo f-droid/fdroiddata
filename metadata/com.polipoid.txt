@@ -59,7 +59,26 @@ Build:1.2.0,4
         mv run_pie-arm ../assets/run_pie-arm && \
         mv run_pie-x86 ../assets/run_pie-x86
 
+Build:1.2.1,5
+    commit=v1.2.1
+    submodules=yes
+    maven=yes
+    build=TOOLCHAIN_ARM=/tmp/polipoid-toolchain-arm && \
+        TOOLCHAIN_X86=/tmp/polipoid-toolchain-x86 && \
+        $$NDK$$/build/tools/make-standalone-toolchain.sh --platform=android-9 --arch=arm --install-dir=$TOOLCHAIN_ARM && \
+        $$NDK$$/build/tools/make-standalone-toolchain.sh --platform=android-9 --arch=x86 --install-dir=$TOOLCHAIN_X86 && \
+        cd polipo/ && \
+        PATH=$TOOLCHAIN_ARM/bin:$PATH CC=arm-linux-androideabi-gcc EXTRA_DEFINES="-fvisibility=default -fPIE -U __linux__" LDFLAGS="-rdynamic -fPIE -pie" make clean polipo && \
+        mv polipo ../src/main/assets/polipo-arm && \
+        PATH=$TOOLCHAIN_X86/bin:$PATH CC=i686-linux-android-gcc EXTRA_DEFINES="-fvisibility=default -fPIE -U __linux__" LDFLAGS="-rdynamic -fPIE -pie" make clean polipo && \
+        mv polipo ../src/main/assets/polipo-x86 && \
+        cd ../src/main/run-pie/ && \
+        $TOOLCHAIN_ARM/bin/arm-linux-androideabi-gcc -o run_pie-arm run_pie.c && \
+        $TOOLCHAIN_X86/bin/i686-linux-android-gcc -o run_pie-x86 run_pie.c && \
+        mv run_pie-arm ../assets/run_pie-arm && \
+        mv run_pie-x86 ../assets/run_pie-x86
+
 Auto Update Mode:None
 Update Check Mode:Tags
-Current Version:1.2.0
-Current Version Code:4
+Current Version:1.2.1
+Current Version Code:5
