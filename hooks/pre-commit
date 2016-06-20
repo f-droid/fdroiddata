@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 set -o errexit
 set -o nounset
@@ -7,5 +7,8 @@ set -o pipefail
 # Redirect output to stderr.
 exec 1>&2
 
+apps="$(git diff --cached --name-only --diff-filter=ACM | sed -n 's@metadata/\(.*\).txt@\1@p')"
 
-fdroid lint -f $(git diff --cached --name-only --diff-filter=ACM | sed -n 's@metadata/\(.*\).txt@\1@p')
+if [[ -n "$apps" ]]; then
+	fdroid lint -f $apps
+fi
