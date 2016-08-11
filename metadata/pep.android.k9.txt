@@ -4,6 +4,7 @@ Web Site:https://prettyeasyprivacy.com/
 Source Code:
 Issue Tracker:https://cacert.pep.foundation/trac/
 
+Auto Name:p≡p
 Summary:Reliable and confidential communication
 Description:
 p≡p is a cyber security solution which protects the confidentiality and
@@ -57,5 +58,24 @@ Build:0.7.3,8
         sed -i 's:ASN1C_INCLUDE=.*$:ASN1C_INCLUDE=/usr/share/asn1c:' $$pEpEngine$$/Makefile.conf && \
         sed -i 's:-fcompound-names:-fcompound-names -fnative-types:' $$pEpEngine$$/asn.1/Makefile
 
+Build:0.9,9
+    commit=v0.9
+    subdir=k9mail
+    gradle=fDroid
+    srclibs=pEpJNIAdapter@dff0851f0,pEpEngine@1fddfbef5b,yml2@8859102a
+    prebuild=sed -i 's:file("../pEpJNIAdapter/android"):file("../srclib/pEpJNIAdapter/android"):' ../settings.gradle && \
+        sed -i "s/4.8/4.9/" $$pEpJNIAdapter$$/android/external/Makefile && \
+        sed -i 's:include $(ANDROID_NDK_HOME)/\(toolchains/$(NDK_TOOLCHAIN)/setup.mk\):include $(ANDROID_NDK_HOME)/build/core/\1:' $$pEpJNIAdapter$$/android/external/Makefile && \
+        sed -i 's:\(ICONV_PREFIX=$(LOCAL)\) \(./build.sh\):\1 bash \2:' $$pEpJNIAdapter$$/android/external/Makefile && \
+        sed -i "s:yml2proc:../$$yml2$$/yml2proc:" $$pEpJNIAdapter$$/src/Makefile && \
+        sed -i 's:YML2PROC=.*$:YML2PROC=src/$$yml2$$/yml2proc:;s:YML_PATH=.*$:YML_PATH=src/$$yml2$$:' $$pEpEngine$$/Makefile.conf && \
+        sed -i 's:env python:env python2:' $$yml2$$/yml2proc && \
+        sed -i "s:backend.includePath.extend(dirs):backend.includePath.extend(['$(realpath $$yml2$$)']):" $$yml2$$/yml2proc && \
+        sed -i "s:/bin/sh:/bin/bash:" $$pEpEngine$$/build-android/build.sh && \
+        sed -i 's:ASN1C_INCLUDE=.*$:ASN1C_INCLUDE=/usr/share/asn1c:' $$pEpEngine$$/Makefile.conf && \
+        sed -i 's:-fcompound-names:-fcompound-names -fnative-types:' $$pEpEngine$$/asn.1/Makefile
+
 Auto Update Mode:Version v%v
 Update Check Mode:Tags
+Current Version:0.9
+Current Version Code:9
