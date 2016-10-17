@@ -42,7 +42,12 @@ Build:2.7,13
 Build:3.0,16
     commit=3.0
     gradle=zbar
-    scanignore=src/zbar/jniLibs
+    prebuild=sed -i -e '/play-services/d' build.gradle
+    scandelete=src/zbar/jniLibs
+    build=pushd libzbar && \
+        NDK_PROJECT_PATH=$(pwd) ndk-build && \
+        cp -rv libs/* ../src/zbar/jniLibs/ && \
+        popd
 
 Auto Update Mode:Version %v
 Update Check Mode:Tags
