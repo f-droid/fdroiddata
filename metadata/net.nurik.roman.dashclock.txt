@@ -62,9 +62,25 @@ Build:1.6,30
     prebuild=echo "sdk.dir=$ANDROID_HOME" > ../local.properties && \
         sed -i '/^project\.archivesBaseName/d' build.gradle
 
+Build:1.7.2,35
+    disable=gsmlib issues
+    commit=v1.7.2
+    subdir=main
+    gradle=yes
+    srclibs=gsmlib@3a219305d801f79c5385583e8ae8a9e9febc0160
+    prebuild=pushd $$gsmlib$$ && \
+        gradle install && \
+        popd && \
+        echo "sdk.dir=$ANDROID_HOME" > ../local.properties && \
+        sed -i '/^project\.archivesBaseName/d' build.gradle && \
+        sed -i -e '/mavenCentral/amavenLocal()' -e '/Goddchen/d' -e '/play-services/d' build.gradle ../build.gradle && \
+        sed -i -e '/support-v13/acompile "org.microg.gms:play-services:1.0-SNAPSHOT"' build.gradle
+
 Maintainer Notes:
 MicroG's GmsLib can be used to strip play-services dependency
 for this one, according to https://github.com/microg/android_external_GmsLib#example-dashclock .
+
+Installing gsmlib fails due to signing issues. Maybe just `gradle assembleRelease` and sign manually?
 .
 
 Auto Update Mode:None
