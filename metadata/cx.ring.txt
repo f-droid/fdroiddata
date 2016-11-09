@@ -168,17 +168,19 @@ Build:20161103,53
         cd ../../ && \
         ./compile.sh release
 
-Maintainer Notes:
-
-Build fails for me with:
-
-Android NDK:     This is likely to result in incorrect builds. Try using LOCAL_STATIC_LIBRARIES    
-Android NDK:     or LOCAL_SHARED_LIBRARIES instead to list the library dependencies of the    
-Android NDK:     current module    
-
-jni/ring_wrapper.cpp:8133:21: error: 'isIax2Enabled' is not a member of 'DRing'
-jni/ring_wrapper.cpp:8264:12: error: 'getIp2IpDetails' is not a member of 'DRing'
-.
+Build:20161108,54
+    commit=7b381a62fba638106e5d71137a4e3351f9324b82
+    subdir=client-android/ring-android/app
+    submodules=yes
+    output=build/outputs/apk/app-release-unsigned.apk
+    scandelete=client-windows
+    build=sed -i -e "/MissingTranslation/adisable 'ExtraTranslation'\n" build.gradle && \
+        ln -s ../daemon/ ../../ring-daemon && \
+        echo -e '#!/bin/sh\ngradle "$@"' > ../gradlew && \
+        export ANDROID_NDK_ROOT=$ANDROID_NDK && \
+        export ANDROID_ABI="armeabi-v7a" && \
+        cd ../../ && \
+        ./compile.sh release
 
 Auto Update Mode:None
 Update Check Mode:RepoManifest/production
