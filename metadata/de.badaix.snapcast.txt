@@ -37,6 +37,25 @@ Build:0.7.0,6
         pushd ../client && \
         sh build_android.sh
 
+Build:0.10.0,7
+    disable=wip
+    commit=41be3ade60de166cd8f0bd8b2b66a78537e2599d
+    subdir=android/Snapcast
+    submodules=yes
+    gradle=yes
+    scandelete=android/Snapcast/src/main/assets/bin
+    build=pushd ../.. && \
+        ndkdir="$PWD/ndk" && \
+        sed -i "s@NDK_DIR=.*@NDK_DIR='${ndkdir}'@" client/build_android.sh externals/build_externals_android.sh && \
+        pushd $$NDK$$/build/tools && \
+        ./make_standalone_toolchain.py --arch arm --api 14 --install-dir ${ndkdir} && \
+        popd && \
+        pushd externals && \
+        sh build_externals_android.sh && \
+        pushd ../client && \
+        sh build_android.sh
+    ndk=r13b
+
 Auto Update Mode:None
 Update Check Mode:Tags
 Current Version:0.10.0
