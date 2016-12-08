@@ -20,7 +20,7 @@ most apps from the marketplace.
 .
 
 Repo Type:hg
-Repo:https://hg.mozilla.org/releases/mozilla-esr38
+Repo:https://hg.mozilla.org/releases/mozilla-esr45
 
 Build:38.6.0,380600
     commit=FIREFOX_38_6_0esr_RELEASE
@@ -112,6 +112,48 @@ Build:38.8.0,380810
         popd && \
         ./mach package
 
+Build:45.5.1,450501
+    commit=FIREFOX_45_5_1esr_RELEASE
+    output=obj-android/dist/gecko-unsigned-unaligned.apk
+    srclibs=MozLocales@a4998ff4,IceCat@300e01d4
+    prebuild=export I_PREFER_A_SUBOPTIMAL_MERCURIAL_EXPERIENCE=1 && \
+        bash $$IceCat$$/makeicecat -- --no-tarball --skip-l10n --no-debian --with-sourcedir=$PWD && \
+        bash $$MozLocales$$/prebuild-icecat.sh && \
+        fxarch=`echo $$VERCODE$$ | cut -c 5 | sed -e 's/0/arm-linux-androideabi/g' -e 's/1/i386-linux-androideabi/g'` && \
+        echo "ac_add_options --with-android-ndk=$$NDK$$" >> .mozconfig && \
+        echo "ac_add_options --with-android-sdk=$$SDK$$" >> .mozconfig && \
+        echo "ac_add_options --target=${fxarch}" >> .mozconfig && \
+        echo "mk_add_options 'export ANDROID_VERSION_CODE=$$VERCODE$$'" >> .mozconfig
+    scanignore=mobile/android/base/java/org/mozilla/gecko/javaaddons
+    build=export I_PREFER_A_SUBOPTIMAL_MERCURIAL_EXPERIENCE=1 && \
+        ./mach build && \
+        pushd obj-android/mobile/android/locales && \
+        for loc in $(cat ../../../../used-locales); do LOCALE_MERGEDIR=$PWD/merge-$loc make merge-$loc || exit 1; LOCALE_MERGEDIR=$PWD/merge-$loc make chrome-$loc || exit 1; done && \
+        popd && \
+        ./mach package
+    ndk=r10e
+
+Build:45.5.1,450511
+    commit=FIREFOX_45_5_1esr_RELEASE
+    output=obj-android/dist/gecko-unsigned-unaligned.apk
+    srclibs=MozLocales@a4998ff4,IceCat@300e01d4
+    prebuild=export I_PREFER_A_SUBOPTIMAL_MERCURIAL_EXPERIENCE=1 && \
+        bash $$IceCat$$/makeicecat -- --no-tarball --skip-l10n --no-debian --with-sourcedir=$PWD && \
+        bash $$MozLocales$$/prebuild-icecat.sh && \
+        fxarch=`echo $$VERCODE$$ | cut -c 5 | sed -e 's/0/arm-linux-androideabi/g' -e 's/1/i386-linux-androideabi/g'` && \
+        echo "ac_add_options --with-android-ndk=$$NDK$$" >> .mozconfig && \
+        echo "ac_add_options --with-android-sdk=$$SDK$$" >> .mozconfig && \
+        echo "ac_add_options --target=${fxarch}" >> .mozconfig && \
+        echo "mk_add_options 'export ANDROID_VERSION_CODE=$$VERCODE$$'" >> .mozconfig
+    scanignore=mobile/android/base/java/org/mozilla/gecko/javaaddons
+    build=export I_PREFER_A_SUBOPTIMAL_MERCURIAL_EXPERIENCE=1 && \
+        ./mach build && \
+        pushd obj-android/mobile/android/locales && \
+        for loc in $(cat ../../../../used-locales); do LOCALE_MERGEDIR=$PWD/merge-$loc make merge-$loc || exit 1; LOCALE_MERGEDIR=$PWD/merge-$loc make chrome-$loc || exit 1; done && \
+        popd && \
+        ./mach package
+    ndk=r10e
+
 Maintainer Notes:
 
 Dependencies:
@@ -122,5 +164,5 @@ Dependencies:
 Archive Policy:3 versions
 Auto Update Mode:None
 Update Check Mode:None
-Current Version:38.8.0
-Current Version Code:380810
+Current Version:45.5.1
+Current Version Code:450511
