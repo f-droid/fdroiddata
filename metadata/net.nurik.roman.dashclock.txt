@@ -1,9 +1,9 @@
 Categories:Theming
-License:Apache2
-Web Site:https://code.google.com/p/dashclock
-Source Code:https://code.google.com/p/dashclock/source
-Issue Tracker:
-Changelog:https://code.google.com/p/dashclock/wiki/Changelog
+License:Apache-2.0
+Web Site:
+Source Code:https://github.com/romannurik/dashclock/
+Issue Tracker:https://github.com/romannurik/dashclock/issues
+Changelog:https://github.com/romannurik/dashclock/wiki/Changelog
 
 Auto Name:DashClock Widget
 Summary:Extensible lock screen widget
@@ -62,9 +62,25 @@ Build:1.6,30
     prebuild=echo "sdk.dir=$ANDROID_HOME" > ../local.properties && \
         sed -i '/^project\.archivesBaseName/d' build.gradle
 
+Build:1.7.2,35
+    disable=gsmlib issues
+    commit=v1.7.2
+    subdir=main
+    gradle=yes
+    srclibs=gmslib@3a219305d801f79c5385583e8ae8a9e9febc0160
+    prebuild=pushd $$gmslib$$ && \
+        gradle install && \
+        popd && \
+        echo "sdk.dir=$ANDROID_HOME" > ../local.properties && \
+        sed -i '/^project\.archivesBaseName/d' build.gradle && \
+        sed -i -e '/mavenCentral/amavenLocal()' -e '/Goddchen/d' -e '/play-services/d' build.gradle ../build.gradle && \
+        sed -i -e '/support-v13/acompile "org.microg.gms:play-services:1.0-SNAPSHOT"' build.gradle
+
 Maintainer Notes:
 MicroG's GmsLib can be used to strip play-services dependency
 for this one, according to https://github.com/microg/android_external_GmsLib#example-dashclock .
+
+Installing gmslib fails due to signing issues. Maybe just `gradle assembleRelease` and sign manually?
 .
 
 Auto Update Mode:None
