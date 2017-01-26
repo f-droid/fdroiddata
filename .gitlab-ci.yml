@@ -8,4 +8,13 @@ before_script:
 
 lint:
   script:
-    - fdroid lint -f
+    - export EXITVALUE=0
+    - fdroid lint -f || {
+          export EXITVALUE=1;
+          printf "\nThese files have lint issues:\n";
+          fdroid rewritemeta -l;
+          printf "\nThese are the formatting issues:\n";
+          fdroid rewritemeta;
+          git --no-pager diff --color=always;
+      }
+    - exit $EXITVALUE
