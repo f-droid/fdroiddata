@@ -13,8 +13,9 @@ use it directly from master:
 	git clone https://gitlab.com/fdroid/fdroidserver.git
 	export PATH="$PATH:$PWD/fdroidserver"
 
-Enter your fdroiddata clone:
+Clone fdroiddata (or your fork) and enter it:
 
+	git clone https://gitlab.com/fdroid/fdroiddata.git
 	cd fdroiddata
 
 An empty config file should work for most setups:
