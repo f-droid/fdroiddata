@@ -219,8 +219,23 @@ Build:2.8.1,216
         cp $$JSword$$/target/jsword-*.jar libs/jsword.jar
 
 Build:2.8.2,219
-    disable=remove apk
     commit=build-02.08.02
+    subdir=and-bible/app
+    gradle=yes
+    srclibs=JSword@fa6a44d05982a67f0122ffdd7b522d8ebcf43824
+    rm=and-bible/app/libs/*,and-bible/libs-src,ReadingPlanCreator/libs,jsword-tweaks/libs
+    prebuild=sed -i "/mmseg4j/d" build.gradle && \
+        cp -r ../../jsword-tweaks/src/main/. $$JSword$$/src/main && \
+        sed -i "/<repositories>/,/<\/repositories>/d" $$JSword$$/pom.xml && \
+        rm -rf $$JSword$$/src/main/java/org/crosswire/jsword/examples && \
+        sed -i "/<dependencies>/a <dependency><groupId>com.chenlb.mmseg4j</groupId><artifactId>mmseg4j-all</artifactId><version>1.8.6</version></dependency>" $$JSword$$/pom.xml
+    build=pushd $$JSword$$ && \
+        $$MVN3$$ package -Dmaven.test.skip=true && \
+        popd && \
+        cp $$JSword$$/target/jsword-*.jar libs/jsword.jar
+
+Build:2.8.3,221
+    commit=build-02.08.03
     subdir=and-bible/app
     gradle=yes
     srclibs=JSword@fa6a44d05982a67f0122ffdd7b522d8ebcf43824
