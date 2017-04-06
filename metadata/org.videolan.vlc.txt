@@ -1192,17 +1192,30 @@ Build:2.0.6,12000605
         ./compile.sh -a "x86" --release
     ndk=r11c
 
-Build:2.1.1,12000609
-    disable=doesnt build
-    commit=2.1.1
+Build:2.1.4,12000609
+    disable=contrib make failed
+    commit=2.1.4
     subdir=vlc-android
     gradle=VanillaX86
-    srclibs=VLC@6b4ff0f
-    prebuild=ln -s vlc-android/$$VLC$$ ../vlc
-    build=cd ../ && \
-        sed -i 's,http://download,https://download,g' compile.sh && \
-        ./compile.sh -a "x86" --release
-    ndk=r13b
+    srclibs=VLC@ed56521
+    prebuild=ln -s vlc-android/$$VLC$$ ../vlc && \
+        mkdir -p gradle/wrapper/ && \
+        echo 'distributionUrl=https://services.gradle.org/distributions/gradle-3.4.1-bin.zip' > gradle/wrapper/gradle-wrapper.properties && \
+        sed -i -e '/signingConfigs/d' build.gradle
+    build=pushd ../vlc/extras/tools && \
+        ./bootstrap && \
+        popd && \
+        pushd ../vlc/contrib && \
+        mkdir native && \
+        pushd native && \
+        ../bootstrap && \
+        make && \
+        popd && \
+        popd && \
+        cd ../ && \
+        ./compile.sh -a "x86" && \
+        ./compile release
+    ndk=r14
 
 Maintainer Notes:
 Instructions and dependencies here: http://wiki.videolan.org/AndroidCompile
