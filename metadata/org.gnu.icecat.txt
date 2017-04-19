@@ -238,8 +238,50 @@ Build:45.7.0,450710
         ./mach package
     ndk=r10e
 
+Build:52.0.2,520002
+    commit=FIREFOX_52_0_2esr_RELEASE
+    output=fdroid/icecat-unsigned.apk
+    srclibs=MozLocales@05d905c5,IceCat@f1f99399
+    prebuild=bash $$IceCat$$/makeicecat -- --no-tarball --skip-l10n --no-debian --with-sourcedir=$PWD && \
+        bash $$MozLocales$$/prebuild-icecat.sh && \
+        fxarch=`echo $$VERCODE$$ | cut -c 5 | sed -e 's/0/arm-linux-androideabi/g' -e 's/1/i386-linux-androideabi/g'` && \
+        echo "ac_add_options --with-android-ndk=$$NDK$$" >> .mozconfig && \
+        echo "ac_add_options --with-android-sdk=$$SDK$$" >> .mozconfig && \
+        echo "ac_add_options --target=${fxarch}" >> .mozconfig && \
+        echo "mk_add_options 'export ANDROID_VERSION_CODE=$$VERCODE$$'" >> .mozconfig
+    scanignore=mobile/android/base/java/org/mozilla/gecko/javaaddons
+    build=export I_PREFER_A_SUBOPTIMAL_MERCURIAL_EXPERIENCE=1 && \
+        ./mach build && \
+        pushd obj-android/mobile/android/locales && \
+        for loc in $(cat ../../../../used-locales); do LOCALE_MERGEDIR=$PWD/merge-$loc make merge-$loc || exit 1; LOCALE_MERGEDIR=$PWD/merge-$loc make chrome-$loc || exit 1; done && \
+        popd && \
+        ./mach package && \
+        mv obj-android/dist/icecat*-unsigned-unaligned.apk fdroid/icecat-unsigned.apk
+    ndk=r12b
+
+Build:52.0.2,520012
+    commit=FIREFOX_52_0_2esr_RELEASE
+    output=fdroid/icecat-unsigned.apk
+    srclibs=MozLocales@05d905c5,IceCat@f1f99399
+    prebuild=bash $$IceCat$$/makeicecat -- --no-tarball --skip-l10n --no-debian --with-sourcedir=$PWD && \
+        bash $$MozLocales$$/prebuild-icecat.sh && \
+        fxarch=`echo $$VERCODE$$ | cut -c 5 | sed -e 's/0/arm-linux-androideabi/g' -e 's/1/i386-linux-androideabi/g'` && \
+        echo "ac_add_options --with-android-ndk=$$NDK$$" >> .mozconfig && \
+        echo "ac_add_options --with-android-sdk=$$SDK$$" >> .mozconfig && \
+        echo "ac_add_options --target=${fxarch}" >> .mozconfig && \
+        echo "mk_add_options 'export ANDROID_VERSION_CODE=$$VERCODE$$'" >> .mozconfig
+    scanignore=mobile/android/base/java/org/mozilla/gecko/javaaddons
+    build=export I_PREFER_A_SUBOPTIMAL_MERCURIAL_EXPERIENCE=1 && \
+        ./mach build && \
+        pushd obj-android/mobile/android/locales && \
+        for loc in $(cat ../../../../used-locales); do LOCALE_MERGEDIR=$PWD/merge-$loc make merge-$loc || exit 1; LOCALE_MERGEDIR=$PWD/merge-$loc make chrome-$loc || exit 1; done && \
+        popd && \
+        ./mach package && \
+        mv obj-android/dist/icecat*-unsigned-unaligned.apk fdroid/icecat-unsigned.apk
+    ndk=r12b
+
 Archive Policy:4 versions
 Auto Update Mode:None
 Update Check Mode:None
-Current Version:45.7.0
-Current Version Code:450710
+Current Version:52.0.2
+Current Version Code:520012
