@@ -456,14 +456,29 @@ Build:2.0.0,347
     output=build/outputs/apk/xabber-dev-universal-release-unsigned.apk
 
 Build:2.0.1,348
-    disable=untrusted repo
     commit=2.0.1
     subdir=xabber
     submodules=yes
     gradle=dev
     output=build/outputs/apk/xabber-dev-universal-release-unsigned.apk
+    prebuild=echo "smackCommitShortHash=8466a5a" >> gradle.properties && \
+        sed -i "s/maven { url 'https:\/\/igniterealtime.org\/repo' }//" ../build.gradle && \
+        sed -i 's/compile \"org.igniterealtime.smack:smack-android-extensions.*\"/compile \"com.github.igniterealtime.smack:smack-android-extensions:$smackCommitShortHash\"/' build.gradle && \
+        sed -i 's/compile \"org.igniterealtime.smack:smack-experimental.*\"/compile \"com.github.igniterealtime.smack:smack-experimental:$smackCommitShortHash\"/' build.gradle && \
+        sed -i 's/compile \"org.igniterealtime.smack:smack-experimental.*\"/compile \"com.github.igniterealtime.smack:smack-experimental:$smackCommitShortHash\"/' build.gradle && \
+        sed -i 's/compile \"org.igniterealtime.smack:smack-tcp.*\"/compile \"com.github.igniterealtime.smack:smack-tcp:$smackCommitShortHash\"/' build.gradle && \
+        sed -i 's/compile \"org.igniterealtime.smack:smack-resolver-dnsjava.*\"/compile \"com.github.igniterealtime.smack:smack-resolver-dnsjava:$smackCommitShortHash\"/' build.gradle
 
-Auto Update Mode:Version %v
-Update Check Mode:Tags
+Maintainer Notes:
+Upstream uses the (untrusted) igniterealtime Maven repository for Smack.
+While it does this, before adding an update, make sure
+smackCommitShortHash is the commit corresponding to the Smack snapshot
+used by upstream.  To do this, cross reference xabber/build.gradle
+dependencies (version/date) with commits in igniterealtime's Smack
+github respository (may not be in master branch).
+.
+
+Auto Update Mode:None
+Update Check Mode:None
 Current Version:2.0.1
 Current Version Code:348
