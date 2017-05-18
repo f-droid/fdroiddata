@@ -38,11 +38,20 @@ Build:1.8.0,1304
     gradle=yes
 
 Build:1.9.2,1480
-    disable=Google Repo
     commit=d195e1cee24af70ce6e6a2c12d4d2a9b796d53c6
+    subdir=app
     gradle=Fdroid
-    prebuild=sed -i 's#./gradlew#gradle#' build_skymap_fdroid.sh
-    build=./build_skymap_fdroid.sh
+    prebuild=sed -i -e 's/gms/fdroid/' ../tools/build.gradle && \
+        sed -i -e '/gms/d' ../build.gradle && \
+        sed -i -e '/gmsCompile/d' build.gradle && \
+        sed -i -e '/com.google.gms.google-services/d' build.gradle && \
+        cd .. && \
+        gradle assembleFdroid installDist && \
+        cd tools && \
+        sed -i -e 's#CLASSPATH=#CLASSPATH=$APP_HOME/lib/:#g' build/install/datagen/bin/datagen && \
+        ./generate.sh && \
+        ./rewrite.sh && \
+        ./binary.sh
 
 Auto Update Mode:None
 Update Check Mode:Tags
