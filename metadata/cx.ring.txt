@@ -414,20 +414,20 @@ Build:20170412,74
         ./compile.sh release
 
 Build:20170501,76
-    disable=builds locally, but not on server...
     commit=628969d1bd199ccfcbcfbf4aae146fb261f4c6db
     subdir=client-android/ring-android/app
     submodules=yes
     output=build/outputs/apk/app-release-unsigned.apk
     scandelete=client-windows,client-uwp
-    build=sed -i -e "/MissingTranslation/adisable 'ExtraTranslation'\n" build.gradle && \
+    build=export PATH=$PATH:/opt/gradle/bin && \
+        sed -i -e "/MissingTranslation/adisable 'ExtraTranslation'\n" build.gradle && \
         ln -s ../daemon/ ../../ring-daemon && \
         echo -e '#!/bin/sh\ngradle "$@"' > ../gradlew && \
         export ANDROID_NDK_ROOT=$ANDROID_NDK && \
         export ANDROID_ABI="armeabi-v7a" && \
         cd ../../ && \
         ./compile.sh release
-    ndk=r14
+    ndk=r14b
 
 Build:20170516,78
     commit=fc2d83c
@@ -443,6 +443,30 @@ Build:20170516,78
         cd ../../ && \
         ./compile.sh release
     ndk=r14b
+
+Build:20170531,79
+    disable=wait for test build 76
+    commit=79f748e3ea0354a7ba3e25d30a3e0178a16658d0
+    subdir=client-android/ring-android/app
+    submodules=yes
+    output=build/outputs/apk/app-release-unsigned.apk
+    scandelete=client-windows,client-uwp
+    build=export PATH=$PATH:/opt/gradle/bin && \
+        sed -i -e "/MissingTranslation/adisable 'ExtraTranslation'\n" build.gradle && \
+        ln -s ../daemon/ ../../ring-daemon && \
+        echo -e '#!/bin/sh\ngradle "$@"' > ../gradlew && \
+        export ANDROID_NDK_ROOT=$ANDROID_NDK && \
+        export ANDROID_ABI="armeabi-v7a" && \
+        cd ../../ && \
+        ./compile.sh release
+    ndk=r14b
+
+Maintainer Notes:
+Looks like buildserver/setup-env-vars wasnt properly run the last time. PATH
+should in fact already includee /opt/gradle:
+
+echo 'export PATH=$PATH:${ANDROID_HOME}/tools:${ANDROID_HOME}/platform-tools:/opt/gradle/bin' >> $bsenv
+.
 
 Auto Update Mode:None
 Update Check Mode:RepoManifest/production
