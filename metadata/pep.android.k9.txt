@@ -41,7 +41,7 @@ Just install the app and you can communicate in confidence with your peers.
 .
 
 Repo Type:git
-Repo:https://download.pep-security.net/git/k9-pep
+Repo:https://letsencrypt.pep-security.lu/gitlab/android/pep.git
 
 Build:0.7.3,8
     disable=old failing build
@@ -133,6 +133,24 @@ Build:0.9.4,13
         sed -i 's:-fcompound-names:-fcompound-names -fnative-types:' $$pEpEngine$$/asn.1/Makefile
     ndk=r11c
 
+Build:0.9.10.1,60
+    commit=v0.9.10.1
+    subdir=k9mail
+    gradle=WiththoutkeysyncPlayStore
+    srclibs=pEpJNIAdapter@f5210e9e14a7,pEpEngine@46fa9082dd6b,yml2@2.5.5
+    prebuild=sed -i 's:file("../pEpJNIAdapter/android"):file("../srclib/pEpJNIAdapter/android"):' ../settings.gradle && \
+        sed -i "s/4.8/4.9/" $$pEpJNIAdapter$$/android/external/Makefile && \
+        sed -i 's:include $(ANDROID_NDK_HOME)/\(toolchains/$(NDK_TOOLCHAIN)/setup.mk\):include $(ANDROID_NDK_HOME)/build/core/\1:' $$pEpJNIAdapter$$/android/external/Makefile && \
+        sed -i 's:\(ICONV_PREFIX=$(LOCAL)\) \(./build.sh\):\1 bash \2:' $$pEpJNIAdapter$$/android/external/Makefile && \
+        sed -i "s:yml2proc:../$$yml2$$/yml2proc:" $$pEpJNIAdapter$$/src/Makefile && \
+        sed -i 's:env python:env python2:' $$yml2$$/yml2proc && \
+        sed -i "s:backend.includePath.extend(dirs):backend.includePath.extend(['$(realpath $$yml2$$)']):" $$yml2$$/yml2proc && \
+        sed -i 's:YML2PROC=.*$:YML2PROC=src/$$yml2$$/yml2proc:;s:YML_PATH=.*$:YML_PATH=src/$$yml2$$:' $$pEpEngine$$/Makefile.conf && \
+        sed -i "s:/bin/sh:/bin/bash:" $$pEpEngine$$/build-android/build.sh && \
+        sed -i 's:ASN1C_INCLUDE=.*$:ASN1C_INCLUDE=/usr/share/asn1c:' $$pEpEngine$$/Makefile.conf && \
+        sed -i 's:-fcompound-names:-fcompound-names -fnative-types:' $$pEpEngine$$/asn.1/Makefile
+    ndk=r11c
+
 Maintainer Notes:
 Do not set AUM when srclibs tend to change!
 
@@ -142,4 +160,4 @@ Auto Update Mode:Version v%v
 Auto Update Mode:None
 Update Check Mode:Tags
 Current Version:Unknown
-Current Version Code:59
+Current Version Code:60
