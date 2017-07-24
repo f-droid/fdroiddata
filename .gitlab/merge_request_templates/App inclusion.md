@@ -2,3 +2,6 @@
 * [ ] The original app author has been notified (and supports the inclusion)
 * [ ] All related fdroiddata and rfp issues have been referenced in this merge request
 * [ ] Builds with `fdroid build`
+
+---------------------
+
