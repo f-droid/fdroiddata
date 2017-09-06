@@ -145,16 +145,19 @@ Build:1.0.1,15
     buildjni=yes
 
 Build:1.0.2,16
-    disable=Project updated to Gradle from Ant. New build instructions are missing.
     commit=SnoopSnitch-1.0.2
-    subdir=SnoopSnitch
-    prebuild=rm -rf ../contrib/prebuilt/*
-    target=android-19
-    build=export PATH=$$NDK$$/toolchains/arm-linux-androideabi-4.8/prebuilt/linux-x86/bin:$PATH && \
+    subdir=SnoopSnitch/app
+    submodules=yes
+    gradle=yes
+    prebuild=rm -rf ../../contrib/prebuilt/*
+    build=cd ../../contrib && \
+        export PATH=$$NDK$$/toolchains/arm-linux-androideabi-4.9/prebuilt/linux-x86_64/bin:$PATH && \
         export NDK_DIR=$$NDK$$ && \
-        cd ../contrib && \
-        bash compile.sh -t android -g -u
-    buildjni=yes
+        bash compile.sh -t android -u && \
+        mv prebuilt/*.so ../SnoopSnitch/app/src/main/jniLibs/armeabi/ && \
+        mv prebuilt/*.sql ../SnoopSnitch/app/src/main/assets/ && \
+        rmdir prebuilt
+    ndk=r14b
 
 Auto Update Mode:Version SnoopSnitch-%v
 Update Check Mode:Tags
