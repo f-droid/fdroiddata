@@ -1,0 +1,232 @@
+From 968517eda162de3b21df3bb5c752edb1c825809b Mon Sep 17 00:00:00 2001
+From: mimi89999 <michel@lebihan.pl>
+Date: Fri, 8 Sep 2017 17:41:34 +0200
+Subject: [PATCH] Remove GCM
+
+---
+ app/build.gradle                                   |  3 --
+ .../notification/LibrusGCMRegistrationManager.kt   | 63 ----------------------
+ .../api/notification/LibrusGcmListenerService.kt   | 50 -----------------
+ .../java/com/wabadaba/dziennik/ui/MainActivity.kt  | 26 +--------
+ build.gradle                                       |  1 -
+ 5 files changed, 1 insertion(+), 142 deletions(-)
+ delete mode 100644 app/src/main/java/com/wabadaba/dziennik/api/notification/LibrusGCMRegistrationManager.kt
+ delete mode 100644 app/src/main/java/com/wabadaba/dziennik/api/notification/LibrusGcmListenerService.kt
+
+diff --git a/app/build.gradle b/app/build.gradle
+index 89316c9..b000371 100644
+--- a/app/build.gradle
++++ b/app/build.gradle
+@@ -1,4 +1,3 @@
+-apply plugin: 'com.google.gms.google-services'
+ apply plugin: 'com.android.application'
+ apply plugin: 'kotlin-android'
+ apply plugin: 'kotlin-android-extensions'
+@@ -65,8 +64,6 @@ dependencies {
+     implementation 'com.android.support:support-v13:26.0.2'
+     implementation 'com.android.support:support-v4:26.0.2'
+ 
+-    implementation "com.google.android.gms:play-services-gcm:11.2.0"
+-
+     implementation 'com.android.support:preference-v14:26.0.2'
+     implementation 'com.android.support:design:26.0.2'
+     testImplementation 'junit:junit:4.12'
+diff --git a/app/src/main/java/com/wabadaba/dziennik/api/notification/LibrusGCMRegistrationManager.kt b/app/src/main/java/com/wabadaba/dziennik/api/notification/LibrusGCMRegistrationManager.kt
+deleted file mode 100644
+index 67f5afc..0000000
+--- a/app/src/main/java/com/wabadaba/dziennik/api/notification/LibrusGCMRegistrationManager.kt
++++ /dev/null
+@@ -1,63 +0,0 @@
+-package com.wabadaba.dziennik.api.notification
+-
+-import android.content.Context
+-import android.preference.PreferenceManager
+-import com.bugsnag.android.Bugsnag
+-import com.google.android.gms.gcm.GoogleCloudMessaging
+-import com.google.android.gms.iid.InstanceID
+-import com.wabadaba.dziennik.BuildConfig
+-import com.wabadaba.dziennik.api.APIClient
+-import com.wabadaba.dziennik.api.FullUser
+-import com.wabadaba.dziennik.api.RxHttpClient
+-import io.reactivex.Single
+-import io.reactivex.schedulers.Schedulers
+-
+-class LibrusGCMRegistrationManager(private val currentUser: FullUser,
+-                                   rxHttpClient: RxHttpClient,
+-                                   val context: Context) {
+-
+-    private val senderId = BuildConfig.SENDER_ID
+-
+-    private val pref_key = "gcm_registered_users"
+-    private val apiClient = APIClient(currentUser.authInfo, rxHttpClient)
+-
+-    fun register() {
+-        if (!isRegistered()) {
+-            getRegistrationToken()
+-                    .flatMap { regToken -> apiClient.pushDevices(regToken) }
+-                    .doOnSuccess { this.setRegistered() }
+-                    .subscribeOn(Schedulers.io())
+-                    .subscribe(
+-                            {
+-                                println("GCM registration successful")
+-                            },
+-                            { e ->
+-                                println("GCM registration failed")
+-                                Bugsnag.notify(e)
+-                            })
+-        } else {
+-            println("User $currentUser already registered for GCM")
+-        }
+-    }
+-
+-
+-    private fun isRegistered(): Boolean {
+-        val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+-        return prefs.getStringSet(pref_key, emptySet())
+-                .contains(currentUser.login)
+-    }
+-
+-    private fun setRegistered() {
+-        val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+-        val registered = prefs.getStringSet(pref_key, emptySet())
+-        prefs.edit().putStringSet(pref_key, registered.plus(currentUser.login))
+-                .apply()
+-    }
+-
+-    private fun getRegistrationToken() = Single.fromCallable {
+-        val instanceID = InstanceID.getInstance(context)
+-        instanceID.getToken(senderId,
+-                GoogleCloudMessaging.INSTANCE_ID_SCOPE, null)
+-    }
+-}
+-
+diff --git a/app/src/main/java/com/wabadaba/dziennik/api/notification/LibrusGcmListenerService.kt b/app/src/main/java/com/wabadaba/dziennik/api/notification/LibrusGcmListenerService.kt
+deleted file mode 100644
+index 6f02f0b..0000000
+--- a/app/src/main/java/com/wabadaba/dziennik/api/notification/LibrusGcmListenerService.kt
++++ /dev/null
+@@ -1,50 +0,0 @@
+-package com.wabadaba.dziennik.api.notification
+-
+-import android.app.NotificationManager
+-import android.app.PendingIntent
+-import android.content.Context
+-import android.content.Intent
+-import android.os.Bundle
+-import android.preference.PreferenceManager
+-import android.support.v4.app.NotificationCompat
+-import com.google.android.gms.gcm.GcmListenerService
+-import com.wabadaba.dziennik.R
+-import com.wabadaba.dziennik.ui.MainActivity
+-
+-
+-@Suppress("DEPRECATION")
+-class LibrusGcmListenerService : GcmListenerService() {
+-    override fun onMessageReceived(p0: String, data: Bundle) {
+-
+-        val prefs = PreferenceManager.getDefaultSharedPreferences(this)
+-        if (!prefs.getBoolean("enable_notifications", true)) {
+-            println("received message but notifications are disabled")
+-            return
+-        }
+-
+-        println("received message, sending notification...")
+-
+-        val message = data.getString("message")
+-        val user = data.getString("userId")
+-
+-        val intent = Intent(this, MainActivity::class.java)
+-        val pendingIntent = PendingIntent.getActivity(
+-                this,
+-                0,
+-                intent,
+-                PendingIntent.FLAG_UPDATE_CURRENT
+-        )
+-
+-        val notification = NotificationCompat.Builder(this)
+-                .setSmallIcon(R.drawable.ic_school_black_24dp)
+-                .setContentTitle(message)
+-                .setContentText(user)
+-                .setContentIntent(pendingIntent)
+-                .setAutoCancel(true)
+-                .setPriority(NotificationCompat.PRIORITY_HIGH)
+-                .build()
+-
+-        val notifyManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+-        notifyManager.notify(System.currentTimeMillis().toInt(), notification)
+-    }
+-}
+\ No newline at end of file
+diff --git a/app/src/main/java/com/wabadaba/dziennik/ui/MainActivity.kt b/app/src/main/java/com/wabadaba/dziennik/ui/MainActivity.kt
+index 88f0aea..e06e18f 100644
+--- a/app/src/main/java/com/wabadaba/dziennik/ui/MainActivity.kt
++++ b/app/src/main/java/com/wabadaba/dziennik/ui/MainActivity.kt
+@@ -16,8 +16,6 @@ import co.zsmb.materialdrawerkt.draweritems.profile.profileSetting
+ import com.amulyakhare.textdrawable.TextDrawable
+ import com.amulyakhare.textdrawable.util.ColorGenerator
+ import com.bugsnag.android.Bugsnag
+-import com.google.android.gms.common.ConnectionResult
+-import com.google.android.gms.common.GoogleApiAvailability
+ import com.mikepenz.materialdrawer.Drawer
+ import com.mikepenz.materialdrawer.model.PrimaryDrawerItem
+ import com.mikepenz.materialdrawer.model.ProfileDrawerItem
+@@ -28,7 +26,6 @@ import com.wabadaba.dziennik.api.HttpException
+ import com.wabadaba.dziennik.api.RxHttpClient
+ import com.wabadaba.dziennik.api.User
+ import com.wabadaba.dziennik.api.UserRepository
+-import com.wabadaba.dziennik.api.notification.LibrusGCMRegistrationManager
+ import com.wabadaba.dziennik.di.ViewModelFactory
+ import com.wabadaba.dziennik.ui.login.LoginActivity
+ import io.reactivex.android.schedulers.AndroidSchedulers
+@@ -108,7 +105,7 @@ class MainActivity : AppCompatActivity(), LifecycleRegistryOwner {
+ 
+         viewModel = ViewModelProviders.of(this, viewModelFactory).get(MainViewModel::class.java)
+ 
+-        if (checkGooglePlayServicesAvailable()) {
++        if (true) {
+             userRepository.allUsers.observeOn(AndroidSchedulers.mainThread())
+                     .subscribe { users ->
+                         if (users.isEmpty()) {
+@@ -124,27 +121,6 @@ class MainActivity : AppCompatActivity(), LifecycleRegistryOwner {
+                         }
+                     }
+         }
+-        registerGCM()
+-    }
+-
+-    private fun registerGCM() {
+-        userRepository.currentUser.subscribe {
+-            println("Registering user $it for GCM")
+-            LibrusGCMRegistrationManager(it, rxHttpClient, this)
+-                    .register()
+-        }
+-    }
+-
+-    private fun checkGooglePlayServicesAvailable(): Boolean {
+-        val googleApiAvailability = GoogleApiAvailability.getInstance()
+-        val status = googleApiAvailability.isGooglePlayServicesAvailable(this)
+-        if (status != ConnectionResult.SUCCESS) {
+-            if (googleApiAvailability.isUserResolvableError(status)) {
+-                googleApiAvailability.getErrorDialog(this, status, 2404).show()
+-            }
+-            return false
+-        }
+-        return true
+     }
+ 
+     @Suppress("DEPRECATION")
+diff --git a/build.gradle b/build.gradle
+index 5d39b90..77bf458 100644
+--- a/build.gradle
++++ b/build.gradle
+@@ -9,7 +9,6 @@ buildscript {
+     dependencies {
+         classpath 'com.android.tools.build:gradle:3.0.0-beta4'
+         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+-        classpath 'com.google.gms:google-services:3.1.0'
+ 
+         // NOTE: Do not place your application dependencies here; they belong
+         // in the individual module build.gradle files
+-- 
+2.11.0
+
