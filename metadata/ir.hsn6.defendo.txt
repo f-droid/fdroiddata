@@ -35,7 +35,28 @@ Build:2.3.1,6
         cd ../defendo && \
         ../godot/bin/godot_server.server.tools.* -export Android ../defendo.apk
 
+Build:2.4.0,7
+    commit=28fbfdcac66871b7fc33b4f5418613b6a9bf798a
+    output=defendo.apk
+    srclibs=Godot@b61462268e9a8a2c86c1abd5bc65cd96659fa979
+    prebuild=mkdir defendo && \
+        bash -O extglob -c "mv !(defendo) defendo" && \
+        cp -R $$Godot$$ godot
+    target=android-19
+    build=cd godot && \
+        scons -j `nproc` p=server unix_global_settings_path=".." && \
+        export ANDROID_NDK_ROOT=$$NDK$$ && \
+        scons -j `nproc` p=android target=release && \
+        pushd platform/android/java/ && \
+        gradle assembleRelease && \
+        popd && \
+        export HOME=$PWD && \
+        mkdir -p ../templates/ && \
+        cp bin/android_release.apk ../templates && \
+        cd ../defendo && \
+        ../godot/bin/godot_server.server.tools.* -export Android ../defendo.apk
+
 Auto Update Mode:None
 Update Check Mode:None
-Current Version:2.3.1
-Current Version Code:6
+Current Version:2.4.0
+Current Version Code:7
