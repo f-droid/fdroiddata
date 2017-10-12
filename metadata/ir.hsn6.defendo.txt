@@ -7,8 +7,9 @@ Bitcoin:16D7Nroenpx4QDNqfq3Js7sdAVhew2NzGp
 
 Summary:A tower defense game
 Description:
-You are called to defend a base. Currently language of the game is Esperanto.
-The game is developing using Godot v2.1.3.
+You are called to defend a base.
+
+The game is developing using Godot v2.1.4.
 .
 
 Repo Type:git
@@ -56,7 +57,28 @@ Build:2.4.0,7
         cd ../defendo && \
         ../godot/bin/godot_server.server.tools.* -export Android ../defendo.apk
 
+Build:2.5.0,8
+    commit=5992c529fec860fe5c09df9df44904e2a7732381
+    output=defendo.apk
+    srclibs=Godot@b61462268e9a8a2c86c1abd5bc65cd96659fa979
+    prebuild=mkdir defendo && \
+        bash -O extglob -c "mv !(defendo) defendo" && \
+        cp -R $$Godot$$ godot
+    target=android-19
+    build=cd godot && \
+        scons -j `nproc` p=server unix_global_settings_path=".." && \
+        export ANDROID_NDK_ROOT=$$NDK$$ && \
+        scons -j `nproc` p=android target=release && \
+        pushd platform/android/java/ && \
+        gradle assembleRelease && \
+        popd && \
+        export HOME=$PWD && \
+        mkdir -p ../templates/ && \
+        cp bin/android_release.apk ../templates && \
+        cd ../defendo && \
+        ../godot/bin/godot_server.server.tools.* -export Android ../defendo.apk
+
 Auto Update Mode:None
 Update Check Mode:None
-Current Version:2.4.0
-Current Version Code:7
+Current Version:2.5.0
+Current Version Code:8
