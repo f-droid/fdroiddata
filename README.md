@@ -18,9 +18,9 @@ Clone fdroiddata (or your fork) and enter it:
 	git clone https://gitlab.com/fdroid/fdroiddata.git
 	cd fdroiddata
 
-An empty config file should work for most setups:
+Optionally create a base config.py and signing keys with:
 
-	touch config.py
+    fdroid init
 
 Make sure fdroid works and reads the metadata files properly:
 
