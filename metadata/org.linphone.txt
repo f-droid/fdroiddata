@@ -265,14 +265,22 @@ Build:3.2.4-fdroid,3241
     scandelete=submodules/mswebrtc/webrtc/data/voice_engine/stereo_rtp_files/rtpplay.exe,submodules/externals/openh264/autotest/performanceTest/ios/*,submodules/externals/mbedtls/tests/
     build=./prepare.py; make BUILD_GPLV3_ZRTP=1
 
-Build:3.2.6-testing,3260
-    disable=wip
-    commit=3.2.6
+Build:3.3.0,3303
+    commit=3.3.0
     submodules=yes
-    build=export USE_SDK_WRAPPER=yes && \
-        ./prepare.py -cf && \
-        make
-    ndk=r13b
+    sudo=apt-get install -y cmake/testing
+    patch=3.3.0-gradle.patch
+    gradle=yes
+    output=bin/outputs/apk/org.linphone-release-unsigned.apk
+    rm=libs,src/android/org/linphone/gcm,src/android/org/linphone/firebase/Firebase*.java
+    scandelete=submodules
+    build=echo 'gradle "$@"' > gradlew && \
+        chmod a+x gradlew && \
+        ./prepare.py && \
+        make -j`nproc` build && \
+        make copy-libs && \
+        make `pwd`/res/raw/rootca.pem
+    ndk=r15c
 
 Auto Update Mode:None
 Update Check Mode:Tags
