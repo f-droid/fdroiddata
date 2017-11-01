@@ -32,4 +32,13 @@ See the [Contributing](CONTRIBUTING.md) doc.
 
 ## More information
 
-You can find more details on [the manual](https://f-droid.org/manual/).
+You can find more details on the [docs](https://f-droid.org/docs/).
+
+
+## Translation
+
+Many app summaries and some descriptions can be translated as part of
+F-Droid.  See
+[Translation and Localization](https://f-droid.org/docs/Translation_and_Localization)
+for more info.
+[![translation status](https://hosted.weblate.org/widgets/f-droid/-/fdroiddata/multi-auto.svg)](https://hosted.weblate.org/engage/f-droid/?utm_source=widget)
