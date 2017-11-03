@@ -3685,30 +3685,232 @@ Build:55.0,550020
         mv obj-aarch64-linux-android/dist/fennec-*-unsigned-unaligned.apk fdroid/fennec-unsigned.apk
     ndk=r12b
 
+Build:55.0.2,550200
+    commit=FENNEC_55_0_2_RELEASE
+    output=fdroid/fennec-unsigned.apk
+    srclibs=MozLocales@f9db105d36b5496792f4b0a126a008b1ae108472
+    prebuild=mkdir fdroid && \
+        l10ndir=`readlink -f $$MozLocales$$` && \
+        bash $$MozLocales$$/prebuild.sh && \
+        echo "ac_add_options --target=arm-linux-androideabi" >> .mozconfig && \
+        echo "ac_add_options --with-android-min-sdk=15" >> .mozconfig && \
+        echo "ac_add_options --with-android-ndk=\"$$NDK$$\"" >> .mozconfig && \
+        echo "ac_add_options --with-android-sdk=\"$$SDK$$\"" >> .mozconfig && \
+        echo "ac_add_options --enable-application=mobile/android" >> .mozconfig && \
+        echo "ac_add_options --with-branding=mobile/android/branding/unofficial" >> .mozconfig && \
+        echo "ac_add_options --with-l10n-base=${l10ndir}" >> .mozconfig && \
+        echo "mk_add_options 'export L10NBASEDIR=${l10ndir}'" >> .mozconfig && \
+        echo "mk_add_options 'export MOZ_CHROME_MULTILOCALE=$(tr '\n' ' ' <  mobile/android/locales/maemo-locales)'" >> .mozconfig && \
+        pushd mobile/android/branding/unofficial/ && \
+        sed -i -e '/ANDROID_PACKAGE_NAME/d' -e '/MOZ_APP_DISPLAYNAME/d' configure.sh && \
+        echo 'ANDROID_PACKAGE_NAME=org.mozilla.fennec_fdroid' >> configure.sh && \
+        echo 'MOZ_APP_DISPLAYNAME="Fennec F-Droid"' >> configure.sh && \
+        echo 'MOZ_APP_ANDROID_VERSION_CODE=$$VERCODE$$' >> configure.sh && \
+        popd
+    build=export I_PREFER_A_SUBOPTIMAL_MERCURIAL_EXPERIENCE=1 && \
+        mkdir rust && \
+        curl https://static.rust-lang.org/dist/rust-1.19.0-`uname -m`-unknown-linux-gnu.tar.xz | tar -x -J -C rust --strip-components 2 && \
+        curl https://static.rust-lang.org/dist/rust-std-1.19.0-armv7-linux-androideabi.tar.xz | tar -x -J -C rust --strip-components 2 && \
+        PATH=$PATH:$PWD/rust/bin ./mach build && \
+        pushd obj-arm-linux-androideabi/mobile/android/locales && \
+        for loc in $(cat ../../../../mobile/android/locales/maemo-locales); do LOCALE_MERGEDIR=$PWD/merge-$loc make merge-$loc || exit 1; LOCALE_MERGEDIR=$PWD/merge-$loc make chrome-$loc || exit 1; done && \
+        popd && \
+        ./mach package && \
+        mv obj-arm-linux-androideabi/dist/fennec-*-unsigned-unaligned.apk fdroid/fennec-unsigned.apk
+    ndk=r12b
+
+Build:55.0.2,550210
+    commit=FENNEC_55_0_2_RELEASE
+    output=fdroid/fennec-unsigned.apk
+    srclibs=MozLocales@f9db105d36b5496792f4b0a126a008b1ae108472
+    prebuild=mkdir fdroid && \
+        l10ndir=`readlink -f $$MozLocales$$` && \
+        bash $$MozLocales$$/prebuild.sh && \
+        echo "ac_add_options --target=i386-linux-androideabi" >> .mozconfig && \
+        echo "ac_add_options --with-android-min-sdk=15" >> .mozconfig && \
+        echo "ac_add_options --with-android-ndk=\"$$NDK$$\"" >> .mozconfig && \
+        echo "ac_add_options --with-android-sdk=\"$$SDK$$\"" >> .mozconfig && \
+        echo "ac_add_options --enable-application=mobile/android" >> .mozconfig && \
+        echo "ac_add_options --with-branding=mobile/android/branding/unofficial" >> .mozconfig && \
+        echo "ac_add_options --with-l10n-base=${l10ndir}" >> .mozconfig && \
+        echo "mk_add_options 'export L10NBASEDIR=${l10ndir}'" >> .mozconfig && \
+        echo "mk_add_options 'export MOZ_CHROME_MULTILOCALE=$(tr '\n' ' ' <  mobile/android/locales/maemo-locales)'" >> .mozconfig && \
+        pushd mobile/android/branding/unofficial/ && \
+        sed -i -e '/ANDROID_PACKAGE_NAME/d' -e '/MOZ_APP_DISPLAYNAME/d' configure.sh && \
+        echo 'ANDROID_PACKAGE_NAME=org.mozilla.fennec_fdroid' >> configure.sh && \
+        echo 'MOZ_APP_DISPLAYNAME="Fennec F-Droid"' >> configure.sh && \
+        echo 'MOZ_APP_ANDROID_VERSION_CODE=$$VERCODE$$' >> configure.sh && \
+        popd
+    build=export I_PREFER_A_SUBOPTIMAL_MERCURIAL_EXPERIENCE=1 && \
+        mkdir rust && \
+        curl https://static.rust-lang.org/dist/rust-1.19.0-`uname -m`-unknown-linux-gnu.tar.xz | tar -x -J -C rust --strip-components 2 && \
+        curl https://static.rust-lang.org/dist/rust-std-1.19.0-i686-linux-android.tar.xz | tar -x -J -C rust --strip-components 2 && \
+        PATH=$PATH:$PWD/rust/bin ./mach build && \
+        pushd obj-i386-linux-androideabi/mobile/android/locales && \
+        for loc in $(cat ../../../../mobile/android/locales/maemo-locales); do LOCALE_MERGEDIR=$PWD/merge-$loc make merge-$loc || exit 1; LOCALE_MERGEDIR=$PWD/merge-$loc make chrome-$loc || exit 1; done && \
+        popd && \
+        ./mach package && \
+        mv obj-i386-linux-androideabi/dist/fennec-*-unsigned-unaligned.apk fdroid/fennec-unsigned.apk
+    ndk=r12b
+
+Build:55.0.2,550220
+    commit=FENNEC_55_0_2_RELEASE
+    output=fdroid/fennec-unsigned.apk
+    srclibs=MozLocales@f9db105d36b5496792f4b0a126a008b1ae108472
+    prebuild=mkdir fdroid && \
+        l10ndir=`readlink -f $$MozLocales$$` && \
+        bash $$MozLocales$$/prebuild.sh && \
+        echo "ac_add_options --target=aarch64-linux-android" >> .mozconfig && \
+        echo "ac_add_options --with-android-min-sdk=21" >> .mozconfig && \
+        echo "ac_add_options --with-android-ndk=\"$$NDK$$\"" >> .mozconfig && \
+        echo "ac_add_options --with-android-sdk=\"$$SDK$$\"" >> .mozconfig && \
+        echo "ac_add_options --enable-application=mobile/android" >> .mozconfig && \
+        echo "ac_add_options --with-branding=mobile/android/branding/unofficial" >> .mozconfig && \
+        echo "ac_add_options --with-l10n-base=${l10ndir}" >> .mozconfig && \
+        echo "mk_add_options 'export L10NBASEDIR=${l10ndir}'" >> .mozconfig && \
+        echo "mk_add_options 'export MOZ_CHROME_MULTILOCALE=$(tr '\n' ' ' <  mobile/android/locales/maemo-locales)'" >> .mozconfig && \
+        pushd mobile/android/branding/unofficial/ && \
+        sed -i -e '/ANDROID_PACKAGE_NAME/d' -e '/MOZ_APP_DISPLAYNAME/d' configure.sh && \
+        echo 'ANDROID_PACKAGE_NAME=org.mozilla.fennec_fdroid' >> configure.sh && \
+        echo 'MOZ_APP_DISPLAYNAME="Fennec F-Droid"' >> configure.sh && \
+        echo 'MOZ_APP_ANDROID_VERSION_CODE=$$VERCODE$$' >> configure.sh && \
+        popd
+    build=export I_PREFER_A_SUBOPTIMAL_MERCURIAL_EXPERIENCE=1 && \
+        mkdir rust && \
+        curl https://static.rust-lang.org/dist/rust-1.19.0-`uname -m`-unknown-linux-gnu.tar.xz | tar -x -J -C rust --strip-components 2 && \
+        curl https://static.rust-lang.org/dist/rust-std-1.19.0-aarch64-linux-android.tar.xz | tar -x -J -C rust --strip-components 2 && \
+        PATH=$PATH:$PWD/rust/bin ./mach build && \
+        pushd obj-aarch64-linux-android/mobile/android/locales && \
+        for loc in $(cat ../../../../mobile/android/locales/maemo-locales); do LOCALE_MERGEDIR=$PWD/merge-$loc make merge-$loc || exit 1; LOCALE_MERGEDIR=$PWD/merge-$loc make chrome-$loc || exit 1; done && \
+        popd && \
+        ./mach package && \
+        mv obj-aarch64-linux-android/dist/fennec-*-unsigned-unaligned.apk fdroid/fennec-unsigned.apk
+    ndk=r12b
+
+Build:56.0,560000
+    commit=FENNEC_56_0_RELEASE
+    sudo=apt-get install -y g++
+    output=fdroid/fennec-unsigned.apk
+    srclibs=MozLocales@18b4a210745249f1152c40f48d6eb75c12aff7db
+    prebuild=mkdir fdroid && \
+        l10ndir=`readlink -f $$MozLocales$$` && \
+        bash $$MozLocales$$/prebuild.sh && \
+        echo "ac_add_options --target=arm-linux-androideabi" >> .mozconfig && \
+        echo "ac_add_options --with-android-min-sdk=16" >> .mozconfig && \
+        echo "ac_add_options --with-android-ndk=\"$$NDK$$\"" >> .mozconfig && \
+        echo "ac_add_options --with-android-sdk=\"$$SDK$$\"" >> .mozconfig && \
+        echo "ac_add_options --enable-application=mobile/android" >> .mozconfig && \
+        echo "ac_add_options --with-branding=mobile/android/branding/unofficial" >> .mozconfig && \
+        echo "ac_add_options --with-l10n-base=${l10ndir}" >> .mozconfig && \
+        echo "mk_add_options 'export L10NBASEDIR=${l10ndir}'" >> .mozconfig && \
+        echo "mk_add_options 'export MOZ_CHROME_MULTILOCALE=$(tr '\n' ' ' <  mobile/android/locales/maemo-locales)'" >> .mozconfig && \
+        pushd mobile/android/branding/unofficial/ && \
+        sed -i -e '/ANDROID_PACKAGE_NAME/d' -e '/MOZ_APP_DISPLAYNAME/d' configure.sh && \
+        echo 'ANDROID_PACKAGE_NAME=org.mozilla.fennec_fdroid' >> configure.sh && \
+        echo 'MOZ_APP_DISPLAYNAME="Fennec F-Droid"' >> configure.sh && \
+        echo 'MOZ_APP_ANDROID_VERSION_CODE=$$VERCODE$$' >> configure.sh && \
+        popd
+    build=export I_PREFER_A_SUBOPTIMAL_MERCURIAL_EXPERIENCE=1 && \
+        mkdir rust && \
+        curl https://static.rust-lang.org/dist/rust-1.20.0-`uname -m`-unknown-linux-gnu.tar.xz | tar -x -J -C rust --strip-components 2 && \
+        curl https://static.rust-lang.org/dist/rust-std-1.20.0-armv7-linux-androideabi.tar.xz | tar -x -J -C rust --strip-components 2 && \
+        PATH=$PATH:$PWD/rust/bin ./mach build && \
+        pushd obj-arm-linux-androideabi/mobile/android/locales && \
+        for loc in $(cat ../../../../mobile/android/locales/maemo-locales); do LOCALE_MERGEDIR=$PWD/merge-$loc make merge-$loc || exit 1; LOCALE_MERGEDIR=$PWD/merge-$loc make chrome-$loc || exit 1; done && \
+        popd && \
+        ./mach package && \
+        mv obj-arm-linux-androideabi/dist/fennec-*-unsigned-unaligned.apk fdroid/fennec-unsigned.apk
+    ndk=r12b
+
+Build:56.0,560010
+    commit=FENNEC_56_0_RELEASE
+    sudo=apt-get install -y g++
+    output=fdroid/fennec-unsigned.apk
+    srclibs=MozLocales@18b4a210745249f1152c40f48d6eb75c12aff7db
+    prebuild=mkdir fdroid && \
+        l10ndir=`readlink -f $$MozLocales$$` && \
+        bash $$MozLocales$$/prebuild.sh && \
+        echo "ac_add_options --target=i386-linux-androideabi" >> .mozconfig && \
+        echo "ac_add_options --with-android-min-sdk=16" >> .mozconfig && \
+        echo "ac_add_options --with-android-ndk=\"$$NDK$$\"" >> .mozconfig && \
+        echo "ac_add_options --with-android-sdk=\"$$SDK$$\"" >> .mozconfig && \
+        echo "ac_add_options --enable-application=mobile/android" >> .mozconfig && \
+        echo "ac_add_options --with-branding=mobile/android/branding/unofficial" >> .mozconfig && \
+        echo "ac_add_options --with-l10n-base=${l10ndir}" >> .mozconfig && \
+        echo "mk_add_options 'export L10NBASEDIR=${l10ndir}'" >> .mozconfig && \
+        echo "mk_add_options 'export MOZ_CHROME_MULTILOCALE=$(tr '\n' ' ' <  mobile/android/locales/maemo-locales)'" >> .mozconfig && \
+        pushd mobile/android/branding/unofficial/ && \
+        sed -i -e '/ANDROID_PACKAGE_NAME/d' -e '/MOZ_APP_DISPLAYNAME/d' configure.sh && \
+        echo 'ANDROID_PACKAGE_NAME=org.mozilla.fennec_fdroid' >> configure.sh && \
+        echo 'MOZ_APP_DISPLAYNAME="Fennec F-Droid"' >> configure.sh && \
+        echo 'MOZ_APP_ANDROID_VERSION_CODE=$$VERCODE$$' >> configure.sh && \
+        popd
+    build=export I_PREFER_A_SUBOPTIMAL_MERCURIAL_EXPERIENCE=1 && \
+        mkdir rust && \
+        curl https://static.rust-lang.org/dist/rust-1.20.0-`uname -m`-unknown-linux-gnu.tar.xz | tar -x -J -C rust --strip-components 2 && \
+        curl https://static.rust-lang.org/dist/rust-std-1.20.0-i686-linux-android.tar.xz | tar -x -J -C rust --strip-components 2 && \
+        PATH=$PATH:$PWD/rust/bin ./mach build && \
+        pushd obj-i386-linux-androideabi/mobile/android/locales && \
+        for loc in $(cat ../../../../mobile/android/locales/maemo-locales); do LOCALE_MERGEDIR=$PWD/merge-$loc make merge-$loc || exit 1; LOCALE_MERGEDIR=$PWD/merge-$loc make chrome-$loc || exit 1; done && \
+        popd && \
+        ./mach package && \
+        mv obj-i386-linux-androideabi/dist/fennec-*-unsigned-unaligned.apk fdroid/fennec-unsigned.apk
+    ndk=r12b
+
+Build:56.0,560020
+    commit=FENNEC_56_0_RELEASE
+    sudo=apt-get install -y g++
+    output=fdroid/fennec-unsigned.apk
+    srclibs=MozLocales@18b4a210745249f1152c40f48d6eb75c12aff7db
+    prebuild=mkdir fdroid && \
+        l10ndir=`readlink -f $$MozLocales$$` && \
+        bash $$MozLocales$$/prebuild.sh && \
+        echo "ac_add_options --target=aarch64-linux-android" >> .mozconfig && \
+        echo "ac_add_options --with-android-min-sdk=21" >> .mozconfig && \
+        echo "ac_add_options --with-android-ndk=\"$$NDK$$\"" >> .mozconfig && \
+        echo "ac_add_options --with-android-sdk=\"$$SDK$$\"" >> .mozconfig && \
+        echo "ac_add_options --enable-application=mobile/android" >> .mozconfig && \
+        echo "ac_add_options --with-branding=mobile/android/branding/unofficial" >> .mozconfig && \
+        echo "ac_add_options --with-l10n-base=${l10ndir}" >> .mozconfig && \
+        echo "mk_add_options 'export L10NBASEDIR=${l10ndir}'" >> .mozconfig && \
+        echo "mk_add_options 'export MOZ_CHROME_MULTILOCALE=$(tr '\n' ' ' <  mobile/android/locales/maemo-locales)'" >> .mozconfig && \
+        pushd mobile/android/branding/unofficial/ && \
+        sed -i -e '/ANDROID_PACKAGE_NAME/d' -e '/MOZ_APP_DISPLAYNAME/d' configure.sh && \
+        echo 'ANDROID_PACKAGE_NAME=org.mozilla.fennec_fdroid' >> configure.sh && \
+        echo 'MOZ_APP_DISPLAYNAME="Fennec F-Droid"' >> configure.sh && \
+        echo 'MOZ_APP_ANDROID_VERSION_CODE=$$VERCODE$$' >> configure.sh && \
+        popd
+    build=export I_PREFER_A_SUBOPTIMAL_MERCURIAL_EXPERIENCE=1 && \
+        mkdir rust && \
+        curl https://static.rust-lang.org/dist/rust-1.20.0-`uname -m`-unknown-linux-gnu.tar.xz | tar -x -J -C rust --strip-components 2 && \
+        curl https://static.rust-lang.org/dist/rust-std-1.20.0-aarch64-linux-android.tar.xz | tar -x -J -C rust --strip-components 2 && \
+        PATH=$PATH:$PWD/rust/bin ./mach build && \
+        pushd obj-aarch64-linux-android/mobile/android/locales && \
+        for loc in $(cat ../../../../mobile/android/locales/maemo-locales); do LOCALE_MERGEDIR=$PWD/merge-$loc make merge-$loc || exit 1; LOCALE_MERGEDIR=$PWD/merge-$loc make chrome-$loc || exit 1; done && \
+        popd && \
+        ./mach package && \
+        mv obj-aarch64-linux-android/dist/fennec-*-unsigned-unaligned.apk fdroid/fennec-unsigned.apk
+    ndk=r12b
+
 Maintainer Notes:
 
 Updating/Versioning:
- * Update Check Mode:Tags ^FENNEC_[1-9][0-9]*_[0-9]*_RELEASE$
- * versionCode via ANDROID_VERSION_CODE is datestring with some magic applied
-   and changes every build!
- * Since we no longer target an official build, we are free to use any VC. (Fx35)
-    * Current scheme: major version & minor version & arch & revision
-    * Example: 350010 = Firefox 35.00, x86, revision (= if we need to re-release) 0
-    * Example: 360103 = Firefox 36.01, arm, revision (= if we need to re-release) 3
-    * Maybe we should stay in sync with upstream?
+* Update Check Mode:Tags ^FENNEC_[1-9][0-9]*_[0-9]*_RELEASE$
+* versionCode via ANDROID_VERSION_CODE is datestring with some magic applied and changes every build!
+* Since we no longer target an official build, we are free to use any version code.
+** Current scheme: XYZAR, where X.Y.Z is upstream version, A is architecture (0 = ARMv7, 1 = x86, 2 = ARMv8), R is revision (if we need to re-release)
+** Example: 530210 = Firefox 53.0.2 for x86, initial revision
+** Example: 550021 = Firefox 55.0 for ARMv8, second revision
+* Builds for different architectures target different Android API levels: 15 for 32-bit (ARMv7 and x86) and 21 for 64-bit (ARMv8).
 
 Reroute Feedback:
-* about:feedback links to the PlayStore for rating the app. While with FDroid
-  installed, we can intercept the intent and open the page in FDroid client
-  instead, there is no way to rate the app. If FDroid is not installed (or Play
-  is configured to be used always), no app info page is displayed at all: Our
-  package id is not in Play! Some options:
-* sed -i -e '/OpenPlayStore/,+4s/getPackageName()/"org.mozilla.fennec"/g' mobile/android/base/BrowserApp.java
-* sed -i -e 's|about:feedback|https://gitlab.com/fdroid/fdroiddata/issues|g' mobile/android/base/resources/xml/preferences_vendor.xml
+* about:feedback links to the Play Store for rating the app. While with F-Droid installed, we can intercept the intent and open the page in F-Droid client instead, there is no way to rate the app. If F-Droid is not installed (or Play is configured to be used always), no app info page is displayed at all: Our package id is not in Play Store! Some options:
+** sed -i -e '/OpenPlayStore/,+4s/getPackageName()/"org.mozilla.fennec"/g' mobile/android/base/BrowserApp.java
+** sed -i -e 's|about:feedback|https://gitlab.com/fdroid/fdroiddata/issues|g' mobile/android/base/resources/xml/preferences_vendor.xml
 .
 
-Archive Policy:0 versions
+Archive Policy:6 versions
 Auto Update Mode:None
 Update Check Mode:None
-Current Version:54.0.1
-Current Version Code:540110
+Current Version:56.0
+Current Version Code:560010
