@@ -568,9 +568,6 @@ Build:4.1.0,260
     commit=v4.1.0
     subdir=app
     submodules=yes
-    sudo=. /etc/profile.d/bsenv.sh && \
-        echo -e '\nd56f5187479451eabf01fb78af6dfcb131a6481e' > $ANDROID_HOME/licenses/android-sdk-license && \
-        chmod g+w $ANDROID_HOME/platforms
     init=sed -i -e 's/signingConfig signingConfigs.release/{}/g' build.gradle && \
         rm ../gradle.properties
     gradle=basic
@@ -582,9 +579,17 @@ Build:4.1.1,270
     commit=v4.1.1
     subdir=app
     submodules=yes
-    sudo=. /etc/profile.d/bsenv.sh && \
-        echo -e '\nd56f5187479451eabf01fb78af6dfcb131a6481e' > $ANDROID_HOME/licenses/android-sdk-license && \
-        chmod g+w $ANDROID_HOME/platforms
+    init=sed -i -e 's/signingConfig signingConfigs.release/{}/g' build.gradle && \
+        rm ../gradle.properties
+    gradle=basic
+    prebuild=sed -i -e "/crashlytics/,+2d" -e "/googleplayCompile/d" build.gradle && \
+        sed -i -e '/fabric/d' ../build.gradle build.gradle
+    scanignore=app/src/main/res/raw/truststore
+
+Build:4.1.2,280
+    commit=v4.1.2
+    subdir=app
+    submodules=yes
     init=sed -i -e 's/signingConfig signingConfigs.release/{}/g' build.gradle && \
         rm ../gradle.properties
     gradle=basic
