@@ -1,16 +1,19 @@
 # Contributing to F-Droid
 
+For information about all aspects of F-Droid, check out the
+[docs](https://f-droid.org/docs)
+
+
 ## Issue Tracker
 
-You may use the issue tracker to report issues on app metadata and issues with
-the packages distributed through our repository.
-
-Please note that app submissions belong in the
-[submission queue](https://f-droid.org/forums/forum/submission-queue/).
+You may use the
+[issue tracker](https://gitlab.com/fdroid/fdroiddata/issues) to report
+issues on app metadata and issues with the packages distributed
+through our repository.
 
 Before opening an issue about an outdated app, have a look at its metadata
-file and make sure that updating the app is actually possible. Issues opened
-about apps that can no longer be built will be closed.
+file and make sure that updating the app is actually possible.
+
 
 ## Merge Requests
 
