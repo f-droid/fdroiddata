@@ -282,6 +282,24 @@ Build:3.3.0,3303
         make `pwd`/res/raw/rootca.pem
     ndk=r15c
 
+Build:3.3.1,3311
+    commit=3.3.1
+    submodules=yes
+    sudo=apt-get install -y cmake/testing libjsoncpp1/testing libstdc++6/testing
+    patch=3.3.0-gradle.patch
+    gradle=yes
+    output=bin/outputs/apk/org.linphone-release-unsigned.apk
+    rm=libs,liblinphone_tester,submodules/externals/antlr3,src/android/org/linphone/gcm,src/android/org/linphone/firebase/Firebase*.java
+    prebuild=sed -i -e 's|"kill_service_with_task_manager">true<|"kill_service_with_task_manager">false<|' res/values/non_localizable_custom.xml
+    scandelete=submodules
+    build=echo 'gradle "$@"' > gradlew && \
+        chmod a+x gradlew && \
+        ./prepare.py && \
+        make -j`nproc` build && \
+        make copy-libs && \
+        make `pwd`/res/raw/rootca.pem
+    ndk=r15c
+
 Auto Update Mode:None
 Update Check Mode:Tags
 Current Version:3.3.1
