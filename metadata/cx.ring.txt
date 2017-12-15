@@ -463,14 +463,47 @@ Build:20170531,79
         ./compile.sh release
     ndk=r14b
 
-Maintainer Notes:
-Looks like buildserver/setup-env-vars wasnt properly run the last time. PATH
-should in fact already includee /opt/gradle:
+Build:20171126,96
+    commit=84816c91a7db583f11442b7cda9751b15b211134
+    subdir=client-android/ring-android/app
+    submodules=yes
+    sudo=apt-get update && \
+        apt-get install --yes -t jessie-backports swig
+    output=build/outputs/apk/release/app-release-unsigned.apk
+    scandelete=client-windows,client-uwp
+    build=echo -e '#!/bin/sh\ngradle "$@"' > ../gradlew && \
+        chmod +x ../gradlew && \
+        export ANDROID_NDK_ROOT=$ANDROID_NDK && \
+        export ANDROID_ABI="armeabi-v7a arm64-v8a x86" && \
+        cd ../../ && \
+        ./compile.sh release
+    ndk=r15c
 
-echo 'export PATH=$PATH:${ANDROID_HOME}/tools:${ANDROID_HOME}/platform-tools:/opt/gradle/bin' >> $bsenv
+Build:20171129,97
+    commit=cf5bbff85068826144e5c00832630294cd172e0e
+    subdir=client-android/ring-android/app
+    submodules=yes
+    sudo=apt-get update && \
+        apt-get install --yes -t jessie-backports swig
+    output=build/outputs/apk/release/app-release-unsigned.apk
+    scandelete=client-windows,client-uwp
+    build=echo -e '#!/bin/sh\ngradle "$@"' > ../gradlew && \
+        chmod +x ../gradlew && \
+        export ANDROID_NDK_ROOT=$ANDROID_NDK && \
+        export ANDROID_ABI="armeabi-v7a arm64-v8a x86" && \
+        cd ../../ && \
+        ./compile.sh release
+    ndk=r15c
+
+Maintainer Notes:
+Ring has a lot of native dependencies, the source tarballs of these are all downloaded and build for all enabled architectures.
+We provide a fake gradlew because compile.sh calls this in the end.
+Build failed with swig 2.0.12 from jessie but works with 3.0.10 from jessie-backports.
+We don't build for x86_64 to reduce apk size a bit, x86 should work as well for those devices(?).
+We DO build separately for arm64 because this is a fairly common architecture and improves performance over using the armv7 binaries.
 .
 
 Auto Update Mode:None
 Update Check Mode:RepoManifest/production
-Current Version:20171020
-Current Version Code:95
+Current Version:20171129
+Current Version Code:97
