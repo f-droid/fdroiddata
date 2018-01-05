@@ -1,6 +1,7 @@
 # F-Droid Data
 
-[![build status](https://gitlab.com/fdroid/fdroiddata/badges/master/build.svg)](https://gitlab.com/fdroid/fdroiddata/builds)
+[![build status](https://gitlab.com/fdroid/fdroiddata/badges/master/build.svg)](https://gitlab.com/fdroid/fdroiddata/builds) 
+[![Donate](https://liberapay.com/assets/widgets/donate.svg)](https://liberapay.com/F-Droid-Data/)
 
 This repository holds general and build information for all the apps on our
 main repo on f-droid.org.
