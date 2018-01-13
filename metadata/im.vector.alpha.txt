@@ -265,25 +265,17 @@ Build:0.7.03,70301
 Build:0.7.08-dev,70800
     commit=9da011858efc05d5e843e39aea78f849b47059f9
     subdir=vector
-    sudo=apt-get update && \
-        apt-get install -y -t jessie-backports nodejs nodejs-legacy && \
-        curl -Lo npm.tar.gz https://github.com/npm/npm/archive/v5.6.0.tar.gz && \
-        echo "1fe2ad002eaa4afff9d1ff1b401da19fdb59d770989a9b02771fb183c2131906e7a0ee930404fd8fdcb6d8b1f23368d9241587500483ad6beebbf00f7ff8070c npm.tar.gz" | sha512sum -c - && \
-        tar xzf npm.tar.gz && \
-        cd npm-5.6.0 && \
-        make install && \
+    sudo=curl -Lo node.tar.xz https://nodejs.org/dist/v8.9.4/node-v8.9.4-linux-x64.tar.xz && \
+        echo "68b94aac38cd5d87ab79c5b38306e34a20575f31a3ea788d117c20fffcca3370 node.tar.xz" | sha256sum -c - && \
+        tar xJf node.tar.xz && \
+        cp -a node-v8.9.4-linux-x64/. /usr/local/ && \
         npm install -g react-native-cli
     gradle=appfdroid
-    srclibs=matrixsdk@b2ea75e4bc172663570e89847134dcdc40108fae,olmsdk@18b067a46f575299a80349d2a5dce74b7dad88de,jitsi-meet@30b51ff3841b4b8d326e31dd1b7ec83a3024c39b,nodejs@v6.12.3
+    srclibs=matrixsdk@b2ea75e4bc172663570e89847134dcdc40108fae,olmsdk@18b067a46f575299a80349d2a5dce74b7dad88de,jitsi-meet@30b51ff3841b4b8d326e31dd1b7ec83a3024c39b
     prebuild=sed -i -e '/com.google.firebase/d' build.gradle && \
         sed -i -e '/com.google.gms.google-services/d' build.gradle && \
         find . -name *.aar -exec truncate -s 0 {} \;
-    build=pushd $$nodejs$$ && \
-        ./configure && \
-        make -j 4 && \
-        export PATH=$(readlink -f .):$PATH && \
-        popd && \
-        pushd $$olmsdk$$/android && \
+    build=pushd $$olmsdk$$/android && \
         echo ndk.dir=$$NDK$$ > local.properties && \
         rm gradle.properties && \
         gradle assembleRelease && \
@@ -317,10 +309,8 @@ Build:0.7.08-dev,70800
 
 Maintainer Notes:
 Upstream puts their library aars inside the repo, we need build them our self. We truncate instead of deleting them such that the initial gradle clean is successful.
-jitsi-meet needs react-native which we get via npm for now. This pulls in a few prebuilt binaries for now :-/.
-We also need to provide an up to date version of npm and nodejs, neither of which can be found in debian jessie.i
-We first install nodejs from backports to be able to install npm from their github archive.
-Afterwards we build nodejs 6.x LTS from source which can be used to build jitsi AND compiles on debian jessie.
+jitsi-meet needs react-native which we get via npm. This pulls in a few prebuilt binaries for now :-/.
+We also need to provide an up to date version of npm and nodejs, neither of which can be found in debian jessie, so we download the upstream provided nodejs bundle which includes npm.
 Then we walk through olmsdk, jitsi-meet, matrixsdk (which needs those other two, at least partly) and finally riot, which needs all three dependencies.
 .
 
