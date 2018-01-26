@@ -8,13 +8,25 @@ before_script:
 
 lint:
   script:
+    # if this is a merge request fork, then only check relevant apps
+    - if [ "$CI_PROJECT_NAMESPACE" != "fdroid" ]; then
+        git fetch https://gitlab.com/fdroid/fdroiddata;
+        test -d build || mkdir build;
+        for f in `git diff --name-only FETCH_HEAD`; do
+           appid=`echo $f | sed -n -e 's,^metadata/\(.*\)\.txt,\1,p'
+                                   -e 's,^metadata/\(.*\)\.yml,\1,p'`;
+           export CHANGED="$CHANGED $appid";
+           grep -q "^Repo *Type\W *git" $f && git -C build clone `sed -n "s,^Repo *:,,p" $f` $appid;
+        done;
+        ./tools/audit-gradle.py $CHANGED;
+      fi
     - export EXITVALUE=0
-    - fdroid lint -f || {
+    - fdroid lint -f $CHANGED || {
           export EXITVALUE=1;
           printf "\nThese files have lint issues:\n";
-          fdroid rewritemeta -l;
+          fdroid rewritemeta -l $CHANGED;
           printf "\nThese are the formatting issues:\n";
-          fdroid rewritemeta;
+          fdroid rewritemeta $CHANGED;
           git --no-pager diff --color=always;
       }
     - exit $EXITVALUE
