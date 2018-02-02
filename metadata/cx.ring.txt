@@ -528,6 +528,23 @@ Build:20180115,101
         ./compile.sh release
     ndk=r15c
 
+Build:20180201,102
+    commit=b855d3232daef0cc7572c712239aa218ae5b8c89
+    subdir=client-android/ring-android/app
+    submodules=yes
+    sudo=apt-get update && \
+        apt-get install --yes -t jessie-backports swig
+    output=build/outputs/apk/release/app-release-unsigned.apk
+    prebuild=$ANDROID_HOME/tools/bin/sdkmanager 'platforms;android-27'
+    scandelete=client-windows,client-uwp
+    build=echo -e '#!/bin/sh\ngradle "$@"' > ../gradlew && \
+        chmod +x ../gradlew && \
+        export ANDROID_NDK_ROOT=$ANDROID_NDK && \
+        export ANDROID_ABI="armeabi-v7a arm64-v8a x86" && \
+        cd ../../ && \
+        ./compile.sh release
+    ndk=r15c
+
 Maintainer Notes:
 Ring has a lot of native dependencies, the source tarballs of these are all downloaded and build for all enabled architectures.
 We provide a fake gradlew because compile.sh calls this in the end.
@@ -538,5 +555,5 @@ We DO build separately for arm64 because this is a fairly common architecture an
 
 Auto Update Mode:None
 Update Check Mode:RepoManifest/production
-Current Version:20180115
-Current Version Code:101
+Current Version:20180201
+Current Version Code:102
