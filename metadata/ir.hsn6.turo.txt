@@ -38,7 +38,29 @@ Build:1.0.0-beta.1,2
         cd ../turo && \
         ../godot/bin/godot_server.server.tools.* -export Android ../turo.apk
 
+Build:1.1.0,3
+    commit=0d2cceb790af73ec7fb1aae311b61818db9ebfc2
+    sudo=apt-get install -y g++
+    output=turo.apk
+    srclibs=Godot@b61462268e9a8a2c86c1abd5bc65cd96659fa979
+    prebuild=mkdir turo && \
+        bash -O extglob -c "mv !(turo) turo" && \
+        cp -R $$Godot$$ godot
+    target=android-19
+    build=cd godot && \
+        scons -j `nproc` p=server unix_global_settings_path=".." && \
+        export ANDROID_NDK_ROOT=$$NDK$$ && \
+        scons -j `nproc` p=android target=release && \
+        pushd platform/android/java/ && \
+        gradle assembleRelease && \
+        popd && \
+        export HOME=$PWD && \
+        mkdir -p ../templates/ && \
+        cp bin/android_release.apk ../templates && \
+        cd ../turo && \
+        ../godot/bin/godot_server.server.tools.* -export Android ../turo.apk
+
 Auto Update Mode:None
 Update Check Mode:None
-Current Version:1.0.0-beta.1
-Current Version Code:2
+Current Version:1.1.0
+Current Version Code:3
