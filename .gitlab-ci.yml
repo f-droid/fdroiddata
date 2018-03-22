@@ -2,19 +2,39 @@ image: registry.gitlab.com/fdroid/ci-images-server:latest
 
 before_script:
   - rm -rf fdroidserver
-  - git clone --depth=1 https://gitlab.com/fdroid/fdroidserver.git
+  - mkdir fdroidserver
+  - curl --silent https://gitlab.com/fdroid/fdroidserver/repository/master/archive.tar.gz
+      | tar -xz --directory=fdroidserver --strip-components=1
   - export PATH="$PWD/fdroidserver:$PATH"
   - touch config.py
 
 lint:
   script:
+    # if this is a merge request fork, then only check relevant apps
+    - if [ "$CI_PROJECT_NAMESPACE" != "fdroid" ]; then
+        git fetch https://gitlab.com/fdroid/fdroiddata;
+        test -d build || mkdir build;
+        for f in `git diff --name-only --diff-filter=d FETCH_HEAD...HEAD`; do
+           appid=`echo $f | sed -n -e 's,^metadata/\([^/][^/]*\)\.txt,\1,p'
+                                   -e 's,^metadata/\([^/][^/]*\)\.yml,\1,p'`;
+           export CHANGED="$CHANGED $appid";
+           grep -q "^Repo *Type\W *git" $f && git -C build clone `sed -n "s,^Repo *:,,p" $f` $appid;
+        done;
+        ./tools/audit-gradle.py $CHANGED;
+      fi
     - export EXITVALUE=0
-    - fdroid lint -f || {
+    - fdroid lint -f $CHANGED || {
           export EXITVALUE=1;
           printf "\nThese files have lint issues:\n";
-          fdroid rewritemeta -l;
+          fdroid rewritemeta -l $CHANGED;
           printf "\nThese are the formatting issues:\n";
-          fdroid rewritemeta;
+          fdroid rewritemeta $CHANGED;
           git --no-pager diff --color=always;
       }
+    - apt-get -qy update
+    - apt-get -qy install --no-install-recommends exiftool
+    - exiftool -all= `find metadata/ -name '*.jp*g' -o -name '*.png'`
+    - echo "these images have EXIF that must be stripped:"
+    - git --no-pager diff --stat
+    - git --no-pager diff --name-only --exit-code || export EXITVALUE=1
     - exit $EXITVALUE

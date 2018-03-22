@@ -2,6 +2,7 @@
 
 [![build status](https://gitlab.com/fdroid/fdroiddata/badges/master/build.svg)](https://gitlab.com/fdroid/fdroiddata/builds) 
 [![Donate](https://liberapay.com/assets/widgets/donate.svg)](https://liberapay.com/F-Droid-Data/)
+**[Current Buildserver Activity](https://f-droid.org/wiki/index.php?title=Special:RecentChanges&days=7&from=&hidebots=0&hideanons=1&hideliu=1&limit=500)**
 
 This repository holds general and build information for all the apps on our
 main repo on f-droid.org.
