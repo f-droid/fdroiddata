@@ -1,0 +1,73 @@
+diff --git a/base.gradle b/base.gradle
+index 228d859..441df5a 100644
+--- a/base.gradle
++++ b/base.gradle
+@@ -15,10 +15,6 @@ buildscript {
+
+ repositories {
+     mavenCentral()
+-    maven {
+-        // TODO: Remove this after support library v24 public release.
+-        url "$rootDir/prebuilts/fullsdk/extras/android/m2repository"
+-    }
+ }
+
+ android {
+diff --git a/build.gradle b/build.gradle
+index ffb4460..8ea8d2c 100644
+--- a/build.gradle
++++ b/build.gradle
+@@ -27,7 +27,6 @@ android {
+ }
+
+ dependencies {
+-    compile 'com.google.android.gms:play-services:8.4.0'
+     compile 'com.android.support:support-v4:24.0.0'
+ }
+
+diff --git a/src/main/AndroidManifest.xml b/src/main/AndroidManifest.xml
+index 04948e9..9532e39 100644
+--- a/src/main/AndroidManifest.xml
++++ b/src/main/AndroidManifest.xml
+@@ -282,10 +282,6 @@
+             android:directBootAware="true"
+             android:enabled="@bool/atLeastL" >
+         </activity>
+-
+-        <meta-data
+-            android:name="com.google.android.gms.version"
+-            android:value="@integer/google_play_services_version" />
+     </application>
+
+ </manifest>
+diff --git a/src/main/java/com/android/talkback/TalkBackPreferencesActivity.java b/src/main/java/com/android/talkback/TalkBackPreferencesActivity.java
+index ba3bd6b..781e1c5 100644
+--- a/src/main/java/com/android/talkback/TalkBackPreferencesActivity.java
++++ b/src/main/java/com/android/talkback/TalkBackPreferencesActivity.java
+@@ -61,8 +61,6 @@ import com.android.utils.AccessibilityEventUtils;
+ import com.android.utils.LogUtils;
+ import com.android.utils.PackageManagerUtils;
+ import com.android.utils.SharedPreferencesUtils;
+-import com.google.android.gms.common.ConnectionResult;
+-import com.google.android.gms.common.GooglePlayServicesUtil;
+ import com.google.android.marvin.talkback.TalkBackService;
+
+ import java.util.HashSet;
+@@ -957,17 +955,6 @@ public class TalkBackPreferencesActivity extends Activity {
+                 return;
+             }
+
+-            if (GooglePlayServicesUtil.isGooglePlayServicesAvailable(activity)
+-                    != ConnectionResult.SUCCESS) {
+-                // Not needed, but playing safe since this is hard to test outside of China
+-                playStoreButton.setIntent(null);
+-                final PreferenceGroup category = (PreferenceGroup)
+-                        findPreferenceByResId(R.string.pref_category_miscellaneous_key);
+-                if (category != null) {
+-                    category.removePreference(playStoreButton);
+-                }
+-            }
+-
+             if (playStoreButton.getIntent() != null &&
+                     activity.getPackageManager().queryIntentActivities(
+                             playStoreButton.getIntent(), 0).size() == 0) {
