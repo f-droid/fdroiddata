@@ -2,9 +2,9 @@ Provides:org.mozilla.firefox
 Categories:Internet
 License:MPL-2.0
 Web Site:http://www.gnu.org/software/gnuzilla/
-Source Code:http://hg.mozilla.org
-Issue Tracker:https://bugzilla.mozilla.org
-Donate:https://my.fsf.org/donate/
+Source Code:https://ftp.gnu.org/gnu/gnuzilla/
+Issue Tracker:https://savannah.gnu.org/bugs/?group=gnuzilla
+Donate:https://www.fsf.org/about/ways-to-donate/
 
 Name:IceCatMobile
 Summary:Web browser
@@ -12,11 +12,6 @@ Description:
 Browser using the Gecko layout engine to render web pages, which implements
 current and anticipated web standards. This is a free software rebranding of the
 latest Firefox-ESR release.
-
-Anti-features: Non-free Addons: The license of the addons/modules on
-addons.mozilla.org may be seen in the version notes of the addon and often the
-license is Custom or other non-free. However there is no such license info for
-most apps from the marketplace.
 .
 
 Repo Type:hg
@@ -328,6 +323,50 @@ Build:52.4.1,520411
         mv obj-android/dist/icecat*-unsigned-unaligned.apk fdroid/icecat-unsigned.apk
     ndk=r12b
 
+Build:52.6.0,520600
+    commit=FIREFOX_52_6_0esr_RELEASE
+    timeout=21600
+    sudo=apt-get install -y g++
+    output=fdroid/icecat-unsigned.apk
+    srclibs=MozLocales@7707113b,IceCat@a5245aa2
+    prebuild=bash $$IceCat$$/makeicecat -- --no-tarball --skip-l10n --no-debian --with-sourcedir=$PWD && \
+        bash $$MozLocales$$/prebuild-icecat.sh && \
+        fxarch=`echo $$VERCODE$$ | cut -c 5 | sed -e 's/0/arm-linux-androideabi/g' -e 's/1/i386-linux-androideabi/g'` && \
+        echo "ac_add_options --with-android-ndk=$$NDK$$" >> .mozconfig && \
+        echo "ac_add_options --with-android-sdk=$$SDK$$" >> .mozconfig && \
+        echo "ac_add_options --target=${fxarch}" >> .mozconfig && \
+        echo "mk_add_options 'export MOZ_APP_ANDROID_VERSION_CODE=$$VERCODE$$'" >> .mozconfig
+    scanignore=mobile/android/base/java/org/mozilla/gecko/javaaddons
+    build=./mach build && \
+        pushd obj-android/mobile/android/locales && \
+        for loc in $(cat ../../../../used-locales); do LOCALE_MERGEDIR=$PWD/merge-$loc make merge-$loc || exit 1; LOCALE_MERGEDIR=$PWD/merge-$loc make chrome-$loc || exit 1; done && \
+        popd && \
+        ./mach package && \
+        mv obj-android/dist/icecat*-unsigned-unaligned.apk fdroid/icecat-unsigned.apk
+    ndk=r12b
+
+Build:52.6.0,520610
+    commit=FIREFOX_52_6_0esr_RELEASE
+    timeout=21600
+    sudo=apt-get install -y g++
+    output=fdroid/icecat-unsigned.apk
+    srclibs=MozLocales@7707113b,IceCat@a5245aa2
+    prebuild=bash $$IceCat$$/makeicecat -- --no-tarball --skip-l10n --no-debian --with-sourcedir=$PWD && \
+        bash $$MozLocales$$/prebuild-icecat.sh && \
+        fxarch=`echo $$VERCODE$$ | cut -c 5 | sed -e 's/0/arm-linux-androideabi/g' -e 's/1/i386-linux-androideabi/g'` && \
+        echo "ac_add_options --with-android-ndk=$$NDK$$" >> .mozconfig && \
+        echo "ac_add_options --with-android-sdk=$$SDK$$" >> .mozconfig && \
+        echo "ac_add_options --target=${fxarch}" >> .mozconfig && \
+        echo "mk_add_options 'export MOZ_APP_ANDROID_VERSION_CODE=$$VERCODE$$'" >> .mozconfig
+    scanignore=mobile/android/base/java/org/mozilla/gecko/javaaddons
+    build=./mach build && \
+        pushd obj-android/mobile/android/locales && \
+        for loc in $(cat ../../../../used-locales); do LOCALE_MERGEDIR=$PWD/merge-$loc make merge-$loc || exit 1; LOCALE_MERGEDIR=$PWD/merge-$loc make chrome-$loc || exit 1; done && \
+        popd && \
+        ./mach package && \
+        mv obj-android/dist/icecat*-unsigned-unaligned.apk fdroid/icecat-unsigned.apk
+    ndk=r12b
+
 Maintainer Notes:
 Needs Mercurial (a.k.a. hg) >= 3.5 to clone from Mozilla server.
 Needs host g++ since at least version 52.3
@@ -336,5 +375,5 @@ Needs host g++ since at least version 52.3
 Archive Policy:4 versions
 Auto Update Mode:None
 Update Check Mode:None
-Current Version:52.4.1
-Current Version Code:520411
+Current Version:52.6.0
+Current Version Code:520610
