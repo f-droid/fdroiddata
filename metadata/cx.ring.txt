@@ -545,6 +545,23 @@ Build:20180201,102
         ./compile.sh release
     ndk=r15c
 
+Build:20180421,116
+    commit=8ce06c1bc2ee0837281f6d05fe97393d2a351a59
+    subdir=client-android/ring-android/app
+    submodules=yes
+    sudo=apt-get update && \
+        apt-get install --yes -t jessie-backports swig
+    patch=0001-gradle-remove-unneeded-repo.patch
+    gradle=noPush
+    prebuild=$ANDROID_HOME/tools/bin/sdkmanager 'platforms;android-27' && \
+        sed -i -e '/$DAEMON_ONLY/,+7d' ../../compile.sh
+    scandelete=client-windows,client-uwp
+    build=export ANDROID_NDK_ROOT=$ANDROID_NDK && \
+        export ANDROID_ABI="armeabi-v7a arm64-v8a x86" && \
+        cd ../../ && \
+        ./compile.sh release
+    ndk=r16b
+
 Maintainer Notes:
 Ring has a lot of native dependencies, the source tarballs of these are all downloaded and build for all enabled architectures.
 We provide a fake gradlew because compile.sh calls this in the end.
