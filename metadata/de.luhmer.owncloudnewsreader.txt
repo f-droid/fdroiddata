@@ -1,5 +1,5 @@
 Categories:Internet
-License:AGPL-3.0+
+License:AGPL-3.0-or-later
 Web Site:
 Source Code:https://github.com/owncloud/News-Android-App
 Issue Tracker:https://github.com/owncloud/News-Android-App/issues
@@ -731,6 +731,28 @@ Build:0.9.9.15,129
         mkdir libs && \
         mv $$JavaOptionClass$$/target/option-1.3-SNAPSHOT.jar libs/option-1.3.jar
 
+Build:0.9.9.16,130
+    commit=v.0.9.9.16.1
+    subdir=News-Android-App
+    submodules=yes
+    init=sed -i -e '/com.nbsp:library/d' build.gradle && \
+        sed -i -e '/com.gu:option/d' build.gradle && \
+        sed -i -e '/maven { url/d' build.gradle && \
+        sed -i -e '/signingConfigs {/,+3d' build.gradle && \
+        sed -i "/repositories {/a flatDir { dirs 'libs' }" build.gradle && \
+        sed -i "/dependencies {/a compile project(':MaterialFilePicker:library')" build.gradle && \
+        sed -i "$ ainclude ':MaterialFilePicker:library'" ../settings.gradle
+    gradle=oss
+    srclibs=MaterialFilePicker@13920fc,JavaOptionClass@e933c3a
+    prebuild=rm -rf $$MaterialFilePicker$$/app && \
+        cp -r $$MaterialFilePicker$$ ../ && \
+        sed -i -e '/apply from/d' ../MaterialFilePicker/library/build.gradle && \
+        pushd $$JavaOptionClass$$ && \
+        $$MVN3$$ package -Dmaven.compiler.source=1.6 -Dmaven.compiler.target=1.6 && \
+        popd && \
+        mkdir libs && \
+        mv $$JavaOptionClass$$/target/option-1.3-SNAPSHOT.jar libs/option-1.3.jar
+
 Maintainer Notes:
 MaterialShowcaseView/build.gradle misses the google() repo but it's specified at top level.
 So deleting this file prevents it from overriding the top level one.
@@ -738,5 +760,5 @@ So deleting this file prevents it from overriding the top level one.
 
 Auto Update Mode:Version v.%v
 Update Check Mode:Tags
-Current Version:0.9.9.15
-Current Version Code:129
+Current Version:0.9.9.16
+Current Version Code:130
