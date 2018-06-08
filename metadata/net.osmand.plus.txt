@@ -442,6 +442,40 @@ Build:3.0.2,302
         popd
     ndk=r11c
 
+Build:3.0.3,303
+    commit=d4bb77548df8cdbb0690992ea6a0035188c6b7d6
+    subdir=android/OsmAnd
+    submodules=yes
+    sudo=apt-get update && \
+        apt-get install --yes -t jessie-backports swig
+    gradle=full,legacy,fat
+    rm=android/OsmAnd-java/libs/*.jar,android/OsmAnd-java/test/libs/*.jar,android/OsmAnd/ant-lib/*.jar,android/OsmAnd/libs/*.jar,android/OsmAndCore-sample
+    prebuild=sed  -i -e "/net.osmand:OsmAndCore_android:.*SNAPSHOT@jar/d" ../OsmAnd/build.gradle && \
+        sed -i -e '/qt.*Compile/d' -e '/com.google.firebase/d' build.gradle ../plugins/Osmand-ParkingPlugin/build.gradle ../plugins/Osmand-SRTMPlugin/build.gradle ../plugins/Osmand-Skimaps/build.gradle ../plugins/Osmand-Nautical/build.gradle && \
+        sed -i -e "s/System.getenv(\"APK_VERSION\")/\"$$VERSION$$\"/g" build.gradle && \
+        sed -i -e "s/System.getenv(\"APK_NUMBER_VERSION\")/\"$$VERCODE$$\"/g" build.gradle && \
+        sed -i -e "s/System.getenv(\"APP_FEATURES\")/\"+play_market +gps_status -parking_plugin -blackberry -amazon -route_nav\"/g" build.gradle && \
+        sed -i -e "s/System.getenv(\"APP_NAME\")/\"OsmAnd~\"/g" build.gradle && \
+        sed -i -e "s/System.getenv(\"TARGET_APP_NAME\")/\"OsmAnd~\"/g" build.gradle && \
+        sed -i -e '/com.android.vending.BILLING/d' AndroidManifest.xml && \
+        sed -i -e '/javaMaxHeapSize/s/4g/1536m/g' build.gradle && \
+        sed -i -e "s/compile fileTree.*/ compile 'commons-logging:commons-logging:1.1.1'\n compile group: 'net.sf.trove4j', name: 'trove4j', version: '3.0.3'\n compile 'org.json:json:20090211'\n compile 'it.unibo.alice.tuprolog:tuprolog:3.2.1'\n compile 'net.sf.kxml:kxml2:2.3.0'\n compile 'org.beanshell:bsh-core:2.0b4'\n compile 'com.ibm.icu:icu4j:50.1'\n compile 'fr.univ-valenciennes:bzip2:1.0'\n compile 'com.moparisthebest:junidecode:0.1.1'\n compile 'com.vividsolutions:jts-core:1.14.0'/" ../OsmAnd-java/build.gradle && \
+        sed -i -e "s/implementation fileTree.*/implementation fileTree(include: ['classes.jar'], dir: 'libs')\n implementation 'com.ibm.icu:icu4j:50.1'\n implementation group: 'net.sf.trove4j', name: 'trove4j', version: '3.0.3'\n/" build.gradle && \
+        sed -i -e "s/, ':OsmAndCore-sample'//" ../settings.gradle
+    scanignore=help/website/help/map-legend_nautical.png,help/website/help/map-legend_default.png,help/website/images/dvr/4p-en.png,help/website/images/blog/ios-2-0/con-scrn-1.png,help/website/images/blog/ios-2-0/con-scrn-2.png,help/website/images/blog/ios-2-0/interf-2.png,help/website/images/blog/ios-2-0/navigat-6.png,android/OsmAnd/assets/fonts/RobotoSlab-Regular.ttf
+    build=pushd ../../OsmAnd-core/wrappers/android/ && \
+        sed -i -e "/Native/d" settings.gradle && \
+        sed -i -e "/Native/d" build.gradle && \
+        sed -i -e "/compileTask.*copyNdkSharedLibs/d" build.gradle && \
+        sed -i -e "/compileTask.*copyQtSharedLibs/d" build.gradle && \
+        sed -i -e "/compileTask.*copyQtJarLibs/d" build.gradle && \
+        gradle assembleRelease && \
+        cd build/outputs/aar && \
+        unzip OsmAndCore_android-release.aar && \
+        cp classes.jar ../../../../../../android/OsmAnd/libs/ && \
+        popd
+    ndk=r11c
+
 Maintainer Notes:
 Update CV only after sucessfully built and tested.
 
@@ -485,5 +519,5 @@ code that is not needed.
 
 Auto Update Mode:None
 Update Check Mode:None
-Current Version:3.0.2
-Current Version Code:302
+Current Version:3.0.3
+Current Version Code:303
