@@ -1,12 +1,10 @@
 Categories:Games
 License:GPL-3.0-only
-Web Site:http://supertuxkart.sourceforge.net/
+Web Site:https://supertuxkart.net/Main_Page
 Source Code:https://github.com/supertuxkart/stk-code
 Issue Tracker:https://github.com/supertuxkart/stk-code/issues
 Changelog:https://github.com/supertuxkart/stk-code/blob/HEAD/CHANGELOG.md
 
-Name:SuperTuxKart (DEV)
-Auto Name:SuperTuxKart
 Summary:Play a kart racing games with Tux and friends
 Description:
 This is a development build, do not install.
@@ -33,14 +31,28 @@ Build:1.0,1
         ./make.sh -j5
     ndk=r13b
 
+Build:0.9.3,10
+    commit=0.9.3
+    subdir=android
+    output=build/outputs/apk/android-release-unsigned.apk
+    srclibs=supertuxkartdeps@eeb6a5e1841ec5f0c02848abc00f8fa9466ea8bb,supertuxkartassets093@17659
+    prebuild=tar -C '../lib' -xf $$supertuxkartdeps$$/dependencies-android.tar.xz && \
+        sed -i 's/android:versionCode="1"/android:versionCode="$$VERCODE$$"/' AndroidManifest.xml && \
+        sed -i 's/android:versionName="1.0"/android:versionName="$$VERSION$$"/' AndroidManifest.xml && \
+        sed -i -e 's#../../stk-assets#$$supertuxkartassets093$$#' generate_assets.sh
+    scandelete=lib/curl/tests,tools/windows_installer
+    build=export BUILD_TYPE=release && \
+        export SDK_PATH=$$SDK$$ && \
+        export NDK_PATH=$$NDK$$ && \
+        ./generate_assets.sh && \
+        ./make.sh
+    ndk=r12b
+
 Maintainer Notes:
-* We need to force version and versioncode.
-* Check binaries
-* Upstream does not bump VC, so we need a way to deal with it.
+By default, the build script only builds a binary for armeabi-v7a.
+
+Upstream sets the version manually during the build so we can't enable auto update.
 .
 
-Archive Policy:0 versions
 Auto Update Mode:None
-Update Check Mode:RepoManifest
-Current Version:1.0
-Current Version Code:1
+Update Check Mode:None
