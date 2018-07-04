@@ -96,7 +96,20 @@ Build:1.7.0,16
     build=ANDROID_SDK_ROOT="$$SDK$$" ANDROID_NDK_ROOT="$$NDK$$" ../build-native.sh -j $(nproc)
     ndk=r15c
 
+Build:1.7.1,17
+    commit=1.7.1
+    subdir=app
+    gradle=fdroid
+    srclibs=OpenSSL@OpenSSL_1_1_0h,QtBase@v5.11.1
+    prebuild=sed -i -e '/splits/,+7d' build.gradle && \
+        sed -i -e 's/android:extractNativeLibs=\"false\"/android:extractNativeLibs=\"true\"/' src/main/AndroidManifest.xml && \
+        sed -i -e "806s/\"\$MAKE\"/\"\$MAKE\" -j $(nproc)/" $$QtBase$$/configure && \
+        ln -s $(realpath $$OpenSSL$$) ../3rdparty/openssl/openssl && \
+        ln -s $(realpath $$QtBase$$) ../3rdparty/qt/qtbase
+    build=ANDROID_SDK_ROOT="$$SDK$$" ANDROID_NDK_ROOT="$$NDK$$" ../build-native.sh -j $(nproc)
+    ndk=r17b
+
 Auto Update Mode:Version %v
 Update Check Mode:Tags
-Current Version:1.7.0
-Current Version Code:16
+Current Version:1.7.1
+Current Version Code:17
