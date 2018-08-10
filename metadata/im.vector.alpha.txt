@@ -663,14 +663,65 @@ Build:0.8.12,81200
         popd && \
         cp $$matrixsdk$$/matrix-sdk/build/outputs/aar/matrix-sdk-release-*.aar libs/matrix-sdk.aar
 
+Build:0.8.13,81300
+    commit=v0.8.13
+    subdir=vector
+    sudo=curl -Lo node.tar.xz https://nodejs.org/dist/v8.11.3/node-v8.11.3-linux-x64.tar.xz && \
+        echo "08e2fcfea66746bd966ea3a89f26851f1238d96f86c33eaf6274f67fce58421a node.tar.xz" | sha256sum -c - && \
+        tar xJf node.tar.xz && \
+        cp -a node-v8.11.3-linux-x64/. /usr/local/ && \
+        npm install -g react-native-cli
+    gradle=appfdroid
+    srclibs=matrixsdk@v0.9.7,olmsdk@2.3.0,jitsi-meet@c109199e060faa05440c6971f0683e8eb4d81167
+    prebuild=sed -i -e '/com.google.firebase/d' build.gradle && \
+        sed -i -e '/com.google.gms.google-services/d' build.gradle && \
+        find . -name *.aar -exec truncate -s 0 {} \;
+    build=pushd $$olmsdk$$/android && \
+        echo ndk.dir=$$NDK$$ > local.properties && \
+        rm gradle.properties && \
+        gradle assembleRelease && \
+        popd && \
+        cp $$olmsdk$$/android/olm-sdk/build/outputs/aar/olm-sdk-release-2.3.0.aar libs/olm-sdk.aar && \
+        cp $$olmsdk$$/android/olm-sdk/build/outputs/aar/olm-sdk-release-2.3.0.aar $$matrixsdk$$/matrix-sdk/libs/olm-sdk.aar && \
+        pushd $$jitsi-meet$$ && \
+        sed -i -e 's|"url-polyfill": "github:github/url-polyfill#39734186de44612bc5a16eb25f5407adcc5b2e7c"|"@webcomponents/url": "0.7.1"|' package.json && \
+        sed -i -e 's|url-polyfill|@webcomponents/url|' react/features/base/lib-jitsi-meet/native/polyfills-browser.js && \
+        sed -i -e '/url-polyfill/d' react/features/base/lib-jitsi-meet/_.web.js && \
+        rm package-lock.json && \
+        npm install && \
+        make && \
+        pushd android && \
+        gradle assembleRelease && \
+        popd && \
+        react-native bundle --platform android --dev false --entry-file index.android.js --bundle-output index.android.bundle --assets-dest android/app/src/main/res/ && \
+        popd && \
+        cp $$jitsi-meet$$/android/sdk/build/outputs/aar/sdk-release.aar libs/jitsi-sdk.aar && \
+        cp $$jitsi-meet$$/node_modules/react-native-background-timer/android/build/outputs/aar/react-native-background-timer-release.aar libs/react-native-background-timer.aar && \
+        cp $$jitsi-meet$$/node_modules/react-native-fetch-blob/android/build/outputs/aar/react-native-fetch-blob-release.aar libs/react-native-fetch-blob.aar && \
+        cp $$jitsi-meet$$/node_modules/react-native-immersive/android/build/outputs/aar/react-native-immersive-release.aar libs/react-native-immersive.aar && \
+        cp $$jitsi-meet$$/node_modules/react-native-keep-awake/android/build/outputs/aar/react-native-keep-awake-release.aar libs/react-native-keep-awake.aar && \
+        cp $$jitsi-meet$$/node_modules/react-native-vector-icons/android/build/outputs/aar/react-native-vector-icons-release.aar libs/react-native-vector-icons.aar && \
+        cp $$jitsi-meet$$/node_modules/react-native-webrtc/android/build/outputs/aar/react-native-webrtc-release.aar libs/react-native-webrtc.aar && \
+        cp $$jitsi-meet$$/node_modules/react-native-webrtc/android/build/outputs/aar/react-native-webrtc-release.aar $$matrixsdk$$/matrix-sdk/libs/react-native-webrtc.aar && \
+        cp $$jitsi-meet$$/node_modules/react-native-locale-detector/android/build/outputs/aar/react-native-locale-detector-release.aar libs/react-native-locale-detector.aar && \
+        cp $$jitsi-meet$$/node_modules/react-native/android/com/facebook/react/react-native/0.50.4/react-native-0.50.4.aar libs/react-native.aar && \
+        cp $$jitsi-meet$$/node_modules/react-native-vector-icons/Fonts/*.ttf src/main/assets/fonts/ && \
+        cp $$jitsi-meet$$/index.android.bundle src/main/assets/ && \
+        pushd $$matrixsdk$$ && \
+        gradle clean assembleRelease && \
+        popd && \
+        cp $$matrixsdk$$/matrix-sdk/build/outputs/aar/matrix-sdk-release-*.aar libs/matrix-sdk.aar
+
 Maintainer Notes:
 Upstream puts their library aars inside the repo, we need build them our self. We truncate instead of deleting them such that the initial gradle clean is successful.
 jitsi-meet needs react-native which we get via npm. This pulls in a few prebuilt binaries for now :-/.
 We also need to provide an up to date version of npm and nodejs, neither of which can be found in debian jessie, so we download the upstream provided nodejs bundle which includes npm.
 Then we walk through olmsdk, jitsi-meet, matrixsdk (which needs those other two, at least partly) and finally riot, which needs all three dependencies.
+
+Currently pinned jitsi-lib version needs a few hacks to still build from source: https://github.com/vector-im/riot-android/issues/2507
 .
 
 Auto Update Mode:None
 Update Check Mode:Tags
-Current Version:0.8.12
-Current Version Code:81200
+Current Version:0.8.13
+Current Version Code:81300
