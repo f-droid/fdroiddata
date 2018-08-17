@@ -40,9 +40,13 @@ If the app is on GitHub, GitLab or Bitbucket, use `fdroid import`:
 
 	fdroid import --url https://github.com/foo/bar --subdir app
 
-Alternatively, start the metadata file from scratch:
+Alternatively, start the metadata file from scratch, see [the templates](https://gitlab.com/fdroid/fdroiddata/tree/master/templates):
 
 	cp templates/app-minimal metadata/app.id.txt
+
+Or by download:
+
+    wget -O metadata/app.id.txt https://gitlab.com/fdroid/fdroiddata/raw/master/templates/app-minimal
 
 Now that the file is created, you need to fill up all the app information and
 add a working build recipe.
