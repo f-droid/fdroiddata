@@ -96,7 +96,7 @@ to appear in our repository.
 
 - Once your app metadata is merged, it can take a day or more for the
     build system to build the app.
-- If you have enabled auto-updates, F-Droid will build new versions from tags
+- If you have enabled [auto-updates], F-Droid will build new versions from tags
     automatically.
 
     ```
@@ -116,3 +116,4 @@ to appear in our repository.
 
 [localization and screenshots]: https://fdroid.gitlab.io/fdroid-website/docs/All_About_Descriptions_Graphics_and_Screenshots/
 [get-it-on-fdroid]: https://f-droid.org/badge/get-it-on.png
+[auto-updates]: https://f-droid.org/en/docs/Build_Metadata_Reference/#Auto-Update-Mode
