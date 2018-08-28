@@ -1,0 +1,36 @@
+Categories:Games
+License:GPL-3.0-only
+Author Name:Daniel Darias,Yanara Aristiguieta
+Web Site:https://pipoypipagames.itch.io/cows-revenge
+Source Code:https://github.com/Dariasteam/Cows-Revenge
+Issue Tracker:https://github.com/Dariasteam/Cows-Revenge/issues
+Changelog:https://github.com/Dariasteam/Cows-Revenge/releases
+
+Auto Name:Cow's Revenge
+
+Repo Type:git
+Repo:https://github.com/Dariasteam/Cows-Revenge.git
+
+Build:1.0.4,6
+    commit=a53801e19f35c5656307da909e5f6a7b3719654a
+    sudo=apt-get install -y -t jessie-backports clang
+    output=cows_revenge.apk
+    srclibs=Godot@7cb027d0718bda02dac3b7d570bc359ca32921e5
+    prebuild=mkdir cows_revenge && \
+        bash -O extglob -c "mv !(cows_revenge) cows_revenge" && \
+        cp -R $$Godot$$ godot
+    target=android-19
+    build=cd godot && \
+        scons -j `nproc` platform=server target=release_debug use_llvm=yes unix_global_settings_path=".." tools=yes && \
+        export ANDROID_NDK_ROOT=$$NDK$$ && \
+        scons -j `nproc` use_llvm=yes p=android target=release && \
+        pushd platform/android/java/ && \
+        gradle assembleRelease && \
+        popd && \
+        mkdir -p ../templates/ && \
+        cp bin/android_release.apk ../templates && \
+        cd ../cows_revenge && \
+        ../godot/bin/godot_server.server.opt.tools.64 -export Android ../cows_revenge.apk
+
+Auto Update Mode:None
+Update Check Mode:None
