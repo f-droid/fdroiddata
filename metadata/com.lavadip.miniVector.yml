@@ -1,0 +1,43 @@
+Categories:
+  - Internet
+  - Phone & SMS
+License: Apache-2.0
+Changelog: https://github.com/LiMium/mini-vector-android/blob/HEAD/CHANGES.rst
+
+AutoName: miniVector
+Summary: Open team collaboration
+Description: |-
+    A simplified fork of the [[im.vector.alpha]] Android app.
+
+    This is a minified Android Matrix client derived from the official client. It requires fewer permissions and compiles to a much smaller package.
+
+    Full credit goes to the original developers. This fork just shaves-off the following features and dependencies:
+
+    * Jitsi integration (for audio / video conference)
+    * React native libraries
+    * Application Icon badger
+    * Analytics
+
+RepoType: git
+Repo: https://github.com/Bubu/mini-vector-android.git
+
+Builds:
+  - versionName: 0.8.15
+    versionCode: 81500
+    commit: miniv0.8.15-fdroid
+    subdir: vector
+    gradle:
+      - appfdroid
+    srclibs:
+      - mini-matrixsdk@v0.9.9-no-webrtc
+      - olmsdk@2.3.0
+    prebuild: |-
+        sed -i -e '/com.google.firebase/d' build.gradle && sed -i -e '/com.google.gms.google-services/d' build.gradle && mkdir -p libs
+    build: |-
+        pushd $$olmsdk$$/android && echo ndk.dir=$$NDK$$ > local.properties && gradle assembleRelease && popd && cp $$olmsdk$$/android/olm-sdk/build/outputs/aar/olm-sdk-release-2.3.0.aar libs/olm-sdk.aar && mkdir -p $$mini-matrixsdk$$/matrix-sdk/libs && cp $$olmsdk$$/android/olm-sdk/build/outputs/aar/olm-sdk-release-2.3.0.aar $$mini-matrixsdk$$/matrix-sdk/libs/olm-sdk.aar && pushd $$mini-matrixsdk$$ && gradle clean assembleRelease && popd && cp $$mini-matrixsdk$$/matrix-sdk/build/outputs/aar/matrix-sdk-release-*.aar libs/matrix-sdk.aar
+    ndk: r17b
+
+AutoUpdateMode: None
+UpdateCheckMode: None
+CurrentVersion: 0.8.15
+CurrentVersionCode: 81500
