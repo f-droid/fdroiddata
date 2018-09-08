@@ -4843,6 +4843,146 @@ Build:61.0.2,610210
         zip -d obj/dist/fennec-$$VERSION$$.multi.android-*-unsigned-unaligned.apk 'META-INF/*.*'
     ndk=r15c
 
+Build:62.0.1,620100
+    commit=FENNEC_62_0_1_RELEASE
+    timeout=28800
+    sudo=apt update && \
+        apt install -y g++ libgmp-dev libmpfr-dev libmpc-dev proguard-cli/testing libproguard-java/testing
+    output=obj/dist/fennec-$$VERSION$$.multi.android-*-unsigned-unaligned.apk
+    srclibs=MozLocales@c795b1463d98524da163ae29c0343be13c4f6392,pyenv@v1.2.7
+    prebuild=bash $$MozLocales$$/prebuild.sh && \
+        echo "ac_add_options --target=arm-linux-androideabi" >> .mozconfig && \
+        echo "ac_add_options --with-android-min-sdk=16" >> .mozconfig && \
+        echo "ac_add_options --with-android-ndk=\"$$NDK$$\"" >> .mozconfig && \
+        echo "ac_add_options --with-android-sdk=\"$$SDK$$\"" >> .mozconfig && \
+        echo "ac_add_options --enable-application=mobile/android" >> .mozconfig && \
+        echo "ac_add_options --with-branding=mobile/android/branding/unofficial" >> .mozconfig && \
+        echo "ac_add_options --with-libclang-path=$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/lib64/" >> .mozconfig && \
+        echo "ac_add_options --with-clang-path=$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin/clang" >> .mozconfig && \
+        echo "mk_add_options 'export PROGUARD_JAR=/usr/share/java/proguard.jar'" >> .mozconfig && \
+        echo "mk_add_options MOZ_OBJDIR=@TOPSRCDIR@/obj" >> .mozconfig && \
+        pushd mobile/android/branding/unofficial/ && \
+        sed -i -e '/ANDROID_PACKAGE_NAME/d' -e '/MOZ_APP_DISPLAYNAME/d' configure.sh && \
+        echo 'ANDROID_PACKAGE_NAME=org.mozilla.fennec_fdroid' >> configure.sh && \
+        echo 'MOZ_APP_DISPLAYNAME="Fennec F-Droid"' >> configure.sh && \
+        echo 'MOZ_APP_ANDROID_VERSION_CODE=$$VERCODE$$' >> configure.sh && \
+        sed -i -e 's/Mozilla Fennec/Fennec F-Droid/g' locales/en-US/brand* && \
+        popd
+    build=export I_PREFER_A_SUBOPTIMAL_MERCURIAL_EXPERIENCE=1 && \
+        mkdir clang+llvm && \
+        curl --retry 3 https://releases.llvm.org/6.0.0/clang+llvm-6.0.0-x86_64-linux-gnu-debian8.tar.xz | tar -x -J -C clang+llvm --strip-components 1 && \
+        export LLVM_CONFIG=$PWD/clang+llvm/bin/llvm-config && \
+        export HOST_CC=$PWD/clang+llvm/bin/clang && \
+        export HOST_CXX=$PWD/clang+llvm/bin/clang++ && \
+        export PYENV_ROOT="$(realpath '$$pyenv$$')" && \
+        export PATH="$PYENV_ROOT/bin:$PATH" && \
+        eval "$(pyenv init -)" && \
+        pyenv install 3.5.6 && \
+        pyenv global 3.5.6 && \
+        mkdir rust && \
+        curl --retry 3 https://static.rust-lang.org/dist/rust-1.26.2-`uname -m`-unknown-linux-gnu.tar.xz | tar -x -J -C rust --strip-components 2 && \
+        curl --retry 3 https://static.rust-lang.org/dist/rust-std-1.26.2-armv7-linux-androideabi.tar.xz | tar -x -J -C rust --strip-components 2 && \
+        PATH=$PATH:$PWD/rust/bin ./mach build && \
+        cat used-locales | xargs -I % ./mach build chrome-% && \
+        make -C obj/mobile/android/base android_apks && \
+        make -C obj package AB_CD=multi && \
+        zip -d obj/dist/fennec-$$VERSION$$.multi.android-*-unsigned-unaligned.apk 'META-INF/*.*'
+    ndk=r15c
+
+Build:62.0.1,620110
+    commit=FENNEC_62_0_1_RELEASE
+    timeout=28800
+    sudo=apt update && \
+        apt install -y g++ libgmp-dev libmpfr-dev libmpc-dev proguard-cli/testing libproguard-java/testing
+    output=obj/dist/fennec-$$VERSION$$.multi.android-*-unsigned-unaligned.apk
+    srclibs=MozLocales@c795b1463d98524da163ae29c0343be13c4f6392,pyenv@v1.2.7
+    prebuild=bash $$MozLocales$$/prebuild.sh && \
+        echo "ac_add_options --target=i386-linux-androideabi" >> .mozconfig && \
+        echo "ac_add_options --with-android-min-sdk=16" >> .mozconfig && \
+        echo "ac_add_options --with-android-ndk=\"$$NDK$$\"" >> .mozconfig && \
+        echo "ac_add_options --with-android-sdk=\"$$SDK$$\"" >> .mozconfig && \
+        echo "ac_add_options --enable-application=mobile/android" >> .mozconfig && \
+        echo "ac_add_options --with-branding=mobile/android/branding/unofficial" >> .mozconfig && \
+        echo "ac_add_options --with-libclang-path=$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/lib64/" >> .mozconfig && \
+        echo "ac_add_options --with-clang-path=$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin/clang" >> .mozconfig && \
+        echo "mk_add_options 'export PROGUARD_JAR=/usr/share/java/proguard.jar'" >> .mozconfig && \
+        echo "mk_add_options MOZ_OBJDIR=@TOPSRCDIR@/obj" >> .mozconfig && \
+        pushd mobile/android/branding/unofficial/ && \
+        sed -i -e '/ANDROID_PACKAGE_NAME/d' -e '/MOZ_APP_DISPLAYNAME/d' configure.sh && \
+        echo 'ANDROID_PACKAGE_NAME=org.mozilla.fennec_fdroid' >> configure.sh && \
+        echo 'MOZ_APP_DISPLAYNAME="Fennec F-Droid"' >> configure.sh && \
+        echo 'MOZ_APP_ANDROID_VERSION_CODE=$$VERCODE$$' >> configure.sh && \
+        sed -i -e 's/Mozilla Fennec/Fennec F-Droid/g' locales/en-US/brand* && \
+        popd
+    build=export I_PREFER_A_SUBOPTIMAL_MERCURIAL_EXPERIENCE=1 && \
+        mkdir clang+llvm && \
+        curl --retry 3 https://releases.llvm.org/6.0.0/clang+llvm-6.0.0-x86_64-linux-gnu-debian8.tar.xz | tar -x -J -C clang+llvm --strip-components 1 && \
+        export LLVM_CONFIG=$PWD/clang+llvm/bin/llvm-config && \
+        export HOST_CC=$PWD/clang+llvm/bin/clang && \
+        export HOST_CXX=$PWD/clang+llvm/bin/clang++ && \
+        export PYENV_ROOT="$(realpath '$$pyenv$$')" && \
+        export PATH="$PYENV_ROOT/bin:$PATH" && \
+        eval "$(pyenv init -)" && \
+        pyenv install 3.5.6 && \
+        pyenv global 3.5.6 && \
+        mkdir rust && \
+        curl --retry 3 https://static.rust-lang.org/dist/rust-1.26.2-`uname -m`-unknown-linux-gnu.tar.xz | tar -x -J -C rust --strip-components 2 && \
+        curl --retry 3 https://static.rust-lang.org/dist/rust-std-1.26.2-i686-linux-android.tar.xz | tar -x -J -C rust --strip-components 2 && \
+        export PATH="$PATH:$PWD/rust/bin" && \
+        ./mach build && \
+        cat used-locales | xargs -I % ./mach build chrome-% && \
+        make -C obj/mobile/android/base android_apks && \
+        make -C obj package AB_CD=multi && \
+        zip -d obj/dist/fennec-$$VERSION$$.multi.android-*-unsigned-unaligned.apk 'META-INF/*.*'
+    ndk=r15c
+
+Build:62.0.1,620120
+    commit=FENNEC_62_0_1_RELEASE
+    timeout=28800
+    sudo=apt update && \
+        apt install -y g++ libgmp-dev libmpfr-dev libmpc-dev proguard-cli/testing libproguard-java/testing
+    output=obj/dist/fennec-$$VERSION$$.multi.android-*-unsigned-unaligned.apk
+    srclibs=MozLocales@c795b1463d98524da163ae29c0343be13c4f6392,pyenv@v1.2.7
+    prebuild=bash $$MozLocales$$/prebuild.sh && \
+        echo "ac_add_options --target=aarch64-linux-android" >> .mozconfig && \
+        echo "ac_add_options --with-android-min-sdk=21" >> .mozconfig && \
+        echo "ac_add_options --with-android-ndk=\"$$NDK$$\"" >> .mozconfig && \
+        echo "ac_add_options --with-android-sdk=\"$$SDK$$\"" >> .mozconfig && \
+        echo "ac_add_options --enable-application=mobile/android" >> .mozconfig && \
+        echo "ac_add_options --with-branding=mobile/android/branding/unofficial" >> .mozconfig && \
+        echo "ac_add_options --with-libclang-path=$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/lib64/" >> .mozconfig && \
+        echo "ac_add_options --with-clang-path=$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin/clang" >> .mozconfig && \
+        echo "mk_add_options 'export PROGUARD_JAR=/usr/share/java/proguard.jar'" >> .mozconfig && \
+        echo "mk_add_options MOZ_OBJDIR=@TOPSRCDIR@/obj" >> .mozconfig && \
+        pushd mobile/android/branding/unofficial/ && \
+        sed -i -e '/ANDROID_PACKAGE_NAME/d' -e '/MOZ_APP_DISPLAYNAME/d' configure.sh && \
+        echo 'ANDROID_PACKAGE_NAME=org.mozilla.fennec_fdroid' >> configure.sh && \
+        echo 'MOZ_APP_DISPLAYNAME="Fennec F-Droid"' >> configure.sh && \
+        echo 'MOZ_APP_ANDROID_VERSION_CODE=$$VERCODE$$' >> configure.sh && \
+        sed -i -e 's/Mozilla Fennec/Fennec F-Droid/g' locales/en-US/brand* && \
+        popd
+    build=export I_PREFER_A_SUBOPTIMAL_MERCURIAL_EXPERIENCE=1 && \
+        mkdir clang+llvm && \
+        curl --retry 3 https://releases.llvm.org/6.0.0/clang+llvm-6.0.0-x86_64-linux-gnu-debian8.tar.xz | tar -x -J -C clang+llvm --strip-components 1 && \
+        export LLVM_CONFIG=$PWD/clang+llvm/bin/llvm-config && \
+        export HOST_CC=$PWD/clang+llvm/bin/clang && \
+        export HOST_CXX=$PWD/clang+llvm/bin/clang++ && \
+        export PYENV_ROOT="$(realpath '$$pyenv$$')" && \
+        export PATH="$PYENV_ROOT/bin:$PATH" && \
+        eval "$(pyenv init -)" && \
+        pyenv install 3.5.6 && \
+        pyenv global 3.5.6 && \
+        mkdir rust && \
+        curl --retry 3 https://static.rust-lang.org/dist/rust-1.26.2-`uname -m`-unknown-linux-gnu.tar.xz | tar -x -J -C rust --strip-components 2 && \
+        curl --retry 3 https://static.rust-lang.org/dist/rust-std-1.26.2-aarch64-linux-android.tar.xz | tar -x -J -C rust --strip-components 2 && \
+        export PATH="$PATH:$PWD/rust/bin" && \
+        ./mach build && \
+        cat used-locales | xargs -I % ./mach build chrome-% && \
+        make -C obj/mobile/android/base android_apks && \
+        make -C obj package AB_CD=multi && \
+        zip -d obj/dist/fennec-$$VERSION$$.multi.android-*-unsigned-unaligned.apk 'META-INF/*.*'
+    ndk=r15c
+
 Maintainer Notes:
 
 Updating/Versioning:
