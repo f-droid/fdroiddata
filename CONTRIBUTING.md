@@ -112,8 +112,20 @@ to appear in our repository.
     ```
     <img src="https://f-droid.org/badge/get-it-on.png" height="75">
     ```
-
+- You can add a badge of your apps F-Droid version from [shields.io].
+    ![](https://img.shields.io/badge/f--droid-v1.0-blue.svg)
+    ```
+    https://img.shields.io/f-droid/v/APP.ID.svg
+    ```
+    You can also include a GitHub release badge to know if your version is
+    up to date.
+    ![Latest Release](https://img.shields.io/badge/release-v1.0-blue.svg?logo=github)
+    ```
+    https://img.shields.io/github/release/USER/REPO.svg?logo=github
+    ```
+    
 
 [localization and screenshots]: https://fdroid.gitlab.io/fdroid-website/docs/All_About_Descriptions_Graphics_and_Screenshots/
 [get-it-on-fdroid]: https://f-droid.org/badge/get-it-on.png
 [auto-updates]: https://f-droid.org/en/docs/Build_Metadata_Reference/#Auto-Update-Mode
+[shields.io]: https://shields.io/#/examples/version
