@@ -50,7 +50,21 @@ Build:2.0.0-rc1,11
         ./android-build-freerdp.sh --ndk $$NDK$$ --sdk $$SDK$$ --conf android-build-64.conf
     ndk=r12b
 
+Build:2.0.0-rc2,12
+    commit=2.0.0-rc2
+    subdir=client/Android/Studio/aFreeRDP
+    patch=2.0.0-rc0-gcc-sysroot.diff
+    gradle=yes
+    prebuild=echo -e "RELEASE_STORE_FILE=\nRELEASE_KEY_ALIAS=" >>../gradle.properties && \
+        cd ../../../../scripts && \
+        sed -i -e 's/OPENSSL_TAG=OpenSSL_1_1_0[a-g]/OPENSSL_TAG=OpenSSL_1_1_0h/' -e 's/WITH_OPENH264=0/WITH_OPENH264=1/' android-build-*.conf && \
+        sed -i -e 's/make/make USE_ASM=no/' android-build-openh264.sh
+    build=cd ../../../../scripts && \
+        ./android-build-freerdp.sh --ndk $$NDK$$ --sdk $$SDK$$ --conf android-build-32.conf && \
+        ./android-build-freerdp.sh --ndk $$NDK$$ --sdk $$SDK$$ --conf android-build-64.conf
+    ndk=r12b
+
 Auto Update Mode:None
 Update Check Mode:None
-Current Version:2.0.0-rc1
-Current Version Code:11
+Current Version:2.0.0-rc2
+Current Version Code:12
