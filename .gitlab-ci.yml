@@ -39,3 +39,20 @@ lint:
     - git --no-pager diff --name-only --exit-code || export EXITVALUE=1
     - ./tools/check-keyalias-collision.py || export EXITVALUE=1
     - exit $EXITVALUE
+
+pages:
+  image: ruby:2.3
+  stage: deploy
+  only:
+    - schedules
+    - master@fdroid/fdroiddata
+  cache:
+    paths:
+      - vendor/ruby
+  artifacts:
+    paths:
+      - public
+  script:
+    - rm -rf public
+    - gem install git_stats
+    - git_stats generate --silent --out-path=public
