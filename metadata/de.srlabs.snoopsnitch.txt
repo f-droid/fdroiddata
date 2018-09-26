@@ -172,22 +172,26 @@ Build:1.0.3,17
         bash copy.sh
     ndk=r14b
 
-Build:2.0.5,33
-    disable=links against com.google.android.gms:play-services-safetynet
-    commit=SnoopSnitch-2.0.5
+Build:2.0.7,35
+    commit=SnoopSnitch-2.0.7
     subdir=SnoopSnitch/app
     submodules=yes
-    gradle=yes
-    prebuild=rm -rf ../../contrib/prebuilt/*
-    build=cd ../../contrib && \
-        export PATH=$$NDK$$/toolchains/arm-linux-androideabi-4.9/prebuilt/linux-x86_64/bin:$PATH && \
-        export NDK_DIR=$$NDK$$ && \
+    gradle=nobuildcheck
+    rm=SnoopSnitch/app/src/main/jniLibs/*/*.so,contrib/prebuilt/*.so
+    prebuild=sed -i -e '/versionNameSuffix/d' build.gradle
+    scandelete=SnoopSnitch/patchanalysis
+    build=export NDK_DIR=$$NDK$$ && \
+        cd ../../contrib && \
         bash compile.sh -t android -u && \
-        cd ../SnoopSnitch && \
+        cd ../SnoopSnitch/patchanalysis/contrib && \
+        bash compile.sh -t android -u && \
+        bash copy.sh && \
+        cp builds/*.so ../../../contrib/prebuilt && \
+        cd ../.. && \
         bash copy.sh
     ndk=r14b
 
 Auto Update Mode:Version SnoopSnitch-%v
 Update Check Mode:Tags
-Current Version:2.0.5
-Current Version Code:33
+Current Version:2.0.7
+Current Version Code:35
