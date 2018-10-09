@@ -33,8 +33,25 @@ lint:
       }
     - apt-get -qy update
     - apt-get -qy install --no-install-recommends exiftool
-    - exiftool -all= `find metadata/ -name '*.jp*g' -o -name '*.png'`
+    - find metadata/ -name '*.jp*g' -o -name '*.png' | xargs exiftool -all=
     - echo "these images have EXIF that must be stripped:"
     - git --no-pager diff --stat
     - git --no-pager diff --name-only --exit-code || export EXITVALUE=1
+    - ./tools/check-keyalias-collision.py || export EXITVALUE=1
     - exit $EXITVALUE
+
+pages:
+  image: ruby:2.3
+  stage: deploy
+  only:
+    - schedules
+  cache:
+    paths:
+      - vendor/ruby
+  artifacts:
+    paths:
+      - public
+  script:
+    - rm -rf public
+    - gem install git_stats
+    - git_stats generate --silent --out-path=public
