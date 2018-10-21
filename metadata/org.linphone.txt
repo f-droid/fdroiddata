@@ -318,6 +318,26 @@ Build:3.3.2,3320
         make `pwd`/res/raw/rootca.pem
     ndk=r15c
 
+Build:4.0.1,4002
+    commit=4.0.1
+    submodules=yes
+    sudo=apt-get update && \
+        apt-get install -y cmake -t testing && \
+        apt-get install -y python-pystache doxygen
+    patch=4.0-gradle.patch
+    gradle=yes
+    output=bin/outputs/apk/release/org.linphone-release-unsigned.apk
+    rm=liblinphone_tester,submodules/belle-sip/src/antlr3c/antlr-3.4-complete.jar,src/android/org/linphone/firebase/Firebase*.java,submodules/externals/xerces-c/tools/jars
+    prebuild=sed -i -e 's|"kill_service_with_task_manager">true<|"kill_service_with_task_manager">false<|' res/values/non_localizable_custom.xml
+    scanignore=submodules/belcard/src/vcard_grammar,submodules/linphone/share/cpim_grammar
+    scandelete=submodules
+    build=echo 'gradle "$@"' > gradlew && \
+        chmod a+x gradlew && \
+        ./prepare.py && \
+        make -j`nproc` build && \
+        make copy-libs
+    ndk=r16b
+
 Auto Update Mode:None
 Update Check Mode:Tags
 Current Version:4.0.1
