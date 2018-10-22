@@ -1,0 +1,41 @@
+Categories:
+  - Internet
+License: BSD-3-Clause
+SourceCode: https://github.com/juha-h/baresip-studio
+IssueTracker: https://github.com/juha-h/baresip-studio/issues
+
+Summary: baresip SIP client
+Description: |-
+    This is very basic project implementing baresip [https://github.com/alfredh/baresip baresip] based SIP User Agent.
+
+    Currently supports voice calls and messages with TLS transport, voicemail MWI, PCMU/PCMA and opus voice codecs, as well as ZRTP and (DTLS) SRTP media encapsulation.
+
+    Motivated by need for secure SIP user agent for Android that does not depend on third party push notification services.
+
+RepoType: git
+Repo: https://github.com/juha-h/baresip-studio
+
+Builds:
+  - versionName: 3.0.5
+    versionCode: 26
+    commit: v3.0.5
+    subdir: app
+    gradle:
+      - yes
+    srclibs:
+      - libbaresip-android@v1.0.0
+    rm:
+      - distribution/*/lib/armeabi-v7a/*.a
+    build: |-
+        pushd $$libbaresip-android$$ && \
+        sed -i -e 's!\/usr\/local\/android-ndk-r18b!$$NDK$$!' -e 's!\/usr\/src\/baresip-studio!../../com.tutpro.baresip!' Makefile && \
+        make download-sources && \
+        make all && \
+        make install-all && \
+        popd
+    ndk: r18b
+
+AutoUpdateMode: Version v%v
+UpdateCheckMode: Tags
+CurrentVersion: 3.0.5
+CurrentVersionCode: 26
