@@ -105,6 +105,43 @@ Builds:
         npm run build-android-assets
     ndk: r17b
 
+  - versionName: 0.1810.24-beta
+    versionCode: 34
+    commit: v0.1810.24-beta
+    subdir: android/app
+    sudo: |-
+        apt-get install -y g++ && \
+        curl -Lo node.tar.xz https://nodejs.org/dist/v8.11.4/node-v8.11.4-linux-x64.tar.xz && \
+        echo "85ea7cbb5bf624e130585bfe3946e99c85ce5cb84c2aee474038bdbe912f908c node.tar.xz" | sha256sum -c - && \
+        tar xJf node.tar.xz && \
+        cp -a node-v8.11.4-linux-x64/. /usr/local/ && \
+        npm install -g react-native-cli
+    init: |-
+        sed -i -e '/appium/d' ../../package.json && \
+        npm install && \
+        truncate -s 0 ../../node_modules/react-native/local-cli/server/util/external/xsel
+    gradle:
+      - yes
+    srclibs:
+      - NodejsMobile@nodejs-mobile-v0.1.7
+    rm:
+      - node_modules/react-native/ReactAndroid/src/main/third-party/java/infer-annotations/infer-annotations-4.0.jar
+      - node_modules/react-native/ReactAndroid/src/main/third-party/java/buck-android-support/buck-android-support.jar
+      - node_modules/*/build/Release/*.node
+      - node_modules/sodium-native/prebuilds/
+      - node_modules/react-native-android-wifi/Examples/
+    scanignore:
+      - android/build.gradle
+    scandelete:
+      - node_modules
+    build: |-
+        pushd $$NodejsMobile$$ && \
+        ./tools/android_build.sh $$NDK$$ arm && \
+        popd && \
+        mv $$NodejsMobile$$/out_android/armeabi-v7a/libnode.so ../../node_modules/nodejs-mobile-react-native/android/libnode/bin/armeabi-v7a/libnode.so && \
+        npm run build-android-assets
+    ndk: r17b
+
 MaintainerNotes: |-
     scanignore is used to allow the "node_modules/react-native/android" local Maven repository which contains the prebuilt react-native library which we get from npm.
 
@@ -112,5 +149,5 @@ MaintainerNotes: |-
 
 AutoUpdateMode: Version v%v
 UpdateCheckMode: Tags
-CurrentVersion: 0.1810.16-beta
-CurrentVersionCode: 32
+CurrentVersion: 0.1810.24-beta
+CurrentVersionCode: 34
