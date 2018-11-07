@@ -40,11 +40,17 @@ Build:0.9,6
 Build:0.9.1,7
     commit=v0.9.1
     output=build/app/outputs/apk/fdroid/release/app-fdroid-release.apk
-    srclibs=flutter@beta
+    srclibs=flutter@v0.8.2
     prebuild=sed -i -e 's|git@github.com:|https://github.com/|' pubspec.lock pubspec.yaml && \
-        $$flutter$$/bin/flutter upgrade
+        sed -i '/repositories {/a google()' $$flutter$$/packages/flutter_tools/gradle/flutter.gradle
     build=$$flutter$$/bin/flutter config --no-analytics && \
         $$flutter$$/bin/flutter build apk --flavor fdroid
+
+Maintainer Notes:
+Builds will fail when the srclib ref of flutter and the version with which
+upstream has been built with differ.
+In that case we need to manually give the correct ref to srclib.
+.
 
 Auto Update Mode:Version v%v
 Update Check Mode:Tags
