@@ -1,14 +1,13 @@
 image: registry.gitlab.com/fdroid/ci-images-server:latest
 
-before_script:
-  - rm -rf fdroidserver
-  - mkdir fdroidserver
-  - curl --silent https://gitlab.com/fdroid/fdroidserver/repository/master/archive.tar.gz
-      | tar -xz --directory=fdroidserver --strip-components=1
-  - export PATH="$PWD/fdroidserver:$PATH"
-  - touch config.py
-
 lint:
+  before_script:
+    - rm -rf fdroidserver
+    - mkdir fdroidserver
+    - curl --silent https://gitlab.com/fdroid/fdroidserver/repository/master/archive.tar.gz
+        | tar -xz --directory=fdroidserver --strip-components=1
+    - export PATH="$PWD/fdroidserver:$PATH"
+    - touch config.py
   script:
     # if this is a merge request fork, then only check relevant apps
     - if [ "$CI_PROJECT_NAMESPACE" != "fdroid" ]; then
@@ -55,3 +54,40 @@ pages:
     - rm -rf public
     - gem install git_stats
     - git_stats generate --silent --out-path=public
+
+fdroid-buildserver:
+  tags:
+    - fdroid
+    - buildserver
+  artifacts:
+    name: "${CI_PROJECT_PATH}_${CI_JOB_STAGE}_${CI_COMMIT_REF_NAME}_${CI_COMMIT_SHA}"
+    paths:
+      - logs
+      - unsigned
+    expire_in: 1 week
+    when: always
+  script:
+    - virsh -c qemu:///system destroy builder_default || true
+    - virsh -c qemu:///system undefine builder_default
+          --nvram --managed-save --remove-all-storage --snapshots-metadata || true
+    - git -C /home/fdroid/fdroidserver reset --hard
+    - git -C /home/fdroid/fdroidserver checkout -B master origin/master
+    - export PATH="$HOME/fdroidserver:$PATH"
+    - git fetch https://gitlab.com/fdroid/fdroiddata.git
+    - test -d build || mkdir build
+    - for f in `git diff --name-only --diff-filter=d FETCH_HEAD...HEAD`; do
+          appid=`echo $f | sed -n -e 's,^metadata/\([^/][^/]*\)\.txt,\1,p'
+                                  -e 's,^metadata/\([^/][^/]*\)\.yml,\1,p'`;
+          ! test -z "$appid" || continue;
+          echo building $appid;
+          set -x;
+          if [ "$CI_PROJECT_NAMESPACE" = "fdroid" ]; then
+            fdroid build --verbose -Werror --server --stop --latest $appid;
+          else
+            fdroid build --verbose -Wwarn --server --stop --test --force --latest $appid;
+          fi;
+          set +x;
+      done
+  after_script:
+    - cd builder
+    - vagrant destroy --force
