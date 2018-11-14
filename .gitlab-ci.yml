@@ -62,7 +62,10 @@ fdroid-buildserver:
   artifacts:
     name: "${CI_PROJECT_PATH}_${CI_JOB_STAGE}_${CI_COMMIT_REF_NAME}_${CI_COMMIT_SHA}"
     paths:
+      - json
+      - libscout-logs
       - logs
+      - stats
       - unsigned
     expire_in: 1 week
     when: always
@@ -85,6 +88,15 @@ fdroid-buildserver:
          | sed -n -e 's,^metadata/\([^/][^/]*\)\.txt,\1,p' -e 's,^metadata/\([^/][^/]*\)\.yml,\1,p'`
     - echo $appids | grep '\w' || exit 0
     - fdroid build --verbose --server --stop $EXTRA_FLAGS --latest $appids
+    - find unsigned -maxdepth 0 -empty -exec exit 0 \;
+    - cd ~/libscout
+    - java -jar build/LibScout.jar -o match -a lib/android-23.jar -p profiles
+           -j $CI_PROJECT_DIR/json
+           -s $CI_PROJECT_DIR/stats
+           -d $CI_PROJECT_DIR/libscout-logs
+           $CI_PROJECT_DIR/unsigned
+    - for f in $CI_PROJECT_DIR/libscout-logs/*.log; do printf "\n\n$f\n"; cut -b43-160 $f; done
+    - for f in `find $CI_PROJECT_DIR/json -name \*.json`; do cat $f | python3 -m json.tool; done
   after_script:
     - test -d builder || exit 0
     - cd builder
