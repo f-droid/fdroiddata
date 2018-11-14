@@ -73,21 +73,19 @@ fdroid-buildserver:
     - git -C /home/fdroid/fdroidserver reset --hard
     - git -C /home/fdroid/fdroidserver checkout -B master origin/master
     - export PATH="$HOME/fdroidserver:$PATH"
-    - git fetch https://gitlab.com/fdroid/fdroiddata.git
-    - test -d build || mkdir build
-    - for f in `git diff --name-only --diff-filter=d FETCH_HEAD...HEAD`; do
-          appid=`echo $f | sed -n -e 's,^metadata/\([^/][^/]*\)\.txt,\1,p'
-                                  -e 's,^metadata/\([^/][^/]*\)\.yml,\1,p'`;
-          ! test -z "$appid" || continue;
-          echo building $appid;
-          set -x;
-          if [ "$CI_PROJECT_NAMESPACE" = "fdroid" ]; then
-            fdroid build --verbose -Werror --server --stop --latest $appid;
-          else
-            fdroid build --verbose -Wwarn --server --stop --test --force --latest $appid;
-          fi;
-          set +x;
-      done
+    - if [ "$CI_PROJECT_NAMESPACE" = "fdroid" ]; then
+          export EXTRA_FLAGS="-Werror";
+          export head=HEAD^^^;
+      else
+          export EXTRA_FLAGS="-Wwarn --test --force";
+          git fetch https://gitlab.com/fdroid/fdroiddata.git;
+          export head=FETCH_HEAD;
+      fi
+    - export appids=`git diff --name-only --diff-filter=d $head...HEAD
+         | sed -n -e 's,^metadata/\([^/][^/]*\)\.txt,\1,p' -e 's,^metadata/\([^/][^/]*\)\.yml,\1,p'`
+    - echo $appids | grep '\w' || exit 0
+    - fdroid build --verbose --server --stop $EXTRA_FLAGS --latest $appids
   after_script:
+    - test -d builder || exit 0
     - cd builder
     - vagrant destroy --force
