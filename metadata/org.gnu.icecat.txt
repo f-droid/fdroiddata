@@ -15,7 +15,7 @@ latest Firefox-ESR release.
 .
 
 Repo Type:hg
-Repo:https://hg.mozilla.org/releases/mozilla-esr52
+Repo:https://hg.mozilla.org/releases/mozilla-esr60
 
 Build:38.6.0,380600
     commit=FIREFOX_38_6_0esr_RELEASE
@@ -367,6 +367,60 @@ Build:52.6.0,520610
         mv obj-android/dist/icecat*-unsigned-unaligned.apk fdroid/icecat-unsigned.apk
     ndk=r12b
 
+Build:60.3.0,600300
+    commit=FIREFOX_60_3_0esr_RELEASE
+    timeout=21600
+    sudo=apt-get update || apt-get update && \
+        apt install -y g++
+    output=fdroid/icecat-unsigned.apk
+    srclibs=MozLocales@3afdd978,IceCat@9db906c9
+    prebuild=bash $$IceCat$$/makeicecat -- --no-tarball --skip-l10n --no-debian --with-sourcedir=$PWD && \
+        bash $$MozLocales$$/prebuild-icecat.sh && \
+        fxarch=`echo $$VERCODE$$ | cut -c 5 | sed -e 's/0/arm-linux-androideabi/g' -e 's/1/i686-linux-androideabi/g'` && \
+        echo "ac_add_options --with-android-ndk=\"$$NDK$$\"" >> .mozconfig && \
+        echo "ac_add_options --with-android-sdk=\"$$SDK$$\"" >> .mozconfig && \
+        echo "ac_add_options --with-libclang-path=$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/lib64/" >> .mozconfig && \
+        echo "ac_add_options --with-clang-path=$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin/clang" >> .mozconfig && \
+        echo "ac_add_options --target=${fxarch}" >> .mozconfig && \
+        echo "mk_add_options 'export MOZ_APP_ANDROID_VERSION_CODE=$$VERCODE$$'" >> .mozconfig
+    build=mkdir rust && \
+        rsarch=`echo $$VERCODE$$ | cut -c 5 | sed -e 's/0/armv7-linux-androideabi/g' -e 's/1/i686-linux-android/g'` && \
+        curl https://static.rust-lang.org/dist/rust-1.29.2-`uname -m`-unknown-linux-gnu.tar.xz | tar -x -J -C rust --strip-components 2 && \
+        curl https://static.rust-lang.org/dist/rust-std-1.29.2-${rsarch}.tar.xz | tar -x -J -C rust --strip-components 2 && \
+        PATH=$PWD/rust/bin:$PATH ./mach build && \
+        cat used-locales | xargs -I % ./mach build chrome-% && \
+        make -C obj-android package AB_CD=multi && \
+        mv obj-android/dist/icecat*-unsigned-unaligned.apk fdroid/icecat-unsigned.apk && \
+        zip -d fdroid/icecat-unsigned.apk 'META-INF/*.*'
+    ndk=r15c
+
+Build:60.3.0,600310
+    commit=FIREFOX_60_3_0esr_RELEASE
+    timeout=21600
+    sudo=apt-get update || apt-get update && \
+        apt install -y g++
+    output=fdroid/icecat-unsigned.apk
+    srclibs=MozLocales@3afdd978,IceCat@9db906c9
+    prebuild=bash $$IceCat$$/makeicecat -- --no-tarball --skip-l10n --no-debian --with-sourcedir=$PWD && \
+        bash $$MozLocales$$/prebuild-icecat.sh && \
+        fxarch=`echo $$VERCODE$$ | cut -c 5 | sed -e 's/0/arm-linux-androideabi/g' -e 's/1/i686-linux-androideabi/g'` && \
+        echo "ac_add_options --with-android-ndk=\"$$NDK$$\"" >> .mozconfig && \
+        echo "ac_add_options --with-android-sdk=\"$$SDK$$\"" >> .mozconfig && \
+        echo "ac_add_options --with-libclang-path=$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/lib64/" >> .mozconfig && \
+        echo "ac_add_options --with-clang-path=$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin/clang" >> .mozconfig && \
+        echo "ac_add_options --target=${fxarch}" >> .mozconfig && \
+        echo "mk_add_options 'export MOZ_APP_ANDROID_VERSION_CODE=$$VERCODE$$'" >> .mozconfig
+    build=mkdir rust && \
+        rsarch=`echo $$VERCODE$$ | cut -c 5 | sed -e 's/0/armv7-linux-androideabi/g' -e 's/1/i686-linux-android/g'` && \
+        curl https://static.rust-lang.org/dist/rust-1.29.2-`uname -m`-unknown-linux-gnu.tar.xz | tar -x -J -C rust --strip-components 2 && \
+        curl https://static.rust-lang.org/dist/rust-std-1.29.2-${rsarch}.tar.xz | tar -x -J -C rust --strip-components 2 && \
+        PATH=$PWD/rust/bin:$PATH ./mach build && \
+        cat used-locales | xargs -I % ./mach build chrome-% && \
+        make -C obj-android package AB_CD=multi && \
+        mv obj-android/dist/icecat*-unsigned-unaligned.apk fdroid/icecat-unsigned.apk && \
+        zip -d fdroid/icecat-unsigned.apk 'META-INF/*.*'
+    ndk=r15c
+
 Maintainer Notes:
 Needs Mercurial (a.k.a. hg) >= 3.5 to clone from Mozilla server.
 Needs host g++ since at least version 52.3
@@ -375,5 +429,5 @@ Needs host g++ since at least version 52.3
 Archive Policy:4 versions
 Auto Update Mode:None
 Update Check Mode:None
-Current Version:52.6.0
-Current Version Code:520610
+Current Version:60.3.0
+Current Version Code:600310
