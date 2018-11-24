@@ -1,8 +1,8 @@
 Categories:Reading
-License:LGPL-2.1
+License:LGPL-2.1-only
 Web Site:
-Source Code:https://github.com/mjdenham/and-bible
-Issue Tracker:https://github.com/mjdenham/and-bible/issues
+Source Code:https://github.com/AndBible/and-bible
+Issue Tracker:https://github.com/AndBible/and-bible/issues
 
 Auto Name:And Bible
 Summary:Offline Bible reader
@@ -18,7 +18,7 @@ Description:
 .
 
 Repo Type:git
-Repo:https://github.com/mjdenham/and-bible.git
+Repo:https://github.com/AndBible/and-bible.git
 
 Build:1.5.5,79
     commit=7d7e23e88da2ea9ce598fc6c454e52b508d70c48
@@ -283,7 +283,25 @@ Build:2.9.1,230
         popd && \
         cp $$JSword$$/target/jsword-*.jar libs/jsword.jar
 
+Build:2.11.1.246,246
+    commit=build-02.11.01
+    subdir=and-bible/app
+    gradle=yes
+    srclibs=JSword@fa6a44d05982a67f0122ffdd7b522d8ebcf43824
+    rm=and-bible/app/libs/*,and-bible/libs-src,ReadingPlanCreator/libs,jsword-tweaks/libs
+    prebuild=sed -i "/mmseg4j/d" build.gradle && \
+        cp -r ../../jsword-tweaks/src/main/. $$JSword$$/src/main && \
+        sed -i "/<repositories>/,/<\/repositories>/d" $$JSword$$/pom.xml && \
+        rm -rf $$JSword$$/src/main/java/org/crosswire/jsword/examples && \
+        rm $$JSword$$/src/main/java/org/crosswire/jsword/book/install/sword/FTPExample.java && \
+        sed -i "/<dependencies>/a <dependency><groupId>com.chenlb.mmseg4j</groupId><artifactId>mmseg4j-all</artifactId><version>1.8.6</version></dependency>" $$JSword$$/pom.xml
+    build=pushd $$JSword$$ && \
+        $$MVN3$$ package -Dmaven.test.skip=true && \
+        popd && \
+        cp $$JSword$$/target/jsword-*.jar libs/jsword.jar && \
+        echo "-dontwarn com.chenlb.mmseg4j.**" >> proguard-rules.pro
+
 Auto Update Mode:None
 Update Check Mode:Tags
-Current Version:2.9.5.238
-Current Version Code:238
+Current Version:2.12.2.252
+Current Version Code:252

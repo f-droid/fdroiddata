@@ -1,0 +1,77 @@
+diff --git a/app/build.gradle b/app/build.gradle
+index d8311b0..08d4ec5 100755
+--- a/app/build.gradle
++++ b/app/build.gradle
+@@ -34,7 +34,6 @@ dependencies {
+     compile 'com.android.support:appcompat-v7:26.0.2'
+     compile 'com.squareup.okhttp:okhttp:2.5.0'
+     compile 'com.squareup.okhttp:okhttp-urlconnection:2.5.0'
+-    compile 'com.google.android.gms:play-services-gcm:11.8.0'
+
+     /* If you want to enable unread message badges */
+     // compile 'me.leolin:ShortcutBadger:1.1.3@aar'
+@@ -46,5 +45,3 @@ dependencies {
+             [group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.4.1']
+     )
+ }
+-
+-apply plugin: 'com.google.gms.google-services'
+diff --git a/app/src/main/AndroidManifest.xml b/app/src/main/AndroidManifest.xml
+index c3131c3..0724942 100755
+--- a/app/src/main/AndroidManifest.xml
++++ b/app/src/main/AndroidManifest.xml
+@@ -42,9 +42,6 @@
+         android:supportsRtl="true"
+         android:hardwareAccelerated="true">
+
+-        <meta-data
+-            android:name="com.google.android.gms.version"
+-            android:value="@integer/google_play_services_version" />
+
+
+         <activity
+diff --git a/app/src/main/java/com/mattermost/mattermost/MainActivity.java b/app/src/main/java/com/mattermost/mattermost/MainActivity.java
+index f355dc8..40f9c9a 100755
+--- a/app/src/main/java/com/mattermost/mattermost/MainActivity.java
++++ b/app/src/main/java/com/mattermost/mattermost/MainActivity.java
+@@ -18,7 +18,6 @@ import android.app.AlertDialog;
+ import android.content.DialogInterface;
+ import android.view.KeyEvent;
+
+-import com.google.android.gms.gcm.GoogleCloudMessaging;
+ import com.mattermost.model.User;
+ import com.mattermost.service.IResultListener;
+ import com.mattermost.service.MattermostService;
+@@ -36,7 +35,6 @@ public class MainActivity extends WebViewActivity {
+     Uri appUri;
+
+     String senderID;
+-    GoogleCloudMessaging gcm;
+     ProgressDialog dialog;
+     long timeAway;
+
+diff --git a/app/src/main/java/com/mattermost/mattermost/SplashScreenActivity.java b/app/src/main/java/com/mattermost/mattermost/SplashScreenActivity.java
+index 476d650..4641dfa 100755
+--- a/app/src/main/java/com/mattermost/mattermost/SplashScreenActivity.java
++++ b/app/src/main/java/com/mattermost/mattermost/SplashScreenActivity.java
+@@ -8,7 +8,6 @@ import android.content.Intent;
+ import android.os.Bundle;
+ import android.util.Log;
+
+-import com.mattermost.gcm.RegistrationIntentService;
+
+ import java.io.File;
+
+@@ -29,11 +28,9 @@ public class SplashScreenActivity extends AppActivity {
+     private void onAfterCreate() {
+         enableHttpResponseCache();
+
+-        Intent intent = new Intent(this, RegistrationIntentService.class);
+-        startService(intent);
+
+         boolean teamSet = service.getBaseUrl() != null;
+-        intent = new Intent(this, teamSet ? MainActivity.class : SelectServerActivity.class);
++        Intent intent = new Intent(this, teamSet ? MainActivity.class : SelectServerActivity.class);
+         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+         startActivity(intent);
+         finish();

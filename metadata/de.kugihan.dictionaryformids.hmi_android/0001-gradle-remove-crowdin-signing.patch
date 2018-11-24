@@ -1,0 +1,80 @@
+From 608589f8ceb7f52af27943e0482dc01dcda619f4 Mon Sep 17 00:00:00 2001
+From: Marcus Hoffmann <m.hoffmann@cartelsol.com>
+Date: Sun, 22 Apr 2018 11:49:45 +0200
+Subject: [PATCH] gradle: remove crowdin, singing
+
+---
+ Android/build.gradle | 42 ------------------------------------------
+ 1 file changed, 42 deletions(-)
+
+diff --git a/Android/build.gradle b/Android/build.gradle
+index 0e35b83..28aa42d 100644
+--- a/Android/build.gradle
++++ b/Android/build.gradle
+@@ -4,27 +4,10 @@ buildscript {
+     }
+     dependencies {
+         classpath 'com.android.tools.build:gradle:2.2.3'
+-        classpath 'com.github.triplet.gradle:play-publisher:1.1.5'
+-    }
+-}
+-
+-plugins {
+-    id "com.mendhak.gradlecrowdin" version "0.0.9"
+-}
+-
+-tasks.whenTaskAdded { task ->
+-    if (task.name == 'validateReleaseSigning') {
+-        task.dependsOn readPasswordFromInput
+-    }
+-    if (task.name == 'validateReleaseSigning') {
+-        tasks.assembleRelease.doLast {
+-            tasks.createReleaseZip.execute()
+-        }
+     }
+ }
+ 
+ apply plugin: 'com.android.application'
+-apply plugin: "com.mendhak.gradlecrowdin"
+ 
+ repositories {
+     mavenCentral()
+@@ -76,11 +59,6 @@ android {
+         }
+     }
+ 
+-    // Enable signing of release if property is set in file gradle.properties
+-    if (releaseSigning == "true") {
+-        buildTypes.release.signingConfig signingConfigs.release
+-    }
+-
+ }
+ 
+ task readPasswordFromInput << {
+@@ -125,23 +103,3 @@ def getVersionName() {
+     def versionName = manifestXml.getAttributeNS("http://schemas.android.com/apk/res/android", "versionName")
+     return versionName
+ }
+-
+-crowdinDownload {
+-    projectId = crowdinProjectId
+-    apiKey = crowdinApiKey
+-    destination = "$projectDir/src/main"
+-}
+-
+-crowdinUpload {
+-    projectId = crowdinProjectId
+-    apiKey = crowdinApiKey
+-    sourceFiles = [
+-            ['strings.xml', "$projectDir/src/main/res/values/strings.xml"],
+-    ]
+-}
+-
+-apply plugin: 'com.github.triplet.play'
+-
+-play {
+-    jsonFile = file(playJsonFile)
+-}
+-- 
+2.14.1
+

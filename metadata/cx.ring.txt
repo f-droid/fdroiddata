@@ -1,8 +1,9 @@
 Categories:Phone & SMS,Internet
-License:GPL-3.0+
+License:GPL-3.0-or-later
 Web Site:https://ring.cx/
-Source Code:
-Issue Tracker:https://tuleap.ring.cx/projects/ring/
+Source Code:https://git.ring.cx/savoirfairelinux/ring-client-android
+Issue Tracker:https://git.ring.cx/savoirfairelinux/ring-client-android/issues
+Changelog:https://git.ring.cx/savoirfairelinux/ring-client-android/tree/master/ring-android/fastlane/metadata/android/en-US/changelogs
 
 Auto Name:Ring
 Summary:Secure and distributed communication platform
@@ -11,6 +12,22 @@ Ring (formerly SFLphone) is a free distributed multimedia communication
 software. It is developed by Savoir-faire Linux with the help of a global
 community of users and contributors. Savoir-faire Linux is a Canadian company
 specialized in Linux and free software.
+
+Ring allows to make audio or video calls, and to send messages, safely and
+freely, in confidence. Ring is a Free and open source software that requires no
+central server.
+
+What can you do with Ring:
+
+* send text messages
+* make audio calls
+* make video calls
+* send files
+* use your existing SIP account
+
+There are plenty of ways to help us, check out: [https://ring.cx/en/contribute]
+
+You can also install Ring on Windows, macOS, iOS and GNU/Linux.
 .
 
 Repo Type:git
@@ -545,16 +562,77 @@ Build:20180201,102
         ./compile.sh release
     ndk=r15c
 
+Build:20180421,116
+    commit=8ce06c1bc2ee0837281f6d05fe97393d2a351a59
+    subdir=client-android/ring-android/app
+    submodules=yes
+    sudo=apt-get update && \
+        apt-get install --yes -t jessie-backports swig
+    patch=0001-gradle-remove-unneeded-repo.patch
+    gradle=noPush
+    prebuild=$ANDROID_HOME/tools/bin/sdkmanager 'platforms;android-27' && \
+        sed -i -e '/$DAEMON_ONLY/,+7d' ../../compile.sh
+    scandelete=client-windows,client-uwp
+    build=export ANDROID_NDK_ROOT=$ANDROID_NDK && \
+        export ANDROID_ABI="armeabi-v7a arm64-v8a x86" && \
+        cd ../../ && \
+        ./compile.sh release
+    ndk=r16b
+
+Build:20180501,117
+    commit=3b176a6abca66f1c0f1485cec57dfd87487e6d98
+    subdir=client-android/ring-android/app
+    submodules=yes
+    sudo=apt-get update && \
+        apt-get install --yes -t jessie-backports swig
+    gradle=noPush
+    prebuild=$ANDROID_HOME/tools/bin/sdkmanager 'platforms;android-27'
+    scandelete=client-windows,client-uwp
+    build=export ANDROID_NDK_ROOT=$ANDROID_NDK && \
+        export ANDROID_ABI="armeabi-v7a arm64-v8a x86" && \
+        cd ../../ && \
+        ./compile.sh --release --no-gradle
+    ndk=r16b
+
+Build:20180712,127
+    commit=af8399f830b9fd10689d2d11a4e76ddf576d2f40
+    timeout=10800
+    subdir=client-android/ring-android/app
+    submodules=yes
+    sudo=apt-get update && \
+        apt-get install --yes -t jessie-backports swig
+    gradle=noPush
+    rm=client-electron,client-gnome,client-ios,client-macosx,client-uwp,client-windows
+    build=cd ../.. && \
+        export ANDROID_NDK_ROOT="$ANDROID_NDK" && \
+        export ANDROID_ABI="armeabi-v7a arm64-v8a x86" && \
+        ./compile.sh --release --no-gradle
+    ndk=r16b
+
+Build:20180805,129
+    commit=ac674c27172339c0c4eb7fc23a560f694905efb0
+    timeout=10800
+    subdir=client-android/ring-android/app
+    submodules=yes
+    sudo=apt-get update && \
+        apt-get install --yes -t jessie-backports swig
+    gradle=noPush
+    rm=client-electron,client-gnome,client-ios,client-macosx,client-uwp,client-windows
+    build=cd ../.. && \
+        export ANDROID_NDK_ROOT="$ANDROID_NDK" && \
+        export ANDROID_ABI="armeabi-v7a arm64-v8a x86" && \
+        ./compile.sh --release --no-gradle
+    ndk=r17b
+
 Maintainer Notes:
 Ring has a lot of native dependencies, the source tarballs of these are all downloaded and build for all enabled architectures.
-We provide a fake gradlew because compile.sh calls this in the end.
 Build failed with swig 2.0.12 from jessie but works with 3.0.10 from jessie-backports.
 We don't build for x86_64 to reduce apk size a bit, x86 should work as well for those devices(?).
 We DO build separately for arm64 because this is a fairly common architecture and improves performance over using the armv7 binaries.
-v103 introduces push notifications using gplay. Later versions will make this optional.
+v103 introduces push notifications using gplay. Optional since 106 with noPush flavour.
 .
 
 Auto Update Mode:None
 Update Check Mode:RepoManifest/production
-Current Version:20180309
-Current Version Code:108
+Current Version:20180805
+Current Version Code:129
