@@ -1,0 +1,120 @@
+AntiFeatures:
+  - NonFreeNet
+Categories:
+  - Science & Education
+License: Apache-2.0
+WebSite: https://www.democracy-deutschland.de/
+SourceCode: https://github.com/demokratie-live/democracy-client
+IssueTracker: https://github.com/demokratie-live/democracy-client/issues
+Changelog: https://github.com/demokratie-live/democracy-client/blob/HEAD/CHANGELOG.md
+
+AutoName: DEMOCRACY
+Summary: Dein virtuelles Bundestagsmandat
+Description: |-
+    Dein Bundestagsmandat ist da – einfach, schnell, sicher.
+
+    Als Serious Game macht DEMOCRACY den Bundestag für Dich als Bürger
+    zugänglich und hält Dich, so intensiv wie Du möchtest, über den
+    parlamentarischen Prozess auf dem Laufenden. Überdies kannst Du als
+    verifizierter Nutzer selbst über die Bundestagsvorgänge abstimmen und
+    daraufhin Deine Entscheidung interaktiv mit der Community sowie den
+    offiziellen Resultaten des Bundestages vergleichen. Ob bereits (Politik-)
+    Experte oder politischer Neuling, DEMOCRACY bietet Dir eine breit
+    gefächerte Auswahl an Möglichkeiten, politisch aktiv zu werden.
+
+    '''INFORMIEREN'''
+
+    Du hast von einem aktuellen politischen Thema schlagwortartig gehört oder
+    gelesen, aber weißt aus den Medien nur bedingt, was wirklich beschlossen
+    werden soll? DEMOCRACY macht den gesamten parlamentarischen Datenbestand
+    für Dich durchsuchbar und zeigt Dir in Echtzeit alle aktuellen, vergangenen
+    und zukünftigen Abstimmungen des Deutschen Bundestages samt
+    Detailinformationen auf Deinem Handy.
+
+    '''INFORMIERT-BLEIBEN'''
+
+    Du hast ein konkretes Thema oder gar ein komplettes Sachgebiet gefunden,
+    über dessen Verlauf bzw. Inhalte Du regelmäßig informiert werden möchtest?
+    DEMOCRACY informiert Dich entsprechend Deiner Filter- und
+    Benachrichtigungseinstellungen genau darüber, was Dir wichtig ist. Du
+    entscheidest. Deine Ressourcen. Deine Themen.
+
+    '''ABSTIMMEN'''
+
+    Du möchtest öfter als alle vier Jahre Deine Meinung im politischen Berlin
+    einbringen und wissen, welche Partei Dich wirklich repräsentiert?
+
+    '''DEMOCRACY''' ermöglicht Dir zu jedem Gesetzgebungsverfahren und Antrag,
+    eine eigene Entscheidung zu treffen, die du daraufhin mit der Community und
+    den offiziellen Ergebnissen des Bundestages vergleichen kannst. Mit dem
+    Wahl-o-Meter stellt Dir die App ab 02/2019 überdies eine systematische
+    Auswertungsmöglichkeit zur Verfügung, die Dir für den parlamentarischen
+    Echtbetrieb zeigt, mit welcher (Bundestagas-)Partei Du wie stark
+    übereinstimmst.
+
+    '''DEMOCRACY''' ist EINFACH zu bedienen und speziell dafür entwickelt, den
+    Bundestag allen Bundesbürgern zugänglich zu machen. Die App ist SCHNELL und
+    arbeitet mit den neusten technischen Standards. Der eigens entwicklte
+    Datenservice bundestag.io greift die parlamentarischen Daten in Echtzeit
+    ab.
+
+    '''DEMOCRACY''' ist SICHER und legt auf Datenschutz bzw. Datenvermeidung
+    aller größten Wert. Insofern werden Deine sensiblen Abstimmungsdaten
+    lediglich auf Deinem Handy gespeichert, ohne dass daraus kommerzieller
+    Nutzen gezogen werden kann.
+
+    ''DEMOCRACY'' ist für alle, die an politischer Teilhabe und maximaler
+    Privatsphäre interessiert sind.
+
+    Wir setzen neue Standards im Bereich Politikcontrolling und Voting Advice.
+
+    Entdecke die Zukunft – Entdecke die gemeinnützige App DEMOCRACY!
+
+RepoType: git
+Repo: https://github.com/demokratie-live/democracy-client.git
+
+Builds:
+  - versionName: 1.0.5
+    versionCode: 102715
+    commit: d629dea78fe38fa977593ae21a737de231f935a8
+    subdir: android/app/
+    sudo: |-
+        curl -Lo node.tar.xz https://nodejs.org/dist/v8.11.1/node-v8.11.1-linux-x64.tar.xz && \
+        echo "6617e245fa0f7fbe0e373e71d543fea878315324ab31dc64b4eba10e42d04c11 node.tar.xz" | sha256sum -c - && \
+        tar xJf node.tar.xz && \
+        cp -a node-v8.11.1-linux-x64/. /usr/local/ && \
+        npm -g install yarn
+    init: yarn install
+    gradle:
+      - production
+    rm:
+      - node_modules/react-native-notifications/android/src/main/java/com/wix/reactnativenotifications/gcm/
+      - node_modules/react-native-device-info/android/build/
+    prebuild: |-
+        echo -e "GRAPHQL_URL=https://api.democracy-app.de/\nPHONE_NUMBER=+4917647040213\nGITHUB_URL=https://github.com/demokratie-live/democracy-client\nCONTACT_EMAIL=prototyping@democracy-deutschland.de" >> ../../.env.production && \
+        sed -i -e 's#../package.json#../../package.json#' ../build.gradle && \
+        sed -i -e '/play-services-gcm/,+2d' -e 's/getVersionCode()/$$VERCODE$$/' build.gradle && \
+        sed -i -e '/play-services/d' ../../node_modules/react-native-device-info/android/build.gradle ../../node_modules/react-native-notifications/android/build.gradle && \
+        sed -i -e '/hasPermission/d' -e '/tokenFetchIntent/d' -e '/GcmInstance/d' ../../node_modules/react-native-notifications/android/src/main/java/com/wix/reactnativenotifications/RNNotificationsModule.java && \
+        sed -i -e '/com.google.android.gms.iid.InstanceID.getInstance/d' ../../node_modules/react-native-device-info/android/src/main/java/com/learnium/RNDeviceInfo/RNDeviceModule.java && \
+        truncate -s 0 ../../node_modules/react-native/local-cli/server/util/external/xsel
+    scanignore:
+      - android/build.gradle
+      - node_modules/react-native-navigation/android/build.gradle
+      - node_modules/react-native-svg/android/build.gradle
+    scandelete:
+      - node_modules/
+
+MaintainerNotes: |-
+    sed is used to:
+    * Remove push notifications (see [https://github.com/wix/react-native-notifications/issues/207 this issue])
+    * Remove Play Services from Device Information (see [https://github.com/rebeccahughes/react-native-device-info/issues/381 this issue])
+
+    scanignore is used to allow the "node_modules/react-native/android" local Maven repository.
+
+    Tags are centralized in the [https://github.com/demokratie-live/democracy-development democracy-development] repository but version code is set manually so it wouldn't be enough to enable auto update anyway.
+
+AutoUpdateMode: None
+UpdateCheckMode: None
+CurrentVersion: 1.0.5
+CurrentVersionCode: 102715
