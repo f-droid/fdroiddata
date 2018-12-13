@@ -1,0 +1,153 @@
+Categories:
+  - Internet
+License: Apache-2.0
+WebSite: https://dev.guardianproject.info/projects/gibberbot
+SourceCode: https://github.com/guardianproject/ChatSecureAndroid
+IssueTracker: https://dev.guardianproject.info/projects/gibberbot/issues
+LiberapayID: '33617'
+Bitcoin: 1Fi5xUHiAPRKxHvyUGVFGt9extBe8Srdbk
+
+AutoName: ChatSecure
+Summary: Instant Messaging client with OTR
+Description: |-
+    The app is currently completly out-of-date. We recommend getting it directly
+    from the developers using [https://guardianproject.info/fdroid/repo/ their
+    F-Droid repository]. All existing versions have been moved to our archive.
+
+    XMPP (Jabber) client that can do end-to-end encryption using the
+    [http://en.wikipedia.org/wiki/Off-the-Record_Messaging Off-the-Record Messaging]
+    protocol and can anonymize your chats via the [[org.torproject.android]] app
+    (root not required).
+
+    The app used to be called GibberBot.
+
+RepoType: git
+Repo: https://github.com/guardianproject/ChatSecureAndroid
+
+Builds:
+  - versionName: 0.0.7-RC1
+    versionCode: 25
+    commit: e17dbbcf338af00466cabc5178634cd0d5ffded8
+    target: android-4
+
+  - versionName: 0.0.8-FINAL
+    versionCode: 31
+    commit: e4b49ca9508477564c2cba4cfe2821b270281218
+    target: android-11
+
+  - versionName: 0.0.9-RC3
+    versionCode: 34
+    commit: 9311f2ebdcf06660fa4f145a1c2d88b6b15341f3
+    target: android-15
+
+  - versionName: 0.0.9-RC4
+    versionCode: 35
+    commit: b3a7433be1
+    target: android-15
+
+  - versionName: 0.0.10-RC2
+    versionCode: 37
+    commit: v10-RC2
+    srclibs:
+      - ActionBarSherlock@4.1.0
+    prebuild:
+      - sed -i 's@\(android.library.reference.1=\).*@\1$$ActionBarSherlock$$@' project.properties
+      - mkdir assets
+
+  - versionName: 0.0.10-RC6
+    versionCode: 41
+    commit: 0.0.10-RC6
+    srclibs:
+      - ActionBarSherlock@4.1.0
+    forceversion: true
+    forcevercode: true
+    prebuild: sed -i 's@\(android.library.reference.1=\).*@\1$$ActionBarSherlock$$@'
+        project.properties
+
+  - versionName: 0.0.11-RC5
+    versionCode: 57
+    commit: 92db4fe01571
+    submodules: true
+    patch:
+      - otr-asmack.patch
+    prebuild:
+      - rm -rf tests/ META-INF/ robo-tests/ gitian/ proguard-project.txt
+      - echo "sdk-location=$$SDK$$" > external/asmack/local.properties
+    androidupdate:
+      - .
+      - external/ActionBarSherlock/library
+      - external/MemorizingTrustManager
+      - external/OnionKit/library
+    build:
+      - ant -Dbuild.all=true -f external/asmack/build.xml
+      - mv external/asmack/build/asmack-android-4.jar libs/
+
+  - versionName: 12.4.1
+    versionCode: 82
+    disable: prebuilt binaries in source
+    commit: ee9e3dcc07134
+    submodules: true
+    prebuild:
+      - ./update-ant-build.sh
+      - echo "android.library=true" >> external/MessageBar/library/project.properties
+      - echo "sdk-location=$$SDK$$" >> external/asmack/local.properties
+      - rm -f external/SlidingMenu/example/libs/crittercism*
+    build:
+      - (cd external/asmack
+      - ./build.bash
+      - cp build/asmack-android-4.jar ../../libs)
+
+  - versionName: 12.7.1
+    versionCode: 92
+    disable: prebuilt binaries issues - see https://dev.guardianproject.info/issues/2201
+    commit: 12.7.1
+    submodules: true
+    prebuild:
+      - ./update-ant-build.sh
+      - echo "android.library=true" >> external/MessageBar/library/project.properties
+      - echo "sdk-location=$$SDK$$" >> external/asmack/local.properties
+      - rm -f external/SlidingMenu/example/libs/crittercism*
+    build:
+      - (cd external/asmack
+      - ./build.bash
+      - cp build/asmack-android-4.jar ../../libs)
+
+  - versionName: 13.1.2
+    versionCode: 107
+    commit: 13.1.2
+    submodules: true
+    init:
+      - wget https://s3.amazonaws.com/sqlcipher/SQLCipher+for+Android+v2.2.2.zip
+      - unzip SQLCipher+for+Android+v2.2.2.zip
+      - cp -R SQLCipherforAndroidv2.2.2/libs .
+      - cp -R SQLCipherforAndroidv2.2.2/assets .
+      - rm -rf SQLCipher+for+Android+v2.2.2.zip "SQLCipher for Android v2.2.2" libs/guava-r09.jar
+      - ./update-ant-build.sh
+    srclibs:
+      - IOCipher@v0.1
+    prebuild:
+      - rm external/cacheword/cachewordlib/libs/iocipher.jar
+      - echo 'android.library.reference.1=../../../../srclib/IOCipher' >> external/cacheword/cachewordlib/project.properties
+      - echo "sdk-location=$$SDK$$" >> external/asmack/local.properties
+    androidupdate:
+      - no
+    scanignore:
+      - libs
+      - external/SlidingMenu/example/libs
+    build:
+      - cd external/asmack
+      - ./build.bash
+      - cp build/asmack-android-7.jar ../../libs
+
+  - versionName: 14.2.2
+    versionCode: 1422001
+    disable: jars, binaries
+    commit: 14.2.2
+    submodules: true
+    prebuild: sh update-ant-build.sh
+
+ArchivePolicy: 0 versions
+AutoUpdateMode: None
+UpdateCheckMode: Tags ^[0-9.]*$
+CurrentVersion: 14.2.3
+CurrentVersionCode: 1423001
