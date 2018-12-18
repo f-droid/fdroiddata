@@ -1,0 +1,46 @@
+Categories:
+  - System
+License: GPL-3.0-only
+WebSite: https://gitlab.com/axet/android-sms-gate
+SourceCode: https://gitlab.com/axet/android-sms-gate/tree/HEAD
+IssueTracker: https://gitlab.com/axet/android-sms-gate/issues
+
+AutoName: SMS Gate
+Summary: Backup all your SMS to an IMAP server or a local folder
+Description: |-
+    You should be able to control all data produced by your phone and be able to
+    collect it all into one place (cloud / p2p or local).
+
+    SMS Gate app backups all your SMS from Android/INCOMING folder to the
+    IMAP/INBOX folder of Gmail or your provider of choice (you can setup one in
+    Settings). Once uploaded to an IMAP server you can even reply to the SMS
+    using standard reply e-mail mecanics.
+
+    Saving to a local folder allows you to backup it using an app like
+    [[com.nutomic.syncthingandroid]].
+
+RepoType: git
+Repo: https://gitlab.com/axet/android-sms-gate.git
+
+Builds:
+  - versionName: 1.9.7
+    versionCode: 216
+    commit: smsgate-1.9.7
+    subdir: app
+    gradle:
+      - yes
+    srclibs:
+      - android-firebase-fake@firebasefake-0.0.5
+    prebuild:
+      - sed -i -e '/com.google/d' -e "s/\/\/ implementation project(':android-firebase-fake')/implementation
+        project(':android-firebase-fake')/" build.gradle
+      - sed -i -e '/com.google/d' ../build.gradle
+      - ln -s ../srclib/android-firebase-fake ../
+      - sed -i -e '/uploadArchives/,+42d' ../android-firebase-fake/build.gradle
+    scanignore:
+      - app/build.gradle
+
+AutoUpdateMode: Version smsgate-%v
+UpdateCheckMode: Tags
+CurrentVersion: 1.9.7
+CurrentVersionCode: 216
