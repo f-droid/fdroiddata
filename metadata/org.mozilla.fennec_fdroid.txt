@@ -5338,7 +5338,6 @@ Build:64.0.1,640100
     ndk=r15c
 
 Build:64.0.1,640110
-    disable=ld segfaults while linking libxul.so
     commit=FENNEC_64_0_1_RELEASE
     timeout=28800
     sudo=apt-get update || apt-get update && \
@@ -5346,7 +5345,7 @@ Build:64.0.1,640110
     output=obj/dist/fennec-$$VERSION$$.multi.android-*-unsigned-unaligned.apk
     srclibs=MozLocales@60d879a279c3ced9746400f5bd7e1e8deffad025,rustup@1.16.0
     prebuild=bash $$MozLocales$$/prebuild.sh && \
-        echo "ac_add_options --target=i686-linux-androideabi" >> .mozconfig && \
+        echo "ac_add_options --target=i686-linux-android" >> .mozconfig && \
         echo "ac_add_options --with-android-min-sdk=16" >> .mozconfig && \
         echo "ac_add_options --with-android-ndk=\"$$NDK$$\"" >> .mozconfig && \
         echo "ac_add_options --with-android-sdk=\"$$SDK$$\"" >> .mozconfig && \
@@ -5354,6 +5353,7 @@ Build:64.0.1,640110
         echo "ac_add_options --with-branding=mobile/android/branding/unofficial" >> .mozconfig && \
         echo "ac_add_options --with-libclang-path=$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/lib64/" >> .mozconfig && \
         echo "ac_add_options --with-clang-path=$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin/clang" >> .mozconfig && \
+        sed -i -e 's/libclang.so.1/libclang.so.6/' build/moz.configure/bindgen.configure && \
         echo "mk_add_options MOZ_OBJDIR=@TOPSRCDIR@/obj" >> .mozconfig && \
         pushd mobile/android/branding/unofficial/ && \
         sed -i -e '/ANDROID_PACKAGE_NAME/d' -e '/MOZ_APP_DISPLAYNAME/d' configure.sh && \
@@ -5372,7 +5372,7 @@ Build:64.0.1,640110
         make -C obj/mobile/android/base android_apks && \
         make -C obj package AB_CD=multi && \
         zip -d obj/dist/fennec-$$VERSION$$.multi.android-*-unsigned-unaligned.apk 'META-INF/*.*'
-    ndk=r15c
+    ndk=r17b
 
 Maintainer Notes:
 
@@ -5397,5 +5397,5 @@ Reroute Feedback:
 Archive Policy:6 versions
 Auto Update Mode:None
 Update Check Mode:None
-Current Version:63.0.2
-Current Version Code:630210
+Current Version:64.0.1
+Current Version Code:640110
