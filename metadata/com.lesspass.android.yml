@@ -44,6 +44,34 @@ Builds:
       - node_modules/
       - packages/mobile/node_modules/
 
+  - versionName: 3.0.3
+    versionCode: 30003
+    commit: mobile-v3.0.3
+    subdir: packages/mobile/android/app/
+    sudo:
+      - curl -Lo node.tar.xz https://nodejs.org/dist/v10.13.0/node-v10.13.0-linux-x64.tar.xz
+      - echo "0dc6dba645550b66f8f00541a428c29da7c3cde32fb7eda2eb626a9db3bbf08d node.tar.xz"
+        | sha256sum -c -
+      - tar xJf node.tar.xz
+      - cp -a node-v10.13.0-linux-x64/. /usr/local/
+    init:
+      - pushd ../../../../
+      - sed -i -e 's/yarn/npm/' package.json
+      - npm install
+      - npm run bootstrap
+      - popd
+    gradle:
+      - yes
+    prebuild:
+      - truncate -s 0 ../../node_modules/react-native/local-cli/server/util/external/xsel
+      - sed -i -e 's#../package.json#../../package.json#' ../build.gradle
+    scanignore:
+      - packages/mobile/android/build.gradle
+      - packages/mobile/node_modules/react-native-screens/android/build.gradle
+    scandelete:
+      - node_modules/
+      - packages/*/node_modules/
+
 MaintainerNotes: |-
     scanignore is used to allow the "node_modules/react-native/android" local Maven repository.
 
