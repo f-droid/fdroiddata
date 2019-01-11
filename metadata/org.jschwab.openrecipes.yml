@@ -1,0 +1,73 @@
+Categories:
+  - Sports & Health
+  - Connectivity
+License: GPL-3.0-or-later
+AuthorName: Johannes Schwab
+WebSite: https://openrecipes.jschwab.org
+SourceCode: https://gitlab.com/ddorian/openrecipes/
+IssueTracker: https://gitlab.com/ddorian/openrecipes/issues
+Changelog: https://gitlab.com/ddorian/openrecipes/tags
+
+AutoName: OpenRecipes
+Summary: A privacy friendly personal cook book
+Description: |-
+    A privacy friendly personal cook book with synchronization features. Manage
+    your favorite recipes, use the end-to-end encrypted synchronization to
+    synchronize your recipes between devices (mobile and desktop) and share them with your friends.
+
+RepoType: git
+Repo: https://gitlab.com/ddorian/openrecipes/
+
+Builds:
+  - versionName: 0.2.1
+    versionCode: 3
+    commit: v0.2.1
+    output: client/android/build/outputs/apk/android-release-unsigned.apk
+    srclibs:
+      - libsodium@1.0.16
+      - libqrencode@v4.0.2
+    prebuild:
+      - OPENRECIPES_ANDROID_SYSROOT=/tmp/openrecipes/sysroot
+      - $$NDK$$/build/tools/make_standalone_toolchain.py --arch=arm --api 27 --install-dir=/tmp/openrecipes/android-ndk-toolchain
+      - export PATH=/tmp/openrecipes/android-ndk-toolchain/bin:$PATH
+      - export CFLAGS="-D_FORTIFY_SOURCE=2"
+      - mkdir -p /tmp/openrecipes/build-libsodium
+      - libsodium_abs=$(realpath $$libsodium$$)
+      - pushd /tmp/openrecipes/build-libsodium
+      - $libsodium_abs/configure --host arm-linux-androideabi --prefix $OPENRECIPES_ANDROID_SYSROOT
+      - make -j4
+      - make install
+      - popd
+      - mkdir -p /tmp/openrecipes/build-libqrencode
+      - libqrencode_abs=$(realpath $$libqrencode$$)
+      - pushd /tmp/openrecipes/build-libqrencode
+      - $libqrencode_abs/configure --host arm-linux-androideabi --prefix $OPENRECIPES_ANDROID_SYSROOT
+        --without-tools
+      - make -j4
+      - make install
+      - popd
+      - QT_INSTALL_SCRIPT=`pwd`/android-setup-qt.sh
+      - mkdir -p /tmp/openrecipes/download-qt
+      - pushd /tmp/openrecipes/download-qt
+      - export QT_VERSION=5.11.1
+      - export QT_INSTALL_PATH=/tmp/openrecipes/QT
+      - $QT_INSTALL_SCRIPT
+      - popd
+    build:
+      - export ANDROID_NDK_ROOT=$$NDK$$
+      - export ANDROID_SDK_ROOT=$$SDK$$
+      - export ANDROID_NDK_PLATFORM=android-27
+      - export OPENRECIPES_ANDROID_SYSROOT=/tmp/openrecipes/sysroot/
+      - QT5_arm=/tmp/openrecipes/QT/5.11.1/android_armv7/bin
+      - $QT5_arm/qmake
+      - make
+      - make install INSTALL_ROOT=android
+      - pushd client
+      - $QT5_arm/androiddeployqt --release --gradle --output android --input android-libopenrecipes.so-deployment-settings.json
+      - popd
+    ndk: r16b
+
+AutoUpdateMode: Version v%v
+UpdateCheckMode: Tags
+CurrentVersion: 0.2.1
+CurrentVersionCode: 3
