@@ -1,0 +1,64 @@
+Categories:
+  - System
+License: MIT
+SourceCode: https://github.com/SkyzohKey/M-Droid
+IssueTracker: https://github.com/SkyzohKey/M-Droid/issues
+
+AutoName: M-Droid
+Summary: Unofficial Material Designed client for F-Droid
+Description: |-
+    This is M-Droid, a drop-in replacement for the F-Droid client. It provides the same features but in a Material Design way that is both nice to see and easy to use.
+
+    This project started because I hate the new F-Droid UI while still loving the actual software. And as I like React-Native, this is a good project for me.
+
+    === Features ===
+
+    MDroid attempts to mimic F-Droid features as much as possible, in a Material design fashion. Here's a (not ordered) list of actual MDroid's features:
+
+    * Clean UI following the Material Design specifications
+    * Fetching multiple repositories
+    * Curated main screen showing somes apps from each categories
+    * View app's details
+    * Download and install any app from repositories
+    * Search for apps (fuzzy search, super fast)
+    * Manage (add, edit, delete) your repositories
+
+    === How it works ===
+
+    Basically you add your repositories of choice (along with the F-Droid, F-Droid Archive & Guardian ones) then the client will send some GET requests to actually get the content of the https://${repoBaseUrl}/index.xml file who's contains the repo.
+
+    Then it parse that file by converting the XML to JSON format, for better code efficiency. Cache the parsed stuffs and display the informations in a great way for the user.
+
+RepoType: git
+Repo: https://github.com/SkyzohKey/M-Droid
+
+Builds:
+  - versionName: '5.4'
+    versionCode: 54
+    commit: v0.5.4
+    subdir: android/app
+    sudo:
+      - curl -Lo node.tar.xz https://nodejs.org/dist/v10.15.0/node-v10.15.0-linux-x64.tar.xz
+      - echo "4ee8503c1133797777880ebf75dcf6ae3f9b894c66fd2d5da507e407064c13b5 node.tar.xz"
+        | sha256sum -c -
+      - tar xJf node.tar.xz
+      - cp -a node-v10.15.0-linux-x64/. /usr/local/
+      - npm -g install yarn
+    init: yarn install
+    gradle:
+      - yes
+    rm:
+      - node_modules/react-native-fast-image/ios/
+    prebuild: truncate -s 0 ../../node_modules/react-native/local-cli/server/util/external/xsel
+    scanignore:
+      - android/build.gradle
+    scandelete:
+      - node_modules
+
+MaintainerNotes: scanignore is used to allow the "node_modules/react-native/android"
+    local Maven repository.
+
+AutoUpdateMode: Version v0.%v
+UpdateCheckMode: Tags
+CurrentVersion: '5.4'
+CurrentVersionCode: 54
