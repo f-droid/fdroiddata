@@ -68,5 +68,30 @@ Builds:
       - cd ../tower_jumper
       - ../godot/bin/godot_server.server.opt.tools.64 -export Android ../tower_jumper.apk
 
+  - versionName: 1.0.7
+    versionCode: 12
+    commit: v0.19
+    sudo: apt-get install -y clang
+    output: tower_jumper.apk
+    srclibs:
+      - Godot@f2a42e1ae535013d712a224680c10ee9019f0172
+    prebuild:
+      - mkdir tower_jumper
+      - bash -O extglob -c "mv !(tower_jumper) tower_jumper"
+      - cp -R $$Godot$$ godot
+    build:
+      - cd godot
+      - scons -j `nproc` platform=server target=release_debug use_llvm=yes unix_global_settings_path=".."
+        tools=yes
+      - export ANDROID_NDK_ROOT=$$NDK$$
+      - scons -j `nproc` use_llvm=yes p=android target=release
+      - pushd platform/android/java/
+      - gradle assembleRelease
+      - popd
+      - mkdir -p ../templates/
+      - cp bin/android_release.apk ../templates
+      - cd ../tower_jumper
+      - ../godot/bin/godot_server.server.opt.tools.64 -export Android ../tower_jumper.apk
+
 AutoUpdateMode: None
 UpdateCheckMode: Static
