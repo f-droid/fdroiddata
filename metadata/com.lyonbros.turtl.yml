@@ -84,6 +84,73 @@ Builds:
       - cp $$TurtlCore$$/target/aarch64-linux-android/release/libturtl_core.so libs/arm64-v8a
     ndk: r17b
 
+  - versionName: 0.7.2.4
+    versionCode: 7240
+    commit: v0.7.2.4
+    subdir: app
+    gradle:
+      - yes
+    srclibs:
+      - libsodium@1.0.16
+      - OpenSSL@OpenSSL_1_0_2o
+      - TurtlCore@442ceadb5b7ec024d14a2e7d9f4d5ef31b34f3bd
+    prebuild: sed -i -e '/addSigningProps(cdvReleaseSigningPropertiesFile/d' build.gradle
+    build:
+      - toolchain="$PWD/../toolchain/"
+      - lib="$PWD/../lib/"
+      - export PATH="$PATH:${toolchain}/armv7/bin/:${toolchain}/arm64/bin/"
+      - mkdir ../rust/
+      - $$NDK$$/build/tools/make_standalone_toolchain.py --arch arm --api 23 --install-dir
+        ${toolchain}/armv7/
+      - $$NDK$$/build/tools/make_standalone_toolchain.py --arch arm64 --api 23 --install-dir
+        ${toolchain}/arm64/
+      - curl --retry 3 https://static.rust-lang.org/dist/rust-1.28.0-`uname -m`-unknown-linux-gnu.tar.xz
+        | tar -x -J -C ../rust/ --strip-components 2
+      - curl --retry 3 https://static.rust-lang.org/dist/rust-std-1.28.0-armv7-linux-androideabi.tar.xz
+        | tar -x -J -C ../rust/ --strip-components 2
+      - curl --retry 3 https://static.rust-lang.org/dist/rust-std-1.28.0-aarch64-linux-android.tar.xz
+        | tar -x -J -C ../rust/ --strip-components 2
+      - export PATH="$PATH:$PWD/../rust/bin"
+      - pushd $$libsodium$$
+      - CC="arm-linux-androideabi-gcc" CFLAGS="-Os -fPIC -mfloat-abi=softfp -mfpu=vfpv3-d16
+        -mthumb -marm -march=armv7-a" ./configure --prefix=${lib}/libsodium/armv7/
+        --host=arm-linux-androideabi --disable-soname-versions --enable-static --disable-shared
+      - make
+      - make install
+      - make distclean
+      - CC="aarch64-linux-android-gcc" CFLAGS="-fPIC -O2" ./configure --prefix=${lib}/libsodium/arm64/
+        --host=aarch64-linux-android --disable-soname-versions --enable-static --disable-shared
+      - make
+      - make install
+      - popd
+      - pushd $$OpenSSL$$
+      - ANDROID_DEV=${toolchain}/armv7/ ./Configure android no-shared no-ssl2 no-ssl3
+        no-engine no-dso no-asm no-hw no-comp -D__ANDROID_API__=21 -funroll-loops
+        -ffast-math -O3 -fPIC -DOPENSSL_PIC --prefix=${lib}/openssl/armv7/ --cross-compile-prefix="${toolchain}/armv7/bin/arm-linux-androideabi-"
+      - make depend
+      - make
+      - make install
+      - make distclean
+      - ANDROID_DEV=${toolchain}/arm64/ ./Configure linux-aarch64 no-shared no-ssl2
+        no-ssl3 no-engine no-dso no-asm no-hw no-comp -D__ANDROID_API__=21 -funroll-loops
+        -ffast-math -O3 -fPIC -DOPENSSL_PIC --prefix=${lib}/openssl/arm64/ --cross-compile-prefix="${toolchain}/arm64/bin/aarch64-linux-android-"
+      - make depend
+      - make
+      - make install
+      - popd
+      - pushd $$TurtlCore$$
+      - make SODIUM_LIB_DIR=${lib}/libsodium/armv7/lib/ SODIUM_STATIC=static OPENSSL_LIB_DIR=${lib}/openssl/armv7/lib/  OPENSSL_INCLUDE_DIR=${lib}/openssl/armv7/include/
+        OPENSSL_STATIC=static CARGO_BUILD_ARGS="${CARGO_BUILD_ARGS} --target armv7-linux-androideabi"
+        FEATURES="build-jni sqlite-static" release
+      - make SODIUM_LIB_DIR=${lib}/libsodium/arm64/lib/ SODIUM_STATIC=static OPENSSL_LIB_DIR=${lib}/openssl/arm64/lib/  OPENSSL_INCLUDE_DIR=${lib}/openssl/arm64/include/
+        OPENSSL_STATIC=static CARGO_BUILD_ARGS="${CARGO_BUILD_ARGS} --target aarch64-linux-android"
+        FEATURES="build-jni sqlite-static" release
+      - popd
+      - mkdir -p libs/armeabi-v7a libs/arm64-v8a
+      - cp $$TurtlCore$$/target/armv7-linux-androideabi/release/libturtl_core.so libs/armeabi-v7a
+      - cp $$TurtlCore$$/target/aarch64-linux-android/release/libturtl_core.so libs/arm64-v8a
+    ndk: r17b
+
 MaintainerNotes: |-
     Here is what the ''build'' step does (based on instructions provided by upstream):
     * Create a [https://developer.android.com/ndk/guides/standalone_toolchain standalone toolchain] that will be used to build OpenSSL.
@@ -95,5 +162,5 @@ MaintainerNotes: |-
 
 AutoUpdateMode: Version v%v
 UpdateCheckMode: Tags ^v[0-9.]+$
-CurrentVersion: 0.7.0
-CurrentVersionCode: 7000
+CurrentVersion: 0.7.2.4
+CurrentVersionCode: 7240
