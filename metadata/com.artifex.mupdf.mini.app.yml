@@ -1,0 +1,69 @@
+Categories:
+  - Reading
+License: AGPL-3.0-or-later
+AuthorName: Artifex Software LLC
+WebSite: https://mupdf.com/
+SourceCode: https://git.ghostscript.com/?p=mupdf-android-viewer-mini.git;a=summary
+IssueTracker: https://bugs.ghostscript.com/
+
+AutoName: MuPDF mini
+Summary: Minimalist viewer for PDF, XPS, CBZ, unprotected EPUB, and FB2 documents
+Description: |-
+    ''MuPDF Mini Viewer'' is a minimalist Android app that uses the MuPDF library to
+    view PDF, XPS, CBZ, unprotected EPUB, and FB2 documents.
+
+    This is a minimalist version of the MuPDF app, which focuses on reading only. It
+    does not support editing annotations or filling out forms.
+
+    The app will start with a file picker showing the contents of the external
+    storage directory. Only files that it can open will be listed.
+
+    Each document you open will start its own activity, so you can view many
+    documents at once. Use the Overview system button to switch between the file
+    picker and any open documents and other activities you have running.
+
+    Tapping on the left and right side of the screen will flip to the previous and
+    next pages. Tapping in the middle will bring up or hide the tool bars. A long
+    tap will toggle highlighting of links. When the links are highlighted they are
+    also active and tappable.
+
+    You can pinch to zoom in. When zoomed in, tapping will scroll to advance the
+    next screenful of content.
+
+    In the toolbar there is a button to show the table of contents, if the document
+    has one. In EPUB and FB2 documents, there is also a menu item to pick the font
+    size. The scrubber at the bottom allows you to quickly jump to a given page in
+    the document.
+
+RepoType: git
+Repo: git://git.ghostscript.com/mupdf-android-viewer-mini.git
+
+Builds:
+  - versionName: 1.13.0
+    versionCode: 30
+    commit: 1.13.0
+    subdir: app
+    submodules: true
+    gradle:
+      - yes
+    prebuild:
+      - sed -i -e '/maven.ghostscript.com/d' ../build.gradle
+      - sed -i -e 's/enable true/enable false/' build.gradle
+      - sed -i -e "s/'-j4'/'-j`nproc`'/" ../jni/build.gradle
+      - "sed -i -e \"/Uncomment/a\\\t\tndk.abiFilters 'armeabi-v7a', 'arm64-v8a',\
+        \ 'x86'\" ../jni/build.gradle"
+      - make -C ../jni/libmupdf generate
+    scandelete:
+      - jni/libmupdf/thirdparty
+      - jni/libmupdf/build/release/scripts
+    ndk: r16b
+
+MaintainerNotes: |-
+    Upstream builds separate APKs for all target architectures supported by NDK
+    (7 as of r16). We build universal APK with armeabi-v7a, arm64-v8a and x86
+    support only.
+
+AutoUpdateMode: Version %v
+UpdateCheckMode: Tags
+CurrentVersion: 1.13.0
+CurrentVersionCode: 30
