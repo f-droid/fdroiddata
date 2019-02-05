@@ -1,0 +1,54 @@
+Categories:
+  - Reading
+License: GPL-3.0-or-later
+SourceCode: https://github.com/foobnix/LibreraReader
+IssueTracker: https://github.com/foobnix/LibreraReader/issues
+
+Summary: Book and PDF reader
+Description: Librera Reader is an application that reads PDF, EPUB, MOBI, DjVu, FB2,
+    TXT, RTF, AZW, AZW3, HTML, CBZ, CBR books on Android. Librera Reader is an easy
+    to use and highly configurable reading app that supports the most popular document
+    formats. With its simple, yet powerful interface, Librera makes document reading
+    a true pleasure. Librera even features a unique auto-scrolling, hand-free music
+    mode.
+
+RepoType: git
+Repo: https://github.com/foobnix/LibreraReader.git
+
+Builds:
+  - versionName: 8.0.38-fdroid
+    versionCode: 1098
+    commit: 8.0.39
+    subdir: app/
+    sudo:
+      - apt-get update
+      - apt-get install -y g++-6 mesa-common-dev libxcursor-dev libxrandr-dev libxinerama-dev
+        libgl1-mesa-dev
+    gradle:
+      - fdroid
+    srclibs:
+      - MuPDF@1.11
+    rm:
+      - Builder/libs/
+    prebuild:
+      - sed -i -e '/DexClassLoader/d' -e '/clazz/d' src/main/java/com/foobnix/sys/BitmapActivity.java
+      - sed -i -e '/splits/,+9d' -e '/applicationVariants/,+13d' -e '/a_copyApks/,+10d'
+        build.gradle
+      - sed -i -e '/git clone/d' -e 's#cd mupdf-1.11#pushd '$PWD'/$$MuPDF$$#' -e 's#/home/ivan-dev/git/LibreraReader/Builder/mupdf-1.11#'$PWD'/$$MuPDF$$#'
+        -e 's#/home/ivan-dev/git/LibreraReader/app/src/main/jniLibs#'$PWD'/src/main/jniLibs#'
+        -e 's#cd \.\.#popd#' ../Builder/link_to_mupdf_1.11.sh
+      - mkdir src/main/jniLibs/
+    scandelete:
+      - Builder/
+    build:
+      - pushd ../Builder/
+      - ./link_to_mupdf_1.11.sh
+    ndk: r17b
+
+MaintainerNotes: Upstream builds separate APKs for each architecture but we build
+    an universal APK.
+
+AutoUpdateMode: None
+UpdateCheckMode: None
+CurrentVersion: 8.0.38-fdroid
+CurrentVersionCode: 1098
