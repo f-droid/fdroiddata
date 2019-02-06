@@ -46,7 +46,7 @@ Alternatively, start the metadata file from scratch, see [the templates](https:/
 
 Or by download:
 
-    wget -O metadata/app.id.txt https://gitlab.com/fdroid/fdroiddata/raw/master/templates/app-minimal
+    wget -O metadata/app.id.yml https://gitlab.com/fdroid/fdroiddata/raw/master/templates/app-full
 
 Now that the file is created, you need to fill up all the app information and
 add a working build recipe.
@@ -104,8 +104,8 @@ to appear in our repository.
     automatically.
 
     ```
-    Auto Update Mode:Version v%v
-    Update Check Mode:Tags
+    AutoUpdateMode: Version v%v
+    UpdateCheckMode: Tags
     ```
 - You may like to add [localization and screenshots], so users can have a glance
     at the app in pictures and in their preferred language.
