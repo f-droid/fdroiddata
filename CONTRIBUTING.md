@@ -34,7 +34,7 @@ fdroidserver would probably work, but it is not guaranteed.
 ### Adding a new app
 
 If you want to add a new app you will have to add a new metadata file to the
-repository, like `metadata/app.id.txt`. Here is how to write that file.
+repository, like `metadata/app.id.yml`. Here is how to write that file.
 
 If the app is on GitHub, GitLab or Bitbucket, use `fdroid import`:
 
