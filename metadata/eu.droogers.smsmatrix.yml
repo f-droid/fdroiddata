@@ -1,0 +1,56 @@
+Categories:
+  - Phone & SMS
+License: GPL-3.0-only
+SourceCode: https://github.com/tijder/SmsMatrix
+IssueTracker: https://github.com/tijder/SmsMatrix/issues
+Changelog: https://github.com/tijder/SmsMatrix/releases
+
+AutoName: SmsMatrix
+Summary: Matrix SMS bridge
+Description: |-
+    This app bridges all sms messages to matrix. For every (new) text
+    conversation contact the bot will open a private 1:1 room and sends the
+    incoming messages to that room. Any messages sent in that room by the
+    matrix user will then be sent to the contact via SMS.
+
+    As currently there is no end-to-end encryption implemented in this app, for
+    privacy reasons it is preferable to use it with your own Matrix server.
+    Your data-in-transit however will always be safe as they are encrypted
+    using https over matrix -- provided the Matrix server is configured
+    properly.
+
+RepoType: git
+Repo: https://github.com/tijder/SmsMatrix
+
+Builds:
+  - versionName: 0.0.12
+    versionCode: 12
+    commit: v0.0.12
+    subdir: app
+    gradle:
+      - yes
+    srclibs:
+      - mini-matrixsdk@v0.9.14-no-webrtc
+      - olmsdk@3.0.0
+    rm:
+      - app/libs/*.aar
+    build:
+      - pushd $$olmsdk$$/android
+      - echo ndk.dir=$$NDK$$ > local.properties
+      - gradle assembleRelease
+      - popd
+      - cp $$olmsdk$$/android/olm-sdk/build/outputs/aar/olm-sdk-release-*.aar libs/olm-sdk.aar
+      - mkdir -p $$mini-matrixsdk$$/matrix-sdk/libs
+      - cp $$olmsdk$$/android/olm-sdk/build/outputs/aar/olm-sdk-release-*.aar $$mini-matrixsdk$$/matrix-sdk/libs/olm-sdk.aar
+      - cp $$olmsdk$$/android/olm-sdk/build/outputs/aar/olm-sdk-release-*.aar libs/olm-sdk.aar
+      - pushd $$mini-matrixsdk$$
+      - gradle clean assembleRelease
+      - popd
+      - cp $$mini-matrixsdk$$/matrix-sdk/build/outputs/aar/matrix-sdk-release-*.aar
+        libs/matrix-sdk.aar
+    ndk: r17b
+
+AutoUpdateMode: Version v%v
+UpdateCheckMode: Tags
+CurrentVersion: 0.0.12
+CurrentVersionCode: 12
