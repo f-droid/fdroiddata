@@ -1,0 +1,46 @@
+Categories:
+  - Connectivity
+License: Apache-2.0
+SourceCode: https://github.com/friimaind/pi-hole-droid
+IssueTracker: https://github.com/friimaind/pi-hole-droid/issues
+
+AutoName: Pi-hole Droid
+Summary: Unofficial client that connects to your Pi-hole to show charts and statistics
+Description: Pi-hole Droid makes use of Pi-hole API to obtain all the data. The credentials
+    is locally stored on your device through localStorage.
+
+RepoType: git
+Repo: https://github.com/friimaind/pi-hole-droid
+
+Builds:
+  - versionName: 1.0.4
+    versionCode: 10004
+    commit: 1.0.5
+    subdir: platforms/android/
+    gradle:
+      - yes
+    srclibs:
+      - BarcodeScanner@2.1.5
+    rm:
+      - platforms/android/CordovaLib/build/
+      - platforms/android/.gradle/
+      - platforms/android/libs/*.aar
+      - plugins/phonegap-plugin-barcodescanner/src/android/barcodescanner-release-2.1.2.aar
+    prebuild: sed -i -e '/phonegap-plugin-barcodescanner/d' build.gradle
+    scandelete:
+      - platforms/android/cordova/node_modules/properties-parser/test/
+      - plugins/phonegap-plugin-barcodescanner/src/blackberry10/
+    build:
+      - "echo 'apply from: \"phonegap-plugin-barcodescanner/piholedroid-barcodescanner.gradle\"\
+        ' >> build.gradle"
+      - pushd $$BarcodeScanner$$
+      - rm local.properties
+      - gradle clean assembleRelease
+      - popd
+      - cp $$BarcodeScanner$$/barcodescanner/build/outputs/aar/barcodescanner-release.aar
+        libs/barcodescanner.aar
+
+AutoUpdateMode: Version %v
+UpdateCheckMode: Tags
+CurrentVersion: 1.0.4
+CurrentVersionCode: 10004
