@@ -1,0 +1,24 @@
+diff --git a/cmake/CompilerFlags.cmake b/cmake/CompilerFlags.cmake
+--- a/cmake/CompilerFlags.cmake
++++ b/cmake/CompilerFlags.cmake
+@@ -10,7 +10,7 @@ IF(CMAKE_VERSION VERSION_LESS "3.12")
+ 	ADD_DEFINITIONS(-DQT_RESTRICTED_CAST_FROM_ASCII)
+ ELSE()
+ 	ADD_COMPILE_DEFINITIONS($<$<CONFIG:Debug>:QT_RESTRICTED_CAST_FROM_ASCII>)
+-	ADD_COMPILE_DEFINITIONS($<$<CONFIG:Release>:QT_NO_CAST_FROM_ASCII>)
++	ADD_COMPILE_DEFINITIONS($<$<NOT:$<CONFIG:Debug>>:QT_NO_CAST_FROM_ASCII>)
+ ENDIF()
+ 
+ IF(QT_VENDOR STREQUAL "Governikus")
+diff --git a/src/ui/qml/UIPlugInQml.cpp b/src/ui/qml/UIPlugInQml.cpp
+--- a/src/ui/qml/UIPlugInQml.cpp
++++ b/src/ui/qml/UIPlugInQml.cpp
+@@ -91,7 +91,7 @@ UIPlugInQml::UIPlugInQml()
+ 	, mTrayIcon()
+ {
+ #if defined(Q_OS_ANDROID)
+-	QGuiApplication::setFont(QFont("Roboto"));
++	QGuiApplication::setFont(QFont(QStringLiteral("Roboto")));
+ #endif
+ 
+ 	connect(&mTrayIcon, &TrayIcon::fireShow, this, &UIPlugInQml::show);

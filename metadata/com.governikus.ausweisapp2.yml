@@ -1,0 +1,47 @@
+Categories:
+  - Internet
+License: EUPL-1.2
+WebSite: https://www.ausweisapp.bund.de/
+SourceCode: https://github.com/Governikus/AusweisApp2
+IssueTracker: https://github.com/Governikus/AusweisApp2/issues
+
+Summary: ePerso mit dem Handy nutzen
+Description: |-
+    Mit der Online-Ausweisfunktion des Personalausweises und des elektronischen
+    Aufenthaltstitels können Sie sich im Internet ausweisen.
+
+RepoType: git
+Repo: https://github.com/Governikus/AusweisApp2
+
+Builds:
+  - versionName: 1.16.1
+    versionCode: 1
+    commit: 1.16.1
+    sudo:
+      - apt update || apt update
+      - apt install -y -t stretch-backports cmake
+    patch:
+      - 1.16.1-unsigned-apk.patch
+      - 1.16.1-qstring-constructor.patch
+    output: build/dist/AusweisApp2-$$VERSION$$-armeabi-v7a.apk
+    rm:
+      - test
+      - resources/packaging/macos
+    build:
+      - export ANDROID_BUILD_TOOLS_REVISION=28.0.3
+      - mkdir libs/build build
+      - cd libs/build
+      - cmake .. -DCMAKE_TOOLCHAIN_FILE=../../cmake/android.toolchain.cmake -DCMAKE_BUILD_TYPE=release
+      - make
+      - cd ../../build
+      - cmake .. -DCMAKE_TOOLCHAIN_FILE=../cmake/android.toolchain.cmake -DCMAKE_BUILD_TYPE=release
+        -DCMAKE_PREFIX_PATH=$(realpath ../libs/build/dist) -DANDROID_VERSION_CODE=$$VERCODE$$
+      - make
+      - make install
+      - make apk
+    ndk: r18b
+
+AutoUpdateMode: None
+UpdateCheckMode: None
+CurrentVersion: 1.16.1
+CurrentVersionCode: 1

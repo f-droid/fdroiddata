@@ -1,0 +1,30 @@
+diff --git a/cmake/Packaging.cmake b/cmake/Packaging.cmake
+--- a/cmake/Packaging.cmake
++++ b/cmake/Packaging.cmake
+@@ -185,9 +185,10 @@ ELSEIF(ANDROID)
+ 	MESSAGE(STATUS "Prepare ${ANDROID_FILE_EXT} file generation")
+ 
+ 	IF(${CMAKE_BUILD_TYPE} STREQUAL "RELEASE" OR ${CMAKE_BUILD_TYPE} STREQUAL "RELWITHDEBINFO" OR ${CMAKE_BUILD_TYPE} STREQUAL "MINSIZEREL")
++		SET(DEPLOY_CMD_SIGN --release)
++
+ 		IF(ANDROID_BUILD_AAR)
+ 			SET(ANDROID_FILE dist-release.aar)
+-			SET(DEPLOY_CMD_SIGN --release)
+ 		ELSEIF(APK_SIGN_KEYSTORE AND APK_SIGN_KEYSTORE_ALIAS AND APK_SIGN_KEYSTORE_PSW)
+ 			MESSAGE(STATUS "Release build will be signed using: ${APK_SIGN_KEYSTORE} | Alias: ${APK_SIGN_KEYSTORE_ALIAS}")
+ 			SET(DEPLOY_CMD_SIGN --sign ${APK_SIGN_KEYSTORE} ${APK_SIGN_KEYSTORE_ALIAS} --storepass ${APK_SIGN_KEYSTORE_PSW} --digestalg SHA-256 --sigalg SHA256WithRSA)
+@@ -197,7 +198,13 @@ ELSEIF(ANDROID)
+ 				SET(ANDROID_FILE QtApp-release-signed.apk)
+ 			ENDIF()
+ 		ELSE()
+-			MESSAGE(FATAL_ERROR "Cannot sign release build! Set APK_SIGN_KEYSTORE, APK_SIGN_KEYSTORE_ALIAS and APK_SIGN_KEYSTORE_PSW!")
++			IF(ANDROID_USE_GRADLE)
++				SET(ANDROID_FILE dist-release-unsigned.apk)
++			ELSE()
++				SET(ANDROID_FILE QtApp-release-unsigned.apk)
++			ENDIF()
++
++			MESSAGE(WARNING "Cannot sign release build! Set APK_SIGN_KEYSTORE, APK_SIGN_KEYSTORE_ALIAS and APK_SIGN_KEYSTORE_PSW!")
+ 		ENDIF()
+ 
+ 	ELSE()
