@@ -502,6 +502,33 @@ Build:60.5.0,600500
         zip -d fdroid/icecat-unsigned.apk 'META-INF/*.*'
     ndk=r15c
 
+Build:60.5.1,600501
+    commit=FIREFOX_60_5_1esr_RELEASE
+    timeout=21600
+    sudo=apt-get update || apt-get update && \
+        apt install -y g++
+    output=fdroid/icecat-unsigned.apk
+    srclibs=MozLocales@ebea561a,IceCat@3bc22233
+    prebuild=bash $$IceCat$$/makeicecat -- --no-tarball --skip-l10n --no-debian --with-sourcedir=$PWD && \
+        bash $$MozLocales$$/prebuild-icecat.sh && \
+        fxarch=`echo $$VERCODE$$ | cut -c 5 | sed -e 's/0/arm-linux-androideabi/g' -e 's/1/i686-linux-androideabi/g'` && \
+        echo "ac_add_options --with-android-ndk=\"$$NDK$$\"" >> .mozconfig && \
+        echo "ac_add_options --with-android-sdk=\"$$SDK$$\"" >> .mozconfig && \
+        echo "ac_add_options --with-libclang-path=$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/lib64/" >> .mozconfig && \
+        echo "ac_add_options --with-clang-path=$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin/clang" >> .mozconfig && \
+        echo "ac_add_options --target=${fxarch}" >> .mozconfig && \
+        echo "mk_add_options 'export MOZ_APP_ANDROID_VERSION_CODE=$$VERCODE$$'" >> .mozconfig
+    build=mkdir rust && \
+        rsarch=`echo $$VERCODE$$ | cut -c 5 | sed -e 's/0/armv7-linux-androideabi/g' -e 's/1/i686-linux-android/g'` && \
+        curl https://static.rust-lang.org/dist/rust-1.29.2-`uname -m`-unknown-linux-gnu.tar.xz | tar -x -J -C rust --strip-components 2 && \
+        curl https://static.rust-lang.org/dist/rust-std-1.29.2-${rsarch}.tar.xz | tar -x -J -C rust --strip-components 2 && \
+        PATH=$PWD/rust/bin:$PATH ./mach build && \
+        cat used-locales | xargs -I % ./mach build chrome-% && \
+        make -C obj-android package AB_CD=multi && \
+        mv obj-android/dist/icecat*-unsigned-unaligned.apk fdroid/icecat-unsigned.apk && \
+        zip -d fdroid/icecat-unsigned.apk 'META-INF/*.*'
+    ndk=r15c
+
 Build:60.5.0,600510
     commit=FIREFOX_60_5_0esr_RELEASE
     timeout=21600
@@ -509,6 +536,33 @@ Build:60.5.0,600510
         apt install -y g++
     output=fdroid/icecat-unsigned.apk
     srclibs=MozLocales@ebea561a,IceCat@2e8d99bb
+    prebuild=bash $$IceCat$$/makeicecat -- --no-tarball --skip-l10n --no-debian --with-sourcedir=$PWD && \
+        bash $$MozLocales$$/prebuild-icecat.sh && \
+        fxarch=`echo $$VERCODE$$ | cut -c 5 | sed -e 's/0/arm-linux-androideabi/g' -e 's/1/i686-linux-androideabi/g'` && \
+        echo "ac_add_options --with-android-ndk=\"$$NDK$$\"" >> .mozconfig && \
+        echo "ac_add_options --with-android-sdk=\"$$SDK$$\"" >> .mozconfig && \
+        echo "ac_add_options --with-libclang-path=$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/lib64/" >> .mozconfig && \
+        echo "ac_add_options --with-clang-path=$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin/clang" >> .mozconfig && \
+        echo "ac_add_options --target=${fxarch}" >> .mozconfig && \
+        echo "mk_add_options 'export MOZ_APP_ANDROID_VERSION_CODE=$$VERCODE$$'" >> .mozconfig
+    build=mkdir rust && \
+        rsarch=`echo $$VERCODE$$ | cut -c 5 | sed -e 's/0/armv7-linux-androideabi/g' -e 's/1/i686-linux-android/g'` && \
+        curl https://static.rust-lang.org/dist/rust-1.29.2-`uname -m`-unknown-linux-gnu.tar.xz | tar -x -J -C rust --strip-components 2 && \
+        curl https://static.rust-lang.org/dist/rust-std-1.29.2-${rsarch}.tar.xz | tar -x -J -C rust --strip-components 2 && \
+        PATH=$PWD/rust/bin:$PATH ./mach build && \
+        cat used-locales | xargs -I % ./mach build chrome-% && \
+        make -C obj-android package AB_CD=multi && \
+        mv obj-android/dist/icecat*-unsigned-unaligned.apk fdroid/icecat-unsigned.apk && \
+        zip -d fdroid/icecat-unsigned.apk 'META-INF/*.*'
+    ndk=r15c
+
+Build:60.5.1,600511
+    commit=FIREFOX_60_5_1esr_RELEASE
+    timeout=21600
+    sudo=apt-get update || apt-get update && \
+        apt install -y g++
+    output=fdroid/icecat-unsigned.apk
+    srclibs=MozLocales@ebea561a,IceCat@3bc22233
     prebuild=bash $$IceCat$$/makeicecat -- --no-tarball --skip-l10n --no-debian --with-sourcedir=$PWD && \
         bash $$MozLocales$$/prebuild-icecat.sh && \
         fxarch=`echo $$VERCODE$$ | cut -c 5 | sed -e 's/0/arm-linux-androideabi/g' -e 's/1/i686-linux-androideabi/g'` && \
@@ -537,5 +591,5 @@ Needs host g++ since at least version 52.3
 Archive Policy:4 versions
 Auto Update Mode:None
 Update Check Mode:None
-Current Version:60.5.0
-Current Version Code:600510
+Current Version:60.5.1
+Current Version Code:600511
