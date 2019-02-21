@@ -1,0 +1,81 @@
+Categories:
+  - System
+License: MIT
+WebSite: http://trikita.co/
+SourceCode: https://github.com/trikita/obsqr
+IssueTracker: https://github.com/trikita/obsqr/issues
+
+AutoName: Obsqr
+Summary: Scan QR codes
+Description: |-
+    Fast and simple QR code scanner that uses the zbar library. Minimalistic design
+    allows you to access QR content with a single tap.
+
+    '''N.B''' QR codes only, not other kinds of barcodes.
+
+    QR types that can be decoded by Obsqr:
+
+    * URLs
+    * phone numbers
+    * SMS
+    * geolocations
+    * emails
+    * contact information
+    * applications on Play Store
+    * WiFi configuration
+    * plain text
+
+RepoType: git
+Repo: https://github.com/trikita/obsqr
+
+Builds:
+  - versionName: '2.4'
+    versionCode: 9
+    commit: 071341595ce3
+    prebuild: bash fetch-zbar.sh
+    target: android-15
+    buildjni:
+      - yes
+
+  - versionName: '2.5'
+    versionCode: 10
+    commit: 4c6ad70039ba
+    prebuild: bash fetch-zbar.sh
+    target: android-16
+    buildjni:
+      - yes
+
+  - versionName: '2.6'
+    versionCode: 11
+    commit: 0b81963
+    prebuild: bash fetch-zbar.sh
+    target: android-19
+    buildjni:
+      - yes
+
+  - versionName: '2.7'
+    versionCode: 13
+    commit: 2d2886a
+    gradle:
+      - fat
+    prebuild: sed -i -e 's/buildTypes.release.signingConfig/android.buildTypes.release.signingConfig/g'
+        build.gradle
+
+  - versionName: '3.0'
+    versionCode: 16
+    commit: '3.0'
+    gradle:
+      - zbar
+    prebuild: sed -i -e '/play-services/d' build.gradle
+    scandelete:
+      - src/zbar/jniLibs
+    build:
+      - pushd libzbar
+      - NDK_PROJECT_PATH=$(pwd) ndk-build
+      - cp -rv libs/* ../src/zbar/jniLibs/
+      - popd
+
+AutoUpdateMode: Version %v
+UpdateCheckMode: Tags
+CurrentVersion: '3.0'
+CurrentVersionCode: 16
