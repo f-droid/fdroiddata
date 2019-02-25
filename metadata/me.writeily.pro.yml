@@ -1,0 +1,73 @@
+Categories:
+  - Writing
+License: MIT
+WebSite: http://writeily.me
+SourceCode: https://github.com/jffrymrtn/writeily-pro
+IssueTracker: https://github.com/jffrymrtn/writeily-pro/issues
+
+AutoName: Writeily Pro
+Summary: Edit markdown files
+Description: |-
+    Simply and elegantly compose notes in markdown or plain text. Organize by
+    folders, save and access files from external storage, and restrict access with a
+    PIN lock.
+
+    This app has been deprecated in favor of [[me.writeily]].
+
+RepoType: git
+Repo: https://github.com/jffrymrtn/writeily-pro
+
+Builds:
+  - versionName: 1.1.1
+    versionCode: 4
+    commit: v1.1.1
+    subdir: app
+    gradle:
+      - yes
+    rm:
+      - app/libs/*.jar
+      - app/libs/anddown/libs
+      - app/libs/anddown/obj
+    prebuild: sed -i -e '/compile files/d' -e '/appcompat-v7/acompile "com.android.support:recyclerview-v7:21.0.3"'
+        build.gradle
+    scanignore:
+      - app/libs/anddown/libs
+    scandelete:
+      - app/libs/anddown/obj
+    build:
+      - pushd libs/anddown/
+      - ndk-build
+      - gradle packageNativeLibs
+      - popd
+
+  - versionName: 1.2.0
+    versionCode: 5
+    commit: v1.2.0
+    subdir: app
+    gradle:
+      - yes
+    rm:
+      - app/libs/*.jar
+      - app/libs/anddown/libs
+      - app/libs/anddown/obj
+    scanignore:
+      - app/libs/anddown/libs
+    scandelete:
+      - app/libs/anddown/obj
+    build:
+      - pushd libs/anddown/
+      - ndk-build
+      - gradle packageNativeLibs
+      - popd
+
+MaintainerNotes: |-
+    Builds locally, but might break on BS. We need to integrate ndkbuild and gradle
+    task into overall build, e.g. with preassemble=libs:anddown:packageNativeLibs
+    instead of using `build=`. However, right now this breaks the app because the
+    native libs don't seem to get included.
+
+ArchivePolicy: 0 versions
+AutoUpdateMode: None
+UpdateCheckMode: Static
+CurrentVersion: 1.2.0
+CurrentVersionCode: 5
