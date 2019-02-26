@@ -1,0 +1,77 @@
+Categories:
+  - Multimedia
+License: GPL-3.0-only
+SourceCode: https://github.com/dozingcat/VectorCamera
+IssueTracker: https://github.com/dozingcat/VectorCamera/issues
+
+AutoName: Vector Camera
+Summary: An app that applies real-time effects to the camera input
+Description: Vector Camera displays real-time effects applied to what your camera
+    is pointing at. Effects include wireframes and outlines, color shifting, and rendering
+    with text characters. Take pictures and record videos, change their effects, and
+    export or share them. You can also apply the effects to your existing pictures.
+
+RepoType: git
+Repo: https://github.com/dozingcat/VectorCamera
+
+Builds:
+  - versionName: 1.4.2
+    versionCode: 10
+    commit: v1.4.2
+    subdir: app/
+    gradle:
+      - yes
+    srclibs:
+      - libvpx@5cbd333f3b491f6ecb41387acf72e8ec27d8a474
+    prebuild:
+      - cp -r $$libvpx$$ src/main/jni/
+      - sed -i -e '/enabled external_build \&\& return/d' -e '/"$@" >>${logfile} 2>&1/d'
+        src/main/jni/libvpx/build/make/configure.sh
+    scandelete:
+      - app/src/main/cpp/libvpx_prebuilt_libs/
+    build:
+      - DIR=$PWD
+      - pushd $$libvpx$$
+      - ./configure --target=armv7-android-gcc --sdk-path=$$NDK$$ --disable-examples
+        --disable-docs --disable-tools --disable-vp8-decoder --disable-vp9-decoder
+        --enable-vp8-encoder --disable-vp9-encoder --disable-neon --disable-neon-asm
+        --disable-runtime-cpu-detect
+      - make
+      - mv libvpx.a $DIR/src/main/cpp/libvpx_prebuilt_libs/armeabi-v7a/
+      - make distclean
+      - popd
+      - pushd src/main/jni/
+      - libvpx/configure --target=arm64-android-gcc --disable-examples --disable-docs
+        --disable-tools --disable-vp8-decoder --disable-vp9-decoder --enable-vp8-encoder
+        --disable-vp9-encoder
+      - cd ..
+      - $$NDK$$/ndk-build
+      - mv obj/local/arm64-v8a/libvpx.a cpp/libvpx_prebuilt_libs/arm64-v8a/
+      - popd
+      - pushd $$libvpx$$
+      - export PATH=$$NDK$$/toolchains/x86-4.9/prebuilt/linux-x86_64/bin:$PATH
+      - ASFLAGS="-D__ANDROID__" CROSS=i686-linux-android- LDFLAGS="--sysroot=$$NDK$$/platforms/android-9/arch-x86"
+        ./configure --target=x86-android-gcc --sdk-path=$$NDK$$ --disable-examples
+        --disable-docs --disable-vp8-decoder --disable-vp9-decoder --enable-vp8-encoder
+        --disable-vp9-encoder --disable-runtime-cpu-detect --disable-mmx --disable-sse
+        --disable-sse2 --disable-sse3 --disable-ssse3 --disable-sse4_1 --extra-cflags="--sysroot=$$NDK$$/platforms/android-9/arch-x86"
+      - make
+      - mv libvpx.a $DIR/src/main/cpp/libvpx_prebuilt_libs/x86/
+      - make distclean
+      - export PATH=$$NDK$$/toolchains/x86_64-4.9/prebuilt/linux-x86_64/bin:$PATH
+      - ASFLAGS="-D__ANDROID__" CROSS=x86_64-linux-android- LDFLAGS="--sysroot=$$NDK$$/platforms/android-21/arch-x86_64"
+        ./configure --target=x86_64-android-gcc --sdk-path=$$NDK$$ --disable-examples
+        --disable-docs --disable-vp8-decoder --disable-vp9-decoder --enable-vp8-encoder
+        --disable-vp9-encoder --disable-runtime-cpu-detect --disable-mmx --disable-sse
+        --disable-sse2 --disable-sse3 --disable-ssse3 --disable-sse4_1 --extra-cflags="--sysroot=$$NDK$$/platforms/android-21/arch-x86_64"
+      - make
+      - mv libvpx.a $DIR/src/main/cpp/libvpx_prebuilt_libs/x86_64/
+    ndk: r15c
+
+MaintainerNotes: The libvpx build is documented by upstream [https://github.com/dozingcat/VectorCamera/blob/master/README-libvpx.md
+    here].
+
+AutoUpdateMode: Version v%v
+UpdateCheckMode: Tags
+CurrentVersion: 1.4.2
+CurrentVersionCode: 10
