@@ -20,3 +20,14 @@ for f in glob.glob('metadata/*.yml'):
             fp.write(data['Summary'].strip().rstrip() + '\n')
         with open(f, 'w') as out:
             out.write(re.sub(r'Summary:[^\n]+\n', r'', raw))
+        packageName = f[9:-4]
+        scraped_glob = os.path.join('/path/to/scraper/metadata/',
+                                    packageName, '[a-z]*', 'short_description.txt')
+        for df in glob.glob(scraped_glob):
+            locale = os.path.basename(os.path.dirname(df))
+            with open(df) as fp:
+                text = fp.read()
+            outfile = 'metadata/' + packageName + '/' + locale + '/summary.txt'
+            os.makedirs(os.path.dirname(outfile), exist_ok=True)
+            with open(outfile, 'w') as fp:
+                fp.write(text.strip().rstrip() + '\n')
