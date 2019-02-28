@@ -1,0 +1,41 @@
+Categories:
+  - Games
+License: GPL-2.0-or-later
+WebSite: https://yabause.org
+SourceCode: https://sourceforge.net/p/yabause/code
+IssueTracker: https://sourceforge.net/projects/yabause/support
+Changelog: http://wiki.yabause.org/index.php5?title=Changelog
+
+Summary: Sega Saturn emulator
+Description: |-
+    Yabause support booting games using Saturn cds or iso files. BIOS (optional)
+    should be placed into /sdcard/yabause/bios and games go in
+    /sdcard/yabause/games.
+
+    [https://wiki.yabause.org/index.php5?title=Compatibility_list Compatibility
+    list]
+
+    Status: ALPHA
+
+RepoType: git-svn
+Repo: https://svn.code.sf.net/p/yabause/code/trunk
+
+Builds:
+  - versionName: 0.9.11
+    versionCode: 1
+    commit: '3136'
+    subdir: yabause/src/android
+    patch:
+      - toolchain.patch
+    build:
+      - echo "APP_CFLAGS+=-Wno-error=format-security" > jni/Application.mk
+      - cd ../..
+      - export PATH="$PATH:$$NDK$$/toolchains/arm-linux-androideabi-4.6/prebuilt/linux-x86/bin"
+      - cmake -DCMAKE_TOOLCHAIN_FILE=src/android/android.cmake -DNDK_BUILD=$$NDK$$/ndk-build
+        -DSDK_ANDROID=$$SDK$$/tools/android -DYAB_PORTS=android .
+      - make
+
+AutoUpdateMode: None
+UpdateCheckMode: None
+CurrentVersion: 0.9.11
+CurrentVersionCode: 1
