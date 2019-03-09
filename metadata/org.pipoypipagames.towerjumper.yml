@@ -11,7 +11,7 @@ AutoName: TowerJumper
 Description: |
     This is a clone of a popular android game in which you move a jumping ball and
     try to reach the end of a tower avoiding the obstacles. The levels are randomly
-    generated
+    generated.
 
 RepoType: git
 Repo: https://github.com/Dariasteam/TowerJumper.git
@@ -91,6 +91,32 @@ Builds:
       - cp bin/android_release.apk ../templates
       - cd ../tower_jumper
       - ../godot/bin/godot_server.server.opt.tools.64 -export Android ../tower_jumper.apk
+
+  - versionName: 1.0.8
+    versionCode: 13
+    commit: v1.0.8
+    sudo: apt-get install -y clang
+    output: tower_jumper.apk
+    srclibs:
+      - Godot@f2a42e1ae535013d712a224680c10ee9019f0172
+    prebuild:
+      - mkdir tower_jumper
+      - bash -O extglob -c "mv !(tower_jumper) tower_jumper"
+      - cp -R $$Godot$$ godot
+    build:
+      - cd godot
+      - scons -j `nproc` platform=server target=release_debug use_llvm=yes unix_global_settings_path=".."
+        tools=yes
+      - export ANDROID_NDK_ROOT=$$NDK$$
+      - scons -j `nproc` use_llvm=yes p=android target=release
+      - pushd platform/android/java/
+      - gradle assembleRelease
+      - popd
+      - mkdir -p ../templates/
+      - cp bin/android_release.apk ../templates
+      - cd ../tower_jumper
+      - ../godot/bin/godot_server.server.opt.tools.64 -export Android ../tower_jumper.apk
+    ndk: r12b
 
 AutoUpdateMode: None
 UpdateCheckMode: Static
