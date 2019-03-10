@@ -139,11 +139,34 @@ Build:0.3.4-universal,304
         echo -e "[target.x86_64-linux-android]\n linker = \""$(realpath x86_64)"/bin/x86_64-linux-android-clang\"\n" >> oab-utils/.cargo/config
     ndk=r17b
 
+Build:0.3.5-universal,305
+    commit=0.3.5
+    gradle=universal
+    srclibs=rustup@1.14.0
+    prebuild=sed -i -e '/set -e/a\source $HOME/.cargo/env' build.sh
+    build=$$rustup$$/rustup-init.sh -y && \
+        source $HOME/.cargo/env && \
+        rustup default 1.30.1 && \
+        rustup target add armv7-linux-androideabi && \
+        rustup target add aarch64-linux-android && \
+        rustup target add i686-linux-android && \
+        rustup target add x86_64-linux-android && \
+        $$NDK$$/build/tools/make_standalone_toolchain.py --api 18 --arch=arm --install-dir=arm && \
+        $$NDK$$/build/tools/make_standalone_toolchain.py --api 21 --arch=arm64 --install-dir=arm64 && \
+        $$NDK$$/build/tools/make_standalone_toolchain.py --api 18 --arch=x86 --install-dir=x86 && \
+        $$NDK$$/build/tools/make_standalone_toolchain.py --api 21 --arch=x86_64 --install-dir=x86_64 && \
+        mkdir oab-utils/.cargo && \
+        echo -e "[target.armv7-linux-androideabi]\n linker = \""$(realpath arm)"/bin/arm-linux-androideabi-clang\"\n" >> oab-utils/.cargo/config && \
+        echo -e "[target.aarch64-linux-android]\n linker = \""$(realpath arm64)"/bin/aarch64-linux-android-clang\"\n" >> oab-utils/.cargo/config && \
+        echo -e "[target.i686-linux-android]\n linker = \""$(realpath x86)"/bin/i686-linux-android-clang\"\n" >> oab-utils/.cargo/config && \
+        echo -e "[target.x86_64-linux-android]\n linker = \""$(realpath x86_64)"/bin/x86_64-linux-android-clang\"\n" >> oab-utils/.cargo/config
+    ndk=r17b
+
 Maintainer Notes:
 Cannot use AUM/UCM because version code and version name are dynamic.
 .
 
 Auto Update Mode:None
 Update Check Mode:None
-Current Version:0.3.4-universal
-Current Version Code:304
+Current Version:0.3.5-universal
+Current Version Code:305
