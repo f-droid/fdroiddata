@@ -639,6 +639,42 @@ Builds:
       - npm run build-android-assets
     ndk: r17b
 
+  - versionName: 0.1903.13-beta
+    versionCode: 50
+    commit: v0.1903.13-beta
+    subdir: android/app
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y --no-install-recommends g++ ninja-build -t stretch-backports
+        npm
+      - npm install -g react-native-cli
+    init:
+      - sed -i -e '/appium/d' ../../package.json
+      - npm install
+      - truncate -s 0 ../../node_modules/react-native/local-cli/server/util/external/xsel
+    gradle:
+      - yes
+    srclibs:
+      - NodejsMobile@nodejs-mobile-v0.1.7
+    rm:
+      - node_modules/react-native/ReactAndroid/src/main/third-party/java/infer-annotations/infer-annotations-4.0.jar
+      - node_modules/react-native/ReactAndroid/src/main/third-party/java/buck-android-support/buck-android-support.jar
+      - node_modules/*/build/Release/*.node
+      - node_modules/sodium-native/prebuilds/
+      - node_modules/react-native-android-wifi/Examples/
+    prebuild: sed -i -e '/lifecycle/d' ../build.gradle
+    scanignore:
+      - android/build.gradle
+    scandelete:
+      - node_modules
+    build:
+      - pushd $$NodejsMobile$$
+      - ./tools/android_build.sh $$NDK$$ arm
+      - popd
+      - mv $$NodejsMobile$$/out_android/armeabi-v7a/libnode.so ../../node_modules/nodejs-mobile-react-native/android/libnode/bin/armeabi-v7a/libnode.so
+      - npm run build-android-assets
+    ndk: r17b
+
 MaintainerNotes: |-
     scanignore is used to allow the "node_modules/react-native/android" local Maven repository which contains the prebuilt react-native library which we get from npm.
 
@@ -646,5 +682,5 @@ MaintainerNotes: |-
 
 AutoUpdateMode: Version v%v
 UpdateCheckMode: Tags
-CurrentVersion: 0.1903.4-beta
-CurrentVersionCode: 49
+CurrentVersion: 0.1903.13-beta
+CurrentVersionCode: 50
