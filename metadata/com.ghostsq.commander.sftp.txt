@@ -15,7 +15,7 @@ credentials.
 .
 
 Repo Type:git-svn
-Repo:https://svn.code.sf.net/p/gc-sftp/code/trunk
+Repo:https://svn.code.sf.net/p/gc-sftp/code/trunk/
 
 Build:1.10b1,11
     commit=26
@@ -78,13 +78,28 @@ Build:1.14.2b4,25
         cp $$Ganymed$$/target/ganymed-ssh2-263-SNAPSHOT.jar libs/
     target=android-19
 
+Build:1.14.7b1,37
+    commit=54
+    srclibs=GhostCommander@631,Zip4j@d0ec9f4f80bdbeaec76478ab0c0a63d9e9e7eaa5
+    prebuild=mv $$Zip4j$$/src/net $$GhostCommander$$/src/. && \
+        pushd $$GhostCommander$$ && \
+        android update project -p ./ -t "android-27" && \
+        ant release && \
+        jar c -C bin/classes/ com > gc.jar && \
+        popd && \
+        install -D $$GhostCommander$$/gc.jar libs/gc.jar && \
+        unzip ganymed-ssh-2_2011.zip && \
+        mv ch src/.
+    target=android-23
+
 Maintainer Notes:
 No commit comments whatsoever!
 
-A few different forks of used SSH2 library exist, but
-https://code.google.com/p/ganymed-ssh-2 (which is in turn referenced by number
-of sites) claims, that it is the most genuine one.
-
+Ganymed-ssh library is not available anymore from
+https://code.google.com/p/ganymed-ssh-2, but the sftp plugin author started
+to package the source archive with the main code. We're unpacking it and
+compiling along with the sftp plugin.
+Recent versions of ghost commander also require Zip4j.
 Recent builds are made difficult by the complete lack of documentation and
 no way of referencing which version of the main GhostCommander API jar should
 be used.
