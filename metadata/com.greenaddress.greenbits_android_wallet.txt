@@ -1,25 +1,22 @@
 Categories:Money
 License:GPL-3.0-only
 Web Site:https://greenaddress.it
-Source Code:https://github.com/greenaddress/GreenBits
-Issue Tracker:https://github.com/greenaddress/GreenBits/issues
-Changelog:https://github.com/greenaddress/GreenBits/releases
+Source Code:https://github.com/blockstream/green_android
+Issue Tracker:https://github.com/blockstream/green_android/issues
+Changelog:https://github.com/blockstream/green_android/releases
 
-Auto Name:GreenBits
-Summary:GreenAddress client
+Auto Name:Blockstream Green
+Summary:Blockstream Green Bitcoin wallet
 Description:
-GreenBits is a Bitcoin Wallet for Android provided by GreenAddress.
+Blockstream Green is a Bitcoin Wallet for Android.
 
-The wallet main strengths are security, privacy, easy of use and aims is to
-provide a great user experience.
+Other Bitcoin wallets offer a choice between convenience, security, and control.
 
-* It supports the payment protocol via both click and qrcode scanning.
-* Supports paper wallet scanning in both WIF and BIP38 format.
-* Uses multisignature for improved security and per transaction two factor authentication.
+With Blockstream Green, you get all three.
 .
 
 Repo Type:git
-Repo:https://github.com/greenaddress/GreenBits
+Repo:https://github.com/blockstream/green_android
 
 Build:1.33,33
     commit=1.33
@@ -697,11 +694,25 @@ Build:2.07,207
     build=JAVA_HOME=$(readlink -f /usr/bin/javac | sed "s:/bin/javac::") sh ./prepare_fdroid.sh
     ndk=r17b
 
+Build:3.0.7,307
+    commit=release_3.0.7
+    subdir=app
+    sudo=apt-get install -y build-essential clang virtualenv
+    gradle=production
+    forcevercode=yes
+    prebuild=sed -i -e 's/output.versionCodeOverride =/0 + /g' build.gradle
+    scanignore=bitcoinj/core/src/main/resources/org/bitcoinj/crypto/cacerts,bitcoinj/core/src/test,app/src/main/assets/production/checkpoints
+    scandelete=app/src/main/assets/btctestnet/checkpoints
+    build=JAVA_HOME=$(readlink -f /usr/bin/javac | sed "s:/bin/javac::") sh ./prepare_fdroid.sh && \
+        find src/main/jniLibs -type f -name "libgreenaddress.a" -exec rm -f {} \;
+    ndk=r19b
+
 Maintainer Notes:
 Watch prepare_fdroid.sh for changes on new builds.
+The two files app/src/main/assets/btctestnet/checkpoints and app/src/main/assets/production/checkpoints are hashes of the blocks of the respective chains (testnet3 and mainnet) and are re-generated ad-hoc occasionally by using the tool ./buildCheckpoints.sh inside the repo while having a bitcoin full node for each chain runnin on localhost. They are used to speed up SPV verification when possible and they can be verified independently by checking each hash against the blockchain.
 .
 
-Auto Update Mode:Version r%v
+Auto Update Mode:Version release_%v
 Update Check Mode:Tags
-Current Version:2.07
-Current Version Code:207
+Current Version:3.0.7
+Current Version Code:307
