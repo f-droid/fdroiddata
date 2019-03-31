@@ -7,9 +7,8 @@ SourceCode: https://github.com/mozilla-tw/FirefoxLite
 IssueTracker: https://github.com/mozilla-tw/FirefoxLite/issues
 
 Summary: Fast and Lightweight Web Browser
-Description: Firefox Lite is a light but feature-packed browser that lets you save
-    data and phone storage, capture and share content, and browse quickly even on
-    slow connections.
+Description: |-
+    Firefox Lite is a light but feature-packed browser that lets you save data and phone storage, capture and share content, and browse quickly even on slow connections.
 
 RepoType: git
 Repo: https://github.com/mozilla-tw/FirefoxLite
@@ -28,13 +27,32 @@ Builds:
       - ktlint
     prebuild:
       - sed -i -e '/maven {/,+2d' ../build.gradle
-      - sed -i -e '/play-services-analytics/d' -e '/sb.append/,+1d' -e 's/\["firebase"\]/\["firebase_no_op"\]/'
-        -e 's/browser-session/session/' -e 's/service-telemetry/telemetry/' -e 's/browser-domains/domains/'
-        -e 's/ui-autocomplete/autocomplete/' -e 's/Versions.version_code/$$VERCODE$$/'
-        build.gradle
+      - sed -i -e '/play-services-analytics/d' -e '/sb.append/,+1d' -e 's/\["firebase"\]/\["firebase_no_op"\]/' -e 's/browser-session/session/' -e 's/service-telemetry/telemetry/' -e 's/browser-domains/domains/' -e 's/ui-autocomplete/autocomplete/' -e 's/Versions.version_code/$$VERCODE$$/' build.gradle
       - sed -i -e 's/browser-session/session/' ../components/feature/tabs/build.gradle
-      - sed -i -e 's/isBetaBuild() || isReleaseBuild() || isFirebaseBuild()/false/'
-        src/main/java/org/mozilla/focus/utils/AppConstants.java
+      - sed -i -e 's/isBetaBuild() || isReleaseBuild() || isFirebaseBuild()/false/' src/main/java/org/mozilla/focus/utils/AppConstants.java
+      - cp src/debug/java/org/mozilla/focus/utils/AdjustHelper.java src/release/java/org/mozilla/focus/utils/AdjustHelper.java
+    scanignore:
+      - app/build.gradle
+    scandelete:
+      - buildSrc/build/
+      - buildSrc/.gradle/
+
+  - versionName: 1.3.0
+    versionCode: 2
+    commit: 1.3.0
+    subdir: app/
+    submodules: true
+    gradle:
+      - focus
+      - webkit
+    rm:
+      - third_party/glide/annotation/compiler/libs/jarjar-1.4.jar
+      - ktlint
+    prebuild:
+      - sed -i -e '/maven {/,+2d' ../build.gradle
+      - sed -i -e '/play-services-analytics/d' -e '/sb.append/,+1d' -e 's/\["firebase"\]/\["firebase_no_op"\]/' -e 's/browser-session/session/' -e 's/service-telemetry/telemetry/' -e 's/browser-domains/domains/' -e 's/ui-autocomplete/autocomplete/' -e 's/Versions.version_code/$$VERCODE$$/' build.gradle
+      - sed -i -e 's/browser-session/session/' ../components/feature/tabs/build.gradle
+      - sed -i -e 's/isBetaBuild() || isReleaseBuild() || isFirebaseBuild()/false/' src/main/java/org/mozilla/focus/utils/AppConstants.java
       - cp src/debug/java/org/mozilla/focus/utils/AdjustHelper.java src/release/java/org/mozilla/focus/utils/AdjustHelper.java
     scanignore:
       - app/build.gradle
@@ -53,5 +71,5 @@ MaintainerNotes: |-
 
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: 1.2.1
-CurrentVersionCode: 1
+CurrentVersion: 1.3.0
+CurrentVersionCode: 2
