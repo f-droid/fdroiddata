@@ -401,7 +401,34 @@ Builds:
         libs/matrix-sdk.aar
     ndk: r17b
 
+    versionCode: 82900
+    commit: miniv0.8.29-fdroid
+    subdir: vector
+    gradle:
+      - appfdroid
+    srclibs:
+      - mini-matrixsdk@v0.9.20-no-webrtc
+      - olmsdk@ec2695b9c945fa577c6fc4501d65a186208ecfed
+    prebuild:
+      - sed -i -e '/com.google.firebase/d' build.gradle
+      - sed -i -e '/com.google.gms.google-services/d' build.gradle
+      - mkdir -p libs
+    build:
+      - pushd $$olmsdk$$/android
+      - echo ndk.dir=$$NDK$$ > local.properties
+      - gradle assembleRelease
+      - popd
+      - cp $$olmsdk$$/android/olm-sdk/build/outputs/aar/olm-sdk-release-*.aar libs/olm-sdk.aar
+      - mkdir -p $$mini-matrixsdk$$/matrix-sdk/libs
+      - cp $$olmsdk$$/android/olm-sdk/build/outputs/aar/olm-sdk-release-*.aar $$mini-matrixsdk$$/matrix-sdk/libs/olm-sdk.aar
+      - pushd $$mini-matrixsdk$$
+      - gradle clean assembleRelease
+      - popd
+      - cp $$mini-matrixsdk$$/matrix-sdk/build/outputs/aar/matrix-sdk-release-*.aar
+        libs/matrix-sdk.aar
+    ndk: r17c
+
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: 0.8.28
-CurrentVersionCode: 82800
+CurrentVersion: 0.8.29
+CurrentVersionCode: 82900
