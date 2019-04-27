@@ -56,10 +56,38 @@ Builds:
       - ./make.sh
     ndk: r12b
 
+  - versionName: '1.0'
+    versionCode: 104
+    commit: '1.0'
+    subdir: android
+    output: build/outputs/apk/android-release-unsigned.apk
+    srclibs:
+      - supertuxkartdeps@f0a772c941b77e0cdae02baac332089b3af3f4dc
+    prebuild:
+      - tar -C '../lib' -xf $$supertuxkartdeps$$/dependencies-android.tar.xz
+      - sed -i -e 's#../../stk-assets#./supertuxkart-code-r18212-stk-assets-release-1.0#'
+        generate_assets.sh
+    scandelete:
+      - lib/curl/tests
+      - tools/windows_installer
+    build:
+      - wget https://sourceforge.net/code-snapshots/svn/s/su/supertuxkart/code/supertuxkart-code-r18212-stk-assets-release-1.0.zip
+      - unzip supertuxkart-code-r18212-stk-assets-release-1.0.zip
+      - export BUILD_TYPE=release
+      - export SDK_PATH=$$SDK$$
+      - export NDK_PATH=$$NDK$$
+      - export PROJECT_VERSION=$$VERSION$$
+      - export PROJECT_CODE=$$VERCODE$$
+      - ./generate_assets.sh
+      - ./make.sh -j`nproc`
+    ndk: r12b
+
 MaintainerNotes: |-
     By default, the build script only builds a binary for armeabi-v7a.
 
     Upstream sets the version manually during the build so we can't enable auto update.
+
+    We get the assets from a Zip file, because git-svn on the repository almost always fails with a timeout.
 
 AutoUpdateMode: None
 UpdateCheckMode: None
