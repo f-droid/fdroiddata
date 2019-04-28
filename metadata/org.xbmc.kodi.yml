@@ -53,6 +53,42 @@ Builds:
       - make apk-unsigned
     ndk: r17b
 
+  - versionName: '18.2'
+    versionCode: 1802000
+    commit: 18.2-Leia
+    timeout: 10800
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y build-essential default-jdk gawk lib32stdc++6 lib32z1 lib32z1-dev
+        libcurl4-openssl-dev zlib1g-dev groovy libcommons-lang-java python-dev
+    patch:
+      - groovy.patch
+    output: build/tools/android/packaging/images/*.apk
+    rm:
+      - tools/codegenerator/groovy/
+    prebuild:
+      - sed -i -e '/gradlew/d' -e '/gradle-wrapper.jar/d' cmake/scripts/android/Install.cmake
+      - sed -i -e 's#./gradlew#gradle#' tools/android/packaging/Makefile.in
+    scandelete:
+      - lib/
+      - project/
+      - tools/
+    build:
+      - DIR=$PWD
+      - $$NDK$$/build/tools/make_standalone_toolchain.py --install-dir=toolchain/
+        --api 21 --arch arm
+      - pushd tools/depends/
+      - ./bootstrap
+      - ./configure --host=arm-linux-androideabi --with-sdk-path=$$SDK$$ --with-ndk-path=$$NDK$$
+        --prefix=$DIR/prefix/ --with-toolchain=$DIR/toolchain/ --disable-debug
+      - make -j$(getconf _NPROCESSORS_ONLN)
+      - popd
+      - make -C tools/depends/target/cmakebuildsys
+      - pushd build/
+      - make -j$(getconf _NPROCESSORS_ONLN)
+      - make apk-unsigned
+    ndk: r17c
+
 MaintainerNotes: |-
     groovy.patch was [https://github.com/xbmc/xbmc/issues/6860#issuecomment-461122155 provided by upstream]; it makes the build use the Debian groovy package instead of a prebuilt JAR.
 
@@ -60,5 +96,5 @@ MaintainerNotes: |-
 
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: '18.0'
-CurrentVersionCode: 1800000
+CurrentVersion: '18.2'
+CurrentVersionCode: 1802000
