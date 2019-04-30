@@ -1,0 +1,52 @@
+Categories:
+  - Connectivity
+License: GPL-3.0-or-later
+SourceCode: https://github.com/google/samba-documents-provider
+IssueTracker: https://github.com/google/samba-documents-provider/issues
+
+AutoName: Android Samba Client
+Summary: Access files shared through a SAMBA share
+Description: This app extends the built in File Manager to support connecting to SMB
+    file shares. You can download and upload your files from your device once the
+    connection has been set up. The app doesn't support browsing your local network
+    for shares yet, so you will have to type the full URI (e.g. smb://server/data).
+
+RepoType: git
+Repo: https://github.com/google/samba-documents-provider.git
+
+Builds:
+  - versionName: '1.1'
+    versionCode: 111
+    commit: v1.1
+    subdir: app/
+    gradle:
+      - yes
+    srclibs:
+      - samba@samba-4.5.1
+    prebuild:
+      - CWD=$PWD
+      - sed -i -e '/arm64-v8a/d' -e '/x86/d' -e '/x86_64/d' build.gradle
+      - pushd $$samba$$
+      - git apply $CWD/../sambapatch.diff
+      - sed -i -e '/perl_inc.remove/d' buildtools/wafsamba/samba_perl.py
+      - sed -i -e 's#$ANDROID_SDK/ndk-bundle#$$NDK$$#' -e '/ABI=/d' -e '/PLATFORM_ARCH=/d'
+        -e '/CMD_PREFIX=/d' configure.sh
+      - export ABI=arm-linux-androideabi
+      - export PLATFORM_ARCH=arch-arm
+      - export CMD_PREFIX=arm-linux-androideabi
+      - ./configure.sh
+    build:
+      - CWD=$PWD
+      - pushd $$samba$$
+      - ./compile.sh
+      - ./install.sh $CWD/src/main/jniLibs/armeabi-v7a/
+      - popd
+      - mv src/main/jniLibs/armeabi-v7a/includes/ src/main/cpp/samba_includes/
+    ndk: r13b
+
+MaintainerNotes: We only build for ARM, but we could build for more ABIs.
+
+AutoUpdateMode: Version v%v
+UpdateCheckMode: Tags
+CurrentVersion: '1.1'
+CurrentVersionCode: 111
