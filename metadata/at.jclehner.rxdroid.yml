@@ -1,0 +1,48 @@
+AntiFeatures:
+  - NonFreeAssets
+Categories:
+  - Sports & Health
+  - Time
+License: GPL-3.0-or-later
+WebSite: https://github.com/jclehner/rxdroid
+SourceCode: https://github.com/jclehner/rxdroid
+IssueTracker: https://github.com/jclehner/rxdroid/issues
+Changelog: https://github.com/jclehner/rxdroid/blob/HEAD/ChangeLog.md
+
+Summary: Reminds you of your medication schedules
+Description: |-
+    A simple medication reminder. Also keeps track of your pill count and required
+    refills.
+
+    Help with translating RxDroid to your language at
+    [https://crowdin.com/project/rxdroid crowdin.com]!
+
+RepoType: git
+Repo: https://github.com/jclehner/rxdroid
+
+Builds:
+  - versionName: 0.9.32.2
+    versionCode: 9322
+    commit: v0.9.32.2
+    gradle:
+      - yes
+    srclibs:
+      - ShowCase-jclehner@fd3318b6a27f13159b57efa0c56d1c1e9d793c60
+    rm:
+      - .m2repo/
+    prebuild:
+      - sed -i -e 's#file://$pwd/.m2repo#https://jitpack.io#' -e "s/warning 'MissingTranslation'/checkReleaseBuilds
+        false/" -e "s/'at.jclehner.rxdroid.localmaven:ShowcaseView:9999'/(name:'ShowcaseView',
+        ext:'aar')/" -e '/theTask.dependsOn/d' build.gradle
+      - mkdir libs/
+      - echo "repositories { flatDir { dirs 'libs' } }" >> build.gradle
+    build:
+      - pushd $$ShowCase-jclehner$$
+      - gradle assembleRelease
+      - popd
+      - mv $$ShowCase-jclehner$$/library/build/libs/library.aar libs/ShowcaseView.aar
+
+AutoUpdateMode: Version v%v
+UpdateCheckMode: Tags
+CurrentVersion: 0.9.32.2
+CurrentVersionCode: 9322
