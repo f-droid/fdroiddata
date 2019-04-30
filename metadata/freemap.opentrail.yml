@@ -1,0 +1,52 @@
+Categories:
+  - Navigation
+License: GPL-2.0-only
+WebSite: http://www.free-map.org.uk/common/opentrail.html
+SourceCode: https://gitlab.com/nickw1/opentrail
+IssueTracker: https://gitlab.com/nickw1/opentrail/issues
+Changelog: https://gitlab.com/nickw1/opentrail/tags
+
+AutoName: OpenTrail
+Summary: OSM-based England and Wales walking app
+Description: |-
+    OpenStreetMap-based Android app for UK walkers and other countryside users,
+    highlighting rights of way and showing contours from OS OpenData. Allows
+    both online and offline use. In addition to navigation, walkers may share
+    and download footpath issues (blockages, directions etc) and walking
+    routes.
+
+RepoType: git
+Repo: https://gitlab.com/nickw1/opentrail
+
+Builds:
+  - versionName: '0.4'
+    versionCode: 4
+    commit: 0.4-fdroid
+    subdir: app
+    gradle:
+      - yes
+    srclibs:
+      - andromaps@ec817a0b869ad41d0dc661bcca0b8595dc719003
+      - freemaplib@20170509
+      - freemaplibProj@20131013
+      - JCoord@328e75a8d44d9f6a13205994d3b9d3fd50f68867
+      - javaproj@b2167fa5aa64dce82867f7d96ac1462a4212c9df
+    prebuild: echo -e "\nproject(':andromaps').projectDir = new File('./app/$$andromaps$$/app/')"
+        >> ../settings.gradle
+    build:
+      - pushd $$freemaplib$$
+      - $$MVN3$$ install
+      - popd
+      - pushd $$JCoord$$
+      - $$MVN3$$ install -DskipTests
+      - popd
+      - pushd $$javaproj$$
+      - $$MVN3$$ install -DskipTests
+      - popd
+      - pushd $$freemaplibProj$$
+      - $$MVN3$$ install
+
+AutoUpdateMode: Version %v
+UpdateCheckMode: Tags
+CurrentVersion: '0.4'
+CurrentVersionCode: 4
