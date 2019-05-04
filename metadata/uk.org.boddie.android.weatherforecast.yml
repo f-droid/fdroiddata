@@ -108,8 +108,17 @@ Builds:
         imagemagick pngquant python-cairosvg
     output: output.apk
     srclibs:
-      - duck@1.0.3
-    build: PYTHONPATH=$$duck$$ ./build.py output.apk
+      - duck-git@1.0.4
+    prebuild:
+      - pushd $$duck-git$$
+      - git reset --hard `cat ../../uk.org.boddie.android.weatherforecast/deps/DUCK`
+      - popd
+    build: PYTHONPATH=$$duck-git$$ ./build.py output.apk
+
+MaintainerNotes: |-
+    From version 1.3.0, the app handles its own dependencies during the build,
+    using the prebuild step to take a specific version of DUCK then update it
+    to the version given in the app's deps/DUCK file.
 
 AutoUpdateMode: Version %v
 UpdateCheckMode: HTTP
