@@ -1,0 +1,57 @@
+Categories:
+  - Games
+License: GPL-3.0-only
+WebSite: https://openmw.org/
+SourceCode: https://github.com/xyzz/openmw-android
+IssueTracker: https://github.com/xyzz/openmw-android/issues
+Changelog: https://github.com/xyzz/openmw-android/releases
+
+AutoName: OMW
+Summary: A game engine compatible with TES3:Morrowind data files
+Description: |-
+    Note: This is the "unofficial" version build from the XYZZ repo where the Android app is developed. This means that while new feature will be implemented here first, it might entail a more unstable app.
+
+    OpenMW is an open-source, free-software game engine that reimplements the one powering Bethesda Softworks' 2002 open-world role-playing game Morrowind.
+
+    This is an OpenMW port for Android, adapted to be played with touchscreen or remote controller. To play it, you need to use your own, legally acquired Morrowind data files.
+
+RepoType: git
+Repo: https://github.com/xyzz/openmw-android.git
+
+Builds:
+  - versionName: 0.46.0-16
+    versionCode: 16
+    commit: 0.46.0-16
+    timeout: 10000
+    sudo:
+      - apt update || apt update
+      - apt install -y cmake doxygen g++ pkgconf wget
+    gradle:
+      - yes
+    output: app/build/outputs/apk/release/omw_release_*.apk
+    prebuild:
+      - sed -i -e '/Unzip/,+5d' buildscripts/include/setup-ndk.sh
+      - sed -i -e 's/\ -Wl,-plugin-opt=-emulated-tls//' -e '/download-ndk/d' -e '/debugging\
+        life/,+19d' buildscripts/build.sh
+      - mkdir -p buildscripts/toolchain/ndk
+      - ./buildscripts/build.sh --arch arm --lto
+      - ./buildscripts/build.sh --arch arm64 --lto --no-resources
+      - ./buildscripts/build.sh --arch x86 --lto --no-resources
+      - ./buildscripts/build.sh --arch x86_64 --lto --no-resources
+      - rm -fr ./buildscripts/build/*
+      - rm -fr ./buildscripts/prefix/*
+      - rm -fr ./buildscripts/symbols/*
+      - rm -fr ./buildscripts/toolchain/*
+    scanignore:
+      - app/src/main/assets
+      - app/src/main/jniLibs
+    ndk: r18b
+
+MaintainerNotes: |-
+    - we use prebuild else fdroid scanner will detect the built libs as binaries on the second pass before running build, and we can't scanignore them (at start) since they don't exist yet, see https://gitlab.com/fdroid/fdroidserver/issues/635
+    - we remove the buildtools and intermediary artefacts (several gigabytes) else they'll get pulled in the source tarball
+
+AutoUpdateMode: Version %v
+UpdateCheckMode: Tags
+CurrentVersion: 0.46.0-16
+CurrentVersionCode: 16
