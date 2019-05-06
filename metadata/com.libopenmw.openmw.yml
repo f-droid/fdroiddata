@@ -1,0 +1,61 @@
+Categories:
+  - Games
+License: GPL-3.0-only
+WebSite: https://openmw.org/
+SourceCode: https://github.com/OpenMW/android-port
+IssueTracker: https://github.com/OpenMW/android-port/issues
+
+Summary: A game engine compatible with TES3:Morrowind data files
+Description: |-
+    OpenMW is an open-source, free-software game engine that reimplements the one powering Bethesda Softworks' 2002 open-world role-playing game Morrowind.
+
+    This is an OpenMW port for Android, adapted to be played with touchscreen or remote controller. To play it, you need to use your own, legally acquired Morrowind data files.
+
+    Note: This is the "official" version build from the OpenMW Android repo where the releases might follow the main OpenMW release cycle.
+
+RepoType: git
+Repo: https://github.com/OpenMW/android-port.git
+
+Builds:
+  - versionName: 0.46.0
+    versionCode: 8
+    commit: 4552b111043665f5501bcfb0173c0e09bf19447a
+    timeout: 20000
+    sudo:
+      - apt update || apt update
+      - apt install -y cmake doxygen g++ pkgconf wget
+    patch:
+      - build-gradle.patch
+      - androidmanifest.patch
+      - mainactivity.patch
+    gradle:
+      - yes
+    output: app/build/outputs/apk/release/app-release-unsigned.apk
+    prebuild:
+      - sed -i -e '/Unzip/,+5d' buildscripts/include/setup-ndk.sh
+      - sed -i -e 's/\ -Wl,-plugin-opt=-emulated-tls//' -e '/download-ndk/d' -e '/debugging\
+        life/,+19d' buildscripts/build.sh
+      - mkdir -p buildscripts/toolchain/ndk
+      - cp -r $$NDK$$/* buildscripts/toolchain/ndk/
+      - ./buildscripts/build.sh --arch arm --lto
+      - ./buildscripts/build.sh --arch arm64 --lto
+      - ./buildscripts/build.sh --arch x86 --lto
+      - ./buildscripts/build.sh --arch x86_64 --lto
+      - rm -fr ./buildscripts/build/*
+      - rm -fr ./buildscripts/prefix/*
+      - rm -fr ./buildscripts/symbols/*
+      - rm -fr ./buildscripts/toolchain/*
+    scanignore:
+      - app/src/main/assets
+      - app/src/main/jniLibs
+    ndk: r18b
+
+MaintainerNotes: |-
+    - we patch Crashlytics away in build-gradle, androidmanifest and mainactivity
+    - we use prebuild else fdroid scanner will detect the built libs as binaries on the second pass before running build, and we can't scanignore them (at start) since they don't exist yet, see https://gitlab.com/fdroid/fdroidserver/issues/635
+    - we remove the buildtools and intermediary artefacts (several gigabytes) else they'll get pulled in the source tarball
+
+AutoUpdateMode: None
+UpdateCheckMode: None
+CurrentVersion: 0.46.0
+CurrentVersionCode: 8
