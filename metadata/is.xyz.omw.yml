@@ -32,37 +32,8 @@ Builds:
       - sed -i -e '/Unzip/,+5d' buildscripts/include/setup-ndk.sh
       - sed -i -e 's/\ -Wl,-plugin-opt=-emulated-tls//' -e '/download-ndk/d' -e '/debugging\
         life/,+19d' buildscripts/build.sh
-      - mkdir -p buildscripts/toolchain/ndk
-      - cp -r $$NDK$$/* buildscripts/toolchain/ndk/
-      - ./buildscripts/build.sh --arch arm --lto
-      - ./buildscripts/build.sh --arch arm64 --lto --no-resources
-      - ./buildscripts/build.sh --arch x86 --lto --no-resources
-      - ./buildscripts/build.sh --arch x86_64 --lto --no-resources
-      - rm -fr ./buildscripts/build/*
-      - rm -fr ./buildscripts/prefix/*
-      - rm -fr ./buildscripts/symbols/*
-      - rm -fr ./buildscripts/toolchain/*
-    scanignore:
-      - app/src/main/assets
-      - app/src/main/jniLibs
-    ndk: r18b
-
-  - versionName: 0.46.0-18-nightly
-    versionCode: 18
-    commit: 0.46.0-18-nightly
-    timeout: 16000
-    sudo:
-      - apt update || apt update
-      - apt install -y doxygen g++ pkgconf wget
-    gradle:
-      - yes
-    output: app/build/outputs/apk/release/omw_release_*.apk
-    prebuild:
-      - sed -i -e '/Unzip/,+5d' buildscripts/include/setup-ndk.sh
-      - sed -i -e 's/\ -Wl,-plugin-opt=-emulated-tls//' -e '/download-ndk/d' -e '/debugging\
-        life/,+19d' buildscripts/build.sh
-      - mkdir -p buildscripts/toolchain/ndk
-      - cp -r $$NDK$$/* buildscripts/toolchain/ndk/
+      - mkdir -p buildscripts/toolchain
+      - ln -s -T $$NDK$$ buildscripts/toolchain/ndk
       - ./buildscripts/build.sh --arch arm --lto
       - ./buildscripts/build.sh --arch arm64 --lto --no-resources
       - ./buildscripts/build.sh --arch x86 --lto --no-resources
@@ -81,6 +52,6 @@ MaintainerNotes: |-
     - we remove the buildtools and intermediary artefacts (several gigabytes) else they'll get pulled in the source tarball
 
 AutoUpdateMode: Version %v
-UpdateCheckMode: Tags
-CurrentVersion: 0.46.0-18-nightly
-CurrentVersionCode: 18
+UpdateCheckMode: Tags .*[0-9]$
+CurrentVersion: 0.46.0-17
+CurrentVersionCode: 17
