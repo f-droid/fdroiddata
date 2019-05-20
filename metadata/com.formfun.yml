@@ -1,0 +1,55 @@
+Categories:
+  - Games
+License: MIT
+SourceCode: https://github.com/Rohithkvsp/Form-N-Fun
+IssueTracker: https://github.com/Rohithkvsp/Form-N-Fun/issues
+
+AutoName: Form-N-Fun
+Summary: Draw a custom maze on paper and play it on your device using the accelerometer
+Description: |-
+    Form ‘N’ Fun is an android maze game based on real time computer vision.
+    The user draws a custom maze on a white piece of paper and the device
+    camera creates graphics according to the geometric shape and ball allowing
+    the user to play using the accelerometer. The app uses contours algorithms
+    in OpenCV to detect maze that is drawn on the paper and JBox2d engine for
+    simulating the rigid bodies.
+
+    In order to use Form-N-Fun, you also need to install the OpenCV Manager application.
+
+RepoType: git
+Repo: https://github.com/Rohithkvsp/Form-N-Fun.git
+
+Builds:
+  - versionName: '1.0'
+    versionCode: 1
+    commit: v1.1
+    subdir: app/
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install ninja-build
+    gradle:
+      - yes
+    srclibs:
+      - opencv@4.1.0
+    rm:
+      - opencv-java/build/
+      - app/libs/jbox2d-library-2.2.1-ds.jar
+    prebuild:
+      - mkdir $$opencv$$/platforms/android/build/
+      - echo 'buildscript { repositories { google() } }' >> ../build.gradle
+      - sed -i -e 's#/Users/rohithkvsp/Documents/Android/openCV-android-sdk-4.1.0#$$opencv$$/platforms/android/build/OpenCV-android-sdk/#'
+        src/main/jni/Android.mk
+      - sed -i -e "s#files('libs/jbox2d-library-2.2.1-ds.jar')#'org.jbox2d:jbox2d-library:2.2.1.1'#"
+        build.gradle
+    scandelete:
+      - app/src/main/jniLibs/
+    build:
+      - pushd $$opencv$$/platforms/android/build/
+      - python ../build_sdk.py --ndk_path $$NDK$$ --sdk_path $$SDK$$
+      - popd
+    ndk: r16b
+
+AutoUpdateMode: Version v%v
+UpdateCheckMode: Tags
+CurrentVersion: '1.0'
+CurrentVersionCode: 1
