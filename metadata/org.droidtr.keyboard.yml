@@ -88,10 +88,16 @@ Builds:
 
   - versionName: '6.7'
     versionCode: 44
-    commit: '6.7'
-    subdir: app
-    gradle:
-      - yes
+    commit: 9463550afb16e0dc8cea49fd9763faf87d1b25fa
+    output: bin/app.apk
+    rm:
+      - bin
+    prebuild:
+      - sed -i -e 's|~/Android/Sdk|$$SDK$$|' -e 's/ sign//' Makefile
+      - android update sdk --no-ui --filter android-28
+    build:
+      - JAVA_HOME=$(file /etc/alternatives/javac | cut -d " " -f 5|cut -d "/" -f 1-5) make
+      - mv bin/app.ap_ bin/app.apk
 
 AutoUpdateMode: Version %v
 UpdateCheckMode: Tags
