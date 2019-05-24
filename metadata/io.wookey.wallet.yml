@@ -1,0 +1,62 @@
+Categories:
+  - Money
+License: MIT
+WebSite: https://wallet.wookey.io
+SourceCode: https://github.com/WooKeyWallet/wookey-wallet-android-app
+IssueTracker: https://github.com/WooKeyWallet/wookey-wallet-android-app/releases
+
+Name: Wookey Wallet
+Description: |4-
+
+    为隐私而生
+    保护个人隐私，支持匿名币种，代码完全开源，注重用户体验
+
+    For Privacy
+    Less Privacy Collection; More Privacy Coins; Fully Open Source; Better User Experience
+
+RepoType: git
+Repo: https://github.com/WooKeyWallet/wookey-wallet-android-app
+
+Builds:
+  - versionName: 1.0.3
+    versionCode: 103
+    commit: v1.0.3
+    subdir: app
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y build-essential tofrodos wget
+    gradle:
+      - yes
+    build:
+      - cd ..
+      - export ROOT_PATH=`pwd`
+      - git clone https://github.com/WooKeyWallet/monero-android-lib.git /tmp/monero-android-lib
+        || echo "exists"
+      - cd /tmp/monero-android-lib/
+      - git reset --hard
+      - cd external-libs
+      - find . -name "*.sh" -exec chmod +x {} \;
+      - mkdir -p build/src
+      - ANDROID_NDK_ROOT=$$NDK$$ make all
+      - cd $ROOT_PATH
+      - mkdir -p monero-libs/{monero,boost,openssl,libsodium}/lib/{arm64-v8a,armeabi-v7a}
+      - cp -a /tmp/monero-android-lib/external-libs/build/build/monero/arm/lib/* monero-libs/monero/lib/armeabi-v7a/
+      - cp -a /tmp/monero-android-lib/external-libs/build/build/monero/arm64/lib/*
+        monero-libs/monero/lib/arm64-v8a/
+      - cp -a /tmp/monero-android-lib/external-libs/build/build/boost/arm/lib/* monero-libs/boost/lib/armeabi-v7a/
+      - cp -a /tmp/monero-android-lib/external-libs/build/build/boost/arm64/lib/*
+        monero-libs/boost/lib/arm64-v8a/
+      - cp -a /tmp/monero-android-lib/external-libs/build/build/openssl/arm/lib/*
+        monero-libs/openssl/lib/armeabi-v7a/
+      - cp -a /tmp/monero-android-lib/external-libs/build/build/openssl/arm64/lib/*
+        monero-libs/openssl/lib/arm64-v8a/
+      - cp -a /tmp/monero-android-lib/external-libs/build/build/libsodium/arm/lib/*
+        monero-libs/libsodium/lib/armeabi-v7a/
+      - cp -a /tmp/monero-android-lib/external-libs/build/build/libsodium/arm64/lib/*
+        monero-libs/libsodium/lib/arm64-v8a/
+    ndk: r17c
+
+AutoUpdateMode: None
+UpdateCheckMode: Static
+CurrentVersion: v1.0.3
+CurrentVersionCode: 103
