@@ -1,0 +1,58 @@
+diff --git a/libs/CMakeLists.txt b/libs/CMakeLists.txt
+--- a/libs/CMakeLists.txt
++++ b/libs/CMakeLists.txt
+@@ -342,6 +342,7 @@ ExternalProject_Add(qt
+ 			${PATCH_CMD} -p1 ${PATCH_OPTIONS} ${PATCHES_DIR}/qt-Use-user-provided-session-data-if-available.patch &&
+ 			${PATCH_CMD} -p1 ${PATCH_OPTIONS} ${PATCHES_DIR}/qt-Work-Around-FreeBSD-v12-build.patch &&
+ 			${PATCH_CMD} -p1 ${PATCH_OPTIONS} ${PATCHES_DIR}/qt-Linux-Remove-our-use-of-syscall-for-statx-2-and-rena.patch &&
++			${PATCH_CMD} -p1 ${PATCH_OPTIONS} ${PATCHES_DIR}/qt-Re-disable-statx-on-Android.patch &&
+ 			${CMAKE_COMMAND} -E touch qtbase/.gitignore
+ 	CONFIGURE_COMMAND ${QT_ENV} ${QT_CONFIGURE} ${QT_CONFIGURE_FLAGS} ${QT_CONFIGURE_FLAGS_SKIP_MODULES}
+ 	BUILD_COMMAND ${MAKE} ${MAKE_JOBS}
+diff --git a/patches/qt-Re-disable-statx-on-Android.patch b/patches/qt-Re-disable-statx-on-Android.patch
+new file mode 100644
+--- /dev/null
++++ b/patches/qt-Re-disable-statx-on-Android.patch
+@@ -0,0 +1,42 @@
++From 7f60940fbedef17984e283da41eae94f29fef428 Mon Sep 17 00:00:00 2001
++From: Thiago Macieira <thiago.macieira@intel.com>
++Date: Wed, 17 Oct 2018 07:59:25 -0700
++Subject: [PATCH] Re-disable statx() on Android
++
++Commit b7887f9b4faad2227691a2af589e9d7680d6ae08 removed this explicit
++disabling because it shouldn't be needed anymore. Turns out it was, as
++new Android SDK do include modern Linux headers and those define the
++structs and constants needed for statx().
++
++Repeat of 8eb3944dac81b8c51d7bac7784204d457551b50c.
++
++Task-number: QTBUG-64490
++Fixes: QTBUG-71200
++Change-Id: If7e743cf8476463880ccfffd155e6d5c2b5a3da9
++Reviewed-by: Simon Hausmann <simon.hausmann@qt.io>
++Reviewed-by: BogDan Vatra <bogdan@kdab.com>
++---
++ src/corelib/io/qfilesystemengine_unix.cpp | 7 +++++++
++ 1 file changed, 7 insertions(+)
++
++diff --git x/qtbase/src/corelib/io/qfilesystemengine_unix.cpp y/qtbase/src/corelib/io/qfilesystemengine_unix.cpp
++index 40e8f82a80..964dcebeb2 100644
++--- x/qtbase/src/corelib/io/qfilesystemengine_unix.cpp
+++++ y/qtbase/src/corelib/io/qfilesystemengine_unix.cpp
++@@ -97,6 +97,13 @@ extern "C" NSString *NSTemporaryDirectory();
++ #endif
++ #endif
++ 
+++#if defined(Q_OS_ANDROID)
+++// statx() is disabled on Android because quite a few systems
+++// come with sandboxes that kill applications that make system calls outside a
+++// whitelist and several Android vendors can't be bothered to update the list.
+++#  undef STATX_BASIC_STATS
+++#endif
+++
++ #ifndef STATX_ALL
++ struct statx { mode_t stx_mode; };      // dummy
++ #endif
++-- 
++2.21.0
++
