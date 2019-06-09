@@ -21,14 +21,16 @@ Builds:
   - versionName: '1.1'
     versionCode: 1
     commit: '1.1'
-    output: bin/app.ap_
+    output: bin/app.apk
     prebuild:
-      - mkdir assets/
       - sed -i -e 's#~/Android/Sdk#$$SDK$$#' Makefile
+      - sed -i -e 's/package="org.droidtr.termbin"/package="org.droidtr.termbin" android:versionCode="$$VERCODE$$"
+        android:versionName="$$VERSION$$"/' AndroidManifest.xml
       - make clear
     build:
       - export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64/
       - make build zipalign
+      - mv bin/app.ap_ bin/app.apk
 
 AutoUpdateMode: Version %v
 UpdateCheckMode: Tags
