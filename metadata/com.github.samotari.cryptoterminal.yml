@@ -1,0 +1,73 @@
+Categories:
+  - Internet
+  - Money
+License: AGPL-3.0-or-later
+WebSite: https://cryptoterminal.eu/
+SourceCode: https://github.com/samotari/crypto-terminal
+IssueTracker: https://github.com/samotari/crypto-terminal/issues
+Changelog: https://github.com/samotari/crypto-terminal/blob/HEAD/CHANGELOG.md
+
+AutoName: CryptoTerminal
+Summary: Secure Point of Sale cryptocurrency payment terminal
+Description: |-
+    CryptoTerminal is an open-source payment terminal app with which businesses
+    can accept in-person cryptocurrency payments. The app currently supports
+    the following payment options: Bitcoin, Litecoin, Monero, and Lightning
+    Network (Bitcoin).
+
+    '''Business-Focused'''
+
+    In-person payments are often neglected by app designers in the
+    cryptocurrency space. That's why we have decided to focus on businesses, by
+    developing a payment solution that just works and doesn't bother you or
+    your customers with implementation details. Future releases of this app
+    will include full payment history exports with business accounting in mind,
+    NFC payments, offline payment schemes, and more.
+
+    '''Resolves Common Issues'''
+
+    The app will do its best to smooth over and resolve many of the common
+    gotcha's associated with cryptocurrency payments so that you can focus your
+    attention on running your business. Future releases of this app will
+    include catching low-fee transactions at the time of payment,
+    rebroadcasting transactions that were dropped from the memory pool, and
+    more.
+
+    '''Security and Privacy'''
+
+    You are in complete control of your funds. It is impossible for your funds
+    to be compromised by the app because it does not have access to your
+    private keys. We follow industry best practices to maintain our users'
+    security and privacy, as well as provide explicit guidance wherever it
+    makes sense to do so.
+
+RepoType: git
+Repo: https://github.com/samotari/crypto-terminal
+
+Builds:
+  - versionName: 1.5.0
+    versionCode: 10500
+    commit: fdroid-v1.5.0
+    subdir: platforms/android/app/
+    gradle:
+      - yes
+    srclibs:
+      - BarcodeScanner@2.1.5
+    rm:
+      - platforms/android/app/libs/barcodescanner-release-2.1.5.aar
+    prebuild: sed -i -e "s/gradleVersion = '4.1.0'/gradleVersion = '4.1'/" build.gradle
+    build:
+      - pushd $$BarcodeScanner$$
+      - rm local.properties
+      - gradle clean assembleRelease
+      - popd
+      - cp $$BarcodeScanner$$/barcodescanner/build/outputs/aar/barcodescanner-release.aar
+        libs/barcodescanner-release-2.1.5.aar
+
+MaintainerNotes: We have to fix the Gradle version because 4.1.0 does not really exist
+    (see https://gitlab.com/fdroid/fdroidserver/issues/608).
+
+AutoUpdateMode: Version fdroid-v%v
+UpdateCheckMode: Tags
+CurrentVersion: 1.5.0
+CurrentVersionCode: 10500
