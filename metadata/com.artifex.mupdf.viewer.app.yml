@@ -1,0 +1,122 @@
+Categories:
+  - Reading
+License: AGPL-3.0-or-later
+WebSite: https://mupdf.com
+SourceCode: https://git.ghostscript.com/?p=mupdf-android-viewer.git;a=summary
+IssueTracker: https://bugs.ghostscript.com
+Changelog: https://git.ghostscript.com/?p=mupdf.git;a=blob_plain;f=CHANGES;hb=HEAD
+
+AutoName: MuPDF viewer
+Summary: Lightweight document viewer
+Description: |-
+    MuPDF supports PDF 1.7 with transparency, encryption, hyperlinks, annotations,
+    searching, form editing and more. It also reads OpenXPS and CBZ (comic book)
+    documents.
+
+RepoType: git
+Repo: git://git.ghostscript.com/mupdf-android-viewer.git
+
+Builds:
+  - versionName: 1.12.0
+    versionCode: 20
+    commit: 1.12.0
+    subdir: app
+    submodules: true
+    gradle:
+      - yes
+    prebuild:
+      - sed -i -e '/maven.ghostscript.com/d' ../build.gradle
+      - sed -i -e 's/enable true/enable false/' build.gradle
+      - sed -i -e "s/'-j4'/'-j`nproc`'/" ../jni/build.gradle
+      - "sed -i -e \"/Uncomment/a\\\t\tndk.abiFilters 'armeabi-v7a', 'arm64-v8a',\
+        \ 'x86'\" ../jni/build.gradle"
+      - make -C ../jni/libmupdf generate
+    scandelete:
+      - jni/libmupdf/thirdparty
+      - jni/libmupdf/build/release/scripts
+    ndk: r16b
+
+  - versionName: 1.13.0
+    versionCode: 30
+    commit: 1.13.0
+    subdir: app
+    submodules: true
+    gradle:
+      - yes
+    prebuild:
+      - sed -i -e '/maven.ghostscript.com/d' ../build.gradle
+      - sed -i -e 's/enable true/enable false/' build.gradle
+      - sed -i -e "s/'-j4'/'-j`nproc`'/" ../jni/build.gradle
+      - "sed -i -e \"/Uncomment/a\\\t\tndk.abiFilters 'armeabi-v7a', 'arm64-v8a',\
+        \ 'x86'\" ../jni/build.gradle"
+      - make -C ../jni/libmupdf generate
+    scandelete:
+      - jni/libmupdf/thirdparty
+      - jni/libmupdf/build/release/scripts
+    ndk: r16b
+
+  - versionName: 1.14.0
+    versionCode: 40
+    commit: 1.14.0
+    subdir: app
+    submodules: true
+    gradle:
+      - yes
+    prebuild:
+      - sed -i -e '/maven.ghostscript.com/d; /url MAVEN_REPO/d' ../build.gradle
+      - sed -i -e 's/enable true/enable false/' build.gradle
+      - sed -i -e "s/'-j4'/'-j`nproc`'/" ../jni/build.gradle
+      - echo 'ABI_FILTERS=armeabi-v7a,arm64-v8a,x86' >> ../gradle.properties
+    scandelete:
+      - jni/libmupdf/thirdparty
+    build: make -C ../jni/libmupdf generate
+    ndk: r18b
+
+  - versionName: 1.15.0
+    versionCode: 50
+    commit: 1.15.0
+    subdir: app
+    submodules: true
+    gradle:
+      - yes
+    prebuild:
+      - sed -i -e '/maven.ghostscript.com/d; /url MAVEN_REPO/d' ../build.gradle
+      - sed -i -e 's/enable true/enable false/' build.gradle
+      - sed -i -e "s/'-j4'/'-j`nproc`'/" ../jni/build.gradle
+      - echo 'ABI_FILTERS=armeabi-v7a,arm64-v8a,x86' >> ../gradle.properties
+    scandelete:
+      - jni/libmupdf/thirdparty
+    build: make -C ../jni/libmupdf generate
+    ndk: r18b
+
+  - versionName: 1.15.1
+    versionCode: 60
+    commit: 1.15.1
+    subdir: app
+    submodules: true
+    gradle:
+      - yes
+    prebuild:
+      - sed -i -e '/maven.ghostscript.com/d; /url MAVEN_REPO/d' ../build.gradle
+      - sed -i -e 's/enable true/enable false/' build.gradle
+      - sed -i -e "s/'-j4'/'-j`nproc`'/" ../jni/build.gradle
+      - echo 'ABI_FILTERS=armeabi-v7a,arm64-v8a,x86' >> ../gradle.properties
+    scandelete:
+      - jni/libmupdf/thirdparty
+    build: make -C ../jni/libmupdf generate
+    ndk: r18b
+
+MaintainerNotes: |-
+    Upstream builds separate APKs for all target architectures supported by NDK
+    (5 as of r18). We build a universal APK with armeabi-v7a, arm64-v8a and x86
+    support only.
+
+    Documents:
+    * https://www.mupdf.com/docs/how-to-build-mupdf-for-android
+    * https://mupdf.com/downloads/
+    * https://twiki.ghostscript.com/do/view/MuPDF/AndroidReleases
+
+AutoUpdateMode: Version %v
+UpdateCheckMode: Tags
+CurrentVersion: 1.15.1
+CurrentVersionCode: 60
