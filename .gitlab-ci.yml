@@ -17,7 +17,7 @@ lint:
            appid=`echo $f | sed -n -e 's,^metadata/\([^/][^/]*\)\.txt,\1,p'
                                    -e 's,^metadata/\([^/][^/]*\)\.yml,\1,p'`;
            export CHANGED="$CHANGED $appid";
-           grep -q "^Repo *Type\W *git$" $f && git -C build clone `sed -n "s,^Repo *:,,p" $f` $appid;
+           grep -q "^Repo *Type\W *git$" $f && tail -1 $f | grep -qv '^NoSourceSince' && git -C build clone `sed -n "s,^Repo *:,,p" $f` $appid;
         done;
         ./tools/audit-gradle.py $CHANGED;
       fi
