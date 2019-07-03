@@ -1,0 +1,33 @@
+AntiFeatures:
+  - NonFreeNet
+Categories:
+  - Internet
+  - Reading
+License: AGPL-3.0-or-later
+SourceCode: https://github.com/woffs/tazapp-android
+
+RepoType: git
+Repo: https://github.com/woffs/tazapp-android
+
+Builds:
+  - versionName: 3.10.3.0+fdroid+universal
+    versionCode: 3100300
+    commit: fdroid-3.10.3.0
+    subdir: tazapp
+    gradle:
+      - lmd
+    output: ./build/outputs/apk/lmd/release/tazapp-lmd-universal-release-unsigned.apk
+    srclibs:
+      - MuPDF@1.10-114-g9d96d035
+    build:
+      - find $$MuPDF$$ -type f -name \*.[ch] | xargs perl -i -pe 's/com.artifex.mupdf(?!demo)/$&demo/g'
+      - perl -i -pe 's,^/\* (#define TOFU(?:_CJK)?) .*,$1,' $$MuPDF$$/include/mupdf/fitz/config.h
+      - make -j`nproc` -C $$MuPDF$$ generate
+      - $$NDK$$/ndk-build -j`nproc` -C $$MuPDF$$/platform/android/viewer/ APP_PLATFORM=android-16
+        APP_ABI="arm64-v8a armeabi-v7a x86 x86_64" APP_OPTIM=release
+      - mv $$MuPDF$$/platform/android/viewer/libs src/main/jniLibs
+
+AutoUpdateMode: None
+UpdateCheckMode: Tags
+CurrentVersion: 3.10.3.0+fdroid+universal
+CurrentVersionCode: 3100300
