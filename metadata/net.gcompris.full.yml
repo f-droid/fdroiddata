@@ -1,0 +1,77 @@
+Categories:
+  - Science & Education
+  - Games
+License: GPL-3.0-or-later
+WebSite: http://www.gcompris.net/
+SourceCode: https://github.com/GCompris/GCompris-qt
+IssueTracker: https://github.com/GCompris/GCompris-qt/issues
+
+AutoName: GCompris
+Summary: GCompris education suite
+Description: |-
+    GCompris is a high quality educational software suite, including a large number
+    of activities for children aged 2 to 10. Some of the activities are game
+    orientated, but nonetheless still educational.
+
+RepoType: git
+Repo: https://github.com/GCompris/GCompris-qt
+
+Builds:
+  - versionName: '0.96'
+    versionCode: 9600
+    commit: V0.96
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install --yes extra-cmake-modules libncurses5
+    output: android-build/android/bin/GCompris-Android-release-armeabi-v7a-dl-$$VERSION$$.apk
+    prebuild: mkdir qt/ android-build/
+    scandelete:
+      - installer/
+    build:
+      - export ANDROID_NDK=$$NDK$$
+      - export ANDROID_NDK_ROOT=$$NDK$$
+      - export ANDROID_SDK_ROOT=$$SDK$$
+      - pushd qt/
+      - for ms in qttranslations:e08e6b4db93a7b761d64d5bedbeaaf7c4c9e9f0b qttools:1afbf2026f8db7a55c5dca857c50469fdd24ca77
+        qtsvg:d1287d3523773a4daf9c7af5c0c1137708614a68 qtquickcontrols2:445b1fb541479c6ad0fca349e8629549b7679ca5
+        qtmultimedia:304cd3dcb3ac4cb00adf3a0e2a0c903d9eec0a69 qtimageformats:06ef7ff597d6b429fae3074e137e9a2ada779988
+        qtdeclarative:857fd00eb5be840fa89632c9d45d3ed49fa089a4 qtbase:0a8186830b6a70e8962a6f1d9c632a4265af05a2
+        qtgraphicaleffects:9cf881e586070dd6e8becbf34c37aa4af59fdb85 qtquickcontrols:1fabf5cdc24669b2e1298329bcb0a9108963735f
+        qtsensors:3b3d8b58c19c0b23668edd1f22913850a400e9a6 qtxmlpatterns:ef88f18b5d11577cea13d298797f0de82ab99b29
+        qtandroidextras:bca23aacc75ae5e509463152cd5c7722c0eae9f0; do m=${ms%:*}; s=${ms#*:};
+        fn=5.9.7-0-201810181505${m}-Linux-RHEL_7_4-GCC-Android-Android_ANY-ARMv7.7z;
+        wget -q https://download.qt.io/online/qtsdkrepository/linux_x64/android/qt5_597/qt.qt5.597.android_armv7/$fn;
+        echo "$s  $fn" | sha1sum -c
+      - 7zr x $fn; done
+      - export CMAKE_LIB=$(pwd)/5.9.7/android_armv7/lib/cmake/
+      - export QTPREFIX=$(pwd)/5.9.7/android_armv7
+      - popd
+      - sed -i '/set(QT_REQUIRED_VERSION 5.12.0)/d' ./CMakeLists.txt
+      - sed -i '/android-extra-plugins/d' ./android/configAndroid.json.cmake
+      - sed -i 's/gcompris",/gcompris"/g' ./android/configAndroid.json.cmake
+      - sed -i '/QT_LICHECK/d' $QTPREFIX/mkspecs/qconfig.pri
+      - sed -i 's/Enterprise/OpenSource/g' $QTPREFIX/mkspecs/qconfig.pri
+      - echo "[Paths]" > $QTPREFIX/bin/qt.conf
+      - echo "Prefix = $QTPREFIX" >> $QTPREFIX/bin/qt.conf
+      - pushd android-build/
+      - cmake -DCMAKE_TOOLCHAIN_FILE=/usr/share/ECM/toolchain/Android.cmake -DQt5_DIR=$CMAKE_LIB/Qt5/
+        -DQt5Core_DIR=$CMAKE_LIB/Qt5Core/ -DQt5Widgets_DIR=$CMAKE_LIB/Qt5Widgets -DQt5Qml_DIR=$CMAKE_LIB/Qt5Qml
+        -DQt5Gui_DIR=$CMAKE_LIB/Qt5Gui -DQt5Svg_DIR=$CMAKE_LIB/Qt5Svg -DQt5Sensors_DIR=$CMAKE_LIB/Qt5Sensors
+        -DQt5AndroidExtras_DIR=$CMAKE_LIB/Qt5AndroidExtras -DQt5Xml_DIR=$CMAKE_LIB/Qt5Xml
+        -DQt5LinguistTools_DIR=$CMAKE_LIB/Qt5LinguistTools -DQt5XmlPatterns_DIR=$CMAKE_LIB/Qt5XmlPatterns
+        -DQt5Quick_DIR=$CMAKE_LIB/Qt5Quick -DQt5Multimedia_DIR=$CMAKE_LIB/Qt5Multimedia
+        -DQt5Network_DIR=$CMAKE_LIB/Qt5Network -DACTIVATION_MODE=no -Wno-dev -DCMAKE_ANDROID_API=16
+        -DCMAKE_ANDROID_NDK_TOOLCHAIN_VERSION=4.9 -DCMAKE_ANDROID_STL_TYPE=gnustl_shared
+        ../
+      - make getSvnTranslations
+      - rm -f ../po/gcompris_ast.po ../po/gcompris_ca@valencia.po
+      - cmake -DCMAKE_TOOLCHAIN_FILE=/usr/share/ECM/toolchain/Android.cmake ../
+      - make
+      - make apk_release
+    ndk: r12b
+
+AutoUpdateMode: None
+UpdateCheckMode: Tags
+CurrentVersion: '0.96'
+CurrentVersionCode: 9600
