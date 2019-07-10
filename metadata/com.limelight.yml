@@ -1,0 +1,147 @@
+AntiFeatures:
+  - NonFreeNet
+Categories:
+  - Games
+License: GPL-3.0-or-later
+AuthorName: Cameron Gutman
+AuthorEmail: android-help@moonlight-stream.org
+WebSite: https://moonlight-stream.org
+SourceCode: https://github.com/moonlight-stream/moonlight-android
+IssueTracker: https://github.com/moonlight-stream/moonlight-android/issues
+Changelog: https://github.com/moonlight-stream/moonlight-android/releases
+
+AutoName: Moonlight Game Streaming
+Summary: Play games from your PC on your phone (NVIDIA-only)
+Description: |-
+    This app streams games, programs, or your full desktop from an NVIDIA GameStream-compatible PC on your local network or the Internet using NVIDIA GeForce Experience. Mouse, keyboard, and controller input is sent from your Android device to the PC.
+
+    Streaming performance may vary based on your client device and network setup. HDR requires an HDR10-capable device, GTX 1000-series GPU, and HDR10-enabled game.
+
+    <b>Features</b>
+    &bull; Open-source and completely free (no ads, IAPs, or "Pro")
+    &bull; Streams games purchased from any store
+    &bull; Works on your home network or over the Internet/LTE
+    &bull; Up to 4K 120 FPS HDR streaming with 5.1 surround sound
+    &bull; Keyboard and mouse support (with Android 8.0 or rooted device)
+    &bull; Supports PS3, PS4, Xbox 360, Xbox One, and Android gamepads
+    &bull; Force feedback support
+    &bull; Local co-op with up to 4 connected controllers
+    &bull; Mouse control via gamepad by long-pressing Start
+
+    <b>PC Requirements</b>
+    &bull; NVIDIA GeForce GTX/RTX series GPU (<i>GT-series and AMD GPUs aren't supported by NVIDIA GameStream</i>)
+    &bull; NVIDIA GeForce Experience (GFE) 2.2.2 or later
+
+    <b>Quick Setup Instructions</b>
+    &bull; Make sure GeForce Experience is open on your PC. Turn on GameStream in the SHIELD settings page.
+    &bull; Tap on the PC in Moonlight and type the PIN on your PC
+    &bull; Start streaming!
+
+    To have a good experience, you need a mid to high-end wireless router with a good wireless connection to your Android device (5 GHz highly recommended) and a good connection from your PC to your router (Ethernet highly recommended).
+
+    <b>Detailed Setup Instructions</b>
+    See the full setup guide https://bit.ly/1skHFjN for:
+    &bull; Adding a PC manually (if your PC is not detected)
+    &bull; Streaming over the Internet or LTE
+    &bull; Using a controller connected directly to your PC
+    &bull; Streaming your full desktop
+    &bull; Adding custom apps to stream
+
+    <b>Troubleshooting</b>
+    A detailed troubleshooting guide is available here: https://bit.ly/1TO2NLq
+    If you still can't solve your issue or just have a question, feel free to send me an email using the address at the bottom of the app listing page.
+
+    Disclaimer: This app is not affiliated with NVIDIA Corporation. Please do not contact them for support. Instead, use the troubleshooting link at the bottom of the app description.
+
+    For more details on Moonlight, check out the wiki here: https://bit.ly/1X6fySw
+    To report issues on our GitHub project, use the bug tracker here: https://bit.ly/1Udghu0
+
+    This app is open-source under the GPL. The code can be found here: https://github.com/moonlight-stream/moonlight-android
+
+    Legal: All trademarks cited here are the property of their respective owners.
+
+RepoType: git
+Repo: https://github.com/moonlight-stream/moonlight-android
+
+Builds:
+  - versionName: '7.4'
+    versionCode: 195
+    commit: v7.4
+    subdir: app
+    submodules: true
+    gradle:
+      - nonRoot
+    srclibs:
+      - OpenSSL@OpenSSL_1_1_1c
+      - opus@v1.3
+    rm:
+      - moonlight-common/src/main/jni/moonlight-core/openssl/include
+      - moonlight-common/src/main/jni/moonlight-core/libopus/include
+    prebuild: sed -i 's/applicationIdSuffix/\/\/applicationIdSuffix/g' build.gradle
+    scandelete:
+      - moonlight-common/src/main/jni/moonlight-core/openssl
+      - moonlight-common/src/main/jni/moonlight-core/libopus
+    build:
+      - lib="$PWD/../moonlight-common/src/main/jni/moonlight-core"
+      - PATH=$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
+      - pushd $$opus$$
+      - ./autogen.sh
+      - CC=armv7a-linux-androideabi16-clang ./configure --host=arm-linux-androideabi
+        --with-pic --disable-extra-programs --disable-doc
+      - make -j16
+      - cp .libs/libopus.a ${lib}/libopus/armeabi-v7a/
+      - make distclean
+      - CC=aarch64-linux-android21-clang ./configure --host=aarch64-linux-android
+        --with-pic --disable-extra-programs --disable-doc
+      - make -j16
+      - cp .libs/libopus.a ${lib}/libopus/arm64-v8a/
+      - make distclean
+      - CC=i686-linux-android16-clang ./configure --host=i686-linux-android --with-pic
+        --disable-extra-programs --disable-doc
+      - make -j16
+      - cp .libs/libopus.a ${lib}/libopus/x86/
+      - make distclean
+      - CC=x86_64-linux-android21-clang ./configure --host=x86_64-linux-android --with-pic
+        --disable-extra-programs --disable-doc
+      - make -j16
+      - cp .libs/libopus.a ${lib}/libopus/x86_64/
+      - cp -R include/ ${lib}/libopus/
+      - make distclean
+      - popd
+      - pushd $$OpenSSL$$
+      - CC=armv7a-linux-androideabi16-clang ./Configure android-arm no-shared no-ssl3
+        no-engine no-dso no-asm no-hw no-comp no-stdio -fPIC -DOPENSSL_PIC -D__ANDROID_API__=16
+        -ffast-math -O3 -funroll-loops
+      - make -j16
+      - cp libcrypto.a ${lib}/openssl/armeabi-v7a/
+      - cp libssl.a ${lib}/openssl/armeabi-v7a/
+      - make distclean
+      - CC=aarch64-linux-android21-clang ./Configure android-arm64 no-shared no-ssl3
+        no-engine no-dso no-asm no-hw no-comp no-stdio -fPIC -DOPENSSL_PIC -D__ANDROID_API__=21
+        -ffast-math -O3 -funroll-loops
+      - make -j16
+      - cp libcrypto.a ${lib}/openssl/arm64-v8a/
+      - cp libssl.a ${lib}/openssl/arm64-v8a/
+      - make distclean
+      - CC=i686-linux-android16-clang ./Configure android-x86 no-shared no-ssl3 no-engine
+        no-dso no-asm no-hw no-comp no-stdio -fPIC -DOPENSSL_PIC -D__ANDROID_API__=16
+        -ffast-math -O3 -funroll-loops
+      - make -j16
+      - cp libcrypto.a ${lib}/openssl/x86/
+      - cp libssl.a ${lib}/openssl/x86/
+      - make distclean
+      - CC=x86_64-linux-android21-clang ./Configure android-x86_64 no-shared no-ssl3
+        no-engine no-dso no-asm no-hw no-comp no-stdio -fPIC -DOPENSSL_PIC -D__ANDROID_API__=21
+        -ffast-math -O3 -funroll-loops
+      - make -j`nproc`
+      - cp libcrypto.a ${lib}/openssl/x86_64/
+      - cp libssl.a ${lib}/openssl/x86_64/
+      - cp -R include/ ${lib}/openssl/
+      - make distclean
+      - popd
+    ndk: r19c
+
+AutoUpdateMode: Version v%v
+UpdateCheckMode: Tags v\d+\.\d+(\.\d+)?
+CurrentVersion: '7.4'
+CurrentVersionCode: 195
