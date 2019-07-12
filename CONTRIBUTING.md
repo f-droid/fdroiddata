@@ -111,10 +111,10 @@ to appear in our repository.
     at the app in pictures and in their preferred language.
 - You can advertise the download of your app in this app store using the
     [official grafic][get-it-on-fdroid].  
-    <img src="https://f-droid.org/badge/get-it-on.png" height="75">
+    <img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png" height="75">
 
     ```
-    <img src="https://f-droid.org/badge/get-it-on.png" height="75">
+    <img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png" height="75">
     ```
 - You can add a badge of your apps F-Droid version from [shields.io].
     ![](https://img.shields.io/badge/f--droid-v1.0-blue.svg)
