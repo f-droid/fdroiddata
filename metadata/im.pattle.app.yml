@@ -9,7 +9,8 @@ Builds:
     commit: 'v0.10.1'
     output: build/app/outputs/apk/fdroid/release/app-fdroid-release.apk
     srclibs: flutter@stable
-    prebuild: echo 'BUILD_TYPE=fdroid' > .env && echo 'SENTRY_DSN=https://4e306dcaabef4fd99a3e6a024a9747bb@sentry.pattle.im/9' && echo 'android { flavorDimensions "deploy"; productFlavors { fdroid { signingConfig null } }; android.applicationVariants.all { variant -> if (variant.flavorName == "fdroid") { variant.outputs.all { output -> output.outputFileName = "app-fdroid-release.apk" } } } }' >> android/app/build.gradle
+    prebuild: |-
+        echo 'BUILD_TYPE=fdroid' > .env && echo 'SENTRY_DSN=https://4e306dcaabef4fd99a3e6a024a9747bb@sentry.pattle.im/9' && echo "version: $$VERSION$$+$$VERCODE$$" >> pubspec.yaml && export PATH="$$flutter$$/bin:$PATH" && echo 'android { flavorDimensions "deploy"; productFlavors { fdroid { signingConfig null } }; android.applicationVariants.all { variant -> if (variant.flavorName == "fdroid") { variant.outputs.all { output -> output.outputFileName = "app-fdroid-release.apk" } } } }' >> android/app/build.gradle
     build: flutter build apk --flavor fdroid -v
 
 
