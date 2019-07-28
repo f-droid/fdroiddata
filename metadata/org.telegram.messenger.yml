@@ -734,6 +734,34 @@ Builds:
       - popd
     ndk: r19c
 
+  - versionName: 5.9.0
+    versionCode: 16480
+    commit: v5.9.0
+    subdir: TMessagesProj
+    submodules: true
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y ninja-build golang-go
+    gradle:
+      - afat
+    rm:
+      - TMessagesProj/jni/libwebp/swig/libwebp.jar
+      - TMessagesProj/jni/ffmpeg/tests/ref/fate/sub-microdvd-remux
+    prebuild: echo -e 'APP_ID = 12834\nAPP_HASH = c84d9229db1d6be95c067b02b126352c'
+        > API_KEYS
+    scandelete:
+      - TMessagesProj/jni
+    build:
+      - export NDK=$$NDK$$
+      - export NINJA_PATH=/usr/bin/ninja
+      - pushd jni
+      - ./build_ffmpeg_clang.sh
+      - ./patch_ffmpeg.sh
+      - ./patch_boringssl.sh
+      - ./build_boringssl.sh
+      - popd
+    ndk: r19c
+
 MaintainerNotes: |-
     Summary and Description have been moved to the new localizable text files:
     https://f-droid.org/docs/All_About_Descriptions_Graphics_and_Screenshots
@@ -743,5 +771,5 @@ MaintainerNotes: |-
 
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: 5.7.1
-CurrentVersionCode: 16080
+CurrentVersion: 5.9.0
+CurrentVersionCode: 16480
