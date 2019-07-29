@@ -5,12 +5,11 @@ Author Email:hello@blokada.org
 Web Site:https://blokada.org
 Source Code:https://github.com/blokadaorg/blokada
 Issue Tracker:https://github.com/blokadaorg/blokada/issues
-Changelog:https://blokada.org/api/v3/content/en/changelog.html
+Changelog:https://blokada.org/docs/changelog.html
 Donate:https://blokada.org/docs/donate.html
-LiberapayID:35205
 Bitcoin:16rJ49uNKCohVhHvWNganP6Y48Ba9BTyKd
 
-Name:Blokada v3 (ad blocker)
+Name:Blokada v4 (ad blocker)
 Summary:The ad blocker - battery efficient, fast, powerful and simple to use
 Description:
 Block ads without killing the battery
@@ -140,7 +139,29 @@ Build:3.7.022000,307022000
     subdir=app
     gradle=AdblockerFdroid
 
+Build:4.1.5,401000005
+    commit=4.1.5
+    subdir=app
+    gradle=AdblockerFdroid
+    srclibs=rustup@1.18.3
+    rm=app/src/vpn/jniLibs
+    prebuild=sed -i -e '/set -e/a\source $HOME/.cargo.env' ../boringtun/build.sh
+    build=$$rustup$$/rustup-init.sh -y && \
+        source $HOME/.cargo/env && \
+        rustup default 1.36.0 && \
+        rustup target add armv7-linux-androideabi && \
+        rustup target add aarch64-linux-android && \
+        rustup target add i686-linux-android && \
+        $$NDK$$/build/tools/make_standalone_toolchain.py --api 21 --arch=arm --install-dir=arm && \
+        $$NDK$$/build/tools/make_standalone_toolchain.py --api 21 --arch=arm64 --install-dir=arm64 && \
+        $$NDK$$/build/tools/make_standalone_toolchain.py --api 21 --arch=x86 --install-dir=x86 && \
+        export NDK_STANDALONE=$(realpath .) && \
+        sed -i -e "s|/Users/kar/.NDK|$PWD|" ../boringtun/.cargo/config && \
+        cd ../boringtun/ && \
+        ./build.sh
+    ndk=r18b
+
 Auto Update Mode:Version v%v
 Update Check Mode:Tags
-Current Version:3.7.022000
-Current Version Code:307022000
+Current Version:4.1.5
+Current Version Code:401000005
