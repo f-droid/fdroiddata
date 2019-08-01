@@ -208,7 +208,22 @@ Build:1.9.0,24
     build=ANDROID_SDK_ROOT="$$SDK$$" ANDROID_NDK_ROOT="$$NDK$$" ../build-native.sh -j $(nproc)
     ndk=r18b
 
+Build:1.9.1,25
+    commit=1.9.1
+    subdir=app
+    sudo=apt-get update || apt-get update && \
+        apt-get install -y g++
+    gradle=fdroid
+    srclibs=OpenSSL@OpenSSL_1_1_1a,QtBase@v5.12.0
+    prebuild=sed -i -e '/splits/,+7d' build.gradle && \
+        sed -i -e 's/android:extractNativeLibs=\"false\"/android:extractNativeLibs=\"true\"/' src/main/AndroidManifest.xml && \
+        cp -a $$OpenSSL$$ ../3rdparty/openssl/openssl && \
+        cp -a $$QtBase$$ ../3rdparty/qt/qtbase
+    scandelete=3rdparty
+    build=ANDROID_SDK_ROOT="$$SDK$$" ANDROID_NDK_ROOT="$$NDK$$" ../build-native.sh -j $(nproc)
+    ndk=r18b
+
 Auto Update Mode:Version %v
 Update Check Mode:Tags
-Current Version:1.9.0
-Current Version Code:24
+Current Version:1.9.1
+Current Version Code:25
