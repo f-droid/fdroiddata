@@ -1,0 +1,90 @@
+Categories:
+  - Games
+License: GPL-2.0-or-later
+WebSite: https://wesnoth.org/
+SourceCode: https://sourceforge.net/projects/wesnoth-on-android/files/
+Donate: https://www.alessandropira.org/bfw_android/get.html
+LiberapayID: '1567974'
+
+Summary: A turn-based strategy game with a high fantasy theme
+Description: The Battle for Wesnoth is a turn-based strategy game with a high fantasy
+    theme. It features both singleplayer and online/hotseat multiplayer combat. Explore
+    the world of Wesnoth and take part in its many adventures! Embark on a desperate
+    quest to reclaim your rightful throne... Flee the Lich Lords to a new home across
+    the sea... Delve into the darkest depths of the earth to craft a jewel of fire
+    itself... Defend your kingdom against the ravaging hordes of a foul necromancer...
+    Or lead a straggly band of survivors across the blazing sands to confront an unseen
+    evil.
+
+RepoType: git
+Repo: https://gitlab.com/f-droid-mirrors/empty
+
+Builds:
+  - versionName: 1.14.5-53
+    versionCode: 10
+    commit: v0.0.0
+    timeout: 10800
+    sudo:
+      - apt update || apt update
+      - apt install -y libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev
+        libboost-all-dev libvorbis-dev libcairo2-dev libpango1.0-dev libssl-dev libreadline-dev
+        pkgconf wget
+    init:
+      - LIBSLINK="https://sourceforge.net/projects/wesnoth-on-android/files/1.14.4/Libraries-20180821.tar.gz/download"
+      - BFWLINK="https://sourceforge.net/projects/wesnoth-on-android/files/1.14.5/Wesnoth-1.14.5-20181203.tar.gz/download"
+      - LIBSSHA="ce7927c738fea7adeba58107b8cbc6b4dd20a1c656a1e057ed354bc2323fade1"
+      - BFWSHA="29df6107211abcadd8c32da7c87e448fddb984b947c37b75dc915619750b0c68"
+      - echo "${LIBSSHA} libs.tar.gz" > libschecksum
+      - echo "${BFWSHA} wesnoth.tar.gz" > bfwchecksum
+      - wget -O "libs.tar.gz" "${LIBSLINK}"
+      - sha256sum -c libschecksum
+      - wget -O "wesnoth.tar.gz" "${BFWLINK}"
+      - sha256sum -c bfwchecksum
+      - rm libschecksum bfwchecksum
+      - LIBSDIR="$(tar -tzf libs.tar.gz | head -1 | rev | cut -c 2- | rev)"
+      - BFWDIR="$(tar -tzf wesnoth.tar.gz | head -1 | rev | cut -c 2- | rev)"
+      - tar -xf "libs.tar.gz"
+      - tar -xf "wesnoth.tar.gz"
+      - rm libs.tar.gz wesnoth.tar.gz
+      - mv "$LIBSDIR" libraries
+      - mv "$BFWDIR" wesnoth
+      - find ./ -type f -regextype posix-extended -regex '.+\.(dll|jar|lib|mcp)$'
+        -delete
+      - sed -i wesnoth/build.sh -e 's/cp jni\/prebuilt-armeabi\/lib\*\.so libs\/armeabi\/
+        || exit//'
+      - sed -i wesnoth/build.sh -e 's/ant debug || exit/ant release || exit/'
+      - sed -i wesnoth/AndroidManifest.xml -e 's/android:debuggable="true"//'
+    output: wesnoth/bin/MainActivity-release-unsigned.apk
+    target: android-26
+    scandelete:
+      - wesnoth
+      - libraries
+    build:
+      - cd libraries/jni/openssl/
+      - tar -xvf openssl-1.0.2o.tar.gz
+      - export ANDROID_NDK_ROOT=$$NDK$$
+      - ./build-all-arch.sh
+      - cd ../../
+      - ./build.sh
+      - ./deploy.sh "../wesnoth"
+      - cd "../wesnoth"
+      - ./build.sh
+    ndk: r13b
+
+MaintainerNotes: Source code is located in the "files" section of SF in the form of
+    tarballs. No VCS is used. The actual repo is a placeholder and not required at
+    all (F-Droid buildserver still requires some repo, though). The source code is
+    split into two parts, the library tarball and the game tarball. Each one is downloaded
+    and their checksums are checked. The build process should not change across new
+    versions and the build and init sections can be copied over, with updated links
+    to the library and wesnoth tarballs as well as their checksums (first four lines
+    in init section). The wesnoth tarball contains prebuilt libs, but we're removing
+    them with scandelete and building again from source. The library tarball also
+    contains various binaries, but they are not used in build and can be safely removed.
+    The only prebuilt component in libraries tarball (that's used in building wesnoth)
+    is openssl library, which we're building again.
+
+AutoUpdateMode: None
+UpdateCheckMode: None
+CurrentVersion: 1.14.5-53
+CurrentVersionCode: 10
