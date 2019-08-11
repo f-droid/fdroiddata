@@ -36,7 +36,30 @@ Builds:
       - xvfb-run -a make -C .. mapscreenshotgenerator
       - make -C .. packer
 
+  - versionName: 0.13.0
+    versionCode: 12
+    commit: 0.13.0
+    subdir: android
+    sudo:
+      - apt-get update
+      - apt-get install -y aseprite python3-setuptools python3-pil xvfb xauth imagemagick-6.q16
+    gradle:
+      - yes
+    srclibs:
+      - pafx@269b0241a4b5507a1f45d0aa576fb9f9dad91ad8
+    rm:
+      - tools/packr.jar
+    prebuild: sed -i -e 's#./gradlew#gradle#' ../Makefile
+    scandelete:
+      - android/libs/
+    build:
+      - gradle tools:dist -b ../build.gradle
+      - export PYTHONPATH=../$$pafx$$/build/lib/
+      - xvfb-run -a make -C .. assets
+      - xvfb-run -a make -C .. mapscreenshotgenerator
+      - make -C .. packer
+
 AutoUpdateMode: Version %v
 UpdateCheckMode: Tags
-CurrentVersion: 0.12.0
-CurrentVersionCode: 11
+CurrentVersion: 0.13.0
+CurrentVersionCode: 12
