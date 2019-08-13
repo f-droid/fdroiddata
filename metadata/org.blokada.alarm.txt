@@ -161,7 +161,29 @@ Build:4.1.5,401000005
         ./build.sh
     ndk=r18b
 
+Build:4.1.6,401000006
+    commit=4.1.6
+    subdir=app
+    gradle=AdblockerFdroid
+    srclibs=rustup@1.18.3
+    rm=app/src/vpn/jniLibs
+    prebuild=sed -i -e '/set -e/a\source $HOME/.cargo.env' ../boringtun/build.sh
+    build=$$rustup$$/rustup-init.sh -y && \
+        source $HOME/.cargo/env && \
+        rustup default 1.36.0 && \
+        rustup target add armv7-linux-androideabi && \
+        rustup target add aarch64-linux-android && \
+        rustup target add i686-linux-android && \
+        $$NDK$$/build/tools/make_standalone_toolchain.py --api 21 --arch=arm --install-dir=arm && \
+        $$NDK$$/build/tools/make_standalone_toolchain.py --api 21 --arch=arm64 --install-dir=arm64 && \
+        $$NDK$$/build/tools/make_standalone_toolchain.py --api 21 --arch=x86 --install-dir=x86 && \
+        export NDK_STANDALONE=$(realpath .) && \
+        sed -i -e "s|/Users/kar/.NDK|$PWD|" ../boringtun/.cargo/config && \
+        cd ../boringtun/ && \
+        ./build.sh
+    ndk=r18b
+
 Auto Update Mode:Version v%v
 Update Check Mode:Tags
-Current Version:4.1.5
-Current Version Code:401000005
+Current Version:4.1.6
+Current Version Code:401000006
