@@ -1,0 +1,129 @@
+Categories:
+  - Internet
+License: GPL-3.0-only
+SourceCode: https://github.com/splondike/polipoid
+IssueTracker: https://github.com/splondike/polipoid/issues
+
+AutoName: Polipoid
+Summary: Wrapper for the polipo proxy
+Description: |-
+    A wrapper for the 'polipo' HTTP(S) proxy. Allows for offline browsing via
+    polipo's cache, and should also speed browsing somewhat. Will be automatically
+    switched to offline browsing mode when the network is disconnected.
+
+RepoType: git
+Repo: https://github.com/splondike/polipoid.git
+
+Builds:
+  - versionName: 1.0.1
+    versionCode: 2
+    commit: v1.0.1
+    submodules: true
+    init:
+      - TOOLCHAIN=/tmp/polipoid-toolchain
+      - $$NDK$$/build/tools/make-standalone-toolchain.sh --platform=android-8 --install-dir=$TOOLCHAIN
+      - cd polipo/
+      - PATH=$TOOLCHAIN/bin:$PATH CC=arm-linux-androideabi-gcc EXTRA_DEFINES="-U __linux__"
+        make clean polipo
+      - mv polipo ../assets/
+    maven: 'yes'
+
+  - versionName: 1.1.0
+    versionCode: 3
+    commit: v1.1.0
+    submodules: true
+    maven: 'yes'
+    build:
+      - TOOLCHAIN_8=/tmp/polipoid-toolchain-8
+      - TOOLCHAIN_16=/tmp/polipoid-toolchain-16
+      - $$NDK$$/build/tools/make-standalone-toolchain.sh --platform=android-8 --arch=arm
+        --install-dir=$TOOLCHAIN_8
+      - $$NDK$$/build/tools/make-standalone-toolchain.sh --platform=android-16 --arch=arm
+        --install-dir=$TOOLCHAIN_16
+      - cd polipo/
+      - PATH=$TOOLCHAIN_8/bin:$PATH CC=arm-linux-androideabi-gcc EXTRA_DEFINES="-U
+        __linux__" make clean polipo
+      - mv polipo ../src/main/assets/polipo
+      - PATH=$TOOLCHAIN_16/bin:$PATH CC=arm-linux-androideabi-gcc EXTRA_DEFINES="-fPIE
+        -U __linux__" LDFLAGS="-fPIE -pie" make clean polipo
+      - mv polipo ../src/main/assets/polipo-pie
+
+  - versionName: 1.2.0
+    versionCode: 4
+    commit: v1.2.0
+    submodules: true
+    maven: 'yes'
+    build:
+      - TOOLCHAIN_ARM=/tmp/polipoid-toolchain-arm
+      - TOOLCHAIN_X86=/tmp/polipoid-toolchain-x86
+      - $$NDK$$/build/tools/make-standalone-toolchain.sh --platform=android-9 --arch=arm
+        --install-dir=$TOOLCHAIN_ARM
+      - $$NDK$$/build/tools/make-standalone-toolchain.sh --platform=android-9 --arch=x86
+        --install-dir=$TOOLCHAIN_X86
+      - cd polipo/
+      - PATH=$TOOLCHAIN_ARM/bin:$PATH CC=arm-linux-androideabi-gcc EXTRA_DEFINES="-fvisibility=default
+        -fPIE -U __linux__" LDFLAGS="-rdynamic -fPIE -pie" make clean polipo
+      - mv polipo ../src/main/assets/polipo-arm
+      - PATH=$TOOLCHAIN_X86/bin:$PATH CC=i686-linux-android-gcc EXTRA_DEFINES="-fvisibility=default
+        -fPIE -U __linux__" LDFLAGS="-rdynamic -fPIE -pie" make clean polipo
+      - mv polipo ../src/main/assets/polipo-x86
+      - cd ../src/main/run-pie/
+      - $TOOLCHAIN_ARM/bin/arm-linux-androideabi-gcc -o run_pie-arm run_pie.c
+      - $TOOLCHAIN_X86/bin/i686-linux-android-gcc -o run_pie-x86 run_pie.c
+      - mv run_pie-arm ../assets/run_pie-arm
+      - mv run_pie-x86 ../assets/run_pie-x86
+
+  - versionName: 1.2.1
+    versionCode: 5
+    commit: v1.2.1
+    submodules: true
+    maven: 'yes'
+    build:
+      - TOOLCHAIN_ARM=/tmp/polipoid-toolchain-arm
+      - TOOLCHAIN_X86=/tmp/polipoid-toolchain-x86
+      - $$NDK$$/build/tools/make-standalone-toolchain.sh --platform=android-9 --arch=arm
+        --install-dir=$TOOLCHAIN_ARM
+      - $$NDK$$/build/tools/make-standalone-toolchain.sh --platform=android-9 --arch=x86
+        --install-dir=$TOOLCHAIN_X86
+      - cd polipo/
+      - PATH=$TOOLCHAIN_ARM/bin:$PATH CC=arm-linux-androideabi-gcc EXTRA_DEFINES="-fvisibility=default
+        -fPIE -U __linux__" LDFLAGS="-rdynamic -fPIE -pie" make clean polipo
+      - mv polipo ../src/main/assets/polipo-arm
+      - PATH=$TOOLCHAIN_X86/bin:$PATH CC=i686-linux-android-gcc EXTRA_DEFINES="-fvisibility=default
+        -fPIE -U __linux__" LDFLAGS="-rdynamic -fPIE -pie" make clean polipo
+      - mv polipo ../src/main/assets/polipo-x86
+      - cd ../src/main/run-pie/
+      - $TOOLCHAIN_ARM/bin/arm-linux-androideabi-gcc -o run_pie-arm run_pie.c
+      - $TOOLCHAIN_X86/bin/i686-linux-android-gcc -o run_pie-x86 run_pie.c
+      - mv run_pie-arm ../assets/run_pie-arm
+      - mv run_pie-x86 ../assets/run_pie-x86
+
+  - versionName: 1.2.2
+    versionCode: 6
+    commit: v1.2.2
+    submodules: true
+    maven: 'yes'
+    build:
+      - TOOLCHAIN_ARM=/tmp/polipoid-toolchain-arm
+      - TOOLCHAIN_X86=/tmp/polipoid-toolchain-x86
+      - $$NDK$$/build/tools/make-standalone-toolchain.sh --platform=android-9 --arch=arm
+        --install-dir=$TOOLCHAIN_ARM
+      - $$NDK$$/build/tools/make-standalone-toolchain.sh --platform=android-9 --arch=x86
+        --install-dir=$TOOLCHAIN_X86
+      - cd polipo/
+      - PATH=$TOOLCHAIN_ARM/bin:$PATH CC=arm-linux-androideabi-gcc EXTRA_DEFINES="-fvisibility=default
+        -fPIE -U __linux__" LDFLAGS="-rdynamic -fPIE -pie" make clean polipo
+      - mv polipo ../src/main/assets/polipo-arm
+      - PATH=$TOOLCHAIN_X86/bin:$PATH CC=i686-linux-android-gcc EXTRA_DEFINES="-fvisibility=default
+        -fPIE -U __linux__" LDFLAGS="-rdynamic -fPIE -pie" make clean polipo
+      - mv polipo ../src/main/assets/polipo-x86
+      - cd ../src/main/run-pie/
+      - $TOOLCHAIN_ARM/bin/arm-linux-androideabi-gcc -o run_pie-arm run_pie.c
+      - $TOOLCHAIN_X86/bin/i686-linux-android-gcc -o run_pie-x86 run_pie.c
+      - mv run_pie-arm ../assets/run_pie-arm
+      - mv run_pie-x86 ../assets/run_pie-x86
+
+AutoUpdateMode: None
+UpdateCheckMode: Tags
+CurrentVersion: 1.2.2
+CurrentVersionCode: 6

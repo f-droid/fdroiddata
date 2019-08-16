@@ -1,0 +1,51 @@
+Categories:
+  - Reading
+  - Internet
+License: GPL-3.0-only
+SourceCode: https://github.com/enricocid/xda-feed-reader
+
+AutoName: Xda Feed Reader
+Summary: Feed reader for XDA Developers
+Description: |-
+    [http://www.xda-developers.com/ XDA Developers] is a well-known community for
+    mobile device development and Android hacking.
+
+Builds:
+  - versionName: '2.0'
+    versionCode: 5
+    commit: '2.0'
+    srclibs:
+      - Crouton@1.8.1
+      - 1:FadingActionBar@1c148b91867259ea43e6343d8afb69d106168b46
+      - 2:LazyList@be926df2ec5ff81693251629748ed38655075393
+      - JSoup@jsoup-1.8.1.a
+    extlibs:
+      - android/android-support-v4r11.jar
+    prebuild:
+      - sed -i -e '/Crouton/d' project.properties
+      - $$MVN3$$ install:install-file -DgroupId=com.google.android -DartifactId=support-v4
+        -Dversion=r11 -Dpackaging=jar -Dfile=libs/android-support-v4r11.jar
+      - pushd $$Crouton$$
+      - $$MVN3$$ package
+      - popd
+      - pushd $$JSoup$$
+      - $$MVN3$$ package
+      - popd
+      - cp $$JSoup$$/target/jsoup-1.8.1.jar $$Crouton$$/target/crouton-1.8.1.jar libs/
+      - pushd $$FadingActionBar$$
+      - android update lib-project -t android-21 -p ./
+      - sed -i -e 's/name="library"/name="FadingActionBar"/g' build.xml
+      - echo "android.library=true" >> project.properties
+      - popd
+      - pushd $$LazyList$$
+      - android update lib-project -t android-21 -p ./
+      - echo "android.library=true" >> project.properties
+      - popd
+      - sed -i -e '/reference\.3/d' project.properties
+
+AutoUpdateMode: None
+UpdateCheckMode: None
+CurrentVersion: '2.0'
+CurrentVersionCode: 5
+
+NoSourceSince: '2.1'

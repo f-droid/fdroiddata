@@ -1,0 +1,49 @@
+Categories:
+  - Reading
+License: GPL-3.0-only
+WebSite: http://android.quran.com/
+SourceCode: https://github.com/quran/quran_android
+IssueTracker: https://github.com/quran/quran_android/issues
+
+AutoName: Quran
+Summary: Read the Quran
+Description: |-
+    A simple (madani based) qu'ran app for android. You are prompted to download the
+    data at startup.
+
+    Translation, tafsir and Arabic data come from [http://tanzil.net tanzil] and
+    King Saud University. Audio from Every Ayah. Images from
+    [https://github.com/quran/quran.com-images quran images project].
+
+RepoType: git
+Repo: https://github.com/ahmedre/quran_android.git
+
+Builds:
+  - versionName: 2.3.1
+    versionCode: 231
+    disable: custom licence v2.3.1
+    commit: unknown - see disabled
+    subdir: app
+    srclibs:
+      - ActionBarSherlock@4.1.0
+    prebuild: echo "android.library.reference.1=$$ActionBarSherlock$$" >> project.properties
+    target: android-17
+
+  - versionName: 2.7.2
+    versionCode: 272
+    disable: crashlytics
+    commit: v2.7.2
+    subdir: app
+    gradle:
+      - yes
+    prebuild:
+      - sed -i -e '/fabric/d' -e '/com.crashlytics.sdk.android:crashlytics/,+2d' -e
+        '/com.android.tools.build:gradle/s/2.2.0-rc1/2.2.2/' build.gradle  ../build.gradle
+      - find . -type f -name '*java' -exec sed -i -e '/Crashlytics.*;$/d' -e '/Fabric/d'
+        -e '/com.crashlytics.android.answers/d' {} \;
+      - pushd src/main/java/com/quran/labs/androidquran/
+
+AutoUpdateMode: None
+UpdateCheckMode: Tags
+CurrentVersion: 2.9.5-p1
+CurrentVersionCode: 2951

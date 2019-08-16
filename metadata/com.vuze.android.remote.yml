@@ -1,0 +1,108 @@
+Categories:
+  - Internet
+License: GPL-2.0-or-later
+WebSite: https://wiki.vuze.com/w/Android_Remote_Guide
+SourceCode: https://github.com/vuze/vuze-remote-for-android
+IssueTracker: http://forum.vuze.com/Forum-Android-Remote-Client
+Donate: http://www.vuze.com/donation/btc.php
+Bitcoin: 15j7vKgJbixQFZ6AvEFw2BhtA4KG7E14JZ
+
+AutoName: Vuze Remote
+Summary: Manage BitTorrent clients
+Description: |-
+    Vuze Remote™ allows you to control your Vuze® desktop client, Transmission
+    torrent client, or the built-in Vuze client through your mobile device or
+    Android TV.
+
+    Download the Vuze Remote application, scan in your Remote Pairing QR Code from
+    your Vuze desktop client (or enter it manually), connect and go. Easy to set-up
+    and effortless to use.
+
+    Features:
+
+    * Search for torrents directly from your device & add to your desktop client
+    * Manage torrent progress
+    * Set download/upload speeds
+    * Adjust torrent and file priorities
+    * Select files and set queue options when adding torrent
+    * Create login profiles to connect multiple remote computers
+    * Simple, easy to use interface
+    * Advanced login controls and supports Transmission bittorrent client
+    * Phone, Tablet, and Television user interfaces
+    * Option to torrent using your current device
+    * Ad free experience
+
+    For a complete step-by-step guide read the
+    [http://wiki.vuze.com/w/Android_Remote_Guide Vuze Remote for Android guide]. For
+    additional help please visit the [http://forum.vuze.com/forum.jspa?forumID=127
+    Vuze forum].
+
+    Have a suggestion? Please use our
+    [http://vote.vuze.com/forums/227649-android-remote Vuze Remote Voting service].
+
+RepoType: git
+Repo: https://github.com/vuze/vuze-remote-for-android
+
+Builds:
+  - versionName: 2.2.4
+    versionCode: 63
+    commit: 5e9486fb4a4cb0a90d6f0ee8fce5dad2ef242e04
+    subdir: VuzeRemoteProject
+    patch:
+      - f-droid.2.2.4.diff
+    srclibs:
+      - FastJSON@1.1.46-android
+      - jcfis@jcifs-1.3.17-kohsuke-1
+    rm:
+      - VuzeRemoteProject/libs/*
+      - google-play-services_lib
+      - VuzeRemoteProject/src/com/vuze/android/remote/VuzeEasyTrackerNew.java
+      - VuzeRemoteProject/src/com/vuze/android/remote/VuzeEasyTrackerOld.java
+      - VuzeRemoteProject/src/com/vuze/android/remote/CampaignTrackingReceiver.java
+      - MaterialEditText/library/src/main/nineoldandroids-2.4.0.jar
+      - android-switch-backport/sample
+      - appcompat/libs/android-support-v4.jar
+    extlibs:
+      - android/android-support-v4.jar
+    prebuild: cp libs/android-support-v4.jar ../appcompat/libs
+    build:
+      - pushd $$FastJSON$$
+      - $$MVN3$$ -DskipTests package
+      - popd
+      - cp -fR $$FastJSON$$/target/fastjson-1.1.46.android.jar libs/
+      - pushd $$jcfis$$
+      - rm -rf src/jcifs/http*
+      - $$MVN3$$ package
+      - popd
+      - cp -fR $$jcfis$$/target/jcifs-1.3.17-kohsuke-1.jar libs/
+
+  - versionName: 2.3.1
+    versionCode: 68
+    commit: v2.3.1
+    subdir: vuzeAndroidRemote
+    gradle:
+      - fossFlavor
+    prebuild: sed -i -e '/mainFlavorCompile/d' build.gradle
+
+  - versionName: 2.5.2
+    versionCode: 78
+    commit: v2.5.2
+    subdir: vuzeAndroidRemote
+    gradle:
+      - CoreFlavorNogaFlavor
+    prebuild: sed -i -e '/gaFlavorCompile/d' build.gradle
+
+  - versionName: 2.6.1
+    versionCode: 82
+    commit: v2.6.1
+    subdir: vuzeAndroidRemote
+    gradle:
+      - CoreFlavorNogaFlavor
+    prebuild: sed -i -e '/gaFlavorCompile/d' build.gradle
+    scanignore:
+      - vuzeAndroidRemote/src/coreFlavor/java/com/vuze/android/core/az/PlatformManagerImpl.java
+
+AutoUpdateMode: None
+UpdateCheckMode: Tags
+CurrentVersion: 2.6.1
+CurrentVersionCode: 82

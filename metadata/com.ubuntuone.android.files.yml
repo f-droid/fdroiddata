@@ -1,0 +1,66 @@
+Disabled: UbuntuOne has been shut down.
+AntiFeatures:
+  - NonFreeNet
+  - UpstreamNonFree
+Categories:
+  - Internet
+License: AGPL-3.0-only
+WebSite: https://one.ubuntu.com
+SourceCode: https://code.launchpad.net/ubuntuone-android-files
+IssueTracker: https://bugs.launchpad.net/ubuntuone-android-files
+
+AutoName: Ubuntu One Files
+Summary: File synchronisation
+Description: |-
+    Client for Ubuntu One, an online storage service provided with the Ubuntu OS.
+
+    The proprietary Google Analytics library was removed from this build.
+
+    Anti-feature:NonFreeNet. The Ubuntu One Files server is proprietary software.
+
+RepoType: bzr
+Repo: lp:ubuntuone-android-files
+
+Builds:
+  - versionName: 1.2.7
+    versionCode: 460
+    commit: '460'
+    srclibs:
+      - NoAnalytics@158a4a
+    extlibs:
+      - android/android-support-v4.jar
+      - oauth-signpost/signpost-core-1.2.1.1.jar
+      - oauth-signpost/signpost-commonshttp4-1.2.1.1.jar
+    prebuild:
+      - sed -i 's@../../GreenDroid@Greendroid@g' build.xml
+      - sed -i 's@\(android.library.reference.1=\).*@\1Greendroid/GreenDroid/@' project.properties
+      - echo "android.library.reference.2=$$NoAnalytics$$" >> project.properties
+      - sed -i 's@executable="android"@executable="$$SDK$$/tools/android"@g' build.xml
+      - sed -i 's@android@$$SDK$$/tools/android@g' tools.sh
+      - sed -i '87,108d' build.xml
+      - ant setup
+
+  - versionName: 1.2.8
+    versionCode: 472
+    disable: Build fails
+    commit: '472'
+    srclibs:
+      - NoAnalytics@158a4a
+    extlibs:
+      - android/android-support-v4.jar
+      - oauth-signpost/signpost-core-1.2.1.1.jar
+      - oauth-signpost/signpost-commonshttp4-1.2.1.1.jar
+    prebuild:
+      - sed -i 's@../../GreenDroid@Greendroid@g' build.xml
+      - sed -i 's@\(android.library.reference.1=\).*@\1Greendroid/GreenDroid/@' project.properties
+      - echo "android.library.reference.2=$$NoAnalytics$$" >> project.properties
+      - sed -i 's@executable="android"@executable="$$SDK$$/tools/android"@g' build.xml
+      - sed -i 's@android@$$SDK$$/tools/android@g' tools.sh
+      - sed -i '87,108d' build.xml
+      - ant setup
+    target: android-10
+
+AutoUpdateMode: None
+UpdateCheckMode: RepoManifest
+CurrentVersion: 1.2.8
+CurrentVersionCode: 472

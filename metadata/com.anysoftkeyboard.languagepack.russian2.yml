@@ -1,0 +1,68 @@
+Categories:
+  - Writing
+License: Apache-2.0
+SourceCode: https://github.com/AnySoftKeyboard/LanguagePack/tree/Russian
+IssueTracker: https://github.com/AnySoftKeyboard/LanguagePack/issues
+Donate: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=KDYBGNUNMMN94&lc=US&item_name=AnySoftKeyboard
+
+Name: 'AnySoftKeyboard: Русский'
+AutoName: AnySoftKeyboard - Russian Language Pack
+Summary: Language pack for AnySoftKeyboard
+Description: |-
+    Russian layouts and a dictionary for auto-complete for AnySoftKeyboard.
+
+    Dictionary comes from AOSP. The source code is in another branch to the default.
+
+    Install [[com.menny.android.anysoftkeyboard]] first, then select the desired
+    layout from AnySoftKeyboard's Settings->Keyboards menu.
+
+RepoType: git
+Repo: https://github.com/AnySoftKeyboard/LanguagePack.git
+
+Builds:
+  - versionName: '20121016'
+    versionCode: 6
+    disable: no source or licence for the dictionary (at 5eabfc)
+    commit: 5eabfc
+    srclibs:
+      - AnySoftKeyboard-API@b21d8907
+      - AnySoftKeyboardTools@73e9a09496
+    forceversion: true
+    forcevercode: true
+    extlibs:
+      - LanguagePacks/russian.zip
+    prebuild:
+      - rm -rf res/ StoreStuff/ dict/
+      - unzip libs/russian.zip
+      - sed -i 's@\(android.library.reference.1=\).*@\1$$AnySoftKeyboard-API$$@' project.properties
+      - sed -i 's/change_me/russian2/g' src/com/anysoftkeyboard/languagepack/change_me/PackBroadcastReceiver.java
+        AndroidManifest.xml
+      - mkdir -p src/com/anysoftkeyboard/languagepack/russian2
+      - mv src/com/anysoftkeyboard/languagepack/change_me/PackBroadcastReceiver.java
+        src/com/anysoftkeyboard/languagepack/russian2/
+      - sed -i 's@..\/AnySoftKeyboardTools@$$AnySoftKeyboardTools$$@g' custom_rules.xml
+      - sed -i 's/LanguagePack/LanguagePackRussian/g' build.xml
+      - sed -i '/key/d' project.properties
+
+  - versionName: '2.0'
+    versionCode: 100
+    commit: russion_2.0
+    gradle:
+      - yes
+    forceversion: true
+    preassemble:
+      - :makeDictionary
+
+  - versionName: 2.0.1
+    versionCode: 101
+    commit: russian_2.0.1
+    gradle:
+      - yes
+    forceversion: true
+    preassemble:
+      - :makeDictionary
+
+AutoUpdateMode: None
+UpdateCheckMode: RepoManifest/Russian
+CurrentVersion: 2.0.1
+CurrentVersionCode: 101

@@ -1,0 +1,46 @@
+Categories:
+  - Development
+License: Apache-2.0
+SourceCode: https://github.com/jgilfelt/GhostLog
+IssueTracker: https://github.com/jgilfelt/GhostLog/issues
+
+AutoName: Ghost Log
+Summary: Show logcat in an overlay
+Description: |-
+    Displays the device logcat buffer in a system overlay window.
+
+    Features:
+
+    * Persistent logcat display as a system overlay
+    * Customisable log filters and display options
+    * Auto filter by the current foreground Activity process
+    * Quick access to pause/play, clear & share functions via rich notification
+    * Integration support for non-root devices
+
+RequiresRoot: 'yes'
+
+RepoType: git
+Repo: https://github.com/jgilfelt/GhostLog.git
+
+Builds:
+  - versionName: 1.0.3
+    versionCode: 3
+    commit: 706b8a596936b9f62a4053dc3cb05fde9b12cd6d
+    subdir: GhostLog/app
+    gradle:
+      - yes
+    prebuild:
+      - sed -e '1,8s/gradle:0.7.+/gradle:1.2.2/g' -e '9,$d' build.gradle > ../build.gradle
+      - sed -i -e '1,8d' -e '/plugin/s/android/com.android.application/g' -e '/propFile/,$d'
+        -e '/roguard/s/^/\/\//g' build.gradle
+      - echo -e "allprojects {\nrepositories {\njcenter()\n}\n}" >> ../build.gradle
+    build:
+      - mkdir -p build/outputs/apk
+      - pushd build
+      - ln -s outputs/apk/ apk
+      - popd
+
+AutoUpdateMode: None
+UpdateCheckMode: RepoManifest
+CurrentVersion: 1.0.3
+CurrentVersionCode: 3

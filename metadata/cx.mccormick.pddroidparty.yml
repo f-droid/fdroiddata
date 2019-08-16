@@ -1,0 +1,74 @@
+Categories:
+  - System
+License: GPL-3.0-only
+WebSite: http://droidparty.net
+SourceCode: https://github.com/chr15m/PdDroidParty
+IssueTracker: https://github.com/chr15m/PdDroidParty/issues
+
+AutoName: PdDroid Party
+Summary: Run Pure Data patches
+Description: Run your Pure Data patches on Android with native GUIs emulated.
+
+RepoType: git
+Repo: https://github.com/chr15m/PdDroidParty
+
+Builds:
+  - versionName: 0.3.0
+    versionCode: 2
+    disable: jars
+    commit: c511fc4ad324817ab80fb3e6c44a7effaaf6735d
+    submodules: true
+    srclibs:
+      - 2:SVGAndroid@ae2e0405fcff18d46fde59d0a3f970661813ad89
+      - Objenesis@1.2
+      - EasyMock@easymock-3.1
+      - Libpd@0.7.0
+      - ASM@ASM_3_3
+      - cglib@RELEASE_2_2
+    rm:
+      - libs/*.jar
+      - pd-for-android/ScenePlayer
+      - pd-for-android/CircleOfFifths
+      - res/raw/abstractions.zip
+      - pd-for-android/midi/AndroidMidiTest/libs/*jar
+      - pd-for-android/PdCore/jni/libpd/libs/*jar
+    prebuild:
+      - pushd $$EasyMock$$
+      - $$MVN3$$ package
+      - popd
+      - pushd $$Objenesis$$
+      - $$MVN3$$ package
+      - popd
+      - pushd $$ASM$$/asm
+      - ant jar
+      - popd
+      - pushd $$cglib$$
+      - ant jar
+      - popd
+      - exit 1
+      - cp $$EasyMock$$/target/easymock-3.1.jar pd-for-android/midi/AndroidMidiTest/libs/
+      - cp $$EasyMock$$/target/easymock-3.1.jar $$Objenesis$$/target/objenesis-1.2.jar
+        pd-for-android/PdCore/jni/libpd/libs/
+      - pushd pd-for-android/PdCore
+      - find libs -iname *.so | xargs rm
+      - android update project --path .
+      - ndk-build
+      - popd
+      - android update project --name PdDroidParty --path .
+    scanignore:
+      - pd-for-android/PdCore/libs
+      - pd-for-android/PdCore/obj/
+      - pd-for-android/ScenePlayer/libs
+
+MaintainerNotes: |-
+    TODO:libpd has jar files
+
+    * android-support-v4.jar is okay.
+    * libpd.jar is most likely the answer to my question about https://github.com/libpd/libpd :) I was not able to build it at first, but will come back to this later.
+    * asm.jar is http://websvn.ow2.org/listing.php?repname=asm .. i hope it’s a simple ant jar
+    * cglib.jar is https://github.com/cglib/cglib
+
+AutoUpdateMode: None
+UpdateCheckMode: RepoManifest
+CurrentVersion: 0.3.0
+CurrentVersionCode: 2

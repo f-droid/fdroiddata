@@ -1,0 +1,55 @@
+Categories:
+  - Writing
+License: MIT
+WebSite: http://jeffreymartin.ca/writeily
+SourceCode: https://github.com/jffrymrtn/writeily
+IssueTracker: https://github.com/jffrymrtn/writeily/issues
+
+AutoName: Writeily
+Summary: Edit plain text and markdown files
+Description: |-
+    Lets you take down notes in plain text, or Markdown format. Organize notes by
+    starring the most important, and preview your work in a rendered Markdown view.
+    The app blossoms in colour and minimalism. Switch between dark and light themes,
+    and choose between your favourite Roboto font style.
+
+RepoType: git
+Repo: https://github.com/jffrymrtn/writeily
+
+Builds:
+  - versionName: '1.5'
+    versionCode: 8
+    disable: ndk packaging
+    commit: 89915168a305126dfeb0016244065b91896b6b9f
+    subdir: writeily
+    gradle:
+      - yes
+    rm:
+      - writeily/libs/*jar
+      - writeily/libs/anddown/obj
+      - writeily/libs/anddown/libs/*jar
+      - writeily/libs/anddown/libs/armeabi-v7a/*
+      - writeily/libs/anddown/libs/armeabi/*
+      - writeily/libs/anddown/libs/x86/*
+    prebuild:
+      - sed -i -e '/gson/d' -e '/android-support/d'  build.gradle
+      - sed -i -e '/dependencies/acompile "com.android.support:support-v13:20.0.+"\ncompile
+        "com.google.code.gson:gson:2.3"' build.gradle
+      - sed -i -e 's/libs:anddown/:writeily:libs:anddown/g' build.gradle
+      - pushd libs/anddown/
+      - ndk-build
+      - android update lib-project -p .
+      - ant release
+      - popd
+
+  - versionName: '1.6'
+    versionCode: 9
+    disable: as per 1.5
+    commit: v1.6
+
+MaintainerNotes: '* Tagging is not reliable.'
+
+AutoUpdateMode: None
+UpdateCheckMode: Tags
+CurrentVersion: '1.6'
+CurrentVersionCode: 9

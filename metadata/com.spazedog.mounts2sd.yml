@@ -1,0 +1,58 @@
+Categories:
+  - System
+License: GPL-3.0-only
+WebSite: http://forum.xda-developers.com/showthread.php?t=2432479
+SourceCode: https://github.com/SpazeDog/mounts2sd
+IssueTracker: https://github.com/SpazeDog/mounts2sd/issues
+
+AutoName: Mounts2SD
+Summary: Map device storage to sdcard
+Description: |-
+    '''N.B''' 'Fix sqlite3 binary' was removed in this build.
+
+    Mounts2SD is a script for devices with low storage capabilities, but It can be
+    used for a lot of things and is useful on almost any device, even those without
+    external sdcard.
+
+    The script itself has grown to become a large storage and management script with
+    features that control SWAP, ZRAM, mount optimization, storage thresholds,
+    different external and internal MMC configurations, cache and more. The content
+    management is able to move a lot more different content between /data and
+    /sd-ext, including the new internal storage, which on newer devices, is placed
+    in /data/media, and it also contains more than one option for storing system
+    content on both /data and /sd-ext.
+
+    Requires root.
+
+RequiresRoot: 'yes'
+
+RepoType: git
+Repo: https://github.com/SpazeDog/mounts2sd
+
+Builds:
+  - versionName: 3.4.8
+    versionCode: 33
+    commit: 3.4.8
+    srclibs:
+      - 1:RootFW@3_1.3.2
+      - 2:TaskManager@67ca5
+      - Busybox@83785f0
+      - BusyboxConfigs@bd2bf4f3
+    rm:
+      - libs/rootfw3.jar
+      - libs/taskmanager.jar
+      - assets/busybox
+      - assets/sqlite3
+    prebuild:
+      - mv libs/android-support-v4.jar $$TaskManager$$/libs
+      - cp $$BusyboxConfigs$$/android_ndk_defconfigPlus $$Busybox$$/.config
+    target: android-18
+    build:
+      - export PATH=$$NDK$$/toolchains/arm-linux-androideabi-4.4.3/prebuilt/linux-x86/bin:$PATH
+      - make CONFIG_SYSROOT="$$NDK$$/platforms/android-9/arch-arm" -C $$Busybox$$
+      - mv $$Busybox$$/busybox assets/busybox
+
+AutoUpdateMode: None
+UpdateCheckMode: RepoManifest/3.x
+CurrentVersion: 3.4.8
+CurrentVersionCode: 33

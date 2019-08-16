@@ -1,0 +1,71 @@
+Categories:
+  - Navigation
+License: Apache-2.0
+WebSite: http://sky-map-team.github.io/stardroid/
+SourceCode: https://github.com/sky-map-team/stardroid
+IssueTracker: https://github.com/sky-map-team/stardroid/issues
+
+AutoName: Sky Map
+Summary: Sky Map to explore the skies
+Description: |-
+    Point your phone at the sky, and Sky Map will show the stars, planets,
+    constellations, and more to help you identify the celestial objects in view. You
+    can also browse the skies in manual mode.
+
+    The app may not be able to detect your location very well if you are not using
+    the non-Free Network Location service. It could be best to enter coordinates
+    rather than entering a town or using GPS.
+
+    The app has been built without the non-free Google Analytics library.
+
+RepoType: git
+Repo: https://github.com/sky-map-team/stardroid
+
+Builds:
+  - versionName: 1.6.4
+    versionCode: 1112
+    commit: '3'
+    prebuild:
+      - rm libs/libGoogleAnalytics.jar
+      - rm libs/.svn/prop-base/libGoogleAnalytics.jar.svn-base
+      - rm libs/.svn/text-base/libGoogleAnalytics.jar.svn-base
+
+  - versionName: 1.6.5
+    versionCode: 1113
+    commit: '8'
+    rm:
+      - libs/libGoogleAnalytics.jar
+      - libs/.svn/prop-base/libGoogleAnalytics.jar.svn-base
+      - libs/.svn/text-base/libGoogleAnalytics.jar.svn-base
+
+  - versionName: 1.8.0
+    versionCode: 1304
+    disable: analytics
+    commit: 1.8.0-published
+    subdir: app
+    gradle:
+      - yes
+
+  - versionName: 1.9.2
+    versionCode: 1480
+    commit: d195e1cee24af70ce6e6a2c12d4d2a9b796d53c6
+    subdir: app
+    gradle:
+      - Fdroid
+    prebuild:
+      - sed -i -e 's/gms/fdroid/' ../tools/build.gradle
+      - sed -i -e '/gms/d' ../build.gradle
+      - sed -i -e '/gmsCompile/d' build.gradle
+      - sed -i -e '/com.google.gms.google-services/d' build.gradle
+      - cd ..
+      - gradle assembleFdroid installDist
+      - cd tools
+      - sed -i -e 's#CLASSPATH=#CLASSPATH=$APP_HOME/lib/:#g' build/install/datagen/bin/datagen
+      - ./generate.sh
+      - ./rewrite.sh
+      - ./binary.sh
+
+AutoUpdateMode: None
+UpdateCheckMode: Tags
+CurrentVersion: 1.9.2
+CurrentVersionCode: 1480

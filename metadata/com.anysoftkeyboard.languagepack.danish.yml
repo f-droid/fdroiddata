@@ -1,0 +1,52 @@
+Categories:
+  - Writing
+License: Apache-2.0
+WebSite: http://s.evendanan.net/ask
+SourceCode: https://softkeyboard.googlecode.com/svn/trunk/LanguagePacks/Danish
+IssueTracker: https://github.com/AnySoftKeyboard/LanguagePack/issues
+Donate: http://anysoftkeyboard.github.io/
+
+Name: 'AnySoftKeyboard: Danish'
+AutoName: AnySoftKeyboard - Danish Language Pack
+Summary: Language pack for AnySoftKeyboard
+Description: |-
+    Dictionary based on AOSP dictionary.
+
+    Install [[com.menny.android.anysoftkeyboard]] first, then select the desired
+    layout from AnySoftKeyboard's Settings->Keyboards menu.
+
+RepoType: git
+Repo: https://github.com/AnySoftKeyboard/LanguagePack.git
+
+Builds:
+  - versionName: '20100614'
+    versionCode: 2
+    commit: '1081'
+    init: rm -f build.xml
+    patch:
+      - xml.patch
+    srclibs:
+      - AnySoftKeyboard-API@b21d8907
+      - AnySoftKeyboardTools@73e9a09496
+    extlibs:
+      - LanguagePacks/da.xml.gz
+    prebuild:
+      - sed -i 's@\(android.library.reference.1=\).*@\1$$AnySoftKeyboard-API$$@' project.properties
+      - mkdir -p dict/ res/raw/
+      - gunzip -c libs/da.xml.gz > dict/words.xml
+      - rm -rf assets/ libs/
+    build: java -jar $$AnySoftKeyboardTools$$/makedict/makedict.jar
+
+  - versionName: '2.0'
+    versionCode: 100
+    commit: danish_2.0
+    gradle:
+      - yes
+    forceversion: true
+    preassemble:
+      - :makeDictionary
+
+AutoUpdateMode: None
+UpdateCheckMode: RepoManifest/Danish
+CurrentVersion: '2.0'
+CurrentVersionCode: 100

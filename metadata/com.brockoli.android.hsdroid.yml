@@ -1,0 +1,42 @@
+Categories:
+  - Games
+License: Apache-2.0
+SourceCode: https://bitbucket.org/brockoli/hsdroid/src
+IssueTracker: https://bitbucket.org/brockoli/hsdroid/issues
+
+AutoName: HSDroid
+Summary: Watch hockey games
+Description: |-
+    Client for watching hockeystreams.com live and on demand video streams. It only
+    uses (HLS) formated streams.
+
+    Requires you to have an active account on [http://www.hockeystreams.com].
+
+RepoType: git
+Repo: https://bitbucket.org/brockoli/hsdroid.git
+
+Builds:
+  - versionName: '1.6'
+    versionCode: 9
+    disable: hard-coded build-tools
+    commit: '127e76'
+    patch:
+      - build.gradle_9.patch
+      - build-fix_9.patch
+    gradle:
+      - yes
+    srclibs:
+      - SlidingMenu@9b3d8c15c1b0fbd
+      - ActionBarSherlock@4.4.0
+    prebuild:
+      - echo -e "include ':SlidingMenu'\nproject(':SlidingMenu').projectDir = new
+        File('$(readlink -f $$SlidingMenu$$)')" > settings.gradle
+      - sed -i 's/targetSdkVersion="17"/targetSdkVersion="16"/g' $$SlidingMenu$$/AndroidManifest.xml
+      - cp $$ActionBarSherlock$$/build.gradle $$SlidingMenu$$/
+      - sed -i -e 's/compileSdkVersion 14/compileSdkVersion 16/g' -e "s/buildToolsVersion
+        '17.0.0'/buildToolsVersion '18.1.1'/g" $$SlidingMenu$$/build.gradle
+
+AutoUpdateMode: None
+UpdateCheckMode: RepoManifest
+CurrentVersion: '1.6'
+CurrentVersionCode: 9

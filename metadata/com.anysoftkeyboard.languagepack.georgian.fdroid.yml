@@ -1,0 +1,73 @@
+Categories:
+  - Writing
+License: Apache-2.0
+WebSite: https://github.com/Stichoza
+SourceCode: https://github.com/Stichoza/AnySoftKeyboardLanguagePackGeorgian
+IssueTracker: https://github.com/Stichoza/AnySoftKeyboardLanguagePackGeorgian/issues
+Donate: http://anysoftkeyboard.github.io/
+
+Name: 'AnySoftKeyboard: Georgian'
+AutoName: Georgian (full) for AnySoftKeyboard
+Summary: Language pack for AnySoftKeyboard
+Description: |-
+    N.B You may need to install Georgian fonts. This process would require root. We
+    have a package for them: [[org.herrlado.geofonts]].
+
+    Install [[com.menny.android.anysoftkeyboard]] first, then select the desired
+    layout from AnySoftKeyboard's Settings->Keyboards menu. See the Google Play
+    description of com.anysoftkeyboard.languagepack.georgian_full for more tips.
+
+    This package is a hybrid, using keyboards from the source code page and
+    dictionaries from the texts of the literature portal lib.ge (editor an co-owner
+    Giorgi Kekelidze) and published with his permission. Be sure to mention that
+    this package uses a different dictionary if visiting the issue tracker
+
+RepoType: git
+Repo: https://github.com/Stichoza/AnySoftKeyboardLanguagePackGeorgian
+
+Builds:
+  - versionName: 2.0.204
+    versionCode: 4
+    disable: One of the srclibs fails on android update project (at e8b7071461)
+    commit: e8b7071461
+    init: rm -rf bin/ gen/
+    patch:
+      - packageid.patch
+      - xml.patch
+    srclibs:
+      - AnySoftKeyboard-API@b21d8907
+      - AnySoftKeyboardTools@73e9a09496
+    prebuild:
+      - echo 'android.library.reference.1=$$AnySoftKeyboard-API$$' >> project.properties
+      - echo "android.jar=$$SDK$$/platforms/android-17/android.jar" > ant.properties
+      - mkdir -p dict/ res/raw/
+      - rm -f assets/*
+      - wget https://softkeyboard.googlecode.com/svn/trunk/DictionaryTools/xml/ka.xml
+        -O dict/words.xml
+    build: java -jar $$AnySoftKeyboardTools$$/makedict/makedict.jar
+
+  - versionName: 2.1.4
+    versionCode: 5
+    commit: eb2334531
+    init: rm -rf bin/ gen/
+    patch:
+      - packageid.patch
+      - xml.patch
+    srclibs:
+      - AnySoftKeyboard-API@b21d8907
+      - AnySoftKeyboardTools@73e9a09496
+    extlibs:
+      - LanguagePacks/ka.xml.gz
+    prebuild:
+      - echo 'android.library.reference.1=$$AnySoftKeyboard-API$$' >> project.properties
+      - echo "android.jar=$$SDK$$/platforms/android-17/android.jar" > ant.properties
+      - mkdir -p dict/ res/raw/
+      - rm -f assets/*
+      - gunzip -c libs/ka.xml.gz > dict/words.xml
+      - rm libs/*.gz
+    build: java -jar $$AnySoftKeyboardTools$$/makedict/makedict.jar
+
+AutoUpdateMode: None
+UpdateCheckMode: None
+CurrentVersion: 2.1.4
+CurrentVersionCode: 5

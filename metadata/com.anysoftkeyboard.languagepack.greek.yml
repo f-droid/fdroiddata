@@ -1,0 +1,52 @@
+Categories:
+  - Writing
+License: Apache-2.0
+WebSite: http://s.evendanan.net/ask
+SourceCode: https://github.com/AnySoftKeyboard/LanguagePack/tree/Greek
+IssueTracker: https://github.com/AnySoftKeyboard/LanguagePack/issues
+Donate: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=KDYBGNUNMMN94&lc=US&item_name=AnySoftKeyboard
+
+Name: 'AnySoftKeyboard: Greek'
+AutoName: AnySoftKeyboard - Ελληνικό Γλωσσικό Πακέτο
+Summary: Language pack for AnySoftKeyboard
+Description: |-
+    Greek keyboard layouts and AOSP dictionary.
+
+    Install [[com.menny.android.anysoftkeyboard]] first, then select the desired
+    layout from AnySoftKeyboard's Settings->Keyboards menu.
+
+RepoType: git
+Repo: https://github.com/AnySoftKeyboard/LanguagePack.git
+
+Builds:
+  - versionName: '20110717'
+    versionCode: 3
+    commit: '1815'
+    init: rm -f build.xml
+    patch:
+      - xml.patch
+    srclibs:
+      - AnySoftKeyboard-API@b21d8907
+      - AnySoftKeyboardTools@73e9a09496
+    extlibs:
+      - LanguagePacks/gr.xml
+    prebuild:
+      - sed -i 's@\(android.library.reference.1=\).*@\1$$AnySoftKeyboard-API$$@' project.properties
+      - mkdir -p dict/ res/raw/
+      - rm -rf assets/
+      - mv libs/gr.xml dict/words.xml
+    build: java -jar $$AnySoftKeyboardTools$$/makedict/makedict.jar
+
+  - versionName: 2.0.0
+    versionCode: 200
+    commit: greek_2.0.0
+    gradle:
+      - yes
+    forceversion: true
+    preassemble:
+      - :makeDictionary
+
+AutoUpdateMode: None
+UpdateCheckMode: RepoManifest/Greek
+CurrentVersion: '2.0'
+CurrentVersionCode: 200

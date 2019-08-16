@@ -1,0 +1,99 @@
+Categories:
+  - Games
+License: GPL-3.0-only
+WebSite: http://www.kebernet.net/Home/projects/shortyz
+SourceCode: https://github.com/kebernet/shortyz
+IssueTracker: https://github.com/kebernet/shortyz/issues
+
+AutoName: Shortyz
+Summary: Crossword game
+Description: |-
+    Crossword game that downloads puzzles from a variety of internet locations.
+
+    Latest version with use of stubs for Google Play Services and removal of
+    Crashlytics.
+
+RepoType: git
+Repo: https://github.com/kebernet/shortyz.git
+
+Builds:
+  - versionName: 3.1.0
+    versionCode: 30100
+    commit: 1ce970a00083
+    subdir: shortyz
+    prebuild:
+      - cd ../puzlib
+      - mvn package
+      - mv target/*.jar ../shortyz/libs
+      - rm -rf target
+      - cd ../shortyz
+    target: android-11
+
+  - versionName: 3.1.7
+    versionCode: 30107
+    disable: No source code apparently
+    commit: unknown - see disabled
+
+  - versionName: 3.2.1
+    versionCode: 30201
+    commit: 0aa74b9d2bef
+    subdir: shortyz
+    prebuild:
+      - mkdir -p libs/
+      - rm -rf src/com/totsp/crossword/io/ src/com/totsp/crossword/puz/
+      - cd ../puzlib
+      - mvn package
+      - mv target/*.jar ../shortyz/libs/
+      - rm -rf target
+      - cd ../shortyz
+    target: android-11
+
+  - versionName: 3.2.10
+    versionCode: 30210
+    commit: 1ba821b4825c
+    subdir: shortyz
+    init: rm build.xml
+
+  - versionName: 4.0.7
+    versionCode: 40007
+    disable: play-services
+    commit: 6bbd1befc8b5
+    subdir: app
+    gradle:
+      - yes
+
+  - versionName: 4.4.0
+    versionCode: 40400
+    commit: 534184e69aa32cb46f12799fed33f091d7255472
+    subdir: app
+    gradle:
+      - yes
+    rm:
+      - gfx
+    prebuild:
+      - sed -i -e "s/compile 'com.google.android.gms:play-services:4.0.30'/compile
+        'com.github.yourealwaysbe:play-services-shortyz:v1'/" build.gradle
+      - sed -i -e "s/compile ('com.google.apis:google-api-services-gmail:v1-rev29-1.20.0'){/compile
+        ('com.github.yourealwaysbe:google-api-services-gmail-shortyz:v1') {/" build.gradle
+      - sed -i -e "/fabric/d" build.gradle
+      - sed -i -e "/crashlytics/,+2d" build.gradle
+      - sed -i -e "/Fabric/d" src/main/java/com/totsp/crossword/shortyz/ShortyzApplication.java
+      - sed -i -e "/Crashlytics/d" src/main/java/com/totsp/crossword/shortyz/ShortyzApplication.java
+      - sed -i -e "s/http:\/\/dl.bintray.com\/jenzz\/maven/https:\/\/jitpack.io/"
+        ../build.gradle
+      - sed -i -e "s/compile 'com.jenzz:materialpreference:1.3'/compile 'com.github.jenzz:Android-MaterialPreference:v1.3'/"
+        build.gradle
+
+MaintainerNotes: |-
+    Repository changed to new github URL.
+    Versions before 4.4.0 unlikely to build again.
+    Play Services replaced by stub respository yourealwaysbe/play-services-shortyz.
+    Play Services Gmail replaced by stub repository yourealwaysbe/google-api-services-gmail-shortyz.
+    These stubs disable feature using Play closed sourced libraries.
+    Crashlytics and Fabric deleted from build.
+    Use of materialpreference from jenzz's bintray account replaced by jitpack alternative.
+
+AutoUpdateMode: None
+UpdateCheckMode: RepoManifest
+CurrentVersion: 4.4.3
+CurrentVersionCode: 40403

@@ -1,0 +1,63 @@
+Categories:
+  - System
+License: GPL-2.0-only
+SourceCode: https://github.com/neurodroid/cryptonite
+IssueTracker: https://github.com/neurodroid/cryptonite/issues
+
+AutoName: Cryptonite
+Summary: Encfs and Truecrypt browser
+Description: |-
+    Cryptonite brings EncFS (no TrueCrypt in this build) to Android. You can browse,
+    export and open EncFS-encrypted directories and files on your Dropbox and on
+    your phone. On rooted phones that support FUSE (e.g. CyanogenMod) you can also
+    mount EncFS and volumes.
+
+RepoType: git
+Repo: https://github.com/neurodroid/cryptonite.git
+
+Builds:
+  - versionName: 0.7.6
+    versionCode: 75
+    disable: WIP at 0.7.6
+    commit: 0.7.6
+    subdir: cryptonite
+    srclibs:
+      - ActionBarSherlock@4.3.0
+    extlibs:
+      - dropbox-sdk/dropbox-android-sdk-1.5.1.jar
+      - httpmime/httpmime-4.0.3.jar
+      - json-simple/json_simple-1.1.jar
+    prebuild:
+      - sed -i 's@\(reference.1=\).*@\1$$ActionBarSherlock$$@' project.properties
+      - echo "db-xxxxxxxxxxxxxxx" > AndroidManifest.xml.key
+      - echo "db-xxxxxxxxxxxxxxx" > AndroidManifest.xml.key2
+      - cd ../
+      - ./insert_key.sh
+      - $$NDK$$/build/tools/make-standalone-toolchain.sh --arch=arm --ndk-dir=$$NDK$$
+        --install-dir=android-toolchain --platform=android-8 --system=linux-x86
+      - mkdir -p scripts/
+      - wget https://neurodroid.googlecode.com/git/nrn/agcc -P scripts/
+      - wget https://neurodroid.googlecode.com/git/nrn/agcc-vfp -P scripts/
+      - export PATH=$PATH:scripts
+      - chmod +x scripts/*
+      - sed -i 's/\$HOME/../g' scripts/*
+      - cd boost
+      - ./download.sh
+      - ./build.sh
+      - cd ../openssl
+      - ./download.sh
+      - ./build.sh
+      - cd ../fuse28
+      - ./download.sh
+      - ./build.sh
+      - cd ../rlog
+      - ./download.sh
+      - ./build.sh
+      - cd ../encfs-1.7.4
+      - ./download.sh
+      - ./build.sh
+      - cd ../cryptonite
+      - ./jni-build.sh
+
+AutoUpdateMode: None
+UpdateCheckMode: Static
