@@ -1,0 +1,108 @@
+AntiFeatures:
+  - UpstreamNonFree
+Categories:
+  - Multimedia
+  - Theming
+License: Apache-2.0
+WebSite: http://www.muzei.co
+SourceCode: https://github.com/romannurik/muzei
+IssueTracker: https://github.com/romannurik/muzei/issues
+
+AutoName: Muzei
+Summary: Live wallpaper of famous art
+Description: |-
+    Muzei is a live wallpaper that gently refreshes your home screen each day with
+    famous works of art. It also recedes into the background, blurring and dimming
+    artwork to keep your icons and widgets in the spotlight. Simply double touch the
+    wallpaper or open the Muzei app to enjoy and explore the artwork in its full
+    glory.
+
+    Alternatively, you can choose your favorite photos from your own gallery or
+    other apps to use on your home screen. To keep your wallpaper fresh, Muzei will
+    rotate through your favorite photos every few hours.
+
+RepoType: git
+Repo: https://github.com/romannurik/muzei.git
+
+Builds:
+  - versionName: 1.0.1
+    versionCode: 1008
+    commit: v1.0.1
+    subdir: main
+    gradle:
+      - yes
+    prebuild:
+      - echo sdk.dir=$$SDK$$ >> ../local.properties
+      - sed -i '/archivesBaseName/d' build.gradle
+
+  - versionName: 2.0.2
+    versionCode: 2003
+    disable: play-services
+    commit: v2.0.2
+    subdir: main
+    gradle:
+      - prod
+    prebuild:
+      - sed -i -e '/wearable/d' build.gradle
+      - rm -fR ../wearable ../example-watchface
+      - sed -i -e "s/':wearable',//g" -e "s/, 'example-watchface'//g" ../settings.gradle
+
+  - versionName: '2.3'
+    versionCode: 23015
+    commit: v2.3
+    subdir: main
+    patch:
+      - 2.3-remove-play-services.patch
+    gradle:
+      - prod
+    rm:
+      - wearable
+      - example-watchface
+
+  - versionName: 2.3.1
+    versionCode: 23124
+    commit: v2.3.1-rc3
+    subdir: main
+    patch:
+      - 2.3.1-remove-play-services.patch
+    gradle:
+      - prod
+    rm:
+      - wearable
+      - example-watchface
+
+  - versionName: 2.4.0
+    versionCode: 24016
+    commit: v2.4.0-rc2
+    subdir: main
+    patch:
+      - 2.4.0-remove-play-services.patch
+    gradle:
+      - yes
+    rm:
+      - wearable
+      - example-watchface
+
+  - versionName: 3.0.2
+    versionCode: 302000
+    commit: v3.0.2-rc1
+    subdir: main
+    patch:
+      - 3.0.2-remove-play-services.patch
+    gradle:
+      - yes
+    rm:
+      - wearable
+      - example-watchface
+
+MaintainerNotes: |-
+    Custom version format, so no UCM applies.
+
+    Since 2.0, source code needs to be patched to get rid of Google Play Services.
+    The "wearable" and "example-watchface" components should be removed
+    completely, the rest of the code has to be cleaned up from FirebaseAnalytics.
+
+AutoUpdateMode: None
+UpdateCheckMode: None
+CurrentVersion: 3.0.2
+CurrentVersionCode: 302000

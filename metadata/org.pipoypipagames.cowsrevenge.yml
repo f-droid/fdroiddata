@@ -1,0 +1,69 @@
+Categories:
+  - Games
+License: GPL-3.0-only
+AuthorName: Daniel Darias,Yanara Aristiguieta
+WebSite: https://pipoypipagames.itch.io/cows-revenge
+SourceCode: https://github.com/Dariasteam/Cows-Revenge
+IssueTracker: https://github.com/Dariasteam/Cows-Revenge/issues
+Changelog: https://github.com/Dariasteam/Cows-Revenge/releases
+
+AutoName: Cow's Revenge
+
+RepoType: git
+Repo: https://github.com/Dariasteam/Cows-Revenge.git
+
+Builds:
+  - versionName: 1.0.4
+    versionCode: 6
+    commit: a53801e19f35c5656307da909e5f6a7b3719654a
+    sudo: apt-get install -y -t jessie-backports clang
+    output: cows_revenge.apk
+    srclibs:
+      - Godot@7cb027d0718bda02dac3b7d570bc359ca32921e5
+    prebuild:
+      - mkdir cows_revenge
+      - bash -O extglob -c "mv !(cows_revenge) cows_revenge"
+      - cp -R $$Godot$$ godot
+    target: android-19
+    build:
+      - cd godot
+      - scons -j `nproc` platform=server target=release_debug use_llvm=yes unix_global_settings_path=".."
+        tools=yes
+      - export ANDROID_NDK_ROOT=$$NDK$$
+      - scons -j `nproc` use_llvm=yes p=android target=release
+      - pushd platform/android/java/
+      - gradle assembleRelease
+      - popd
+      - mkdir -p ../templates/
+      - cp bin/android_release.apk ../templates
+      - cd ../cows_revenge
+      - ../godot/bin/godot_server.server.opt.tools.64 -export Android ../cows_revenge.apk
+
+  - versionName: 1.0.5
+    versionCode: 9
+    commit: 2231e3a0e551f36f69a5e785d6734d97f46910a0
+    sudo: apt-get install -y -t jessie-backports clang
+    output: cows_revenge.apk
+    srclibs:
+      - Godot@702022c94759bbbbe6a080c18c06ff0e285b18ae
+    prebuild:
+      - mkdir cows_revenge
+      - bash -O extglob -c "mv !(cows_revenge) cows_revenge"
+      - cp -R $$Godot$$ godot
+    target: android-19
+    build:
+      - cd godot
+      - scons -j `nproc` platform=server target=release_debug use_llvm=yes unix_global_settings_path=".."
+        tools=yes
+      - export ANDROID_NDK_ROOT=$$NDK$$
+      - scons -j `nproc` use_llvm=yes p=android target=release
+      - pushd platform/android/java/
+      - gradle assembleRelease
+      - popd
+      - mkdir -p ../templates/
+      - cp bin/android_release.apk ../templates
+      - cd ../cows_revenge
+      - ../godot/bin/godot_server.server.opt.tools.64 -export Android ../cows_revenge.apk
+
+AutoUpdateMode: None
+UpdateCheckMode: Static

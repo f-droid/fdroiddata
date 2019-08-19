@@ -1,0 +1,127 @@
+Categories:
+  - System
+License: Apache-2.0
+SourceCode: https://github.com/j4velin/SystemAppMover
+IssueTracker: https://github.com/j4velin/SystemAppMover/issues
+
+AutoName: /system/app mover
+Summary: Add and remove system apps
+Description: |-
+    This app moves apps from and to the /system/app folder, making them a system app
+    or a user app. System apps can get more priviledges, so some apps get more
+    functionality when installed as a system app.
+
+    On the other hand, system apps can not be uninstalled. So this app can also be
+    used to convert system apps to normal user apps by moving them from the
+    /system/app directory to /data/app directory.
+
+    WARNING: Uninstalling important system apps might result in a unusable device!
+    Use this function at your own risk and only if you know what you're doing!
+
+    This app requires a rooted device with BusyBox installed.
+
+RequiresRoot: 'yes'
+
+RepoType: git
+Repo: https://github.com/j4velin/SystemAppMover.git
+
+Builds:
+  - versionName: 1.5.6
+    versionCode: 19
+    disable: Doesn't work
+    commit: 457e6d661b726d5
+    srclibs:
+      - 1:RootToolsSvn@253
+    target: android-19
+
+  - versionName: 1.5.7
+    versionCode: 20
+    disable: Doesn't work
+    commit: 7c449eb05bbcf
+    srclibs:
+      - 1:RootToolsSvn@253
+    target: android-19
+
+  - versionName: 1.5.8
+    versionCode: 158
+    disable: malformed gradle config
+    commit: 9656e9a1fd02bd04476bd5f
+    gradle:
+      - yes
+
+  - versionName: 1.5.9
+    versionCode: 159
+    commit: 85004571574fc6146641e2ba59faf63af5857a93
+    gradle:
+      - yes
+    prebuild: touch key.properties
+
+  - versionName: '1.6'
+    versionCode: 160
+    disable: fail to build with current RootTools
+    commit: 0ef21c7e09ff8a3d7d62400c375946c1a7264073
+    gradle:
+      - yes
+    srclibs:
+      - RootTools@3.5
+    rm:
+      - '*jar'
+    prebuild:
+      - touch key.properties
+      - pushd $$RootToolsSvn$$
+      - android update lib-project -t "android-21" -p ./
+      - ant release
+      - popd
+      - cp $$RootTools$$/bin/RootTools-release-unsigned.apk RootTools2.6.jar
+
+  - versionName: 1.6.1
+    versionCode: 161
+    commit: 7d083998bb9f1681ce9050da311ca13732a04bbf
+    gradle:
+      - yes
+    srclibs:
+      - RootToolsSvn@2.6
+    rm:
+      - '*.jar'
+    prebuild:
+      - touch key.properties
+      - cp -r $$RootToolsSvn$$/src/com/ src/main/java
+
+  - versionName: '1.7'
+    versionCode: 170
+    commit: 3895cad3af3e9b09535c8cd6e10500b867ceb309
+    gradle:
+      - yes
+    srclibs:
+      - RootToolsSvn@2.6
+    rm:
+      - '*.jar'
+    prebuild:
+      - touch key.properties
+      - cp -r $$RootToolsSvn$$/src/com/ src/main/java
+
+  - versionName: 1.7.2
+    versionCode: 172
+    commit: d86371d2b1c24a8d8165625941938471e197e52f
+    gradle:
+      - yes
+    rm:
+      - '*.jar'
+    prebuild:
+      - touch key.properties
+      - wget -c https://f-droid.org/repo/de.j4velin.systemappmover_170_src.tar.gz
+      - gunzip de.j4velin.systemappmover_170_src.tar.gz
+      - tar xvf de.j4velin.systemappmover_170_src.tar
+      - rm de.j4velin.systemappmover_170_src.tar
+      - mv de.j4velin.systemappmover_170_src.tar.gz/src/main/java/com src/main/java/
+      - rm -fR de.j4velin.systemappmover_170_src.tar.gz
+
+MaintainerNotes: |-
+    Upstream didn't carry over history when moving to github. Since GoogleCode
+    is no more, we obtain RootTools-2.6 source form a previous build's source
+    package... weird stuff, indeed.
+
+AutoUpdateMode: None
+UpdateCheckMode: RepoManifest
+CurrentVersion: 1.7.3
+CurrentVersionCode: 173

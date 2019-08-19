@@ -1,0 +1,73 @@
+Categories:
+  - Multimedia
+  - Internet
+License: GPL-3.0-or-later
+SourceCode: https://github.com/badaix/snapcast
+IssueTracker: https://github.com/badaix/snapcast/issues
+Changelog: https://github.com/badaix/snapcast/releases
+
+AutoName: Snapcast
+Summary: Synchronize audio output across devices/players
+Description: |-
+    Multi-room client-server audio player, where all clients are time synchronized
+    with the server to play perfectly synced audio. It's not a standalone player,
+    but an extension that turns your existing audio player into a Sonos-like
+    multi-room solution. The server's audio input is a named pipe /tmp/snapfifo. All
+    data that is fed into this file will be send to the connected clients. One of
+    the most generic ways to use Snapcast is in conjunction with the music player
+    daemon (MPD) or Mopidy, which can be configured to use a named pipe as audio
+    output.
+
+RepoType: git
+Repo: https://github.com/badaix/snapcast
+
+Builds:
+  - versionName: 0.7.0
+    versionCode: 6
+    commit: v0.7.0
+    subdir: android/Snapcast
+    submodules: true
+    gradle:
+      - yes
+    scandelete:
+      - android/Snapcast/src/main/assets/bin
+    build:
+      - pushd ../..
+      - ndkdir="$PWD/ndk"
+      - sed -i "s@NDK_DIR=.*@NDK_DIR='${ndkdir}'@" client/build_android.sh externals/build_flac_android.sh
+      - pushd $$NDK$$/build/tools
+      - ./make-standalone-toolchain.sh --arch=arm --platform=android-14 --install-dir=${ndkdir}
+        --ndk-dir=$$NDK$$ --system=linux-x86
+      - popd
+      - pushd externals
+      - sh build_flac_android.sh
+      - pushd ../client
+      - sh build_android.sh
+
+  - versionName: 0.10.0
+    versionCode: 7
+    disable: wip
+    commit: 41be3ade60de166cd8f0bd8b2b66a78537e2599d
+    subdir: android/Snapcast
+    submodules: true
+    gradle:
+      - yes
+    scandelete:
+      - android/Snapcast/src/main/assets/bin
+    build:
+      - pushd ../..
+      - ndkdir="$PWD/ndk"
+      - sed -i "s@NDK_DIR=.*@NDK_DIR='${ndkdir}'@" client/build_android.sh externals/build_externals_android.sh
+      - pushd $$NDK$$/build/tools
+      - ./make_standalone_toolchain.py --arch arm --api 14 --install-dir ${ndkdir}
+      - popd
+      - pushd externals
+      - sh build_externals_android.sh
+      - pushd ../client
+      - sh build_android.sh
+    ndk: r13b
+
+AutoUpdateMode: None
+UpdateCheckMode: Tags
+CurrentVersion: 0.13.0
+CurrentVersionCode: 1300

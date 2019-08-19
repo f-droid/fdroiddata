@@ -1,0 +1,179 @@
+Categories:
+  - Multimedia
+License: Apache-2.0
+WebSite: https://sourceforge.net/projects/servestream
+SourceCode: https://sourceforge.net/p/servestream/code
+IssueTracker: https://sourceforge.net/p/servestream/_list/tickets
+Donate: https://sourceforge.net/p/servestream/donate
+
+AutoName: ServeStream
+Summary: Audio stream player
+Description: |-
+    HTTP media server browser and stream player. Ideal for playing internet radio or
+    streaming podcasts in the background; if you find an audio file on a web page,
+    share the link to Servestream.
+
+    * Supports http, https, mms (beta), mmsh (beta)
+    * Plays mp3/3gp/mp4/m4a/ogg/wav/mid/xmf/mxmf/rtttl/rtx/ota/imy
+    * Additional support for m3u, m3u8, pls and asx playlists
+    * Supports multitasking/playing audio in the background
+    * Repeat and shuffle modes
+    * Alarm clock support
+    * Home screen widget
+    * Utilizes HTML parsing to allow navigation of HTTP servers that serve HTML pages e.g. [http://listenlive.eu]
+    * Supports x86 and MIPS for ffmpeg playback
+
+RepoType: git-svn
+Repo: https://svn.code.sf.net/p/servestream/code;trunk=trunk;tags=tags
+
+Builds:
+  - versionName: 0.5.4
+    versionCode: 69
+    commit: '1354'
+    srclibs:
+      - ActionBarSherlock@4.2.0
+    prebuild:
+      - rm custom_rules.xml
+      - echo "android.library.reference.1=$$ActionBarSherlock$$" >> project.properties
+      - wget http://sourceforge.net/p/servestream/code/1175/tree/ffmpeg/ffmpeg-0.11.1-android-2012-09-18.tar.gz?format=raw
+        --output-document=ffmpeg-0.11.1-android-2012-09-18.tar.gz
+      - wget http://sourceforge.net/p/servestream/code/1311/tree/ffmpeg/scripts/arm-build.sh?format=raw
+        --output-document=arm-build.sh
+      - tar -xvf ffmpeg-0.11.1-android-2012-09-18.tar.gz
+      - chmod +x arm-build.sh
+      - mv arm-build.sh ffmpeg-0.11.1-android-2012-09-18
+      - sed -i 's/armeabi armeabi-v7a x86 mips/armeabi/g' jni/Application.mk
+      - cd ffmpeg-0.11.1-android-2012-09-18
+      - ./extract.sh
+      - sed -i 's/make -j4/make -j1/g' arm-build.sh
+      - sed -i 's/bash/sh/g' arm-build.sh
+      - sed -i '/PIPESTATUS/d' arm-build.sh
+      - NDK=$$NDK$$ ./arm-build.sh
+      - cp -r build/ffmpeg/* ../jni/ffmpeg/ffmpeg
+    buildjni:
+      - yes
+
+  - versionName: 0.6.0
+    versionCode: 72
+    commit: v0.6.0
+    srclibs:
+      - ActionBarSherlock@4.2.0
+      - DragSort@0.6.1
+    prebuild:
+      - sed -i 's/make -j4/make -j2/g' scripts/*
+      - rm custom_rules.xml
+      - chmod +x scripts/build-ffmpeg.sh
+      - cp $$ActionBarSherlock$$/libs/android-support-v4.jar $$DragSort$$/libs/
+      - echo "android.library.reference.1=$$ActionBarSherlock$$" >> project.properties
+      - echo "android.library.reference.2=$$DragSort$$" >> project.properties
+    build: ./scripts/build-ffmpeg.sh
+    buildjni:
+      - yes
+
+  - versionName: 0.6.3
+    versionCode: 78
+    commit: v0.6.3
+    srclibs:
+      - ActionBarSherlock@4.2.0
+      - DragSort@0.6.1
+      - Streamscraper@f01d9ac64629
+      - Jericho@3.2
+    prebuild:
+      - cp $$ActionBarSherlock$$/libs/android-support-v4.jar $$DragSort$$/libs/
+      - rm libs/streamscraper.jar
+      - cp -r $$Streamscraper$$/src/net/moraleboost/ src/net/
+      - cp -r $$Jericho$$/src/java/net/htmlparser/ src/net/
+      - cp $$Jericho$$/compile-time-dependencies/* libs/
+      - sed -i 's/make -j4/make -j2/g' scripts/*
+      - rm custom_rules.xml
+      - chmod +x scripts/build-ffmpeg.sh
+      - sed -i 's@\(reference.1=\).*@\1$$ActionBarSherlock$$@' project.properties
+      - sed -i 's@\(reference.2=\).*@\1$$DragSort$$@' project.properties
+    build: ./scripts/build-ffmpeg.sh
+    buildjni:
+      - yes
+
+  - versionName: 0.6.6
+    versionCode: 90
+    commit: v0.6.6
+    srclibs:
+      - 1:appcompat@ad5a63f
+      - Streamscraper@f01d9ac64629
+      - Jericho@3.3
+    prebuild:
+      - cp $$appcompat$$/libs/android-support-v4.jar libs/
+      - cp $$appcompat$$/libs/android-support-v7-appcompat.jar libs/
+      - rm libs/streamscraper.jar
+      - cp -r $$Streamscraper$$/src/net/moraleboost/ src/net/
+      - cp -r $$Jericho$$/src/java/net/htmlparser/ src/net/
+      - cp $$Jericho$$/compile-time-dependencies/* libs/
+      - sed -i 's/make -j4/make -j2/g' scripts/*
+      - rm custom_rules.xml
+      - chmod +x scripts/build-ffmpeg.sh
+    build: ./scripts/build-ffmpeg.sh
+    buildjni:
+      - yes
+
+  - versionName: 0.6.7
+    versionCode: 97
+    commit: v0.6.7
+    srclibs:
+      - 1:appcompat@ad5a63f
+      - Jericho@3.3
+    prebuild:
+      - cp $$appcompat$$/libs/android-support-v4.jar libs/
+      - cp $$appcompat$$/libs/android-support-v7-appcompat.jar libs/
+      - cp -r $$Jericho$$/src/java/net/htmlparser/ src/net/
+      - cp $$Jericho$$/compile-time-dependencies/* libs/
+      - sed -i 's/make -j4/make -j2/g' scripts/*
+      - rm custom_rules.xml
+      - chmod +x scripts/build-ffmpeg.sh
+    build: ./scripts/build-ffmpeg.sh
+    buildjni:
+      - yes
+
+  - versionName: 0.6.8
+    versionCode: 98
+    commit: v0.6.8
+    srclibs:
+      - 1:appcompat@ad5a63f
+      - Jericho@3.3
+    prebuild:
+      - cp $$appcompat$$/libs/android-support-v4.jar libs/
+      - cp $$appcompat$$/libs/android-support-v7-appcompat.jar libs/
+      - cp -r $$Jericho$$/src/java/net/htmlparser/ src/net/
+      - cp $$Jericho$$/compile-time-dependencies/* libs/
+      - sed -i 's/make -j4/make -j2/g' scripts/*
+      - rm custom_rules.xml
+      - echo ndk.dir=$$NDK$$ >> local.properties
+      - chmod +x scripts/build-ffmpeg.sh
+    build: ./scripts/build-ffmpeg.sh
+    buildjni:
+      - yes
+
+  - versionName: 0.7.0
+    versionCode: 105
+    disable: Uses com.google.android.gms.cast.{MediaInfo,MediaStatus}
+    commit: v0.7.0
+    srclibs:
+      - 1:appcompat@ad5a63f
+      - Jericho@3.3
+    prebuild:
+      - cp $$appcompat$$/libs/android-support-v4.jar libs/
+      - cp $$appcompat$$/libs/android-support-v7-appcompat.jar libs/
+      - cp -r $$Jericho$$/src/java/net/htmlparser/ src/net/
+      - cp $$Jericho$$/compile-time-dependencies/* libs/
+      - sed -i 's/make -j4/make -j2/g' scripts/*
+      - rm custom_rules.xml
+      - echo ndk.dir=$$NDK$$ >> local.properties
+      - chmod +x scripts/build-ffmpeg.sh
+    target: android-19
+    build: ./scripts/build-ffmpeg.sh
+    buildjni:
+      - yes
+
+ArchivePolicy: 0 versions
+AutoUpdateMode: None
+UpdateCheckMode: Tags
+CurrentVersion: 0.7.0
+CurrentVersionCode: 105

@@ -1,0 +1,45 @@
+Categories:
+  - Games
+License: MIT
+SourceCode: https://github.com/alketii/mighty-knight
+IssueTracker: https://github.com/alketii/mighty-knight/issues
+
+Summary: Infinite runner
+Description: Help the mighty knight fight zombies and get rich.
+
+RepoType: git
+Repo: https://github.com/alketii/mighty-knight.git
+
+Builds:
+  - versionName: 1.0.0
+    versionCode: 1
+    commit: 60d1fcf8e44839db82eaa39cafb5e921cd89d0de
+    sudo:
+      - apt-get update
+      - apt-get install --yes g++
+    output: mighty_knight.apk
+    srclibs:
+      - Godot@b61462268e9a8a2c86c1abd5bc65cd96659fa979
+    prebuild:
+      - mkdir mighty_knight
+      - bash -O extglob -c "mv !(mighty_knight) mighty_knight"
+      - cp -R $$Godot$$ godot
+    target: android-19
+    build:
+      - cd godot
+      - scons -j `nproc` p=server unix_global_settings_path=".."
+      - export ANDROID_NDK_ROOT=$$NDK$$
+      - scons -j `nproc` p=android target=release
+      - pushd platform/android/java/
+      - gradle assembleRelease
+      - popd
+      - export HOME=$PWD
+      - mkdir -p ../templates/
+      - cp bin/android_release.apk ../templates
+      - cd ../mighty_knight
+      - ../godot/bin/godot_server.server.tools.* -export Android ../mighty_knight.apk
+
+AutoUpdateMode: None
+UpdateCheckMode: None
+CurrentVersion: 1.0.0
+CurrentVersionCode: 1
