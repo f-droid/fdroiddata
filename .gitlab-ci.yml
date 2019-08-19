@@ -63,6 +63,24 @@ pages:
     - gem install git_stats
     - git_stats generate --silent --out-path=public
 
+check_git_repos:
+  image: debian:buster-slim
+  stage: test
+  only:
+    - schedules
+  artifacts:
+    when: on_failure
+    expire_in: 1 month
+    paths:
+      - public
+  script:
+    - apt-get update
+    - apt-get -qy install --no-install-recommends ca-certificates git python3-yaml
+    - tools/check-git-repo-availability.py || export EXITVALUE=1
+    - test -d public || mkdir public
+    - cp `git status | grep -Eo 'metadata/.*\.yml'` public/ || true
+    - exit $EXITVALUE
+
 fdroid-buildserver:
   tags:
     - fdroid
