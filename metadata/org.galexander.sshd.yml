@@ -1,0 +1,37 @@
+Categories:
+  - Internet
+  - System
+License: GPL-2.0-only
+WebSite: http://www.galexander.org/software/simplesshd/
+
+AutoName: SimpleSSHD
+Summary: Easy to use SSH server
+Description: |-
+    SimpleSSHD is a SSH server Android app, based on Dropbear, written by Greg Alexander.
+
+    It allows user access (user ssh) or full root access (by setting the login shell to /system/xbin/su) (if root is allowed).
+
+RepoType: git
+Repo: http://galexander.org/git/simplesshd.git/
+
+Builds:
+  - versionName: '21'
+    versionCode: 21
+    commit: release_21
+    subdir: app
+    gradle:
+      - yes
+    prebuild:
+      - sed -i -e 's#~/Android/Sdk/ndk-bundle/#$$NDK$$/#' -e 's#./gradlew assembleRelease
+        &&#gradle assembleRelease#' -e '/andinst/d' ../doit
+      - sed -i -e '/keystore.properties/d' build.gradle
+    build:
+      - pushd ..
+      - ./doit
+      - popd
+    ndk: r19c
+
+AutoUpdateMode: None
+UpdateCheckMode: Tags
+CurrentVersion: '21'
+CurrentVersionCode: 21
