@@ -327,7 +327,40 @@ Builds:
       - 3party
     ndk: r19c
 
+  - versionName: 9.1.8-8
+    versionCode: 1062
+    commit: omim-9.1.8-8
+    timeout: 14400
+    subdir: android
+    submodules: true
+    sudo:
+      - apt update || apt update
+      - apt install -y g++
+    gradle:
+      - google
+    rm:
+      - 3party/Alohalytics/examples
+      - iphone
+      - tools/shaders_compiler
+    prebuild:
+      - sed -i -E -e '/\/\/ .* keys?$/,/^$/d' build.gradle
+      - sed -i -e '/versionName = /d' build.gradle
+      - sed -i -e '/^    <meta-data/,/^$/d' AndroidManifest.xml
+      - sed -i -e 's/!BuildConfig.FABRIC_API_KEY.startsWith("0000")/false/' src/com/mapswithme/maps/analytics/ExternalLibrariesMediator.java
+      - sed -i -e 's/BuildConfig.PW_APPID.equals(PW_EMPTY_APP_ID)/true/' src/com/mapswithme/maps/analytics/PushWooshEventLogger.java
+      - sed -i -e 's/enabled_ = true/enabled_ = false/' ../3party/Alohalytics/src/{alohalytics.h,cpp/alohalytics.cc}
+      - sed -i -e 's/MAPS.ME/Maps/' res/values*/strings.xml
+      - cd ../3party/boost
+      - ./bootstrap.sh
+      - ./b2 headers
+    scanignore:
+      - data/*.bin
+      - data/ugc_migration/*.bin
+    scandelete:
+      - 3party
+    ndk: r19c
+
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: 9.1.8-7
-CurrentVersionCode: 1061
+CurrentVersion: 9.1.8-8
+CurrentVersionCode: 1062
