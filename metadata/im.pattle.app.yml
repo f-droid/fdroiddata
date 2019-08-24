@@ -1,5 +1,3 @@
-AntiFeatures:
-  - Tracking
 Categories:
   - Connectivity
   - Phone & SMS
@@ -20,6 +18,8 @@ Description: |-
 
     Registration is not implemented at the moment, so to get an account,
     use [https://riot.im Riot] for now.
+
+    Also note that notifications are not implemented yet.
 
 RepoType: git
 Repo: https://git.pattle.im/pattle/app.git
@@ -42,8 +42,21 @@ Builds:
         } } } }' >> android/app/build.gradle
     build: $$flutter$$/bin/flutter build apk --flavor fdroid -v --suppress-analytics
 
+  - versionName: 0.11.2
+    versionCode: 671
+    commit: v0.11.2
+    output: build/app/outputs/apk/fdroid/release/app-fdroid-release.apk
+    srclibs:
+      - flutter@stable
+    prebuild:
+      - echo 'BUILD_TYPE=fdroid' > .env
+      - echo 'SENTRY_DSN=https://4e306dcaabef4fd99a3e6a024a9747bb@sentry.pattle.im/9'
+        >> .env
+      - 'echo "version: $$VERSION$$+$$VERCODE$$" >> pubspec.yaml'
+    build: $$flutter$$/bin/flutter build apk --flavor fdroid -v --suppress-analytics
+
 AutoUpdateMode: Version v%v
 UpdateCheckMode: HTTP
-UpdateCheckData: https://version.pattle.im/|\ ([0-9]+)|.|[0-9]+\.[0-9]+\.[0-9]+
-CurrentVersion: 0.10.1
-CurrentVersionCode: 636
+UpdateCheckData: https://version.pattle.im/|\ ([0-9]+)|.|([0-9]+\.[0-9]+\.[0-9]+)
+CurrentVersion: 0.11.2
+CurrentVersionCode: 671
