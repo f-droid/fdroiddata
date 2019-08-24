@@ -1,0 +1,159 @@
+AntiFeatures:
+  - NonFreeNet
+Categories:
+  - Development
+License: Apache-2.0
+WebSite: http://slapperwan.github.io/gh4a/
+SourceCode: https://github.com/slapperwan/gh4a
+IssueTracker: https://github.com/slapperwan/gh4a/issues
+Changelog: https://github.com/slapperwan/gh4a/releases
+
+AutoName: OctoDroid
+Summary: GitHub client
+Description: |-
+    Supports all the basic Github.com features, such as:
+
+    * Watch/unwatch repositories
+    * View branches/tags, pull requests etc. in each repo
+    * View and comment on issues
+    * Home page feed of recent actions and news
+    * Search for repositories
+    * Diff viewer with colorized HTML
+    * Trending repos (today, week, month, forever)
+
+    Uses OAuth2: your password is used to generate a key and is then destroyed. The
+    key can be revoked any time by visiting github.com. Formerly known as GH4A. This
+    application is currently in BETA: please report any issues to the issue tracker.
+
+RepoType: git
+Repo: https://github.com/slapperwan/gh4a.git
+
+Builds:
+  - versionName: '3.6'
+    versionCode: 36
+    commit: 53d2e5bbfd76d8ad4a779913df7b3f193fb19a3e
+    patch:
+      - bugsense.patch
+    gradle:
+      - yes
+    prebuild: rm -rf libs/android-support-v4.jar
+
+  - versionName: 3.7.1
+    versionCode: 38
+    commit: v3.7.1
+    patch:
+      - mint.patch
+      - gradle.patch
+    gradle:
+      - yes
+    srclibs:
+      - GH4AGitHubAPI@3d1878bd48d9aa3817a91b5a193b600c31e0406
+      - ViewPagerIndicator@2.4.1
+    prebuild:
+      - rm -rf libs/*.jar
+      - cp -a $$GH4AGitHubAPI$$/src/org src
+      - sed -i -e '/populov/d' -e '/mavenCentral/imavenLocal()' build.gradle
+      - pushd $$ViewPagerIndicator$$
+      - sed -i 's;<android-maven.version>3.3.0</android-maven.version>;<android-maven.version>3.7.0</android-maven.version>;'
+        ../pom.xml pom.xml
+      - sed -i -e 's/apklib/aar/g' pom.xml
+      - rm libs/*
+      - cd ..
+      - $$MVN3$$ install
+      - popd
+
+  - versionName: '3.8'
+    versionCode: 40
+    commit: v3.8.0
+    gradle:
+      - yes
+    srclibs:
+      - GH4AGitHubAPI@746ef8c843e4dfbd8505f72b6a2dbb23559f4ca6
+      - PreferenceFragment@717a45433b
+    prebuild:
+      - rm -rf libs/*.jar
+      - cp -a $$GH4AGitHubAPI$$/src/org src
+      - sed -i -e '/\(populov\|kolavar\|kageiit\)/d' build.gradle
+      - sed -i -e "s/compile.*preferencefragment.*/compile project('preferencefragment')/"
+        build.gradle
+      - echo -e "include ':preferencefragment'\nproject(':preferencefragment').projectDir
+        = new File('../srclib/PreferenceFragment')" > settings.gradle
+      - sed -i -e "s/0.10.+/1.0.0/" $$PreferenceFragment$$/build.gradle
+      - sed -i -e '/[Cc]rashlytics/d' build.gradle AndroidManifest.xml src/com/gh4a/Gh4Application.java
+
+  - versionName: 3.8.1
+    versionCode: 41
+    commit: v3.8.1
+    gradle:
+      - yes
+    srclibs:
+      - GH4AGitHubAPI@746ef8c843e4dfbd8505f72b6a2dbb23559f4ca6
+      - PreferenceFragment@717a45433b
+    prebuild:
+      - rm -rf libs/*.jar
+      - cp -a $$GH4AGitHubAPI$$/src/org src
+      - sed -i -e '/\(populov\|kolavar\|kageiit\)/d' build.gradle
+      - sed -i -e "s/compile.*preferencefragment.*/compile project('preferencefragment')/"
+        build.gradle
+      - echo -e "include ':preferencefragment'\nproject(':preferencefragment').projectDir
+        = new File('../srclib/PreferenceFragment')" > settings.gradle
+      - sed -i -e "s/0.10.+/1.0.0/" $$PreferenceFragment$$/build.gradle
+      - sed -i -e '/[Cc]rashlytics/d' build.gradle AndroidManifest.xml src/com/gh4a/Gh4Application.java
+
+  - versionName: 4.0.2
+    versionCode: 45
+    disable: third party maven repos, jars, non-free deps
+    commit: v4.0.2
+    gradle:
+      - yes
+
+  - versionName: 4.2.0
+    versionCode: 54
+    commit: v4.2.0
+    subdir: app
+    patch:
+      - 0001-remove-nonfree-dependencies.patch
+      - 0002-add-clientid-and-secret.patch
+    gradle:
+      - foss
+
+  - versionName: 4.2.1
+    versionCode: 55
+    commit: v4.2.1
+    subdir: app
+    gradle:
+      - foss
+    prebuild: sed -i -e '/fabric/d' -e '/playstoreCompile(.*) {/,/}/d' -e s/ClientId/\'\"f0f32f2ee4a709ba3640\"\'/
+        -e s/ClientSecret/\'\"f94cffda88486696c2762ad986bc0b8b830c9cff\"\'/ build.gradle
+
+  - versionName: 4.3.1
+    versionCode: 58
+    commit: v4.3.1
+    subdir: app
+    gradle:
+      - foss
+    prebuild: sed -i -e '/fabric/d' -e '/playstoreImplementation(.*) {/,/}/d' -e s/ClientId/\'\"f0f32f2ee4a709ba3640\"\'/
+        -e s/ClientSecret/\'\"f94cffda88486696c2762ad986bc0b8b830c9cff\"\'/ build.gradle
+
+  - versionName: 4.3.2
+    versionCode: 59
+    commit: v4.3.2
+    subdir: app
+    gradle:
+      - foss
+    prebuild: sed -i -e '/fabric/d' -e '/playstoreImplementation(.*) {/,/}/d' -e s/ClientId/\'\"f0f32f2ee4a709ba3640\"\'/
+        -e s/ClientSecret/\'\"f94cffda88486696c2762ad986bc0b8b830c9cff\"\'/ build.gradle
+
+  - versionName: 4.4.0
+    versionCode: 60
+    commit: v4.4.0
+    subdir: app
+    gradle:
+      - foss
+    prebuild: sed -i -e '/fabric/d' -e '/playstoreImplementation(.*) {/,/}/d' -e s/ClientId/\'\"f0f32f2ee4a709ba3640\"\'/
+        -e s/ClientSecret/\'\"f94cffda88486696c2762ad986bc0b8b830c9cff\"\'/ build.gradle
+
+AutoUpdateMode: Version v%v
+UpdateCheckMode: Tags
+CurrentVersion: 4.4.0
+CurrentVersionCode: 60
