@@ -6,31 +6,26 @@ License: GPL-3.0-only
 SourceCode: https://github.com/LithiumSR/openstud_client
 IssueTracker: https://github.com/LithiumSR/openstud_client/issues
 
-AutoName: OpenStud
-
 RepoType: git
 Repo: https://github.com/LithiumSR/openstud_client.git
 
 Builds:
-  - versionName: 1.25.4
-    versionCode: 160
-    commit: 1.25.4
-    subdir: app
-    gradle:
-      - foss
-    prebuild:
-      - sed -i -e '/getTaskNames/,+5d' -e '/getTaskNames/,+5d' build.gradle
-      - sed -i -e '/getTaskNames/,+6d' ../build.gradle
-
   - versionName: 1.25.5
     versionCode: 161
     commit: 1.25.5
     subdir: app
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y gawk
     gradle:
       - foss
     prebuild:
-      - sed -i -e '/getTaskNames/,+5d' -e '/getTaskNames/,+5d' build.gradle
-      - sed -i -e '/getTaskNames/,+6d' ../build.gradle
+      - gawk 'd==0{m=0} /isGooglePlayFlavor()/{m=1} m==1&&/{/{d++} d==0{print} m==1&&/}/{d--}'
+        build.gradle > build.tmp
+      - mv build.tmp build.gradle
+      - gawk 'd==0{m=0} /isGooglePlayFlavor()/{m=1} m==1&&/{/{d++} d==0{print} m==1&&/}/{d--}'
+        ../build.gradle > ../build.tmp
+      - mv ../build.tmp ../build.gradle
 
 AutoUpdateMode: Version %v
 UpdateCheckMode: Tags
