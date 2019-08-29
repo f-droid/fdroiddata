@@ -1,0 +1,56 @@
+Categories:
+  - Internet
+License: GPL-3.0-or-later
+WebSite: https://github.com/lgallard/qBittorrent-Client/wiki
+SourceCode: https://github.com/lgallard/qBittorrent-Client
+IssueTracker: https://github.com/lgallard/qBittorrent-Client/issues
+Changelog: https://github.com/lgallard/qBittorrent-Controller/releases
+
+AutoName: qBittorrent Client Pro
+Summary: Companion app for qBittorrent client
+Description: |-
+    Manage the queue of your qBittorrent client. Features include:
+
+    * See a two panel view (fragments) for torrent list and details in the same window
+    * Drawer menu for switching between All, Downloading, Completed, Paused, Active and Inactive torrent list
+    * Pause or resume all torrents from the selected list
+    * Auto refresh torrent list after performing an action on a torrent (pause, resume, or delete)
+    * Add URL directly or by clicking the torrent link on your device's browser
+    * Pause, resume, or delete individual torrents with its downloaded data
+    * Set and save a connection account
+
+RepoType: git
+Repo: https://github.com/lgallard/qBittorrent-Client/
+
+Builds:
+  - versionName: 3.9.0
+    versionCode: 390
+    commit: v3.9.0
+    subdir: qBittorrentClient/app
+    patch:
+      - remove_ads_390.patch
+    gradle:
+      - pro
+    srclibs:
+      - ApacheHttpClient@4.3.5
+      - ApacheHttpCore@4.3.2
+    rm:
+      - qBittorrentClient/app/libs/*
+    prebuild: sed -i '/com.google.android.gms:play-services/d' build.gradle
+    build:
+      - pushd $$ApacheHttpClient$$/httpclient/
+      - $$MVN3$$ package
+      - popd
+      - pushd $$ApacheHttpClient$$/httpmime/
+      - $$MVN3$$ package
+      - popd
+      - pushd $$ApacheHttpCore$$/httpcore
+      - $$MVN3$$ package
+      - popd
+      - cp $$ApacheHttpCore$$/httpcore/target/httpcore-4.3.2.jar $$ApacheHttpClient$$/httpclient/target/httpclient-4.3.5.jar
+        $$ApacheHttpClient$$/httpmime/target/httpmime-4.3.5.jar libs/
+
+AutoUpdateMode: None
+UpdateCheckMode: Tags
+CurrentVersion: 4.5.8
+CurrentVersionCode: 458
