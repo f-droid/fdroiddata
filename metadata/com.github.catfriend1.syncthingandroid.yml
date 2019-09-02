@@ -900,7 +900,33 @@ Builds:
       - PATH="$PWD/go/bin:$PATH" gradle buildNative
     ndk: r19c
 
+  - versionName: 1.2.2.3
+    versionCode: 1020203
+    commit: v1.2.2.3
+    submodules: true
+    gradle:
+      - yes
+    output: app/build/outputs/apk/release/app-release-unsigned.apk
+    rm:
+      - syncthing/src/github.com/syncthing/syncthing/lib/model/testdata
+    prebuild: sed -i -e '/signingConfig/d' app/build.gradle
+    build:
+      - wget -O go.tgz https://dl.google.com/go/go1.13rc2.linux-amd64.tar.gz
+      - echo '3cd4490021a5f1f25a7440edca03910e40a38e587b578cf52ab7143a81db1861  go.tgz'
+        | shasum -c -
+      - tar xf go.tgz
+      - PATH="$PWD/go/bin:$PATH" gradle buildNative
+    ndk: r20
+
+MaintainerNotes: |-
+    The submodule in syncthing/src/github.com/syncthing/syncthing must be
+    pristine, as the version/release information is taken from git.
+    The ignored directory
+    syncthing/src/github.com/syncthing/syncthing/lib/model/testdata
+    contains pre-generated data for testing and is thus not involved in the build
+    process.
+
 AutoUpdateMode: Version v%v
 UpdateCheckMode: Tags ^v[a-z0-9.]*$
-CurrentVersion: 1.2.2.1
-CurrentVersionCode: 1020201
+CurrentVersion: 1.2.2.3
+CurrentVersionCode: 1020203
