@@ -1,0 +1,46 @@
+Categories:
+  - Games
+License: GPL-3.0-or-later
+
+AutoName: WonderDroid X
+Summary: Bandai Wonderswan emulator
+Description: |-
+    WonderDroid X, based on WonderDroid, is a WSC emulator. It comes with many features you'd expect, including support for both monochrome and color games, cartridge saves, external keyboard controls, save/load states*, frame skip and sharpness adjustments, and more.
+
+    Languages/言語: English, 日本語, 繁體中文, 简体中文
+
+    NOTES
+    - No games are bundled with the emulator.
+    - WonderDroid X is not officially supported on tablet devices.
+    - This project is not affiliated with or licensed by BANDAI Co., Ltd.
+    - Android is a trademark of Google LLC.
+
+    * Save/load states is an experimental feature that's currently being rolled out.
+
+RepoType: git
+Repo: https://github.com/williehwc/wonderdroid-x.git
+
+Builds:
+  - versionName: '3.1'
+    versionCode: 51
+    commit: v3.1
+    subdir: app
+    gradle:
+      - yes
+    rm:
+      - app/libs
+    prebuild: sed -i -e "s|files('libs/commons-io-2.1.jar')|'commons-io:commons-io:2.1'|"
+        build.gradle
+    scandelete:
+      - app/src/main/jniLibs/
+    build:
+      - pushd src/main/jni
+      - $$NDK$$/ndk-build
+      - popd
+      - mv src/main/libs/* src/main/jniLibs/
+    ndk: r12b
+
+AutoUpdateMode: Version v%v
+UpdateCheckMode: Tags
+CurrentVersion: '3.1'
+CurrentVersionCode: 51
