@@ -819,88 +819,22 @@ Builds:
       - npm run build-android-assets
     ndk: r17b
 
-  - versionName: 0.1908.23-beta
-    versionCode: 65
-    commit: v0.1908.23-beta
-    subdir: android/app
-    sudo:
-      - apt-get update || apt-get update
-      - apt-get install -y --no-install-recommends g++ lib32stdc++-6-dev libc6-dev-i386
-        ninja-build linux-libc-dev linux-libc-dev:i386 -t stretch-backports npm
-      - npm install -g react-native-cli
-    init:
-      - sed -i -e '/appium/d' ../../package.json
-      - npm install
-      - truncate -s 0 ../../node_modules/@react-native-community/cli/build/commands/server/external/xsel
-    gradle:
-      - yes
-    srclibs:
-      - NodejsMobile@nodejs-mobile-v0.2.1
-    rm:
-      - node_modules/react-native/ReactAndroid/src/main/third-party/java/buck-android-support/buck-android-support.jar
-      - node_modules/*/build/Release/*.node
-      - node_modules/sodium-native/prebuilds/
-      - node_modules/react-native-android-wifi/Examples/
-    prebuild: sed -i -e '/lifecycle/d' ../build.gradle
-    scanignore:
-      - android/build.gradle
-    scandelete:
-      - node_modules
-    build:
-      - pushd $$NodejsMobile$$
-      - ./tools/android_build.sh $$NDK$$ arm
-      - popd
-      - mv $$NodejsMobile$$/out_android/armeabi-v7a/libnode.so ../../node_modules/nodejs-mobile-react-native/android/libnode/bin/armeabi-v7a/libnode.so
-      - npm run build-android-assets
-    ndk: r19c
-
-  - versionName: 0.1908.28-beta
-    versionCode: 67
-    commit: v0.1908.28-beta
-    subdir: android/app
-    sudo:
-      - apt-get update || apt-get update
-      - apt-get install -y --no-install-recommends g++ lib32stdc++-6-dev libc6-dev-i386
-        ninja-build linux-libc-dev linux-libc-dev:i386 -t stretch-backports npm
-      - npm install -g react-native-cli
-    init:
-      - sed -i -e '/appium/d' ../../package.json
-      - npm install
-      - truncate -s 0 ../../node_modules/@react-native-community/cli/build/commands/server/external/xsel
-    gradle:
-      - yes
-    srclibs:
-      - NodejsMobile@nodejs-mobile-v0.2.1
-    rm:
-      - node_modules/react-native/ReactAndroid/src/main/third-party/java/buck-android-support/buck-android-support.jar
-      - node_modules/*/build/Release/*.node
-      - node_modules/sodium-native/prebuilds/
-      - node_modules/react-native-android-wifi/Examples/
-    prebuild: sed -i -e '/lifecycle/d' ../build.gradle
-    scanignore:
-      - android/build.gradle
-    scandelete:
-      - node_modules
-    build:
-      - pushd $$NodejsMobile$$
-      - ./tools/android_build.sh $$NDK$$ arm
-      - popd
-      - mv $$NodejsMobile$$/out_android/armeabi-v7a/libnode.so ../../node_modules/nodejs-mobile-react-native/android/libnode/bin/armeabi-v7a/libnode.so
-      - npm run build-android-assets
-    ndk: r19c
-
   - versionName: 0.1909.2-beta
     versionCode: 68
-    commit: v0.1909.2-beta
+    commit: v0.1909.2-beta.c
     subdir: android/app
     sudo:
       - apt-get update || apt-get update
       - apt-get install -y --no-install-recommends g++ lib32stdc++-6-dev libc6-dev-i386
-        ninja-build linux-libc-dev linux-libc-dev:i386 -t stretch-backports npm
+        ninja-build linux-libc-dev linux-libc-dev:i386
+      - curl -Lo node.tar.xz https://nodejs.org/dist/v10.16.3/node-v10.16.3-linux-x64.tar.xz
+      - echo "d2271fd8cf997fa7447d638dfa92749ff18ca4b0d796bf89f2a82bf7800d5506 node.tar.xz"
+        | sha256sum -c -
+      - tar xJf node.tar.xz
+      - cp -a node-v10.16.3-linux-x64/. /usr/local/
       - npm install -g react-native-cli
     init:
-      - sed -i -e '/appium/d' ../../package.json
-      - npm install
+      - npm install --no-optional
       - truncate -s 0 ../../node_modules/@react-native-community/cli/build/commands/server/external/xsel
     gradle:
       - yes
@@ -909,7 +843,6 @@ Builds:
     rm:
       - node_modules/react-native/ReactAndroid/src/main/third-party/java/buck-android-support/buck-android-support.jar
       - node_modules/*/build/Release/*.node
-      - node_modules/sodium-native/prebuilds/
       - node_modules/react-native-android-wifi/Examples/
     prebuild: sed -i -e '/lifecycle/d' ../build.gradle
     scanignore:
@@ -919,15 +852,16 @@ Builds:
     build:
       - pushd $$NodejsMobile$$
       - ./tools/android_build.sh $$NDK$$ arm
+      - ./tools/android_build.sh $$NDK$$ arm64
       - popd
       - mv $$NodejsMobile$$/out_android/armeabi-v7a/libnode.so ../../node_modules/nodejs-mobile-react-native/android/libnode/bin/armeabi-v7a/libnode.so
+      - mv $$NodejsMobile$$/out_android/arm64-v8a/libnode.so ../../node_modules/nodejs-mobile-react-native/android/libnode/bin/arm64-v8a/libnode.so
       - npm run build-android-assets
     ndk: r19c
 
-MaintainerNotes: |-
-    scanignore is used to allow the "node_modules/react-native/android" local Maven repository which contains the prebuilt react-native library which we get from npm.
-
-    appium is removed because it fails to build on the build server due to some missing dev dependencies and we don't need it anyway.
+MaintainerNotes: scanignore is used to allow the "node_modules/react-native/android"
+    local Maven repository which contains the prebuilt react-native library which
+    we get from npm.
 
 AutoUpdateMode: Version v%v
 UpdateCheckMode: Tags
