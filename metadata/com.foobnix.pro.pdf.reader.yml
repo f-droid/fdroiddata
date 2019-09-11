@@ -80,10 +80,40 @@ Builds:
       - ./link_to_mupdf_1.11.sh
     ndk: r17c
 
+  - versionName: 8.1.275-fdroid
+    versionCode: 3136
+    commit: 8.1.275
+    subdir: app/
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y g++-6 mesa-common-dev libxcursor-dev libxrandr-dev libxinerama-dev
+        libgl1-mesa-dev
+    gradle:
+      - fdroid
+    srclibs:
+      - MuPDF@1.16.1
+    rm:
+      - Builder/libs/
+    prebuild:
+      - sed -i -e '/F-DROID REMOVE THIS LINE/,+1d' ../build.gradle
+      - sed -i -e '/com.google.gms.google-services/d' -e '/com.google.android.gms/d'
+        -e '/com.cloudrail/d' build.gradle
+      - sed -i -e '/git clone/d' -e 's#cd mupdf-1.16.1#pushd '$PWD'/$$MuPDF$$#' -e
+        's#/home/ivan-dev/git/LibreraReader/Builder/mupdf-1.16.1#'$PWD'/$$MuPDF$$#'
+        -e 's#/home/ivan-dev/git/LibreraReader/app/src/main/jniLibs#'$PWD'/src/main/jniLibs#'
+        -e 's#cd \.\.#popd#' ../Builder/link_to_mupdf_1.16.1.sh
+      - mkdir src/main/jniLibs/
+    scandelete:
+      - Builder/
+    build:
+      - pushd ../Builder/
+      - ./link_to_mupdf_1.16.1.sh
+    ndk: r17c
+
 MaintainerNotes: Upstream builds separate APKs for each architecture but we build
     an universal APK.
 
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: 8.0.38-fdroid
-CurrentVersionCode: 1098
+CurrentVersion: 8.1.275-fdroid
+CurrentVersionCode: 3136
