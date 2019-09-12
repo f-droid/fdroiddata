@@ -1,0 +1,390 @@
+Categories:
+  - Internet
+License: GPL-2.0-only
+WebSite: http://ics-openvpn.blinkt.de/
+SourceCode: https://github.com/schwabe/ics-openvpn
+IssueTracker: https://github.com/schwabe/ics-openvpn/issues
+
+AutoName: OpenVPN for Android
+Summary: OpenVPN without root
+Description: |-
+    With the VPNService in Android 4.0+ it is possible to create a VPN that doesn't
+    need root access.
+
+RepoType: git
+Repo: https://github.com/schwabe/ics-openvpn
+
+Builds:
+  - versionName: 0.5.21
+    versionCode: 48
+    disable: broken v0.5.21
+    commit: unknown - see disabled
+    buildjni:
+      - yes
+
+  - versionName: 0.5.22
+    versionCode: 49
+    disable: broken v0.5.22
+    commit: unknown - see disabled
+    buildjni:
+      - yes
+
+  - versionName: 0.5.24
+    versionCode: 51
+    disable: broken too v0.5.24
+    commit: unknown - see disabled
+    prebuild:
+      - sed -i 's/ndk-build APP_API=all -j 8/ndk-build APP_ABI=all -j 2/g' build-native.sh
+      - ./build-native.sh
+    target: android-14
+
+  - versionName: 0.5.35
+    versionCode: 63
+    disable: broken too v0.5.35
+    commit: unknown - see disabled
+    prebuild:
+      - sed -i 's/-j 8/-j 2/g' build-native.sh
+      - ./build-native.sh
+    target: android-17
+
+  - versionName: 0.5.47
+    versionCode: 80
+    commit: v0.5.47
+    gradle:
+      - yes
+    rm:
+      - assets
+    prebuild:
+      - sed -i '/google-breakpad/d' jni/Android.mk
+      - sed -i -e '/+=.*breakpad/d' -e 's/ [^ ]*breakpad[^ ]*//' openvpn/Android.mk
+      - find openvpn/src -type f -print0 | xargs -0 sed -i '/breakpad/d'
+      - rm -f openvpn/src/openvpn/breakpad.*
+    build:
+      - echo WITH_BREAKPAD=0 >> jni/Android.mk
+      - sed -i 's/-j 8/-j 4/g' misc/build-native.sh
+      - ./misc/build-native.sh
+
+  - versionName: 0.6.0
+    versionCode: 81
+    commit: v0.6.0
+    gradle:
+      - yes
+    prebuild:
+      - sed -i '/google-breakpad/d' jni/Android.mk
+      - sed -i -e '/+=.*breakpad/d' -e 's/ [^ ]*breakpad[^ ]*//' openvpn/Android.mk
+      - find openvpn/src -type f -print0 | xargs -0 sed -i '/breakpad/d'
+      - rm -f openvpn/src/openvpn/breakpad.*
+      - mv src/de/blinkt/openvpn/fragments/SeekbarTicks.java src/de/blinkt/openvpn/fragments/SeekBarTicks.java
+    scandelete:
+      - assets
+    build:
+      - echo WITH_BREAKPAD=0 >> jni/Android.mk
+      - sed -i 's/-j 8/-j 4/g' misc/build-native.sh
+      - ./misc/build-native.sh
+
+  - versionName: 0.6.1
+    versionCode: 82
+    commit: v0.6.1
+    gradle:
+      - yes
+    prebuild:
+      - sed -i '/google-breakpad/d' jni/Android.mk
+      - sed -i -e '/+=.*breakpad/d' -e 's/ [^ ]*breakpad[^ ]*//' openvpn/Android.mk
+      - find openvpn/src -type f -print0 | xargs -0 sed -i '/breakpad/d'
+      - rm -f openvpn/src/openvpn/breakpad.*
+    scandelete:
+      - assets
+    build:
+      - echo WITH_BREAKPAD=0 >> jni/Android.mk
+      - sed -i 's/-j 8/-j 4/g' misc/build-native.sh
+      - ./misc/build-native.sh
+
+  - versionName: 0.6.5
+    versionCode: 86
+    commit: v0.6.5
+    gradle:
+      - yes
+    prebuild:
+      - sed -i '/google-breakpad/d' jni/Android.mk
+      - sed -i -e '/+=.*breakpad/d' -e 's/ [^ ]*breakpad[^ ]*//g' openvpn/Android.mk
+      - find openvpn/src -type f -print0 | xargs -0 sed -i '/breakpad/d'
+      - rm -f openvpn/src/openvpn/breakpad.*
+    scandelete:
+      - assets
+    build:
+      - echo WITH_BREAKPAD=0 >> jni/Android.mk
+      - sed -i 's/-j 8/-j 4/g' misc/build-native.sh
+      - sed -e '/HAVE_CONFIG_VERSION_H/ d' -i openvpn/config.h
+      - ./misc/build-native.sh
+
+  - versionName: 0.6.9a
+    versionCode: 90
+    commit: v0.6.9a-production
+    subdir: main
+    gradle:
+      - yes
+    prebuild: sed -i -e 's/WITH_BREAKPAD=.*/WITH_BREAKPAD=0/' -e '/include google-breakpad/d'
+        jni/Android.mk
+    build: ./misc/build-native.sh
+
+  - versionName: 0.6.10
+    versionCode: 91
+    commit: v0.6.10-production
+    subdir: main
+    gradle:
+      - yes
+    build: ./misc/build-native.sh USE_BREAKPAD=0
+
+  - versionName: 0.6.11
+    versionCode: 92
+    commit: v0.6.11-production
+    subdir: main
+    gradle:
+      - normal
+    build: ./misc/build-native.sh USE_BREAKPAD=0
+
+  - versionName: 0.6.17
+    versionCode: 98
+    commit: v0.6.17-production
+    subdir: main
+    gradle:
+      - normal
+    prebuild: for f in $(find . -name "*.s"); do mv $f ${f%%.s}.S; done
+    build: ./misc/build-native.sh USE_BREAKPAD=0
+
+  - versionName: 0.6.26
+    versionCode: 107
+    commit: v0.6.26-production
+    subdir: main
+    gradle:
+      - normal
+    build: ./misc/build-native.sh USE_BREAKPAD=0
+
+  - versionName: 0.6.30
+    versionCode: 111
+    commit: v0.6.30-production
+    subdir: main
+    submodules: true
+    gradle:
+      - normal
+    build: ./misc/build-native.sh USE_BREAKPAD=0
+
+  - versionName: 0.6.35
+    versionCode: 116
+    commit: v0.6.35-production
+    subdir: main
+    submodules: true
+    gradle:
+      - normal
+    build: ./misc/build-native.sh USE_BREAKPAD=0
+
+  - versionName: 0.6.44
+    versionCode: 124
+    commit: v0.6.44-production
+    subdir: main
+    submodules: true
+    gradle:
+      - normal
+    build: ./misc/build-native.sh USE_BREAKPAD=0
+
+  - versionName: 0.6.46
+    versionCode: 126
+    disable: no submodule mapping found in .gitmodules for path 'main/breakpad'
+    commit: v0.6.46-production
+    subdir: main
+    submodules: true
+    gradle:
+      - normal
+    build: ./misc/build-native.sh USE_BREAKPAD=0
+
+  - versionName: 0.6.47
+    versionCode: 127
+    commit: v0.6.47-production
+    subdir: main
+    submodules: true
+    gradle:
+      - normal
+    build: ./misc/build-native.sh
+
+  - versionName: 0.6.48
+    versionCode: 128
+    commit: v0.6.48-production
+    subdir: main
+    submodules: true
+    gradle:
+      - normal
+    build: ./misc/build-native.sh
+
+  - versionName: 0.6.49
+    versionCode: 129
+    commit: v0.6.49-production
+    subdir: main
+    submodules: true
+    gradle:
+      - normal
+    build: ./misc/build-native.sh
+
+  - versionName: 0.6.52
+    versionCode: 132
+    commit: v0.6.52-production
+    subdir: main
+    submodules: true
+    gradle:
+      - normal
+    build: ./misc/build-native.sh
+
+  - versionName: 0.6.54
+    versionCode: 135
+    commit: v0.6.54-production
+    subdir: main
+    submodules: true
+    gradle:
+      - normal
+    build: ./misc/build-native.sh
+
+  - versionName: 0.6.57
+    versionCode: 138
+    commit: v0.6.57-production
+    subdir: main
+    submodules: true
+    gradle:
+      - normal
+    build: ./misc/build-native.sh
+
+  - versionName: 0.6.60
+    versionCode: 141
+    commit: v0.6.60-production
+    subdir: main
+    submodules: true
+    gradle:
+      - normal
+    scandelete:
+      - main/breakpad
+    build: USE_BREAKPAD=0 ./misc/build-native.sh
+
+  - versionName: 0.6.63
+    versionCode: 144
+    commit: v0.6.63-production
+    subdir: main
+    submodules: true
+    gradle:
+      - normal
+    scandelete:
+      - main/breakpad
+    build: USE_BREAKPAD=0 ./misc/build-native.sh
+
+  - versionName: 0.6.64
+    versionCode: 145
+    commit: v0.6.64
+    subdir: main
+    submodules: true
+    gradle:
+      - normal
+    prebuild:
+      - sed -i -e '/classpath/s/gradle:2.3.0-beta1/gradle:2.3.0-beta3/g' ../build.gradle
+      - sed -i -e 's/gradle-3.2/gradle-3.3/g' ../gradle/wrapper/gradle-wrapper.properties
+    scandelete:
+      - main/breakpad
+    build: USE_BREAKPAD=0 ./misc/build-native.sh
+
+  - versionName: 0.6.66
+    versionCode: 147
+    commit: v0.6.66
+    subdir: main
+    submodules: true
+    gradle:
+      - normal
+    prebuild: echo -e "android { lintOptions { disable 'MissingTranslation'\n\ndisable
+        'ExtraTranslation' }}" >> build.gradle
+    scandelete:
+      - main/breakpad
+    build: USE_BREAKPAD=0 ./misc/build-native.sh
+    ndk: r14
+
+  - versionName: 0.6.71
+    versionCode: 151
+    commit: v0.6.71
+    subdir: main
+    submodules: true
+    gradle:
+      - normal
+    prebuild: echo -e "android { lintOptions { disable 'MissingTranslation'\n\ndisable
+        'ExtraTranslation' }}" >> build.gradle
+    scandelete:
+      - main/breakpad
+    build: USE_BREAKPAD=0 ./misc/build-native.sh
+    ndk: r15b
+
+  - versionName: 0.6.73
+    versionCode: 153
+    commit: v0.6.73-production
+    subdir: main
+    submodules: true
+    gradle:
+      - normal
+    prebuild: echo -e "android { lintOptions { disable 'MissingTranslation'\n\ndisable
+        'ExtraTranslation' }}" >> build.gradle
+    scandelete:
+      - main/breakpad
+    build: USE_BREAKPAD=0 ./misc/build-native.sh
+    ndk: r15b
+
+  - versionName: 0.7.5
+    versionCode: 158
+    commit: v0.7.5-production
+    subdir: main
+    submodules: true
+    sudo:
+      - apt update
+      - apt install -y swig/jessie-backports
+    gradle:
+      - normal
+    rm:
+      - main/src/main/cpp/mbedtls/tests
+    scandelete:
+      - main/breakpad
+    ndk: r16b
+
+  - versionName: 0.7.6
+    versionCode: 159
+    commit: v0.7.6
+    subdir: main
+    submodules: true
+    gradle:
+      - normal
+    rm:
+      - main/src/main/cpp/mbedtls/tests
+    ndk: r16b
+
+  - versionName: 0.7.7
+    versionCode: 160
+    commit: v0.7.7
+    subdir: main
+    submodules: true
+    gradle:
+      - normal
+    rm:
+      - main/src/main/cpp/mbedtls/tests
+    ndk: r16b
+
+  - versionName: 0.7.8
+    versionCode: 161
+    commit: v0.7.8
+    subdir: main
+    submodules: true
+    gradle:
+      - normal
+    rm:
+      - main/src/main/cpp/mbedtls/tests
+    scandelete:
+      - .gradle
+    ndk: r19c
+
+MaintainerNotes: |-
+    Build instructions:
+    https://github.com/schwabe/ics-openvpn/blob/master/.travis.yml
+
+AutoUpdateMode: Version v%v
+UpdateCheckMode: Tags
+CurrentVersion: 0.7.7
+CurrentVersionCode: 160
