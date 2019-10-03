@@ -1,0 +1,754 @@
+AntiFeatures:
+  - NonFreeAdd
+Categories:
+  - Security
+  - Internet
+License: GPL-3.0-only
+AuthorName: ukpriya
+AuthorEmail: uzoftinc+afwall@gmail.com
+WebSite: https://github.com/ukanth/afwall/wiki
+SourceCode: https://github.com/ukanth/afwall
+IssueTracker: https://github.com/ukanth/afwall/issues
+Translation: http://crowdin.net/project/afwall
+Changelog: https://github.com/ukanth/afwall/blob/HEAD/Changelog.md
+Donate: https://github.com/ukanth/afwall/wiki#making-donations
+Bitcoin: 1LBUdALwYXDv38wvnUSGvsFjituaWAHvFo
+
+AutoName: AFWall+
+Summary: Control network traffic
+Description: |-
+    Firewall (iptables frontend), based on DroidWall which is no longer being
+    developed. A paid "donate"-version with more features it advertised within the
+    app.
+
+    * Import/Export Rules to external storage
+    * Search Applications
+    * Multiple profiles with custom names
+    * Highlights system applications with custom color
+    * Notify on new installations
+    * VPN Support
+    * Device Admin support to protect against being uninstalled
+
+    Requires root: Yes. iptables must run as root.
+
+RequiresRoot: 'yes'
+
+RepoType: git
+Repo: https://github.com/ukanth/afwall.git
+
+Builds:
+  - versionName: 1.2.0
+    versionCode: 120
+    commit: 1.2.0
+    srclibs:
+      - ActionBarSherlock@4.2.0
+      - LockPattern@1c1307
+      - Busybox@83785f0
+      - iptables@android-4.2.2_r1
+    extlibs:
+      - android/android-support-v4.jar
+    prebuild:
+      - rm -rf res/raw/busybox_g1 res/raw/iptables_armv5 external/
+      - mv libs/android-support-v4.jar $$ActionBarSherlock$$/libs/
+      - sed -i 's@\(android.library.reference.1=\).*@\1$$ActionBarSherlock$$@' project.properties
+      - sed -i 's@\(android.library.reference.2=\).*@\1$$LockPattern$$@' project.properties
+      - export PATH=$$NDK$$/toolchains/arm-linux-androideabi-4.4.3/prebuilt/linux-x86/bin:$PATH
+      - mkdir -p bb/
+      - cp -r $$Busybox$$/* bb/
+      - cd bb/
+      - wget https://raw.github.com/tias/android-busybox-ndk/bd2bf4f384350a2bb2f81444012a882ddd48662a/android_ndk_defconfigPlus
+      - mv android_ndk_defconfigPlus .config
+      - make CONFIG_SYSROOT="$$NDK$$/platforms/android-9/arch-arm"
+      - mv busybox ../res/raw/busybox_g1
+      - cd ../
+      - git clone https://android.googlesource.com/platform/external/iptables
+      - cd iptables
+      - wget https://hg.adblockplus.org/adblockplusandroid/raw-file/c3c62b79e758/iptables.patch
+        -P ../
+      - git apply ../iptables.patch
+      - sed -i 's@ndk-build@$$NDK$$/ndk-build@g' Makefile
+      - make fixextensions build
+      - mv libs/armeabi/iptables ../res/raw/iptables_armv5
+
+  - versionName: 1.2.4
+    versionCode: 124
+    commit: v1.2.4
+    srclibs:
+      - ActionBarSherlock@4.2.0
+      - LockPattern@1c1307
+      - Busybox@1_21_0
+      - BusyboxConfigs@e71bc43bd0
+      - iptables@android-4.2.2_r1
+    extlibs:
+      - android/android-support-v4.jar
+      - afwall.patch
+    prebuild:
+      - rm -rf res/raw/busybox_g1 res/raw/iptables_armv5 external/busybox/* external/iptables/*
+      - mv libs/android-support-v4.jar $$ActionBarSherlock$$/libs/
+      - sed -i 's@\(android.library.reference.1=\).*@\1$$ActionBarSherlock$$@' project.properties
+      - sed -i 's@\(android.library.reference.2=\).*@\1$$LockPattern$$@' project.properties
+      - cp -r $$iptables$$/* external/iptables/
+      - mv libs/afwall.patch .
+      - touch external/iptables/extensions/fixinit.py
+      - git apply afwall.patch
+      - cp -r $$Busybox$$/* external/busybox/
+      - cp -r $$BusyboxConfigs$$/* external/busybox/configs/
+      - cd external/busybox
+      - for i in configs/patches/*.patch; do patch -p1 < $i; done
+      - mv configs/android_ndk_stericson-like .config
+    build:
+      - export PATH=$$NDK$$/toolchains/arm-linux-androideabi-4.4.3/prebuilt/linux-x86/bin:$PATH
+      - cd external/busybox/
+      - make CONFIG_SYSROOT="$$NDK$$/platforms/android-9/arch-arm" ARCH=arm ANDROID_NDK=$$NDK$$
+      - mv busybox ../../res/raw/busybox_g1
+      - cd ../iptables
+      - python extensions/fixinit.py
+      - $$NDK$$/ndk-build NDK_PROJECT_PATH=. APP_BUILD_SCRIPT=./Android.mk
+      - mv libs/armeabi/iptables ../../res/raw/iptables_armv5
+
+  - versionName: 1.2.4.1
+    versionCode: 125
+    commit: v1.2.4.1
+    srclibs:
+      - ActionBarSherlock@4.2.0
+      - LockPattern@1c1307
+      - Busybox@1_21_0
+      - BusyboxConfigs@e71bc43bd0
+      - iptables@android-4.2.2_r1
+    extlibs:
+      - android/android-support-v4.jar
+      - afwall.patch
+    prebuild:
+      - rm -rf res/raw/busybox_g1 res/raw/iptables_armv5 external/busybox/* external/iptables/*
+      - mv libs/android-support-v4.jar $$ActionBarSherlock$$/libs/
+      - sed -i 's@\(android.library.reference.1=\).*@\1$$ActionBarSherlock$$@' project.properties
+      - sed -i 's@\(android.library.reference.2=\).*@\1$$LockPattern$$@' project.properties
+      - cp -r $$iptables$$/* external/iptables/
+      - mv libs/afwall.patch .
+      - touch external/iptables/extensions/fixinit.py
+      - git apply afwall.patch
+      - cp -r $$Busybox$$/* external/busybox/
+      - cp -r $$BusyboxConfigs$$/* external/busybox/configs/
+      - cd external/busybox
+      - for i in configs/patches/*.patch; do patch -p1 < $i; done
+      - mv configs/android_ndk_stericson-like .config
+    build:
+      - export PATH=$$NDK$$/toolchains/arm-linux-androideabi-4.4.3/prebuilt/linux-x86/bin:$PATH
+      - cd external/busybox/
+      - make CONFIG_SYSROOT="$$NDK$$/platforms/android-9/arch-arm" ARCH=arm ANDROID_NDK=$$NDK$$
+      - mv busybox ../../res/raw/busybox_g1
+      - cd ../iptables
+      - python extensions/fixinit.py
+      - $$NDK$$/ndk-build NDK_PROJECT_PATH=. APP_BUILD_SCRIPT=./Android.mk
+      - mv libs/armeabi/iptables ../../res/raw/iptables_armv5
+
+  - versionName: 1.2.5.2
+    versionCode: 129
+    commit: v1.2.5.2
+    srclibs:
+      - ActionBarSherlock@4.2.0
+      - LockPattern@1c1307
+      - Busybox@1_21_0
+      - BusyboxConfigs@e71bc43bd0
+      - iptables@android-4.2.2_r1
+    extlibs:
+      - android/android-support-v4.jar
+      - afwall.patch
+    prebuild:
+      - rm -rf res/raw/busybox_g1 res/raw/iptables_armv5 external/busybox/* external/iptables/*
+      - mv libs/android-support-v4.jar $$ActionBarSherlock$$/libs/
+      - sed -i 's@\(android.library.reference.1=\).*@\1$$ActionBarSherlock$$@' project.properties
+      - sed -i 's@\(android.library.reference.2=\).*@\1$$LockPattern$$@' project.properties
+      - cp -r $$iptables$$/* external/iptables/
+      - mv libs/afwall.patch .
+      - touch external/iptables/extensions/fixinit.py
+      - git apply afwall.patch
+      - cp -r $$Busybox$$/* external/busybox/
+      - cp -r $$BusyboxConfigs$$/* external/busybox/configs/
+      - cd external/busybox
+      - for i in configs/patches/*.patch; do patch -p1 < $i; done
+      - mv configs/android_ndk_stericson-like .config
+    build:
+      - export PATH=$$NDK$$/toolchains/arm-linux-androideabi-4.4.3/prebuilt/linux-x86/bin:$PATH
+      - cd external/busybox/
+      - make CONFIG_SYSROOT="$$NDK$$/platforms/android-9/arch-arm" ARCH=arm ANDROID_NDK=$$NDK$$
+      - mv busybox ../../res/raw/busybox_g1
+      - cd ../iptables
+      - python extensions/fixinit.py
+      - $$NDK$$/ndk-build NDK_PROJECT_PATH=. APP_BUILD_SCRIPT=./Android.mk
+      - mv libs/armeabi/iptables ../../res/raw/iptables_armv5
+
+  - versionName: 1.2.6
+    versionCode: 132
+    commit: v1.2.6
+    srclibs:
+      - ActionBarSherlock@4.2.0
+      - LockPattern@1c1307
+      - iptables@android-4.2.2_r1
+    extlibs:
+      - android/android-support-v4.jar
+      - afwall.patch
+    prebuild:
+      - rm -rf external/iptables/*
+      - cp -r $$iptables$$/* external/iptables/
+      - mv libs/afwall.patch .
+      - tr -d '\r' < AndroidManifest.xml > output.file
+      - mv output.file AndroidManifest.xml
+      - touch external/iptables/extensions/fixinit.py
+      - git apply afwall.patch
+      - cd external/busybox/
+      - tar -jxf busybox-1.21.1.tar.bz2
+      - cd busybox-1.21.1/
+      - patch -p1 < ../022-ipv6.patch
+      - cp ../defconfig .config
+      - cd ../../../
+      - rm res/raw/busybox_g2 res/raw/iptables_armv5 res/raw/nflog            external/busybox/busybox-1.21.1.tar.bz2
+      - mv libs/android-support-v4.jar $$ActionBarSherlock$$/libs/
+      - sed -i 's@\(.1=\).*@\1$$ActionBarSherlock$$@' project.properties
+      - sed -i 's@\(.2=\).*@\1$$LockPattern$$@' project.properties
+    build:
+      - export PATH=$$NDK$$/toolchains/arm-linux-androideabi-4.4.3/prebuilt/linux-x86/bin:$PATH
+      - cd external/busybox/busybox-1.21.1/
+      - make CONFIG_SYSROOT="$$NDK$$/platforms/android-9/arch-arm" ARCH=arm ANDROID_NDK=$$NDK$$
+      - mv busybox ../../../res/raw/busybox_g2
+      - cd ../../iptables
+      - python extensions/fixinit.py
+      - cd ../../
+      - $$NDK$$/ndk-build NDK_PROJECT_PATH=. APP_BUILD_SCRIPT=external/iptables/Android.mk
+      - mv libs/armeabi/iptables res/raw/iptables_armv5
+      - $$NDK$$/ndk-build NDK_PROJECT_PATH=. APP_BUILD_SCRIPT=external/nflog/Android.mk
+      - mv libs/armeabi/nflog res/raw/
+
+  - versionName: 1.2.6.1
+    versionCode: 136
+    commit: v1.2.6.1
+    srclibs:
+      - ActionBarSherlock@4.2.0
+      - LockPattern@1c1307
+      - iptables@android-4.2.2_r1
+    extlibs:
+      - android/android-support-v4.jar
+      - afwall.patch
+    prebuild:
+      - rm -rf external/iptables/*
+      - cp -r $$iptables$$/* external/iptables/
+      - mv libs/afwall.patch .
+      - tr -d '\r' < AndroidManifest.xml > output.file
+      - mv output.file AndroidManifest.xml
+      - touch external/iptables/extensions/fixinit.py
+      - git apply afwall.patch
+      - cd external/busybox/
+      - tar -jxf busybox-1.21.1.tar.bz2
+      - cd busybox-1.21.1/
+      - patch -p1 < ../022-ipv6.patch
+      - cp ../defconfig .config
+      - cd ../../../
+      - rm res/raw/busybox_g2 res/raw/iptables_armv5 res/raw/nflog            external/busybox/busybox-1.21.1.tar.bz2
+      - mv libs/android-support-v4.jar $$ActionBarSherlock$$/libs/
+      - sed -i 's@\(.1=\).*@\1$$ActionBarSherlock$$@' project.properties
+      - sed -i 's@\(.2=\).*@\1$$LockPattern$$@' project.properties
+    build:
+      - export PATH=$$NDK$$/toolchains/arm-linux-androideabi-4.4.3/prebuilt/linux-x86/bin:$PATH
+      - cd external/busybox/busybox-1.21.1/
+      - make CONFIG_SYSROOT="$$NDK$$/platforms/android-9/arch-arm" ARCH=arm ANDROID_NDK=$$NDK$$
+      - mv busybox ../../../res/raw/busybox_g2
+      - cd ../../iptables
+      - python extensions/fixinit.py
+      - cd ../../
+      - $$NDK$$/ndk-build NDK_PROJECT_PATH=. APP_BUILD_SCRIPT=external/iptables/Android.mk
+      - mv libs/armeabi/iptables res/raw/iptables_armv5
+      - $$NDK$$/ndk-build NDK_PROJECT_PATH=. APP_BUILD_SCRIPT=external/nflog/Android.mk
+      - mv libs/armeabi/nflog res/raw/
+
+  - versionName: 1.2.7
+    versionCode: 141
+    commit: v1.2.7
+    submodules: true
+    prebuild: rm -f res/raw/{iptables,ip6tables,busybox,nflog}*
+    build: make -C external NDK=$$NDK$$
+
+  - versionName: 1.2.8
+    versionCode: 146
+    commit: v1.2.8
+    submodules: true
+    prebuild: rm -f res/raw/{iptables,ip6tables,busybox,nflog}*
+    build: make -C external NDK=$$NDK$$
+
+  - versionName: 1.2.9
+    versionCode: 152
+    commit: v1.2.9
+    submodules: true
+    prebuild: rm -f res/raw/{iptables,ip6tables,busybox,nflog}*
+    build: make -C external NDK=$$NDK$$
+
+  - versionName: 1.3.1.1
+    versionCode: 164
+    commit: v1.3.1.1
+    submodules: true
+    prebuild: mv jni jni_
+    scandelete:
+      - res/raw
+    build:
+      - mv jni_ jni
+      - make -C external NDK=$$NDK$$
+
+  - versionName: 1.3.2
+    versionCode: 166
+    commit: v1.3.2
+    submodules: true
+    prebuild: mv jni jni_
+    scandelete:
+      - res/raw
+    build:
+      - mv jni_ jni
+      - make -C external NDK=$$NDK$$
+
+  - versionName: 1.3.3
+    versionCode: 168
+    commit: v1.3.3
+    submodules: true
+    prebuild: mv jni jni_
+    scandelete:
+      - res/raw
+    build:
+      - mv jni_ jni
+      - make -C external NDK=$$NDK$$
+
+  - versionName: 1.3.4
+    versionCode: 170
+    commit: v1.3.4
+    submodules: true
+    prebuild: mv jni jni_
+    scandelete:
+      - res/raw
+    build:
+      - mv jni_ jni
+      - make -C external NDK=$$NDK$$
+
+  - versionName: 1.3.4.1
+    versionCode: 171
+    commit: v1.3.4.1
+    submodules: true
+    prebuild: mv jni jni_
+    scandelete:
+      - res/raw
+    build:
+      - mv jni_ jni
+      - make -C external NDK=$$NDK$$
+
+  - versionName: 2.0.0-ALPHA-1
+    versionCode: 15200
+    disable: don't publish alphas
+    commit: 8a6bf73491f46bed34246f90c3243c41d9bbb055
+    subdir: aFWall
+    gradle:
+      - yes
+    scandelete:
+      - aFWall/src/main/res/raw/
+    build:
+      - pushd ..
+      - export NDK_PROJECT_PATH=`pwd`
+      - make -C external NDK=$$NDK$$
+
+  - versionName: 2.0.0-ALPHA-2
+    versionCode: 15201
+    disable: don't publish alphas
+    commit: 7f2ec4043412838d8f42d43839c060dd724a352a
+    subdir: aFWall
+    gradle:
+      - yes
+    scandelete:
+      - aFWall/src/main/res/raw/
+    build:
+      - pushd ..
+      - export NDK_PROJECT_PATH=`pwd`
+      - make -C external NDK=$$NDK$$
+
+  - versionName: 2.0.0-BETA-1
+    versionCode: 15203
+    disable: Bug in NDK r10e
+    commit: 6aae7a1f63bc1dee49080738bbbd3cbec75216aa
+    subdir: aFWall
+    gradle:
+      - yes
+    scandelete:
+      - aFWall/src/main/res/raw/
+    build:
+      - pushd ..
+      - export NDK_PROJECT_PATH=`pwd`
+      - make -C external NDK=$$NDK$$
+
+  - versionName: 2.0.0-RC
+    versionCode: 15205
+    disable: doesn't build locally; r10e bug?
+    commit: v2.0.0-RC
+    subdir: aFWall
+    gradle:
+      - yes
+    scandelete:
+      - aFWall/src/main/res/raw/
+    build:
+      - pushd ..
+      - export NDK_PROJECT_PATH=`pwd`
+      - make -C external NDK=$$NDK$$
+
+  - versionName: 2.0.0
+    versionCode: 15208
+    disable: material-dialogs gone from maven repo
+    commit: v2.0.0
+    subdir: aFWall
+    gradle:
+      - yes
+    scandelete:
+      - aFWall/src/main/res/raw/
+    build:
+      - pushd ..
+      - export NDK_PROJECT_PATH=`pwd`
+      - make -C external NDK=$$NDK$$
+
+  - versionName: 2.1.1
+    versionCode: 15215
+    commit: v2.1.1
+    subdir: aFWall
+    gradle:
+      - yes
+    scandelete:
+      - aFWall/src/main/res/raw/
+    build:
+      - pushd ..
+      - export NDK_PROJECT_PATH=`pwd`
+      - make -C external NDK=$$NDK$$
+
+  - versionName: 2.1.3
+    versionCode: 15217
+    commit: v2.1.3
+    subdir: aFWall
+    gradle:
+      - yes
+    scandelete:
+      - aFWall/src/main/res/raw/
+    build:
+      - pushd ..
+      - export NDK_PROJECT_PATH=`pwd`
+      - make -C external NDK=$$NDK$$
+
+  - versionName: 2.2.1
+    versionCode: 15221
+    commit: v2.2.1
+    subdir: aFWall
+    gradle:
+      - yes
+    scandelete:
+      - aFWall/src/main/res/raw/
+    build:
+      - pushd ..
+      - export NDK_PROJECT_PATH=`pwd`
+      - make -C external NDK=$$NDK$$
+
+  - versionName: 2.2.2
+    versionCode: 15222
+    commit: v2.2.2
+    subdir: aFWall
+    gradle:
+      - yes
+    scandelete:
+      - aFWall/src/main/res/raw/
+    build:
+      - pushd ..
+      - export NDK_PROJECT_PATH=`pwd`
+      - make -C external NDK=$$NDK$$
+
+  - versionName: 2.2.3
+    versionCode: 15223
+    commit: v2.2.3
+    subdir: aFWall
+    gradle:
+      - yes
+    scandelete:
+      - aFWall/src/main/res/raw/
+    build:
+      - pushd ..
+      - export NDK_PROJECT_PATH=`pwd`
+      - make -C external NDK=$$NDK$$
+
+  - versionName: 2.5.1
+    versionCode: 15501
+    commit: v2.5.1
+    subdir: aFWall
+    gradle:
+      - yes
+    prebuild: sed -i -e '/drummer-aidan/d' ../build.gradle build.gradle
+    scandelete:
+      - aFWall/src/main/res/raw/
+    build:
+      - pushd ..
+      - export NDK_PROJECT_PATH=`pwd`
+      - make -C external NDK=$$NDK$$
+    ndk: r10e
+
+  - versionName: 2.5.2
+    versionCode: 15502
+    commit: v2.5.2
+    subdir: aFWall
+    gradle:
+      - yes
+    prebuild: sed -i -e '/drummer-aidan/d' ../build.gradle build.gradle
+    scandelete:
+      - aFWall/src/main/res/raw/
+    build:
+      - pushd ..
+      - export NDK_PROJECT_PATH=`pwd`
+      - make -C external NDK=$$NDK$$
+    ndk: r10e
+
+  - versionName: 2.6.0
+    versionCode: 15600
+    commit: v2.6.0
+    subdir: aFWall
+    gradle:
+      - yes
+    prebuild: sed -i -e '/drummer-aidan/d' ../build.gradle build.gradle
+    scandelete:
+      - aFWall/src/main/res/raw/
+    build:
+      - pushd ..
+      - export NDK_PROJECT_PATH=`pwd`
+      - make -C external NDK=$$NDK$$
+    ndk: r10e
+
+  - versionName: 2.7.0
+    versionCode: 15700
+    commit: v2.7.0
+    subdir: aFWall
+    gradle:
+      - yes
+    prebuild: sed -i -e '/drummer-aidan/d' ../build.gradle build.gradle
+    scandelete:
+      - aFWall/src/main/res/raw/
+    build:
+      - pushd ..
+      - export NDK_PROJECT_PATH=`pwd`
+      - make -C external NDK=$$NDK$$
+    ndk: r10e
+
+  - versionName: 2.8.0
+    versionCode: 15800
+    commit: v2.8.0
+    subdir: aFWall
+    gradle:
+      - yes
+    prebuild: sed -i -e '/drummer-aidan/d' ../build.gradle build.gradle
+    scandelete:
+      - aFWall/src/main/res/raw/
+    build:
+      - pushd ..
+      - export NDK_PROJECT_PATH=`pwd`
+      - make -C external NDK=$$NDK$$
+    ndk: r10e
+
+  - versionName: 2.9.0
+    versionCode: 15900
+    commit: v2.9.0
+    subdir: aFWall
+    gradle:
+      - yes
+    prebuild: sed -i -e '/drummer-aidan/d' ../build.gradle build.gradle
+    scandelete:
+      - aFWall/src/main/res/raw/
+    build:
+      - pushd ..
+      - export NDK_PROJECT_PATH=`pwd`
+      - make -C external NDK=$$NDK$$
+    ndk: r10e
+
+  - versionName: 2.9.1
+    versionCode: 15902
+    commit: v2.9.1
+    subdir: aFWall
+    gradle:
+      - yes
+    prebuild: sed -i -e '/drummer-aidan/d' ../build.gradle build.gradle
+    scandelete:
+      - aFWall/src/main/res/raw/
+    build:
+      - pushd ..
+      - export NDK_PROJECT_PATH=`pwd`
+      - make -C external NDK=$$NDK$$
+    ndk: r10e
+
+  - versionName: 2.9.3
+    versionCode: 15930
+    disable: r10..r11 fail at pie/nopie binaries not found, r12 breaks
+    commit: v2.9.3
+    subdir: aFWall
+    gradle:
+      - yes
+    prebuild: sed -i -e '/drummer-aidan/d' ../build.gradle build.gradle
+    scandelete:
+      - aFWall/src/main/res/raw/
+    build:
+      - pushd ..
+      - export NDK_PROJECT_PATH=`pwd`
+      - make -C external NDK=$$NDK$$
+    ndk: r12b
+
+  - versionName: 2.9.4
+    versionCode: 15940
+    commit: v2.9.4
+    subdir: aFWall
+    gradle:
+      - yes
+    prebuild: sed -i -e '/drummer-aidan/d' ../build.gradle build.gradle
+    scandelete:
+      - aFWall/src/main/res/raw/
+    build:
+      - pushd ..
+      - export NDK_PROJECT_PATH=`pwd`
+      - make -C external NDK=$$NDK$$
+    ndk: r10e
+
+  - versionName: 2.9.5-BETA
+    versionCode: 15950
+    commit: v2.9.5
+    subdir: aFWall
+    gradle:
+      - yes
+    prebuild: sed -i -e '/drummer-aidan/d' ../build.gradle build.gradle
+    scandelete:
+      - aFWall/src/main/res/raw/
+    build:
+      - pushd ..
+      - export NDK_PROJECT_PATH=`pwd`
+      - make -C external NDK=$$NDK$$
+    ndk: r10e
+
+  - versionName: 2.9.6-BETA
+    versionCode: 15960
+    commit: v2.9.6
+    subdir: aFWall
+    gradle:
+      - yes
+    prebuild: sed -i -e '/drummer-aidan/d' ../build.gradle build.gradle
+    scandelete:
+      - aFWall/src/main/res/raw/
+    build:
+      - pushd ..
+      - export NDK_PROJECT_PATH=`pwd`
+      - make -C external NDK=$$NDK$$
+    ndk: r10e
+
+  - versionName: 2.9.6.1
+    versionCode: 15972
+    commit: v2.9.6.1
+    subdir: aFWall
+    gradle:
+      - yes
+    prebuild: sed -i -e '/drummer-aidan/d' ../build.gradle build.gradle
+    scandelete:
+      - aFWall/src/main/res/raw/
+    build:
+      - pushd ..
+      - export NDK_PROJECT_PATH=`pwd`
+      - make -C external NDK=$$NDK$$
+    ndk: r10e
+
+  - versionName: 2.9.7
+    versionCode: 15979
+    commit: v2.9.7
+    subdir: aFWall
+    gradle:
+      - yes
+    prebuild: sed -i -e '/drummer-aidan/d' ../build.gradle build.gradle
+    scandelete:
+      - aFWall/src/main/res/raw/
+    build: make -C ../external -j`nproc` NDK="$$NDK$$" NDK_PROJECT_PATH="$PWD/.."
+    ndk: r10e
+
+  - versionName: 2.9.8
+    versionCode: 15980
+    commit: v2.9.8
+    subdir: aFWall
+    gradle:
+      - yes
+    prebuild: sed -i -e '/drummer-aidan/d' ../build.gradle build.gradle
+    scandelete:
+      - aFWall/src/main/res/raw/
+    build: make -C ../external -j`nproc` NDK="$$NDK$$" NDK_PROJECT_PATH="$PWD/.."
+    ndk: r10e
+
+  - versionName: 2.9.9
+    versionCode: 15992
+    commit: v2.9.9
+    subdir: aFWall
+    gradle:
+      - yes
+    prebuild: sed -i -e '/drummer-aidan/d' ../build.gradle build.gradle
+    scandelete:
+      - aFWall/src/main/res/raw/
+    build: make -C ../external -j`nproc` NDK="$$NDK$$" NDK_PROJECT_PATH="$PWD/.."
+    ndk: r10e
+
+  - versionName: 3.0.0
+    versionCode: 16400
+    commit: v3.0.0
+    subdir: aFWall
+    gradle:
+      - yes
+    prebuild: sed -i -e '/drummer-aidan/d' ../build.gradle build.gradle
+    scandelete:
+      - aFWall/src/main/res/raw/
+    build: make -C ../external -j`nproc` NDK="$$NDK$$" NDK_PROJECT_PATH="$PWD/.."
+    ndk: r10e
+
+  - versionName: 3.0.1
+    versionCode: 16600
+    commit: v3.0.1
+    subdir: aFWall
+    gradle:
+      - yes
+    prebuild: sed -i -e '/drummer-aidan/d' ../build.gradle build.gradle
+    scandelete:
+      - aFWall/src/main/res/raw/
+    build: make -C ../external -j`nproc` NDK="$$NDK$$" NDK_PROJECT_PATH="$PWD/.."
+    ndk: r10e
+
+  - versionName: 3.0.3
+    versionCode: 16800
+    commit: v3.0.3
+    subdir: aFWall
+    gradle:
+      - yes
+    prebuild: sed -i -e '/drummer-aidan/d' ../build.gradle build.gradle
+    scandelete:
+      - aFWall/src/main/res/raw/
+    build: make -C ../external -j`nproc` NDK="$$NDK$$" NDK_PROJECT_PATH="$PWD/.."
+    ndk: r10e
+
+  - versionName: 3.0.4
+    versionCode: 17000
+    commit: v3.0.4
+    subdir: aFWall
+    gradle:
+      - yes
+    prebuild: sed -i -e '/drummer-aidan/d' ../build.gradle build.gradle
+    scandelete:
+      - aFWall/src/main/res/raw/
+    build: make -C ../external -j`nproc` NDK="$$NDK$$" NDK_PROJECT_PATH="$PWD/.."
+    ndk: r10e
+
+  - versionName: 3.1.0
+    versionCode: 17111
+    commit: v3.1.0
+    subdir: aFWall
+    gradle:
+      - yes
+    prebuild: sed -i -e '/drummer-aidan/d' ../build.gradle build.gradle
+    scandelete:
+      - aFWall/src/main/res/raw/
+    build: make -C ../external -j`nproc` NDK="$$NDK$$" NDK_PROJECT_PATH="$PWD/.."
+    ndk: r10e
+
+AutoUpdateMode: Version v%v
+UpdateCheckMode: Tags ^v[0-9.]+$
+CurrentVersion: 3.1.0
+CurrentVersionCode: 17111
