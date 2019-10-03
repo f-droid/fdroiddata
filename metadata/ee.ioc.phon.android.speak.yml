@@ -1,0 +1,112 @@
+Categories:
+  - Multimedia
+License: Apache-2.0
+AuthorName: Kaarel Kaljurand
+AuthorEmail: kaljurand+k6nele@gmail.com
+WebSite: https://kaljurand.github.io/K6nele/
+SourceCode: https://github.com/Kaljurand/K6nele
+IssueTracker: https://github.com/Kaljurand/K6nele/issues
+Translation: https://github.com/Kaljurand/K6nele/issues/38#issuecomment-118494238
+Changelog: https://github.com/Kaljurand/K6nele/releases
+
+AutoName: Kõnele
+Summary: Speech-to-text provider
+Description: |-
+    Offers speech-to-text service to other apps. Apps which allow user input via
+    voice usually have a little microphone button as part of their user interface.
+    It is a free replacement for the proprietary Google voice search, based on the
+    [http://bark.phon.ioc.ee/speech-api/v1/ Net Speech API] to communicate with a
+    speech recognition server. Currently only estonian is supported by the
+    pre-confgured server.
+
+    '''This is an UNTESTED build.'''
+
+RepoType: git
+Repo: https://github.com/Kaljurand/K6nele
+
+Builds:
+  - versionName: 1.2.00
+    versionCode: 1200
+    disable: needs graphviz, needs testing
+    commit: v1.2.00
+    subdir: app
+    gradle:
+      - yes
+    srclibs:
+      - NetSpeechApi@f4290467ac222a8a3c4235c1bbae3d95c0fdc8c2
+    rm:
+      - app/libs/*.jar
+    prebuild:
+      - pushd $$NetSpeechApi$$
+      - $$MVN3$$ install -DskipTests
+      - popd
+      - sed -i -e '/mavenCentral/amavenLocal()' ../build.gradle
+      - sed -i -e '/fileTree/acompile "ee.ioc.phon.netspeechapi:net-speech-api:0.1.8"\n'
+        build.gradle
+      - echo '-keep class org.apache.http.** {*; }' >> proguard.cfg
+      - echo '-dontwarn org.apache.http.**' >> proguard.cfg
+      - sed -i -e '/sourceSets/ipackagingOptions {\nexclude "META-INF/LICENSE.txt"\nexclude
+        "META-INF/LICENSE"\nexclude "META-INF/NOTICE.txt"\nexclude "META-INF/NOTICE"\n}'
+        build.gradle
+      - pushd ..
+      - gradle makeIcons
+      - gradle makeDiagrams
+      - popd
+
+  - versionName: 1.2.04
+    versionCode: 1204
+    commit: v1.2.04
+    subdir: app
+    gradle:
+      - yes
+    srclibs:
+      - NetSpeechApi@f4290467ac222a8a3c4235c1bbae3d95c0fdc8c2
+    rm:
+      - app/libs/*.jar
+    prebuild:
+      - pushd $$NetSpeechApi$$
+      - $$MVN3$$ install -DskipTests
+      - popd
+      - sed -i -e '/mavenCentral/amavenLocal()' ../build.gradle
+      - sed -i -e '/fileTree/acompile "ee.ioc.phon.netspeechapi:net-speech-api:0.1.8"\n'
+        build.gradle
+      - echo '-keep class org.apache.http.** {*; }' >> proguard.cfg
+      - echo '-dontwarn org.apache.http.**' >> proguard.cfg
+      - sed -i -e '/sourceSets/ipackagingOptions {\nexclude "META-INF/LICENSE.txt"\nexclude
+        "META-INF/LICENSE"\nexclude "META-INF/NOTICE.txt"\nexclude "META-INF/NOTICE"\n}'
+        build.gradle
+      - pushd ..
+      - gradle makeIcons
+      - gradle makeDiagrams
+      - popd
+
+  - versionName: 1.2.06
+    versionCode: 1206
+    commit: v1.2.06
+    subdir: app
+    submodules: true
+    gradle:
+      - yes
+    rm:
+      - app/libs/*.jar
+    prebuild:
+      - sed -i -e '/commandLine/s|mvn|$$MVN3$$|g' ../other.gradle
+      - pushd ../
+      - gradle -b other.gradle clean
+      - gradle -b other.gradle makeNetSpeechApi
+      - popd
+    scandelete:
+      - net-speech-api/target/
+
+  - versionName: 1.6.98
+    versionCode: 1698
+    commit: v1.6.98
+    subdir: app
+    submodules: true
+    gradle:
+      - yes
+
+AutoUpdateMode: Version v%v
+UpdateCheckMode: Tags
+CurrentVersion: 1.6.98
+CurrentVersionCode: 1698
