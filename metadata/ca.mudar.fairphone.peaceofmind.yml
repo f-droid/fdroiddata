@@ -57,11 +57,31 @@ Builds:
       - sed -i -e '/maven.fabric.io/d' -e '/io.fabric/d' -e '/RootShell/d' build.gradle
       - cp -fR $$RootShell$$/src/main/java src/main/
 
+  - versionName: 2.1.4
+    versionCode: 22
+    commit: v2.1.4
+    subdir: PeaceOfMind+/app
+    gradle:
+      - yes
+    srclibs:
+      - RootShell@1.6
+    rm:
+      - FairphoneHome
+      - FairphoneUpdater
+      - FairphonePeaceOfMind
+      - PeaceOfMind+/RootShell/RootShell.aar
+    prebuild:
+      - sed -i -e '/maven.fabric.io/d' -e '/io.fabric/d' -e '/com.crashlytics.sdk.android:crashlytics/,+2d'
+        -e '/RootShell/d' -e 's/"USE_CRASHLYTICS", "true"/"USE_CRASHLYTICS", "false"/'
+        build.gradle
+      - sed -i -e '/maven {$/,+2d' -e '/io.fabric.tools:gradle/d' ../build.gradle
+      - sed -i -e '/Fabric/d' -e '/com.crashlytics.android.Crashlytics/d' src/main/java/ca/mudar/fairphone/peaceofmind/PeaceOfMindApp.kt
+      - sed -i -e '/Crashlytics/d' src/main/java/ca/mudar/fairphone/peaceofmind/util/LogUtils.java
+      - cp -fR $$RootShell$$/src/main/java src/main/
+
 MaintainerNotes: Includes Crashlytics.
 
-AutoUpdateMode: None
+AutoUpdateMode: Version v%v
 UpdateCheckMode: Tags
 CurrentVersion: 2.1.4
 CurrentVersionCode: 22
-
-NoSourceSince: 2.1.2
