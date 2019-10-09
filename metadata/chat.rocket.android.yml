@@ -128,27 +128,29 @@ Builds:
     gradleprops:
       - sdk_location=../../srclib/rocketchatsdk
 
-  - versionName: 3.3.0
-    versionCode: 2060
-    disable: unknown maven repo 'https://github.com/jitsi/jitsi-maven-repository/raw/master/releases'
-    commit: v3.3.0
+  - versionName: 3.5.1
+    versionCode: 2077
+    commit: v3.5.1-2077
     subdir: app
     gradle:
       - foss
     srclibs:
-      - rocketchatsdk@app-3.3.0
+      - rocketchatsdk@app-3.5.1
     rm:
       - app/gradle
     prebuild:
       - sed -i -e '/fabric/d; /com.google.gms/d' ../build.gradle build.gradle
       - sed -i -e '/playImplementation/d' build.gradle
+      - sed -i -e 's,https://jitpack.io",&\n content { includeGroupByRegex "com\\\\.github\\\\.luciofm"
+        },g' -e 's,https://github.com/jitsi/jitsi-maven-repository/raw/master/releases,https://github.com/vector-im/jitsi_libre_maven/raw/master/releases,g'
+        ../build.gradle
       - sed -i -e 's,./gradlew,gradle,g' build-sdk.sh
+    scanignore:
+      - build.gradle
     gradleprops:
       - sdk_location=../../srclib/rocketchatsdk
 
-MaintainerNotes: |-
-    Cannot be updated past 3.2.0 because of jitsi-sdk:
-    https://gitlab.com/fdroid/fdroiddata/issues/1607.
+MaintainerNotes: We reuse the LIBRE_BUILD jitsi sdk built by riot-android developers.
 
 AutoUpdateMode: None
 UpdateCheckMode: Tags
