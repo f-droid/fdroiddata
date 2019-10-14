@@ -44,10 +44,36 @@ Builds:
     scandelete:
       - node_modules/
 
+  - versionName: '1.4'
+    versionCode: 5
+    commit: android-1.4
+    subdir: android/app
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y -t stretch-backports npm
+      - npm -g install yarn
+    init: yarn install
+    gradle:
+      - yes
+    rm:
+      - node_modules/@react-native-community/async-storage/packages/storage-legacy/android/build/
+      - node_modules/hermesvm/win64-bin/
+      - node_modules/react-native/template/
+      - node_modules/jetifier/lib/
+      - node_modules/hermesvm/android/*.aar
+    prebuild:
+      - truncate -s 0 ../../node_modules/@react-native-community/cli/build/commands/server/external/xsel
+      - sed -i -e 's/enableSeparateBuildPerCPUArchitecture = true/enableSeparateBuildPerCPUArchitecture
+        = false/' build.gradle
+    scanignore:
+      - android/build.gradle
+    scandelete:
+      - node_modules/
+
 MaintainerNotes: scanignore is used to allow the local React Native and Android JSC
     (installed with NPM).
 
 AutoUpdateMode: Version android-%v
 UpdateCheckMode: Tags
-CurrentVersion: '1.3'
-CurrentVersionCode: 4
+CurrentVersion: '1.4'
+CurrentVersionCode: 5
