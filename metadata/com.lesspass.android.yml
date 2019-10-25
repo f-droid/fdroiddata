@@ -157,6 +157,33 @@ Builds:
     scandelete:
       - mobile/node_modules/
 
+  - versionName: 9.1.2
+    versionCode: 90102
+    commit: 9.1.2
+    subdir: mobile/android/app/
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y -t stretch-backports npm
+      - npm -g install yarn
+    init: yarn install
+    gradle:
+      - yes
+    rm:
+      - mobile/node_modules/react-native/template/android/build.gradle
+      - mobile/node_modules/hermes-engine/android/*.aar
+      - mobile/node_modules/jetifier/lib/
+      - mobile/node_modules/@react-native-community/async-storage/packages/storage-legacy/android/build/
+    prebuild:
+      - truncate -s 0 ../../node_modules/@react-native-community/cli/build/commands/server/external/xsel
+      - sed -i -e 's#../package.json#../../package.json#' ../build.gradle
+      - sed -i -e '/enable enableSeparateBuildPerCPUArchitecture/d' build.gradle
+    scanignore:
+      - mobile/android/build.gradle
+      - mobile/node_modules/react-native-screens/android/build.gradle
+      - mobile/node_modules/@react-native-community/async-storage/android/build.gradle
+    scandelete:
+      - mobile/node_modules/
+
 MaintainerNotes: |-
     scanignore is used to allow the "node_modules/react-native/android" local Maven repository.
 
@@ -164,5 +191,5 @@ MaintainerNotes: |-
 
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: 8.1.1
-CurrentVersionCode: 80101
+CurrentVersion: 9.1.2
+CurrentVersionCode: 90102
