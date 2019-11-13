@@ -76,16 +76,56 @@ Builds:
     sudo:
       - apt-get update || apt-get update
       - apt-get install -y -t stretch-backports npm
-    init: npm install
+      - apt-get install -y bubblewrap cmake g++ git ninja-build python3 zip libicu-dev
+        libreadline-dev
+      - bash -c "echo fs.inotify.max_user_watches=524288 >> /etc/sysctl.conf"
+      - sysctl -p
+    init:
+      - pushd ../..
+      - npm install
+      - rm -vrf node_modules/react-native/template
+      - truncate -s 0 node_modules/react-native/node_modules/@react-native-community/cli/build/commands/server/external/xsel
+      - git clone https://github.com/facebook/hermes.git --branch v0.2.1
+      - rm -vf hermes/external/flowparser/*.a
+      - git clone https://github.com/facebook/flow.git --branch v0.102.0
+      - rm -vrf flow/{tests,website}
+      - git clone https://github.com/ocaml/opam.git --branch 2.0.5
+      - popd
     gradle:
       - yes
-    prebuild: truncate -s 0 ../../node_modules/@react-native-community/cli/build/commands/server/external/xsel
     scanignore:
       - android/build.gradle
-      - node_modules/react-native-svg/android/build.gradle
+      - node_modules/@react-native-community/async-storage/android/build.gradle
+      - node_modules/react-native-reanimated/android/build.gradle
       - node_modules/react-native-screens/android/build.gradle
+      - node_modules/react-native-svg/android/build.gradle
     scandelete:
       - node_modules
+    build:
+      - pushd ../..
+      - pushd opam
+      - make cold CONFIGURE_ARGS="--prefix $(realpath ../opam_build)"
+      - make cold-install
+      - popd
+      - PATH=$PATH:$(realpath opam_build/bin)
+      - opam init --no-setup --compiler 4.05.0
+      - eval $(opam env)
+      - pushd flow
+      - opam update
+      - opam pin add flowtype . -n
+      - opam install -y --deps-only flowtype
+      - popd
+      - pushd flow/src/parser
+      - make dist/libflowparser/lib/libflowparser.a
+      - cp -vf dist/libflowparser/lib/libflowparser.a ../../../hermes/external/flowparser/libflowparser-linux.a
+      - popd
+      - python3 hermes/utils/build/build_llvm.py --distribute
+      - python3 hermes/utils/build/configure.py --distribute hermes_build
+      - pushd hermes_build_release
+      - ninja
+      - popd
+      - cp -vf hermes_build_release/bin/{hermes,hermes-repl} node_modules/hermes-engine/linux64-bin
+      - popd
 
 MaintainerNotes: |-
     Use scanignore to allow the "node_modules/react-native/android"
