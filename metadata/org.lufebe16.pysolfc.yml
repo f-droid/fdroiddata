@@ -115,7 +115,53 @@ Builds:
       - ./mkp4a.unsigned $$SDK$$ $$NDK$$)
     ndk: r12b
 
+  - versionName: 2.6.4
+    versionCode: 72120604
+    commit: 063c35db0d8ffcf64b2664bc6881601ae6ca8d61
+    sudo:
+      - apt-get update || apt-get update
+      - update-alternatives --install /usr/bin/python python /usr/bin/python2.7 1
+      - update-alternatives --install /usr/bin/python python /usr/bin/python3.5 2
+      - apt-get install -y --no-install-recommends virtualenv imagemagick python3-tk
+        ccache libltdl-dev
+    output: android/pysolfc-$$VERSION$$-release-unsigned.apk
+    prebuild:
+      - pushd android
+      - ./mkp4a.preload hostpython3 https://www.python.org/ftp/python/3.7.1 Python-3.7.1.tgz
+      - ./mkp4a.preload libffi https://github.com/libffi/libffi/archive v3.2.1.tar.gz
+      - ./mkp4a.preload openssl https://www.openssl.org/source openssl-1.1.1.tar.gz
+      - ./mkp4a.preload sdl2_image https://www.libsdl.org/projects/SDL_image/release
+        SDL2_image-2.0.4.tar.gz
+      - ./mkp4a.preload sdl2_ttf https://www.libsdl.org/projects/SDL_ttf/release SDL2_ttf-2.0.14.tar.gz
+      - ./mkp4a.preload sqlite3 https://www.sqlite.org/2016 sqlite-amalgamation-3150100.zip
+      - ./mkp4a.preload python3 https://www.python.org/ftp/python/3.7.1 Python-3.7.1.tgz
+      - ./mkp4a.preload sdl2 https://www.libsdl.org/release SDL2-2.0.9.tar.gz
+      - ./mkp4a.preload six https://pypi.python.org/packages/source/s/six six-1.10.0.tar.gz
+      - ./mkp4a.preload pyjnius https://github.com/kivy/pyjnius/archive 6553ad4.zip
+      - ./mkp4a.preload kivy https://github.com/kivy/kivy/archive 1.11.0.zip
+      - ./mkp4a.preload supportlib https://maven.google.com/com/android/support/support-v4/24.1.1
+        support-v4-24.1.1.aar
+      - wget -nv https://netix.dl.sourceforge.net/project/pysolfc/PySolFC-Cardsets/minimal/PySolFC-Cardsets--Minimal-2.0.1.tar.xz
+      - popd
+      - virtualenv --python=python3 ${HOME}/zenv
+      - . ${HOME}/zenv/bin/activate
+      - python3 -m pip install 'python-for-android==2019.7.8'
+      - python3 -m pip install pysol_cards
+      - python3 -m pip install clint
+      - python3 -m pip install random2
+      - python3 -m pip install attrs
+      - python3 -m pip install Cython
+      - deactivate
+    build:
+      - . ${HOME}/zenv/bin/activate
+      - pushd android
+      - ./mkp4a.init 1
+      - ./mkp4a.unsigned $$SDK$$ $$NDK$$
+      - popd
+      - deactivate
+    ndk: r17c
+
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: 2.2.0
-CurrentVersionCode: 20200
+CurrentVersion: 2.6.4
+CurrentVersionCode: 72120604
