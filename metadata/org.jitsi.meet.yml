@@ -1,0 +1,94 @@
+Categories:
+  - Phone & SMS
+License: Apache-2.0
+AuthorName: The Jitsi Team at 8x8 and contributors
+WebSite: https://jitsi.org/jitsi-meet/
+SourceCode: https://github.com/jitsi/jitsi-meet
+IssueTracker: https://github.com/jitsi/jitsi-meet/issues
+Translation: https://translate.jitsi.org/
+Changelog: https://github.com/jitsi/jitsi-meet-release-notes/blob/HEAD/CHANGELOG-MOBILE-APPS.md
+
+AutoName: Jitsi Meet
+Summary: Instant video conferences efficiently adapting to your scale
+Description: |-
+    Jitsi Meet lets you stay in touch with all your teams, be they family, friends,
+    or colleagues. Instant video conferences, efficiently adapting to your scale.
+
+    * Unlimited users: There are no artificial restrictions on the number of users
+    or conference participants. Server power and bandwidth are the only limiting
+    factors.
+    * No account needed.
+    * Lock-protected rooms: Control the access to your conferences with a password.
+    * Encrypted by default.
+    * High quality: Audio and video are delivered with the clarity and richness of
+    Opus and VP8.
+    * Web browser ready: No downloads are required of your friends to join the
+    conversation. Jitsi Meet works directly within their browsers as well.
+    Simply share your conference URL with others to get started.
+    * 100% open source: Powered by awesome communities from all over the world.
+    And your friends at Atlassian.
+    * Invite by pretty URLs: You can meet at the easy to remember
+    https://MySite.com/OurConf of your choice instead of joining the hard to
+    remember rooms with seemingly random sequences of numbers and letters in their
+    names.
+
+    (Warning: when using a Jitsi Meet instance, your stream is encrypted on the
+    network but decrypted on the machine that hosts the bridge.
+    See [https://github.com/jitsi/jitsi-meet/issues/409#issuecomment-355406112]
+    for more information.)
+
+RepoType: git
+Repo: https://github.com/jitsi/jitsi-meet
+
+Builds:
+  - versionName: 19.4.0
+    versionCode: 190400
+    commit: android-19.4.1
+    subdir: android/app
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y -t stretch-backports npm
+    init:
+      - sed -E -i 's/^.*(fabric|com\.(crashlytics|google\.(firebase|android.gms))).*$//g'
+        build.gradle
+      - sed -E -i 's/^.*fabric.*$//g' ../build.gradle
+      - sed -E -i 's/libreBuild =.*$/libreBuild = true/g' ../build.gradle
+      - sed -E -i 's/^.*fabric.*$//g' ../../package.json
+      - sed -E -i 's/vcode =.*$/vcode = $$VERCODE$$/g' build.gradle
+      - sed -i '/flow-bin/d' ../../package.json
+      - sed -E -i 's/^.*libflacjs.*$//g' ../../package.json
+      - export LIBRE_BUILD=true
+      - npm install
+      - truncate -s 0 ../../node_modules/react-native/node_modules/@react-native-community/cli/build/commands/server/external/xsel
+      - sed -E -i 's/^.*google.*play.*services.*$//g' ../../node_modules/@react-native-community/google-signin/android/build.gradle
+    gradle:
+      - yes
+    rm:
+      - node_modules/node-sass/vendor
+      - node_modules/hermes-engine
+      - node_modules/node-notifier
+      - node_modules/react-native-webrtc/ios
+      - node_modules/bplist-parser
+      - node_modules/css-element-queries
+      - node_modules/jquery-contextmenu
+      - node_modules/jQuery-Impromptu
+      - node_modules/jetifier/lib/*.jar
+      - node_modules/react-native/template
+      - node_modules/react-native/ReactAndroid/src/main/third-party/java/buck-android-support/buck-android-support.jar
+    scanignore:
+      - images/dropboxLogo_square.png
+      - android/build.gradle
+      - android/sdk/build.gradle
+      - node_modules/react-native-svg/android/build.gradle
+      - node_modules/jsc-android
+      - node_modules/react-native-webrtc
+      - node_modules/react-native/android
+      - node_modules/react-native-webview/android/build.gradle
+      - node_modules/@react-native-community/google-signin/android/build.gradle
+
+MaintainerNotes: |-
+    According to [https://jitsi.org/user-faq/], Jitsi Meet is fully founded by
+    8x8 and does not seem to take donations.
+
+AutoUpdateMode: None
+UpdateCheckMode: Tags
