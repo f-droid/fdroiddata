@@ -110,7 +110,7 @@ to appear in our repository.
 - You may like to add [localization and screenshots], so users can have a glance
     at the app in pictures and in their preferred language.
 - You can advertise the download of your app in this app store using the
-    [official grafic][get-it-on-fdroid].  
+    [official grafic][get-it-on-fdroid].
     <img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png" height="75">
 
     ```
@@ -127,9 +127,9 @@ to appear in our repository.
     ```
     https://img.shields.io/github/release/USER/REPO.svg?logo=github
     ```
-    
 
-[localization and screenshots]: https://fdroid.gitlab.io/fdroid-website/docs/All_About_Descriptions_Graphics_and_Screenshots/
+
+[localization and screenshots]: https://f-droid.org/en/docs/All_About_Descriptions_Graphics_and_Screenshots/
 [get-it-on-fdroid]: https://f-droid.org/badge/get-it-on.png
-[auto-updates]: https://f-droid.org/en/docs/Build_Metadata_Reference/#Auto-Update-Mode
+[auto-updates]: https://f-droid.org/en/docs/Build_Metadata_Reference/#autoupdatemode
 [shields.io]: https://shields.io/#/examples/version
