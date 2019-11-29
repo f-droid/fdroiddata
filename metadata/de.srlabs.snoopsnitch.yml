@@ -286,7 +286,35 @@ Builds:
       - bash copy.sh
     ndk: r14b
 
+  - versionName: 2.0.10-nbc
+    versionCode: 39
+    commit: SnoopSnitch-2.0.10-nbc
+    subdir: SnoopSnitch/app
+    submodules: true
+    sudo:
+      - apt update || apt update
+      - apt install -y texinfo
+    gradle:
+      - nobuildcheck
+    rm:
+      - SnoopSnitch/app/src/main/jniLibs/*/*.so
+      - contrib/prebuilt/*.so
+    prebuild: sed -i -e '/versionNameSuffix/d' build.gradle
+    scandelete:
+      - SnoopSnitch/patchanalysis
+    build:
+      - export NDK_DIR=$$NDK$$
+      - cd ../../contrib
+      - bash compile.sh -t android -u
+      - cd ../SnoopSnitch/patchanalysis/contrib
+      - bash compile.sh -t android -u
+      - bash copy.sh
+      - cp builds/*.so ../../../contrib/prebuilt
+      - cd ../..
+      - bash copy.sh
+    ndk: r14b
+
 AutoUpdateMode: Version SnoopSnitch-%v
 UpdateCheckMode: Tags
-CurrentVersion: 2.0.9-nbc
-CurrentVersionCode: 38
+CurrentVersion: 2.0.10-nbc
+CurrentVersionCode: 39
