@@ -1,0 +1,328 @@
+Categories:
+  - Games
+License: GPL-2.0-or-later
+WebSite: https://vcmi.eu
+SourceCode: https://github.com/vcmi/vcmi-android
+IssueTracker: https://bugs.vcmi.eu
+
+Description: |-
+    VCMI is work-in-progress attempt to recreate engine for Heroes of Might and Magic III, giving it new and extended possibilities.
+
+    This is an VCMI port for Android. To play it, you need to use your own, legally acquired Heroes of Might and Magic III data files.
+
+    Installation: Copy "Data" "Maps" and "Mp3" folders from your original HoMM III installation to "<internal storage>/vcmi-data/".
+
+    Note: extra display resolutions and random map generation templates are only available with official "essentials" mod:
+    (Warning, external link): https://wiki.vcmi.eu/Mod_list#Utilities
+
+    "Essentials" installation: copy "Mods/vcmi/Mods" folder from the archive to the root of your VCMI installation ("<internal storage>/vcmi-data").
+    Mods should appear in the game launcher "mods" section.
+
+RepoType: git
+Repo: https://github.com/vcmi/vcmi-android.git
+
+Builds:
+  - versionName: '1.4'
+    versionCode: 1004
+    commit: 93d13ec59c9032b4cced8277e71ac2c80f1152cb
+    timeout: 80000
+    submodules: true
+    sudo:
+      - apt update || apt update
+      - apt install -y wget yasm jq dos2unix
+    output: project/vcmi-app/build/outputs/apk/vcmi-vcmiOnly-release-unsigned.apk
+    prebuild:
+      - export VCMI_ABI="armeabi-v7a"
+      - export ABI_ALIAS='arm\|armeabi\|arm_v7a\|armeabi-v7a'
+      - export VCMI_COMMIT="7e7c98852dbec9da748c261995fd16c11e53c494"
+      - export VCMI_VERCODE=1004
+      - pushd ext/vcmi
+      - git checkout -f $VCMI_COMMIT
+      - popd
+      - wget https://dl.bintray.com/boostorg/release/1.68.0/source/boost_1_68_0.tar.gz
+      - wget https://www.libsdl.org/projects/SDL_image/release/SDL2_image-2.0.1.tar.gz
+      - wget https://www.libsdl.org/projects/SDL_mixer/release/SDL2_mixer-2.0.1.tar.gz
+      - wget https://www.libsdl.org/projects/SDL_ttf/release/SDL2_ttf-2.0.13.tar.gz
+      - sha256sum -c <<< "da3411ea45622579d419bfda66f45cd0f8c32a181d84adfa936f5688388995cf  boost_1_68_0.tar.gz"
+      - sha256sum -c <<< "3a3eafbceea5125c04be585373bfd8b3a18f259bd7eae3efc4e6d8e60e0d7f64  SDL2_image-2.0.1.tar.gz"
+      - sha256sum -c <<< "5a24f62a610249d744cbd8d28ee399d8905db7222bf3bdbc8a8b4a76e597695f  SDL2_mixer-2.0.1.tar.gz"
+      - sha256sum -c <<< "f51d3829985691efa9aad306a935ef69bc880a525c887548563c33ea35e8ed04  SDL2_ttf-2.0.13.tar.gz"
+      - tar -xzf boost_1_68_0.tar.gz
+      - tar -xzf SDL2_image-2.0.1.tar.gz
+      - tar -xzf SDL2_mixer-2.0.1.tar.gz
+      - tar -xf SDL2_ttf-2.0.13.tar.gz
+      - rm boost_1_68_0.tar.gz SDL2_image-2.0.1.tar.gz SDL2_mixer-2.0.1.tar.gz SDL2_ttf-2.0.13.tar.gz
+      - mkdir ext/boost
+      - mv boost_1_68_0 ext/boost/.
+      - mv SDL2_image-2.0.1 ext/SDL2/SDL2-image/code
+      - mv SDL2_mixer-2.0.1 ext/SDL2/SDL2-mixer/code
+      - mv SDL2_ttf-2.0.13 ext/SDL2/SDL2-ttf/code
+      - cat vcmiconf.json | jq --arg "DIR" $(pwd) --arg "NDK14" "$HOME/android-ndk/r14b"
+        --arg "ABIS" "$VCMI_ABI" '.bash.ndkRoot=$NDK14 | .ndkRoot=$NDK14 | .sdkRoot="$$SDK$$"
+        | .javaRoot="/usr/lib/jvm/java-8-openjdk-amd64" | .boostFolderName="boost_1_68_0"
+        | .androidApi=21 | .bash.projectRoot=$DIR | .projectRoot=$DIR | .abis=$ABIS'
+        > temp
+      - mv temp vcmiconf.json
+      - sed -i -e 's/\.\/gradlew/gradle/' build.py
+      - dos2unix project/gradle/wrapper/gradle-wrapper.properties
+      - sed -i -e 's/signingConfig\ signingConfigs\.releaseSigning/signingConfig null/'
+        -e '/applicationVariants\.all/d' -e 's/zipAlignEnabled\ true//' project/vcmi-app/build.gradle
+      - sed -i -e 's/^fixFFConf().*//' fix_ffmpeg_confs.py
+      - python3 update_internal_assets.py
+      - python3 build.py fixpaths
+      - find ext/ff -iname "*.sh" -exec dos2unix {} \; -exec chmod +x {} \; -exec
+        sed -i -e "s/^make$/make -j$(nproc)/" {} \;
+      - find ext/ff -iname "configure" -exec dos2unix {} \; -exec chmod +x {} \;
+      - sed -i -e "s/^SLIBNAME_WITH_VERSION='\$(SLIBNAME)\.\$(LIBVERSION)'/SLIBNAME_WITH_VERSION='\$(SLIBNAME)'/"
+        -e "s/^SLIBNAME_WITH_MAJOR='\$(SLIBNAME)\.\$(LIBMAJOR)'/SLIBNAME_WITH_MAJOR='\$(SLIBNAME)'/"
+        -e "s/^SLIB_INSTALL_NAME='\$(SLIBNAME_WITH_VERSION)'/SLIB_INSTALL_NAME='\$(SLIBNAME)'/"
+        -e "s/^SLIB_INSTALL_LINKS='\$(SLIBNAME_WITH_MAJOR)\ \$(SLIBNAME)'/SLIB_INSTALL_LINKS=''/"
+        ext/ff/ffmpeg/configure
+      - find ext/SDL2 -type f -regextype posix-extended -regex '.+\.(dll|jar|lib|mcp)$'
+        -delete
+      - sed -i -e "s/^APP_VERSION_CODE=.*/APP_VERSION_CODE=${VCMI_VERCODE}/" project/gradle.properties
+      - sed -i -e "/^\(build_arch\|copy_output\)\ \(${ABI_ALIAS}\)\($\|\ \)/b; /^\(build_arch\|copy_output\)\
+        .*/d" ext/ff/all.sh
+      - sed -i -e "/^build_arch\ \(${ABI_ALIAS}\)\ .*/b; /^build_arch\ .*/d" ext/ff/bx264.sh
+    scandelete:
+      - ext
+    build:
+      - python3 build.py build-optional
+      - cat vcmiconf.json | jq --arg "NDK17" "$HOME/android-ndk/r17c" '.bash.ndkRoot=$NDK17
+        | .ndkRoot=$NDK17' > temp
+      - mv temp vcmiconf.json
+      - python3 build.py fixpaths
+      - python3 build.py build-cmake
+      - python3 build.py build-app
+
+  - versionName: '1.4'
+    versionCode: 1005
+    commit: 93d13ec59c9032b4cced8277e71ac2c80f1152cb
+    timeout: 80000
+    submodules: true
+    sudo:
+      - apt update || apt update
+      - apt install -y wget yasm jq dos2unix
+    output: project/vcmi-app/build/outputs/apk/vcmi-vcmiOnly-release-unsigned.apk
+    prebuild:
+      - export VCMI_ABI="arm64-v8a"
+      - export ABI_ALIAS='aarch64\|arm64-v8a\|arm64_v8a'
+      - export VCMI_COMMIT="7e7c98852dbec9da748c261995fd16c11e53c494"
+      - export VCMI_VERCODE=1005
+      - pushd ext/vcmi
+      - git checkout -f $VCMI_COMMIT
+      - popd
+      - wget https://dl.bintray.com/boostorg/release/1.68.0/source/boost_1_68_0.tar.gz
+      - wget https://www.libsdl.org/projects/SDL_image/release/SDL2_image-2.0.1.tar.gz
+      - wget https://www.libsdl.org/projects/SDL_mixer/release/SDL2_mixer-2.0.1.tar.gz
+      - wget https://www.libsdl.org/projects/SDL_ttf/release/SDL2_ttf-2.0.13.tar.gz
+      - sha256sum -c <<< "da3411ea45622579d419bfda66f45cd0f8c32a181d84adfa936f5688388995cf  boost_1_68_0.tar.gz"
+      - sha256sum -c <<< "3a3eafbceea5125c04be585373bfd8b3a18f259bd7eae3efc4e6d8e60e0d7f64  SDL2_image-2.0.1.tar.gz"
+      - sha256sum -c <<< "5a24f62a610249d744cbd8d28ee399d8905db7222bf3bdbc8a8b4a76e597695f  SDL2_mixer-2.0.1.tar.gz"
+      - sha256sum -c <<< "f51d3829985691efa9aad306a935ef69bc880a525c887548563c33ea35e8ed04  SDL2_ttf-2.0.13.tar.gz"
+      - tar -xzf boost_1_68_0.tar.gz
+      - tar -xzf SDL2_image-2.0.1.tar.gz
+      - tar -xzf SDL2_mixer-2.0.1.tar.gz
+      - tar -xf SDL2_ttf-2.0.13.tar.gz
+      - rm boost_1_68_0.tar.gz SDL2_image-2.0.1.tar.gz SDL2_mixer-2.0.1.tar.gz SDL2_ttf-2.0.13.tar.gz
+      - mkdir ext/boost
+      - mv boost_1_68_0 ext/boost/.
+      - mv SDL2_image-2.0.1 ext/SDL2/SDL2-image/code
+      - mv SDL2_mixer-2.0.1 ext/SDL2/SDL2-mixer/code
+      - mv SDL2_ttf-2.0.13 ext/SDL2/SDL2-ttf/code
+      - cat vcmiconf.json | jq --arg "DIR" $(pwd) --arg "NDK14" "$HOME/android-ndk/r14b"
+        --arg "ABIS" "$VCMI_ABI" '.bash.ndkRoot=$NDK14 | .ndkRoot=$NDK14 | .sdkRoot="$$SDK$$"
+        | .javaRoot="/usr/lib/jvm/java-8-openjdk-amd64" | .boostFolderName="boost_1_68_0"
+        | .androidApi=21 | .bash.projectRoot=$DIR | .projectRoot=$DIR | .abis=$ABIS'
+        > temp
+      - mv temp vcmiconf.json
+      - sed -i -e 's/\.\/gradlew/gradle/' build.py
+      - dos2unix project/gradle/wrapper/gradle-wrapper.properties
+      - sed -i -e 's/signingConfig\ signingConfigs\.releaseSigning/signingConfig null/'
+        -e '/applicationVariants\.all/d' -e 's/zipAlignEnabled\ true//' project/vcmi-app/build.gradle
+      - sed -i -e 's/^fixFFConf().*//' fix_ffmpeg_confs.py
+      - python3 update_internal_assets.py
+      - python3 build.py fixpaths
+      - find ext/ff -iname "*.sh" -exec dos2unix {} \; -exec chmod +x {} \; -exec
+        sed -i -e "s/^make$/make -j$(nproc)/" {} \;
+      - find ext/ff -iname "configure" -exec dos2unix {} \; -exec chmod +x {} \;
+      - sed -i -e "s/^SLIBNAME_WITH_VERSION='\$(SLIBNAME)\.\$(LIBVERSION)'/SLIBNAME_WITH_VERSION='\$(SLIBNAME)'/"
+        -e "s/^SLIBNAME_WITH_MAJOR='\$(SLIBNAME)\.\$(LIBMAJOR)'/SLIBNAME_WITH_MAJOR='\$(SLIBNAME)'/"
+        -e "s/^SLIB_INSTALL_NAME='\$(SLIBNAME_WITH_VERSION)'/SLIB_INSTALL_NAME='\$(SLIBNAME)'/"
+        -e "s/^SLIB_INSTALL_LINKS='\$(SLIBNAME_WITH_MAJOR)\ \$(SLIBNAME)'/SLIB_INSTALL_LINKS=''/"
+        ext/ff/ffmpeg/configure
+      - find ext/SDL2 -type f -regextype posix-extended -regex '.+\.(dll|jar|lib|mcp)$'
+        -delete
+      - sed -i -e "s/^APP_VERSION_CODE=.*/APP_VERSION_CODE=${VCMI_VERCODE}/" project/gradle.properties
+      - sed -i -e "/^\(build_arch\|copy_output\)\ \(${ABI_ALIAS}\)\($\|\ \)/b; /^\(build_arch\|copy_output\)\
+        .*/d" ext/ff/all.sh
+      - sed -i -e "/^build_arch\ \(${ABI_ALIAS}\)\ .*/b; /^build_arch\ .*/d" ext/ff/bx264.sh
+    scandelete:
+      - ext
+    build:
+      - python3 build.py build-optional
+      - cat vcmiconf.json | jq --arg "NDK17" "$HOME/android-ndk/r17c" '.bash.ndkRoot=$NDK17
+        | .ndkRoot=$NDK17' > temp
+      - mv temp vcmiconf.json
+      - python3 build.py fixpaths
+      - python3 build.py build-cmake
+      - python3 build.py build-app
+
+  - versionName: '1.4'
+    versionCode: 1006
+    commit: 93d13ec59c9032b4cced8277e71ac2c80f1152cb
+    timeout: 80000
+    submodules: true
+    sudo:
+      - apt update || apt update
+      - apt install -y wget yasm jq dos2unix
+    output: project/vcmi-app/build/outputs/apk/vcmi-vcmiOnly-release-unsigned.apk
+    prebuild:
+      - export VCMI_ABI="x86"
+      - export ABI_ALIAS='i686\|x86'
+      - export VCMI_COMMIT="7e7c98852dbec9da748c261995fd16c11e53c494"
+      - export VCMI_VERCODE=1006
+      - pushd ext/vcmi
+      - git checkout -f $VCMI_COMMIT
+      - popd
+      - wget https://dl.bintray.com/boostorg/release/1.68.0/source/boost_1_68_0.tar.gz
+      - wget https://www.libsdl.org/projects/SDL_image/release/SDL2_image-2.0.1.tar.gz
+      - wget https://www.libsdl.org/projects/SDL_mixer/release/SDL2_mixer-2.0.1.tar.gz
+      - wget https://www.libsdl.org/projects/SDL_ttf/release/SDL2_ttf-2.0.13.tar.gz
+      - sha256sum -c <<< "da3411ea45622579d419bfda66f45cd0f8c32a181d84adfa936f5688388995cf  boost_1_68_0.tar.gz"
+      - sha256sum -c <<< "3a3eafbceea5125c04be585373bfd8b3a18f259bd7eae3efc4e6d8e60e0d7f64  SDL2_image-2.0.1.tar.gz"
+      - sha256sum -c <<< "5a24f62a610249d744cbd8d28ee399d8905db7222bf3bdbc8a8b4a76e597695f  SDL2_mixer-2.0.1.tar.gz"
+      - sha256sum -c <<< "f51d3829985691efa9aad306a935ef69bc880a525c887548563c33ea35e8ed04  SDL2_ttf-2.0.13.tar.gz"
+      - tar -xzf boost_1_68_0.tar.gz
+      - tar -xzf SDL2_image-2.0.1.tar.gz
+      - tar -xzf SDL2_mixer-2.0.1.tar.gz
+      - tar -xf SDL2_ttf-2.0.13.tar.gz
+      - rm boost_1_68_0.tar.gz SDL2_image-2.0.1.tar.gz SDL2_mixer-2.0.1.tar.gz SDL2_ttf-2.0.13.tar.gz
+      - mkdir ext/boost
+      - mv boost_1_68_0 ext/boost/.
+      - mv SDL2_image-2.0.1 ext/SDL2/SDL2-image/code
+      - mv SDL2_mixer-2.0.1 ext/SDL2/SDL2-mixer/code
+      - mv SDL2_ttf-2.0.13 ext/SDL2/SDL2-ttf/code
+      - cat vcmiconf.json | jq --arg "DIR" $(pwd) --arg "NDK14" "$HOME/android-ndk/r14b"
+        --arg "ABIS" "$VCMI_ABI" '.bash.ndkRoot=$NDK14 | .ndkRoot=$NDK14 | .sdkRoot="$$SDK$$"
+        | .javaRoot="/usr/lib/jvm/java-8-openjdk-amd64" | .boostFolderName="boost_1_68_0"
+        | .androidApi=21 | .bash.projectRoot=$DIR | .projectRoot=$DIR | .abis=$ABIS'
+        > temp
+      - mv temp vcmiconf.json
+      - sed -i -e 's/\.\/gradlew/gradle/' build.py
+      - dos2unix project/gradle/wrapper/gradle-wrapper.properties
+      - sed -i -e 's/signingConfig\ signingConfigs\.releaseSigning/signingConfig null/'
+        -e '/applicationVariants\.all/d' -e 's/zipAlignEnabled\ true//' project/vcmi-app/build.gradle
+      - sed -i -e 's/^fixFFConf().*//' fix_ffmpeg_confs.py
+      - python3 update_internal_assets.py
+      - python3 build.py fixpaths
+      - find ext/ff -iname "*.sh" -exec dos2unix {} \; -exec chmod +x {} \; -exec
+        sed -i -e "s/^make$/make -j$(nproc)/" {} \;
+      - find ext/ff -iname "configure" -exec dos2unix {} \; -exec chmod +x {} \;
+      - sed -i -e "s/^SLIBNAME_WITH_VERSION='\$(SLIBNAME)\.\$(LIBVERSION)'/SLIBNAME_WITH_VERSION='\$(SLIBNAME)'/"
+        -e "s/^SLIBNAME_WITH_MAJOR='\$(SLIBNAME)\.\$(LIBMAJOR)'/SLIBNAME_WITH_MAJOR='\$(SLIBNAME)'/"
+        -e "s/^SLIB_INSTALL_NAME='\$(SLIBNAME_WITH_VERSION)'/SLIB_INSTALL_NAME='\$(SLIBNAME)'/"
+        -e "s/^SLIB_INSTALL_LINKS='\$(SLIBNAME_WITH_MAJOR)\ \$(SLIBNAME)'/SLIB_INSTALL_LINKS=''/"
+        ext/ff/ffmpeg/configure
+      - find ext/SDL2 -type f -regextype posix-extended -regex '.+\.(dll|jar|lib|mcp)$'
+        -delete
+      - sed -i -e "s/^APP_VERSION_CODE=.*/APP_VERSION_CODE=${VCMI_VERCODE}/" project/gradle.properties
+      - sed -i -e "/^\(build_arch\|copy_output\)\ \(${ABI_ALIAS}\)\($\|\ \)/b; /^\(build_arch\|copy_output\)\
+        .*/d" ext/ff/all.sh
+      - sed -i -e "/^build_arch\ \(${ABI_ALIAS}\)\ .*/b; /^build_arch\ .*/d" ext/ff/bx264.sh
+    scandelete:
+      - ext
+    build:
+      - python3 build.py build-optional
+      - cat vcmiconf.json | jq --arg "NDK17" "$HOME/android-ndk/r17c" '.bash.ndkRoot=$NDK17
+        | .ndkRoot=$NDK17' > temp
+      - mv temp vcmiconf.json
+      - python3 build.py fixpaths
+      - python3 build.py build-cmake
+      - python3 build.py build-app
+
+  - versionName: '1.4'
+    versionCode: 1007
+    commit: 93d13ec59c9032b4cced8277e71ac2c80f1152cb
+    timeout: 80000
+    submodules: true
+    sudo:
+      - apt update || apt update
+      - apt install -y wget yasm jq dos2unix
+    output: project/vcmi-app/build/outputs/apk/vcmi-vcmiOnly-release-unsigned.apk
+    prebuild:
+      - export VCMI_ABI="x86_64"
+      - export ABI_ALIAS='x86_64'
+      - export VCMI_COMMIT="7e7c98852dbec9da748c261995fd16c11e53c494"
+      - export VCMI_VERCODE=1007
+      - pushd ext/vcmi
+      - git checkout -f $VCMI_COMMIT
+      - popd
+      - wget https://dl.bintray.com/boostorg/release/1.68.0/source/boost_1_68_0.tar.gz
+      - wget https://www.libsdl.org/projects/SDL_image/release/SDL2_image-2.0.1.tar.gz
+      - wget https://www.libsdl.org/projects/SDL_mixer/release/SDL2_mixer-2.0.1.tar.gz
+      - wget https://www.libsdl.org/projects/SDL_ttf/release/SDL2_ttf-2.0.13.tar.gz
+      - sha256sum -c <<< "da3411ea45622579d419bfda66f45cd0f8c32a181d84adfa936f5688388995cf  boost_1_68_0.tar.gz"
+      - sha256sum -c <<< "3a3eafbceea5125c04be585373bfd8b3a18f259bd7eae3efc4e6d8e60e0d7f64  SDL2_image-2.0.1.tar.gz"
+      - sha256sum -c <<< "5a24f62a610249d744cbd8d28ee399d8905db7222bf3bdbc8a8b4a76e597695f  SDL2_mixer-2.0.1.tar.gz"
+      - sha256sum -c <<< "f51d3829985691efa9aad306a935ef69bc880a525c887548563c33ea35e8ed04  SDL2_ttf-2.0.13.tar.gz"
+      - tar -xzf boost_1_68_0.tar.gz
+      - tar -xzf SDL2_image-2.0.1.tar.gz
+      - tar -xzf SDL2_mixer-2.0.1.tar.gz
+      - tar -xf SDL2_ttf-2.0.13.tar.gz
+      - rm boost_1_68_0.tar.gz SDL2_image-2.0.1.tar.gz SDL2_mixer-2.0.1.tar.gz SDL2_ttf-2.0.13.tar.gz
+      - mkdir ext/boost
+      - mv boost_1_68_0 ext/boost/.
+      - mv SDL2_image-2.0.1 ext/SDL2/SDL2-image/code
+      - mv SDL2_mixer-2.0.1 ext/SDL2/SDL2-mixer/code
+      - mv SDL2_ttf-2.0.13 ext/SDL2/SDL2-ttf/code
+      - cat vcmiconf.json | jq --arg "DIR" $(pwd) --arg "NDK14" "$HOME/android-ndk/r14b"
+        --arg "ABIS" "$VCMI_ABI" '.bash.ndkRoot=$NDK14 | .ndkRoot=$NDK14 | .sdkRoot="$$SDK$$"
+        | .javaRoot="/usr/lib/jvm/java-8-openjdk-amd64" | .boostFolderName="boost_1_68_0"
+        | .androidApi=21 | .bash.projectRoot=$DIR | .projectRoot=$DIR | .abis=$ABIS'
+        > temp
+      - mv temp vcmiconf.json
+      - sed -i -e 's/\.\/gradlew/gradle/' build.py
+      - dos2unix project/gradle/wrapper/gradle-wrapper.properties
+      - sed -i -e 's/signingConfig\ signingConfigs\.releaseSigning/signingConfig null/'
+        -e '/applicationVariants\.all/d' -e 's/zipAlignEnabled\ true//' project/vcmi-app/build.gradle
+      - sed -i -e 's/^fixFFConf().*//' fix_ffmpeg_confs.py
+      - python3 update_internal_assets.py
+      - python3 build.py fixpaths
+      - find ext/ff -iname "*.sh" -exec dos2unix {} \; -exec chmod +x {} \; -exec
+        sed -i -e "s/^make$/make -j$(nproc)/" {} \;
+      - find ext/ff -iname "configure" -exec dos2unix {} \; -exec chmod +x {} \;
+      - sed -i -e "s/^SLIBNAME_WITH_VERSION='\$(SLIBNAME)\.\$(LIBVERSION)'/SLIBNAME_WITH_VERSION='\$(SLIBNAME)'/"
+        -e "s/^SLIBNAME_WITH_MAJOR='\$(SLIBNAME)\.\$(LIBMAJOR)'/SLIBNAME_WITH_MAJOR='\$(SLIBNAME)'/"
+        -e "s/^SLIB_INSTALL_NAME='\$(SLIBNAME_WITH_VERSION)'/SLIB_INSTALL_NAME='\$(SLIBNAME)'/"
+        -e "s/^SLIB_INSTALL_LINKS='\$(SLIBNAME_WITH_MAJOR)\ \$(SLIBNAME)'/SLIB_INSTALL_LINKS=''/"
+        ext/ff/ffmpeg/configure
+      - find ext/SDL2 -type f -regextype posix-extended -regex '.+\.(dll|jar|lib|mcp)$'
+        -delete
+      - sed -i -e "s/^APP_VERSION_CODE=.*/APP_VERSION_CODE=${VCMI_VERCODE}/" project/gradle.properties
+      - sed -i -e "/^\(build_arch\|copy_output\)\ \(${ABI_ALIAS}\)\($\|\ \)/b; /^\(build_arch\|copy_output\)\
+        .*/d" ext/ff/all.sh
+      - sed -i -e "/^build_arch\ \(${ABI_ALIAS}\)\ .*/b; /^build_arch\ .*/d" ext/ff/bx264.sh
+    scandelete:
+      - ext
+    build:
+      - python3 build.py build-optional
+      - cat vcmiconf.json | jq --arg "NDK17" "$HOME/android-ndk/r17c" '.bash.ndkRoot=$NDK17
+        | .ndkRoot=$NDK17' > temp
+      - mv temp vcmiconf.json
+      - python3 build.py fixpaths
+      - python3 build.py build-cmake
+      - python3 build.py build-app
+
+MaintainerNotes: |-
+    - Build process requires 2 NDKs: r14b to build the dependencies (SDL and boost) and r17c to build the game itself.
+    - Commit hashes for the launcher and vcmi itself match the APK released on google play. The newer commit reported in the app itself is a bug.
+    - The prebuilt section fixes a number of things to allow building dependencies and libraries from the source.
+    - Upstream uses prebuilt libs instead and their build procedures were not updated for some time.
+    - Builds split into a separate build for each architecture, with incremental version code (which must be reflected in both main "build" section and prebuild env variable).
+    - "commit" section points to the commit of the launcher repo, while "VCMI_COMMIT" var points to commit of the upstream vcmi repo.
+
+AutoUpdateMode: None
+UpdateCheckMode: None
+CurrentVersion: '1.4'
+CurrentVersionCode: 1007
