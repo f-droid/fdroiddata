@@ -1,0 +1,41 @@
+From b373662535492696332004a232a4490c54ed0683 Mon Sep 17 00:00:00 2001
+From: Paul Schaub <vanitasvitae@fsfe.org>
+Date: Mon, 2 Dec 2019 17:00:45 +0100
+Subject: [PATCH] Remove bug reporting
+
+
+diff --git a/frontend/android/src/main/java/com/jakewharton/sdksearch/SdkSearchApplication.kt b/frontend/android/src/main/java/com/jakewharton/sdksearch/SdkSearchApplication.kt
+index 247508d..1fd0e27 100644
+--- a/frontend/android/src/main/java/com/jakewharton/sdksearch/SdkSearchApplication.kt
++++ b/frontend/android/src/main/java/com/jakewharton/sdksearch/SdkSearchApplication.kt
+@@ -18,27 +18,6 @@ class SdkSearchApplication : Application(), HasActivityInjector {
+   override fun onCreate() {
+     super.onCreate()
+ 
+-    if (BuildConfig.IS_CI_BUILD || !BuildConfig.DEBUG) {
+-      check(BuildConfig.BUGSNAG_API_KEY.isNotBlank()) {
+-        "Bugsnag API key is blank. Check the README and your Gradle configuration!"
+-      }
+-
+-      val client = Bugsnag.init(this, BuildConfig.BUGSNAG_API_KEY)
+-
+-      client.setReleaseStage(BuildConfig.BUILD_TYPE)
+-      client.setProjectPackages("com.jakewharton.sdksearch")
+-
+-      client.addToTab("App", "commitTime", formattedCommitTime())
+-      client.addToTab("App", "commitSha", BuildConfig.COMMIT_SHA)
+-
+-      val tree = BugsnagTree(client)
+-      Timber.plant(tree)
+-      client.beforeNotify {
+-        tree.update(it)
+-        return@beforeNotify true
+-      }
+-    }
+-
+     if (BuildConfig.DEBUG) {
+       Timber.plant(LogcatTree())
+     }
+-- 
+2.24.0
+
