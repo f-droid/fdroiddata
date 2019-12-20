@@ -1,0 +1,72 @@
+Categories:
+  - Sports & Health
+License: GPL-3.0-only
+AuthorName: Bloody Health collective
+AuthorEmail: drip@mailbox.org
+WebSite: https://bloodyhealth.gitlab.io
+SourceCode: https://gitlab.com/bloodyhealth/drip/tree/HEAD
+IssueTracker: https://gitlab.com/bloodyhealth/drip/issues
+Changelog: https://gitlab.com/bloodyhealth/drip/blob/HEAD/CHANGELOG.md
+
+RepoType: git
+Repo: https://gitlab.com/bloodyhealth/drip.git
+
+Builds:
+  - versionName: 0.1905.29-beta
+    versionCode: 3
+    commit: fdroid-release-1
+    subdir: android/app
+    sudo:
+      - apt-get update
+      - apt-get install -y g++ make ninja-build g++-multilib
+      - apt-get install -y --no-install-recommends -t stretch-backports npm
+    init:
+      - export ANDROID_NDK_HOME=$HOME/android-ndk/r10e
+      - npm install
+    gradle:
+      - yes
+    srclibs:
+      - realm@v2.28.1
+      - NodejsMobile@nodejs-mobile-v0.2.1
+    rm:
+      - node_modules/react-native-share/android/build/
+      - node_modules/realm/compiled/
+      - node_modules/xdate/build/
+    prebuild:
+      - sed -i -e '/maven {/,+2d' ../../node_modules/react-native-document-picker/android/build.gradle
+      - sed -i -e '/maven {/,+3d' ../../node_modules/react-native-share/android/build.gradle
+      - sed -i -e '/maven {/,+3d' ../../node_modules/realm/android/build.gradle
+      - truncate -s 0 ../../node_modules/react-native/local-cli/server/util/external/xsel
+    scanignore:
+      - android/build.gradle
+    scandelete:
+      - node_modules
+    build:
+      - pushd $$realm$$
+      - export NDK=$HOME/android-ndk/r10e
+      - export ANDROID_NDK=$HOME/android-ndk/r10e
+      - export ANDROID_NDK_HOME=$HOME/android-ndk/r10e
+      - export PATH=$HOME/android-ndk/r10e:$PATH
+      - cd react-native/android
+      - gradle publishAndroid
+      - cd ..
+      - popd
+      - mv $$realm$$/android/src/main/jniLibs/armeabi-v7a/librealmreact.so ../../node_modules/realm/android/src/main/jniLibs/armeabi-v7a/librealmreact.so
+      - pushd $$NodejsMobile$$
+      - export NDK=$HOME/android-ndk/r19c
+      - export ANDROID_NDK=$HOME/android-ndk/r19c
+      - export ANDROID_NDK_HOME=$HOME/android-ndk/r19c
+      - export PATH=$HOME/android-ndk/r19c:$PATH
+      - ./tools/android_build.sh $HOME/android-ndk/r19c arm
+      - popd
+      - mv $$NodejsMobile$$/out_android/armeabi-v7a/libnode.so ../../node_modules/nodejs-mobile-react-native/android/libnode/bin/armeabi-v7a/libnode.so
+
+MaintainerNotes: |-
+    scanignore is used to allow the "node_modules/react-native/android" local Maven repository which contains the prebuilt react-native library which we get from npm.
+    sed is used to remove some custom maven repos from dependencies because they bother the fdroid build
+    realm and nodejs-mobile require different NDK versions; modifying the ENV vars is unsupported, but works for now
+
+AutoUpdateMode: None
+UpdateCheckMode: Tags
+CurrentVersion: 0.1905.29-beta
+CurrentVersionCode: 3
