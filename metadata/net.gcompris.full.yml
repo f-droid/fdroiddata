@@ -71,7 +71,65 @@ Builds:
       - make apk_release
     ndk: r12b
 
+  - versionName: '0.97'
+    versionCode: 9700
+    commit: V0.97
+    submodules: true
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install --yes libncurses5 -t stretch-backports cmake
+    output: android-build/android/GCompris-Android-release-armeabi-v7a-dl-$$VERSION$$.apk
+    srclibs:
+      - extra-cmake-modules@v5.63.0
+    prebuild: mkdir qt/ android-build/
+    scandelete:
+      - installer/
+    build:
+      - export ANDROID_NDK=$$NDK$$
+      - export ANDROID_NDK_ROOT=$$NDK$$
+      - export ANDROID_SDK_ROOT=$$SDK$$
+      - pushd qt/
+      - for ms in qttranslations:7b76244fcf0a37cac82e05a959655fab6374aefd qttools:a7e99533372b1931bf176e8f35db202859bee5c4
+        qtsvg:d7668e8a323f40c86707512b5da2bd58cc63a5ed qtquickcontrols2:73936b04687e01780145701767cf43629e982a81
+        qtmultimedia:96a3aff7162e3bf2a18a37af07f3b513282ce1f0 qtimageformats:375306e5bd0a289922086dc95c553348de0a3bc4
+        qtdeclarative:20d4bc625e6a7e3bb5e5291a048ab23b7a078934 qtbase:426de8c2299ac4080719f2420288f2d83cb15c60
+        qtgraphicaleffects:f8c2b592d89a8ed66f74c221ecaa37568a606f15 qtquickcontrols:6348b43dd4c0974ddc7a7efff7226485cc8d583c
+        qtsensors:152eb3a9b9f32d47f898d1eaed7e7610900af7fe qtxmlpatterns:c5050019511ff81a7ec248bf9b58e6edd91b881c
+        qtandroidextras:164155b58fd6642a823f28cf0d6cb51348f666cc; do m=${ms%:*}; s=${ms#*:};
+        fn=5.12.5-0-201909090517${m}-Linux-RHEL_7_4-Clang-Android-Android_ANY-ARMv7.7z;
+        wget -q https://download.qt.io/online/qtsdkrepository/linux_x64/android/qt5_5125/qt.qt5.5125.android_armv7/$fn;
+        echo "$s  $fn" | sha1sum -c
+      - 7zr x $fn; done
+      - export CMAKE_LIB=$(pwd)/5.12.5/android_armv7/lib/cmake/
+      - export QTPREFIX=$(pwd)/5.12.5/android_armv7
+      - popd
+      - sed -i '/QT_LICHECK/d' $QTPREFIX/mkspecs/qconfig.pri
+      - sed -i 's/Enterprise/OpenSource/g' $QTPREFIX/mkspecs/qconfig.pri
+      - echo "[Paths]" > $QTPREFIX/bin/qt.conf
+      - echo "Prefix = $QTPREFIX" >> $QTPREFIX/bin/qt.conf
+      - mkdir $$extra-cmake-modules$$/build
+      - pushd $$extra-cmake-modules$$/build
+      - cmake -DCMAKE_INSTALL_PREFIX=. ..
+      - make
+      - make install
+      - popd
+      - pushd android-build/
+      - cmake -DANDROID_PLATFORM=android-18 -DANDROID_API_LEVEL=18 -DCMAKE_TOOLCHAIN_FILE=$$extra-cmake-modules$$/build/share/ECM/toolchain/Android.cmake
+        -DQt5_DIR=$CMAKE_LIB/Qt5/ -DQt5Core_DIR=$CMAKE_LIB/Qt5Core/ -DQt5Widgets_DIR=$CMAKE_LIB/Qt5Widgets
+        -DQt5Qml_DIR=$CMAKE_LIB/Qt5Qml -DQt5Gui_DIR=$CMAKE_LIB/Qt5Gui -DQt5Svg_DIR=$CMAKE_LIB/Qt5Svg
+        -DQt5Sensors_DIR=$CMAKE_LIB/Qt5Sensors -DQt5AndroidExtras_DIR=$CMAKE_LIB/Qt5AndroidExtras
+        -DQt5Xml_DIR=$CMAKE_LIB/Qt5Xml -DQt5LinguistTools_DIR=$CMAKE_LIB/Qt5LinguistTools
+        -DQt5XmlPatterns_DIR=$CMAKE_LIB/Qt5XmlPatterns -DQt5Quick_DIR=$CMAKE_LIB/Qt5Quick
+        -DQt5Multimedia_DIR=$CMAKE_LIB/Qt5Multimedia -DQt5Network_DIR=$CMAKE_LIB/Qt5Network
+        -DACTIVATION_MODE=no -Wno-dev ../
+      - make getSvnTranslations
+      - rm -f ../po/gcompris_ast.po ../po/gcompris_ca@valencia.po
+      - cmake -DCMAKE_TOOLCHAIN_FILE=/usr/share/ECM/toolchain/Android.cmake ../
+      - make
+      - make apk_release
+    ndk: r18b
+
 AutoUpdateMode: None
 UpdateCheckMode: Tags
-CurrentVersion: '0.96'
-CurrentVersionCode: 9600
+CurrentVersion: '0.97'
+CurrentVersionCode: 9700
