@@ -578,10 +578,54 @@ Builds:
       - mv jni/static_library_built/openssl/output/android/ jni/openssl/
     ndk: r15c
 
+  - versionName: 2.1.4
+    versionCode: 1114
+    commit: 2.1.4
+    subdir: aTalk/
+    gradle:
+      - fdroid
+    srclibs:
+      - fmj@r122
+      - jitsi-zrtp4j@7cbd8101108191089aad871002567c2a0eb2b512
+    rm:
+      - aTalk/lib/src_reference/*/*.jar
+      - aTalk/lib/bundles/*.jar
+      - aTalk/jni/ffmpeg/android/
+      - aTalk/jni/openssl/android/
+      - aTalk/jni/vpx/android/
+    prebuild: sed -i -e "/clean.dependsOn 'ndkClean'/d" build.gradle
+    scanignore:
+      - aTalk/build.gradle
+    build:
+      - pushd $$fmj$$
+      - ant
+      - popd
+      - pushd $$jitsi-zrtp4j$$
+      - ant jar
+      - popd
+      - mv $$fmj$$/build/jars/fmj.jar lib/bundles/fmj-1.0-SNAPSHOT.jar
+      - mv $$jitsi-zrtp4j$$/dist/zrtp4j-light.jar lib/bundles/zrtp4j-light-4.1.0-jitsi-1-SNAPSHOT.jar
+      - pushd jni/static_library_built/ffmpeg-x264/
+      - ./init_update_libs.sh
+      - ./ffmpeg-atalk_build.sh
+      - popd
+      - mv jni/static_library_built/ffmpeg-x264/android/ jni/ffmpeg/
+      - pushd jni/static_library_built/libvpx/
+      - ./init_libvpx.sh
+      - ./build-libvpx4android.sh
+      - popd
+      - mv jni/static_library_built/libvpx/output/android/ jni/vpx/
+      - pushd jni/static_library_built/openssl/
+      - ./init_libopenssl.sh
+      - ./build-openssl4android.sh
+      - popd
+      - mv jni/static_library_built/openssl/output/android/ jni/openssl/
+    ndk: r15c
+
 MaintainerNotes: scanignore is used to allow the local "third_party/m2" Gradle repository
     (which is populated by libraries we build).
 
 AutoUpdateMode: Version %v
 UpdateCheckMode: Tags
-CurrentVersion: 2.1.3
-CurrentVersionCode: 1113
+CurrentVersion: 2.1.4
+CurrentVersionCode: 1114
