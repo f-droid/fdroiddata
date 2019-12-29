@@ -255,6 +255,35 @@ Builds:
       - app/src/main/jniLibs
     ndk: r20
 
+  - versionName: 0.46.0-31-nightly
+    versionCode: 31
+    commit: 0.46.0-31-nightly
+    timeout: 30000
+    sudo:
+      - apt update || apt update
+      - apt install -y doxygen g++ pkgconf wget
+    gradle:
+      - nightly
+    output: app/build/outputs/apk/nightly/release/omw_release_*.apk
+    prebuild:
+      - sed -i -e '/Unzip/,+5d' buildscripts/include/setup-ndk.sh
+      - sed -i -e 's/\ -Wl,-plugin-opt=-emulated-tls//' -e '/download-ndk/d' -e '/debugging\
+        life/,+19d' buildscripts/build.sh
+      - mkdir -p buildscripts/toolchain
+      - ln -s -T $$NDK$$ buildscripts/toolchain/ndk
+      - ./buildscripts/build.sh --arch arm
+      - ./buildscripts/build.sh --arch arm64 --no-resources
+      - ./buildscripts/build.sh --arch x86 --no-resources
+      - ./buildscripts/build.sh --arch x86_64 --no-resources
+      - rm -fr ./buildscripts/build/*
+      - rm -fr ./buildscripts/prefix/*
+      - rm -fr ./buildscripts/symbols/*
+      - rm -fr ./buildscripts/toolchain/*
+    scanignore:
+      - app/src/main/assets
+      - app/src/main/jniLibs
+    ndk: r20
+
 MaintainerNotes: |-
     - we use prebuild else fdroid scanner will detect the built libs as binaries on the second pass before running build, and we can't scanignore them (at start) since they don't exist yet, see https://gitlab.com/fdroid/fdroidserver/issues/635
     - we remove the buildtools and intermediary artefacts (several gigabytes) else they'll get pulled in the source tarball
@@ -262,5 +291,5 @@ MaintainerNotes: |-
 
 AutoUpdateMode: None
 UpdateCheckMode: Tags .*[0-9]-nightly$
-CurrentVersion: 0.46.0-30-nightly
-CurrentVersionCode: 30
+CurrentVersion: 0.46.0-31-nightly
+CurrentVersionCode: 31
