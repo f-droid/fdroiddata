@@ -1,3 +1,5 @@
+AntiFeatures:
+  - NonFreeAdd
 Categories:
   - Phone & SMS
 License: GPL-2.0-or-later
@@ -9,16 +11,21 @@ Changelog: https://github.com/BelledonneCommunications/linphone-android/blob/HEA
 
 AutoName: Linphone
 Description: |-
-    * Audio: speex; Opus; iLBC; G711; GSM; G722; Silk; PCMA; PCMU; AMR-WB; AAC-ELD
-    * Video with VP8, mpeg4, x264; H263
-    * Audio multicall and conferencing
-    * SRTP/ZRTP media encryption
-    * Echo cancellation
-    * Address book integration
-    * Call history
-    * Multiple accounts support
-    * Native x86
-    * Text messaging
+    Linphone is offering free audio/video calls and text messaging.
+    With Linphone, you can be reachable at any time, even if the app is closed, with a WiFi or 3G/4G internet connection.
+
+    Linphone key features:
+    * high definition audio and video calls
+    * audio conference calls with various participants
+    * pictures and file sharing
+    * secure communication (encryption options)
+    * compliant with a large number of SIP-compatible VoIP service providers allowing to reach everyone that has a "classic" phone line.
+
+    Linphone is available on the main mobile and desktop operating systems and offers various specific features for advanced users (codecs, transport standard, encryption options, DTMF...).
+    For more information, see Linphone project website: www.linphone.org
+
+    Antifeature:
+    * NonFreeAdd - on Android 5.0 a binary build of libopenh264 might be downloaded.
 
 RepoType: git
 Repo: git://git.linphone.org/linphone-android.git
@@ -518,6 +525,7 @@ Builds:
 
   - versionName: 4.2.0-beta
     versionCode: 4200
+    disable: stable was released
     commit: 4.2.0-beta
     sudo:
       - apt-get update || apt-get update
@@ -555,10 +563,49 @@ Builds:
         linphone-sdk-android/
     ndk: r16b
 
+  - versionName: 4.2.0
+    versionCode: 4213
+    commit: '4.2'
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y --no-install-recommends cmake -t stretch-backports
+      - apt-get install -y doxygen pkgconf python-pystache python-six yasm
+    gradle:
+      - yes
+    output: app/build/outputs/apk/release/linphone-android-release-*.apk
+    srclibs:
+      - linphone-sdk@4.3.0
+    rm:
+      - app/src/main/java/org/linphone/firebase/Firebase*.java
+      - app/google-services.json
+      - sample
+    prebuild:
+      - sed -i -e '/google-services/d' build.gradle
+      - sed -i -e '/keystore/d' -e '/repositories/,+5d' -e 's/${project.version}/$$VERSION$$/g'
+        -e '/com.google.gms.google-services/d' app/build.gradle
+      - sed -i -e 's|"kill_service_with_task_manager">true<|"kill_service_with_task_manager">false<|'
+        -e 's|"check_for_update_when_app_starts">true<|"check_for_update_when_app_starts">false<|'
+        app/src/main/res/values/non_localizable_custom.xml
+      - sed -i -e 's!https://www.linphone.org/releases!!' app/src/main/res/raw/linphonerc_default
+    scanignore:
+      - app/build.gradle
+    build:
+      - pushd $$linphone-sdk$$
+      - git submodule update --init --recursive
+      - mkdir build-sdk
+      - cd build-sdk
+      - cmake .. -DLINPHONESDK_PLATFORM=Android -DLINPHONESDK_ANDROID_ARCHS="arm64,
+        armv7, x86, x86_64" -DCMAKE_BUILD_TYPE=Release
+      - cmake --build . --parallel $(nproc)
+      - popd
+      - cp $$linphone-sdk$$/build-sdk/linphone-sdk/bin/outputs/aar/linphone-sdk-android-release.aar
+        linphone-sdk-android/
+    ndk: r16b
+
 MaintainerNotes: Main repo for linphone-sdk is upstreams private Gitlab instance with
     submodules, should we switch the main Repo link too?
 
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: 4.1.1
-CurrentVersionCode: 4125
+CurrentVersion: 4.2.0
+CurrentVersionCode: 4213
