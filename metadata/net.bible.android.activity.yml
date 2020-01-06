@@ -1,7 +1,7 @@
 Categories:
   - Reading
 License: GPL-3.0-or-later
-AuthorName: Bible for Android
+AuthorName: And Bible Open Source Project
 AuthorEmail: and-bible-support@googlegroups.com
 WebSite: https://andbible.github.io/
 SourceCode: https://github.com/AndBible/and-bible
@@ -9,15 +9,6 @@ IssueTracker: https://github.com/AndBible/and-bible/issues
 Translation: https://www.transifex.com/mjdenham/andbible/
 
 AutoName: And Bible
-Description: |-
-    * Read the bible and refer to commentaries wherever you are
-    * Over 40 English versions of the bible including ESV, KJV and NET
-    * Totally offline after initial downloads
-    * The bible in over 50 different languages
-    * 26 commentaries
-    * Uses the JSword engine from CrossWire
-    * User interface translated into many different languages
-    * You can add more bibles to the list via the CrossWire site
 
 RepoType: git
 Repo: https://github.com/AndBible/and-bible.git
@@ -498,7 +489,27 @@ Builds:
       - cd -
       - cp $$AndBibleJSwordTweaks$$/jsword.jar libs/jsword.jar
 
-AutoUpdateMode: None
+  - versionName: 3.2.333
+    versionCode: 333
+    commit: v3.2.333-fdroid
+    subdir: app
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y -t stretch-backports npm g++ build-essential
+    gradle:
+      - yes
+    srclibs:
+      - AndBibleJSword@build-2
+      - AndBibleJSwordTweaks@v0.1.3
+    rm:
+      - app/libs/*
+    build:
+      - cd $$AndBibleJSwordTweaks$$
+      - TARGET_DIR="." JSWORD_PATH=$$AndBibleJSword$$ gradle install
+      - cd -
+      - cp $$AndBibleJSwordTweaks$$/jsword.jar libs/jsword.jar
+
+AutoUpdateMode: Version v%v-fdroid
 UpdateCheckMode: Tags
 CurrentVersion: 3.2.333
 CurrentVersionCode: 333
