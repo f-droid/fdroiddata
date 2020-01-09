@@ -1,0 +1,71 @@
+AntiFeatures:
+  - NonFreeNet
+Categories:
+  - Internet
+  - Phone & SMS
+License: Apache-2.0
+AuthorName: Vector Creations Limited
+AuthorEmail: android@riot.im
+WebSite: https://riot.im/
+SourceCode: https://github.com/vector-im/riotx-android
+IssueTracker: https://github.com/vector-im/riotx-android/issues
+Translation: https://translate.riot.im/projects/riotx-android/
+Changelog: https://github.com/vector-im/riotx-android/blob/HEAD/CHANGES.md
+LiberapayID: '10794'
+Bitcoin: 1LxowEgsquZ3UPZ68wHf8v2MDZw82dVmAEa
+
+Description: |-
+    RiotX is a new client for the Matrix protocol (Matrix.org): an open network for secure, decentralised communication. RiotX is a full rewrite of the Riot Android client, based on a full rewrite of the Matrix Android SDK.
+
+    Disclaimer: This is a beta version. RiotX is currently in active development and contains limitations and (we hope not too many) bugs. All feedback is welcome!
+
+    RiotX supports:
+    * Login to an existing account
+    * Create room and join public rooms
+    * Accept and reject invitations
+    * List users rooms
+    * View room details
+    * Send text messages
+    * Send attachment
+    * Read and write messages in encrypted rooms
+    * Crypto: E2E keys backup, advance device verification, key share request and answer
+    * Push notification
+    * Light, Dark and Black themes
+
+    Not all features in Riot are implemented in RiotX yet. Main missing (and coming soon!) features:
+    * Room settings (list room members, etc.)
+    * Calls
+    * Widgets
+    * ...
+
+RepoType: git
+Repo: https://github.com/vector-im/riotx-android
+
+Builds:
+  - versionName: 0.12.0-dev
+    versionCode: 1200
+    commit: v0.12.0
+    subdir: vector
+    gradle:
+      - fdroid
+    srclibs:
+      - piasy@v1.6.2
+    prebuild:
+      - tac ../build.gradle | awk '/dl.bintray.com\/piasy\/maven/{getline;$0="mavenLocal
+        {"}{print $0}' | tac > ../build.gradle.new
+      - mv ../build.gradle.new ../build.gradle
+      - sed -i -e '/com.google.firebase/,+5d' build.gradle
+      - sed -i -e '/com.google.gms.google-services/d' build.gradle
+      - sed -i -e 's/enable true/enable false/g' build.gradle
+
+MaintainerNotes: |-
+    Uses piasy/BigImageViewer which gets build and installed to a local maven repo in srclib prepare step.
+
+    In prebuild we do weird stuff for replacing `maven {` with `mavenLocal {`. tac reverses the lines so we can match the following repo url.
+    The awk call then matches the url, deletes the matching line and replaces the following line. No idea how it works, but it does.
+    Finally reverse the lines again and move back to original build.gradle file.
+
+AutoUpdateMode: None
+UpdateCheckMode: Tags
+CurrentVersion: 0.12.0-dev
+CurrentVersionCode: 1200
