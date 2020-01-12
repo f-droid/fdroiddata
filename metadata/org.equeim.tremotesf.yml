@@ -399,7 +399,32 @@ Builds:
         -j $(nproc)
     ndk: r19c
 
+  - versionName: 2.0.2
+    versionCode: 32
+    commit: 2.0.2
+    subdir: app
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y g++
+    gradle:
+      - fdroid
+    srclibs:
+      - OpenSSL@OpenSSL_1_1_1d
+      - QtBase@v5.13.2
+    prebuild:
+      - sed -i -e '/splits/,+7d' build.gradle
+      - sed -i -e 's/android:extractNativeLibs=\"false\"/android:extractNativeLibs=\"true\"/'
+        src/main/AndroidManifest.xml
+      - cp -a $$OpenSSL$$ ../3rdparty/openssl/openssl
+      - cp -a $$QtBase$$ ../3rdparty/qt/qtbase
+      - "\"$$SDK$$/tools/bin/sdkmanager\" 'cmake;3.10.2.4988404'"
+    scandelete:
+      - 3rdparty
+    build: ANDROID_SDK_ROOT="$$SDK$$" ANDROID_NDK_ROOT="$$NDK$$" ../build-native.sh
+        -j $(nproc)
+    ndk: r20
+
 AutoUpdateMode: Version %v
 UpdateCheckMode: Tags
-CurrentVersion: 2.0.1
-CurrentVersionCode: 31
+CurrentVersion: 2.0.2
+CurrentVersionCode: 32
