@@ -72,7 +72,34 @@ Builds:
       - make apk
     ndk: r18b
 
+  - versionName: 1.20.0
+    versionCode: 3
+    commit: 1.20.0
+    sudo:
+      - apt update || apt update
+      - apt install -y g++
+      - apt install -y -t stretch-backports cmake
+    patch:
+      - 1.20.0-fixture.patch
+    output: build/dist/AusweisApp2-$$VERSION$$-armeabi-v7a.apk
+    rm:
+      - test/fixture
+      - resources/packaging/macos
+    build:
+      - mkdir libs/build build
+      - cd libs/build
+      - cmake .. -DCMAKE_TOOLCHAIN_FILE=../../cmake/android.toolchain.cmake -DCMAKE_BUILD_TYPE=release
+      - make
+      - cd ../../build
+      - cmake .. -DCMAKE_TOOLCHAIN_FILE=../cmake/android.toolchain.cmake -DCMAKE_BUILD_TYPE=MinSizeRel
+        -DCMAKE_PREFIX_PATH=$(realpath ../libs/build/dist) -DANDROID_VERSION_CODE=$$VERCODE$$
+        -DVENDOR=F-Droid -DVENDOR_DOMAIN=f-droid.org
+      - make
+      - make install
+      - make apk
+    ndk: r18b
+
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: 1.16.2
-CurrentVersionCode: 2
+CurrentVersion: 1.20.0
+CurrentVersionCode: 3
