@@ -126,12 +126,49 @@ Builds:
       - ./make.sh -j`nproc`
     ndk: r12b
 
+  - versionName: '1.1'
+    versionCode: 144
+    commit: '1.1'
+    subdir: android
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install imagemagick pngquant vorbis-tools
+    output: build/outputs/apk/release/android-release-unsigned.apk
+    srclibs:
+      - supertuxkartdeps@03aae5b44d959746a147b071fa2574920d81c25d
+    prebuild:
+      - wget https://sourceforge.net/code-snapshots/svn/s/su/supertuxkart/code/supertuxkart-code-r18260-stk-assets-release-$$VERSION$$.zip
+      - echo '5c3c6af17b935e587a2e497f7200760df46f35919771985b4fe6925c5f5b2385  supertuxkart-code-r18260-stk-assets-release-$$VERSION$$.zip'
+        | shasum -c -
+      - unzip supertuxkart-code-r18260-stk-assets-release-$$VERSION$$.zip
+      - tar -C '../lib' -xf $$supertuxkartdeps$$/dependencies-android.tar.xz
+      - sed -i -e 's#../../stk-assets#supertuxkart-code-r18260-stk-assets-release-$$VERSION$$#'
+        generate_assets.sh
+      - sed -i -e 's#./gradlew#gradle#' make.sh
+    scanignore:
+      - android/supertuxkart-code-r18260-stk-assets-release-1.1/textures/
+    scandelete:
+      - lib/curl/tests
+      - tools/windows_installer
+      - lib/harfbuzz/test/
+    build:
+      - export BUILD_TYPE=release
+      - export SDK_PATH=$$SDK$$
+      - export NDK_PATH=$$NDK$$
+      - export PROJECT_VERSION=$$VERSION$$
+      - export PROJECT_CODE=$$VERCODE$$
+      - ./generate_assets.sh
+      - ./make.sh -j`nproc`
+    ndk: r12b
+
 MaintainerNotes: |-
     By default, the build script only builds a binary for armeabi-v7a.
 
     Upstream sets the version manually during the build so we can't enable auto update.
 
+    Starting with 1.1, git-svn crashes when cloning the assets repository, so we have to use a Zip archive instead.
+
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: '1.0'
-CurrentVersionCode: 105
+CurrentVersion: '1.1'
+CurrentVersionCode: 144
