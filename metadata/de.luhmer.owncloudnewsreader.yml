@@ -1326,7 +1326,6 @@ Builds:
 
   - versionName: 0.9.9.32
     versionCode: 151
-    disable: fails to build
     commit: v.0.9.9.32
     subdir: News-Android-App
     init:
@@ -1335,23 +1334,25 @@ Builds:
       - sed -i -e '/guardian.github.com/d; /dl.bintray.com/d' build.gradle
       - sed -i -e '/signingConfigs {/,+3d' build.gradle
       - sed -i "/repositories {/a\    flatDir { dirs 'libs' }" build.gradle
-      - sed -i "/dependencies {/a\    compile project(':MaterialFilePicker:library')"
-        build.gradle
-      - sed -i "$ ainclude ':MaterialFilePicker:library'" ../settings.gradle
+      - sed -i "/dependencies {/a\    implementation(name:'MaterialFilePicker-1.8',
+        ext:'aar')" build.gradle
     gradle:
       - oss
     srclibs:
-      - MaterialFilePicker@13920fc
+      - MaterialFilePicker@7f3679f
       - JavaOptionClass@e933c3a
     prebuild:
       - rm -rf $$MaterialFilePicker$$/app
-      - cp -r $$MaterialFilePicker$$ ../
-      - sed -i -e '/apply from/d' ../MaterialFilePicker/library/build.gradle
+      - pushd $$MaterialFilePicker$$/library
+      - sed -i -e '/apply from/d' build.gradle
+      - gradle assembleRelease
+      - popd
       - pushd $$JavaOptionClass$$
       - $$MVN3$$ package -Dmaven.compiler.source=1.6 -Dmaven.compiler.target=1.6 -DskipTests
       - popd
       - mkdir libs
       - mv $$JavaOptionClass$$/target/option-1.3-SNAPSHOT.jar libs/option-1.3.jar
+      - mv $$MaterialFilePicker$$/library/build/outputs/aar/library-release.aar libs/MaterialFilePicker-1.8.aar
 
 MaintainerNotes: |-
     MaterialShowcaseView/build.gradle misses the google() repo but it's specified at top level.
