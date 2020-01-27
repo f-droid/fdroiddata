@@ -286,9 +286,8 @@ Builds:
       - bash copy.sh
     ndk: r14b
 
-  - versionName: 2.0.10-nbc
+  - versionName: 2.0.10
     versionCode: 39
-    disable: fails to build
     commit: SnoopSnitch-2.0.10
     subdir: SnoopSnitch/app
     submodules: true
@@ -299,23 +298,25 @@ Builds:
       - nobuildcheck
     rm:
       - SnoopSnitch/app/src/main/jniLibs/*/*.so
-      - contrib/prebuilt/*.so
+      - contrib/prebuilt/*/*.so
     prebuild: sed -i -e '/versionNameSuffix/d' build.gradle
     scandelete:
       - SnoopSnitch/patchanalysis
+      - contrib
     build:
       - export NDK_DIR=$$NDK$$
       - cd ../../contrib
-      - bash compile.sh -t android -u
+      - bash compile.sh -a -g -u
       - cd ../SnoopSnitch/patchanalysis/contrib
-      - bash compile.sh -t android -u
+      - bash compile.sh -a
       - bash copy.sh
-      - cp builds/*.so ../../../contrib/prebuilt
+      - cp builds/32/*.so ../../../contrib/prebuilt/32
+      - cp builds/64/*.so ../../../contrib/prebuilt/64
       - cd ../..
       - bash copy.sh
-    ndk: r14b
+    ndk: r20b
 
-AutoUpdateMode: Version SnoopSnitch-%v
+AutoUpdateMode: None
 UpdateCheckMode: Tags
-CurrentVersion: 2.0.10-nbc
+CurrentVersion: 2.0.10
 CurrentVersionCode: 39
