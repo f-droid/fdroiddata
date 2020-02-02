@@ -397,7 +397,33 @@ Builds:
       - ./build.sh
     ndk: r20b
 
+  - versionName: 4.5.2
+    versionCode: 405000002
+    commit: 4.5.2
+    subdir: app
+    gradle:
+      - Community
+    srclibs:
+      - rustup@1.18.3
+    rm:
+      - app/src/tun-blocka/jniLibs
+    prebuild: sed -i -e '/set -e/a\source $HOME/.cargo.env' ../boringtun/build.sh
+    build:
+      - $$rustup$$/rustup-init.sh -y
+      - source $HOME/.cargo/env
+      - rustup default 1.36.0
+      - rustup target add armv7-linux-androideabi
+      - rustup target add aarch64-linux-android
+      - rustup target add i686-linux-android
+      - rustup target add x86_64-linux-android
+      - export NDK_STANDALONE=$$NDK$$
+      - sed -i -e "s|/Users/kar/Library/Android/sdk/ndk-bundle|$$NDK$$|" ../boringtun/.cargo/config
+      - sed -i -e "s|darwin|linux|" ../boringtun/.cargo/config
+      - cd ../boringtun/
+      - ./build.sh
+    ndk: r20b
+
 AutoUpdateMode: None
 UpdateCheckMode: Tags
-CurrentVersion: 4.5.1
-CurrentVersionCode: 405000001
+CurrentVersion: 4.5.2
+CurrentVersionCode: 405000002
