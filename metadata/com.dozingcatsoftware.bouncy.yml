@@ -6,12 +6,6 @@ SourceCode: https://github.com/dozingcat/Vector-Pinball
 IssueTracker: https://github.com/dozingcat/Vector-Pinball/issues
 
 AutoName: Vector Pinball
-Description: |-
-    Vector Pinball is a pinball game.
-
-    The graphics are deliberately simple; currently everything is drawn with
-    lines and circles. The focus is on gameplay and accurate physics. It uses
-    the libgdx Java wrapper for the Box2D physics engine.
 
 RepoType: git
 Repo: https://github.com/dozingcat/Vector-Pinball.git
@@ -174,11 +168,45 @@ Builds:
       - cp $$libgdx$$/dist/gdx.jar libs/
       - cp -r $$libgdx$$/dist/extensions/gdx-box2d/* libs/
 
+  - versionName: 1.7.1
+    versionCode: 25
+    commit: e6f46aad12d01d2bc65b710bbb6854147af14faa
+    subdir: app
+    gradle:
+      - yes
+    srclibs:
+      - libgdx@gdx-parent-1.9.10
+    rm:
+      - app/src/main/jniLibs/*
+      - app/libs/*
+    prebuild:
+      - pushd $$libgdx$$
+      - rm gdx/jni/build.xml
+      - sed -i 's@<target name="compile-natives">@<target name="compile-natives">\n<ant
+        antfile="build-android32.xml"/>\n</target>\n<target name="compile-natives-old">@g'
+        extensions/gdx-box2d/gdx-box2d/jni/build.xml
+      - sed -i 's@<target name="all" depends="compile-natives,pack-natives"/>@<target
+        name="all" depends="compile-natives"/>@g' extensions/gdx-box2d/gdx-box2d/jni/build.xml
+      - sed -i 's@armeabi\s@ @g' extensions/gdx-box2d/gdx-box2d/jni/Application.mk
+      - popd
+    build:
+      - export NDK_HOME=$$NDK$$
+      - pushd $$libgdx$$
+      - pwd
+      - env | grep NDK
+      - ant -f build.xml -Dbuild-natives=true gdx-box2d
+      - popd
+      - cp $$libgdx$$/dist/gdx.jar libs/gdx-1.9.10.jar
+      - cp $$libgdx$$/dist/extensions/gdx-box2d/gdx-box2d.jar libs/gdx-box2d-1.9.10.jar
+      - cp -r $$libgdx$$/dist/extensions/gdx-box2d/{arm64-v8a,armeabi-v7a,x86,x86_64}
+        src/main/jniLibs/
+
 MaintainerNotes: |-
     sed replaces needed as libgdx upstream currently don't provide a way to only build the android native bins only.
     If more apps start to depend on libgdx consider to create a feature request to change this.
+    armeabi is removed from gdx-box2d/jni/Application.mk because recent NDK versions don't support it.
 
 AutoUpdateMode: None
 UpdateCheckMode: RepoManifest
-CurrentVersion: 1.7.0
-CurrentVersionCode: 24
+CurrentVersion: 1.7.1
+CurrentVersionCode: 25
