@@ -2974,6 +2974,102 @@ Builds:
       - cp $$icu50-2-1-patched$$/icu4j/icu4j.jar ../OsmAnd-java/libs/
     ndk: r17c
 
+  - versionName: 3.6.2
+    versionCode: 362
+    commit: v3.6.2
+    subdir: android/OsmAnd
+    submodules: true
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install --yes swig
+    gradle:
+      - full
+      - legacy
+      - fat
+    srclibs:
+      - icu50-2-1-patched@0d825a9779eeb8ee35977ddf8bb4bea4119bf638
+      - osmand-external-skia@android/oreo
+    rm:
+      - android/OsmAnd-java/libs/*.jar
+      - android/OsmAnd-java/*.jar
+      - android/OsmAnd/libs/*.jar
+      - android/OsmAndCore-sample
+    prebuild:
+      - sed -i -e "/.*OsmAndCore.*SNAPSHOT.*/d" ../OsmAnd/build.gradle
+      - sed -i -e "/ivy {/,+6d" ../OsmAnd/build.gradle
+      - sed -i -e '/qt.*Compile/d' -e '/com.google.firebase/d' build.gradle ../plugins/Osmand-ParkingPlugin/build.gradle
+        ../plugins/Osmand-SRTMPlugin/build.gradle ../plugins/Osmand-Skimaps/build.gradle
+        ../plugins/Osmand-Nautical/build.gradle
+      - sed -i -e "s/System.getenv(\"APK_VERSION\")/\"$$VERSION$$\"/g" build.gradle
+      - sed -i -e "s/System.getenv(\"APK_NUMBER_VERSION\")/\"$$VERCODE$$\"/g" build.gradle
+      - sed -i -e "s/System.getenv(\"APP_FEATURES\")/\"+play_market +gps_status -parking_plugin
+        -blackberry -amazon -route_nav\"/g" build.gradle
+      - sed -i -e "s/System.getenv(\"APP_NAME\")/\"OsmAnd~\"/g" build.gradle
+      - sed -i -e "s/System.getenv(\"TARGET_APP_NAME\")/\"OsmAnd~\"/g" build.gradle
+      - sed -i -e '/com.android.vending.BILLING/d' AndroidManifest.xml
+      - "sed -i -e \"s/implementation fileTree.*/ implementation fileTree(include:\
+        \ ['icu4j.jar'], dir: 'libs')\\n implementation 'commons-logging:commons-logging:1.1.1'\\\
+        n implementation group: 'net.sf.trove4j', name: 'trove4j', version: '3.0.3'\\\
+        n implementation 'org.json:json:20090211'\\n implementation 'it.unibo.alice.tuprolog:tuprolog:3.2.1'\\\
+        n implementation 'net.sf.kxml:kxml2:2.3.0'\\n implementation 'org.beanshell:bsh-core:2.0b4'\\\
+        n implementation 'fr.univ-valenciennes:bzip2:1.0'\\n implementation 'com.moparisthebest:junidecode:0.1.1'\\\
+        n implementation 'com.vividsolutions:jts-core:1.14.0'/\" ../OsmAnd-java/build.gradle"
+      - "sed -i -e \"s/implementation fileTree.*/implementation fileTree(include:\
+        \ ['classes.jar','icu4j.jar'], dir: 'libs')\\n implementation group: 'net.sf.trove4j',\
+        \ name: 'trove4j', version: '3.0.3'\\n/\" build.gradle"
+      - sed -i -e '/facebook/d' build.gradle
+      - sed -i -e "s/, ':OsmAndCore-sample'//" ../settings.gradle
+      - pushd ../../core-legacy/externals
+      - sed -i "s/# Extract/sha256sum \$SRCLOC\/upstream.tar.bz2 | grep 13bfc5ae543cf3aa180ac2485c0bc89495e3ae711fc6fab4f8ffe90dfb4bb677
+        || { echo 'Failed checksum' 1>\&2; exit; }/" protobuf/configure.sh
+      - sed -i "/# Download/,+8d" skia/configure.sh
+      - sed -i "s/# Patch/cp -r $(echo $$osmand-external-skia$$ | sed 's/\//\\\//g')
+        \$SRCLOC\/upstream.original/" skia/configure.sh
+      - popd
+      - echo "org.gradle.jvmargs=-XX:MaxHeapSize=2048m" >> ../gradle.properties
+    scanignore:
+      - help/website/help/map-legend_nautical.png
+      - help/website/help/map-legend_default.png
+      - help/website/images/dvr/4p-en.png
+      - help/website/images/blog/ios-2-0/con-scrn-1.png
+      - help/website/images/blog/ios-2-0/con-scrn-2.png
+      - help/website/images/blog/ios-2-0/interf-2.png
+      - help/website/images/blog/ios-2-0/navigat-6.png
+      - android/OsmAnd/assets/fonts/RobotoSlab-Regular.ttf
+      - help/website/fonts/Roboto-Regular-webfont.ttf
+      - help/website/fonts/Roboto-Bold-webfont.woff
+      - help/website/fonts/Roboto-Regular-webfont.eot
+      - help/website/fonts/Roboto-Bold-webfont.ttf
+      - help/website/fonts/Roboto-Regular-webfont.woff
+      - help/website/fonts/Roboto-Bold-webfont.eot
+    build:
+      - pushd ../../OsmAnd-core/wrappers/android/
+      - sed -i -e "/Native/d" settings.gradle
+      - sed -i -e "/Native/d" build.gradle
+      - sed -i -e "/compileTask.*copyNdkSharedLibs/d" build.gradle
+      - sed -i -e "/compileTask.*copyQtSharedLibs/d" build.gradle
+      - sed -i -e "/compileTask.*copyQtJarLibs/d" build.gradle
+      - sed -i -e "s/mavenCentral()/mavenCentral()\n google()\n jcenter()/" build.gradle
+      - gradle assembleRelease
+      - cd build/outputs/aar
+      - unzip OsmAndCore_android-release.aar
+      - cp classes.jar ../../../../../../android/OsmAnd/libs/
+      - popd
+      - pushd $$icu50-2-1-patched$$/icu4j
+      - ant jar
+      - zip -d icu4j.jar "com/ibm/icu/impl/data/icudt50b/brkitr/*"
+      - zip -d icu4j.jar "com/ibm/icu/impl/data/icudt50b/coll/*"
+      - zip -d icu4j.jar "com/ibm/icu/impl/data/icudt50b/curr/*"
+      - zip -d icu4j.jar "com/ibm/icu/impl/data/icudt50b/lang/*"
+      - zip -d icu4j.jar "com/ibm/icu/impl/data/icudt50b/rbnf/*"
+      - zip -d icu4j.jar "com/ibm/icu/impl/data/icudt50b/region/*"
+      - zip -d icu4j.jar "com/ibm/icu/impl/data/icudt50b/translit/*"
+      - zip -d icu4j.jar "com/ibm/icu/impl/data/icudt50b/zone/*"
+      - popd
+      - cp $$icu50-2-1-patched$$/icu4j/icu4j.jar libs/
+      - cp $$icu50-2-1-patched$$/icu4j/icu4j.jar ../OsmAnd-java/libs/
+    ndk: r17c
+
 MaintainerNotes: |-
     Update CV only after sucessfully built and tested.
 
