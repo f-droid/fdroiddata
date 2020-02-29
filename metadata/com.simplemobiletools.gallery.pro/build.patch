@@ -1,0 +1,56 @@
+--- a/app/build.gradle
++++ b/app/build.gradle
+@@ -3,12 +3,6 @@
+ apply plugin: 'kotlin-android-extensions'
+ apply plugin: 'kotlin-kapt'
+ 
+-def keystorePropertiesFile = rootProject.file("keystore.properties")
+-def keystoreProperties = new Properties()
+-if (keystorePropertiesFile.exists()) {
+-    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+-}
+-
+ android {
+     compileSdkVersion 28
+     buildToolsVersion "28.0.3"
+@@ -25,14 +19,6 @@
+     }
+ 
+     signingConfigs {
+-        if (keystorePropertiesFile.exists()) {
+-            release {
+-                keyAlias keystoreProperties['keyAlias']
+-                keyPassword keystoreProperties['keyPassword']
+-                storeFile file(keystoreProperties['storeFile'])
+-                storePassword keystoreProperties['storePassword']
+-            }
+-        }
+     }
+ 
+     buildTypes {
+@@ -43,25 +29,17 @@
+         release {
+             minifyEnabled true
+             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+-            if (keystorePropertiesFile.exists()) {
+-                signingConfig signingConfigs.release
+-            }
+         }
+     }
+ 
+     sourceSets {
+         main.java.srcDirs += 'src/main/kotlin'
+-        if (is_proprietary) {
+-            main.java.srcDirs += 'src/proprietary/kotlin'
+-        }
+     }
+ 
+     flavorDimensions "licensing"
+     productFlavors {
+         proprietary { }
+         foss {
+-            // We're not using PhotoEditor here, so changing the name is fine.
+-            applicationIdSuffix ".foss"
+             versionNameSuffix "-foss"
+         }
+     }
