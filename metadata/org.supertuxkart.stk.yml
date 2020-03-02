@@ -138,16 +138,15 @@ Builds:
     srclibs:
       - supertuxkartdeps@03aae5b44d959746a147b071fa2574920d81c25d
     prebuild:
-      - wget https://sourceforge.net/code-snapshots/svn/s/su/supertuxkart/code/supertuxkart-code-r18260-stk-assets-release-$$VERSION$$.zip
-      - echo '5c3c6af17b935e587a2e497f7200760df46f35919771985b4fe6925c5f5b2385  supertuxkart-code-r18260-stk-assets-release-$$VERSION$$.zip'
-        | shasum -c -
-      - unzip supertuxkart-code-r18260-stk-assets-release-$$VERSION$$.zip
+      - wget https://github.com/supertuxkart/stk-assets-mobile/releases/download/$$VERSION$$/stk-assets-lq.zip
+      - echo '40239115a13b90bc0bee3e4962a59037df526610  stk-assets-lq.zip' | shasum
+        -c -
+      - unzip stk-assets-lq.zip -d stk-assets
       - tar -C '../lib' -xf $$supertuxkartdeps$$/dependencies-android.tar.xz
-      - sed -i -e 's#../../stk-assets#supertuxkart-code-r18260-stk-assets-release-$$VERSION$$#'
-        generate_assets.sh
+      - sed -i -e 's#../../stk-assets#stk-assets#' generate_assets.sh
       - sed -i -e 's#./gradlew#gradle#' make.sh
     scanignore:
-      - android/supertuxkart-code-r18260-stk-assets-release-1.1/textures/
+      - android/stk-assets/textures/
     scandelete:
       - lib/curl/tests
       - tools/windows_installer
@@ -158,6 +157,8 @@ Builds:
       - export NDK_PATH=$$NDK$$
       - export PROJECT_VERSION=$$VERSION$$
       - export PROJECT_CODE=$$VERCODE$$
+      - export DECREASE_QUALITY=0
+      - export CONVERT_TO_JPG=0
       - ./generate_assets.sh
       - ./make.sh -j`nproc`
     ndk: r12b
