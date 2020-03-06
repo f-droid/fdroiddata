@@ -643,10 +643,50 @@ Builds:
         linphone-sdk-android/
     ndk: r16b
 
+  - versionName: 4.2.3
+    versionCode: 4230
+    commit: 4.2.3
+    timeout: 20000
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y --no-install-recommends cmake -t stretch-backports
+      - apt-get install -y doxygen pkgconf python-pystache python-six yasm
+    gradle:
+      - yes
+    output: app/build/outputs/apk/release/linphone-android-release-*.apk
+    srclibs:
+      - linphone-sdk@4.3.3
+    rm:
+      - app/src/main/java/org/linphone/firebase/Firebase*.java
+      - app/google-services.json
+      - sample
+    prebuild:
+      - sed -i -e '/google-services/d' build.gradle
+      - sed -i -e '/keystore/d' -e '/repositories/,+5d' -e 's/${project.version}/$$VERSION$$/g'
+        -e '/com.google.gms.google-services/d' app/build.gradle
+      - sed -i -e 's|"kill_service_with_task_manager">true<|"kill_service_with_task_manager">false<|'
+        -e 's|"check_for_update_when_app_starts">true<|"check_for_update_when_app_starts">false<|'
+        app/src/main/res/values/non_localizable_custom.xml
+      - sed -i -e 's!https://www.linphone.org/releases!!' app/src/main/res/raw/linphonerc_default
+    scanignore:
+      - app/build.gradle
+    build:
+      - pushd $$linphone-sdk$$
+      - git submodule update --init --recursive
+      - mkdir build-sdk
+      - cd build-sdk
+      - cmake .. -DLINPHONESDK_PLATFORM=Android -DLINPHONESDK_ANDROID_ARCHS="arm64,
+        armv7, x86, x86_64" -DCMAKE_BUILD_TYPE=Release
+      - cmake --build . --parallel $(nproc)
+      - popd
+      - cp $$linphone-sdk$$/build-sdk/linphone-sdk/bin/outputs/aar/linphone-sdk-android-release.aar
+        linphone-sdk-android/
+    ndk: r16b
+
 MaintainerNotes: Main repo for linphone-sdk is upstreams private Gitlab instance with
     submodules, should we switch the main Repo link too?
 
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: 4.2.2
-CurrentVersionCode: 4217
+CurrentVersion: 4.2.3
+CurrentVersionCode: 4230
