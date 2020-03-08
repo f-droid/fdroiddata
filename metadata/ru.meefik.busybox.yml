@@ -241,26 +241,25 @@ Builds:
     ndk: r10e
 
   - versionName: 1.31.1
-    versionCode: 42
-    disable: broken build, missing ssl_helper
-    commit: 1.31.1
+    versionCode: 46
+    commit: 65c122d9cf4deff906d4548fc52db1557fe8eaa3
     subdir: app
     gradle:
       - yes
     rm:
-      - app/src/main/assets/arm
-      - app/src/main/assets/arm64
-      - app/src/main/assets/x86
+      - app/src/main/assets/arm/bin
+      - app/src/main/assets/arm64/bin
+      - app/src/main/assets/x86/bin
+      - app/src/main/assets/x86_64/bin
+    prebuild: sed -i -e '/android-ndk-r15c/d' -e 's!${BUILD_DIR}/${NDK}!$$NDK$$!'
+        -e '/dl.google.com/d' ../contrib/build.sh
     build:
-      - cd ../contrib
-      - export ANDROID_NDK_ROOT=$$NDK$$
-      - ./bb-build.sh arm static
-      - ./bb-build.sh arm64 static
-      - ./bb-build.sh x86 static
-      - mv compiled/* ../app/src/main/assets/
-    ndk: r10e
+      - pushd ..
+      - gradle assets
+      - popd
+    ndk: r15c
 
 AutoUpdateMode: Version %v
 UpdateCheckMode: Tags
 CurrentVersion: 1.31.1
-CurrentVersionCode: 42
+CurrentVersionCode: 46
