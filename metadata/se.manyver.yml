@@ -1190,47 +1190,6 @@ Builds:
       - npm run build-android-assets
     ndk: r19c
 
-  - versionName: 0.2002.24-beta
-    versionCode: 81
-    commit: v0.2002.24-beta
-    timeout: 30000
-    subdir: android/app
-    sudo:
-      - apt-get update || apt-get update
-      - apt-get install -y --no-install-recommends g++ lib32stdc++-6-dev libc6-dev-i386
-        ninja-build linux-libc-dev linux-libc-dev:i386
-      - curl -Lo node.tar.xz https://nodejs.org/dist/v10.16.3/node-v10.16.3-linux-x64.tar.xz
-      - echo "d2271fd8cf997fa7447d638dfa92749ff18ca4b0d796bf89f2a82bf7800d5506 node.tar.xz"
-        | sha256sum -c -
-      - tar xJf node.tar.xz
-      - cp -a node-v10.16.3-linux-x64/. /usr/local/
-      - npm install -g react-native-cli
-    init:
-      - npm install --no-optional
-      - truncate -s 0 ../../node_modules/react-native/node_modules/@react-native-community/cli/build/commands/server/external/xsel
-    gradle:
-      - indie
-    srclibs:
-      - NodejsMobile@nodejs-mobile-v0.2.1
-    rm:
-      - node_modules/react-native/ReactAndroid/src/main/third-party/java/buck-android-support/buck-android-support.jar
-      - node_modules/react-native/template/
-      - e2e/apple-app-store-demo
-    prebuild: sed -i -e '/lifecycle/d' ../build.gradle
-    scanignore:
-      - android/build.gradle
-    scandelete:
-      - node_modules
-    build:
-      - pushd $$NodejsMobile$$
-      - ./tools/android_build.sh $$NDK$$ arm
-      - ./tools/android_build.sh $$NDK$$ arm64
-      - popd
-      - mv $$NodejsMobile$$/out_android/armeabi-v7a/libnode.so ../../node_modules/nodejs-mobile-react-native/android/libnode/bin/armeabi-v7a/libnode.so
-      - mv $$NodejsMobile$$/out_android/arm64-v8a/libnode.so ../../node_modules/nodejs-mobile-react-native/android/libnode/bin/arm64-v8a/libnode.so
-      - npm run build-android-assets
-    ndk: r19c
-
   - versionName: 0.2003.4-beta
     versionCode: 82
     commit: v0.2003.4-beta
