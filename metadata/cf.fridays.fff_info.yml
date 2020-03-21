@@ -29,8 +29,10 @@ Builds:
     output: build/app/outputs/apk/release/app-release.apk
     srclibs:
       - flutter@v1.15.3
-    prebuild: echo 'android.applicationVariants.all { variant -> variant.outputs.all
-        { output -> outputFileName = "app-${output.baseName}.apk" } }' >> android/app/build.gradle
+    prebuild:
+      - echo 'android.applicationVariants.all { variant -> variant.outputs.all { output
+        -> outputFileName = "app-${output.baseName}.apk" } }' >> android/app/build.gradle
+      - sed -i '/systemProp\.http\.proxy/d' ~/.gradle/gradle.properties
     build:
       - $$flutter$$/bin/flutter config --no-analytics
       - $$flutter$$/bin/flutter packages pub get
