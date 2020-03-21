@@ -56,9 +56,43 @@ Builds:
       - gradle main:externalNativeBuildCleanNoovpn3Release main:externalNativeBuildNoovpn3Release
     ndk: r20
 
+  - versionName: 1.0.3
+    versionCode: 147
+    commit: calyx/1.0.3
+    subdir: app
+    submodules: true
+    gradle:
+      - customProductionFat
+    rm:
+      - ics-openvpn/main/src/main/cpp/mbedtls/tests
+      - go/src/golang.org/x/tools/cmd/splitdwarf/internal/macho/testdata
+      - go/src/golang.org/x/tools/go/gccgoexportdata/testdata
+      - go/src/golang.org/x/tools/go/gcexportdata/testdata
+      - go/src/golang.org/x/tools/go/internal/gccgoimporter/testdata/
+      - go/src/golang.org/x/tools/go/internal/gcimporter/testdata/
+      - go/src/github.com/shadowsocks/shadowsocks-go/script/shadowsocks.exe
+      - shapeshifter/*.?ar
+    prebuild: sed -i -e "/^task updateSdkLicences/,/^}/d; /commandLine 'git'/d" build.gradle
+    build:
+      - cd ../go
+      - curl -o go.tar.gz https://dl.google.com/go/go1.12.7.linux-amd64.tar.gz
+      - echo 'b6f9db387340e24f5623e6de0b8aa1387d103277  go.tar.gz' | shasum -c
+      - mkdir -p golang
+      - tar -C golang -xzf go.tar.gz
+      - export GOPATH="$PWD"
+      - export GO_LANG="$PWD/golang/go/bin"
+      - export GO_COMPILED="$PWD/bin"
+      - export PATH="$GO_LANG:$GO_COMPILED:$PATH"
+      - ./golang/go/bin/go get golang.org/x/mobile/cmd/gomobile
+      - ./bin/gomobile init
+      - ./android_build_shapeshifter.sh createLibrary
+      - cd ../ics-openvpn
+      - gradle main:externalNativeBuildCleanNoovpn3Release main:externalNativeBuildNoovpn3Release
+    ndk: r20b
+
 MaintainerNotes: The "build" commands are extracted from build_deps.sh.
 
 AutoUpdateMode: Version %v
 UpdateCheckMode: Tags ^calyx/[0-9.]+$
-CurrentVersion: 1.0.1
-CurrentVersionCode: 141
+CurrentVersion: 1.0.3
+CurrentVersionCode: 147
