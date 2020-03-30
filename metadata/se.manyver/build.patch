@@ -1,39 +1,28 @@
---- a/app/build.gradle
-+++ b/app/build.gradle
-@@ -2,12 +2,6 @@
- apply plugin: 'kotlin-android'
- apply plugin: 'kotlin-android-extensions'
- 
--def keystorePropertiesFile = rootProject.file("keystore.properties")
--def keystoreProperties = new Properties()
--if (keystorePropertiesFile.exists()) {
--    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
--}
--
- android {
-     compileSdkVersion 29
-     buildToolsVersion "29.0.2"
-@@ -24,14 +18,6 @@
-     }
- 
-     signingConfigs {
--        if (keystorePropertiesFile.exists()) {
--            release {
--                keyAlias keystoreProperties['keyAlias']
--                keyPassword keystoreProperties['keyPassword']
--                storeFile file(keystoreProperties['storeFile'])
--                storePassword keystoreProperties['storePassword']
--            }
--        }
-     }
- 
-     buildTypes {
-@@ -41,9 +27,6 @@
+--- a/android/app/build.gradle
++++ b/android/app/build.gradle
+@@ -173,14 +173,6 @@
+         //     keyPassword 'android'
+         // }
          release {
-             minifyEnabled true
-             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
--            if (keystorePropertiesFile.exists()) {
+-            if (project.hasProperty('MYAPP_RELEASE_STORE_FILE')) {
+-                storeFile file(MYAPP_RELEASE_STORE_FILE)
+-                storePassword MYAPP_RELEASE_STORE_PASSWORD
+-                keyAlias MYAPP_RELEASE_KEY_ALIAS
+-                keyPassword MYAPP_RELEASE_KEY_PASSWORD
+-            } else {
+-                throw new Exception('Refusing to make release build with wrong keystore')
+-            }
+         }
+     }
+ 
+@@ -203,11 +195,6 @@
+             // signingConfig signingConfigs.debug
+             minifyEnabled enableProguardInReleaseBuilds
+             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+-            if (project.hasProperty('MYAPP_RELEASE_STORE_FILE')) {
 -                signingConfig signingConfigs.release
+-            } else {
+-                throw new Exception('Refusing to make release build with wrong keystore')
 -            }
          }
      }
