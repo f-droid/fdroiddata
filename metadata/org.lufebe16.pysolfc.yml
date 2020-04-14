@@ -161,7 +161,42 @@ Builds:
       - deactivate
     ndk: r17c
 
+  - versionName: 2.8.0
+    versionCode: 72120800
+    commit: 2ea33f8e7af1fea2dd36a39238e0bc9f90a9c416
+    sudo:
+      - apt-get update || apt-get update
+      - update-alternatives --install /usr/bin/python python /usr/bin/python2.7 1
+      - update-alternatives --install /usr/bin/python python /usr/bin/python3.5 2
+      - apt-get install -y --no-install-recommends virtualenv imagemagick python3-tk
+        ccache libltdl-dev
+    output: android/pysolfc-$$VERSION$$-release-unsigned.apk
+    prebuild:
+      - pushd android
+      - ./mkp4a.preload openssl https://www.openssl.org/source/old/1.1.1 openssl-1.1.1.tar.gz
+      - ./mkp4a.preload supportlib https://maven.google.com/com/android/support/support-v4/24.1.1
+        support-v4-24.1.1.aar
+      - wget -nv https://netix.dl.sourceforge.net/project/pysolfc/PySolFC-Cardsets/minimal/PySolFC-Cardsets--Minimal-2.0.1.tar.xz
+      - popd
+      - virtualenv --python=python3 ${HOME}/zenv
+      - . ${HOME}/zenv/bin/activate
+      - python3 -m pip install 'python-for-android==2019.7.8'
+      - python3 -m pip install pysol_cards
+      - python3 -m pip install clint
+      - python3 -m pip install random2
+      - python3 -m pip install attrs
+      - python3 -m pip install Cython
+      - deactivate
+    build:
+      - . ${HOME}/zenv/bin/activate
+      - pushd android
+      - ./mkp4a.init 1
+      - ./mkp4a.unsigned $$SDK$$ $$NDK$$
+      - popd
+      - deactivate
+    ndk: r17c
+
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: 2.6.4
-CurrentVersionCode: 72120604
+CurrentVersion: 2.8.0
+CurrentVersionCode: 72120800
