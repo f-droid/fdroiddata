@@ -1,0 +1,1159 @@
+diff --git a/android-client-common/build.gradle b/android-client-common/build.gradle
+index 39242aea..2f36d21d 100644
+--- a/android-client-common/build.gradle
++++ b/android-client-common/build.gradle
+@@ -32,10 +32,6 @@ dependencies {
+     implementation "androidx.work:work-runtime-ktx:$workManagerVersion"
+     api "androidx.room:room-ktx:$roomVersion"
+     kapt "androidx.room:room-compiler:$roomVersion"
+-    api "com.google.firebase:firebase-core:$firebaseCoreVersion"
+-    api "com.google.firebase:firebase-perf:$firebasePerfVersion"
+-    api "com.crashlytics.sdk.android:crashlytics:$crashlyticsVersion"
+-    api "com.google.android.gms:play-services-wearable:$playServicesWearableVersion"
+ }
+ 
+ android {
+diff --git a/android-client-common/src/main/java/com/google/android/apps/muzei/wearable/ArtworkTransfer.kt b/android-client-common/src/main/java/com/google/android/apps/muzei/wearable/ArtworkTransfer.kt
+deleted file mode 100644
+index c4a1a61d..00000000
+--- a/android-client-common/src/main/java/com/google/android/apps/muzei/wearable/ArtworkTransfer.kt
++++ /dev/null
+@@ -1,58 +0,0 @@
+-/*
+- * Copyright 2017 Google Inc.
+- *
+- * Licensed under the Apache License, Version 2.0 (the "License");
+- * you may not use this file except in compliance with the License.
+- * You may obtain a copy of the License at
+- *
+- *     http://www.apache.org/licenses/LICENSE-2.0
+- *
+- * Unless required by applicable law or agreed to in writing, software
+- * distributed under the License is distributed on an "AS IS" BASIS,
+- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+- * See the License for the specific language governing permissions and
+- * limitations under the License.
+- */
+-
+-package com.google.android.apps.muzei.wearable
+-
+-import androidx.core.net.toUri
+-import androidx.core.os.bundleOf
+-import com.google.android.apps.muzei.room.Artwork
+-import com.google.android.gms.wearable.DataMap
+-
+-private const val KEY_IMAGE_URI = "imageUri"
+-private const val KEY_TITLE = "title"
+-private const val KEY_BYLINE = "byline"
+-private const val KEY_ATTRIBUTION = "attribution"
+-
+-/**
+- * Serializes this artwork object to a [DataMap] representation.
+- *
+- * @return a serialized version of the artwork.
+- * @see toArtwork
+- */
+-fun Artwork.toDataMap(): DataMap = DataMap.fromBundle(bundleOf(
+-        KEY_IMAGE_URI to imageUri.toString(),
+-        KEY_TITLE to title,
+-        KEY_BYLINE to byline,
+-        KEY_ATTRIBUTION to attribution))
+-
+-/**
+- * Deserializes an artwork object from a [DataMap].
+- *
+- * @return the artwork from the [DataMap]
+- * @see toDataMap
+- */
+-fun DataMap.toArtwork(): com.google.android.apps.muzei.api.provider.Artwork {
+-    val bundle = toBundle()
+-    return com.google.android.apps.muzei.api.provider.Artwork().apply {
+-        val imageUri = bundle.getString(KEY_IMAGE_URI)
+-        if (imageUri != null && !imageUri.isBlank()) {
+-            persistentUri = imageUri.toUri()
+-        }
+-        title = bundle.getString(KEY_TITLE)
+-        byline = bundle.getString(KEY_BYLINE)
+-        attribution = bundle.getString(KEY_ATTRIBUTION)
+-    }
+-}
+diff --git a/build.gradle b/build.gradle
+index 09514c32..0ec9ab6d 100644
+--- a/build.gradle
++++ b/build.gradle
+@@ -49,16 +49,10 @@ buildscript {
+ 
+     repositories {
+         google()
+-        maven {
+-            url 'https://maven.fabric.io/public'
+-        }
+         jcenter()
+     }
+     dependencies {
+         classpath 'com.android.tools.build:gradle:3.5.0'
+-        classpath "com.google.gms:google-services:4.3.1"
+-        classpath "io.fabric.tools:gradle:1.31.0"
+-        classpath "com.google.firebase:perf-plugin:1.3.1"
+         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
+         classpath "androidx.navigation:navigation-safe-args-gradle-plugin:$navigationVersion"
+     }
+diff --git a/legacy-standalone/build.gradle b/legacy-standalone/build.gradle
+index 9c87e771..0b863458 100644
+--- a/legacy-standalone/build.gradle
++++ b/legacy-standalone/build.gradle
+@@ -17,8 +17,6 @@
+ apply plugin: 'com.android.application'
+ apply plugin: 'kotlin-android'
+ apply plugin: 'kotlin-kapt'
+-apply plugin: 'com.google.firebase.firebase-perf'
+-apply plugin: 'io.fabric'
+ 
+ android {
+     resourcePrefix 'legacy_'
+@@ -47,34 +45,16 @@ android {
+         }
+     }
+ 
+-    signingConfigs {
+-        release {
+-            Properties localProps = new Properties()
+-            localProps.load(new FileInputStream(file('../local.properties')))
+-            Properties keyProps = new Properties()
+-            if (localProps['keystore.props.file'] != null) {
+-                keyProps.load(new FileInputStream(file(localProps['keystore.props.file'])))
+-            }
+-            storeFile keyProps["store"] != null ? file(keyProps["store"]) : null
+-            keyAlias keyProps["alias"] ?: ""
+-            storePassword keyProps["storePass"] ?: ""
+-            keyPassword keyProps["pass"] ?: ""
+-        }
+-    }
+ 
+     buildTypes {
+         debug {
+             versionNameSuffix " Debug"
+-            FirebasePerformance {
+-                instrumentationEnabled false
+-            }
+         }
+ 
+         release {
+             minifyEnabled true
+             shrinkResources true
+             proguardFiles getDefaultProguardFile('proguard-android.txt'), file('proguard-project.txt')
+-            signingConfig signingConfigs.release
+         }
+     }
+ 
+@@ -98,13 +78,8 @@ dependencies {
+     implementation "androidx.room:room-ktx:$roomVersion"
+     kapt "androidx.room:room-compiler:$roomVersion"
+     implementation "com.google.android.material:material:$materialVersion"
+-    implementation "com.google.firebase:firebase-core:$firebaseCoreVersion"
+-    implementation "com.google.firebase:firebase-perf:$firebasePerfVersion"
+-    implementation "com.crashlytics.sdk.android:crashlytics:$crashlyticsVersion"
+     implementation "com.squareup.okhttp3:okhttp:$okhttpVersion"
+     implementation project(':muzei-api')
+     implementation project(':extensions')
+     implementation project(':legacy-common')
+ }
+-
+-apply plugin: 'com.google.gms.google-services'
+\ No newline at end of file
+diff --git a/legacy-standalone/src/main/java/com/google/android/apps/muzei/legacy/LegacySourceService.kt b/legacy-standalone/src/main/java/com/google/android/apps/muzei/legacy/LegacySourceService.kt
+index 253e49a1..1476fee1 100644
+--- a/legacy-standalone/src/main/java/com/google/android/apps/muzei/legacy/LegacySourceService.kt
++++ b/legacy-standalone/src/main/java/com/google/android/apps/muzei/legacy/LegacySourceService.kt
+@@ -49,7 +49,6 @@ import com.google.android.apps.muzei.api.internal.ProtocolConstants.EXTRA_TOKEN
+ import com.google.android.apps.muzei.sources.SourceSubscriberService
+ import com.google.android.apps.muzei.util.goAsync
+ import com.google.android.apps.muzei.util.toastFromBackground
+-import com.google.firebase.analytics.FirebaseAnalytics
+ import kotlinx.coroutines.Dispatchers
+ import kotlinx.coroutines.GlobalScope
+ import kotlinx.coroutines.asCoroutineDispatcher
+@@ -422,15 +421,11 @@ class LegacySourceService : Service(), LifecycleOwner {
+         if (packageName.length > MAX_VALUE_LENGTH) {
+             packageName = packageName.substring(packageName.length - MAX_VALUE_LENGTH)
+         }
+-        FirebaseAnalytics.getInstance(this).setUserProperty(USER_PROPERTY_SELECTED_SOURCE_PACKAGE,
+-                packageName)
+         var className = selectedSource.flattenToShortString()
+         className = className.substring(className.indexOf('/') + 1)
+         if (className.length > MAX_VALUE_LENGTH) {
+             className = className.substring(className.length - MAX_VALUE_LENGTH)
+         }
+-        FirebaseAnalytics.getInstance(this).setUserProperty(USER_PROPERTY_SELECTED_SOURCE,
+-                className)
+     }
+ 
+     private suspend fun Source.subscribe() {
+diff --git a/legacy-standalone/src/main/java/com/google/android/apps/muzei/legacy/SourceSettingsActivity.kt b/legacy-standalone/src/main/java/com/google/android/apps/muzei/legacy/SourceSettingsActivity.kt
+index 266cef6d..2c2ef46a 100644
+--- a/legacy-standalone/src/main/java/com/google/android/apps/muzei/legacy/SourceSettingsActivity.kt
++++ b/legacy-standalone/src/main/java/com/google/android/apps/muzei/legacy/SourceSettingsActivity.kt
+@@ -53,7 +53,6 @@ import androidx.lifecycle.LiveData
+ import androidx.lifecycle.observe
+ import com.google.android.apps.muzei.api.MuzeiArtSource
+ import com.google.android.material.dialog.MaterialAlertDialogBuilder
+-import com.google.firebase.analytics.FirebaseAnalytics
+ import kotlinx.coroutines.GlobalScope
+ import kotlinx.coroutines.launch
+ import net.nurik.roman.muzei.legacy.R
+@@ -168,8 +167,6 @@ class SourceSettingsActivity : AppCompatActivity() {
+             adapter.clear()
+             adapter.addAll(sourcesViews)
+             if (!dialog.isShowing) {
+-                FirebaseAnalytics.getInstance(this).logEvent(FirebaseAnalytics.Event.VIEW_ITEM_LIST,
+-                        bundleOf(FirebaseAnalytics.Param.ITEM_CATEGORY to "sources"))
+                 dialog.show()
+             }
+         }
+@@ -202,19 +199,9 @@ class SourceSettingsActivity : AppCompatActivity() {
+             }
+             builder.show()
+         } else if (source.setupActivity != null) {
+-            FirebaseAnalytics.getInstance(this).logEvent(FirebaseAnalytics.Event.VIEW_ITEM,
+-                    bundleOf(
+-                            FirebaseAnalytics.Param.ITEM_ID to source.componentName.flattenToShortString(),
+-                            FirebaseAnalytics.Param.ITEM_NAME to source.label,
+-                            FirebaseAnalytics.Param.ITEM_CATEGORY to "sources"))
+             currentInitialSetupSource = source.componentName
+             launchSourceSetup(source)
+         } else {
+-            FirebaseAnalytics.getInstance(this).logEvent(FirebaseAnalytics.Event.SELECT_CONTENT, bundleOf(
+-                    FirebaseAnalytics.Param.ITEM_ID to source.componentName.flattenToShortString(),
+-                    FirebaseAnalytics.Param.ITEM_NAME to source.label,
+-                    FirebaseAnalytics.Param.ITEM_CATEGORY to "sources",
+-                    FirebaseAnalytics.Param.CONTENT_TYPE to "choose"))
+             GlobalScope.launch {
+                 LegacySourceService.selectSource(this@SourceSettingsActivity, source.componentName)
+             }
+@@ -251,10 +238,6 @@ class SourceSettingsActivity : AppCompatActivity() {
+         if (requestCode == REQUEST_EXTENSION_SETUP) {
+             val setupSource = currentInitialSetupSource
+             if (resultCode == Activity.RESULT_OK && setupSource != null) {
+-                FirebaseAnalytics.getInstance(this).logEvent(FirebaseAnalytics.Event.SELECT_CONTENT, bundleOf(
+-                        FirebaseAnalytics.Param.ITEM_ID to setupSource.flattenToShortString(),
+-                        FirebaseAnalytics.Param.CONTENT_TYPE to "sources",
+-                        FirebaseAnalytics.Param.CONTENT_TYPE to "after_setup"))
+                 GlobalScope.launch {
+                     LegacySourceService.selectSource(this@SourceSettingsActivity, setupSource)
+                 }
+diff --git a/main/build.gradle b/main/build.gradle
+index 72e2db64..17c31333 100644
+--- a/main/build.gradle
++++ b/main/build.gradle
+@@ -17,8 +17,6 @@
+ apply plugin: 'com.android.application'
+ apply plugin: 'kotlin-android'
+ apply plugin: 'kotlin-kapt'
+-apply plugin: 'com.google.firebase.firebase-perf'
+-apply plugin: 'io.fabric'
+ apply plugin: 'androidx.navigation.safeargs.kotlin'
+ 
+ project.archivesBaseName = "muzei"
+@@ -48,34 +46,16 @@ android {
+         buildConfigField "String", "DEVICE_TYPE", "\"android\""
+     }
+ 
+-    signingConfigs {
+-        release {
+-            Properties localProps = new Properties()
+-            localProps.load(new FileInputStream(file('../local.properties')))
+-            Properties keyProps = new Properties()
+-            if (localProps['keystore.props.file'] != null) {
+-                keyProps.load(new FileInputStream(file(localProps['keystore.props.file'])))
+-            }
+-            storeFile keyProps["store"] != null ? file(keyProps["store"]) : null
+-            keyAlias keyProps["alias"] ?: ""
+-            storePassword keyProps["storePass"] ?: ""
+-            keyPassword keyProps["pass"] ?: ""
+-        }
+-    }
+ 
+     buildTypes {
+         debug {
+             versionNameSuffix " Debug"
+-            FirebasePerformance {
+-                instrumentationEnabled false
+-            }
+         }
+ 
+         release {
+             minifyEnabled true
+             shrinkResources true
+             proguardFiles getDefaultProguardFile('proguard-android.txt'), file('proguard-project.txt')
+-            signingConfig signingConfigs.release
+         }
+ 
+         publicBeta.initWith(buildTypes.release)
+@@ -107,7 +87,6 @@ dependencies {
+     api "org.jetbrains.kotlinx:kotlinx-coroutines-play-services:$coroutinesVersion"
+     implementation "androidx.multidex:multidex:$multidexVersion"
+     implementation "com.github.bumptech.glide:glide:$glideVersion"
+-    implementation "com.google.android.gms:play-services-wearable:$playServicesWearableVersion"
+     implementation "com.twofortyfouram:android-plugin-api-for-locale:1.0.4"
+     implementation "com.davemorrissey.labs:subsampling-scale-image-view:3.10.0"
+     implementation "androidx.core:core-ktx:$coreVersion"
+@@ -135,5 +114,3 @@ dependencies {
+     implementation project(':source-single')
+     implementation project(':gl-wallpaper')
+ }
+-
+-apply plugin: 'com.google.gms.google-services'
+\ No newline at end of file
+diff --git a/main/src/main/java/com/google/android/apps/muzei/ArtDetailFragment.kt b/main/src/main/java/com/google/android/apps/muzei/ArtDetailFragment.kt
+index bc70542c..c47cf06a 100644
+--- a/main/src/main/java/com/google/android/apps/muzei/ArtDetailFragment.kt
++++ b/main/src/main/java/com/google/android/apps/muzei/ArtDetailFragment.kt
+@@ -69,7 +69,6 @@ import com.google.android.apps.muzei.util.AnimatedMuzeiLoadingSpinnerView
+ import com.google.android.apps.muzei.util.PanScaleProxyView
+ import com.google.android.apps.muzei.util.makeCubicGradientScrimDrawable
+ import com.google.android.apps.muzei.widget.showWidgetPreview
+-import com.google.firebase.analytics.FirebaseAnalytics
+ import kotlinx.coroutines.Dispatchers
+ import kotlinx.coroutines.GlobalScope
+ import kotlinx.coroutines.Job
+@@ -123,8 +122,6 @@ class ArtDetailFragment : Fragment(), (Boolean) -> Unit {
+         metadataView.setOnClickListener {
+             val context = requireContext()
+             lifecycleScope.launch {
+-                FirebaseAnalytics.getInstance(context).logEvent("artwork_info_open", bundleOf(
+-                        FirebaseAnalytics.Param.CONTENT_TYPE to "art_detail"))
+                 currentArtworkLiveData.value?.openArtworkInfo(context)
+             }
+         }
+@@ -272,17 +269,6 @@ class ArtDetailFragment : Fragment(), (Boolean) -> Unit {
+             if (id > 0) {
+                 currentArtworkLiveData.value?.run {
+                     GlobalScope.launch {
+-                        if (id == LegacySourceServiceProtocol.LEGACY_COMMAND_ID_NEXT_ARTWORK) {
+-                            FirebaseAnalytics.getInstance(context).logEvent("next_artwork", bundleOf(
+-                                    FirebaseAnalytics.Param.CONTENT_TYPE to "art_detail"))
+-                        } else {
+-                            FirebaseAnalytics.getInstance(context).logEvent(
+-                                    FirebaseAnalytics.Event.SELECT_CONTENT, bundleOf(
+-                                    FirebaseAnalytics.Param.ITEM_ID to id,
+-                                    FirebaseAnalytics.Param.ITEM_NAME to menuItem.title,
+-                                    FirebaseAnalytics.Param.ITEM_CATEGORY to "actions",
+-                                    FirebaseAnalytics.Param.CONTENT_TYPE to "art_detail"))
+-                        }
+                         sendAction(context, id)
+                     }
+                 }
+@@ -291,20 +277,16 @@ class ArtDetailFragment : Fragment(), (Boolean) -> Unit {
+ 
+             return@setOnMenuItemClickListener when (menuItem.itemId) {
+                 R.id.action_gestures -> {
+-                    FirebaseAnalytics.getInstance(context).logEvent("gestures_open", null)
+                     findNavController().navigate(ArtDetailFragmentDirections.gestures())
+                     true
+                 }
+                 R.id.action_always_dark -> {
+                     val alwaysDark = !menuItem.isChecked
+                     menuItem.isChecked = alwaysDark
+-                    FirebaseAnalytics.getInstance(context).logEvent("always_dark", bundleOf(
+-                            FirebaseAnalytics.Param.CONTENT_TYPE to alwaysDark.toString()))
+                     MuzeiApplication.setAlwaysDark(context, alwaysDark)
+                     true
+                 }
+                 R.id.action_about -> {
+-                    FirebaseAnalytics.getInstance(context).logEvent("about_open", null)
+                     startActivity(Intent(context, AboutActivity::class.java))
+                     true
+                 }
+@@ -314,8 +296,6 @@ class ArtDetailFragment : Fragment(), (Boolean) -> Unit {
+ 
+         nextButton = view.findViewById(R.id.next_button)
+         nextButton.setOnClickListener {
+-            FirebaseAnalytics.getInstance(requireContext()).logEvent("next_artwork", bundleOf(
+-                    FirebaseAnalytics.Param.CONTENT_TYPE to "art_detail"))
+             ProviderManager.getInstance(requireContext()).nextArtwork()
+             showFakeLoading()
+         }
+diff --git a/main/src/main/java/com/google/android/apps/muzei/ArtworkInfoRedirectActivity.kt b/main/src/main/java/com/google/android/apps/muzei/ArtworkInfoRedirectActivity.kt
+index 40fc8406..551b7989 100644
+--- a/main/src/main/java/com/google/android/apps/muzei/ArtworkInfoRedirectActivity.kt
++++ b/main/src/main/java/com/google/android/apps/muzei/ArtworkInfoRedirectActivity.kt
+@@ -23,7 +23,6 @@ import androidx.fragment.app.FragmentActivity
+ import androidx.lifecycle.lifecycleScope
+ import com.google.android.apps.muzei.room.MuzeiDatabase
+ import com.google.android.apps.muzei.room.openArtworkInfo
+-import com.google.firebase.analytics.FirebaseAnalytics
+ 
+ /**
+  * Open the Artwork Info associated with the current artwork
+@@ -46,9 +45,6 @@ class ArtworkInfoRedirectActivity : FragmentActivity() {
+                     .getCurrentArtwork()
+             artwork?.run {
+                 val from = intent?.getStringExtra(EXTRA_FROM) ?: "activity_shortcut"
+-                FirebaseAnalytics.getInstance(this@ArtworkInfoRedirectActivity).logEvent(
+-                        "artwork_info_open", bundleOf(
+-                        FirebaseAnalytics.Param.CONTENT_TYPE to from))
+                 openArtworkInfo(this@ArtworkInfoRedirectActivity)
+             }
+             finish()
+diff --git a/main/src/main/java/com/google/android/apps/muzei/AutoAdvanceSettingsFragment.kt b/main/src/main/java/com/google/android/apps/muzei/AutoAdvanceSettingsFragment.kt
+index 7da86d4a..d8fe1bf3 100644
+--- a/main/src/main/java/com/google/android/apps/muzei/AutoAdvanceSettingsFragment.kt
++++ b/main/src/main/java/com/google/android/apps/muzei/AutoAdvanceSettingsFragment.kt
+@@ -35,7 +35,6 @@ import androidx.core.text.toSpannable
+ import androidx.fragment.app.Fragment
+ import com.google.android.apps.muzei.sync.ProviderManager
+ import com.google.android.apps.muzei.util.toast
+-import com.google.firebase.analytics.FirebaseAnalytics
+ import net.nurik.roman.muzei.R
+ 
+ class AutoAdvanceSettingsFragment : Fragment(R.layout.auto_advance_settings_fragment) {
+@@ -69,9 +68,6 @@ class AutoAdvanceSettingsFragment : Fragment(R.layout.auto_advance_settings_frag
+         val autoAdvanceWifi: CheckBox = view.findViewById(R.id.auto_advance_wifi)
+         autoAdvanceWifi.isChecked = providerManager.loadOnWifi
+         autoAdvanceWifi.setOnCheckedChangeListener { _, isChecked ->
+-            FirebaseAnalytics.getInstance(requireContext()).logEvent(
+-                    "auto_advance_load_on_wifi", bundleOf(
+-                    FirebaseAnalytics.Param.VALUE to isChecked.toString()))
+             providerManager.loadOnWifi = isChecked
+         }
+ 
+@@ -80,9 +76,6 @@ class AutoAdvanceSettingsFragment : Fragment(R.layout.auto_advance_settings_frag
+ 
+         intervalRadioGroup.check(INTERVAL_RADIO_BUTTON_IDS_BY_TIME[currentInterval.toInt()])
+         intervalRadioGroup.setOnCheckedChangeListener { _, id ->
+-            FirebaseAnalytics.getInstance(requireContext()).logEvent(
+-                    "auto_advance_load_frequency", bundleOf(
+-                    FirebaseAnalytics.Param.VALUE to INTERVAL_TIME_BY_RADIO_BUTTON_ID[id]))
+             providerManager.loadFrequencySeconds = INTERVAL_TIME_BY_RADIO_BUTTON_ID[id]
+         }
+ 
+@@ -104,7 +97,6 @@ class AutoAdvanceSettingsFragment : Fragment(R.layout.auto_advance_settings_frag
+                                                 "%26utm_medium%3Dapp" +
+                                                 "%26utm_campaign%3Dauto_advance"))
+                                 ).addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT))
+-                FirebaseAnalytics.getInstance(context).logEvent("tasker_open", null)
+             } catch (e: ActivityNotFoundException) {
+                 context.toast(R.string.play_store_not_found, Toast.LENGTH_LONG)
+             } catch (e: SecurityException) {
+diff --git a/main/src/main/java/com/google/android/apps/muzei/ChooseProviderFragment.kt b/main/src/main/java/com/google/android/apps/muzei/ChooseProviderFragment.kt
+index 35f3cfd6..7c37b5c5 100644
+--- a/main/src/main/java/com/google/android/apps/muzei/ChooseProviderFragment.kt
++++ b/main/src/main/java/com/google/android/apps/muzei/ChooseProviderFragment.kt
+@@ -63,7 +63,6 @@ import com.google.android.apps.muzei.room.MuzeiDatabase
+ import com.google.android.apps.muzei.sync.ProviderManager
+ import com.google.android.apps.muzei.util.toast
+ import com.google.android.material.snackbar.Snackbar
+-import com.google.firebase.analytics.FirebaseAnalytics
+ import kotlinx.coroutines.GlobalScope
+ import kotlinx.coroutines.launch
+ import net.nurik.roman.muzei.BuildConfig.LEGACY_AUTHORITY
+@@ -111,23 +110,16 @@ class ChooseProviderFragment : Fragment(R.layout.choose_provider_fragment) {
+                     if (drawerLayout.isDrawerOpen(GravityCompat.END)) {
+                         drawerLayout.closeDrawer(GravityCompat.END)
+                     } else {
+-                        FirebaseAnalytics.getInstance(context).logEvent(
+-                                "auto_advance_open", null)
+                         drawerLayout.openDrawer(GravityCompat.END)
+                     }
+                     true
+                 }
+                 R.id.auto_advance_disabled -> {
+-                    FirebaseAnalytics.getInstance(context).logEvent(
+-                            "auto_advance_disabled", null)
+                     context.toast(R.string.auto_advance_disabled_description,
+                             Toast.LENGTH_LONG)
+                     true
+                 }
+                 R.id.action_notification_settings -> {
+-                    FirebaseAnalytics.getInstance(context).logEvent(
+-                            "notification_settings_open", bundleOf(
+-                            FirebaseAnalytics.Param.CONTENT_TYPE to "overflow"))
+                     NotificationSettingsDialogFragment.showSettings(context,
+                             childFragmentManager)
+                     true
+@@ -244,11 +236,6 @@ class ChooseProviderFragment : Fragment(R.layout.choose_provider_fragment) {
+                 if (resultCode == Activity.RESULT_OK && provider != null) {
+                     val context = requireContext()
+                     GlobalScope.launch {
+-                        FirebaseAnalytics.getInstance(context).logEvent(
+-                                FirebaseAnalytics.Event.SELECT_CONTENT, bundleOf(
+-                                FirebaseAnalytics.Param.ITEM_ID to provider,
+-                                FirebaseAnalytics.Param.ITEM_CATEGORY to "providers",
+-                                FirebaseAnalytics.Param.CONTENT_TYPE to "after_setup"))
+                         ProviderManager.select(context, provider)
+                     }
+                 }
+@@ -280,23 +267,13 @@ class ChooseProviderFragment : Fragment(R.layout.choose_provider_fragment) {
+                     val context = context
+                     val parentFragment = parentFragment?.parentFragment
+                     if (context is Callbacks) {
+-                        FirebaseAnalytics.getInstance(requireContext()).logEvent(
+-                                "choose_provider_reselected", null)
+                         context.onRequestCloseActivity()
+                     } else if (parentFragment is Callbacks) {
+-                        FirebaseAnalytics.getInstance(requireContext()).logEvent(
+-                                "choose_provider_reselected", null)
+                         parentFragment.onRequestCloseActivity()
+                     }
+                 } else if (setupActivity != null) {
+-                    FirebaseAnalytics.getInstance(requireContext()).logEvent(
+-                            FirebaseAnalytics.Event.VIEW_ITEM, bundleOf(
+-                            FirebaseAnalytics.Param.ITEM_ID to authority,
+-                            FirebaseAnalytics.Param.ITEM_NAME to title,
+-                            FirebaseAnalytics.Param.ITEM_CATEGORY to "providers"))
+                     launchProviderSetup(this)
+                 } else if (providerInfo.authority == viewModel.playStoreAuthority) {
+-                    FirebaseAnalytics.getInstance(requireContext()).logEvent("more_sources_open", null)
+                     try {
+                         startActivity(viewModel.playStoreIntent)
+                     } catch (e: ActivityNotFoundException) {
+@@ -305,12 +282,6 @@ class ChooseProviderFragment : Fragment(R.layout.choose_provider_fragment) {
+                         requireContext().toast(R.string.play_store_not_found, Toast.LENGTH_LONG)
+                     }
+                 } else {
+-                    FirebaseAnalytics.getInstance(requireContext()).logEvent(
+-                            FirebaseAnalytics.Event.SELECT_CONTENT, bundleOf(
+-                            FirebaseAnalytics.Param.ITEM_ID to authority,
+-                            FirebaseAnalytics.Param.ITEM_NAME to title,
+-                            FirebaseAnalytics.Param.ITEM_CATEGORY to "providers",
+-                            FirebaseAnalytics.Param.CONTENT_TYPE to "choose"))
+                     val context = requireContext()
+                     GlobalScope.launch {
+                         ProviderManager.select(context, authority)
+@@ -326,10 +297,6 @@ class ChooseProviderFragment : Fragment(R.layout.choose_provider_fragment) {
+                 try {
+                     startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                             Uri.fromParts("package", packageName, null)))
+-                    FirebaseAnalytics.getInstance(requireContext()).logEvent(
+-                            "app_settings_open", bundleOf(
+-                            FirebaseAnalytics.Param.ITEM_ID to authority,
+-                            FirebaseAnalytics.Param.ITEM_NAME to title))
+                 } catch (e: ActivityNotFoundException) {
+                     return@setOnLongClickListener false
+                 }
+@@ -347,17 +314,9 @@ class ChooseProviderFragment : Fragment(R.layout.choose_provider_fragment) {
+ 
+             setSelected(providerInfo)
+             providerSettings.setOnClickListener {
+-                FirebaseAnalytics.getInstance(requireContext()).logEvent(
+-                        "provider_settings_open", bundleOf(
+-                        FirebaseAnalytics.Param.ITEM_ID to authority,
+-                        FirebaseAnalytics.Param.ITEM_NAME to title))
+                 launchProviderSettings(this)
+             }
+             providerBrowse.setOnClickListener {
+-                FirebaseAnalytics.getInstance(requireContext()).logEvent(
+-                        "provider_browse_open", bundleOf(
+-                        FirebaseAnalytics.Param.ITEM_ID to authority,
+-                        FirebaseAnalytics.Param.ITEM_NAME to title))
+                 findNavController().navigate(
+                         ChooseProviderFragmentDirections.browse(
+                                 ProviderContract.getContentUri(authority)))
+diff --git a/main/src/main/java/com/google/android/apps/muzei/IntroFragment.kt b/main/src/main/java/com/google/android/apps/muzei/IntroFragment.kt
+index c2d2bf8f..16e852a0 100644
+--- a/main/src/main/java/com/google/android/apps/muzei/IntroFragment.kt
++++ b/main/src/main/java/com/google/android/apps/muzei/IntroFragment.kt
+@@ -30,7 +30,6 @@ import androidx.fragment.app.Fragment
+ import androidx.fragment.app.commitNow
+ import com.google.android.apps.muzei.util.AnimatedMuzeiLogoFragment
+ import com.google.android.apps.muzei.util.toast
+-import com.google.firebase.analytics.FirebaseAnalytics
+ import net.nurik.roman.muzei.R
+ 
+ class IntroFragment : Fragment(R.layout.intro_fragment) {
+@@ -39,16 +38,11 @@ class IntroFragment : Fragment(R.layout.intro_fragment) {
+ 
+     override fun onCreate(savedInstanceState: Bundle?) {
+         super.onCreate(savedInstanceState)
+-
+-        if (savedInstanceState == null) {
+-            FirebaseAnalytics.getInstance(requireContext()).logEvent(FirebaseAnalytics.Event.TUTORIAL_BEGIN, null)
+-        }
+     }
+ 
+     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+         activateButton = view.findViewById(R.id.activate_muzei_button)
+         activateButton.setOnClickListener {
+-            FirebaseAnalytics.getInstance(requireContext()).logEvent("activate", null)
+             try {
+                 startActivity(Intent(WallpaperManager.ACTION_CHANGE_LIVE_WALLPAPER)
+                         .putExtra(WallpaperManager.EXTRA_LIVE_WALLPAPER_COMPONENT,
+diff --git a/main/src/main/java/com/google/android/apps/muzei/MainFragment.kt b/main/src/main/java/com/google/android/apps/muzei/MainFragment.kt
+index e268f86f..2e04bc8b 100644
+--- a/main/src/main/java/com/google/android/apps/muzei/MainFragment.kt
++++ b/main/src/main/java/com/google/android/apps/muzei/MainFragment.kt
+@@ -26,7 +26,6 @@ import androidx.navigation.ui.setupWithNavController
+ import com.google.android.apps.muzei.browse.BrowseProviderFragment
+ import com.google.android.apps.muzei.settings.EffectsFragment
+ import com.google.android.material.bottomnavigation.BottomNavigationView
+-import com.google.firebase.analytics.FirebaseAnalytics
+ import net.nurik.roman.muzei.R
+ 
+ /**
+@@ -55,24 +54,12 @@ class MainFragment : Fragment(R.layout.main_fragment), ChooseProviderFragment.Ca
+         navController.addOnDestinationChangedListener { _, destination, _ ->
+             when (destination.id) {
+                 R.id.main_art_details -> {
+-                    FirebaseAnalytics.getInstance(requireContext())
+-                            .setCurrentScreen(requireActivity(), "ArtDetail",
+-                                    ArtDetailFragment::class.java.simpleName)
+                 }
+                 R.id.main_choose_provider -> {
+-                    FirebaseAnalytics.getInstance(requireContext())
+-                            .setCurrentScreen(requireActivity(), "ChooseProvider",
+-                                    ChooseProviderFragment::class.java.simpleName)
+                 }
+                 R.id.browse_provider -> {
+-                    FirebaseAnalytics.getInstance(requireContext())
+-                            .setCurrentScreen(requireActivity(), "BrowseProvider",
+-                                    BrowseProviderFragment::class.java.simpleName)
+                 }
+                 R.id.main_effects -> {
+-                    FirebaseAnalytics.getInstance(requireContext())
+-                            .setCurrentScreen(requireActivity(), "Effects",
+-                                    EffectsFragment::class.java.simpleName)
+                 }
+             }
+         }
+diff --git a/main/src/main/java/com/google/android/apps/muzei/MuzeiActivity.kt b/main/src/main/java/com/google/android/apps/muzei/MuzeiActivity.kt
+index 0599b958..690e9d16 100644
+--- a/main/src/main/java/com/google/android/apps/muzei/MuzeiActivity.kt
++++ b/main/src/main/java/com/google/android/apps/muzei/MuzeiActivity.kt
+@@ -37,7 +37,6 @@ import com.google.android.apps.muzei.notifications.NotificationSettingsDialogFra
+ import com.google.android.apps.muzei.render.MuzeiRendererFragment
+ import com.google.android.apps.muzei.settings.EffectsFragment
+ import com.google.android.apps.muzei.wallpaper.WallpaperActiveState
+-import com.google.firebase.analytics.FirebaseAnalytics
+ import net.nurik.roman.muzei.BuildConfig
+ import net.nurik.roman.muzei.R
+ 
+@@ -56,26 +55,18 @@ class MuzeiActivity : AppCompatActivity() {
+             return when {
+                 WallpaperActiveState.value == true && seenTutorial -> {
+                     // The wallpaper is active and they've seen the tutorial
+-                    FirebaseAnalytics.getInstance(this).setCurrentScreen(this, "Main",
+-                            MainFragment::class.java.simpleName)
+                     MainFragment()
+                 }
+                 WallpaperActiveState.value == true && !seenTutorial -> {
+                     // They need to see the tutorial after activating Muzei for the first time
+-                    FirebaseAnalytics.getInstance(this).setCurrentScreen(this, "Tutorial",
+-                            TutorialFragment::class.java.simpleName)
+                     TutorialFragment()
+                 }
+                 isPreviewMode -> {
+                     // We're previewing the wallpaper and want to adjust its settings
+-                    FirebaseAnalytics.getInstance(this).setCurrentScreen(this, "Effects",
+-                            EffectsFragment::class.java.simpleName)
+                     EffectsFragment()
+                 }
+                 else -> {
+                     // Show the intro fragment to have them activate Muzei
+-                    FirebaseAnalytics.getInstance(this).setCurrentScreen(this, "Intro",
+-                            IntroFragment::class.java.simpleName)
+                     IntroFragment()
+                 }
+             }.also {
+@@ -89,7 +80,6 @@ class MuzeiActivity : AppCompatActivity() {
+             return
+         }
+         setContentView(R.layout.muzei_activity)
+-        FirebaseAnalytics.getInstance(this).setUserProperty("device_type", BuildConfig.DEVICE_TYPE)
+         val containerView = findViewById<View>(R.id.container)
+ 
+         containerView.systemUiVisibility = (View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+@@ -130,9 +120,6 @@ class MuzeiActivity : AppCompatActivity() {
+             }
+         }
+         if (intent?.hasCategory(Notification.INTENT_CATEGORY_NOTIFICATION_PREFERENCES) == true) {
+-            FirebaseAnalytics.getInstance(this).logEvent(
+-                    "notification_settings_open", bundleOf(
+-                    FirebaseAnalytics.Param.CONTENT_TYPE to "intent"))
+             NotificationSettingsDialogFragment.showSettings(this,
+                     supportFragmentManager)
+         }
+diff --git a/main/src/main/java/com/google/android/apps/muzei/MuzeiWallpaperService.kt b/main/src/main/java/com/google/android/apps/muzei/MuzeiWallpaperService.kt
+index a58d1c7f..787414f9 100644
+--- a/main/src/main/java/com/google/android/apps/muzei/MuzeiWallpaperService.kt
++++ b/main/src/main/java/com/google/android/apps/muzei/MuzeiWallpaperService.kt
+@@ -58,9 +58,7 @@ import com.google.android.apps.muzei.sync.ProviderManager
+ import com.google.android.apps.muzei.util.filterNotNull
+ import com.google.android.apps.muzei.wallpaper.LockscreenObserver
+ import com.google.android.apps.muzei.wallpaper.WallpaperAnalytics
+-import com.google.android.apps.muzei.wearable.WearableController
+ import com.google.android.apps.muzei.widget.WidgetUpdater
+-import com.google.firebase.analytics.FirebaseAnalytics
+ import kotlinx.coroutines.GlobalScope
+ import kotlinx.coroutines.Job
+ import kotlinx.coroutines.delay
+@@ -92,7 +90,6 @@ class MuzeiWallpaperService : GLWallpaperService(), LifecycleOwner {
+         wallpaperLifecycle.addObserver(WorkManagerInitializer.initializeObserver(this))
+         wallpaperLifecycle.addObserver(LegacySourceManager.getInstance(this))
+         wallpaperLifecycle.addObserver(NotificationUpdater(this))
+-        wallpaperLifecycle.addObserver(WearableController(this))
+         wallpaperLifecycle.addObserver(WidgetUpdater(this))
+         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
+             wallpaperLifecycle.addObserver(ArtworkInfoShortcutController(this, this))
+@@ -318,9 +315,6 @@ class MuzeiWallpaperService : GLWallpaperService(), LifecycleOwner {
+         private fun triggerTapAction(action: String, type: String) {
+             when (action) {
+                 Prefs.PREF_TAP_ACTION_TEMP -> {
+-                    FirebaseAnalytics.getInstance(this@MuzeiWallpaperService).logEvent(
+-                            "temp_disable_effects", bundleOf(
+-                            FirebaseAnalytics.Param.CONTENT_TYPE to type))
+                     // Temporarily toggle focused/blurred
+                     queueEvent {
+                         renderer.setIsBlurred(!renderer.isBlurred, false)
+@@ -330,9 +324,6 @@ class MuzeiWallpaperService : GLWallpaperService(), LifecycleOwner {
+                 }
+                 Prefs.PREF_TAP_ACTION_NEXT -> {
+                     GlobalScope.launch {
+-                        FirebaseAnalytics.getInstance(this@MuzeiWallpaperService).logEvent(
+-                                "next_artwork", bundleOf(
+-                                FirebaseAnalytics.Param.CONTENT_TYPE to type))
+                         LegacySourceManager.getInstance(this@MuzeiWallpaperService).nextArtwork()
+                     }
+                 }
+@@ -343,9 +334,6 @@ class MuzeiWallpaperService : GLWallpaperService(), LifecycleOwner {
+                                 .artworkDao()
+                                 .getCurrentArtwork()
+                         artwork?.run {
+-                            FirebaseAnalytics.getInstance(this@MuzeiWallpaperService).logEvent(
+-                                    "artwork_info_open", bundleOf(
+-                                    FirebaseAnalytics.Param.CONTENT_TYPE to type))
+                             openArtworkInfo(this@MuzeiWallpaperService)
+                         }
+                     }
+diff --git a/main/src/main/java/com/google/android/apps/muzei/NextArtworkActivity.kt b/main/src/main/java/com/google/android/apps/muzei/NextArtworkActivity.kt
+index d42e2a74..0e22c650 100644
+--- a/main/src/main/java/com/google/android/apps/muzei/NextArtworkActivity.kt
++++ b/main/src/main/java/com/google/android/apps/muzei/NextArtworkActivity.kt
+@@ -20,7 +20,6 @@ import android.app.Activity
+ import android.os.Bundle
+ import androidx.core.os.bundleOf
+ import com.google.android.apps.muzei.legacy.LegacySourceManager
+-import com.google.firebase.analytics.FirebaseAnalytics
+ import kotlinx.coroutines.GlobalScope
+ import kotlinx.coroutines.launch
+ 
+@@ -31,9 +30,6 @@ class NextArtworkActivity : Activity() {
+     override fun onCreate(savedInstanceState: Bundle?) {
+         super.onCreate(savedInstanceState)
+         GlobalScope.launch {
+-            FirebaseAnalytics.getInstance(this@NextArtworkActivity).logEvent(
+-                    "next_artwork", bundleOf(
+-                    FirebaseAnalytics.Param.CONTENT_TYPE to "activity_shortcut"))
+             LegacySourceManager.getInstance(this@NextArtworkActivity).nextArtwork()
+         }
+         finish()
+diff --git a/main/src/main/java/com/google/android/apps/muzei/PhotoSetAsTargetActivity.kt b/main/src/main/java/com/google/android/apps/muzei/PhotoSetAsTargetActivity.kt
+index 95f210f1..5ac8764f 100644
+--- a/main/src/main/java/com/google/android/apps/muzei/PhotoSetAsTargetActivity.kt
++++ b/main/src/main/java/com/google/android/apps/muzei/PhotoSetAsTargetActivity.kt
+@@ -26,7 +26,6 @@ import com.google.android.apps.muzei.single.BuildConfig.SINGLE_AUTHORITY
+ import com.google.android.apps.muzei.single.SingleArtProvider
+ import com.google.android.apps.muzei.sync.ProviderManager
+ import com.google.android.apps.muzei.util.toast
+-import com.google.firebase.analytics.FirebaseAnalytics
+ import net.nurik.roman.muzei.R
+ 
+ class PhotoSetAsTargetActivity : FragmentActivity() {
+@@ -51,11 +50,6 @@ class PhotoSetAsTargetActivity : FragmentActivity() {
+             }
+ 
+             // If adding the artwork succeeded, select the single artwork provider
+-            FirebaseAnalytics.getInstance(context).logEvent(
+-                    FirebaseAnalytics.Event.SELECT_CONTENT, bundleOf(
+-                    FirebaseAnalytics.Param.ITEM_ID to SINGLE_AUTHORITY,
+-                    FirebaseAnalytics.Param.ITEM_CATEGORY to "providers",
+-                    FirebaseAnalytics.Param.CONTENT_TYPE to "set_as"))
+             ProviderManager.select(context, SINGLE_AUTHORITY)
+             startActivity(Intent.makeMainActivity(ComponentName(
+                     context, MuzeiActivity::class.java))
+diff --git a/main/src/main/java/com/google/android/apps/muzei/TutorialFragment.kt b/main/src/main/java/com/google/android/apps/muzei/TutorialFragment.kt
+index b69ab34f..4608eb7b 100644
+--- a/main/src/main/java/com/google/android/apps/muzei/TutorialFragment.kt
++++ b/main/src/main/java/com/google/android/apps/muzei/TutorialFragment.kt
+@@ -30,7 +30,6 @@ import androidx.core.content.edit
+ import androidx.core.content.res.ResourcesCompat
+ import androidx.fragment.app.Fragment
+ import androidx.preference.PreferenceManager
+-import com.google.firebase.analytics.FirebaseAnalytics
+ import net.nurik.roman.muzei.R
+ 
+ class TutorialFragment : Fragment(R.layout.tutorial_fragment) {
+@@ -43,8 +42,6 @@ class TutorialFragment : Fragment(R.layout.tutorial_fragment) {
+ 
+     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+         view.findViewById<View>(R.id.tutorial_icon_affordance).setOnClickListener {
+-            FirebaseAnalytics.getInstance(requireContext())
+-                    .logEvent(FirebaseAnalytics.Event.TUTORIAL_COMPLETE, null)
+             PreferenceManager.getDefaultSharedPreferences(context).edit {
+                 putBoolean(PREF_SEEN_TUTORIAL, true)
+             }
+diff --git a/main/src/main/java/com/google/android/apps/muzei/browse/BrowseProviderFragment.kt b/main/src/main/java/com/google/android/apps/muzei/browse/BrowseProviderFragment.kt
+index a510e41b..e9febb05 100644
+--- a/main/src/main/java/com/google/android/apps/muzei/browse/BrowseProviderFragment.kt
++++ b/main/src/main/java/com/google/android/apps/muzei/browse/BrowseProviderFragment.kt
+@@ -39,7 +39,6 @@ import com.bumptech.glide.Glide
+ import com.google.android.apps.muzei.room.Artwork
+ import com.google.android.apps.muzei.room.MuzeiDatabase
+ import com.google.android.apps.muzei.util.toast
+-import com.google.firebase.analytics.FirebaseAnalytics
+ import kotlinx.coroutines.CoroutineScope
+ import kotlinx.coroutines.Dispatchers
+ import kotlinx.coroutines.launch
+@@ -102,12 +101,6 @@ class BrowseProviderFragment: Fragment(R.layout.browse_provider_fragment) {
+             itemView.setOnClickListener {
+                 val context = it.context
+                 coroutineScope.launch(Dispatchers.Main) {
+-                    FirebaseAnalytics.getInstance(context).logEvent(
+-                            FirebaseAnalytics.Event.SELECT_CONTENT, bundleOf(
+-                            FirebaseAnalytics.Param.ITEM_ID to artwork.id,
+-                            FirebaseAnalytics.Param.ITEM_NAME to artwork.title,
+-                            FirebaseAnalytics.Param.ITEM_CATEGORY to "artwork",
+-                            FirebaseAnalytics.Param.CONTENT_TYPE to "browse"))
+                     MuzeiDatabase.getInstance(context).artworkDao()
+                             .insert(artwork)
+                     context.toast(if (artwork.title.isNullOrBlank()) {
+diff --git a/main/src/main/java/com/google/android/apps/muzei/legacy/LegacySourceInfoFragment.kt b/main/src/main/java/com/google/android/apps/muzei/legacy/LegacySourceInfoFragment.kt
+index 8e470074..a54af43b 100644
+--- a/main/src/main/java/com/google/android/apps/muzei/legacy/LegacySourceInfoFragment.kt
++++ b/main/src/main/java/com/google/android/apps/muzei/legacy/LegacySourceInfoFragment.kt
+@@ -38,7 +38,6 @@ import androidx.recyclerview.widget.DiffUtil
+ import androidx.recyclerview.widget.ListAdapter
+ import androidx.recyclerview.widget.RecyclerView
+ import com.google.android.apps.muzei.util.toast
+-import com.google.firebase.analytics.FirebaseAnalytics
+ import net.nurik.roman.muzei.R
+ 
+ class LegacySourceInfoFragment : Fragment(R.layout.legacy_source_info_fragment) {
+@@ -95,10 +94,6 @@ class LegacySourceInfoFragment : Fragment(R.layout.legacy_source_info_fragment)
+             infoIcon.setImageBitmap(icon)
+             infoTitle.text = title
+             infoAppInfo.setOnClickListener {
+-                FirebaseAnalytics.getInstance(requireContext()).logEvent(
+-                        "legacy_source_info_app_info_open", bundleOf(
+-                        FirebaseAnalytics.Param.ITEM_ID to packageName,
+-                        FirebaseAnalytics.Param.ITEM_NAME to title))
+                 val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                 intent.data = "package:$packageName".toUri()
+                 startActivity(intent)
+@@ -108,10 +103,6 @@ class LegacySourceInfoFragment : Fragment(R.layout.legacy_source_info_fragment)
+             infoSendFeedback.isVisible =
+                     intent.resolveActivity(requireContext().packageManager) != null
+             infoSendFeedback.setOnClickListener {
+-                FirebaseAnalytics.getInstance(requireContext()).logEvent(
+-                        "legacy_source_info_send_feedback_open", bundleOf(
+-                        FirebaseAnalytics.Param.ITEM_ID to packageName,
+-                        FirebaseAnalytics.Param.ITEM_NAME to title))
+                 startActivity(intent)
+             }
+         }
+diff --git a/main/src/main/java/com/google/android/apps/muzei/notifications/NewWallpaperNotificationReceiver.kt b/main/src/main/java/com/google/android/apps/muzei/notifications/NewWallpaperNotificationReceiver.kt
+index dc3e5ae1..360d3349 100644
+--- a/main/src/main/java/com/google/android/apps/muzei/notifications/NewWallpaperNotificationReceiver.kt
++++ b/main/src/main/java/com/google/android/apps/muzei/notifications/NewWallpaperNotificationReceiver.kt
+@@ -43,7 +43,6 @@ import com.google.android.apps.muzei.room.MuzeiDatabase
+ import com.google.android.apps.muzei.room.getCommands
+ import com.google.android.apps.muzei.room.sendAction
+ import com.google.android.apps.muzei.util.goAsync
+-import com.google.firebase.analytics.FirebaseAnalytics
+ import net.nurik.roman.muzei.R
+ 
+ class NewWallpaperNotificationReceiver : BroadcastReceiver() {
+@@ -306,9 +305,6 @@ class NewWallpaperNotificationReceiver : BroadcastReceiver() {
+             when (intent?.action) {
+                 ACTION_MARK_NOTIFICATION_READ -> markNotificationRead(context)
+                 ACTION_NEXT_ARTWORK -> {
+-                    FirebaseAnalytics.getInstance(context).logEvent(
+-                            "next_artwork", bundleOf(
+-                            FirebaseAnalytics.Param.CONTENT_TYPE to "notification"))
+                     LegacySourceManager.getInstance(context).nextArtwork()
+                 }
+                 ACTION_USER_COMMAND -> triggerUserCommandFromRemoteInput(context, intent)
+@@ -325,12 +321,6 @@ class NewWallpaperNotificationReceiver : BroadcastReceiver() {
+             if (artwork != null) {
+                 val commands = artwork.getCommands(context)
+                 commands.find { selectedCommand == it.title }?.run {
+-                    FirebaseAnalytics.getInstance(context).logEvent(
+-                            FirebaseAnalytics.Event.SELECT_CONTENT, bundleOf(
+-                            FirebaseAnalytics.Param.ITEM_ID to id,
+-                            FirebaseAnalytics.Param.ITEM_NAME to title,
+-                            FirebaseAnalytics.Param.ITEM_CATEGORY to "actions",
+-                            FirebaseAnalytics.Param.CONTENT_TYPE to "notification"))
+                     artwork.sendAction(context, id)
+                 }
+             }
+diff --git a/main/src/main/java/com/google/android/apps/muzei/quicksettings/NextArtworkTileService.kt b/main/src/main/java/com/google/android/apps/muzei/quicksettings/NextArtworkTileService.kt
+index 923c6b47..2c8c38a1 100644
+--- a/main/src/main/java/com/google/android/apps/muzei/quicksettings/NextArtworkTileService.kt
++++ b/main/src/main/java/com/google/android/apps/muzei/quicksettings/NextArtworkTileService.kt
+@@ -39,7 +39,6 @@ import com.google.android.apps.muzei.room.MuzeiDatabase
+ import com.google.android.apps.muzei.room.Provider
+ import com.google.android.apps.muzei.util.toast
+ import com.google.android.apps.muzei.wallpaper.WallpaperActiveState
+-import com.google.firebase.analytics.FirebaseAnalytics
+ import kotlinx.coroutines.GlobalScope
+ import kotlinx.coroutines.launch
+ import kotlinx.coroutines.runBlocking
+@@ -73,7 +72,6 @@ class NextArtworkTileService : TileService(), LifecycleOwner {
+     }
+ 
+     override fun onTileAdded() {
+-        FirebaseAnalytics.getInstance(this).logEvent("tile_next_artwork_added", null)
+     }
+ 
+     override fun onStartListening() {
+@@ -110,16 +108,11 @@ class NextArtworkTileService : TileService(), LifecycleOwner {
+             when (state) {
+                 Tile.STATE_ACTIVE -> { // Active means we send the 'Next Artwork' command
+                     GlobalScope.launch {
+-                        FirebaseAnalytics.getInstance(context).logEvent(
+-                                "next_artwork", bundleOf(
+-                                FirebaseAnalytics.Param.CONTENT_TYPE to "tile"))
+                         LegacySourceManager.getInstance(context).nextArtwork()
+                     }
+                 }
+                 else -> unlockAndRun {
+                     // Inactive means we attempt to activate Muzei
+-                    FirebaseAnalytics.getInstance(context).logEvent(
+-                            "tile_next_artwork_activate", null)
+                     try {
+                         startActivityAndCollapse(Intent(WallpaperManager.ACTION_CHANGE_LIVE_WALLPAPER)
+                                 .putExtra(WallpaperManager.EXTRA_LIVE_WALLPAPER_COMPONENT,
+@@ -144,7 +137,6 @@ class NextArtworkTileService : TileService(), LifecycleOwner {
+     }
+ 
+     override fun onTileRemoved() {
+-        FirebaseAnalytics.getInstance(this).logEvent("tile_next_artwork_removed", null)
+     }
+ 
+     override fun onDestroy() {
+diff --git a/main/src/main/java/com/google/android/apps/muzei/tasker/TaskerActionReceiver.kt b/main/src/main/java/com/google/android/apps/muzei/tasker/TaskerActionReceiver.kt
+index c557e9dc..51e2edd8 100644
+--- a/main/src/main/java/com/google/android/apps/muzei/tasker/TaskerActionReceiver.kt
++++ b/main/src/main/java/com/google/android/apps/muzei/tasker/TaskerActionReceiver.kt
+@@ -23,7 +23,6 @@ import androidx.core.os.bundleOf
+ import com.google.android.apps.muzei.legacy.LegacySourceManager
+ import com.google.android.apps.muzei.sync.ProviderManager
+ import com.google.android.apps.muzei.util.goAsync
+-import com.google.firebase.analytics.FirebaseAnalytics
+ import com.twofortyfouram.locale.api.Intent.ACTION_FIRE_SETTING
+ import com.twofortyfouram.locale.api.Intent.EXTRA_BUNDLE
+ 
+@@ -42,18 +41,10 @@ class TaskerActionReceiver : BroadcastReceiver() {
+                 is SelectProviderAction -> {
+                     val authority = selectedAction.authority
+                     if (context.packageManager.resolveContentProvider(authority, 0) != null) {
+-                        FirebaseAnalytics.getInstance(context).logEvent(
+-                                FirebaseAnalytics.Event.SELECT_CONTENT, bundleOf(
+-                                FirebaseAnalytics.Param.ITEM_ID to authority,
+-                                FirebaseAnalytics.Param.ITEM_CATEGORY to "providers",
+-                                FirebaseAnalytics.Param.CONTENT_TYPE to "tasker"))
+                         ProviderManager.select(context, authority)
+                     }
+                 }
+                 is NextArtworkAction -> {
+-                    FirebaseAnalytics.getInstance(context).logEvent(
+-                            "next_artwork", bundleOf(
+-                            FirebaseAnalytics.Param.CONTENT_TYPE to "tasker"))
+                     LegacySourceManager.getInstance(context).nextArtwork()
+                 }
+             }
+diff --git a/main/src/main/java/com/google/android/apps/muzei/wallpaper/WallpaperAnalytics.kt b/main/src/main/java/com/google/android/apps/muzei/wallpaper/WallpaperAnalytics.kt
+index 0be6d26d..c3552f51 100644
+--- a/main/src/main/java/com/google/android/apps/muzei/wallpaper/WallpaperAnalytics.kt
++++ b/main/src/main/java/com/google/android/apps/muzei/wallpaper/WallpaperAnalytics.kt
+@@ -21,7 +21,6 @@ import android.content.Context
+ import androidx.lifecycle.DefaultLifecycleObserver
+ import androidx.lifecycle.LifecycleOwner
+ import androidx.lifecycle.MutableLiveData
+-import com.google.firebase.analytics.FirebaseAnalytics
+ import net.nurik.roman.muzei.BuildConfig
+ 
+ object WallpaperActiveState : MutableLiveData<Boolean>() {
+@@ -43,16 +42,13 @@ class WallpaperAnalytics(private val context: Context) : DefaultLifecycleObserve
+     }
+ 
+     override fun onCreate(owner: LifecycleOwner) {
+-        FirebaseAnalytics.getInstance(context).setUserProperty("device_type", BuildConfig.DEVICE_TYPE)
+     }
+ 
+     override fun onResume(owner: LifecycleOwner) {
+-        FirebaseAnalytics.getInstance(context).logEvent("wallpaper_created", null)
+         WallpaperActiveState.value = true
+     }
+ 
+     override fun onPause(owner: LifecycleOwner) {
+-        FirebaseAnalytics.getInstance(context).logEvent("wallpaper_destroyed", null)
+         WallpaperActiveState.value = false
+     }
+ }
+diff --git a/main/src/main/java/com/google/android/apps/muzei/wearable/NotificationOpenListenerService.kt b/main/src/main/java/com/google/android/apps/muzei/wearable/NotificationOpenListenerService.kt
+deleted file mode 100644
+index 0e5be16b..00000000
+--- a/main/src/main/java/com/google/android/apps/muzei/wearable/NotificationOpenListenerService.kt
++++ /dev/null
+@@ -1,28 +0,0 @@
+-/*
+- * Copyright 2014 Google Inc.
+- *
+- * Licensed under the Apache License, Version 2.0 (the "License");
+- * you may not use this file except in compliance with the License.
+- * You may obtain a copy of the License at
+- *
+- *     http://www.apache.org/licenses/LICENSE-2.0
+- *
+- * Unless required by applicable law or agreed to in writing, software
+- * distributed under the License is distributed on an "AS IS" BASIS,
+- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+- * See the License for the specific language governing permissions and
+- * limitations under the License.
+- */
+-
+-package com.google.android.apps.muzei.wearable
+-
+-import com.google.android.gms.wearable.MessageEvent
+-import com.google.android.gms.wearable.WearableListenerService
+-
+-class NotificationOpenListenerService : WearableListenerService() {
+-    override fun onMessageReceived(messageEvent: MessageEvent?) {
+-        // Only notification/open actions trigger this WearableListenerService
+-        val mainIntent = packageManager.getLaunchIntentForPackage(packageName)
+-        startActivity(mainIntent)
+-    }
+-}
+diff --git a/main/src/main/java/com/google/android/apps/muzei/wearable/WearableController.kt b/main/src/main/java/com/google/android/apps/muzei/wearable/WearableController.kt
+deleted file mode 100644
+index 21bf0e01..00000000
+--- a/main/src/main/java/com/google/android/apps/muzei/wearable/WearableController.kt
++++ /dev/null
+@@ -1,105 +0,0 @@
+-/*
+- * Copyright 2014 Google Inc.
+- *
+- * Licensed under the Apache License, Version 2.0 (the "License");
+- * you may not use this file except in compliance with the License.
+- * You may obtain a copy of the License at
+- *
+- *     http://www.apache.org/licenses/LICENSE-2.0
+- *
+- * Unless required by applicable law or agreed to in writing, software
+- * distributed under the License is distributed on an "AS IS" BASIS,
+- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+- * See the License for the specific language governing permissions and
+- * limitations under the License.
+- */
+-
+-package com.google.android.apps.muzei.wearable
+-
+-import android.content.Context
+-import android.graphics.Bitmap
+-import android.util.Log
+-import androidx.lifecycle.DefaultLifecycleObserver
+-import androidx.lifecycle.LifecycleOwner
+-import androidx.lifecycle.observe
+-import com.google.android.apps.muzei.render.ImageLoader
+-import com.google.android.apps.muzei.room.Artwork
+-import com.google.android.apps.muzei.room.MuzeiDatabase
+-import com.google.android.apps.muzei.util.filterNotNull
+-import com.google.android.gms.common.ConnectionResult
+-import com.google.android.gms.common.GoogleApiAvailability
+-import com.google.android.gms.common.api.AvailabilityException
+-import com.google.android.gms.wearable.Asset
+-import com.google.android.gms.wearable.PutDataMapRequest
+-import com.google.android.gms.wearable.Wearable
+-import kotlinx.coroutines.GlobalScope
+-import kotlinx.coroutines.launch
+-import kotlinx.coroutines.tasks.await
+-import java.io.ByteArrayOutputStream
+-import java.util.concurrent.ExecutionException
+-import java.util.concurrent.TimeoutException
+-
+-/**
+- * Controller for updating Android Wear devices with new wallpapers.
+- */
+-class WearableController(private val context: Context) : DefaultLifecycleObserver {
+-
+-    companion object {
+-        private const val TAG = "WearableController"
+-    }
+-
+-    override fun onCreate(owner: LifecycleOwner) {
+-        // Update Android Wear whenever the artwork changes
+-        MuzeiDatabase.getInstance(context).artworkDao().currentArtwork
+-                .filterNotNull()
+-                .observe(owner) { artwork ->
+-                    GlobalScope.launch {
+-                        updateArtwork(artwork)
+-                    }
+-                }
+-    }
+-
+-    private suspend fun updateArtwork(artwork: Artwork) {
+-        if (ConnectionResult.SUCCESS != GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(context)) {
+-            return
+-        }
+-        val dataClient = Wearable.getDataClient(context)
+-        try {
+-            GoogleApiAvailability.getInstance().checkApiAvailability(dataClient).await()
+-        } catch (e: AvailabilityException) {
+-            val connectionResult = e.getConnectionResult(dataClient)
+-            if (connectionResult.errorCode != ConnectionResult.API_UNAVAILABLE) {
+-                Log.w(TAG, "onConnectionFailed: $connectionResult", e.cause)
+-            }
+-            return
+-        } catch (e: ExecutionException) {
+-            Log.w(TAG, "Unable to check for Wear API availability", e)
+-            return
+-        } catch (e: InterruptedException) {
+-            Log.w(TAG, "Unable to check for Wear API availability", e)
+-            return
+-        } catch (e: TimeoutException) {
+-            Log.w(TAG, "Unable to check for Wear API availability", e)
+-            return
+-        }
+-
+-        val image: Bitmap = ImageLoader.decode(
+-                context.contentResolver, artwork.contentUri,
+-                320) ?: return
+-
+-        val byteStream = ByteArrayOutputStream()
+-        image.compress(Bitmap.CompressFormat.PNG, 100, byteStream)
+-        val asset = Asset.createFromBytes(byteStream.toByteArray())
+-        val dataMapRequest = PutDataMapRequest.create("/artwork").apply {
+-            dataMap.putDataMap("artwork", artwork.toDataMap())
+-            dataMap.putAsset("image", asset)
+-        }
+-        try {
+-            dataClient.putDataItem(dataMapRequest.asPutDataRequest().setUrgent()).await()
+-        } catch (e: ExecutionException) {
+-            Log.w(TAG, "Error uploading artwork to Wear", e)
+-        } catch (e: InterruptedException) {
+-            Log.w(TAG, "Error uploading artwork to Wear", e)
+-        }
+-    }
+-}
+diff --git a/main/src/main/java/com/google/android/apps/muzei/widget/MuzeiAppWidgetProvider.kt b/main/src/main/java/com/google/android/apps/muzei/widget/MuzeiAppWidgetProvider.kt
+index 67ac591f..d9c01f30 100644
+--- a/main/src/main/java/com/google/android/apps/muzei/widget/MuzeiAppWidgetProvider.kt
++++ b/main/src/main/java/com/google/android/apps/muzei/widget/MuzeiAppWidgetProvider.kt
+@@ -24,7 +24,6 @@ import android.os.Bundle
+ import androidx.core.os.bundleOf
+ import com.google.android.apps.muzei.legacy.LegacySourceManager
+ import com.google.android.apps.muzei.util.goAsync
+-import com.google.firebase.analytics.FirebaseAnalytics
+ 
+ /**
+  * AppWidgetProvider for Muzei. The actual updating is done asynchronously in
+@@ -40,9 +39,6 @@ class MuzeiAppWidgetProvider : AppWidgetProvider() {
+         super.onReceive(context, intent)
+         if (intent?.action == ACTION_NEXT_ARTWORK) {
+             goAsync {
+-                FirebaseAnalytics.getInstance(context).logEvent(
+-                        "next_artwork", bundleOf(
+-                        FirebaseAnalytics.Param.CONTENT_TYPE to "app_widget"))
+                 LegacySourceManager.getInstance(context).nextArtwork()
+             }
+         }
