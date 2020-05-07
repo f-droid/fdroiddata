@@ -67,7 +67,55 @@ Builds:
     gradleprops:
       - buildUniversalApk
 
+  - versionName: 2.1.7
+    versionCode: 20107
+    commit: 2.1.7
+    subdir: app
+    submodules: true
+    patch:
+      - openvpn-build.patch
+    gradle:
+      - prod
+    output: build/outputs/apk/prod/release/ProtonVPN-*-prod-release-unsigned.apk
+    rm:
+      - app/src/main/jniLibs/x86/*
+      - app/src/main/jniLibs/x86_64/*
+      - app/src/main/jniLibs/armeabi-v7a/*
+      - app/src/main/jniLibs/arm64-v8a/*
+      - openvpn/src/main/cpp/mbedtls/tests
+      - openvpn/src/main/cpp/openvpn3/test/unittests
+      - strongswan/testing/hosts/alice/etc/raddb/certs/random
+    prebuild:
+      - sed -i -e '/triple/d' -e '/play\ {/,+4d' build.gradle
+      - pushd ../strongswan
+      - export PATH=$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
+      - git clone git://git.strongswan.org/android-ndk-boringssl.git -b ndk-static
+        src/frontends/android/app/src/main/jni/openssl
+      - ./autogen.sh
+      - ./configure
+      - make dist
+      - pushd src/frontends/android/app
+      - sed -i -e '/android\ {/alintOptions\ {abortOnError\ false}' build.gradle
+      - gradle assembleRelease
+      - popd
+      - popd
+      - cp -r ../strongswan/src/frontends/android/app/src/main/libs/* src/main/jniLibs/
+      - rm -fr ../strongswan/src/frontends/android/app/src/main/libs/*
+      - rm -fr ../strongswan/src/frontends/android/app/build
+      - pushd ..
+      - gradle openvpn:assemble
+      - rm -fr openvpn/build/intermediates
+      - rm -fr openvpn/build/kotlin
+      - rm -fr openvpn/build/tmp
+      - rm -fr openvpn/.cxx
+      - popd
+    scanignore:
+      - app/src/main/jniLibs/
+    ndk: r20b
+    gradleprops:
+      - buildUniversalApk
+
 AutoUpdateMode: None
 UpdateCheckMode: Tags
-CurrentVersion: 2.1.3
-CurrentVersionCode: 20103
+CurrentVersion: 2.1.7
+CurrentVersionCode: 20107
