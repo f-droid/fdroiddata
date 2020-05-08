@@ -123,6 +123,27 @@ Builds:
         --sdk $$SDK$$ --conf android-build-64.conf
     ndk: r21
 
+  - versionName: 2.1.0
+    versionCode: 16
+    commit: 2.1.0
+    subdir: client/Android/Studio/aFreeRDP
+    gradle:
+      - yes
+    prebuild:
+      - echo -e "RELEASE_STORE_FILE=\nRELEASE_KEY_ALIAS=" >>../gradle.properties
+      - cd ../../../../scripts
+      - sed -i -e 's/OPENSSL_TAG=OpenSSL_1_1_[0-1][a-h]/OPENSSL_TAG=OpenSSL_1_1_1g/'
+        -e 's/WITH_OPENH264=0/WITH_OPENH264=1/' -e 's/CMAKE_BUILD_TYPE=Debug/CMAKE_BUILD_TYPE=Release/g'
+        android-build-*.conf
+      - sed -i -e 's/make/make USE_ASM=no/' android-build-openh264.sh
+    build:
+      - cd ../../../../scripts
+      - ANDROID_NDK=$$NDK$$ ANDROID_SDK=$$SDK$$ ./android-build-freerdp.sh --ndk $$NDK$$
+        --sdk $$SDK$$ --conf android-build-32.conf
+      - ANDROID_NDK=$$NDK$$ ANDROID_SDK=$$SDK$$ ./android-build-freerdp.sh --ndk $$NDK$$
+        --sdk $$SDK$$ --conf android-build-64.conf
+    ndk: r21
+
 MaintainerNotes: |-
     * Keep OpenH264 at 1.8.0 as the newer versions have issues with reference frames and
       the H264 data sent by microsoft RDP servers.
@@ -130,5 +151,5 @@ MaintainerNotes: |-
 
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: 2.0.0
-CurrentVersionCode: 15
+CurrentVersion: 2.1.0
+CurrentVersionCode: 16
