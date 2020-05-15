@@ -114,8 +114,24 @@ Builds:
       - sed -i -e '/FlutterFirebaseMessagingService/g' android/app/src/main/kotlin/im/pattle/pattle/App.kt
     build: $$flutter$$/bin/flutter build apk --flavor fdroid -v --suppress-analytics
 
+  - versionName: 0.16.0
+    versionCode: 766
+    commit: v0.16.0
+    output: build/app/outputs/apk/fdroid/release/app-fdroid-release.apk
+    srclibs:
+      - flutter@1.17.1
+    prebuild:
+      - echo 'BUILD_TYPE=fdroid' > .env
+      - echo 'SENTRY_DSN=https://4e306dcaabef4fd99a3e6a024a9747bb@sentry.pattle.im/9'
+        >> .env
+      - 'echo "version: $$VERSION$$+$$VERCODE$$" >> pubspec.yaml'
+      - sed -i -e '/google-services/g' -e '/firebase/g' -e '/signingConfigs/,+8d'
+        -e '/signingConfig/d' android/app/build.gradle android/build.gradle
+      - sed -i -e '/FlutterFirebaseMessagingService/g' android/app/src/main/kotlin/im/pattle/pattle/App.kt
+    build: $$flutter$$/bin/flutter build apk --flavor fdroid -v --suppress-analytics
+
 AutoUpdateMode: Version v%v
 UpdateCheckMode: HTTP
 UpdateCheckData: https://version.pattle.im/|\ ([0-9]+)|.|([0-9]+\.[0-9]+\.[0-9]+)
-CurrentVersion: 0.15.0
-CurrentVersionCode: 741
+CurrentVersion: 0.16.0
+CurrentVersionCode: 766
