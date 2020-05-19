@@ -45,22 +45,55 @@ lint:
     - ./tools/check-metadata-summary-whitespace.py || export EXITVALUE=1
     - exit $EXITVALUE
 
+
 pages:
-  image: ruby:2.3
-  stage: deploy
+  image: registry.gitlab.com/fdroid/ci-images-client:latest
   only:
-    - schedules
-  cache:
-    key: "$CI_JOB_NAME"
-    paths:
-      - vendor/ruby
+    - triggers
+    - web
   artifacts:
     paths:
-      - public
+      - metadata/
+      - public/
+      - repo/index-v1.json
+      - repo/index.xml
+      - tmp/apkcache.json
+    when: always
   script:
-    - rm -rf public
-    - gem install git_stats
-    - git_stats generate --silent --out-path=public
+    - apt-get update
+    - apt-get dist-upgrade
+    # install fdroidserver from git, with deps from Debian, until fdroidserver
+    # is stable enough to include all the things needed here
+    - apt-get install -t stretch-backports
+         fdroidserver
+         python3-asn1crypto
+         python3-ruamel.yaml
+         python3-venv
+    - apt-get purge fdroidserver
+    - test -d fdroidserver || mkdir fdroidserver
+    - curl --silent https://gitlab.com/fdroid/fdroidserver/repository/master/archive.tar.gz
+        | tar -xz --directory=fdroidserver --strip-components=1
+    - export PATH="`pwd`/fdroidserver:$PATH"
+    - export PYTHONPATH="`pwd`/fdroidserver"
+    - export PYTHONUNBUFFERED=true
+
+    - export GRADLE_USER_HOME=$PWD/.gradle
+    - rm -rf $GRADLE_USER_HOME/fdroid
+    - mkdir -p $GRADLE_USER_HOME/fdroid
+    - curl --silent https://gitlab.com/fdroid/gradle-plugins/repository/master/archive.tar.gz
+        | tar -xz --directory=$GRADLE_USER_HOME/fdroid --strip-components=1
+
+    - curl --silent https://gitlab.com/fdroid/issuebot/repository/master/archive.tar.gz
+        | tar -xz --strip-components=1
+    - pyvenv --system-site-packages --clear issuebot-env
+    - . issuebot-env/bin/activate
+    - pip3 install python-gitlab wheel pygithub
+    - ./issuebot.py
+
+    # git_stats used to run here, redirect to new location
+    - echo '<html><head><meta http-equiv="refresh" content="0;URL=https://fdroid.gitlab.io/"></head></html>'
+        > public/index.html
+
 
 check_git_repos:
   image: debian:buster-slim
