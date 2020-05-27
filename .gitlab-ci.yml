@@ -21,17 +21,17 @@ lint:
     - if [ "$CI_PROJECT_NAMESPACE" != "fdroid" ]; then
         git fetch https://gitlab.com/fdroid/fdroiddata;
         test -d build || mkdir build;
-        set -x;
-        for f in `git diff --name-only --diff-filter=d FETCH_HEAD...HEAD`; do
+        files=`git diff --name-only --diff-filter=d FETCH_HEAD...HEAD`;
+        for f in $files; do
            appid=`echo $f | sed -n -e 's,^metadata/\([^/][^/]*\)\.yml,\1,p'`;
            if [ -n "$appid" ]; then
              export CHANGED="$CHANGED $appid";
              testcmd="git -C build clone `sed -En 's,^Repo\W +(https?://),\1u:p@,p' $f`";
-           else
-             continue;
            fi;
-           grep -q '^RepoType\W *git$' $f && tail -1 $f | grep -qv '^NoSourceSince:' && $testcmd;
         done;
+        set -x;
+        apt-get install python3-colorama;
+        ./tools/check-git-repo-availability.py $files;
         ./tools/audit-gradle.py $CHANGED;
         set +x;
       fi
@@ -117,7 +117,7 @@ check_git_repos:
       - public
   script:
     - apt-get update
-    - apt-get -qy install --no-install-recommends ca-certificates git python3-yaml
+    - apt-get -qy install --no-install-recommends ca-certificates git python3-colorama python3-yaml
     - tools/check-git-repo-availability.py || export EXITVALUE=1
     - test -d public || mkdir public
     - cp `git status | grep -Eo 'metadata/.*\.yml'` public/ || true
