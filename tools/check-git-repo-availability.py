@@ -1,28 +1,47 @@
 #!/usr/bin/env python3
 
 import glob
+import os
 import re
 import subprocess
 import sys
 import yaml
+from colorama import Fore, Style
+try:
+    from yaml import CSafeLoader as SafeLoader
+except ImportError:
+    from yaml import SafeLoader
 
 if len(sys.argv) > 1:
     files = sys.argv[1:]
 else:
-    files = sorted(glob.glob('metadata/*.yml'))
+    files = sorted(glob.glob('metadata/*.yml') + glob.glob('srclibs/*.yml'))
 
 errors = dict()
 for f in files:
+    f = os.path.relpath(f)
+    if not f.startswith('metadata/') and not f.startswith('srclibs/'):
+        continue
     if not f.endswith('.yml'):
         print('\n' + f + ':\nThis only runs on YAML files (.yml), ignoring.')
         continue
     with open(f) as fp:
-        data = yaml.load(fp)
+        data = yaml.load(fp, Loader=SafeLoader)
 
-    url = data.get('Repo')
-    if not url or 'NoSourceSince' in data.keys():
+    if not data:
+        msg = 'ERROR: %s: empty file!' % f
+        print(Fore.RED + msg + Style.RESET_ALL)
+        errors[f] = msg
         continue
-    if data['RepoType'] != 'git':
+    url = data.get('Repo')
+    if not url:
+        msg = 'ERROR: %s: no Repo: set!' % f
+        print(Fore.RED + msg + Style.RESET_ALL)
+        errors[f] = msg
+        continue
+    if 'NoSourceSince' in data.keys():
+        continue
+    if data.get('RepoType') != 'git':
         continue
 
     # from class vcs_git() in fdroidserver/common.py
@@ -47,10 +66,18 @@ for f in files:
 
     p = subprocess.run(['git', ] + git_config + ['ls-remote', '--exit-code', '-h', url],
                        env=env,
-                       capture_output=True)
+                       stdout=subprocess.DEVNULL,
+                       stderr=subprocess.PIPE)
     if p.returncode != 0:
         with open(f) as fp:
             raw = fp.read()
+        print('\n' + f + ':')
+        print('%s%s%s' % (Fore.RED, p.stderr.decode(), Style.RESET_ALL))
+        errors[f] = p.stderr
+
+        if not f.startswith('metadata/'):
+            continue
+        # this rewriting only works with metadata files, not srclibs
         with open(f, 'w') as fp:
             fp.write(re.sub(r'(Repo|RepoType):.*\n{1,2}', r'', raw))
             builds = data.get('Builds')
@@ -59,16 +86,12 @@ for f in files:
                 # if YAML will think its a float, quote it
                 try:
                     float(versionName)
-                    fp.write("\nNoSourceSince: '" + versionName + "'")
+                    fp.write("\nNoSourceSince: '%s'" % versionName)
                 except ValueError:
-                    fp.write("\nNoSourceSince: " + versionName)
+                    fp.write("\nNoSourceSince: %s" % versionName)
                 fp.write('\n')
-
-        print('\n' + f + ':')
-        print(p.stderr.decode())
-        errors[f] = p.stderr
 
 errorcount = len(errors)
 if errorcount > 0:
-    print('\nFound', errorcount, 'errors.')
+    print(Fore.RED + '\nFound', errorcount, 'errors.' + Style.RESET_ALL)
 sys.exit(errorcount)
