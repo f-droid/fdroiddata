@@ -55,6 +55,30 @@ lint:
     - ./tools/check-metadata-summary-whitespace.py || export EXITVALUE=1
     - exit $EXITVALUE
 
+checkupdates:
+  only:
+    - schedules
+  before_script:
+    - printf "Package\x3a androguard fdroidserver python3-asn1crypto python3-ruamel.yaml\nPin\x3a release a=stretch-backports\nPin-Priority\x3a 500\n" > /etc/apt/preferences.d/debian-stretch-backports.pref
+    - echo "deb http://deb.debian.org/debian/ stretch-backports main" > /etc/apt/sources.list.d/backports.list
+    - apt-get update
+    - apt-get -qy dist-upgrade
+    - apt get install git
+    - rm -rf fdroidserver
+    - mkdir fdroidserver
+    - curl --silent https://gitlab.com/fdroid/fdroidserver/repository/master/archive.tar.gz
+        | tar -xz --directory=fdroidserver --strip-components=1
+    - export PATH="$PWD/fdroidserver:$PATH"
+    - touch config.py
+    - git config --global user.email "team@f-droid.org"
+    - git config --global user.name "F-Droid checkupdates bot"
+    - url_host=`git remote get-url origin | sed -e "s/https:\/\/gitlab-ci-token:.*@//g"`
+    - git remote set-url origin "https://gitlab-ci-token:${CI_GIT_PUSH_TOKEN}@${url_host}"
+  script:
+    - while true; sleep 300; do git pull --rebase origin master; git push origin HEAD:master; done&
+    - fdroid checkupdates --auto --commit
+    - git pull --rebase origin master
+    - git push origin HEAD:master
 
 fdroid build:
   image: registry.gitlab.com/fdroid/ci-images-client:latest
