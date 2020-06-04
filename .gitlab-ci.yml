@@ -2,8 +2,12 @@ image: registry.gitlab.com/fdroid/ci-images-server:latest
 
 lint:
   except:
-    - triggers
-    - schedules
+    refs:
+      - triggers
+      - schedules
+      - piplines
+    variables:
+      - $CHECKUPDATES
   before_script:
     - ./tools/trigger-issuebot
     - printf "Package\x3a androguard fdroidserver python3-asn1crypto python3-ruamel.yaml\nPin\x3a release a=stretch-backports\nPin-Priority\x3a 500\n" > /etc/apt/preferences.d/debian-stretch-backports.pref
@@ -56,11 +60,29 @@ lint:
     - ./tools/check-metadata-summary-whitespace.py || export EXITVALUE=1
     - exit $EXITVALUE
 
-checkupdates:
+checkupdates_trigger:
   only:
-    - schedules
+    refs:
+      - schedules
+    variables:
+      - $CHECKUPDATES == "true"
+  image: debian:buster-slim
   before_script:
-    - if [ -z "${CHECKUPDATES}" ]; then exit 0; fi
+    - apt-get update
+    - apt-get install -qy --no-install-recommends parallel curl ca-certificates
+  script:
+    - files=( metadata/*.yml )
+    - files=( ${files[@]#metadata/} )
+    - files=( ${files[@]%.yml} )
+    - parallel --verbose -N 100 'curl -X POST -F "token=$CI_JOB_TOKEN" -F "ref=master" -F "variables[CHECKUPDATES]=true" -F "variables[CHECKUPDATES_APPIDS]= {} " https://gitlab.com/api/v4/projects/${CI_PROJECT_ID}/trigger/pipeline' ":::" ${files[@]}
+
+checkupdates_runner:
+  only:
+    refs:
+      - pipelines
+    variables:
+      - $CHECKUPDATES == "true"
+  before_script:
     - printf "Package\x3a androguard fdroidserver python3-asn1crypto python3-ruamel.yaml\nPin\x3a release a=stretch-backports\nPin-Priority\x3a 500\n" > /etc/apt/preferences.d/debian-stretch-backports.pref
     - echo "deb http://deb.debian.org/debian/ stretch-backports main" > /etc/apt/sources.list.d/backports.list
     - apt-get update
@@ -77,8 +99,7 @@ checkupdates:
     - url_host=`git remote get-url origin | sed -e "s/https:\/\/gitlab-ci-token:.*@//g"`
     - git remote set-url origin "https://gitlab-ci-token:${CI_GIT_PUSH_TOKEN}@${url_host}"
   script:
-    - while true; sleep 300; do git pull --rebase origin master; git push origin HEAD:master; done&
-    - fdroid checkupdates --auto --commit --allow-dirty
+    - fdroid checkupdates --allow-dirty --auto --commit ${CHECKUPDATES_APPIDS}
     - git pull --rebase origin master
     - git push origin HEAD:master
 
@@ -140,6 +161,9 @@ pages:
   only:
     - triggers
     - web
+  except:
+    variables:
+      - $CHECKUPDATES
   artifacts:
     paths:
       - metadata/
@@ -188,14 +212,16 @@ check_git_repos:
   image: debian:buster-slim
   stage: test
   only:
-    - schedules
+    refs:
+      - schedules
+    variables:
+      - $CHECK_GIT_REPO == "true"
   artifacts:
     when: on_failure
     expire_in: 1 month
     paths:
       - public
   script:
-    - if [ -z "${CHECK_GIT_REPOS}" ]; then exit 0; fi
     - apt-get update
     - apt-get -qy install --no-install-recommends ca-certificates git python3-colorama python3-yaml
     - tools/check-git-repo-availability.py || export EXITVALUE=1
