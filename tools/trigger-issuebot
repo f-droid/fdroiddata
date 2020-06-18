@@ -1,9 +1,29 @@
 #!/bin/bash -e
 
+get_merge_request_iid() {
+    for page in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19; do
+	for mr in `curl --silent ${CI_API_V4_URL}/projects/${project_id}/merge_requests?page=${page} | grep -Eo '"iid": *[0-9]+' | grep -Eo '[0-9]+$'`; do
+	    if curl --silent ${CI_API_V4_URL}/projects/${project_id}/merge_requests/$mr/pipelines \
+		    | grep -Eo "\"id\": *${CI_PIPELINE_ID}," > /dev/null; then
+		echo $mr
+		return 0
+	    fi
+	done
+    done
+}
+
 # insecure "captcha"
 s=$((4`printf "$CI_COMMIT_SHA" | wc -c`-10))
 e=$((s+`echo "$CI_SERVER_HOST" | wc -c`+18))
 issuebot=`cat .issuebot | cut -b${s}-${e}`
+project_id=36528
+CI_MERGE_REQUEST_IID=`get_merge_request_iid`
+
+if test -z "$CI_MERGE_REQUEST_IID"; then
+    echo "$0 No merge request found, not triggering"
+    exit 0
+fi
+
 curl --silent --request POST \
      --form token=$issuebot \
      --form ref=master \
@@ -11,8 +31,9 @@ curl --silent --request POST \
      --form "variables[FROM_CI_COMMIT_REF_SLUG]=$CI_COMMIT_REF_SLUG" \
      --form "variables[FROM_CI_COMMIT_SHA]=$CI_COMMIT_SHA" \
      --form "variables[FROM_CI_JOB_ID]=$CI_JOB_ID" \
+     --form "variables[FROM_CI_MERGE_REQUEST_IID]=$CI_MERGE_REQUEST_IID" \
      --form "variables[FROM_CI_PIPELINE_ID]=$CI_PIPELINE_ID" \
      --form "variables[FROM_CI_PROJECT_PATH]=$CI_PROJECT_PATH" \
      --form "variables[FROM_CI_PROJECT_URL]=$CI_PROJECT_URL" \
-     ${CI_API_V4_URL}/projects/36528/trigger/pipeline > /dev/null \
+     ${CI_API_V4_URL}/projects/${project_id}/trigger/pipeline > /dev/null \
     || echo "$0 failed to post to a merge request"

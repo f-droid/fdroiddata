@@ -7,7 +7,6 @@ lint:
       - schedules
       - pipelines
   before_script:
-    - ./tools/trigger-issuebot
     - printf "Package\x3a androguard fdroidserver python3-asn1crypto python3-ruamel.yaml\nPin\x3a release a=stretch-backports\nPin-Priority\x3a 500\n" > /etc/apt/preferences.d/debian-stretch-backports.pref
     - echo "deb http://deb.debian.org/debian/ stretch-backports main" > /etc/apt/sources.list.d/backports.list
     - apt-get update
@@ -58,6 +57,18 @@ lint:
     - ./tools/check-keyalias-collision.py || export EXITVALUE=1
     - ./tools/check-metadata-summary-whitespace.py || export EXITVALUE=1
     - exit $EXITVALUE
+
+trigger-issuebot:
+  image: alpine
+  only:
+    - branches
+  except:
+    - master@fdroid/fdroiddata
+  variables:
+    GIT_DEPTH: "1"
+  script:
+    - apk add --no-cache bash curl
+    - ./tools/trigger-issuebot
 
 checkupdates_trigger:
   only:
@@ -176,6 +187,9 @@ pages:
       - repo/index.xml
       - tmp/apkcache.json
     when: always
+  # needs lots of git history since it has to compare the merge request to current master
+  variables:
+    GIT_DEPTH: "5000"
   script:
     - apt-get update
     - apt-get dist-upgrade
