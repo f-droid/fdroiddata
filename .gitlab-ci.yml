@@ -111,10 +111,10 @@ fdroid build:
     when: always
     expire_in: 1 month
   only:
-    refs:
-      - merge_requests
     changes:
       - metadata/*.yml
+  except:
+    - master@fdroid/fdroiddata
   cache:
     key: "$CI_JOB_NAME"
     paths:
@@ -155,6 +155,14 @@ fdroid build:
     - fdroid build --verbose --on-server --latest --no-tarball --no-refresh  $CHANGED
 
 
+# issuebot needs secrets to run, so it has to run under the 'fdroid'
+# group, therefore needs the trigger without secrets, there would be
+# no support for virustotal, github downloads, exodus privacy checks,
+# etc.  That means it has to be triggered from the lint: job, which
+# runs in the fork's CI.
+#
+# This job has to be called 'pages' because it deploys the JSON API
+# to GitLab Pages.
 pages:
   image: registry.gitlab.com/fdroid/ci-images-client:latest
   only:
