@@ -150,7 +150,6 @@ fdroid build:
 
     - bash fdroidserver/buildserver/provision-apt-get-install http://deb.debian.org/debian
     - apt-get dist-upgrade
-    - apt-get install sudo # TODO REMOVE ME once merged https://gitlab.com/fdroid/fdroidserver/-/merge_requests/753
 
     # install fdroidserver from git, with deps from Debian, until fdroidserver
     # is stable enough to include all the things needed here
@@ -162,7 +161,12 @@ fdroid build:
     - apt-get purge fdroidserver
 
     - export GRADLE_USER_HOME=$PWD/.gradle
-    - fdroid build --verbose --on-server --latest --no-tarball --no-refresh  $CHANGED
+    # each `fdroid build --on-server` run expects sudo, then uninstalls it
+    - for build in `./tools/find-changed-builds.py`; do
+          set -x;
+          apt-get install sudo;
+          fdroid build --verbose --on-server --no-tarball $build;
+      done
 
 
 # issuebot needs secrets to run, so it has to run under the 'fdroid'
