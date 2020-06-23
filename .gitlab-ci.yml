@@ -152,7 +152,7 @@ fdroid build:
     - curl --silent https://gitlab.com/fdroid/fdroidserver/repository/master/archive.tar.gz
           | tar -xz --directory=fdroidserver --strip-components=1
     - export PATH="`pwd`/fdroidserver:$PATH"
-    - export PYTHONPATH="`pwd`/fdroidserver"
+    - export PYTHONPATH="`pwd`/fdroidserver:$CI_PROJECT_DIR/tools"
     - export PYTHONUNBUFFERED=true
 
     - bash fdroidserver/buildserver/provision-apt-get-install http://deb.debian.org/debian
@@ -172,6 +172,7 @@ fdroid build:
     - for build in `./tools/find-changed-builds.py`; do
           set -x;
           apt-get install sudo;
+          fdroid fetchsrclibs $build --verbose;
           fdroid build --verbose --on-server --no-tarball $build;
       done
 
