@@ -110,7 +110,8 @@ checkupdates_runner:
   script:
     - fdroid checkupdates --allow-dirty --auto --commit ${CHECKUPDATES_APPIDS}
     - git pull --rebase origin master
-    - git push origin HEAD:master
+    # when two jobs try to push at the same time they occasionally fail, so try one more time if it fails
+    - git push origin HEAD:master || (git pull --rebase origin master && git push origin HEAD:master)
 
 fdroid build:
   image: registry.gitlab.com/fdroid/ci-images-client:latest
