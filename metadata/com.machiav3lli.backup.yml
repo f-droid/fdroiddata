@@ -1,0 +1,50 @@
+Categories:
+  - System
+License: MIT
+AuthorName: Antonios Hazim
+SourceCode: https://github.com/machiav3lli/oandbackupx
+IssueTracker: https://github.com/machiav3lli/oandbackupx/issues
+Changelog: https://github.com/machiav3lli/oandbackupx/blob/HEAD/changelog.md
+
+AutoName: OAndBackupX
+
+RequiresRoot: 'yes'
+
+RepoType: git
+Repo: https://github.com/machiav3lli/oandbackupx
+
+Builds:
+  - versionName: 1.2.0-universal
+    versionCode: 1200
+    commit: 1.2.0
+    gradle:
+      - universal
+    srclibs:
+      - rustup@1.21.1
+    prebuild:
+      - sed -i -e '/set -e/a\source $HOME/.cargo/env' build.sh
+      - sed -i -e '/maven/,+2d' build.gradle
+    build:
+      - $$rustup$$/rustup-init.sh -y
+      - source $HOME/.cargo/env
+      - rustup default 1.43.1
+      - rustup target add armv7-linux-androideabi
+      - rustup target add aarch64-linux-android
+      - rustup target add i686-linux-android
+      - rustup target add x86_64-linux-android
+      - mkdir oab-utils/.cargo
+      - export PATH=$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
+      - echo -e "[target.armv7-linux-androideabi]\n linker = \"$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin/armv7a-linux-androideabi29-clang\"\n"
+        >> oab-utils/.cargo/config
+      - echo -e "[target.aarch64-linux-android]\n linker = \"$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android29-clang\"\n"
+        >> oab-utils/.cargo/config
+      - echo -e "[target.i686-linux-android]\n linker = \"$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin/i686-linux-android29-clang\"\n"
+        >> oab-utils/.cargo/config
+      - echo -e "[target.x86_64-linux-android]\n linker = \"$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin/x86_64-linux-android29-clang\"\n"
+        >> oab-utils/.cargo/config
+    ndk: r21b
+
+AutoUpdateMode: None
+UpdateCheckMode: None
+CurrentVersion: 1.2.0-universal
+CurrentVersionCode: 1200
