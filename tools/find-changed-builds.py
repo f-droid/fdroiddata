@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-import difflib
 import os
 import subprocess
 import sys
@@ -13,7 +12,9 @@ changed.discard('')
 for appid in sorted(changed):
     metadata_file = 'metadata/%s.yml' % appid
     diff = subprocess.check_output(
-        ('git diff --no-color --diff-filter=d FETCH_HEAD...HEAD -- ' + metadata_file).split(' '),
+        (
+            'git diff --no-color --diff-filter=d FETCH_HEAD...HEAD -- ' + metadata_file
+        ).split(' ')
     )
 
     with open(metadata_file) as fp:
@@ -21,8 +22,10 @@ for appid in sorted(changed):
     cmd = 'git apply --reverse'
     p = subprocess.run(cmd.split(' '), input=diff, stdout=subprocess.DEVNULL)
     if p.returncode:
-        print(Fore.RED + ('ERROR: %s: %d' % (cmd, p.returncode)) + Style.RESET_ALL,
-              file=sys.stderr)
+        print(
+            Fore.RED + ('ERROR: %s: %d' % (cmd, p.returncode)) + Style.RESET_ALL,
+            file=sys.stderr,
+        )
         sys.exit(p.returncode)
 
     to_build = []
@@ -32,8 +35,10 @@ for appid in sorted(changed):
         cmd = 'git apply'
         p = subprocess.run(cmd.split(' '), input=diff, stdout=subprocess.DEVNULL)
         if p.returncode:
-            print(Fore.RED + ('ERROR: %s: %d' % (cmd, p.returncode)) + Style.RESET_ALL,
-                  file=sys.stderr)
+            print(
+                Fore.RED + ('ERROR: %s: %d' % (cmd, p.returncode)) + Style.RESET_ALL,
+                file=sys.stderr,
+            )
             sys.exit(p.returncode)
 
         previous_builds = dict()
@@ -52,8 +57,10 @@ for appid in sorted(changed):
         cmd = 'git checkout -- ' + metadata_file
         p = subprocess.run(cmd.split(' '), stdout=subprocess.DEVNULL)
         if p.returncode:
-            print(Fore.RED + ('ERROR: %s: %d' % (cmd, p.returncode)) + Style.RESET_ALL,
-                  file=sys.stderr)
+            print(
+                Fore.RED + ('ERROR: %s: %d' % (cmd, p.returncode)) + Style.RESET_ALL,
+                file=sys.stderr,
+            )
             sys.exit(p.returncode)
         with open(metadata_file) as fp:
             data = yaml.safe_load(fp)
