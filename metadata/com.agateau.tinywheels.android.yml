@@ -11,7 +11,7 @@ Changelog: https://github.com/agateau/pixelwheels/blob/HEAD/CHANGELOG.md
 AutoName: Pixel Wheels
 
 RepoType: git
-Repo: https://github.com/agateau/pixelwheels
+Repo: https://github.com/agateau/pixelwheels.git
 
 Builds:
   - versionName: 0.12.0
@@ -128,43 +128,30 @@ Builds:
       - make -C .. assets
       - make -C .. packer
 
-  - versionName: 0.16.0
+  - versionName: 0.16.1
     versionCode: 16
-    disable: fails to build
-    commit: 0.16.0
+    commit: 0.16.1
     subdir: android
     sudo:
       - apt-get update || apt-get update
-      - apt-get install -y g++ python3-pil imagemagick-6.q16 ninja-build libx11-dev
-        libxcursor-dev
+      - apt-get install -y python3-pip python3-setuptools imagemagick-6.q16
     gradle:
       - yes
-    srclibs:
-      - aseprite@v1.2.16.3
-      - pafx@269b0241a4b5507a1f45d0aa576fb9f9dad91ad8
     rm:
       - tools/packr.jar
-    prebuild: sed -i -e 's#./gradlew#gradle#' ../Makefile
+    prebuild:
+      - sed -i -e 's#./gradlew#gradle#' ../Makefile
+      - git cherry-pick --no-commit 4a56032cc4e823ba8d3fd35d5b1941951537b208
     scandelete:
       - android/libs/
     build:
-      - install_dir=$PWD/aseprite
-      - pushd $$aseprite$$
-      - mkdir -p build
-      - cd build
-      - cmake "-DCMAKE_INSTALL_PREFIX=$install_dir" -DENABLE_UI=OFF -DCMAKE_BUILD_TYPE=MinSizeRel
-        -G Ninja ..
-      - ninja aseprite
-      - ninja install
-      - popd
-      - export PATH=$PATH:$PWD/aseprite/bin
+      - pip3 install --user -r ../requirements.txt
       - gradle tools:dist -b ../build.gradle
-      - export PYTHONPATH=../$$pafx$$/build/lib/
       - make -C .. assets
       - make -C .. packer
 
 AutoUpdateMode: Version %v
 UpdateCheckMode: HTTP
 UpdateCheckData: https://raw.githubusercontent.com/agateau/pixelwheels/master/version.properties|VERSION_CODE=(.*)|.|VERSION=(.*)
-CurrentVersion: 0.16.0
+CurrentVersion: 0.16.1
 CurrentVersionCode: 16
