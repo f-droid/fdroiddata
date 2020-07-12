@@ -1,0 +1,94 @@
+Categories:
+  - Internet
+  - Phone & SMS
+License: Apache-2.0
+AuthorName: New Vector Ltd.
+AuthorEmail: android@riot.im
+WebSite: https://riot.im/
+SourceCode: https://github.com/vector-im/riotx-android
+IssueTracker: https://github.com/vector-im/riotx-android/issues
+Translation: https://translate.riot.im/projects/riot-android/
+Changelog: https://github.com/vector-im/riotx-android/blob/HEAD/CHANGES.md
+LiberapayID: '10794'
+Bitcoin: 1LxowEgsquZ3UPZ68wHf8v2MDZw82dVmAEa
+
+RepoType: git
+Repo: https://github.com/vector-im/riotX-android/
+
+Description: |-
+    Riot gathers all your conversations and app integrations into one single app.
+
+    Built around group chatrooms, Riot lets you share messages, images, videos and
+    files - interact with your tools and access all your different communities under
+    one roof. One single identity and place for all your teams: no need to switch
+    accounts, work and chat with people from different organisations in public or
+    private rooms: from professional projects to school trips, Riot will become the
+    center of all your discussions!
+
+    Now with end-to-end encryption! You can view and verify your various devices in
+    the user settings page.
+
+    Features include:
+
+    * Instantly share messages, images, videos and files of any kind within groups of any size
+    * Voice and video 1-1 and conference calling via WebRTC
+    * End-to-end encryption using Olm (https://matrix.org/git/olm)
+    * See who’s reading your messages with read receipts
+    * Communicate with users anywhere in the Matrix.org ecosystem - not just Riot users!
+    * Discover and invite users by email address
+    * Participate in guest-accessible public rooms
+    * Highly scalable - supports hundreds of rooms and thousands of users
+    * Fully synchronised message history across multiple devices and browsers
+    * Finely configurable notification settings, synchronised over all devices
+    * Infinite searchable chat history
+    * Permalinks to messages
+    * Full message search
+    * Excellent support for all Android device sizes and orientations
+
+    Note that the F-Droid release does not use GCM for notifications - instead it
+    will keep syncing in the background. If you find that the ongoing background
+    sync is using too much battery, you can add a delay or change the timeout of the
+    sync or even disable background sync completely, in the settings page.
+
+    For developers:
+
+    * Riot is a Matrix client - built on the Matrix.org open standard and ecosystem, providing interoperability with all other Matrix compatible apps, servers and integrations
+    * Entirely open sourced under the permissive Apache License - get the code from https://github.com/vector-im/riot-android. Pull requests welcome!
+    * Trivially extensible via the open Matrix Client-Server API (https://matrix.org/docs/spec)
+    * Run your own server! You can use the default matrix.org server or run your own Matrix home server (e.g. https://matrix.org/docs/projects/server/synapse.html)
+
+    Coming soon:
+
+    * Add your own integrations, bridges and bots!
+    * Email notifications of missed messages and invites
+    * Screen sharing
+    * Login as multiple users at the same time
+
+    Discover truly efficient and open collaboration with Riot!
+
+Builds:
+  - versionName: '0.91.5'
+    versionCode: 40091050
+    commit: v0.91.5
+    subdir: vector
+    gradle:
+      - fdroid
+    srclibs:
+      - piasy@v1.6.2
+    prebuild:
+      - tac ../build.gradle | awk '/dl.bintray.com\/piasy\/maven/{getline;$0="mavenLocal
+        {"}{print $0}' | tac > ../build.gradle.new
+      - mv ../build.gradle.new ../build.gradle
+      - sed -i -e '/com.google.firebase/,+5d' build.gradle
+      - sed -i -e '/com.google.gms.google-services/d' build.gradle
+      - sed -i -e 's/enable true/enable false/g' build.gradle
+
+MaintainerNotes: |-
+    Uses piasy/BigImageViewer which gets build and installed to a local maven repo in srclib prepare step.
+
+    In prebuild we do weird stuff for replacing `maven {` with `mavenLocal {`. tac reverses the lines so we can match the following repo url.
+    The awk call then matches the url, deletes the matching line and replaces the following line. No idea how it works, but it does.
+    Finally reverse the lines again and move back to original build.gradle file.
+
+AutoUpdateMode: None
+UpdateCheckMode: Tags
