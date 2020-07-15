@@ -4,7 +4,7 @@ Categories:
 License: Apache-2.0
 AuthorName: New Vector Ltd.
 AuthorEmail: android@riot.im
-WebSite: https://riot.im/
+WebSite: https://element.io/
 SourceCode: https://github.com/vector-im/riotx-android
 IssueTracker: https://github.com/vector-im/riotx-android/issues
 Translation: https://translate.riot.im/projects/riot-android/
@@ -13,15 +13,15 @@ LiberapayID: '10794'
 Bitcoin: 1LxowEgsquZ3UPZ68wHf8v2MDZw82dVmAEa
 
 Description: |-
-    '''Note: This is a pre-release of the new Riot.im app based on the RiotX codebase.'''
+    '''Note: Element replaces Riot.im and RiotX, it is based on the RiotX codebase.'''
 
-    Riot gathers all your conversations and app integrations into one single app.
+    Element gathers all your conversations and app integrations into one single app.
 
-    Built around group chatrooms, Riot lets you share messages, images, videos and
+    Built around group chatrooms, Element lets you share messages, images, videos and
     files - interact with your tools and access all your different communities under
     one roof. One single identity and place for all your teams: no need to switch
     accounts, work and chat with people from different organisations in public or
-    private rooms: from professional projects to school trips, Riot will become the
+    private rooms: from professional projects to school trips, Element will become the
     center of all your discussions!
 
     Now with end-to-end encryption! You can view and verify your various devices in
@@ -33,7 +33,7 @@ Description: |-
     * Voice and video 1-1 and conference calling via WebRTC
     * End-to-end encryption using [https://matrix.org/git/olm Olm].
     * See who’s reading your messages with read receipts
-    * Communicate with users anywhere in the Matrix.org ecosystem - not just Riot users!
+    * Communicate with users anywhere in the Matrix.org ecosystem - not just Element users!
     * Discover and invite users by email address
     * Participate in guest-accessible public rooms
     * Highly scalable - supports hundreds of rooms and thousands of users
@@ -51,7 +51,7 @@ Description: |-
 
     For developers:
 
-    * Riot is a Matrix client - built on the Matrix.org open standard and ecosystem, providing interoperability with all other Matrix compatible apps, servers and integrations
+    * Element is a Matrix client - built on the Matrix.org open standard and ecosystem, providing interoperability with all other Matrix compatible apps, servers and integrations
     * Trivially extensible via the open Matrix Client-Server API ([https://matrix.org/docs/spec])
     * Run your own server! You can use the default matrix.org server or run your own Matrix home server (e.g. [https://matrix.org/docs/projects/server/synapse.html])
 
@@ -62,7 +62,7 @@ Description: |-
     * Screen sharing
     * Login as multiple users at the same time
 
-    Discover truly efficient and open collaboration with Riot!
+    Discover truly efficient and open collaboration with Element!
 
 RepoType: git
 Repo: https://github.com/vector-im/riotX-android/
@@ -71,6 +71,24 @@ Builds:
   - versionName: 0.91.5
     versionCode: 40091050
     commit: v0.91.5
+    subdir: vector
+    gradle:
+      - fdroid
+    srclibs:
+      - piasy@v1.6.2
+    prebuild:
+      - tac ../build.gradle | awk '/dl.bintray.com\/piasy\/maven/{getline;$0="mavenLocal
+        {"}{print $0}' | tac > ../build.gradle.new
+      - mv ../build.gradle.new ../build.gradle
+      - sed -i -e '/com.google.firebase/,+5d' build.gradle
+      - sed -i -e '/com.google.gms.google-services/d' build.gradle
+      - sed -i -e 's/enable true/enable false/g' build.gradle
+    ndk: r21d
+
+Builds:
+  - versionName: 1.0.0
+    versionCode: 40100000
+    commit: v1.0.0
     subdir: vector
     gradle:
       - fdroid
