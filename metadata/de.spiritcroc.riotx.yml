@@ -1,0 +1,37 @@
+Categories:
+  - Internet
+  - Phone & SMS
+License: Apache-2.0
+AuthorName: SpiritCroc
+SourceCode: https://github.com/SpiritCroc/SchildiChat-android
+IssueTracker: https://github.com/SpiritCroc/SchildiChat-android/issues
+
+RepoType: git
+Repo: https://github.com/SpiritCroc/SchildiChat-android
+
+Builds:
+  - versionName: 1.0.4.sc.12
+    versionCode: 40100160
+    commit: sc_v1.0.4.sc.12
+    subdir: vector
+    gradle:
+      - fdroid
+    srclibs:
+      - piasy@v1.6.2
+    prebuild:
+      - tac ../build.gradle | awk '/dl.bintray.com\/piasy\/maven/{getline;$0="mavenLocal
+        {"}{print $0}' | tac > ../build.gradle.new
+      - mv ../build.gradle.new ../build.gradle
+      - sed -i -e '/com.google.firebase/,+5d' build.gradle
+      - sed -i -e '/com.google.gms.google-services/d' build.gradle
+      - sed -i -e 's/enable true/enable false/g' build.gradle
+
+MaintainerNotes: |-
+    Uses piasy/BigImageViewer which gets build and installed to a local maven repo in srclib prepare step.
+
+    In prebuild we do weird stuff for replacing `maven {` with `mavenLocal {`. tac reverses the lines so we can match the following repo url.
+    The awk call then matches the url, deletes the matching line and replaces the following line. No idea how it works, but it does.
+    Finally reverse the lines again and move back to original build.gradle file.
+
+AutoUpdateMode: None
+UpdateCheckMode: Tags
