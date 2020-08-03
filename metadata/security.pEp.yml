@@ -128,7 +128,62 @@ Builds:
       - sed -i 's:-fcompound-names:-fcompound-names -fnative-types:' $$pEpEngine$$/asn.1/Makefile
     ndk: r18b
 
+  - versionName: 1.1.008
+    versionCode: 54
+    commit: v1.1.008
+    subdir: k9mail
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get purge asn1c
+      - apt-get install -y --no-install-recommends mercurial g++ clang nettle-dev
+        capnproto libsqlite3-dev libtool python3-lxml
+      - git clone https://github.com/vlm/asn1c /tmp/asn1c || true
+      - cd /tmp/asn1c
+      - git checkout v0.9.28
+      - autoreconf -iv
+      - ./configure
+      - make
+      - make install
+    gradle:
+      - WithkeysyncFDroid
+    srclibs:
+      - yml2@2.6.3
+      - sequoia-pgp@v0.16.0
+      - pEpEngine@4567
+      - pEpJNIAdapter@699
+      - libpEpAdapter@168
+    prebuild:
+      - wget https://sh.rustup.rs -O ~/rustup.sh
+      - chmod +x ~/rustup.sh
+      - ~/rustup.sh -v -y --no-modify-path --default-host x86_64-unknown-linux-gnu
+        -t i686-linux-android -t x86_64-linux-android -t armv7-linux-androideabi -t
+        aarch64-linux-android
+      - export NDKB=${NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/
+      - echo -e "[target.aarch64-linux-android]\nar = \"${NDKB}aarch64-linux-android-ar\"\nlinker
+        = \"${NDKB}aarch64-linux-android21-clang\"\n" > ~/.cargo/config
+      - echo -e "[target.armv7-linux-androideabi]\nar = \"${NDKB}arm-linux-androideabi-ar\"\nlinker
+        = \"${NDKB}armv7a-linux-androideabi18-clang\"\n" >> ~/.cargo/config
+      - echo -e "[target.x86_64-linux-android]\nar = \"${NDKB}x86_64-linux-android-ar\"\nlinker
+        = \"${NDKB}x86_64-linux-android21-clang\"\n" >> ~/.cargo/config
+      - echo -e "[target.i686-linux-android]\nar = \"${NDKB}i686-linux-android-ar\"\nlinker
+        = \"${NDKB}i686-linux-android18-clang\"" >> ~/.cargo/config
+      - echo -e "\norg.gradle.jvmargs=-Xms1024m -Xmx4096m -XX:MaxPermSize=4096m" >>
+        ../gradle.properties
+      - sed -i 's:universalApk false:universalApk true:' build.gradle
+      - sed -i 's:enable true:enable false:' build.gradle
+      - sed -i 's:file("../pEpJNIAdapter/android"):file("../srclib/pEpJNIAdapter/android"):'
+        ../settings.gradle
+      - sed -i 's:20.0:20.1:' ../build.gradle
+      - sed -i 's:YML2_PATH=.*$:YML2_PATH=$$yml2$$:' $$pEpEngine$$/Makefile.conf
+      - sed -i 's:YML2_PATH=.*$:YML2_PATH=$$yml2$$:' $$pEpJNIAdapter$$/Makefile.conf
+      - sed -i 's:ENGINE_INC_PATH=.*$:ENGINE_INC_PATH=$$pEpEngine$$/src:' $$pEpJNIAdapter$$/Makefile.conf
+      - sed -i 's:threadsToUse = .*$:threadsToUse = 4:' $$pEpJNIAdapter$$/android/build.gradle
+      - sed -i 's:cargo build:~/.cargo/bin/cargo build:' $$pEpJNIAdapter$$/android/external/*/Makefile
+      - sed -i 's:$(error JAVA_HOME is not set!):JAVA_HOME='"$(readlink -f $(which
+        javac) | sed "s:bin/javac::")"':' $$pEpJNIAdapter$$/src/Makefile
+    ndk: r20b
+
 AutoUpdateMode: None
 UpdateCheckMode: Tags
-CurrentVersion: 1.0.213
-CurrentVersionCode: 23
+CurrentVersion: 1.1.008
+CurrentVersionCode: 54
