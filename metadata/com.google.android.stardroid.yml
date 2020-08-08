@@ -66,6 +66,36 @@ Builds:
       - ./rewrite.sh
       - ./binary.sh
 
+  - versionName: 1.9.4 - neowisehack
+    versionCode: 1510
+    commit: 25e8ccf98f97692d9fd1a914b9b3b637506c70f6
+    subdir: app
+    gradle:
+      - Fdroid
+    rm:
+      - app/libs-src/*
+      - app/libs/*
+      - tools/libs/*
+    prebuild:
+      - sed -i -e 's/gms/fdroid/' ../tools/build.gradle
+      - sed -i -e "s/implementation fileTree.*/implementation 'com.google.protobuf:protobuf-java:2.6.1'/"
+        ../tools/build.gradle
+      - sed -i -e '/gms/d' ../build.gradle
+      - sed -i -e '/gmsCompile/d' build.gradle
+      - sed -i -e '/com.google.gms.google-services/d' build.gradle
+      - sed -i -e '/fdroid/,+2 s#//##' build.gradle
+      - sed -i -e "s/implementation fileTree.*/implementation 'com.google.protobuf:protobuf-java:2.3.0'/"
+        build.gradle
+      - cd ..
+      - gradle assembleFdroid installDist
+      - cd tools
+      - sed -i -e 's#CLASSPATH=#CLASSPATH=$APP_HOME/lib/:#g' build/install/datagen/bin/datagen
+      - ./generate.sh
+      - ./rewrite.sh
+      - ./binary.sh
+    scanignore:
+      - tools/build
+
 AutoUpdateMode: None
 UpdateCheckMode: Tags
 CurrentVersion: 1.9.4 - neowisehack
