@@ -10404,6 +10404,192 @@ Builds:
         'META-INF/*.*'
     ndk: r19c
 
+  - versionName: 68.12.0
+    versionCode: 689400
+    commit: FIREFOX_68_12_0esr_RELEASE
+    timeout: 28800
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y clang-6.0 llvm-6.0 libgmp-dev libmpfr-dev libmpc-dev
+      - update-alternatives --install /usr/bin/clang clang /usr/bin/clang-6.0 100
+      - update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-6.0
+        100
+    output: obj/dist/fennec-$$VERSION$$.multi.android-*-unsigned-unaligned.apk
+    srclibs:
+      - MozLocales@e6b88d980bbc157fc7903a42161dd8ccbbc84f98
+      - rustup@1.22.1
+    prebuild:
+      - bash $$MozLocales$$/prebuild.sh
+      - echo "ac_add_options --target=arm-linux-androideabi" >> .mozconfig
+      - echo "ac_add_options --with-android-min-sdk=16" >> .mozconfig
+      - echo "ac_add_options --with-android-ndk=\"$$NDK$$\"" >> .mozconfig
+      - echo "ac_add_options --with-android-sdk=\"$$SDK$$\"" >> .mozconfig
+      - echo "ac_add_options --with-libclang-path=$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/lib64/"
+        >> .mozconfig
+      - echo "ac_add_options --with-clang-path=$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin/clang"
+        >> .mozconfig
+      - echo "mk_add_options MOZ_OBJDIR=@TOPSRCDIR@/obj" >> .mozconfig
+      - pushd mobile/android/branding/unofficial/
+      - sed -i -e '/ANDROID_PACKAGE_NAME/d' -e '/MOZ_APP_DISPLAYNAME/d' configure.sh
+      - echo 'ANDROID_PACKAGE_NAME=org.mozilla.fennec_fdroid' >> configure.sh
+      - echo 'MOZ_APP_DISPLAYNAME="Fennec F-Droid"' >> configure.sh
+      - echo 'MOZ_APP_ANDROID_VERSION_CODE=$$VERCODE$$' >> configure.sh
+      - sed -i -e 's/Mozilla Fennec/Fennec F-Droid/g' locales/en-US/brand*
+      - popd
+    scanignore:
+      - servo/components/style/properties/Mako-0.9.1.zip
+    scandelete:
+      - accessible/tests/mochitest/dumbfile.zip
+      - mozglue/linker/tests
+      - python/mozbuild/mozbuild/test/action/data/package_fennec_apk
+      - security/manager/ssl/tests/unit/test_signed_apps
+      - security/nss/automation/taskcluster/docker-saw/LLVMgold.so.zip
+      - testing/mozbase/mozfile/tests/files/missing_file_attributes.zip
+      - testing/mozbase/mozinstall/tests/installer_stubs/firefox.zip
+      - testing/mozbase/mozproxy/tests/archive.tar.gz
+      - testing/mozharness/test/helper_files/archives
+      - third_party/python/pipenv/pipenv/patched/safety.zip
+      - third_party/rust/flate2/tests
+      - third_party/rust/zip/tests/data
+      - toolkit/modules/tests/xpcshell/zips/zen.zip
+    build:
+      - $$rustup$$/rustup-init.sh -y
+      - source $HOME/.cargo/env
+      - rustup default 1.44.1
+      - rustup target add thumbv7neon-linux-androideabi
+      - cargo install --force --vers 0.14.4 cbindgen
+      - ./mach build
+      - cat used-locales | xargs -I % ./mach build chrome-%
+      - make -C obj/mobile/android/base android_apks
+      - make -C obj package AB_CD=multi
+      - zip -d obj/dist/fennec-$$VERSION$$.multi.android-*-unsigned-unaligned.apk
+        'META-INF/*.*'
+    ndk: r19c
+
+  - versionName: 68.12.0
+    versionCode: 689410
+    commit: FIREFOX_68_12_0esr_RELEASE
+    timeout: 28800
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y clang-6.0 llvm-6.0 libgmp-dev libmpfr-dev libmpc-dev
+      - update-alternatives --install /usr/bin/clang clang /usr/bin/clang-6.0 100
+      - update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-6.0
+        100
+    output: obj/dist/fennec-$$VERSION$$.multi.android-*-unsigned-unaligned.apk
+    srclibs:
+      - MozLocales@e6b88d980bbc157fc7903a42161dd8ccbbc84f98
+      - rustup@1.22.1
+    prebuild:
+      - bash $$MozLocales$$/prebuild.sh
+      - echo "ac_add_options --target=i686-linux-android" >> .mozconfig
+      - echo "ac_add_options --with-android-min-sdk=16" >> .mozconfig
+      - echo "ac_add_options --with-android-ndk=\"$$NDK$$\"" >> .mozconfig
+      - echo "ac_add_options --with-android-sdk=\"$$SDK$$\"" >> .mozconfig
+      - echo "ac_add_options --with-libclang-path=$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/lib64/"
+        >> .mozconfig
+      - echo "ac_add_options --with-clang-path=$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin/clang"
+        >> .mozconfig
+      - echo "mk_add_options MOZ_OBJDIR=@TOPSRCDIR@/obj" >> .mozconfig
+      - pushd mobile/android/branding/unofficial/
+      - sed -i -e '/ANDROID_PACKAGE_NAME/d' -e '/MOZ_APP_DISPLAYNAME/d' configure.sh
+      - echo 'ANDROID_PACKAGE_NAME=org.mozilla.fennec_fdroid' >> configure.sh
+      - echo 'MOZ_APP_DISPLAYNAME="Fennec F-Droid"' >> configure.sh
+      - echo 'MOZ_APP_ANDROID_VERSION_CODE=$$VERCODE$$' >> configure.sh
+      - sed -i -e 's/Mozilla Fennec/Fennec F-Droid/g' locales/en-US/brand*
+      - popd
+    scanignore:
+      - servo/components/style/properties/Mako-0.9.1.zip
+    scandelete:
+      - accessible/tests/mochitest/dumbfile.zip
+      - mozglue/linker/tests
+      - python/mozbuild/mozbuild/test/action/data/package_fennec_apk
+      - security/manager/ssl/tests/unit/test_signed_apps
+      - security/nss/automation/taskcluster/docker-saw/LLVMgold.so.zip
+      - testing/mozbase/mozfile/tests/files/missing_file_attributes.zip
+      - testing/mozbase/mozinstall/tests/installer_stubs/firefox.zip
+      - testing/mozbase/mozproxy/tests/archive.tar.gz
+      - testing/mozharness/test/helper_files/archives
+      - third_party/python/pipenv/pipenv/patched/safety.zip
+      - third_party/rust/flate2/tests
+      - third_party/rust/zip/tests/data
+      - toolkit/modules/tests/xpcshell/zips/zen.zip
+    build:
+      - $$rustup$$/rustup-init.sh -y
+      - source $HOME/.cargo/env
+      - rustup default 1.44.1
+      - rustup target add i686-linux-android
+      - cargo install --force --vers 0.14.4 cbindgen
+      - ./mach build
+      - cat used-locales | xargs -I % ./mach build chrome-%
+      - make -C obj/mobile/android/base android_apks
+      - make -C obj package AB_CD=multi
+      - zip -d obj/dist/fennec-$$VERSION$$.multi.android-*-unsigned-unaligned.apk
+        'META-INF/*.*'
+    ndk: r19c
+
+  - versionName: 68.12.0
+    versionCode: 689420
+    commit: FIREFOX_68_12_0esr_RELEASE
+    timeout: 28800
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y clang-6.0 llvm-6.0 libgmp-dev libmpfr-dev libmpc-dev
+      - update-alternatives --install /usr/bin/clang clang /usr/bin/clang-6.0 100
+      - update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-6.0
+        100
+    output: obj/dist/fennec-$$VERSION$$.multi.android-*-unsigned-unaligned.apk
+    srclibs:
+      - MozLocales@e6b88d980bbc157fc7903a42161dd8ccbbc84f98
+      - rustup@1.22.1
+    prebuild:
+      - bash $$MozLocales$$/prebuild.sh
+      - echo "ac_add_options --target=aarch64-linux-android" >> .mozconfig
+      - echo "ac_add_options --with-android-min-sdk=21" >> .mozconfig
+      - echo "ac_add_options --with-android-ndk=\"$$NDK$$\"" >> .mozconfig
+      - echo "ac_add_options --with-android-sdk=\"$$SDK$$\"" >> .mozconfig
+      - echo "ac_add_options --with-libclang-path=$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/lib64/"
+        >> .mozconfig
+      - echo "ac_add_options --with-clang-path=$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin/clang"
+        >> .mozconfig
+      - echo "mk_add_options MOZ_OBJDIR=@TOPSRCDIR@/obj" >> .mozconfig
+      - pushd mobile/android/branding/unofficial/
+      - sed -i -e '/ANDROID_PACKAGE_NAME/d' -e '/MOZ_APP_DISPLAYNAME/d' configure.sh
+      - echo 'ANDROID_PACKAGE_NAME=org.mozilla.fennec_fdroid' >> configure.sh
+      - echo 'MOZ_APP_DISPLAYNAME="Fennec F-Droid"' >> configure.sh
+      - echo 'MOZ_APP_ANDROID_VERSION_CODE=$$VERCODE$$' >> configure.sh
+      - sed -i -e 's/Mozilla Fennec/Fennec F-Droid/g' locales/en-US/brand*
+      - popd
+    scanignore:
+      - servo/components/style/properties/Mako-0.9.1.zip
+    scandelete:
+      - accessible/tests/mochitest/dumbfile.zip
+      - mozglue/linker/tests
+      - python/mozbuild/mozbuild/test/action/data/package_fennec_apk
+      - security/manager/ssl/tests/unit/test_signed_apps
+      - security/nss/automation/taskcluster/docker-saw/LLVMgold.so.zip
+      - testing/mozbase/mozfile/tests/files/missing_file_attributes.zip
+      - testing/mozbase/mozinstall/tests/installer_stubs/firefox.zip
+      - testing/mozbase/mozproxy/tests/archive.tar.gz
+      - testing/mozharness/test/helper_files/archives
+      - third_party/python/pipenv/pipenv/patched/safety.zip
+      - third_party/rust/flate2/tests
+      - third_party/rust/zip/tests/data
+      - toolkit/modules/tests/xpcshell/zips/zen.zip
+    build:
+      - $$rustup$$/rustup-init.sh -y
+      - source $HOME/.cargo/env
+      - rustup default 1.44.1
+      - rustup target add aarch64-linux-android
+      - cargo install --force --vers 0.14.4 cbindgen
+      - ./mach build
+      - cat used-locales | xargs -I % ./mach build chrome-%
+      - make -C obj/mobile/android/base android_apks
+      - make -C obj package AB_CD=multi
+      - zip -d obj/dist/fennec-$$VERSION$$.multi.android-*-unsigned-unaligned.apk
+        'META-INF/*.*'
+    ndk: r19c
+
 MaintainerNotes: |4-
 
     Updating/Versioning:
