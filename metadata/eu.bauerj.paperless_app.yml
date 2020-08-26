@@ -1,0 +1,38 @@
+Categories:
+  - Reading
+License: GPL-3.0-only
+AuthorName: Johann Bauer
+AuthorEmail: bauerj@bauerj.eu
+AuthorWebSite: https://bauerj.eu/
+SourceCode: https://github.com/bauerj/paperless_app
+IssueTracker: https://github.com/bauerj/paperless_app/issues
+
+AutoName: Paperless
+
+RepoType: git
+Repo: https://github.com/bauerj/paperless_app.git
+
+Builds:
+  - versionName: 0.0.5
+    versionCode: 5
+    commit: 0.0.5
+    output: build/app/outputs/apk/release/app-release.apk
+    srclibs:
+      - flutter@1.17.3
+    prebuild: echo 'android.applicationVariants.all { variant -> variant.outputs.all
+        { output -> outputFileName = "app-${output.baseName}.apk" } }' >> android/app/build.gradle
+    build:
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+      - $$flutter$$/bin/flutter pub run build_runner build
+      - $$flutter$$/bin/flutter build apk
+
+MaintainerNotes: |-
+    Builds will fail when the srclib ref of flutter and the version with which
+    upstream has been built with differ to mouch.
+
+AutoUpdateMode: Version %v
+UpdateCheckMode: HTTP
+UpdateCheckData: https://github.com/bauerj/paperless_app/raw/master/pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 0.0.5
+CurrentVersionCode: 5
