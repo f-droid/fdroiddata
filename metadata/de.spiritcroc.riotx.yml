@@ -10,22 +10,6 @@ RepoType: git
 Repo: https://github.com/SpiritCroc/SchildiChat-android
 
 Builds:
-  - versionName: 1.0.4.sc.13
-    versionCode: 40100170
-    commit: sc_v1.0.4.sc.13
-    subdir: vector
-    gradle:
-      - fdroid
-    srclibs:
-      - piasy@v1.6.2
-    prebuild:
-      - tac ../build.gradle | awk '/dl.bintray.com\/piasy\/maven/{getline;$0="mavenLocal
-        {"}{print $0}' | tac > ../build.gradle.new
-      - mv ../build.gradle.new ../build.gradle
-      - sed -i -e '/com.google.firebase/,+5d' build.gradle
-      - sed -i -e '/com.google.gms.google-services/d' build.gradle
-      - sed -i -e 's/enable true/enable false/g' build.gradle
-
   - versionName: 1.0.5.sc.17
     versionCode: 40100220
     commit: sc_v1.0.5.sc.17
@@ -43,6 +27,7 @@ Builds:
       - sed -i -e 's/enable true/enable false/g' build.gradle
     scanignore:
       - build.gradle
+    ndk: r21d
 
 MaintainerNotes: |-
     Uses piasy/BigImageViewer which gets build and installed to a local maven repo in srclib prepare step.
@@ -50,6 +35,9 @@ MaintainerNotes: |-
     In prebuild we do weird stuff for replacing `maven {` with `mavenLocal {`. tac reverses the lines so we can match the following repo url.
     The awk call then matches the url, deletes the matching line and replaces the following line. No idea how it works, but it does.
     Finally reverse the lines again and move back to original build.gradle file.
+
+    Upstream builds and publishes a libre build of the jitsi sdk. The maven repo can be recreated by using tools/jitsi/build_jitsi_libs.sh
+    We use that build instead of doing our own for now as jitsi embeds a timstamp in the version number and it's a major pain to maintain.
 
 AutoUpdateMode: None
 UpdateCheckMode: Tags
