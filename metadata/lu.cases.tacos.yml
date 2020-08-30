@@ -1,0 +1,46 @@
+Categories:
+  - Security
+License: GPL-3.0-or-later
+AuthorName: CASES Luxembourg
+AuthorEmail: info@cases.lu
+
+Summary: The CASES.LU mobile app for cybersecurity awareness
+Description: TACOS is the mobile application by CASES.LU and stands for TrustApp Cases
+    for Obvious Security. TACOS is an awareness application for cybersecurity. It
+    aims to educate the users to cybersecurity risks with short articles, videos and
+    tips & tricks. We also included a password cards generator. Besides that, TACOS
+    provides a spam detection feature. It allows you to check for spam phone numbers.
+    You can also contribute to our database by reporting spam phone numbers.
+
+RepoType: git
+Repo: https://github.com/CASES-LU/TACOS.git
+
+Builds:
+  - versionName: 0.0.23
+    versionCode: 23
+    commit: v0.0.23
+    sudo:
+      - apt update || apt update
+      - apt install -y build-essential
+      - apt install -y -t stretch-backports npm
+      - npm install -g ionic cordova npm@6.14.7
+      - curl -Lo node.tar.xz https://nodejs.org/dist/v10.21.0/node-v10.21.0-linux-x64.tar.xz
+      - echo "1d3296763e46540047099e4910812e81c4899c0595f2d82474e2099c1e1603e2 node.tar.xz"
+        | sha256sum -c -
+      - tar xJf node.tar.xz
+      - cp -a node-v10.21.0-linux-x64/. /usr/local/
+    init: npm install
+    output: platforms/android/app/build/outputs/apk/release/app-release-unsigned.apk
+    rm:
+      - node_modules/sharp/vendor/lib/
+      - node_modules/sharp/build/Release/sharp.node
+      - node_modules/cordova-plugin-x-socialsharing/src/wp8/Newtonsoft.Json.dll
+    prebuild: ionic cordova platforms add android
+    scandelete:
+      - node_modules/cordova-android/spec/fixtures/
+    build: ionic cordova build android --release
+
+AutoUpdateMode: None
+UpdateCheckMode: None
+CurrentVersion: 0.0.23
+CurrentVersionCode: 23
