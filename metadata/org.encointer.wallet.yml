@@ -1,0 +1,55 @@
+Categories:
+  - Money
+License: Apache-2.0
+AuthorName: Encointer Association
+WebSite: https://encointer.org
+SourceCode: https://github.com/encointer/encointer-wallet-flutter
+IssueTracker: https://github.com/encointer/encointer-wallet-flutter/issues
+Changelog: https://github.com/encointer/encointer-wallet-flutter/blob/HEAD/CHANGELOG.md
+Donate: https://encointer.org/donate/
+Bitcoin: 3P2rNo2vgwodoP7D6oesRkqhr1UHmYoJiD
+
+RepoType: git
+Repo: https://github.com/encointer/encointer-wallet-flutter
+
+Builds:
+  - versionName: 0.7.6
+    versionCode: 763
+    commit: v0.7.6
+    init:
+      - curl -Lo node.tar.xz https://nodejs.org/dist/v12.18.2/node-v12.18.2-linux-x64.tar.xz
+      - echo "b8dc634798ee783482c2ae1755bd7dff09d83fa7bb037cdc370b601d0a5e5cbb node.tar.xz"
+        | sha256sum -c -
+      - tar -vxf node.tar.xz
+      - curl -Lo yarn.tar.gz https://github.com/yarnpkg/yarn/releases/download/v1.22.4/yarn-v1.22.4.tar.gz
+      - echo "bc5316aa110b2f564a71a3d6e235be55b98714660870c5b6b2d2d3f12587fb58  yarn.tar.gz"
+        | sha256sum -c -
+      - tar zvxf yarn.tar.gz
+      - export PATH=$PATH:$PWD/node-v12.18.2-linux-x64/bin:$PWD/yarn-v1.22.4/bin
+      - pushd ./lib/js_service_kusama
+      - yarn install
+      - yarn run build
+      - popd
+      - pushd ./lib/js_service_encointer
+      - yarn install
+      - yarn run build
+      - popd
+    output: build/app/outputs/apk/fdroid/release/app-fdroid-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - node-v12.18.2-linux-x64
+      - yarn-v1.22.4
+      - node.tar.xz
+      - yarn.tar.gz
+      - lib/js_service_encointer/node_modules
+      - lib/js_service_kusama/node_modules
+    build:
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter build apk --flavor fdroid
+
+AutoUpdateMode: Version v%v
+UpdateCheckMode: HTTP
+UpdateCheckData: https://raw.githubusercontent.com/encointer/encointer-wallet-flutter/master/pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 0.7.6
+CurrentVersionCode: 763
