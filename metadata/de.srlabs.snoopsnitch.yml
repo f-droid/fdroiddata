@@ -317,7 +317,38 @@ Builds:
       - bash copy.sh
     ndk: r20b
 
+  - versionName: 2.0.11
+    versionCode: 40
+    commit: SnoopSnitch-2.0.11
+    timeout: 10800
+    subdir: SnoopSnitch/app
+    submodules: true
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y texinfo
+    gradle:
+      - nobuildcheck
+    rm:
+      - SnoopSnitch/app/src/main/jniLibs/*/*.so
+      - contrib/prebuilt/*/*.so
+    prebuild: sed -i -e '/versionNameSuffix/d' build.gradle
+    scandelete:
+      - SnoopSnitch/patchanalysis
+      - contrib
+    build:
+      - export NDK_DIR=$$NDK$$
+      - cd ../../contrib
+      - bash compile.sh -a -g -u
+      - cd ../SnoopSnitch/patchanalysis/contrib
+      - bash compile.sh -a
+      - bash copy.sh
+      - cp builds/32/*.so ../../../contrib/prebuilt/32
+      - cp builds/64/*.so ../../../contrib/prebuilt/64
+      - cd ../..
+      - bash copy.sh
+    ndk: r20b
+
 AutoUpdateMode: None
 UpdateCheckMode: Tags
-CurrentVersion: 2.0.11-nbc
+CurrentVersion: 2.0.11
 CurrentVersionCode: 40
