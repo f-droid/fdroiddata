@@ -100,7 +100,37 @@ Builds:
       - make apk
     ndk: r18b
 
+  - versionName: 1.20.2
+    versionCode: 4
+    commit: 1.20.2
+    timeout: 20000
+    sudo:
+      - apt update || apt update
+      - apt install -y g++
+      - apt-get install -y -t stretch-backports-sloppy libarchive13
+      - apt-get install -y -t stretch-backports cmake
+      - sed -i '26iset(_CMAKE_TOOLCHAIN_PREFIX \"${CMAKE_ANDROID_ARCH_TRIPLE}-\")'
+        /usr/share/cmake-3.16/Modules/Platform/Android/Determine-Compiler-NDK.cmake
+    output: build/dist/AusweisApp2-$$VERSION$$-armeabi-v7a.apk
+    rm:
+      - test/fixture
+      - resources/packaging/macos
+    build:
+      - export ANDROID_SDK_ROOT=$$SDK$$
+      - mkdir libs/build build
+      - cd libs/build
+      - cmake .. -DCMAKE_TOOLCHAIN_FILE=../../cmake/android.toolchain.cmake -DCMAKE_BUILD_TYPE=release
+      - make
+      - cd ../../build
+      - cmake .. -DCMAKE_TOOLCHAIN_FILE=../cmake/android.toolchain.cmake -DCMAKE_BUILD_TYPE=MinSizeRel
+        -DCMAKE_PREFIX_PATH=$(realpath ../libs/build/dist) -DANDROID_VERSION_CODE=$$VERCODE$$
+        -DVENDOR=F-Droid -DVENDOR_DOMAIN=f-droid.org
+      - make
+      - make install
+      - make apk
+    ndk: r21d
+
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: 1.20.0
-CurrentVersionCode: 3
+CurrentVersion: 1.20.2
+CurrentVersionCode: 4
