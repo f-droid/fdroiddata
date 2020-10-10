@@ -59,7 +59,51 @@ Builds:
       - ../godot/bin/godot_server.x11.tools.* --export Android ../output.apk
     ndk: r21
 
+  - versionName: 1.0.1
+    versionCode: 2
+    commit: v1.0.1
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y g++
+    output: output.apk
+    srclibs:
+      - Godot@3.2.3-stable
+    prebuild:
+      - mkdir game
+      - bash -O extglob -c "mv !(game) game"
+      - cp -R $$Godot$$ godot
+      - rm godot/misc/dist/ios_xcode/libgodot.iphone.release.fat.a
+      - rm godot/misc/dist/ios_xcode/libgodot.iphone.debug.fat.a
+      - sed -i -e '/Godot\ user/,+8d' godot/platform/android/java/app/build.gradle
+    build:
+      - cd godot
+      - sed -i "s|valid = false|valid = true|" ./platform/android/export/export.cpp
+      - mkdir -p ../fake_user_home/.config/godot/
+      - cp ../game/editor_settings-3.tres ../fake_user_home/.config/godot/
+      - mkdir -p ../fake_user_home/.android/
+      - keytool -genkey -v -keystore ../fake_user_home/.android/debug.keystore -storepass
+        android -alias androiddebugkey -keypass android -dname "CN=Android Debug,O=Android,C=US"
+      - pushd ../fake_user_home
+      - export HOME=$PWD
+      - sed -i "s|DEBUG_KEYSTORE|$PWD/.android/debug.keystore|" ./.config/godot/editor_settings-3.tres
+      - popd
+      - scons -j `nproc` platform=server unix_global_settings_path=".."
+      - export ANDROID_NDK_ROOT=$$NDK$$
+      - scons -j `nproc` platform=android target=release android_arch=armv7
+      - scons -j `nproc` platform=android target=release_debug android_arch=armv7
+      - pushd platform/android/java/
+      - gradle generateGodotTemplates
+      - popd
+      - mkdir -p ../fake_user_home/.local/share/godot/templates/3.2.3.stable/
+      - echo "3.2.3.stable" > ../fake_user_home/.local/share/godot/templates/3.2.3.stable/version.txt
+      - cp ./bin/android_release.apk ../fake_user_home/.local/share/godot/templates/3.2.3.stable/
+      - cp ./bin/android_debug.apk ../fake_user_home/.local/share/godot/templates/3.2.3.stable/
+      - cp ./bin/android_source.zip ../fake_user_home/.local/share/godot/templates/3.2.3.stable/
+      - cd ../game
+      - ../godot/bin/godot_server.x11.tools.* --export Android ../output.apk
+    ndk: r21d
+
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: 1.0.0
-CurrentVersionCode: 1
+CurrentVersion: 1.0.1
+CurrentVersionCode: 2
