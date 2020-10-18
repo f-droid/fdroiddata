@@ -110,7 +110,7 @@ to appear in our repository.
 - You may like to add [localization and screenshots], so users can have a glance
     at the app in pictures and in their preferred language.
 - You can advertise the download of your app in this app store using the
-    [official grafic][get-it-on-fdroid].
+    [official graphic][get-it-on-fdroid].
     <img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png" height="75">
 
     ```
