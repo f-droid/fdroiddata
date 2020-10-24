@@ -169,7 +169,7 @@ Builds:
     subdir: android
     sudo:
       - apt-get update || apt-get update
-      - apt-get install -y imagemagick pngquant vorbis-tools
+      - apt-get install -y imagemagick libogg-dev pngquant vorbis-tools
     output: build/outputs/apk/release/android-release-unsigned.apk
     srclibs:
       - supertuxkartdeps@5b135b51bdddc3ce91af70dd2add7fb8a5ece964
@@ -209,9 +209,18 @@ Builds:
       - export COMPILE_ARCH=aarch64
       - bash ./generate_assets.sh
       - bash ./make.sh -j`nproc`
+      - cp -r libs/* tmp_lib/
+      - bash ./make.sh clean
+      - export COMPILE_ARCH=x86
+      - bash ./generate_assets.sh
+      - bash ./make.sh -j`nproc`
+      - cp -r libs/* tmp_lib/
+      - bash ./make.sh clean
+      - export COMPILE_ARCH=x86_64
+      - bash ./generate_assets.sh
+      - bash ./make.sh -j`nproc`
       - cp -r tmp_lib/* libs/
       - gradle -Pcompile_sdk_version=29 -Pbuild_tools_ver=29.0.3 assembleRelease
-      - gradle -Pcompile_sdk_version=29 -Pbuild_tools_ver=29.0.3 bundleRelease
     ndk: r20b
 
 MaintainerNotes: |-
