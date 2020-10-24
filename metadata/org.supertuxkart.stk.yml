@@ -163,8 +163,67 @@ Builds:
       - ./make.sh -j`nproc`
     ndk: r12b
 
+  - versionName: '1.2'
+    versionCode: 205
+    commit: '1.2'
+    subdir: android
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y imagemagick pngquant vorbis-tools
+    output: build/outputs/apk/release/android-release-unsigned.apk
+    srclibs:
+      - supertuxkartdeps@5b135b51bdddc3ce91af70dd2add7fb8a5ece964
+    prebuild:
+      - sed -i -e 's#./gradlew#gradle#' -e '/Check\ if\ we\ have\ key/,+22d' -e '/ANDROID_HOME/,+15d'
+        make.sh
+      - sed -i -e '/keystore/,+3d' build.gradle
+      - wget https://github.com/supertuxkart/stk-assets-mobile/releases/download/$$VERSION$$/stk-assets-lq.zip
+      - echo '9d5a921efa63ef27756af171900fa73566c262c83358fad2f1f337b85f1b54bc  stk-assets-lq.zip'
+        | sha256sum -c -
+      - unzip stk-assets-lq.zip -d stk-assets
+      - sed -i -e 's#../../stk-assets#stk-assets#' generate_assets.sh
+      - tar -C '../lib' -xf $$supertuxkartdeps$$/dependencies-android-1.2.tar.xz
+      - mkdir tmp_lib
+    scanignore:
+      - android/stk-assets/textures/
+    scandelete:
+      - android/stk-assets-lq.zip
+      - lib/curl/tests
+      - lib/freetype/docs/reference/sitemap.xml.gz
+      - lib/harfbuzz/test/
+      - lib/sdl2/Xcode/SDL/pkg-support/resources/SDL_DS_Store
+      - tools/windows_installer
+    build:
+      - export BUILD_TYPE=release
+      - export SDK_PATH=$$SDK$$
+      - export NDK_PATH=$$NDK$$
+      - export PROJECT_VERSION=$$VERSION$$
+      - export PROJECT_CODE=$$VERCODE$$
+      - export DECREASE_QUALITY=0
+      - export CONVERT_TO_JPG=0
+      - export COMPILE_ARCH=armv7
+      - bash ./generate_assets.sh
+      - bash ./make.sh -j`nproc`
+      - cp -r libs/* tmp_lib/
+      - bash ./make.sh clean
+      - export COMPILE_ARCH=aarch64
+      - bash ./generate_assets.sh
+      - bash ./make.sh -j`nproc`
+      - cp -r tmp_lib/* libs/
+      - gradle -Pcompile_sdk_version=29 -Pbuild_tools_ver=29.0.3 assembleRelease
+      - gradle -Pcompile_sdk_version=29 -Pbuild_tools_ver=29.0.3 bundleRelease
+    ndk: r20b
+
 MaintainerNotes: |-
-    By default, the build script only builds a binary for armeabi-v7a.
+    We remove the gradle steps from make.sh so we can run it only after *all* the arches are build.
+
+    We need to regenerate the assets after clean up and before make for each arch.
+
+    make.sh has a '()' bashism so we explicitely use bash to run in.
+
+    make.sh needs to clean up before building each arch so we save the built libs first and bring them back right before gradle is run.
+
+    The resulting APK is 112Mb per arch, but per arch lib is only 10-20Mb so either we have 4 APKs (one per arch) each 112Mbs (3 versions mean 12 APKs, right?_or one for all at 140Mb.
 
     Upstream sets the version manually during the build so we can't enable auto update.
 
@@ -172,5 +231,5 @@ MaintainerNotes: |-
 
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: '1.1'
-CurrentVersionCode: 144
+CurrentVersion: '1.2'
+CurrentVersionCode: 205
