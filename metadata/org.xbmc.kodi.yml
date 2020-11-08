@@ -167,6 +167,45 @@ Builds:
       - make -C build apk-unsigned
     ndk: r18b
 
+  - versionName: '18.9'
+    versionCode: 1809000
+    commit: 18.9-Leia
+    timeout: 7200
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y build-essential default-jdk gawk lib32stdc++6 lib32z1 lib32z1-dev
+        libcurl4-openssl-dev zlib1g-dev groovy libcommons-lang-java python-dev
+    patch:
+      - groovy.patch
+    output: build/tools/android/packaging/xbmc/build/outputs/apk/releaseUnsigned/xbmc-releaseUnsigned-unsigned.apk
+    rm:
+      - tools/codegenerator/groovy/
+    prebuild:
+      - sed -i -e '/gradlew/d' -e '/gradle-wrapper.jar/d' cmake/scripts/android/Install.cmake
+      - sed -i -e 's#./gradlew#gradle#' tools/android/packaging/Makefile.in
+    scanignore:
+      - addons/webinterface.default/lib/soundmanager/swf/soundmanager2_flash_xdomain.zip
+    scandelete:
+      - lib/
+      - project/
+      - tools/
+      - xbmc/filesystem/test
+    build:
+      - $$NDK$$/build/tools/make-standalone-toolchain.sh --install-dir=$PWD/toolchain
+        --platform=android-21 --toolchain=arm-linux-androideabi
+      - pushd tools/depends/
+      - ./bootstrap
+      - ./configure --host=arm-linux-androideabi --with-sdk-path=$$SDK$$ --with-ndk-path=$$NDK$$
+        --with-toolchain=$(realpath ../../toolchain) --with-ndk-api=21 --prefix=$PWD/output
+        --disable-debug
+      - make -j`nproc`
+      - popd
+      - make -C tools/depends/target/binary-addons -j`nproc`
+      - make -C tools/depends/target/cmakebuildsys
+      - make -C build -j`nproc`
+      - make -C build apk-unsigned
+    ndk: r18b
+
 MaintainerNotes: |-
     groovy.patch was [https://github.com/xbmc/xbmc/issues/6860#issuecomment-461122155 provided by upstream]; it makes the build use the Debian groovy package instead of a prebuilt JAR.
 
@@ -174,5 +213,5 @@ MaintainerNotes: |-
 
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: '18.8'
-CurrentVersionCode: 1808000
+CurrentVersion: '18.9'
+CurrentVersionCode: 1809000
