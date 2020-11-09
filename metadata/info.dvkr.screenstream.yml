@@ -355,9 +355,32 @@ Builds:
       - sed -i -e '/firebaseCrashlytics/,+2d' -e '/^android\.applicationVariants\.all
         {/,/^}$/d' build.gradle
 
-MaintainerNotes: No source for bottomsheets.aar after 3.4.9, see upstream issue 107
+  - versionName: 3.5.0
+    versionCode: 30500
+    commit: 3.5.0
+    subdir: app
+    gradle:
+      - firebasefree
+    srclibs:
+      - Material-Dialogs@3.3.0
+    rm:
+      - app/libs/bottomsheets-release.aar
+    prebuild:
+      - sed -i -e 's|= uri("https://jitpack\.io")|"https://jitpack.io"|' ../build.gradle
+      - sed -i -e '/com\.google\.firebase/d; /com\.google\.gms/d' ../build.gradle
+        build.gradle
+      - sed -i -e '/firebaseCrashlytics/d' -e '/^android\.applicationVariants\.all
+        {/,/^}$/d' build.gradle
+      - pushd $$Material-Dialogs$$
+      - sed -i -e '241d' bottomsheets/src/main/java/com/afollestad/materialdialogs/bottomsheets/BottomSheet.kt
+    build:
+      - pushd $$Material-Dialogs$$
+      - gradle bottomsheets:assembleRelease
+      - popd
+      - cp $$Material-Dialogs$$/bottomsheets/build/outputs/aar/bottomsheets-release.aar
+        libs/
 
-AutoUpdateMode: None
+AutoUpdateMode: Version %v
 UpdateCheckMode: Tags
 CurrentVersion: 3.5.0
 CurrentVersionCode: 30500
