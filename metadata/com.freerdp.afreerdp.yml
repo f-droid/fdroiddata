@@ -102,95 +102,29 @@ Builds:
       - ./android-build-freerdp.sh --ndk $$NDK$$ --sdk $$SDK$$ --conf android-build-64.conf
     ndk: r12b
 
-  - versionName: 2.0.0
-    versionCode: 15
-    commit: 2.0.0
-    subdir: client/Android/Studio/aFreeRDP
-    gradle:
-      - yes
-    prebuild:
-      - cd ../../../../scripts
-      - sed -i -e 's/OPENSSL_TAG=OpenSSL_1_1_[0-1][a-h]/OPENSSL_TAG=OpenSSL_1_1_1g/'
-        -e 's/NDK_TARGET=14/NDK_TARGET=21/' android-build-*.conf
-    build:
-      - cd ../../../../scripts
-      - ANDROID_NDK=$$NDK$$ ANDROID_SDK=$$SDK$$ ./android-build-freerdp.sh --ndk $$NDK$$
-        --sdk $$SDK$$ --conf android-build-32.conf
-      - ANDROID_NDK=$$NDK$$ ANDROID_SDK=$$SDK$$ ./android-build-freerdp.sh --ndk $$NDK$$
-        --sdk $$SDK$$ --conf android-build-64.conf
-    ndk: r21
-
-  - versionName: 2.1.0
-    versionCode: 16
-    commit: 2.1.0
-    subdir: client/Android/Studio/aFreeRDP
-    gradle:
-      - yes
-    prebuild:
-      - cd ../../../../scripts
-      - sed -i -e 's/OPENSSL_TAG=OpenSSL_1_1_[0-1][a-h]/OPENSSL_TAG=OpenSSL_1_1_1g/'
-        -e 's/NDK_TARGET=14/NDK_TARGET=21/' android-build-*.conf
-    build:
-      - cd ../../../../scripts
-      - ANDROID_NDK=$$NDK$$ ANDROID_SDK=$$SDK$$ ./android-build-freerdp.sh --ndk $$NDK$$
-        --sdk $$SDK$$ --conf android-build-32.conf
-      - ANDROID_NDK=$$NDK$$ ANDROID_SDK=$$SDK$$ ./android-build-freerdp.sh --ndk $$NDK$$
-        --sdk $$SDK$$ --conf android-build-64.conf
-    ndk: r21
-
-  - versionName: 2.1.1
-    versionCode: 17
-    commit: 2.1.1
-    subdir: client/Android/Studio/aFreeRDP
-    gradle:
-      - yes
-    prebuild:
-      - cd ../../../../scripts
-      - sed -i -e 's/OPENSSL_TAG=OpenSSL_1_1_[0-1][a-h]/OPENSSL_TAG=OpenSSL_1_1_1h/'
-        -e 's/NDK_TARGET=14/NDK_TARGET=21/' android-build-*.conf
-    build:
-      - cd ../../../../scripts
-      - ANDROID_NDK=$$NDK$$ ANDROID_SDK=$$SDK$$ ./android-build-freerdp.sh --ndk $$NDK$$
-        --sdk $$SDK$$ --conf android-build-32.conf
-      - ANDROID_NDK=$$NDK$$ ANDROID_SDK=$$SDK$$ ./android-build-freerdp.sh --ndk $$NDK$$
-        --sdk $$SDK$$ --conf android-build-64.conf
-    ndk: r21
-
-  - versionName: 2.1.2
-    versionCode: 18
-    commit: 2.1.2
-    subdir: client/Android/Studio/aFreeRDP
-    gradle:
-      - yes
-    prebuild:
-      - cd ../../../../scripts
-      - sed -i -e 's/OPENSSL_TAG=OpenSSL_1_1_[0-1][a-h]/OPENSSL_TAG=OpenSSL_1_1_1h/'
-        -e 's/NDK_TARGET=14/NDK_TARGET=21/' android-build-*.conf
-    build:
-      - cd ../../../../scripts
-      - ANDROID_NDK=$$NDK$$ ANDROID_SDK=$$SDK$$ ./android-build-freerdp.sh --ndk $$NDK$$
-        --sdk $$SDK$$ --conf android-build-32.conf
-      - ANDROID_NDK=$$NDK$$ ANDROID_SDK=$$SDK$$ ./android-build-freerdp.sh --ndk $$NDK$$
-        --sdk $$SDK$$ --conf android-build-64.conf
-    ndk: r21
-
   - versionName: 2.2.0
     versionCode: 19
     commit: 2.2.0
     subdir: client/Android/Studio/aFreeRDP
+    patch:
+      - openh264-ndk.patch
     gradle:
       - yes
     prebuild:
-      - cd ../../../../scripts
+      - $$SDK$$/tools/bin/sdkmanager 'cmake;3.10.2.4988404'
+      - pushd ../../../../scripts
       - sed -i -e 's/OPENSSL_TAG=OpenSSL_1_1_[0-1][a-h]/OPENSSL_TAG=OpenSSL_1_1_1h/'
-        -e 's/NDK_TARGET=14/NDK_TARGET=21/' android-build-*.conf
+        -e 's/WITH_OPENH264=0/WITH_OPENH264=1/' -e 's/NDK_TARGET=14/NDK_TARGET=21/'
+        android-build-*.conf
     build:
-      - cd ../../../../scripts
-      - ANDROID_NDK=$$NDK$$ ANDROID_SDK=$$SDK$$ ./android-build-freerdp.sh --ndk $$NDK$$
-        --sdk $$SDK$$ --conf android-build-32.conf
-      - ANDROID_NDK=$$NDK$$ ANDROID_SDK=$$SDK$$ ./android-build-freerdp.sh --ndk $$NDK$$
-        --sdk $$SDK$$ --conf android-build-64.conf
-    ndk: r21
+      - pushd ../../../../scripts
+      - export ANDROID_NDK=$$NDK$$
+      - export ANDROID_SDK=$$SDK$$
+      - export ANDROID_NDK_OPENH264=$$NDK$$/../r15c
+      - ./android-build-freerdp.sh --conf android-build-32.conf
+      - ./android-build-freerdp.sh --conf android-build-64.conf
+      - popd
+    ndk: r21d
 
 MaintainerNotes: |-
     * Keep OpenH264 at 1.8.0 as the newer versions have issues with reference frames and
