@@ -5,7 +5,7 @@ import os
 import re
 import sys
 
-os.chdir(os.path.dirname(__file__) + '/../')
+os.chdir(os.path.join(os.path.dirname(__file__), '..'))
 
 count = 0
 
