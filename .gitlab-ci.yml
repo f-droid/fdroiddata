@@ -125,10 +125,13 @@ fdroid build:
       - unsigned/
     when: always
     expire_in: 1 month
-  only:
-    - branches
-  except:
-    - master@fdroid/fdroiddata
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH && $CI_PROJECT_PATH != "fdroid/fdroiddata"
+      changes:
+        - metadata/*.yml
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_PROJECT_PATH != "fdroid/fdroiddata"
+      changes:
+        - metadata/*.yml
   cache:
     key: "$CI_JOB_NAME"
     paths:
