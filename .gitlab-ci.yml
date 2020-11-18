@@ -7,7 +7,7 @@ lint:
       - schedules
       - pipelines
   before_script:
-    - printf "Package\x3a androguard fdroidserver python3-asn1crypto python3-ruamel.yaml\nPin\x3a release a=stretch-backports\nPin-Priority\x3a 500\n" > /etc/apt/preferences.d/debian-stretch-backports.pref
+    - printf "Package\x3a androguard fdroidserver python3-asn1crypto python3-ruamel.yaml yamllint\nPin\x3a release a=stretch-backports\nPin-Priority\x3a 500\n" > /etc/apt/preferences.d/debian-stretch-backports.pref
     - echo "deb http://deb.debian.org/debian/ stretch-backports main" > /etc/apt/sources.list.d/backports.list
     - apt-get update
     - apt-get -qy dist-upgrade
@@ -33,7 +33,8 @@ lint:
            fi;
         done;
         set -x;
-        apt-get install python3-colorama;
+        apt-get install python3-colorama yamllint;
+        for f in $files; do [[ $f == *'.yml' ]] && yamllint "$f"; done;
         ./tools/check-git-repo-availability.py $files;
         ./tools/audit-gradle.py $CHANGED;
         set +x;
