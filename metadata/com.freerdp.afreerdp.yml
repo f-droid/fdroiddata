@@ -102,7 +102,38 @@ Builds:
       - ./android-build-freerdp.sh --ndk $$NDK$$ --sdk $$SDK$$ --conf android-build-64.conf
     ndk: r12b
 
+  - versionName: 2.2.0
+    versionCode: 19
+    commit: 2.2.0
+    subdir: client/Android/Studio/aFreeRDP
+    patch:
+      - openh264-ndk.patch
+    gradle:
+      - yes
+    prebuild:
+      - $$SDK$$/tools/bin/sdkmanager 'cmake;3.10.2.4988404'
+      - pushd ../../../../scripts
+      - sed -i -e 's/OPENSSL_TAG=OpenSSL_1_1_[0-1][a-h]/OPENSSL_TAG=OpenSSL_1_1_1h/'
+        -e 's/WITH_OPENH264=0/WITH_OPENH264=1/' -e 's/NDK_TARGET=14/NDK_TARGET=21/'
+        android-build-*.conf
+    build:
+      - pushd ../../../../scripts
+      - export ANDROID_NDK=$$NDK$$
+      - export ANDROID_SDK=$$SDK$$
+      - export ANDROID_NDK_OPENH264=$$NDK$$/../r15c
+      - ./android-build-freerdp.sh --conf android-build-32.conf
+      - ./android-build-freerdp.sh --conf android-build-64.conf
+      - popd
+    ndk: r21d
+
+MaintainerNotes: |-
+    * Keep OpenH264 at 1.8.0 as the newer versions have issues with reference frames and
+      the H264 data sent by microsoft RDP servers.
+    * Can not build OpenH264 since OpenSSL already needs r21 to build.
+    * Need to update NDK target to 21 for tmerfd_create
+    * The build script argument passing is buggy, provide NDK and SDK via environment too
+
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: 2.0.0-rc4
-CurrentVersionCode: 14
+CurrentVersion: 2.2.0
+CurrentVersionCode: 19
