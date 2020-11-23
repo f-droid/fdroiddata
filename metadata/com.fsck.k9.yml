@@ -20,6 +20,441 @@ RepoType: git
 Repo: https://github.com/k9mail/k-9.git
 
 Builds:
+  - versionName: '4.201'
+    versionCode: 16025
+    commit: 7834cdd8ca
+    srclibs:
+      - Jutf7@20
+    extlibs:
+      - jzlib/jzlib-1.0.7.tar.gz
+    prebuild:
+      - chmod +x tools/build-beta
+      - ./tools/build-beta
+      - rm -f libs/jzlib*.jar libs/htmlcleaner*.jar libs/jutf*.jar
+      - mkdir -p tests/res/
+      - unzip libs/htmlcleaner-2.2-all.zip
+      - cp -r $$Jutf7$$/src/main/java/com/ src/
+      - tar xzf libs/jzlib-1.0.7.tar.gz
+      - mv jzlib-1.0.7/com/jcraft src/com/
+      - rm -rf libs/jzlib* libs/htmlcleaner*.zip jzlib*
+    build:
+      - $$MVN3$$ package -f HtmlCleaner/pom.xml
+      - mv HtmlCleaner/target/htmlcleaner-2.2.jar libs/
+      - rm -rf HtmlCleaner
+
+  - versionName: '4.409'
+    versionCode: 17046
+    commit: '4.409'
+    srclibs:
+      - Jutf7@20
+    extlibs:
+      - jzlib/jzlib-1.0.7.tar.gz
+    prebuild:
+      - chmod +x tools/build-beta
+      - ./tools/build-beta
+      - rm -f libs/jzlib*.jar libs/htmlcleaner*.jar libs/jutf*.jar
+      - mkdir -p tests/res/
+      - unzip libs/htmlcleaner-2.2-all.zip
+      - cp -r $$Jutf7$$/src/main/java/com/ src/
+      - tar xzf libs/jzlib-1.0.7.tar.gz
+      - mv jzlib-1.0.7/com/jcraft src/com/
+      - rm -rf libs/jzlib* libs/htmlcleaner*.zip jzlib*
+    androidupdate:
+      - .
+      - plugins/HoloColorPicker
+      - plugins/Android-PullToRefresh/library
+      - plugins/ckChangeLog/library
+      - plugins/ActionBarSherlock/library
+    target: android-17
+    build:
+      - $$MVN3$$ package -f HtmlCleaner/pom.xml
+      - mv HtmlCleaner/target/htmlcleaner-2.2.jar libs/
+
+  - versionName: '4.802'
+    versionCode: 20003
+    commit: '4.802'
+    srclibs:
+      - Jutf7@20
+    rm:
+      - libs/jzlib-1.0.7.jar
+      - libs/htmlcleaner-2.2.jar
+      - libs/jutf7-1.0.1-SNAPSHOT.jar
+      - tests
+    extlibs:
+      - jzlib/jzlib-1.0.7.tar.gz
+    prebuild:
+      - unzip libs/htmlcleaner-2.2-all.zip
+      - tar xzf libs/jzlib-1.0.7.tar.gz
+      - echo 'source.dir=src;$$Jutf7$$/src;jzlib-1.0.7' >> ant.properties
+      - rm libs/jzlib-1.0.7.tar.gz libs/htmlcleaner-2.2-all.zip
+    build:
+      - $$MVN3$$ package -f HtmlCleaner/pom.xml
+      - mv HtmlCleaner/target/htmlcleaner-2.2.jar libs/
+
+  - versionName: '4.803'
+    versionCode: 20004
+    commit: '4.803'
+    srclibs:
+      - Jutf7@20
+    rm:
+      - libs/jzlib-1.0.7.jar
+      - libs/htmlcleaner-2.2.jar
+      - libs/jutf7-1.0.1-SNAPSHOT.jar
+      - tests
+    extlibs:
+      - jzlib/jzlib-1.0.7.tar.gz
+    prebuild:
+      - unzip libs/htmlcleaner-2.2-all.zip
+      - tar xzf libs/jzlib-1.0.7.tar.gz
+      - echo 'source.dir=src;$$Jutf7$$/src;jzlib-1.0.7' >> ant.properties
+      - rm libs/jzlib-1.0.7.tar.gz libs/htmlcleaner-2.2-all.zip
+    build:
+      - $$MVN3$$ package -f HtmlCleaner/pom.xml
+      - mv HtmlCleaner/target/htmlcleaner-2.2.jar libs/
+
+  - versionName: '4.804'
+    versionCode: 20005
+    commit: '4.804'
+    srclibs:
+      - Jutf7@20
+    rm:
+      - libs/jzlib-1.0.7.jar
+      - libs/htmlcleaner-2.2.jar
+      - libs/jutf7-1.0.1-SNAPSHOT.jar
+      - tests
+    extlibs:
+      - jzlib/jzlib-1.0.7.tar.gz
+    prebuild:
+      - unzip libs/htmlcleaner-2.2-all.zip
+      - tar xzf libs/jzlib-1.0.7.tar.gz
+      - echo 'source.dir=src;$$Jutf7$$/src;jzlib-1.0.7' >> ant.properties
+      - rm libs/jzlib-1.0.7.tar.gz libs/htmlcleaner-2.2-all.zip
+    build:
+      - $$MVN3$$ package -f HtmlCleaner/pom.xml
+      - mv HtmlCleaner/target/htmlcleaner-2.2.jar libs/
+
+  - versionName: '5.000'
+    versionCode: 22000
+    commit: '5.000'
+    gradle:
+      - yes
+    srclibs:
+      - Jutf7@20
+    rm:
+      - libs/*
+    prebuild:
+      - sed -i -e "/buildToolsVersion/adefaultConfig {\ntargetSdkVersion 17\n}\n\npackagingOptions
+        {\n exclude 'META-INF/LICENSE.txt'\n  exclude 'META-INF/NOTICE.txt'\n}" -e
+        "/com.android.application/arepositories {\n  mavenCentral()\n  mavenLocal()\n}"
+        -e "/fileTree/acompile 'net.sourceforge.htmlcleaner:htmlcleaner:2.2'" -e "/fileTree/acompile
+        'org.apache.james:apache-mime4j-core:0.7.2'" -e "/fileTree/acompile 'org.apache.james:apache-mime4j-dom:0.7.2'"
+        -e "/fileTree/acompile 'com.jcraft:jzlib:1.0.7'" -e "/fileTree/acompile 'com.beetstra.jutf7:jutf7:1.0.1-SNAPSHOT'"
+        -e "/fileTree/acompile 'commons-io:commons-io:2.0.1'" build.gradle
+      - pushd $$Jutf7$$
+      - $$MVN3$$ install
+      - popd
+
+  - versionName: '5.001'
+    versionCode: 22001
+    commit: '5.001'
+    gradle:
+      - yes
+    srclibs:
+      - Jutf7@20
+    rm:
+      - libs/*
+    prebuild:
+      - sed -i -e "/buildToolsVersion/adefaultConfig {\ntargetSdkVersion 17\n}\n\npackagingOptions
+        {\n exclude 'META-INF/LICENSE.txt'\n  exclude 'META-INF/NOTICE.txt'\n}" -e
+        "/com.android.application/arepositories {\n  mavenCentral()\n  mavenLocal()\n}"
+        -e "/fileTree/acompile 'net.sourceforge.htmlcleaner:htmlcleaner:2.2'" -e "/fileTree/acompile
+        'org.apache.james:apache-mime4j-core:0.7.2'" -e "/fileTree/acompile 'org.apache.james:apache-mime4j-dom:0.7.2'"
+        -e "/fileTree/acompile 'com.jcraft:jzlib:1.0.7'" -e "/fileTree/acompile 'com.beetstra.jutf7:jutf7:1.0.1-SNAPSHOT'"
+        -e "/fileTree/acompile 'commons-io:commons-io:2.0.1'" build.gradle
+      - pushd $$Jutf7$$
+      - $$MVN3$$ install
+      - popd
+
+  - versionName: '5.002'
+    versionCode: 22002
+    commit: '5.002'
+    gradle:
+      - yes
+    srclibs:
+      - Jutf7@20
+    rm:
+      - libs/*
+    prebuild:
+      - sed -i -e "/buildToolsVersion/adefaultConfig {\ntargetSdkVersion 17\n}\n\npackagingOptions
+        {\n exclude 'META-INF/LICENSE.txt'\n  exclude 'META-INF/NOTICE.txt'\n}" -e
+        "/com.android.application/arepositories {\n  mavenCentral()\n  mavenLocal()\n}"
+        -e "/fileTree/acompile 'net.sourceforge.htmlcleaner:htmlcleaner:2.2'" -e "/fileTree/acompile
+        'org.apache.james:apache-mime4j-core:0.7.2'" -e "/fileTree/acompile 'org.apache.james:apache-mime4j-dom:0.7.2'"
+        -e "/fileTree/acompile 'com.jcraft:jzlib:1.0.7'" -e "/fileTree/acompile 'com.beetstra.jutf7:jutf7:1.0.1-SNAPSHOT'"
+        -e "/fileTree/acompile 'commons-io:commons-io:2.0.1'" build.gradle
+      - pushd $$Jutf7$$
+      - $$MVN3$$ install
+      - popd
+
+  - versionName: '5.004'
+    versionCode: 22004
+    commit: '5.004'
+    gradle:
+      - yes
+    srclibs:
+      - Jutf7@20
+    rm:
+      - libs/*
+    prebuild:
+      - sed -i -e "/buildToolsVersion/adefaultConfig {\ntargetSdkVersion 17\n}\n\npackagingOptions
+        {\n exclude 'META-INF/LICENSE.txt'\n  exclude 'META-INF/NOTICE.txt'\n}" -e
+        "/com.android.application/arepositories {\n  mavenCentral()\n  mavenLocal()\n}"
+        -e "/fileTree/acompile 'net.sourceforge.htmlcleaner:htmlcleaner:2.2'" -e "/fileTree/acompile
+        'org.apache.james:apache-mime4j-core:0.7.2'" -e "/fileTree/acompile 'org.apache.james:apache-mime4j-dom:0.7.2'"
+        -e "/fileTree/acompile 'com.jcraft:jzlib:1.0.7'" -e "/fileTree/acompile 'com.beetstra.jutf7:jutf7:1.0.1-SNAPSHOT'"
+        -e "/fileTree/acompile 'commons-io:commons-io:2.0.1'" build.gradle
+      - pushd $$Jutf7$$
+      - $$MVN3$$ install
+      - popd
+
+  - versionName: '5.005'
+    versionCode: 22005
+    commit: '5.005'
+    gradle:
+      - yes
+    srclibs:
+      - Jutf7@20
+    rm:
+      - libs/*
+    prebuild:
+      - sed -i -e "/buildToolsVersion/adefaultConfig {\ntargetSdkVersion 17\n}\n\npackagingOptions
+        {\n exclude 'META-INF/LICENSE.txt'\n  exclude 'META-INF/NOTICE.txt'\n}" -e
+        "/com.android.application/arepositories {\n  mavenCentral()\n  mavenLocal()\n}"
+        -e "/fileTree/acompile 'net.sourceforge.htmlcleaner:htmlcleaner:2.2'" -e "/fileTree/acompile
+        'org.apache.james:apache-mime4j-core:0.7.2'" -e "/fileTree/acompile 'org.apache.james:apache-mime4j-dom:0.7.2'"
+        -e "/fileTree/acompile 'com.jcraft:jzlib:1.0.7'" -e "/fileTree/acompile 'com.beetstra.jutf7:jutf7:1.0.1-SNAPSHOT'"
+        -e "/fileTree/acompile 'commons-io:commons-io:2.0.1'" build.gradle
+      - pushd $$Jutf7$$
+      - $$MVN3$$ install
+      - popd
+
+  - versionName: '5.006'
+    versionCode: 22006
+    commit: '5.006'
+    gradle:
+      - yes
+    srclibs:
+      - Jutf7@20
+    rm:
+      - libs/*
+    prebuild:
+      - sed -i -e "/buildToolsVersion/adefaultConfig {\ntargetSdkVersion 17\n}\n\npackagingOptions
+        {\n exclude 'META-INF/LICENSE.txt'\n  exclude 'META-INF/NOTICE.txt'\n}" -e
+        "/com.android.application/arepositories {\n  mavenCentral()\n  mavenLocal()\n}"
+        -e "/fileTree/acompile 'net.sourceforge.htmlcleaner:htmlcleaner:2.2'" -e "/fileTree/acompile
+        'org.apache.james:apache-mime4j-core:0.7.2'" -e "/fileTree/acompile 'org.apache.james:apache-mime4j-dom:0.7.2'"
+        -e "/fileTree/acompile 'com.jcraft:jzlib:1.0.7'" -e "/fileTree/acompile 'com.beetstra.jutf7:jutf7:1.0.1-SNAPSHOT'"
+        -e "/fileTree/acompile 'commons-io:commons-io:2.0.1'" build.gradle
+      - pushd $$Jutf7$$
+      - $$MVN3$$ install
+      - popd
+
+  - versionName: '5.007'
+    versionCode: 22007
+    commit: '5.007'
+    gradle:
+      - yes
+    srclibs:
+      - Jutf7@20
+    rm:
+      - libs/*
+    prebuild:
+      - sed -i -e "/buildToolsVersion/adefaultConfig {\ntargetSdkVersion 17\n}\n\npackagingOptions
+        {\n exclude 'META-INF/LICENSE.txt'\n  exclude 'META-INF/NOTICE.txt'\n}" -e
+        "/com.android.application/arepositories {\n  mavenCentral()\n  mavenLocal()\n}"
+        -e "/fileTree/acompile 'net.sourceforge.htmlcleaner:htmlcleaner:2.2'" -e "/fileTree/acompile
+        'org.apache.james:apache-mime4j-core:0.7.2'" -e "/fileTree/acompile 'org.apache.james:apache-mime4j-dom:0.7.2'"
+        -e "/fileTree/acompile 'com.jcraft:jzlib:1.0.7'" -e "/fileTree/acompile 'com.beetstra.jutf7:jutf7:1.0.1-SNAPSHOT'"
+        -e "/fileTree/acompile 'commons-io:commons-io:2.0.1'" build.gradle
+      - pushd $$Jutf7$$
+      - $$MVN3$$ install
+      - popd
+
+  - versionName: '5.008'
+    versionCode: 22008
+    commit: '5.008'
+    gradle:
+      - yes
+    srclibs:
+      - Jutf7@20
+    rm:
+      - libs/*
+    prebuild:
+      - sed -i -e "/buildToolsVersion/adefaultConfig {\ntargetSdkVersion 17\n}\n\npackagingOptions
+        {\n exclude 'META-INF/LICENSE.txt'\n  exclude 'META-INF/NOTICE.txt'\n}" -e
+        "/com.android.application/arepositories {\n  mavenCentral()\n  mavenLocal()\n}"
+        -e "/fileTree/acompile 'net.sourceforge.htmlcleaner:htmlcleaner:2.2'" -e "/fileTree/acompile
+        'org.apache.james:apache-mime4j-core:0.7.2'" -e "/fileTree/acompile 'org.apache.james:apache-mime4j-dom:0.7.2'"
+        -e "/fileTree/acompile 'com.jcraft:jzlib:1.0.7'" -e "/fileTree/acompile 'com.beetstra.jutf7:jutf7:1.0.1-SNAPSHOT'"
+        -e "/fileTree/acompile 'commons-io:commons-io:2.0.1'" build.gradle
+      - pushd $$Jutf7$$
+      - $$MVN3$$ install
+      - popd
+
+  - versionName: '5.009'
+    versionCode: 22009
+    disable: binaries
+    commit: '5.009'
+    gradle:
+      - yes
+    srclibs:
+      - Jutf7@20
+    rm:
+      - libs/*
+    prebuild:
+      - sed -i -e "/buildToolsVersion/adefaultConfig {\ntargetSdkVersion 17\n}\n\npackagingOptions
+        {\n exclude 'META-INF/LICENSE.txt'\n  exclude 'META-INF/NOTICE.txt'\n}" -e
+        "/com.android.application/arepositories {\n  mavenCentral()\n  mavenLocal()\n}"
+        -e "/fileTree/acompile 'net.sourceforge.htmlcleaner:htmlcleaner:2.2'" -e "/fileTree/acompile
+        'org.apache.james:apache-mime4j-core:0.7.2'" -e "/fileTree/acompile 'org.apache.james:apache-mime4j-dom:0.7.2'"
+        -e "/fileTree/acompile 'com.jcraft:jzlib:1.0.7'" -e "/fileTree/acompile 'com.beetstra.jutf7:jutf7:1.0.1-SNAPSHOT'"
+        -e "/fileTree/acompile 'commons-io:commons-io:2.0.1'" build.gradle
+      - pushd $$Jutf7$$
+      - $$MVN3$$ install
+      - popd
+
+  - versionName: '5.010'
+    versionCode: 22010
+    commit: '5.010'
+    gradle:
+      - yes
+    srclibs:
+      - Jutf7@20
+    rm:
+      - libs/*
+    prebuild:
+      - sed -i -e "/buildToolsVersion/adefaultConfig {\ntargetSdkVersion 17\n}\n\npackagingOptions
+        {\n exclude 'META-INF/LICENSE.txt'\n  exclude 'META-INF/NOTICE.txt'\n}" -e
+        "/com.android.application/arepositories {\n  mavenCentral()\n  mavenLocal()\n}"
+        -e "/fileTree/acompile 'net.sourceforge.htmlcleaner:htmlcleaner:2.2'" -e "/fileTree/acompile
+        'org.apache.james:apache-mime4j-core:0.7.2'" -e "/fileTree/acompile 'org.apache.james:apache-mime4j-dom:0.7.2'"
+        -e "/fileTree/acompile 'com.jcraft:jzlib:1.0.7'" -e "/fileTree/acompile 'com.beetstra.jutf7:jutf7:1.0.1-SNAPSHOT'"
+        -e "/fileTree/acompile 'commons-io:commons-io:2.0.1'" -e "/filetree/acompile
+        'de.cketti.safecontentresolver:safe-content-resolver-v14:0.0.1'" build.gradle
+      - pushd $$Jutf7$$
+      - $$MVN3$$ install
+      - popd
+    scandelete:
+      - plugins/SafeContentResolver/*
+
+  - versionName: '5.115'
+    versionCode: 23114
+    disable: remove
+    commit: '5.115'
+    subdir: k9mail
+    gradle:
+      - yes
+
+  - versionName: 5.200-RC2
+    versionCode: 23191
+    disable: remove
+    commit: '5.115'
+    subdir: k9mail
+    gradle:
+      - yes
+
+  - versionName: '5.200'
+    versionCode: 23200
+    commit: '5.200'
+    subdir: k9mail
+    gradle:
+      - yes
+
+  - versionName: '5.201'
+    versionCode: 23210
+    commit: '5.201'
+    subdir: k9mail
+    gradle:
+      - yes
+
+  - versionName: '5.202'
+    versionCode: 23220
+    commit: '5.202'
+    subdir: k9mail
+    gradle:
+      - yes
+
+  - versionName: '5.203'
+    versionCode: 23230
+    commit: '5.203'
+    subdir: k9mail
+    gradle:
+      - yes
+
+  - versionName: '5.205'
+    versionCode: 23250
+    commit: '5.205'
+    subdir: k9mail
+    gradle:
+      - yes
+
+  - versionName: '5.206'
+    versionCode: 23260
+    commit: '5.206'
+    subdir: k9mail
+    gradle:
+      - yes
+
+  - versionName: '5.207'
+    versionCode: 23270
+    commit: '5.207'
+    subdir: k9mail
+    gradle:
+      - yes
+
+  - versionName: '5.208'
+    versionCode: 23271
+    commit: '5.208'
+    subdir: k9mail
+    gradle:
+      - yes
+
+  - versionName: '5.400'
+    versionCode: 23600
+    commit: '5.400'
+    subdir: k9mail
+    gradle:
+      - yes
+    rm:
+      - tools/android-studio/settings.jar
+
+  - versionName: '5.401'
+    versionCode: 23610
+    commit: '5.401'
+    subdir: k9mail
+    gradle:
+      - yes
+    rm:
+      - tools/android-studio/settings.jar
+
+  - versionName: '5.402'
+    versionCode: 23620
+    commit: '5.402'
+    subdir: k9mail
+    gradle:
+      - yes
+    rm:
+      - tools/android-studio/settings.jar
+
+  - versionName: '5.403'
+    versionCode: 23630
+    commit: '5.403'
+    subdir: k9mail
+    gradle:
+      - yes
+    rm:
+      - tools/android-studio/settings.jar
+
   - versionName: '5.600'
     versionCode: 26000
     commit: '5.600'
@@ -28,6 +463,218 @@ Builds:
       - yes
     rm:
       - tools/android-studio/settings.jar
+
+  - versionName: '5.700'
+    versionCode: 27000
+    commit: '5.700'
+    subdir: app/k9mail
+    gradle:
+      - yes
+    rm:
+      - tools/android-studio/settings.jar
+    prebuild: echo 'org.gradle.jvmargs=-Xmx1g' >> ../../gradle.properties
+
+  - versionName: '5.701'
+    versionCode: 27001
+    commit: '5.701'
+    gradle:
+      - yes
+    output: app/k9mail/build/outputs/apk/release/k9mail-release-unsigned.apk
+    rm:
+      - tools/android-studio/settings.jar
+    prebuild: sed -i -e 's/6.0.1/5.6.4/' gradle/wrapper/gradle-wrapper.properties
+
+  - versionName: '5.702'
+    versionCode: 27002
+    commit: '5.702'
+    gradle:
+      - yes
+    output: app/k9mail/build/outputs/apk/release/k9mail-release-unsigned.apk
+    rm:
+      - tools/android-studio/settings.jar
+    prebuild: sed -i -e 's/6.0.1/5.6.4/' gradle/wrapper/gradle-wrapper.properties
+
+  - versionName: '5.703'
+    versionCode: 27003
+    commit: '5.703'
+    gradle:
+      - yes
+    output: app/k9mail/build/outputs/apk/release/k9mail-release-unsigned.apk
+    rm:
+      - tools/android-studio/settings.jar
+    prebuild: sed -i -e 's/6.0.1/5.6.4/' gradle/wrapper/gradle-wrapper.properties
+
+  - versionName: '5.704'
+    versionCode: 27004
+    commit: '5.704'
+    gradle:
+      - yes
+    output: app/k9mail/build/outputs/apk/release/k9mail-release-unsigned.apk
+    rm:
+      - tools/android-studio/settings.jar
+
+  - versionName: '5.705'
+    versionCode: 27005
+    commit: '5.705'
+    gradle:
+      - yes
+    output: app/k9mail/build/outputs/apk/release/k9mail-release-unsigned.apk
+    rm:
+      - tools/android-studio/settings.jar
+
+  - versionName: '5.706'
+    versionCode: 27006
+    commit: '5.706'
+    gradle:
+      - yes
+    output: app/k9mail/build/outputs/apk/release/k9mail-release-unsigned.apk
+    rm:
+      - tools/android-studio/settings.jar
+
+  - versionName: '5.707'
+    versionCode: 27007
+    commit: '5.707'
+    gradle:
+      - yes
+    output: app/k9mail/build/outputs/apk/release/k9mail-release-unsigned.apk
+    rm:
+      - tools/android-studio/settings.jar
+
+  - versionName: '5.708'
+    versionCode: 27008
+    commit: '5.708'
+    gradle:
+      - yes
+    output: app/k9mail/build/outputs/apk/release/k9mail-release-unsigned.apk
+    rm:
+      - tools/android-studio/settings.jar
+
+  - versionName: '5.709'
+    versionCode: 27009
+    commit: '5.709'
+    gradle:
+      - yes
+    output: app/k9mail/build/outputs/apk/release/k9mail-release-unsigned.apk
+    rm:
+      - tools/android-studio/settings.jar
+
+  - versionName: '5.710'
+    versionCode: 27010
+    commit: '5.710'
+    gradle:
+      - yes
+    output: app/k9mail/build/outputs/apk/release/k9mail-release-unsigned.apk
+    rm:
+      - tools/android-studio/settings.jar
+
+  - versionName: '5.711'
+    versionCode: 27011
+    disable: remove
+    commit: '5.711'
+    gradle:
+      - yes
+    output: app/k9mail/build/outputs/apk/release/k9mail-release-unsigned.apk
+    rm:
+      - tools/android-studio/settings.jar
+
+  - versionName: '5.712'
+    versionCode: 27012
+    commit: '5.712'
+    gradle:
+      - yes
+    output: app/k9mail/build/outputs/apk/release/k9mail-release-unsigned.apk
+    rm:
+      - tools/android-studio/settings.jar
+
+  - versionName: '5.713'
+    versionCode: 27013
+    commit: '5.713'
+    gradle:
+      - yes
+    output: app/k9mail/build/outputs/apk/release/k9mail-release-unsigned.apk
+    rm:
+      - tools/android-studio/settings.jar
+
+  - versionName: '5.714'
+    versionCode: 27014
+    commit: '5.714'
+    gradle:
+      - yes
+    output: app/k9mail/build/outputs/apk/release/k9mail-release-unsigned.apk
+    rm:
+      - tools/android-studio/settings.jar
+
+  - versionName: '5.715'
+    versionCode: 27015
+    commit: '5.715'
+    gradle:
+      - yes
+    output: app/k9mail/build/outputs/apk/release/k9mail-release-unsigned.apk
+    rm:
+      - tools/android-studio/settings.jar
+
+  - versionName: '5.716'
+    versionCode: 27016
+    commit: '5.716'
+    gradle:
+      - yes
+    output: app/k9mail/build/outputs/apk/release/k9mail-release-unsigned.apk
+    rm:
+      - tools/android-studio/settings.jar
+
+  - versionName: '5.717'
+    versionCode: 27017
+    commit: '5.717'
+    gradle:
+      - yes
+    output: app/k9mail/build/outputs/apk/release/k9mail-release-unsigned.apk
+    rm:
+      - tools/android-studio/settings.jar
+
+  - versionName: '5.718'
+    versionCode: 27018
+    commit: '5.718'
+    gradle:
+      - yes
+    output: app/k9mail/build/outputs/apk/release/k9mail-release-unsigned.apk
+    rm:
+      - tools/android-studio/settings.jar
+
+  - versionName: '5.719'
+    versionCode: 27019
+    disable: obsolte beta
+    commit: '5.719'
+    gradle:
+      - yes
+    output: app/k9mail/build/outputs/apk/release/k9mail-release-unsigned.apk
+    rm:
+      - tools/android-studio/settings.jar
+
+  - versionName: '5.720'
+    versionCode: 27020
+    disable: obsolte beta
+    commit: '5.720'
+    gradle:
+      - yes
+    output: app/k9mail/build/outputs/apk/release/k9mail-release-unsigned.apk
+    rm:
+      - tools/android-studio/settings.jar
+
+  - versionName: '5.721'
+    versionCode: 27021
+    commit: '5.721'
+    gradle:
+      - yes
+    output: app/k9mail/build/outputs/apk/release/k9mail-release-unsigned.apk
+    rm:
+      - tools/android-studio/settings.jar
+
+  - versionName: '5.722'
+    versionCode: 27022
+    commit: '5.722'
+    gradle:
+      - yes
+    output: app/k9mail/build/outputs/apk/release/k9mail-release-unsigned.apk
 
   - versionName: '5.724'
     versionCode: 27024
