@@ -1,0 +1,45 @@
+AntiFeatures:
+  - NonFreeNet
+Categories:
+  - Internet
+License: MPL-2.0
+SourceCode: https://github.com/yggdrasil-network/yggdrasil-android
+IssueTracker: https://github.com/yggdrasil-network/yggdrasil-android/issues
+
+AutoName: Yggdrasil
+
+RepoType: git
+Repo: https://github.com/yggdrasil-network/yggdrasil-android.git
+
+Builds:
+  - versionName: '1.5'
+    versionCode: 5
+    commit: v1.5
+    subdir: app
+    gradle:
+      - yes
+    build:
+      - sed -i '/signingConfig\ signing/d' build.gradle
+      - sed -i '/ndkVersion/d' build.gradle
+      - curl -Lso go.tar.gz https://golang.org/dl/go1.15.4.linux-amd64.tar.gz
+      - echo "eb61005f0b932c93b424a3a4eaa67d72196c79129d9a3ea8578047683e2c80d5 go.tar.gz"
+        | sha256sum -c -
+      - mkdir -p golang
+      - tar -C golang -xzf go.tar.gz
+      - export GOPATH="$PWD"
+      - export GO_LANG="$PWD/golang/go/bin"
+      - export GO_COMPILED="$PWD/bin"
+      - export PATH="$GO_LANG:$GO_COMPILED:$PATH"
+      - export ANDROID_SDK_ROOT=$$SDK$$
+      - export ANDROID_NDK_ROOT=$$NDK$$
+      - export PATH=$(pwd)/go/bin:$PATH
+      - go version
+      - ./golang/go/bin/go get golang.org/x/mobile/cmd/gomobile
+      - ./bin/gomobile init
+      - cd ../yggdrasil; make
+    ndk: r21d
+
+AutoUpdateMode: Version v%v
+UpdateCheckMode: Tags
+CurrentVersion: '1.5'
+CurrentVersionCode: 5
