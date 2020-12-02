@@ -137,7 +137,10 @@ fdroid build:
     - git fetch https://gitlab.com/fdroid/fdroiddata.git;
     - test -d build || mkdir build
     - for f in `git diff --name-only --diff-filter=d FETCH_HEAD...HEAD -- metadata/*.yml`; do
-          git diff FETCH_HEAD...HEAD -- $f |grep -E '^\+ *(NoSourceSince|Disabled|disable):' && continue;
+          diff=$(git diff FETCH_HEAD...HEAD -- $f);
+          echo "$diff";
+          test $(echo "$diff" | grep '^[+-] ' | grep -v '^+  *disable:' | wc -l) = 0 && continue;
+          echo "$diff" | grep -E '^\+ *(NoSourceSince|Disabled):' && continue;
           appid=`echo $f | sed -n -e 's,^metadata/\([^/][^/]*\)\.yml,\1,p'`;
           export CHANGED="$CHANGED $appid";
       done;
