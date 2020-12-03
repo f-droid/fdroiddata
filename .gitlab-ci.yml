@@ -1,6 +1,6 @@
-image: registry.gitlab.com/fdroid/ci-images-server:latest
 
 lint:
+  image: registry.gitlab.com/fdroid/ci-images-base
   except:
     refs:
       - triggers
@@ -11,6 +11,8 @@ lint:
     - echo "deb http://deb.debian.org/debian/ stretch-backports main" > /etc/apt/sources.list.d/backports.list
     - apt-get update
     - apt-get -qy dist-upgrade
+    - apt-get install -qy --no-install-recommends
+          `apt-cache depends fdroidserver | grep -Fv -e java -e jdk -e '<' | awk '/Depends:/{print$2}'`
 
     - rm -rf fdroidserver
     - mkdir fdroidserver
