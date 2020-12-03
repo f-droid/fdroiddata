@@ -1,0 +1,50 @@
+Categories:
+  - Internet
+License: GPL-3.0-only
+AuthorName: The Blokada Community
+AuthorEmail: hello@blokada.org
+WebSite: https://blokada.org
+SourceCode: https://go.blokada.org/dev_home
+IssueTracker: https://github.com/blokadaorg/blokada/issues
+Changelog: https://go.blokada.org/changelog
+Donate: https://go.blokada.org/donate
+Bitcoin: 16rJ49uNKCohVhHvWNganP6Y48Ba9BTyKd
+
+Name: Blokada 5 (ad blocker and privacy app)
+
+RepoType: git
+Repo: https://github.com/blokadaorg/blokada.git
+
+Builds:
+  - versionName: 5.5.0
+    versionCode: 505000000
+    commit: android-v5.5.0
+    subdir: android5/app
+    gradle:
+      - Droid
+    srclibs:
+      - rustup@1.22.1
+    rm:
+      - android5/app/src/engine/jniLibs
+    prebuild:
+      - unzip -P default_blocklist src/main/assets/default_blocklist.zip default_blocklist
+        -d src/main/assets
+      - rm src/main/assets/default_blocklist.zip
+    build:
+      - $$rustup$$/rustup-init.sh -y
+      - source $HOME/.cargo/env
+      - rustup default stable
+      - rustup target add armv7-linux-androideabi
+      - rustup target add aarch64-linux-android
+      - cargo install cargo-ndk
+      - git submodule update --init --recursive
+      - export ANDROID_NDK=$$NDK$$
+      - cd ./../..
+      - ./build.boringtun.sh
+      - ./build.blocka.sh
+    ndk: r21d
+
+AutoUpdateMode: Version android-v%v
+UpdateCheckMode: Tags
+CurrentVersion: 5.5.0
+CurrentVersionCode: 505000000
