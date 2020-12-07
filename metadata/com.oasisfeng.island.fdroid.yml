@@ -37,16 +37,17 @@ Builds:
   - versionName: 5.1.2
     versionCode: 51200
     commit: v5.1.2-fdroid
-    output: assembly/build/outputs/apk/completeFdroid/release/*.apk
+    subdir: assembly
+    gradle:
+      - completeFdroid
     srclibs:
       - deagle@dev
       - setupwizard@android10-mainline-release
-    prebuild: sed -i -e 's!..\/deagle!$$deagle$$!' -e 's!..\/setup-wizard!$$setupwizard$$!'
-        settings.gradle
-    build:
-      - export VERSION_CODE=$$VERCODE$$
-      - export VERSION_NAME=$$VERSION$$
-      - gradlew-fdroid assembleCompleteFdroidRelease
+    prebuild:
+      - sed -i -e 's!..\/deagle!$$deagle$$!' -e 's!..\/setup-wizard!$$setupwizard$$!'
+        ../settings.gradle
+      - sed -i -e 's!System.env.VERSION_CODE!\"$$VERCODE$$\"!' -e 's!System.env.VERSION_NAME!\"$$VERSION$$\"!'
+        build.gradle
 
 AutoUpdateMode: Version %v-fdroid
 UpdateCheckMode: RepoManifest/dev-ci
