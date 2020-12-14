@@ -1,0 +1,50 @@
+Categories:
+  - Multimedia
+License: Unlicense
+AuthorName: Marcel Dopita
+AuthorEmail: m@rcel.cz
+AuthorWebSite: https://brouken.com/
+SourceCode: https://github.com/moneytoo/Player
+IssueTracker: https://github.com/moneytoo/Player/issues
+Donate: https://paypal.me/MarcelDopita
+Bitcoin: bc1q9u2ezgsnug995fv0m4vaxa90ujjwlucp78w4n0
+Litecoin: LLZ3fULGwxbs6W9Vf7gtu1EjZvviCka7zP
+
+Name: Just (Video) Player
+
+RepoType: git
+Repo: https://github.com/moneytoo/Player
+
+Builds:
+  - versionName: '0.8'
+    versionCode: 8
+    commit: v0.8
+    subdir: app
+    gradle:
+      - yes
+    srclibs:
+      - ExoPlayer@r2.12.2
+      - FFmpeg@release/4.2
+    scandelete:
+      - app/libs/
+    build:
+      - export FFMPEG_EXT_PATH="$$ExoPlayer$$/extensions/ffmpeg/src/main"
+      - export HOST_PLATFORM="$(uname -s | tr '[:upper:]' '[:lower:]')-x86_64"
+      - export ENABLED_DECODERS=(vorbis opus flac alac pcm_mulaw pcm_alaw mp3 amrnb
+        amrwb aac ac3 eac3 dca mlp truehd)
+      - pushd "${FFMPEG_EXT_PATH}/jni"
+      - ln -s "$$FFmpeg$$" ffmpeg
+      - cd "${FFMPEG_EXT_PATH}/jni"
+      - ./build_ffmpeg.sh "${FFMPEG_EXT_PATH}" "$$NDK$$" "${HOST_PLATFORM}" "${ENABLED_DECODERS[@]}"
+      - cd "$$ExoPlayer$$"
+      - ./gradlew :extension-ffmpeg:bundleReleaseAar
+      - popd
+      - cp $$ExoPlayer$$/extensions/ffmpeg/buildout/outputs/aar/*.aar libs/
+    ndk: r20b
+
+MaintainerNotes: 'FFmpeg extension build instructions: https://github.com/google/ExoPlayer/blob/r2.12.2/extensions/ffmpeg/README.md'
+
+AutoUpdateMode: None
+UpdateCheckMode: Tags ^v[0-9.]*$
+CurrentVersion: '0.8'
+CurrentVersionCode: 8
