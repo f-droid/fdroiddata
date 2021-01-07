@@ -1,0 +1,45 @@
+Categories:
+  - Games
+License: GPL-2.0-only
+
+Description: |
+    An arcade style game in the tradition of:
+
+    * Boulder Dash (C 64)
+    * Emerald Mine (Amiga)
+    * Supaplex (Amiga/PC)
+    * Sokoban (PC)
+
+RepoType: git
+Repo: http://git.artsoft.org/rocksndiamonds.git
+
+Builds:
+  - versionName: 4.2.2.0
+    versionCode: 4020200
+    commit: 4.2.2.0
+    subdir: build-projects/android/app/
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y libsdl2-dev
+    gradle:
+      - yes
+    prebuild:
+      - sed -i -e 's#./gradlew#gradle#' ../Makefile
+      - pushd ..
+      - make manifest sdl assets assets-toc
+      - popd
+    scanignore:
+      - levels/Classic_Games/classic_emerald_mine/
+      - build-projects/android/app/src/main/assets/levels/Classic_Games/classic_emerald_mine/
+    scandelete:
+      - build-projects/android/app/jni/*/Xcode/
+      - build-projects/android/app/jni/SDL2_image/external/
+    build:
+      - pushd ..
+      - export ANDROID_HOME=$$SDK$$
+      - make
+      - popd
+    ndk: r21d
+
+AutoUpdateMode: None
+UpdateCheckMode: None
