@@ -3626,6 +3626,7 @@ Builds:
 
   - versionName: 3.9.4
     versionCode: 394
+    disable: WiP after upstream gradle file refactor
     commit: v3.9.4
     subdir: android/OsmAnd
     submodules: true
@@ -3642,10 +3643,11 @@ Builds:
     rm:
       - android/OsmAnd-java/libs/*.jar
       - android/OsmAnd/libs/*.jar
-      - android/OsmAndCore-sample
       - help/website/images/features.zip
       - resources/icons/tools/SVGtoXML/vd-tool
     prebuild:
+      - perl -i -0 -p -e "s|maven {\n\s*url 'https://developer.huawei.com/repo/'\n\s*}||g"
+        ../build.gradle
       - sed -i -e "/.*OsmAndCore.*SNAPSHOT.*/d" ../OsmAnd/build.gradle
       - sed -i -e "/ivy {/,+6d" ../OsmAnd/build.gradle
       - sed -i -e '/qt.*Compile/d' -e '/com.google.firebase/d' build.gradle ../plugins/Osmand-ParkingPlugin/build.gradle
@@ -3669,7 +3671,6 @@ Builds:
         \ ['classes.jar','icu4j.jar'], dir: 'libs')\\n implementation group: 'net.sf.trove4j',\
         \ name: 'trove4j', version: '3.0.3'\\n/\" build.gradle"
       - sed -i -e '/facebook/d' build.gradle
-      - sed -i -e "s/, ':OsmAndCore-sample'//" ../settings.gradle
       - pushd ../../core-legacy/externals
       - sed -i "s/# Extract/sha256sum \$SRCLOC\/upstream.tar.bz2 | grep 13bfc5ae543cf3aa180ac2485c0bc89495e3ae711fc6fab4f8ffe90dfb4bb677
         || { echo 'Failed checksum' 1>\&2; exit; }/" protobuf/configure.sh
@@ -3677,7 +3678,7 @@ Builds:
       - sed -i "s/# Patch/cp -r $(echo $$osmand-external-skia$$ | sed 's/\//\\\//g')
         \$SRCLOC\/upstream.original/" skia/configure.sh
       - popd
-      - echo "org.gradle.jvmargs=-XX:MaxHeapSize=2048m" >> ../gradle.properties
+      - echo -e "\norg.gradle.jvmargs=-XX:MaxHeapSize=2048m" >> ../gradle.properties
     scandelete:
       - resources/test-resources
     build:
@@ -3749,11 +3750,6 @@ MaintainerNotes: |-
     (http://bugs.icu-project.org/trac/ticket/12021).  The end of the build
     process compiles this library and removes a bunch of unwanted data
     files.
-
-    The prebuild finishes in the core-legacy/externals directory.  Just before this
-    there is a sed command removes OsmAndCore-sample from the settings to prevent
-    its build (which also downloads prebuilt binaries).  OsmAndCore-sample is demo
-    code that is not needed.
 
     In core-legacy/externals the build fetches in source tarballs from external
     sources.  Checksums for these need to be verified but are not.  Hence the lines
