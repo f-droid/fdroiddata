@@ -3626,7 +3626,6 @@ Builds:
 
   - versionName: 3.9.4
     versionCode: 394
-    disable: WiP after upstream gradle file refactor
     commit: v3.9.4
     subdir: android/OsmAnd
     submodules: true
@@ -3634,6 +3633,7 @@ Builds:
       - apt-get update || apt-get update
       - apt-get install --yes swig
     gradle:
+      - android
       - full
       - legacy
       - fat
@@ -3643,13 +3643,17 @@ Builds:
     rm:
       - android/OsmAnd-java/libs/*.jar
       - android/OsmAnd/libs/*.jar
+      - android/OsmAnd-telegram/
       - help/website/images/features.zip
       - resources/icons/tools/SVGtoXML/vd-tool
     prebuild:
+      - sed -i -e "/.*OsmAndCore.*SNAPSHOT.*/d" build-common.gradle
+      - sed -i -e "/.*OsmAndCore.*SNAPSHOT.*/d" build.gradle
+      - sed -i -e "/ivy {/,+6d" ../build.gradle
+      - rm build-library.gradle
       - perl -i -0 -p -e "s|maven {\n\s*url 'https://developer.huawei.com/repo/'\n\s*}||g"
         ../build.gradle
-      - sed -i -e "/.*OsmAndCore.*SNAPSHOT.*/d" ../OsmAnd/build.gradle
-      - sed -i -e "/ivy {/,+6d" ../OsmAnd/build.gradle
+      - sed -i -e "/huaweiImplementation/d" build.gradle
       - sed -i -e '/qt.*Compile/d' -e '/com.google.firebase/d' build.gradle ../plugins/Osmand-ParkingPlugin/build.gradle
         ../plugins/Osmand-SRTMPlugin/build.gradle ../plugins/Osmand-Skimaps/build.gradle
         ../plugins/Osmand-Nautical/build.gradle
@@ -3657,17 +3661,13 @@ Builds:
       - sed -i -e "s/System.getenv(\"APK_NUMBER_VERSION\")/\"$$VERCODE$$\"/g" build.gradle
       - sed -i -e "s/System.getenv(\"TARGET_APP_NAME\")/\"OsmAnd~\"/g" build.gradle
       - sed -i -e '/com.android.vending.BILLING/d' AndroidManifest.xml
-      - "sed -i -e \"s/implementation fileTree.*/ implementation fileTree(include:\
-        \ ['icu4j.jar'], dir: 'libs')\\n implementation 'commons-logging:commons-logging:1.1.1'\\\
-        n implementation group: 'net.sf.trove4j', name: 'trove4j', version: '3.0.3'\\\
-        n implementation 'org.json:json:20090211'\\n implementation 'it.unibo.alice.tuprolog:tuprolog:3.2.1'\\\
-        n implementation 'net.sf.kxml:kxml2:2.3.0'\\n implementation 'org.beanshell:bsh-core:2.0b4'\\\
-        n implementation 'fr.univ-valenciennes:bzip2:1.0'\\n implementation 'com.moparisthebest:junidecode:0.1.1'\\\
-        n implementation 'com.vividsolutions:jts-core:1.14.0'/\" ../OsmAnd-java/build.gradle"
+      - "sed -i -e \"s/implementation fileTree.*/implementation fileTree(include:\
+        \ ['icu4j.jar'], dir: 'libs')\\n implementation group: 'net.sf.trove4j', name:\
+        \ 'trove4j', version: '3.0.3'\\n/\" ../OsmAnd-java/build.gradle"
       - "sed -i -e \"s/implementation fileTree.*/implementation fileTree(include:\
         \ ['classes.jar','icu4j.jar'], dir: 'libs')\\n implementation group: 'net.sf.trove4j',\
-        \ name: 'trove4j', version: '3.0.3'\\n/\" build.gradle"
-      - sed -i -e '/facebook/d' build.gradle
+        \ name: 'trove4j', version: '3.0.3'\\n/\" build-common.gradle"
+      - sed -i -e "s/, ':OsmAnd-telegram'//" ../settings.gradle
       - pushd ../../core-legacy/externals
       - sed -i "s/# Extract/sha256sum \$SRCLOC\/upstream.tar.bz2 | grep 13bfc5ae543cf3aa180ac2485c0bc89495e3ae711fc6fab4f8ffe90dfb4bb677
         || { echo 'Failed checksum' 1>\&2; exit; }/" protobuf/configure.sh
@@ -3708,9 +3708,6 @@ Builds:
 MaintainerNotes: |-
     Update CV only after sucessfully built and tested.
 
-    Summary and Description have been moved to the new localizable text files:
-    https://f-droid.org/docs/All_About_Descriptions_Graphics_and_Screenshots
-
     Initial section of build commands builds the OsmAnd core java
     interface.  The standard build downloads a prebuilt jar file from the OsmAnd
     build server.  To avoid this, the required jar file is built in
@@ -3722,24 +3719,20 @@ MaintainerNotes: |-
     build/outputs/aar/OsmAndCore_android-release.aar and it is copied to the
     android/OsmAnd submodule as libs/classes.jar.  
 
-    A couple of rogue pngs are scan-ignored.
-
     In the prebuild, the very first sed command prevents gradle downloading
     OsmAndCore*SNAPSHOT.(j|a)ar, which contains the files built above.  To
     be extra sure the next command removes the osmand ivy repository.
 
-    Many other jar files are distributed, prebuilt, with the OsmAnd submodules.
+    We delete the huawei maven repo afterwards (with perl because multi-line sed is 
+    annoying).
+
+    Some other jar files are distributed, prebuilt, with the OsmAnd submodules.
     The rm= command removes all of these, and replacements are sought through
     Maven.  This is what the sed commands replacing "compile fileTree" sections are
     doing.  Details of replaced jars are below.
 
     Replacement of jar files in OsmAnd-java where versions did not match:
-        commons-logging-1.1.1.jar replaced with commons-logging:commons-logging:1.1.1
         gnu-trove-osmand.jar replaced with net.sf.trove4j:trove4j:3.0.3
-        tuprolog.jar replaced with it.unibo.alice.tuprolog:tuprolog:3.2.1
-        bzip2-20090327.jar replaced with compile 'fr.univ-valenciennes:bzip2:1.0'
-        junidecode-0.1.jar replaced with compile 'com.moparisthebest:junidecode:0.1.1'
-        simple-logging.jar not replaced (subset of commons-logging-1.1.1.jar)
 
     icu4j-49_1_patched.jar was replaced with the icu50-2-1 srclib which is a
     mirror of the nearest icu version i could find with the patch applied
@@ -3761,5 +3754,5 @@ MaintainerNotes: |-
 
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: 3.8.5
-CurrentVersionCode: 385
+CurrentVersion: 3.9.4
+CurrentVersionCode: 394
