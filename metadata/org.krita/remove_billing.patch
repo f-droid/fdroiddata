@@ -1,0 +1,412 @@
+diff --git a/remove_billing_actual.patch b/remove_billing_actual.patch
+new file mode 100644
+index 0000000000..d1bea8e661
+--- /dev/null
++++ b/remove_billing_actual.patch
+@@ -0,0 +1,406 @@
++diff --git a/libs/ui/KisWelcomePageWidget.cpp b/libs/ui/KisWelcomePageWidget.cpp
++index b4077b5f0f..b65fe659e5 100644
++--- a/libs/ui/KisWelcomePageWidget.cpp
+++++ b/libs/ui/KisWelcomePageWidget.cpp
++@@ -46,20 +46,6 @@
++ #include <KisPart.h>
++ #include <utils/KisFileIconCreator.h>
++ 
++-#include <kritaversion.h>
++-#include <QSysInfo>
++-#include <kis_config.h>
++-#include <kis_image_config.h>
++-#include "opengl/kis_opengl.h"
++-
++-#ifdef Q_OS_ANDROID
++-#include <QtAndroid>
++-
++-
++-QPushButton* KisWelcomePageWidget::donationLink;
++-QLabel* KisWelcomePageWidget::donationBannerImage;
++-#endif
++-
++ 
++ KisWelcomePageWidget::KisWelcomePageWidget(QWidget *parent)
++     : QWidget(parent)
++@@ -117,35 +103,22 @@ KisWelcomePageWidget::KisWelcomePageWidget(QWidget *parent)
++     helpTitleLabel_2->hide();
++     chkShowNews->hide();
++ 
++-    donationLink = new QPushButton(dropFrameBorder);
++-    donationLink->setFlat(true);
+++    donationLink = new QLabel(dropFrameBorder);
+++    donationLink->setOpenExternalLinks(true);
+++    donationLink->setTextInteractionFlags(Qt::TextBrowserInteraction);
+++
++     QFont f = font();
++     f.setPointSize(15);
++-    f.setUnderline(true);
++     donationLink->setFont(f);
++ 
++-    connect(donationLink, SIGNAL(clicked(bool)), this, SLOT(slotStartDonationFlow()));
++-
++     verticalLayout_3->addWidget(donationLink);
++-    verticalLayout_3->setAlignment(donationLink, Qt::AlignTop);
++     verticalLayout_3->setSpacing(20);
++ 
++-    donationBannerImage = new QLabel(dropFrameBorder);
+++    QLabel *donationBannerImage = new QLabel(dropFrameBorder);
++     QString bannerPath = QStandardPaths::locate(QStandardPaths::AppDataLocation, "share/krita/donation/banner.png");
++     donationBannerImage->setPixmap(QPixmap(bannerPath));
++ 
++     verticalLayout_3->addWidget(donationBannerImage);
++-
++-    jboolean bannerPurchased = QAndroidJniObject::callStaticMethod<jboolean>("org/krita/android/DonationHelper", "isBadgePurchased", "()Z");
++-    if (bannerPurchased) {
++-        donationLink->hide();
++-        donationBannerImage->show();
++-        QAndroidJniObject::callStaticMethod<void>("org/krita/android/DonationHelper", "endConnection", "()V");
++-    } else {
++-        donationLink->show();
++-        donationBannerImage->hide();
++-    }
++-
++ #endif
++ 
++ 
++@@ -282,8 +255,8 @@ void KisWelcomePageWidget::slotUpdateThemeColors()
++ 
++ 
++ #ifdef Q_OS_ANDROID
++-    donationLink->setStyleSheet(blendedStyle);
++-    donationLink->setText(QString(i18n("Get your Krita Supporter Badge here!")));
+++    donationLink->setText(QString("<a style=\"color: " + blendedColor.name() + " \" href=\"https://krita.org/en/support-us/donations?" + analyticsString + "donations" + "\">")
+++                              .append(i18n("Krita is free and open source.")).append("<br>").append(i18n("Support Krita's Development!")).append("</a>"));
++ #endif
++     // re-populate recent files since they might have themed icons
++     populateRecentDocuments();
++@@ -400,13 +373,6 @@ void KisWelcomePageWidget::slotUpdateVersionMessage()
++ 
++ }
++ 
++-#ifdef Q_OS_ANDROID
++-void KisWelcomePageWidget::slotStartDonationFlow()
++-{
++-    QAndroidJniObject::callStaticMethod<void>("org/krita/android/DonationHelper", "startBillingFlow", "()V");
++-}
++-#endif
++-
++ void KisWelcomePageWidget::dragEnterEvent(QDragEnterEvent *event)
++ {
++     //qDebug() << "dragEnterEvent formats" << event->mimeData()->formats() << "urls" << event->mimeData()->urls() << "has images" << event->mimeData()->hasImage();
++@@ -477,13 +443,3 @@ void KisWelcomePageWidget::slotOpenFileClicked()
++     m_mainWindow->slotFileOpen();
++ }
++ 
++-#ifdef Q_OS_ANDROID
++-extern "C" JNIEXPORT void JNICALL
++-Java_org_krita_android_JNIWrappers_donationSuccessful(JNIEnv* /*env*/,
++-                                                      jobject /*obj*/,
++-                                                      jint    /*n*/)
++-{
++-    KisWelcomePageWidget::donationLink->hide();
++-    KisWelcomePageWidget::donationBannerImage->show();
++-}
++-#endif
++diff --git a/libs/ui/KisWelcomePageWidget.h b/libs/ui/KisWelcomePageWidget.h
++index 4b192325a8..b41b248eb1 100644
++--- a/libs/ui/KisWelcomePageWidget.h
+++++ b/libs/ui/KisWelcomePageWidget.h
++@@ -52,10 +52,6 @@ public Q_SLOTS:
++ 
++     void slotUpdateVersionMessage();
++ 
++-#ifdef Q_OS_ANDROID
++-    void slotStartDonationFlow();
++-#endif
++-
++ protected:
++ 
++     // QWidget overrides
++@@ -85,11 +81,9 @@ private:
++     QColor blendedColor;
++     QString blendedStyle;
++ 
++-#ifdef Q_OS_ANDROID
++-public:
++-    static QPushButton* donationLink;
++-    static QLabel* donationBannerImage;
++-#endif
+++
+++
+++    QLabel* donationLink;
++ 
++ private Q_SLOTS:
++     void slotNewFileClicked();
++diff --git a/packaging/android/apk/AndroidManifest.xml b/packaging/android/apk/AndroidManifest.xml
++index 426a354914..2b5ab3da57 100644
++--- a/packaging/android/apk/AndroidManifest.xml
+++++ b/packaging/android/apk/AndroidManifest.xml
++@@ -137,6 +137,5 @@
++ 
++     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
++     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
++-    <uses-permission android:name="com.android.vending.BILLING" />
++ 
++ </manifest>
++diff --git a/packaging/android/apk/build.gradle b/packaging/android/apk/build.gradle
++index 3ebdc632b3..30bd0c3ce8 100644
++--- a/packaging/android/apk/build.gradle
+++++ b/packaging/android/apk/build.gradle
++@@ -143,8 +143,3 @@ android {
++     preBuild.dependsOn(copyAssets)
++     preBuild.dependsOn(removeDuplicateAssets)
++ }
++-
++-dependencies {
++-    implementation 'com.android.billingclient:billing:2.2.0'
++-}
++-
++diff --git a/packaging/android/apk/res/values/strings.xml b/packaging/android/apk/res/values/strings.xml
++index 482f93ed44..c3545fe5f3 100644
++--- a/packaging/android/apk/res/values/strings.xml
+++++ b/packaging/android/apk/res/values/strings.xml
++@@ -8,7 +8,5 @@
++ 	<string name="remote_action_swiperight">Swipe Right</string>
++ 	<string name="remote_action_circlecw">Circle Clockwise</string>
++ 	<string name="remote_action_circleccw">Circle Counter-Clockwise</string>
++-	<string name="something_wrong">Something went wrong...</string>
++-	<string name="cancelled">Cancelled</string>
++ </resources>
++ 
++diff --git a/packaging/android/apk/src/org/krita/android/DonationHelper.java b/packaging/android/apk/src/org/krita/android/DonationHelper.java
++deleted file mode 100644
++index 43537f1312..0000000000
++--- a/packaging/android/apk/src/org/krita/android/DonationHelper.java
+++++ /dev/null
++@@ -1,204 +0,0 @@
++-/*
++- * This file is part of the KDE project
++- * Copyright (C) 2020 Sharaf Zaman <sharafzaz121@gmail.com>
++- *
++- * This program is free software; you can redistribute it and/or modify
++- * it under the terms of the GNU General Public License as published by
++- * the Free Software Foundation; either version 2 of the License, or
++- * (at your option) any later version.
++- *
++- * This program is distributed in the hope that it will be useful,
++- * but WITHOUT ANY WARRANTY; without even the implied warranty of
++- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++- * GNU General Public License for more details.
++- *
++- * You should have received a copy of the GNU General Public License
++- * along with this program; if not, write to the Free Software
++- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
++- */
++-
++-package org.krita.android;
++-
++-import android.util.Log;
++-import android.widget.Toast;
++-
++-import com.android.billingclient.api.AcknowledgePurchaseParams;
++-import com.android.billingclient.api.AcknowledgePurchaseResponseListener;
++-import com.android.billingclient.api.BillingClient;
++-import com.android.billingclient.api.BillingClientStateListener;
++-import com.android.billingclient.api.BillingFlowParams;
++-import com.android.billingclient.api.BillingResult;
++-import com.android.billingclient.api.Purchase;
++-import com.android.billingclient.api.PurchasesUpdatedListener;
++-import com.android.billingclient.api.SkuDetails;
++-import com.android.billingclient.api.SkuDetailsParams;
++-import com.android.billingclient.api.SkuDetailsResponseListener;
++-
++-import org.krita.R;
++-import org.qtproject.qt5.android.QtNative;
++-
++-import java.util.ArrayList;
++-import java.util.List;
++-
++-public class DonationHelper implements PurchasesUpdatedListener, BillingClientStateListener, SkuDetailsResponseListener {
++-
++-    private final String LOG_TAG = "krita.DonationHelper";
++-
++-    private BillingClient mBillingClient;
++-    private List<SkuDetails> mSkuDetails;
++-
++-    private static DonationHelper sInstance;
++-
++-    private DonationHelper() {
++-
++-        mBillingClient = BillingClient.newBuilder(QtNative.getContext())
++-                                      .setListener(this)
++-                                      .enablePendingPurchases()
++-                                      .build();
++-        mBillingClient.startConnection(this);
++-    }
++-
++-    public static DonationHelper getInstance() {
++-        if (sInstance == null) {
++-            sInstance = new DonationHelper();
++-        }
++-        return sInstance;
++-    }
++-
++-    @Override
++-    public void onBillingSetupFinished(BillingResult billingResult) {
++-        if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK) {
++-            querySkuDetails();
++-        }
++-    }
++-
++-    private void querySkuDetails() {
++-        List<String> skus = new ArrayList<>();
++-        skus.add("thankyoukiki");
++-
++-        SkuDetailsParams params = SkuDetailsParams.newBuilder()
++-          .setType(BillingClient.SkuType.INAPP)
++-          .setSkusList(skus)
++-          .build();
++-
++-        mBillingClient.querySkuDetailsAsync(params, this);
++-    }
++-
++-    @Override
++-    public void onSkuDetailsResponse(BillingResult billingResult, List<SkuDetails> list) {
++-        if (billingResult == null) {
++-            Log.e(LOG_TAG, "null billingResult");
++-            return;
++-        }
++-
++-        if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK) {
++-            if (list != null) {
++-                mSkuDetails = list;
++-            }
++-        }
++-    }
++-
++-    @Override
++-    public void onBillingServiceDisconnected() {
++-
++-    }
++-
++-
++-    @Override
++-    public void onPurchasesUpdated(BillingResult billingResult, List<Purchase> purchases) {
++-        if (billingResult == null) {
++-            Log.e(LOG_TAG, "null billingResult");
++-            return;
++-        }
++-        switch (billingResult.getResponseCode()) {
++-            case BillingClient.BillingResponseCode.OK:
++-                // only one item, for now
++-                for (Purchase purchase: purchases) {
++-                    handlePurchase(purchase);
++-                }
++-                break;
++-
++-            case BillingClient.BillingResponseCode.ITEM_ALREADY_OWNED:
++-                // this shouldn't happen with our current logic!
++-                Log.w(LOG_TAG, "Item already owned");
++-                JNIWrappers.donationSuccessful();
++-                break;
++-
++-            case BillingClient.BillingResponseCode.DEVELOPER_ERROR:
++-                Log.e(LOG_TAG, "Dev Error: " + billingResult.getDebugMessage());
++-                break;
++-
++-            case BillingClient.BillingResponseCode.USER_CANCELED:
++-                showToast(R.string.cancelled);
++-                break;
++-
++-            default:
++-                showToast(R.string.something_wrong);
++-        }
++-    }
++-
++-    private void handlePurchase(Purchase purchase) {
++-        if (purchase.getPurchaseState() == Purchase.PurchaseState.PURCHASED) {
++-            ackPurchase(purchase);
++-            JNIWrappers.donationSuccessful();
++-        }
++-    }
++-
++-    private void ackPurchase(Purchase purchase) {
++-        AcknowledgePurchaseParams params = AcknowledgePurchaseParams
++-                                                 .newBuilder()
++-                                                 .setPurchaseToken(purchase.getPurchaseToken())
++-                                                 .build();
++-        mBillingClient.acknowledgePurchase(params, new AcknowledgePurchaseResponseListener() {
++-            @Override
++-            public void onAcknowledgePurchaseResponse(BillingResult billingResult) {
++-                Log.d(LOG_TAG, "BillingResult: " + billingResult.getResponseCode());
++-            }
++-        });
++-    }
++-
++-    private static void showToast(final int resourceId) {
++-        QtNative.activity().runOnUiThread(new Runnable() {
++-            @Override
++-            public void run() {
++-                Toast.makeText(QtNative.getContext(), resourceId, Toast.LENGTH_LONG).show();
++-            }
++-        });
++-    }
++-
++-    public static void startBillingFlow() {
++-        if (!getInstance().mBillingClient.isReady()) {
++-            getInstance().mBillingClient.startConnection(sInstance);
++-            showToast(R.string.something_wrong);
++-            return;
++-        }
++-
++-        if (getInstance().mSkuDetails != null) {
++-            // there's only one for nwo
++-            for (SkuDetails detail: getInstance().mSkuDetails) {
++-                BillingFlowParams flowParams = BillingFlowParams.newBuilder()
++-                  .setSkuDetails(detail)
++-                  .build();
++-
++-                getInstance().mBillingClient.launchBillingFlow(QtNative.activity(), flowParams);
++-            }
++-        }
++-    }
++-
++-    // This method will be called from C++ side, to see if the banner has been purchased.
++-    // We only have one item right now, so this will do.
++-    public static boolean isBadgePurchased() {
++-        Purchase.PurchasesResult purchasesResult =
++-          getInstance().mBillingClient.queryPurchases(BillingClient.SkuType.INAPP);
++-
++-        if (purchasesResult.getPurchasesList() != null)
++-            return !purchasesResult.getPurchasesList().isEmpty();
++-        else
++-            return false;
++-    }
++-
++-    public static void endConnection() {
++-        getInstance().mBillingClient.endConnection();
++-        sInstance = null;
++-    }
++-}
++diff --git a/packaging/android/apk/src/org/krita/android/JNIWrappers.java b/packaging/android/apk/src/org/krita/android/JNIWrappers.java
++index 781a6ac7cd..d91a899436 100644
++--- a/packaging/android/apk/src/org/krita/android/JNIWrappers.java
+++++ b/packaging/android/apk/src/org/krita/android/JNIWrappers.java
++@@ -22,7 +22,6 @@ package org.krita.android;
++ class JNIWrappers {
++ 	public static native void saveState();
++ 	public static native void exitFullScreen();
++-	public static native void donationSuccessful();
++     public static native void openFileFromIntent(String uri);
++ }
++ 
++diff --git a/packaging/android/apk/src/org/krita/android/MainActivity.java b/packaging/android/apk/src/org/krita/android/MainActivity.java
++index 9e7cb47280..4a4f9c8554 100644
++--- a/packaging/android/apk/src/org/krita/android/MainActivity.java
+++++ b/packaging/android/apk/src/org/krita/android/MainActivity.java
++@@ -54,8 +54,6 @@ public class MainActivity extends QtActivity {
++ 
++ 		super.onCreate(savedInstanceState);
++ 		new ConfigsManager().handleAssets(this);
++-
++-        DonationHelper.getInstance();
++ 	}
++ 
++     @Override
