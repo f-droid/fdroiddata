@@ -3786,6 +3786,87 @@ Builds:
       - cp $$icu50-2-1-patched$$/icu4j/icu4j.jar ../OsmAnd-java/libs/
     ndk: r17c
 
+  - versionName: 3.9.6
+    versionCode: 396
+    commit: v3.9.6
+    subdir: android/OsmAnd
+    submodules: true
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install --yes swig
+    gradle:
+      - android
+      - full
+      - legacy
+      - fat
+    srclibs:
+      - icu50-2-1-patched@0d825a9779eeb8ee35977ddf8bb4bea4119bf638
+      - osmand-external-skia@android/oreo
+    rm:
+      - android/OsmAnd-java/libs/*.jar
+      - android/OsmAnd/libs/*.jar
+      - android/OsmAnd-telegram/
+      - help/website/images/features.zip
+      - resources/icons/tools/SVGtoXML/vd-tool
+    prebuild:
+      - sed -i -e "/.*OsmAndCore.*SNAPSHOT.*/d" build-common.gradle
+      - sed -i -e "/.*OsmAndCore.*SNAPSHOT.*/d" build.gradle
+      - sed -i -e "/ivy {/,+6d" ../build.gradle
+      - rm build-library.gradle
+      - perl -i -0 -p -e "s|maven {\n\s*url 'https://developer.huawei.com/repo/'\n\s*}||g"
+        ../build.gradle
+      - sed -i -e "/huaweiImplementation/d" build.gradle
+      - sed -i -e '/qt.*Compile/d' -e '/com.google.firebase/d' build.gradle ../plugins/Osmand-ParkingPlugin/build.gradle
+        ../plugins/Osmand-SRTMPlugin/build.gradle ../plugins/Osmand-Skimaps/build.gradle
+        ../plugins/Osmand-Nautical/build.gradle
+      - sed -i -e "s/System.getenv(\"APK_VERSION\")/\"$$VERSION$$\"/g" build.gradle
+      - sed -i -e "s/System.getenv(\"APK_NUMBER_VERSION\")/\"$$VERCODE$$\"/g" build.gradle
+      - sed -i -e "s/System.getenv(\"TARGET_APP_NAME\")/\"OsmAnd~\"/g" build.gradle
+      - sed -i -e '/com.android.vending.BILLING/d' AndroidManifest.xml
+      - "sed -i -e \"s/implementation fileTree.*/implementation fileTree(include:\
+        \ ['icu4j.jar'], dir: 'libs')\\n implementation group: 'net.sf.trove4j', name:\
+        \ 'trove4j', version: '3.0.3'\\n/\" ../OsmAnd-java/build.gradle"
+      - "sed -i -e \"s/implementation fileTree.*/implementation fileTree(include:\
+        \ ['classes.jar','icu4j.jar'], dir: 'libs')\\n implementation group: 'net.sf.trove4j',\
+        \ name: 'trove4j', version: '3.0.3'\\n/\" build-common.gradle"
+      - sed -i -e "s/, ':OsmAnd-telegram'//" ../settings.gradle
+      - pushd ../../core-legacy/externals
+      - sed -i "s/# Extract/sha256sum \$SRCLOC\/upstream.tar.bz2 | grep 13bfc5ae543cf3aa180ac2485c0bc89495e3ae711fc6fab4f8ffe90dfb4bb677
+        || { echo 'Failed checksum' 1>\&2; exit; }/" protobuf/configure.sh
+      - sed -i "/# Download/,+8d" skia/configure.sh
+      - sed -i "s/# Patch/cp -r $(echo $$osmand-external-skia$$ | sed 's/\//\\\//g')
+        \$SRCLOC\/upstream.original/" skia/configure.sh
+      - popd
+      - echo -e "\norg.gradle.jvmargs=-XX:MaxHeapSize=2048m" >> ../gradle.properties
+    scandelete:
+      - resources/test-resources
+    build:
+      - pushd ../../OsmAnd-core/wrappers/android/
+      - sed -i -e "/Native/d" settings.gradle
+      - sed -i -e "/Native/d" build.gradle
+      - sed -i -e "/compileTask.*copyNdkSharedLibs/d" build.gradle
+      - sed -i -e "/compileTask.*copyQtSharedLibs/d" build.gradle
+      - sed -i -e "/compileTask.*copyQtJarLibs/d" build.gradle
+      - gradle assembleRelease
+      - cd build/outputs/aar
+      - unzip OsmAndCore_android-release.aar
+      - cp classes.jar ../../../../../../android/OsmAnd/libs/
+      - popd
+      - pushd $$icu50-2-1-patched$$/icu4j
+      - ant jar
+      - zip -d icu4j.jar "com/ibm/icu/impl/data/icudt50b/brkitr/*"
+      - zip -d icu4j.jar "com/ibm/icu/impl/data/icudt50b/coll/*"
+      - zip -d icu4j.jar "com/ibm/icu/impl/data/icudt50b/curr/*"
+      - zip -d icu4j.jar "com/ibm/icu/impl/data/icudt50b/lang/*"
+      - zip -d icu4j.jar "com/ibm/icu/impl/data/icudt50b/rbnf/*"
+      - zip -d icu4j.jar "com/ibm/icu/impl/data/icudt50b/region/*"
+      - zip -d icu4j.jar "com/ibm/icu/impl/data/icudt50b/translit/*"
+      - zip -d icu4j.jar "com/ibm/icu/impl/data/icudt50b/zone/*"
+      - popd
+      - cp $$icu50-2-1-patched$$/icu4j/icu4j.jar libs/
+      - cp $$icu50-2-1-patched$$/icu4j/icu4j.jar ../OsmAnd-java/libs/
+    ndk: r17c
+
 MaintainerNotes: |-
     Update CV only after sucessfully built and tested.
 
@@ -3835,5 +3916,5 @@ MaintainerNotes: |-
 
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: 3.9.5
-CurrentVersionCode: 395
+CurrentVersion: 3.9.6
+CurrentVersionCode: 396
