@@ -1,0 +1,34 @@
+Categories:
+  - Security
+License: MIT
+AuthorName: Bill Dietrich
+AuthorEmail: bill@billdietrich.me
+AuthorWebSite: https://www.billdietrich.me/
+SourceCode: https://github.com/BillDietrich/fake_contacts
+
+RepoType: git
+Repo: https://github.com/BillDietrich/fake_contacts
+
+Builds:
+  - versionName: '1.6'
+    versionCode: 2
+    commit: v1.6
+    output: build/app/outputs/apk/release/app-release.apk
+    srclibs:
+      - flutter@1.26.0-12.0.pre
+    rm:
+      - ios
+      - test
+      - integration_test
+    prebuild: echo 'android.applicationVariants.all { variant -> variant.outputs.all
+        { output -> outputFileName = "app-${output.baseName}.apk" } }' >> android/app/build.gradle
+    build:
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter packages pub get
+      - $$flutter$$/bin/flutter build apk
+
+AutoUpdateMode: Version v%v
+UpdateCheckMode: HTTP
+UpdateCheckData: https://raw.githubusercontent.com/BillDietrich/fake_contacts/master/pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: '1.6'
+CurrentVersionCode: 2
