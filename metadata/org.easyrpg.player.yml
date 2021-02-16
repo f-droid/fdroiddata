@@ -1,0 +1,68 @@
+Categories:
+  - Games
+License: GPL-3.0-or-later
+WebSite: https://easyrpg.org/
+SourceCode: https://github.com/EasyRPG/Player
+IssueTracker: https://github.com/EasyRPG/Player/issues
+
+Summary: RPG Maker 2000/2003 and EasyRPG games interpreter
+Description: |-
+    EasyRPG Player is a program that allows to play games created with RPG Maker 2000 and 2003.
+
+    It aims to be a free (as in freedom) cross-platform RPG Maker 2000/2003 interpreter.
+    The main goal is to play all games created with them as the original game interpreter (RPG_RT) does.
+
+RepoType: git
+Repo: https://github.com/EasyRPG/buildscripts
+
+Builds:
+  - versionName: 0.6.2.3
+    versionCode: 6699
+    commit: f8a23ba
+    subdir: android
+    sudo:
+      - apt update || apt update
+      - apt -y install g++
+    output: Player/builds/android/app/build/outputs/apk/app-release-unsigned.apk
+    prebuild:
+      - export LIBLCF_COMMIT=0.6.2
+      - export PLAYER_COMMIT=0.6.2.3
+      - export TIMIDITY_COMMIT=1bfb06f
+      - sed -i -e '/Installing Android SDK/,/Preparing libraries/d' 1_download_library.sh
+      - sed -i -e '/if \[ -d liblcf/,/fi/d' 4_build_liblcf.sh
+      - sed -i -e '/if \[ -d Player/,/fi/d' 5_build_android_port.sh
+      - sed -i -e '/if \[ -d assets\/timidity/,/fi/d' 5_build_android_port.sh
+      - sed -i -e 's/\(jarsigner.*\|zipalign.*\)//g' 5_build_android_port.sh
+      - sed -i -e 's/\.\/gradlew/gradle/g' 5_build_android_port.sh
+      - ./1_download_library.sh
+      - git clone https://github.com/EasyRPG/liblcf.git
+      - git -C liblcf checkout $LIBLCF_COMMIT
+      - git clone https://github.com/EasyRPG/Player.git
+      - git -C Player checkout $PLAYER_COMMIT
+      - cd Player/builds/android/app/src/main
+      - git clone https://github.com/Ghabry/timidity_gus.git assets/timidity
+      - git -C assets/timidity checkout $TIMIDITY_COMMIT
+      - cd ../../
+      - export VER_NAME=$(git describe | cut -d - -f -2)
+      - export VER_CODE=$(git rev-list HEAD --count)
+      - sed -i -e "/defaultConfig/a \ \ \ \ \ \ \ \ versionCode $VER_CODE" build.gradle
+      - sed -i -e "/defaultConfig/a \ \ \ \ \ \ \ \ versionName \'$VER_NAME\'" build.gradle
+    scandelete:
+      - .
+    build:
+      - ln -s $$SDK$$ android-sdk
+      - mkdir android-ndk-r15c
+      - cp -r $$NDK$$/* android-ndk-r15c/
+      - ./2_build_toolchain.sh
+      - ./4_build_liblcf.sh
+      - ./5_build_android_port.sh
+    ndk: r15c
+
+MaintainerNotes: |-
+    Upstream patches versionCode and versionName on their CI
+    based on "Player" repo, we do the same here.
+
+AutoUpdateMode: None
+UpdateCheckMode: None
+CurrentVersion: 0.6.2.3
+CurrentVersionCode: 6699
