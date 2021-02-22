@@ -95,6 +95,8 @@ to appear in our repository.
 
 * Check for CI errors once you have opened your Merge Request
 
+* Please don't commit directly onto your `master` branch. Use a new branch instead. This makes merging much more easy and the correct jobs in CI will run.
+
 
 ### After You Added Your App
 
