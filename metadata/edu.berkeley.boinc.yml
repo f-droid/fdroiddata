@@ -28,30 +28,29 @@ Builds:
   - versionName: 7.16.16
     versionCode: 71616
     commit: client_release/7.16/7.16.16
-    subdir: android/BOINC/
-    patch:
-      - fix-version.patch
-      - remove-xiaomi.patch
+    subdir: android/BOINC/app
     gradle:
       - yes
-    output: app/build/outputs/apk/release/app-release-unsigned.apk
+    rm:
+      - clientgui/res/*.zip
+      - clientscr/*.zip
+      - clientscr/progress/simt
+      - clientscr/progress/win/
+      - samples/example_app/bin/
     prebuild:
-      - cd ..
+      - sed -i -e 's/versionCode .*/versionCode $$VERCODE$$/' build.gradle
+      - sed -i -e 's/versionName .*/versionName "$$VERSION$$"/' build.gradle
+      - sed -i -e '/xiaomi_.* {/,/}/d' build.gradle
+      - sed -i -e '/NDK_ROOT/d' ../../buildAndroidBOINC-CI.sh
+    build:
+      - cd ../..
+      - export CREATED_NDK_FOLDER=yes
+      - export NDK_ROOT=$$NDK$$
       - ./buildAndroidBOINC-CI.sh --silent --ci --arch arm
       - ./buildAndroidBOINC-CI.sh --silent --ci --arch arm64
       - ./buildAndroidBOINC-CI.sh --silent --ci --arch x86
       - ./buildAndroidBOINC-CI.sh --silent --ci --arch x86_64
-      - cd BOINC
-    scanignore:
-      - 3rdParty
-      - android
-      - lib
-      - api
-      - client
-      - stage
-      - samples
-      - clientscr
-      - clientgui/res
+    ndk: r21d
 
 AutoUpdateMode: None
 UpdateCheckMode: Static
