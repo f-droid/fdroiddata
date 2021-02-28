@@ -18,7 +18,7 @@ Description: |-
     output.
 
 RepoType: git
-Repo: https://github.com/badaix/snapcast
+Repo: https://github.com/badaix/snapdroid
 
 Builds:
   - versionName: 0.7.0
@@ -43,34 +43,31 @@ Builds:
       - pushd ../client
       - sh build_android.sh
 
-  - versionName: 0.10.0
-    versionCode: 7
-    disable: wip
-    commit: 41be3ade60de166cd8f0bd8b2b66a78537e2599d
-    subdir: android/Snapcast
+  - versionName: 0.24.0.0
+    versionCode: 2400
+    commit: v0.24.0
+    subdir: Snapcast
     submodules: true
-    gradle:
-      - yes
-    scandelete:
-      - android/Snapcast/src/main/assets/bin
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y libvorbisidec-dev
+    output: build/outputs/apk/release/Snapcast-release-unsigned.apk
+    srclibs:
+      - snapcast-deps@v0.24.0
+    rm:
+      - Snapcast/Ressources
+    prebuild: sed -i -e '/maven {/,/^    }/d' build.gradle
     build:
-      - pushd ../..
-      - ndkdir="$PWD/ndk"
-      - sed -i "s@NDK_DIR=.*@NDK_DIR='${ndkdir}'@" client/build_android.sh externals/build_externals_android.sh
-      - pushd $$NDK$$/build/tools
-      - ./make_standalone_toolchain.py --arch arm --api 14 --install-dir ${ndkdir}
+      - pushd $$snapcast-deps$$
+      - wget -q https://dl.bintray.com/boostorg/release/1.75.0/source/boost_1_75_0.tar.bz2
+      - tar xjf boost_1_75_0.tar.bz2
+      - NDK_DIR=$$NDK$$ ./build_android.sh
       - popd
-      - pushd externals
-      - sh build_externals_android.sh
-      - pushd ../client
-      - sh build_android.sh
-    ndk: r13b
+      - mv $$snapcast-deps$$/build/aar/*.aar libs
+      - gradle assembleRelease
+    ndk: r22
 
-MaintainerNotes: archiving (no longer works with recent server versions, see https://gitlab.com/fdroid/fdroiddata/-/issues/1269#note_508988027);
-    once the path to updates is clear, ArchivePolicy should be adjusted/cleared again.
-
-ArchivePolicy: 0 versions
 AutoUpdateMode: None
-UpdateCheckMode: Tags
-CurrentVersion: 0.13.0
-CurrentVersionCode: 1300
+UpdateCheckMode: None
+CurrentVersion: 0.24.0.0
+CurrentVersionCode: 2400
