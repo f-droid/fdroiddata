@@ -1,0 +1,43 @@
+Categories:
+  - Connectivity
+License: GPL-3.0-or-later
+AuthorName: Jeroen1602
+SourceCode: https://github.com/jeroen1602/lighthouse_pm
+IssueTracker: https://github.com/jeroen1602/lighthouse_pm/issues
+Changelog: https://github.com/jeroen1602/lighthouse_pm/blob/HEAD/CHANGELOG.md
+
+AutoName: Lighthouse Powermanagement
+
+RepoType: git
+Repo: https://github.com/jeroen1602/lighthouse_pm
+
+Builds:
+  - versionName: 1.1.2
+    versionCode: 7
+    commit: 1.1.2+7
+    output: build/app/outputs/apk/release/app-release-unsigned.apk
+    srclibs:
+      - flutter@1.22.6
+    rm:
+      - ios
+      - test
+      - local_assets
+    prebuild:
+      - echo "flutter.sdk=$$flutter$$" >> android/local.properties
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter doctor --suppress-analytics
+      - $$flutter$$/bin/flutter packages pub get
+      - $$flutter$$/bin/flutter packages pub run build_runner build
+    build:
+      - cd android
+      - cp $$flutter$$/bin/cache/artifacts/gradle_wrapper/gradlew ./
+      - cp $$flutter$$/bin/cache/artifacts/gradle_wrapper/gradle/wrapper/gradle-wrapper.jar
+        ./gradle/wrapper/gradle-wrapper.jar
+      - ./gradlew assemble
+      - cd ../
+      - $$flutter$$/bin/flutter build apk --shrink --no-obfuscate --release
+
+AutoUpdateMode: Version %v+%c
+UpdateCheckMode: Tags
+CurrentVersion: 1.1.2
+CurrentVersionCode: 7
