@@ -6,3 +6,5 @@
 
 ---------------------
 
+<!--Add the corresponding issue number or remove this if this merge request does not close an issue at fdroiddata.-->
+Closes fdroiddata#<issue number>

@@ -7,3 +7,8 @@
 
 ---------------------
 
+<!--Add the corresponding issue number or remove this if this merge request does not close an issue at rfp.-->
+Closes rfp#<RFP issue number>
+
+<!--Add the corresponding issue number or remove this if this merge request does not close an issue at fdroiddata.-->
+Closes fdroiddata#<fdroiddata issue number>
