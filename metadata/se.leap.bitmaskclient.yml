@@ -236,6 +236,8 @@ Builds:
     gradle:
       - normalProductionFat
     rm:
+      - bitmask-core/*.?ar
+      - bitmask-web-core/*.?ar
       - go/src/github.com/agl/ed25519/testdata/sign.input.gz
       - go/src/github.com/shadowsocks/shadowsocks-go/script/shadowsocks.exe
       - go/src/golang.org/x/crypto/ed25519/testdata/sign.input.gz
@@ -248,12 +250,13 @@ Builds:
       - go/src/golang.org/x/tools/go/packages/testdata/TestName_ModulesDedup/pkg/mod/cache/download/github.com/heschik/tools-testrepo/v2/@v/*.zip
       - ics-openvpn/main/src/main/cpp/mbedtls/programs/fuzz/corpuses/*
       - ics-openvpn/main/src/main/cpp/mbedtls/tests
-      - shapeshifter/*.?ar
+      - ics-openvpn/main/src/main/cpp/openvpn3/test/unittests/comp-testdata
     prebuild: sed -i -e "/^task updateSdkLicences/,/^}/d; /commandLine 'git'/d" build.gradle
     build:
       - cd ../go
-      - curl -o go.tar.gz https://dl.google.com/go/go1.12.7.linux-amd64.tar.gz
-      - echo 'b6f9db387340e24f5623e6de0b8aa1387d103277  go.tar.gz' | shasum -c
+      - curl -o go.tar.gz https://dl.google.com/go/go1.14.2.linux-amd64.tar.gz
+      - echo '6272d6e940ecb71ea5636ddb5fab3933e087c1356173c61f4a803895e947ebb3  go.tar.gz'
+        | shasum -c
       - mkdir -p golang
       - tar -C golang -xzf go.tar.gz
       - export GOPATH="$PWD"
@@ -262,7 +265,8 @@ Builds:
       - export PATH="$GO_LANG:$GO_COMPILED:$PATH"
       - ./golang/go/bin/go get golang.org/x/mobile/cmd/gomobile
       - ./bin/gomobile init
-      - ./android_build_shapeshifter.sh createLibrary
+      - ./android_build_web_core.sh
+      - ./android_build_core.sh
       - cd ../ics-openvpn
       - gradle main:externalNativeBuildCleanSkeletonRelease main:externalNativeBuildSkeletonRelease
     ndk: r20b
