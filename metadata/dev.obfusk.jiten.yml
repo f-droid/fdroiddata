@@ -1,0 +1,69 @@
+Categories:
+  - Science & Education
+License: AGPL-3.0-or-later
+AuthorName: obfusk
+WebSite: https://github.com/obfusk/jiten
+SourceCode: https://github.com/obfusk/jiten
+IssueTracker: https://github.com/obfusk/jiten/issues
+Donate: https://ko-fi.com/obfusk
+
+Name: Jiten Japanese Dictionary
+
+RepoType: git
+Repo: https://github.com/obfusk/jiten
+
+Builds:
+  - versionName: 1.0.0
+    versionCode: 1010000001
+    commit: v1.0.0
+    subdir: android
+    sudo:
+      - ( apt-get update || apt-get update )
+      - apt-get install -y build-essential git
+      - apt-get install -y libsqlite3-dev libpcre3-dev
+      - apt-get install -y openjdk-11-jdk-headless
+      - apt-get install -y zlib1g-dev zip unzip pkg-config libffi-dev
+      - apt-get install -y libltdl-dev libssl-dev
+      - apt-get install -y lld-7
+      - ln -fs lld-7 /usr/bin/lld
+      - cd build/srclib/cpython
+      - ./configure --enable-loadable-sqlite-extensions
+      - make -j`nproc`
+      - make altinstall
+    output: bin/jiten-$$VERSION$$-armeabi-v7a-release-unsigned.apk
+    srclibs:
+      - cpython@v3.7.10
+      - buildozer@1.2.0
+      - python-for-android@ab65c485822ec7832912fe6f59ec5aaf0045f185
+    prebuild:
+      - python3.7 -mvenv ../../../env
+      - source ../../../env/bin/activate
+      - ln -sf "$$python-for-android$$" .p4a
+      - sed -r "s:#?android.sdk_path =.*:android.sdk_path = $$SDK$$:" -i buildozer.spec
+      - sed -r "s:#?android.ndk_path =.*:android.ndk_path = $$NDK$$:" -i buildozer.spec
+      - sed -r "s:#?android.accept_sdk_license =.*:android.accept_sdk_license = False:"
+        -i buildozer.spec
+      - sed -r "s:#?p4a.source_dir =.*:p4a.source_dir = $$python-for-android$$:" -i
+        buildozer.spec
+      - make _setup_user BUILDOZER="$$buildozer$$" PIP_INSTALL='pip3 install'
+    scanignore:
+      - jiten/res/jmdict/jmdict-unpatched.xml.gz
+      - jiten/res/jmdict/kanjidic2-unpatched.xml.gz
+      - jiten/res/radicals/kanjivg.xml.gz
+    build:
+      - source ../../../env/bin/activate
+      - make release-armeabi-v7a
+    ndk: r22
+
+MaintainerNotes: We're excluding some *.xml.gz files from the scan process because
+    they are only compressed to prevent the source repository from becoming unnecessarily
+    large and to avoid going over the maximum individual file size of common git hosting
+    services.
+
+AutoUpdateMode: Version v%v
+UpdateCheckMode: HTTP
+VercodeOperation: '%c - 1'
+UpdateCheckData: https://raw.githubusercontent.com/obfusk/jiten/master/android/buildozer.spec|android.numeric_version
+    *= *([0-9]+)|.|version *= *([0-9.a-g-]+)
+CurrentVersion: 1.0.0
+CurrentVersionCode: 1010000001
