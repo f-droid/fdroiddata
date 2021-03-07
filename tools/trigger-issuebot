@@ -1,8 +1,8 @@
 #!/bin/bash -e
 
 get_merge_request_iid() {
-    for page in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19; do
-	for mr in `curl --silent ${CI_API_V4_URL}/projects/${project_id}/merge_requests?page=${page} | grep -Eo '"iid": *[0-9]+' | grep -Eo '[0-9]+$'`; do
+    for page in 1 2 3 4 5; do
+	for mr in `curl --silent "${CI_API_V4_URL}/projects/${project_id}/merge_requests?page=${page}&per_page=50&state=opened&order_by=updated_at" | grep -Eo '"iid": *[0-9]+' | grep -Eo '[0-9]+$'`; do
 	    if curl --silent ${CI_API_V4_URL}/projects/${project_id}/merge_requests/$mr/pipelines \
 		    | grep -Eo "\"id\": *${CI_PIPELINE_ID}," > /dev/null; then
 		echo $mr
