@@ -7,28 +7,59 @@ SourceCode: https://github.com/mpv-android/mpv-android
 IssueTracker: https://github.com/mpv-android/mpv-android/issues
 Changelog: https://github.com/mpv-android/mpv-android/releases
 
-Name: mpv-android(pre-release)
-AutoName: mpv
-Description: |-
-    A simple wrapper around the libmpv library provided by mpv that lets you listen
-    to music and watch videos.
-
 RepoType: git
 Repo: https://github.com/mpv-android/mpv-android.git
 
 Builds:
-  - versionName: 2017-02-20-alpha
-    versionCode: 4
-    disable: missing libs
-    commit: mpv-android-2017-02-20
+  - versionName: 2021-03-10-release
+    versionCode: 24
+    commit: mpv-android-2021-03-10-fastlane
     subdir: app
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y ninja-build
+      - pip3 install wheel
+      - pip3 install meson
     gradle:
       - yes
-
-MaintainerNotes: Lower CVC by 1 to mark current build as pre-release
+    srclibs:
+      - mbedtls@v2.25.0
+      - dav1d@2479973
+      - FFmpeg@a7425f7
+      - freetype2@VER-2-10-4
+      - fribidi@v1.0.10
+      - harfbuzz@2.7.4
+      - libass@0a3b14a
+      - mpv@d7f6eba
+    prebuild:
+      - cd ../buildscripts/
+      - mkdir -p sdk
+      - ln -s $$NDK$$ sdk/android-ndk-r22
+      - mkdir -p deps
+      - pushd deps/
+      - cp -r $$mbedtls$$ mbedtls
+      - cp -r $$dav1d$$ dav1d
+      - cp -r $$FFmpeg$$ ffmpeg
+      - cp -r $$freetype2$$ freetype2
+      - cp -r $$fribidi$$ fribidi
+      - cp -r $$harfbuzz$$ harfbuzz
+      - cp -r $$libass$$ libass
+      - mkdir lua
+      - wget https://www.lua.org/ftp/lua-5.2.4.tar.gz -O - | tar -xz --strip-components=1
+        -C lua
+      - cp -r $$mpv$$ mpv
+      - popd
+      - sed -i -e '/.\/gradlew assembleDebug assembleRelease/d' scripts/mpv-android.sh
+      - sed -i -e '/"$target" == "mpv-android"/,/ls -lh/d' buildall.sh
+    scandelete:
+      - buildscripts/deps/mbedtls/
+    build:
+      - cd ../buildscripts/
+      - ./buildall.sh --arch arm64 mpv
+      - ./buildall.sh
+    ndk: r22
 
 AutoUpdateMode: None
-UpdateCheckMode: Tags
-VercodeOperation: '%c - 1'
+UpdateCheckMode: None
 CurrentVersion: 2021-03-10-release
-CurrentVersionCode: 23
+CurrentVersionCode: 24
