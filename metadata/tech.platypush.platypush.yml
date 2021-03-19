@@ -1,0 +1,64 @@
+Categories:
+  - Connectivity
+  - Development
+  - Internet
+  - Multimedia
+  - System
+License: MIT
+AuthorName: Fabio Manganiello
+AuthorEmail: info@fabiomanganiello.com
+AuthorWebSite: https://fabiomanganiello.com
+WebSite: https://platypush.tech
+SourceCode: https://git.platypush.tech/platypush/platypush-app
+IssueTracker: https://git.platypush.tech/platypush/platypush-app/-/issues
+Changelog: https://git.platypush.tech/platypush/platypush-app/-/blob/master/CHANGELOG.md
+Donate: https://paypal.me/fabiomanganiello
+Bitcoin: 1CtAwhvkKzbnjvSmbtar4Dad7QyFrPGHN8
+
+RepoType: git
+Repo: https://git.platypush.tech/platypush/platypush-app
+
+Builds:
+  - versionName: 1.0.0
+    versionCode: 1000032
+    commit: v1.0.0
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y -t stretch-backports npm
+    output: dist/platypush.apk
+    build:
+      - mkdir -p /tmp/npm
+      - npm config set prefix /tmp/npm
+      - export PATH="/tmp/npm/bin:$PATH"
+      - npm install -g androidjs-builder
+      - sed -i /tmp/npm/lib/node_modules/androidjs-builder/modules/Html/ProgressBar.js
+        -e 's/process.stdout.clearLine()/\/\/process.stdout.clearLine()/g'
+      - sed -i /tmp/npm/lib/node_modules/androidjs-builder/modules/Html/ProgressBar.js
+        -e 's/process.stdout.cursorTo(/\/\/process.stdout.cursorTo(/g'
+      - sed -i /tmp/npm/lib/node_modules/androidjs-builder/modules/Html/ManifestBuilder.js
+        -e 's/com\.androidjs\.//g'
+      - npm install
+      - androidjs build --release
+
+MaintainerNotes: |-
+    This is an Android JS based app.
+
+    Install dependencies:
+
+        - sudo apt-get install -y npm
+        - npm install -g androidjs
+        - npm install
+
+    Building the app in debug mode:
+
+        - npm run build
+
+    Building the app in release mode:
+
+        - npm run build:release
+
+AutoUpdateMode: Version v%v
+UpdateCheckMode: HTTP
+UpdateCheckData: https://git.platypush.tech/platypush/platypush-app/-/raw/master/package.json|"version-code":\s*(\d+)|.|"version":\s*"([\d.]+)"
+CurrentVersion: 1.0.0
+CurrentVersionCode: 1000032
