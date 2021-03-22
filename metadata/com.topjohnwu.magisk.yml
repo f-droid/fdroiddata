@@ -1,0 +1,68 @@
+AntiFeatures:
+  - NonFreeAdd
+Categories:
+  - System
+License: GPL-3.0-or-later
+AuthorName: John Wu
+SourceCode: https://github.com/topjohnwu/Magisk
+IssueTracker: https://github.com/topjohnwu/Magisk/issues
+Changelog: https://topjohnwu.github.io/Magisk/changes.html
+Donate: https://paypal.me/magiskdonate
+
+Summary: The Magic Mask
+Description: |-
+    Magisk is a suite of open source tools for customizing Android, supporting devices higher than Android 4.2. It covers fundamental parts of Android customization: root, boot scripts, SELinux patches, AVB2.0 / dm-verity / forceencrypt removals etc.
+
+    Here are some feature highlights:
+    * MagiskSU: Provide root access to your device
+    * Magisk Modules: Modify read-only partitions by installing modules
+    * MagiskHide: Hide Magisk from root detections / system integrity checks
+
+RequiresRoot: 'yes'
+
+RepoType: git
+Repo: https://github.com/topjohnwu/Magisk
+
+Builds:
+  - versionName: '22.0'
+    versionCode: 22000
+    commit: v22.0
+    submodules: true
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y g++
+      - pushd build/srclib/cpython
+      - ./configure
+      - make -j`nproc`
+      - make altinstall
+      - popd
+    output: app/build/outputs/apk/release/app-release-unsigned.apk
+    srclibs:
+      - cpython@v3.9.2
+    prebuild:
+      - echo -e 'version=$$VERSION$$' > ./config.prop
+      - sed -i -e '/buildTypes/,+11d' ./build.gradle.kts
+      - sed -i -e 's/ndkPath.*/ndkPath = "${System.getenv("ANDROID_NDK_HOME")}"/'
+        ./build.gradle.kts
+      - sed -i -e '/android.ndkPath/d' -e '/ndk.dir/d' ./local.properties
+      - sed -i -e 's/21d/21e/' -e 's/21.3.6528147/21.4.7075529/' ./gradle.properties
+      - sed -i -e "s/op.join(ndk_root, 'magisk')/os.environ['ANDROID_NDK_HOME']/"
+        ./build.py
+    scanignore:
+      - app/shared/src/main/java/com/topjohnwu/magisk/utils/DynamicClassLoader.java
+    scandelete:
+      - native/jni/external
+      - tools
+    build:
+      - ln -s `which gradle` ./gradlew
+      - python3.9 ./build.py -rv stub
+      - mv stub/build/outputs/apk/release/stub-release-unsigned.apk out/stub-release.apk
+      - python3.9 ./build.py -rv binary
+      - python3.9 ./build.py -rv app
+    ndk: r21e
+
+AutoUpdateMode: Version %v
+UpdateCheckMode: HTTP
+UpdateCheckData: https://topjohnwu.github.io/magisk-files/stable.json|"versionCode":\s"(\d+)"|.|"version":\s"([\d.]+)"
+CurrentVersion: '22.0'
+CurrentVersionCode: 22000
