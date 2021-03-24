@@ -1,7 +1,7 @@
 Categories:
   - Science & Education
   - Games
-License: GPL-3.0-or-later
+License: AGPL-3.0-only
 WebSite: https://www.gcompris.net/
 SourceCode: https://invent.kde.org/education/gcompris.git
 IssueTracker: https://bugs.kde.org/enter_bug.cgi?product=gcompris
@@ -203,7 +203,80 @@ Builds:
       - make apk_release
     ndk: r18b
 
+  - versionName: '1.1'
+    versionCode: 10100
+    commit: V1.1
+    submodules: true
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y -t stretch-backports-sloppy libarchive13
+      - apt-get install -y -t stretch-backports cmake libncurses5
+      - apt-get install -y libgl1-mesa-dev g++ zlib1g-dev
+    output: android-build/android/GCompris-Android-release-armeabi-v7a-dl-$$VERSION$$.apk
+    srclibs:
+      - extra-cmake-modules@v5.63.0
+    prebuild: mkdir qt/ android-build/
+    scandelete:
+      - installer/
+    build:
+      - export ANDROID_NDK=$$NDK$$
+      - export ANDROID_NDK_ROOT=$$NDK$$
+      - export ANDROID_SDK_ROOT=$$SDK$$
+      - export QT_VERSION=5.12.9
+      - export PREFIX=$(pwd)/qt/install/
+      - export OPENSSL_LIBS=-L$PREFIX'/lib -lssl -lcrypto'
+      - git clone --depth 1 https://github.com/openssl/openssl.git --branch OpenSSL_1_1_1j
+      - pushd openssl
+      - PATH=$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH ./Configure shared
+        android-arm -D__ANDROID_API__=21 --prefix=$PREFIX
+      - PATH=$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH make depend
+      - PATH=$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH make build_libs
+        SHLIB_VERSION_NUMBER= SHLIB_EXT=.so
+      - PATH=$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH make install_sw
+        SHLIB_VERSION_NUMBER= SHLIB_EXT=.so
+      - popd
+      - pushd qt/
+      - git clone https://code.qt.io/cgit/qt/qtbase.git --single-branch --branch $QT_VERSION
+      - pushd qtbase
+      - ./configure -xplatform android-clang --disable-rpath -openssl-linked -nomake
+        tests -nomake examples -android-ndk $$NDK$$ -android-sdk $$SDK$$ -no-warnings-are-errors
+        -opensource -confirm-license -prefix $PREFIX -I$PREFIX/include
+      - make -j$(nproc)
+      - make install
+      - popd
+      - export CMAKE_QT_LIB=${PREFIX}/lib/cmake/
+      - for module in qtdeclarative qtquickcontrols qtquickcontrols2 qtsvg qtandroidextras
+        qtgraphicaleffects qttools qtmultimedia qtimageformats qtsensors qtxmlpatterns
+        qttranslations; do git clone https://code.qt.io/qt/${module}.git --single-branch
+        --branch=$QT_VERSION
+      - pushd ${module}
+      - QMAKESPEC=android-clang $PREFIX/bin/qmake .
+      - make -j$(nproc)
+      - make install
+      - popd; done
+      - popd
+      - mkdir $$extra-cmake-modules$$/build
+      - pushd $$extra-cmake-modules$$/build
+      - cmake -DCMAKE_INSTALL_PREFIX=. ..
+      - make
+      - make install
+      - popd
+      - pushd android-build/
+      - cmake -DANDROID_PLATFORM=android-18 -DANDROID_API_LEVEL=18 -DCMAKE_TOOLCHAIN_FILE=$$extra-cmake-modules$$/build/share/ECM/toolchain/Android.cmake
+        -DQt5_DIR=${CMAKE_QT_LIB}/Qt5/ -DQt5Core_DIR=${CMAKE_QT_LIB}/Qt5Core/ -DQt5Widgets_DIR=${CMAKE_QT_LIB}/Qt5Widgets
+        -DQt5Qml_DIR=${CMAKE_QT_LIB}/Qt5Qml -DQt5Gui_DIR=${CMAKE_QT_LIB}/Qt5Gui -DQt5Svg_DIR=${CMAKE_QT_LIB}/Qt5Svg
+        -DQt5Sensors_DIR=${CMAKE_QT_LIB}/Qt5Sensors -DQt5AndroidExtras_DIR=${CMAKE_QT_LIB}/Qt5AndroidExtras
+        -DQt5Xml_DIR=${CMAKE_QT_LIB}/Qt5Xml -DQt5LinguistTools_DIR=${CMAKE_QT_LIB}/Qt5LinguistTools
+        -DQt5XmlPatterns_DIR=${CMAKE_QT_LIB}/Qt5XmlPatterns -DQt5Quick_DIR=${CMAKE_QT_LIB}/Qt5Quick
+        -DQt5Multimedia_DIR=${CMAKE_QT_LIB}/Qt5Multimedia -DQt5Network_DIR=${CMAKE_QT_LIB}/Qt5Network
+        -Wno-dev ../
+      - make getSvnTranslations
+      - cmake -DCMAKE_TOOLCHAIN_FILE=/usr/share/ECM/toolchain/Android.cmake ../
+      - make
+      - make apk_release
+    ndk: r18b
+
 AutoUpdateMode: None
 UpdateCheckMode: Tags
-CurrentVersion: '1.0'
-CurrentVersionCode: 10000
+CurrentVersion: '1.1'
+CurrentVersionCode: 10100
