@@ -1,0 +1,71 @@
+AntiFeatures:
+  - UpstreamNonFree
+Categories:
+  - Multimedia
+  - Writing
+License: LGPL-2.1-only
+WebSite: http://tuxguitar.com.ar/
+SourceCode: https://sourceforge.net/p/tuxguitar/code/
+IssueTracker: https://sourceforge.net/p/tuxguitar/bugs/
+Donate: http://tuxguitar.com.ar/donate.html
+
+Summary: TuxGuitar is a multitrack tablature editor and player
+Description: |-
+    TuxGuitar is a multitrack tablature editor and player.
+    It can open Guitar Pro and PowerTab files.
+
+    With TuxGuitar, you will be able to compose music using
+    the following features:
+
+    * Tablature editor
+    * Score Viewer
+    * Autoscroll while playing
+    * Note duration management
+    * Various effects (bend, slide, vibrato, hammer-on/pull-off)
+    * Support for triplets (5,6,7,9,10,11,12)
+    * Repeat open, close and alternative endings
+    * Time signature management
+    * Tempo management
+
+    Note: this version of TuxGuitar is missing google
+    drive functionality as it depends on a proprietary
+    library.
+
+RepoType: git
+Repo: https://gitlab.com/f-droid-mirrors/empty.git
+
+Builds:
+  - versionName: fdroid_1821
+    versionCode: 1821
+    commit: d3746f98
+    init: svn checkout -r 1821 svn://svn.code.sf.net/p/tuxguitar/code/trunk/ .
+    patch:
+      - remove_gdrive.patch
+    output: build-scripts/tuxguitar-android/apk/build/outputs/apk/release/tuxguitar-android-fdroid_1821-release-unsigned.apk
+    prebuild:
+      - find . -iname "*.jar" -o -iname "*.zip" -o -iname "*.so" -exec rm {} \;
+      - rm -rf TuxGuitar-android-gdrive
+      - rm -rf TuxGuitar-android-gdrive-gdaa
+      - rm -rf TuxGuitar-android-gdrive-plugin
+      - sed -i "s/^\s*versionCode.*/        versionCode $$VERCODE$$/" build-scripts/tuxguitar-android/apk/build.gradle
+      - sed -i "s/SNAPSHOT/$$VERSION$$/g" build-scripts/tuxguitar-android/apk/build.gradle
+    scanignore:
+      - TuxGuitar-android/src/org/herac/tuxguitar/android/resource/TGResourceLoaderImpl.java
+    scandelete:
+      - .
+    build:
+      - cd build-scripts/tuxguitar-android
+      - gradle assembleRelease
+
+MaintainerNotes: |-
+    Using a dummy repo because svn-type repos are deprecated
+    And git-svn is incredibly slow.
+
+    Upstream doesn't have tags or any way to determine the release.
+
+    VersionCode is generated from build date, so we instead use our own.
+
+AutoUpdateMode: None
+UpdateCheckMode: None
+CurrentVersion: fdroid-1821
+CurrentVersionCode: 1821
