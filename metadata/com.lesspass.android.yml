@@ -186,27 +186,27 @@ Builds:
 
   - versionName: 9.1.9
     versionCode: 90109
-    disable: fails to build
     commit: 9.1.9
     subdir: mobile/android/app/
     sudo:
-      - apt-get update || apt-get update
-      - apt-get install -y -t stretch-backports npm
+      - curl -Lo node.tar.xz https://nodejs.org/dist/v14.16.0/node-v14.16.0-linux-x64.tar.xz
+      - echo "2e079cf638766fedd720d30ec8ffef5d6ceada4e8b441fc2a093cb9a865f4087  node.tar.xz"
+        | sha256sum -c -
+      - tar xJf node.tar.xz
+      - cp -a node-v14.16.0-linux-x64/. /usr/local/
       - npm -g install yarn
     init: yarn install
     gradle:
       - yes
     rm:
       - mobile/node_modules/react-native/template/android/build.gradle
-      - mobile/node_modules/hermes-engine/android/*.aar
-      - mobile/node_modules/jetifier/lib/
     prebuild:
       - sed -i -e 's#../package.json#../../package.json#' ../build.gradle
       - sed -i -e '/enable enableSeparateBuildPerCPUArchitecture/d' build.gradle
     scanignore:
       - mobile/android/build.gradle
-      - mobile/node_modules/react-native/android/com/facebook/react/react-native/0.62.2/react-native-0.62.2.aar
-      - mobile/node_modules/jsc-android/dist/org/webkit/android-jsc/r245459/android-jsc-r245459.aar
+      - mobile/node_modules/react-native/android/com/facebook/react/react-native
+      - mobile/node_modules/jsc-android/dist/org/webkit/android-jsc
       - mobile/node_modules/react-native-screens/android/build.gradle
       - mobile/node_modules/@react-native-community/async-storage/android/build.gradle
       - mobile/node_modules/@react-native-community/masked-view/android/build.gradle
