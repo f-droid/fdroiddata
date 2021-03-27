@@ -79,19 +79,36 @@ Builds:
 
   - versionName: '4.0'
     versionCode: 13
-    disable: 'ninja: error: libcrypto.a, needed by libdpi-bypass.so, missing and no
-        known rule to make it'
     commit: v4.0
     subdir: app
     submodules: true
     gradle:
       - yes
-    rm:
-      - app/src/main/cpp/openssl/*/lib
+    srclibs:
+      - OpenSSL@OpenSSL_1_1_1k
     prebuild:
-      - sed -i -e 's/21.1.6352462/21.3.6528147/' build.gradle
+      - sed -i -e 's/21.1.6352462/21.4.7075529/' build.gradle
       - sed -i -e '/kotlin-eap/d' build.gradle ../build.gradle
-    ndk: r21d
+      - cp -r $$OpenSSL$$ openssl
+      - rm -rf openssl/fuzz
+    scandelete:
+      - app/src/main/cpp/openssl
+    build:
+      - cd openssl
+      - export PATH=$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
+      - ./Configure android-arm64 -D__ANDROID_API__=21 no-stdio
+      - make clean build_libs
+      - cp lib*.a ../src/main/cpp/openssl/arm64-v8a/lib
+      - ./Configure android-arm -D__ANDROID_API__=17 no-stdio
+      - make clean build_libs
+      - cp lib*.a ../src/main/cpp/openssl/armeabi-v7a/lib
+      - ./Configure android-x86 -D__ANDROID_API__=17 no-stdio
+      - make clean build_libs
+      - cp lib*.a ../src/main/cpp/openssl/x86/lib
+      - ./Configure android-x86_64 -D__ANDROID_API__=21 no-stdio
+      - make clean build_libs
+      - cp lib*.a ../src/main/cpp/openssl/x86_64/lib
+    ndk: r21e
 
 AutoUpdateMode: Version v%v
 UpdateCheckMode: Tags
