@@ -805,7 +805,155 @@ Builds:
         release
     ndk: r21d
 
+  - versionName: 4.0.9.4
+    versionCode: 400090400
+    commit: 4.0.9.4
+    timeout: 10800
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y libncurses5-dev libncursesw5-dev build-essential ccache
+        openjdk-11-jdk unzip libffi-dev libltdl-dev libgmp-dev virtualenv
+      - cd build/srclib/cpython
+      - ./configure
+      - make -j`nproc`
+      - make altinstall
+    output: bin/Electrum_DASH-$$VERSION$$-armeabi-v7a-release-unsigned.apk
+    srclibs:
+      - buildozer@54b2975f
+      - python-for-android@6a9f28af
+      - cpython@v3.7.9
+    rm:
+      - electrum_dash/tests/
+    prebuild:
+      - pushd $$python-for-android$$
+      - if [[ -z `git remote | grep sombernight` ]]; then git remote add -f sombernight
+        https://github.com/SomberNight/python-for-android; fi
+      - git config --local user.name "Builder"
+      - git config --local user.email "builder@example.com"
+      - git fetch --all
+      - git checkout "0dd2ce87a8f380d20505ca5dc1e2d2357b4a08fc^{commit}"
+      - git revert --no-edit "257cfacbdd523af0b5b6bb5b2ba64ab7a5c82d58"
+      - popd
+      - pushd $$buildozer$$
+      - if [[ -z `git remote | grep sombernight` ]]; then git remote add -f sombernight
+        https://github.com/SomberNight/buildozer; fi
+      - git config --local user.name "Builder"
+      - git config --local user.email "builder@example.com"
+      - git fetch --all
+      - git checkout "94cfcb8d591c11d6ad0e11f129b08c1e27a161c5^{commit}"
+      - popd
+      - cp contrib/android/buildozer.spec .
+      - sed -r "s:#?android.sdk_path =.*:android.sdk_path = $$SDK$$:" -i buildozer.spec
+      - sed -r "s:#?android.ndk_path =.*:android.ndk_path = $$NDK$$:" -i buildozer.spec
+      - sed -r "s:#?android.ndk =.*:android.ndk = r21e:" -i buildozer.spec
+      - sed -r "s:#?android.ant_path =.*:#android.ant_path = $$ANT$$:" -i buildozer.spec
+      - sed -r "s:#?requirements =.*:requirements = six\, setuptools\,:" -i buildozer.spec
+      - sed -r "s:#?log_level =.*:log_level = 2:" -i buildozer.spec
+      - sed -r "s:#?p4a.source_dir =.*:p4a.source_dir = $$python-for-android$$:" -i
+        buildozer.spec
+      - virtualenv --python=python3.7 ~/env
+      - source ~/env/bin/activate
+      - pip install Cython==0.29.19 Pillow==7.2.0
+      - pip install kivy==1.11.1
+      - pip install $$python-for-android$$
+      - pip install $$buildozer$$
+      - cp contrib/dash/travis/read_apk_version_code.patch ~/
+      - pushd ~/env/lib/python3.7/site-packages
+      - patch -p0 < ~/read_apk_version_code.patch
+      - popd
+      - contrib/make_locale
+      - find electrum_dash -name *.po -delete
+      - find electrum_dash -name *.pot -delete
+      - contrib/make_packages
+      - pushd electrum_dash/gui/kivy
+      - python -m kivy.atlas theming/light 1024 theming/light/*.png
+      - popd
+      - cp electrum-dash main.py
+    scanignore:
+      - electrum_dash/checkpoints*.gz
+    scandelete:
+      - packages
+    build:
+      - source ~/env/bin/activate
+      - APK_VERSION_CODE=$$VERCODE$$ APP_ANDROID_ARCH=armeabi-v7a buildozer android
+        release
+    ndk: r21e
+
+  - versionName: 4.0.9.4
+    versionCode: 400090401
+    commit: 4.0.9.4
+    timeout: 10800
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y libncurses5-dev libncursesw5-dev build-essential ccache
+        openjdk-11-jdk unzip libffi-dev libltdl-dev libgmp-dev virtualenv
+      - cd build/srclib/cpython
+      - ./configure
+      - make -j`nproc`
+      - make altinstall
+    output: bin/Electrum_DASH-$$VERSION$$-arm64-v8a-release-unsigned.apk
+    srclibs:
+      - buildozer@54b2975f
+      - python-for-android@6a9f28af
+      - cpython@v3.7.9
+    rm:
+      - electrum_dash/tests/
+    prebuild:
+      - pushd $$python-for-android$$
+      - if [[ -z `git remote | grep sombernight` ]]; then git remote add -f sombernight
+        https://github.com/SomberNight/python-for-android; fi
+      - git config --local user.name "Builder"
+      - git config --local user.email "builder@example.com"
+      - git fetch --all
+      - git checkout "0dd2ce87a8f380d20505ca5dc1e2d2357b4a08fc^{commit}"
+      - git revert --no-edit "257cfacbdd523af0b5b6bb5b2ba64ab7a5c82d58"
+      - popd
+      - pushd $$buildozer$$
+      - if [[ -z `git remote | grep sombernight` ]]; then git remote add -f sombernight
+        https://github.com/SomberNight/buildozer; fi
+      - git config --local user.name "Builder"
+      - git config --local user.email "builder@example.com"
+      - git fetch --all
+      - git checkout "94cfcb8d591c11d6ad0e11f129b08c1e27a161c5^{commit}"
+      - popd
+      - cp contrib/android/buildozer.spec .
+      - sed -r "s:#?android.sdk_path =.*:android.sdk_path = $$SDK$$:" -i buildozer.spec
+      - sed -r "s:#?android.ndk_path =.*:android.ndk_path = $$NDK$$:" -i buildozer.spec
+      - sed -r "s:#?android.ndk =.*:android.ndk = r21e:" -i buildozer.spec
+      - sed -r "s:#?android.ant_path =.*:#android.ant_path = $$ANT$$:" -i buildozer.spec
+      - sed -r "s:#?requirements =.*:requirements = six\, setuptools\,:" -i buildozer.spec
+      - sed -r "s:#?log_level =.*:log_level = 2:" -i buildozer.spec
+      - sed -r "s:#?p4a.source_dir =.*:p4a.source_dir = $$python-for-android$$:" -i
+        buildozer.spec
+      - virtualenv --python=python3.7 ~/env
+      - source ~/env/bin/activate
+      - pip install Cython==0.29.19 Pillow==7.2.0
+      - pip install kivy==1.11.1
+      - pip install $$python-for-android$$
+      - pip install $$buildozer$$
+      - cp contrib/dash/travis/read_apk_version_code.patch ~/
+      - pushd ~/env/lib/python3.7/site-packages
+      - patch -p0 < ~/read_apk_version_code.patch
+      - popd
+      - contrib/make_locale
+      - find electrum_dash -name *.po -delete
+      - find electrum_dash -name *.pot -delete
+      - contrib/make_packages
+      - pushd electrum_dash/gui/kivy
+      - python -m kivy.atlas theming/light 1024 theming/light/*.png
+      - popd
+      - cp electrum-dash main.py
+    scanignore:
+      - electrum_dash/checkpoints*.gz
+    scandelete:
+      - packages
+    build:
+      - source ~/env/bin/activate
+      - APK_VERSION_CODE=$$VERCODE$$ APP_ANDROID_ARCH=arm64-v8a buildozer android
+        release
+    ndk: r21e
+
 AutoUpdateMode: None
 UpdateCheckMode: Static
-CurrentVersion: 4.0.9.3
-CurrentVersionCode: 400090301
+CurrentVersion: 4.0.9.4
+CurrentVersionCode: 400090401
