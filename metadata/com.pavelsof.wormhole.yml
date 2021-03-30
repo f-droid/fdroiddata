@@ -1,0 +1,45 @@
+Categories:
+  - Internet
+License: GPL-3.0-or-later
+AuthorName: pavelsof
+AuthorWebSite: https://pavelsof.com
+SourceCode: https://github.com/pavelsof/mobile-wormhole
+IssueTracker: https://github.com/pavelsof/mobile-wormhole/issues
+Changelog: https://github.com/pavelsof/mobile-wormhole/blob/HEAD/CHANGELOG.md
+
+RepoType: git
+Repo: https://github.com/pavelsof/mobile-wormhole
+
+Builds:
+  - versionName: 0.2.1
+    versionCode: 721201
+    commit: v0.2.1
+    sudo:
+      - apt-get update
+      - apt-get install -y build-essential libffi-dev libltdl-dev
+      - cd build/srclib/cpython
+      - ./configure
+      - make -j`nproc`
+      - make altinstall
+    output: bin/wormhole-$$VERSION$$-armeabi-v7a-release-unsigned.apk
+    srclibs:
+      - cpython@v3.7.7
+    prebuild:
+      - echo PREBUILD
+      - sed -r "s:#?android.sdk_path =.*:android.sdk_path = $$SDK$$:" -i buildozer.spec
+      - sed -r "s:#?android.ndk_path =.*:android.ndk_path = $$NDK$$:" -i buildozer.spec
+      - sed -r "s:log_level =.*:log_level = 0:" -i buildozer.spec
+      - sed -r "s:warn_on_root =.*:warn_on_root = 0:" -i buildozer.spec
+      - python3.7 -m venv ../../venv
+      - source ../../venv/bin/activate
+      - pip install -r requirements.txt
+    build:
+      - echo BUILD
+      - source ../../venv/bin/activate
+      - buildozer android release
+    ndk: r19c
+
+AutoUpdateMode: Version v%v
+UpdateCheckMode: Tags
+CurrentVersion: 0.2.1
+CurrentVersionCode: 721201
