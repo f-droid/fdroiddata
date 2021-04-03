@@ -539,8 +539,60 @@ Builds:
     gradleprops:
       - buildUniversalApk
 
+  - versionName: 2.6.91.0
+    versionCode: 102069100
+    commit: 2.6.91.0
+    subdir: app
+    submodules: true
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y --no-install-recommends libgmp-dev
+    patch:
+      - openvpn-build.patch
+    gradle:
+      - prod
+    output: build/outputs/apk/prod/release/ProtonVPN-*-prod-release-unsigned.apk
+    rm:
+      - app/src/main/jniLibs/x86/*
+      - app/src/main/jniLibs/x86_64/*
+      - app/src/main/jniLibs/armeabi-v7a/*
+      - app/src/main/jniLibs/arm64-v8a/*
+      - openvpn/src/main/cpp/mbedtls/tests
+      - openvpn/src/main/cpp/openvpn3/test/unittests
+      - strongswan/testing/hosts/alice/etc/raddb/certs/random
+    prebuild:
+      - sed -i -e '/triple/d' -e '/play\ {/,+4d' build.gradle
+      - sed -i -e '/kotlinx/d' ../build.gradle
+      - pushd ../strongswan
+      - git clone git://git.strongswan.org/android-ndk-boringssl.git -b ndk-static
+        src/frontends/android/app/src/main/jni/openssl
+    build:
+      - pushd ../strongswan
+      - export PATH=$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
+      - ./autogen.sh
+      - ./configure
+      - make dist
+      - pushd src/frontends/android/app
+      - sed -i -e '/android\ {/alintOptions\ {abortOnError\ false}' build.gradle
+      - gradle assembleRelease
+      - popd
+      - popd
+      - cp -r ../strongswan/src/frontends/android/app/src/main/libs/* src/main/jniLibs/
+      - rm -fr ../strongswan/src/frontends/android/app/src/main/libs/*
+      - rm -fr ../strongswan/src/frontends/android/app/build
+      - pushd ..
+      - gradle openvpn:assemble
+      - rm -fr openvpn/build/intermediates
+      - rm -fr openvpn/build/kotlin
+      - rm -fr openvpn/build/tmp
+      - rm -fr openvpn/.cxx
+      - popd
+    ndk: r21d
+    gradleprops:
+      - buildUniversalApk
+
 AutoUpdateMode: Version %v
 UpdateCheckMode: HTTP
 UpdateCheckData: https://raw.githubusercontent.com/ProtonVPN/android-app/master/metadata/version_fdroid.txt|versionCode=(.*)|.|versionName=(.*)
-CurrentVersion: 2.6.44.5
-CurrentVersionCode: 102064405
+CurrentVersion: 2.6.91.0
+CurrentVersionCode: 102069100
