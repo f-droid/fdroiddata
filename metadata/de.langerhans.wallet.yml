@@ -13,56 +13,24 @@ RepoType: git
 Repo: https://github.com/langerhans/dogecoin-wallet-new.git
 
 Builds:
-  - versionName: '1.07'
-    versionCode: 157
-    disable: 'todo: dogecoinj integration'
-    commit: '1.07'
+  - versionName: 4.0.0
+    versionCode: 400
+    commit: 4.0.0
     subdir: wallet
-    maven: yes@..
-    srclibs:
-      - DogecoinJ@8cf2b249bde3ec9b870e50afd3101946ec753412
-    prebuild: cp -r $$DogecoinJ$$/ DogecoinJ
-    scanignore:
-      - wallet
-    build: $$MVN3$$ clean install -DskipTests -f DogecoinJ/pom.xml
-
-  - versionName: 2.0.8
-    versionCode: 208
-    disable: 'Failed to read artifact descriptor for org.bitcoinj:bitcoinj-core:jar:0.14-SNAPSHOT:
-        Could not find artifact org.bitcoinj:bitcoinj-parent:pom:0.14-SNAPSHOT'
-    commit: 2.0.8
     gradle:
-      - _mainnet
-    output: wallet/build/outputs/apk/dogecoin-wallet-_mainnet-release-unsigned.apk
+      - prod
     srclibs:
-      - libdohj@89cf3c6b1778632198c90335157fa7a9fe858623
-      - bitcoinj@08ab6a0da5cc0b88c8bbac565053b0713802106a
-      - scrypt@0675236370458e819ee21e4427c5f7f3f9485d33
-    prebuild:
-      - pushd $$bitcoinj$$
-      - $$MVN3$$ -DskipTests --projects core clean install
-      - popd
-      - pushd $$libdohj$$
-      - $$MVN3$$ -DskipTests clean install
-      - popd
-      - pushd $$scrypt$$
-      - TARGET=android NDK_ROOT=$$NDK$$ PATH=$$NDK$$/toolchains/arm-linux-androideabi-4.8/prebuilt/linux-x86/bin:$PATH
-        make clean all
-      - popd
-      - cp --force $$scrypt$$/target/libscrypt.so wallet/jniLibs/armeabi/
-      - pushd $$scrypt$$
-      - TARGET=android NDK_ROOT=$$NDK$$ PATH=$$NDK$$/toolchains/x86-4.8/prebuilt/linux-x86/bin:$PATH
-        make CC=i686-linux-android-gcc SYSROOT=$$NDK$$/platforms/android-9/arch-x86
-        clean all
-      - popd
-      - cp --force $$scrypt$$/target/libscrypt.so wallet/jniLibs/x86/
-    scanignore:
-      - wallet/assets/ssl-keystore
+      - libdohj@v0.15.9
+    prebuild: cp -r $$libdohj$$ ../libdohj
     scandelete:
-      - wallet/jniLibs
       - wallet/test/de/schildbach/wallet/util/backup-protobuf-testnet
+    build:
+      - pushd ../libdohj
+      - gradle clean build install
+      - popd
+    ndk: r21e
 
 AutoUpdateMode: None
-UpdateCheckMode: None
-CurrentVersion: 2.0.8
-CurrentVersionCode: 208
+UpdateCheckMode: Tags
+CurrentVersion: 4.0.0
+CurrentVersionCode: 400
