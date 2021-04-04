@@ -35,7 +35,32 @@ Builds:
     build: libs/build
     ndk: r21d
 
-AutoUpdateMode: Version +-stable v%v
-UpdateCheckMode: Tags
-CurrentVersion: 5.1.0
-CurrentVersionCode: 2122
+  - versionName: 5.2.0
+    versionCode: 2125
+    commit: v5.2.0-stable
+    subdir: tordnscrypt
+    submodules: true
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y autogen g++
+      - apt-get install -y -t testing golang-go
+    init:
+      - sed -i -e "s/ndkVersion .*/ndkVersion '20.1.5948944'/" build.gradle
+      - libs/prebuild
+    gradle:
+      - fdroidArmv7a
+    rm:
+      - TorBuildScript/external/openssl/fuzz
+      - PurpleI2PBuildScript/external/libs/openssl/fuzz
+    scandelete:
+      - tordnscrypt/libs
+      - TorBuildScript/external
+    build: libs/build
+    ndk: r20b
+
+AutoUpdateMode: Version v%v-stable
+UpdateCheckMode: HTTP
+VercodeOperation: 2000 + %c
+UpdateCheckData: https://raw.githubusercontent.com/Gedsh/InviZible/stable/tordnscrypt/build.gradle|versionCode\s(\d+)|.|versionName\s"([\d.]+)"
+CurrentVersion: 5.2.0
+CurrentVersionCode: 2125
