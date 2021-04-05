@@ -2711,84 +2711,6 @@ Builds:
       - popd
     ndk: r20b
 
-  - versionName: 9.8.4
-    versionCode: 255
-    disable: requires NDK 22 which is not compatible with OpenSSL 1.1.1 https://github.com/openssl/openssl/pull/13694
-    commit: v9.8.4
-    subdir: app
-    submodules: true
-    gradle:
-      - nonRoot
-    srclibs:
-      - OpenSSL@OpenSSL_1_1_1c
-      - opus@v1.3
-    rm:
-      - app/src/main/jni/moonlight-core/openssl/include
-      - app/src/main/jni/moonlight-core/libopus/include
-    prebuild: sed -i 's/applicationIdSuffix/\/\/applicationIdSuffix/g' build.gradle
-    scandelete:
-      - app/src/main/jni/moonlight-core/openssl
-      - app/src/main/jni/moonlight-core/libopus
-    build:
-      - lib="$PWD/src/main/jni/moonlight-core"
-      - PATH=$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
-      - pushd $$opus$$
-      - ./autogen.sh
-      - CC=armv7a-linux-androideabi16-clang ./configure --host=arm-linux-androideabi
-        --with-pic --disable-extra-programs --disable-doc
-      - make -j16
-      - cp .libs/libopus.a ${lib}/libopus/armeabi-v7a/
-      - make distclean
-      - CC=aarch64-linux-android21-clang ./configure --host=aarch64-linux-android
-        --with-pic --disable-extra-programs --disable-doc
-      - make -j16
-      - cp .libs/libopus.a ${lib}/libopus/arm64-v8a/
-      - make distclean
-      - CC=i686-linux-android16-clang ./configure --host=i686-linux-android --with-pic
-        --disable-extra-programs --disable-doc
-      - make -j16
-      - cp .libs/libopus.a ${lib}/libopus/x86/
-      - make distclean
-      - CC=x86_64-linux-android21-clang ./configure --host=x86_64-linux-android --with-pic
-        --disable-extra-programs --disable-doc
-      - make -j16
-      - cp .libs/libopus.a ${lib}/libopus/x86_64/
-      - cp -R include/ ${lib}/libopus/
-      - make distclean
-      - popd
-      - pushd $$OpenSSL$$
-      - CC=armv7a-linux-androideabi16-clang ./Configure android-arm no-shared no-ssl3
-        no-engine no-dso no-asm no-hw no-comp no-stdio -fPIC -DOPENSSL_PIC -D__ANDROID_API__=16
-        -ffast-math -O3 -funroll-loops
-      - make -j16
-      - cp libcrypto.a ${lib}/openssl/armeabi-v7a/
-      - cp libssl.a ${lib}/openssl/armeabi-v7a/
-      - make distclean
-      - CC=aarch64-linux-android21-clang ./Configure android-arm64 no-shared no-ssl3
-        no-engine no-dso no-asm no-hw no-comp no-stdio -fPIC -DOPENSSL_PIC -D__ANDROID_API__=21
-        -ffast-math -O3 -funroll-loops
-      - make -j16
-      - cp libcrypto.a ${lib}/openssl/arm64-v8a/
-      - cp libssl.a ${lib}/openssl/arm64-v8a/
-      - make distclean
-      - CC=i686-linux-android16-clang ./Configure android-x86 no-shared no-ssl3 no-engine
-        no-dso no-asm no-hw no-comp no-stdio -fPIC -DOPENSSL_PIC -D__ANDROID_API__=16
-        -ffast-math -O3 -funroll-loops
-      - make -j16
-      - cp libcrypto.a ${lib}/openssl/x86/
-      - cp libssl.a ${lib}/openssl/x86/
-      - make distclean
-      - CC=x86_64-linux-android21-clang ./Configure android-x86_64 no-shared no-ssl3
-        no-engine no-dso no-asm no-hw no-comp no-stdio -fPIC -DOPENSSL_PIC -D__ANDROID_API__=21
-        -ffast-math -O3 -funroll-loops
-      - make -j`nproc`
-      - cp libcrypto.a ${lib}/openssl/x86_64/
-      - cp libssl.a ${lib}/openssl/x86_64/
-      - cp -R include/ ${lib}/openssl/
-      - make distclean
-      - popd
-    ndk: r20b
-
   - versionName: 9.8.5
     versionCode: 256
     commit: v9.8.5
@@ -2797,76 +2719,66 @@ Builds:
     gradle:
       - nonRoot
     srclibs:
-      - OpenSSL@OpenSSL_1_1_1c
+      - OpenSSL@OpenSSL_1_1_1k
       - opus@v1.3
     rm:
       - app/src/main/jni/moonlight-core/openssl/include
       - app/src/main/jni/moonlight-core/libopus/include
-    prebuild: sed -i 's/applicationIdSuffix/\/\/applicationIdSuffix/g' build.gradle
+    prebuild:
+      - sed -i -e '/applicationIdSuffix/d' build.gradle
+      - sed -i -e 's/ndkVersion\s".*"/ndkVersion "21.4.7075529"/' build.gradle
     scandelete:
       - app/src/main/jni/moonlight-core/openssl
       - app/src/main/jni/moonlight-core/libopus
     build:
       - lib="$PWD/src/main/jni/moonlight-core"
-      - PATH=$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
+      - PATH=$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
       - pushd $$opus$$
       - ./autogen.sh
       - CC=armv7a-linux-androideabi16-clang ./configure --host=arm-linux-androideabi
         --with-pic --disable-extra-programs --disable-doc
-      - make -j16
+      - make clean opus -j`nproc`
       - cp .libs/libopus.a ${lib}/libopus/armeabi-v7a/
-      - make distclean
       - CC=aarch64-linux-android21-clang ./configure --host=aarch64-linux-android
         --with-pic --disable-extra-programs --disable-doc
-      - make -j16
+      - make clean opus -j`nproc`
       - cp .libs/libopus.a ${lib}/libopus/arm64-v8a/
-      - make distclean
       - CC=i686-linux-android16-clang ./configure --host=i686-linux-android --with-pic
         --disable-extra-programs --disable-doc
-      - make -j16
+      - make clean opus -j`nproc`
       - cp .libs/libopus.a ${lib}/libopus/x86/
-      - make distclean
       - CC=x86_64-linux-android21-clang ./configure --host=x86_64-linux-android --with-pic
         --disable-extra-programs --disable-doc
-      - make -j16
+      - make clean opus -j`nproc`
       - cp .libs/libopus.a ${lib}/libopus/x86_64/
       - cp -R include/ ${lib}/libopus/
-      - make distclean
       - popd
       - pushd $$OpenSSL$$
       - CC=armv7a-linux-androideabi16-clang ./Configure android-arm no-shared no-ssl3
         no-engine no-dso no-asm no-hw no-comp no-stdio -fPIC -DOPENSSL_PIC -D__ANDROID_API__=16
         -ffast-math -O3 -funroll-loops
-      - make -j16
-      - cp libcrypto.a ${lib}/openssl/armeabi-v7a/
-      - cp libssl.a ${lib}/openssl/armeabi-v7a/
-      - make distclean
+      - make clean build_libs -j`nproc`
+      - cp lib*.a ${lib}/openssl/armeabi-v7a/
       - CC=aarch64-linux-android21-clang ./Configure android-arm64 no-shared no-ssl3
         no-engine no-dso no-asm no-hw no-comp no-stdio -fPIC -DOPENSSL_PIC -D__ANDROID_API__=21
         -ffast-math -O3 -funroll-loops
-      - make -j16
-      - cp libcrypto.a ${lib}/openssl/arm64-v8a/
-      - cp libssl.a ${lib}/openssl/arm64-v8a/
-      - make distclean
+      - make clean build_libs -j`nproc`
+      - cp lib*.a ${lib}/openssl/arm64-v8a/
       - CC=i686-linux-android16-clang ./Configure android-x86 no-shared no-ssl3 no-engine
         no-dso no-asm no-hw no-comp no-stdio -fPIC -DOPENSSL_PIC -D__ANDROID_API__=16
         -ffast-math -O3 -funroll-loops
-      - make -j16
-      - cp libcrypto.a ${lib}/openssl/x86/
-      - cp libssl.a ${lib}/openssl/x86/
-      - make distclean
+      - make clean build_libs -j`nproc`
+      - cp lib*.a ${lib}/openssl/x86/
       - CC=x86_64-linux-android21-clang ./Configure android-x86_64 no-shared no-ssl3
         no-engine no-dso no-asm no-hw no-comp no-stdio -fPIC -DOPENSSL_PIC -D__ANDROID_API__=21
         -ffast-math -O3 -funroll-loops
-      - make -j`nproc`
-      - cp libcrypto.a ${lib}/openssl/x86_64/
-      - cp libssl.a ${lib}/openssl/x86_64/
+      - make clean build_libs -j`nproc`
+      - cp lib*.a ${lib}/openssl/x86_64/
       - cp -R include/ ${lib}/openssl/
-      - make distclean
       - popd
-    ndk: r20b
+    ndk: r21e
 
 AutoUpdateMode: Version v%v
-UpdateCheckMode: Tags v\d+\.\d+(\.\d+)?
+UpdateCheckMode: Tags
 CurrentVersion: 9.8.5
 CurrentVersionCode: 256
