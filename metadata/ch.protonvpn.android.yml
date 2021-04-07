@@ -547,8 +547,6 @@ Builds:
     sudo:
       - apt-get update || apt-get update
       - apt-get install -y --no-install-recommends libgmp-dev
-    patch:
-      - openvpn-build.patch
     gradle:
       - prod
     output: build/outputs/apk/prod/release/ProtonVPN-*-prod-release-unsigned.apk
@@ -560,9 +558,12 @@ Builds:
       - openvpn/src/main/cpp/mbedtls/tests
       - openvpn/src/main/cpp/openvpn3/test/unittests
       - strongswan/testing/hosts/alice/etc/raddb/certs/random
+      - openvpn/src/main/cpp/mbedtls/programs/fuzz/corpuses/*
     prebuild:
       - sed -i -e '/triple/d' -e '/play\ {/,+4d' build.gradle
       - sed -i -e '/kotlinx/d' ../build.gradle
+      - sed -i -e 's/21.3.6528147/21.4.7075529/' ../openvpn/build.gradle.kts
+      - sed -i -e 's/21.3.6528147/21.4.7075529/' build.gradle
       - pushd ../strongswan
       - git clone git://git.strongswan.org/android-ndk-boringssl.git -b ndk-static
         src/frontends/android/app/src/main/jni/openssl
@@ -587,7 +588,7 @@ Builds:
       - rm -fr openvpn/build/tmp
       - rm -fr openvpn/.cxx
       - popd
-    ndk: r21d
+    ndk: r21e
     gradleprops:
       - buildUniversalApk
 
