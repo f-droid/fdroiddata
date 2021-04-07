@@ -1,0 +1,82 @@
+Categories:
+  - Development
+License: MIT
+AuthorName: Foxdebug (Ajit Kumar)
+AuthorEmail: dellevenjack@gmail.com
+WebSite: https://acode.foxdebug.com/
+SourceCode: https://github.com/deadlyjack/code-editor
+IssueTracker: https://github.com/deadlyjack/code-editor/issues
+Changelog: https://github.com/deadlyjack/code-editor/blob/HEAD/updates.txt
+
+AutoName: Acode
+Summary: Powerful text/code editor
+Description: |-
+    A powerful code editor for android. Edit like a pro.
+
+    <b>Why Acode?</b>
+
+    * Edit remote files (FTP/Github).
+    * Edit files from your internal/external storage.
+    * Supports maximum number of lines.
+    * Supports syntax highlighting for 100+ programming languages.
+    * Manage you files and folder very easily.
+    * Run or preview you web applications.
+    * Preview includes inbuilt interactive js console.
+    * Keyboard shortcuts.
+    * Customizable.
+    * Open any file with any application.
+    * Updated frequenlty.
+    * Fast bugs fixes.
+    * And it is open source.
+
+RepoType: git
+Repo: https://github.com/deadlyjack/code-editor
+
+Builds:
+  - versionName: 1.2.143
+    versionCode: 143
+    commit: 1.2.43
+    sudo:
+      - sysctl fs.inotify.max_user_watches=524288
+      - curl -Lo node.tar.xz https://nodejs.org/dist/v10.18.1/node-v10.18.1-linux-x64.tar.xz
+      - echo "8cc40f45c2c62529b15e83a6bbe0ac1febf57af3c5720df68067c96c0fddbbdf node.tar.xz"
+        | sha256sum -c -
+      - tar xJf node.tar.xz
+      - cp -a node-v10.18.1-linux-x64/. /usr/local/
+      - npm install -g npm@latest
+      - npm install -g cordova
+    output: platforms/android/app/build/outputs/apk/release/app-release-unsigned.apk
+    srclibs:
+      - ftp4j@86
+    rm:
+      - .gradle
+      - test
+    prebuild:
+      - sed -i -e '/ajax({/,+18d' src/lib/main.js
+      - npm install
+      - ./node_modules/.bin/webpack
+      - cordova platform add android
+      - cd platforms/android/app
+      - sed -i -e '/SUB-PROJECT DEPENDENCIES END/a implementation "commons-io:commons-io:2.7"'
+        build.gradle
+      - sed -i -e '/SUB-PROJECT DEPENDENCIES END/a implementation "commons-codec:commons-codec:1.15"'
+        build.gradle
+      - sed -i -e '/signingConfig signingConfigs.release/d' build.gradle
+    scandelete:
+      - node_modules
+      - platforms/android
+      - plugins
+    build:
+      - pushd $$ftp4j$$/tags/1.7.2
+      - sed -i -e 's/else="rv\${revision}"/else="1.7.2"/' build.xml
+      - ant jar
+      - popd
+      - cp $$ftp4j$$/tags/1.7.2/ftp4j-1.7.2.jar platforms/android/app/libs/
+      - cd platforms/android/app
+      - gradle assembleRelease
+
+AutoUpdateMode: None
+UpdateCheckMode: HTTP
+UpdateCheckData: https://raw.githubusercontent.com/deadlyjack/code-editor/master/config.xml|android-versionCode="(\d+)"|.|version="([\d.]+)"
+CurrentVersion: 1.2.143
+CurrentVersionCode: 143
