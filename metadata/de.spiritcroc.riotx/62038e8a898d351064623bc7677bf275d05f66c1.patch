@@ -1,0 +1,34 @@
+From 62038e8a898d351064623bc7677bf275d05f66c1 Mon Sep 17 00:00:00 2001
+From: Marcus Hoffmann <bubu@bubu1.eu>
+Date: Tue, 6 Apr 2021 20:50:43 +0200
+Subject: [PATCH] propagate jitsi LIBRE_BUILD exclusion rules to not pull in
+ gms libs
+
+Previously jitsi only had optional dependencies being disabled by the
+LIBRE build flag but a while ago they introduced optional exclusion
+rules which don't transitively propagate to consumers of the library, so
+instead we need to mirror the exclusion rules from the jitsi gradle file:
+See: https://github.com/jitsi/jitsi-meet/blob/7a64bf006ea027b77564d8847570e1ac46ff0ec0/android/sdk/build.gradle#L53
+
+Signed-off-by: Marcus Hoffmann <bubu@bubu1.eu>
+---
+ vector/build.gradle | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/vector/build.gradle b/vector/build.gradle
+index 3ee11450cc..d5a105d893 100644
+--- a/vector/build.gradle
++++ b/vector/build.gradle
+@@ -442,7 +442,11 @@ dependencies {
+     implementation('com.facebook.react:react-native-webrtc:1.87.3-jitsi-6624067@aar')
+ 
+     // Jitsi
+-    implementation('org.jitsi.react:jitsi-meet-sdk:3.1.0')
++    implementation('org.jitsi.react:jitsi-meet-sdk:3.1.0') {
++       exclude group: 'com.google.firebase'
++       exclude group: 'com.google.android.gms'
++       exclude group: 'com.android.installreferrer'
++    }
+ 
+     // QR-code
+     // Stick to 3.3.3 because of https://github.com/zxing/zxing/issues/1170

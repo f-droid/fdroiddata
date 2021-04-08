@@ -302,6 +302,7 @@ Builds:
 
   - versionName: 1.1.0.sc29
     versionCode: 40100430
+    disable: includes gms via jitsi
     commit: sc_v1.1.0.sc29
     subdir: vector
     gradle:
@@ -318,6 +319,30 @@ Builds:
     scanignore:
       - build.gradle
     ndk: r21d
+
+  - versionName: 1.1.0.sc29
+    versionCode: 40100431
+    commit: sc_v1.1.0.sc29
+    subdir: vector
+    patch:
+      - 62038e8a898d351064623bc7677bf275d05f66c1.patch
+    gradle:
+      - fdroid
+    srclibs:
+      - piasy@v1.7.1
+    prebuild:
+      - tac ../build.gradle | awk '/dl.bintray.com\/piasy\/maven/{getline;$0="mavenLocal
+        {"}{print $0}' | tac > ../build.gradle.new
+      - mv ../build.gradle.new ../build.gradle
+      - sed -i -e '/firebase-messaging/,+5d' build.gradle
+      - sed -i -e '/com.google.gms.google-services/d' build.gradle
+      - sed -i -e 's/21.3.6528147/21.4.7075529/g' build.gradle
+      - sed -i -e 's/enable true/enable false/g' build.gradle
+      - sed -i -e 's/40100430/40100431/g' build.gradle
+      - sed -i -e 's/1.6.2/1.7.1/g' build.gradle
+    scanignore:
+      - build.gradle
+    ndk: r21e
 
 MaintainerNotes: |-
     Uses piasy/BigImageViewer which gets build and installed to a local maven repo in srclib prepare step.
