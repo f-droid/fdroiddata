@@ -181,16 +181,22 @@ fdroid build:
     - git ls-remote https://gitlab.com/fdroid/fdroidserver.git master
     - curl --silent https://gitlab.com/fdroid/fdroidserver/-/archive/master/fdroidserver-master.tar.gz
           | tar -xz --directory=fdroidserver --strip-components=1
-    - export PATH="`pwd`/fdroidserver:$PATH"
-    - export PYTHONPATH="$CI_PROJECT_DIR/fdroidserver:$CI_PROJECT_DIR/fdroidserver/examples"
-    - export PYTHONUNBUFFERED=true
+
+    - adduser --disabled-password --gecos "" vagrant
+    - test -d /etc/sudoers.d || mkdir /etc/sudoers.d
+    - echo "vagrant ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/vagrant
+
+    - export VAGRANT_HOME=/home/vagrant
+    - ln -s $CI_PROJECT_DIR/fdroidserver $VAGRANT_HOME/fdroidserver
+    - cp -r $HOME/.android $VAGRANT_HOME/.android
+    - for d in build logs tmp unsigned $ANDROID_HOME $VAGRANT_HOME/.android; do
+          test -d $d || mkdir $d;
+          chown -R vagrant $d;
+      done
+    - ln -s $ANDROID_HOME $VAGRANT_HOME/android-sdk
+    - export ANDROID_HOME=$VAGRANT_HOME/android-sdk
 
     - bash fdroidserver/buildserver/setup-env-vars $ANDROID_HOME
-    - adduser --disabled-password --gecos "" vagrant
-    - ln -s $CI_PROJECT_DIR/fdroidserver /home/vagrant/fdroidserver
-    - mkdir -p /vagrant/cache
-    - wget -q https://services.gradle.org/distributions/gradle-5.6.2-bin.zip
-          --output-document=/vagrant/cache/gradle-5.6.2-bin.zip
     - bash fdroidserver/buildserver/provision-gradle
     - bash fdroidserver/buildserver/provision-apt-get-install http://deb.debian.org/debian
     - source /etc/profile.d/bsenv.sh
@@ -205,14 +211,21 @@ fdroid build:
          yamllint
     - apt-get purge fdroidserver
 
-    - export GRADLE_USER_HOME=$PWD/.gradle
+    - export GRADLE_USER_HOME=$VAGRANT_HOME/.gradle
     # each `fdroid build --on-server` run expects sudo, then uninstalls it
+    - export fdroid="sudo --preserve-env --user vagrant
+          env PATH=$VAGRANT_HOME/fdroidserver:$PATH
+          env PYTHONPATH=$VAGRANT_HOME/fdroidserver:$VAGRANT_HOME/fdroidserver/examples
+          env PYTHONUNBUFFERED=true
+          env TERM=$TERM
+          env HOME=$VAGRANT_HOME
+          fdroid"
     - for build in `./tools/find-changed-builds.py`; do
           set -x;
           apt-get install sudo;
-          ./tools/setup-ndk-per-build.py $build /home/vagrant/android-ndk;
-          fdroid fetchsrclibs $build --verbose;
-          fdroid build --verbose --scan-binary --on-server --no-tarball $build;
+          ./tools/setup-ndk-per-build.py $build $VAGRANT_HOME/android-ndk;
+          $fdroid fetchsrclibs $build --verbose;
+          $fdroid build --verbose --scan-binary --on-server --no-tarball $build;
       done
 
 
