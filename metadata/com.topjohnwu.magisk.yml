@@ -62,7 +62,7 @@ Builds:
 
   - versionName: '22.1'
     versionCode: 22100
-    commit: '22.1'
+    commit: 632cee1613eecae03b68f2b3d8ab1358a1b5bf4a
     submodules: true
     sudo:
       - apt-get update || apt-get update
@@ -74,16 +74,17 @@ Builds:
       - popd
     output: app/build/outputs/apk/release/app-release-unsigned.apk
     srclibs:
-      - cpython@v3.9.2
+      - cpython@v3.9.4
     prebuild:
       - echo -e 'version=$$VERSION$$' > ./config.prop
       - sed -i -e '/buildTypes/,+11d' ./build.gradle.kts
       - sed -i -e 's/ndkPath.*/ndkPath = "${System.getenv("ANDROID_NDK_HOME")}"/'
         ./build.gradle.kts
       - sed -i -e '/android.ndkPath/d' -e '/ndk.dir/d' ./local.properties
-      - sed -i -e 's/21d/21e/' -e 's/21.3.6528147/21.4.7075529/' ./gradle.properties
       - sed -i -e "s/op.join(ndk_root, 'magisk')/os.environ['ANDROID_NDK_HOME']/"
         ./build.py
+      - sed -i -e 's/Key.CHECK_UPDATES, true/Key.CHECK_UPDATES, false/' ./app/src/main/java/com/topjohnwu/magisk/core/Config.kt
+      - sed -i -e '/pid_t getsid/,+14d' native/jni/external/busybox/libbb/missing_syscalls.c
     scanignore:
       - app/shared/src/main/java/com/topjohnwu/magisk/utils/DynamicClassLoader.java
     scandelete:
@@ -97,7 +98,11 @@ Builds:
       - python3.9 ./build.py -rv app
     ndk: r21e
 
-AutoUpdateMode: Version %v
+MaintainerNotes: |-
+    https://github.com/topjohnwu/ndk-busybox/commit/31b2b5780bf9fe982e1f3d9df0bd4b1b44d6e394
+    in submodule is removed for some unkonwn reasons. Re-add it to fix the multiple definition error.
+
+AutoUpdateMode: Version v%v
 UpdateCheckMode: HTTP
 UpdateCheckData: https://topjohnwu.github.io/magisk-files/stable.json|"versionCode":\s"(\d+)"|.|"version":\s"([\d.]+)"
 CurrentVersion: '22.1'
