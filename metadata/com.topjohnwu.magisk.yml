@@ -60,8 +60,45 @@ Builds:
       - python3.9 ./build.py -rv app
     ndk: r21e
 
+  - versionName: '22.1'
+    versionCode: 22100
+    commit: '22.1'
+    submodules: true
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y g++
+      - pushd build/srclib/cpython
+      - ./configure
+      - make -j`nproc`
+      - make altinstall
+      - popd
+    output: app/build/outputs/apk/release/app-release-unsigned.apk
+    srclibs:
+      - cpython@v3.9.2
+    prebuild:
+      - echo -e 'version=$$VERSION$$' > ./config.prop
+      - sed -i -e '/buildTypes/,+11d' ./build.gradle.kts
+      - sed -i -e 's/ndkPath.*/ndkPath = "${System.getenv("ANDROID_NDK_HOME")}"/'
+        ./build.gradle.kts
+      - sed -i -e '/android.ndkPath/d' -e '/ndk.dir/d' ./local.properties
+      - sed -i -e 's/21d/21e/' -e 's/21.3.6528147/21.4.7075529/' ./gradle.properties
+      - sed -i -e "s/op.join(ndk_root, 'magisk')/os.environ['ANDROID_NDK_HOME']/"
+        ./build.py
+    scanignore:
+      - app/shared/src/main/java/com/topjohnwu/magisk/utils/DynamicClassLoader.java
+    scandelete:
+      - native/jni/external
+      - tools
+    build:
+      - ln -s `which gradle` ./gradlew
+      - python3.9 ./build.py -rv stub
+      - mv stub/build/outputs/apk/release/stub-release-unsigned.apk out/stub-release.apk
+      - python3.9 ./build.py -rv binary
+      - python3.9 ./build.py -rv app
+    ndk: r21e
+
 AutoUpdateMode: Version %v
 UpdateCheckMode: HTTP
 UpdateCheckData: https://topjohnwu.github.io/magisk-files/stable.json|"versionCode":\s"(\d+)"|.|"version":\s"([\d.]+)"
-CurrentVersion: '22.0'
-CurrentVersionCode: 22000
+CurrentVersion: '22.1'
+CurrentVersionCode: 22100
