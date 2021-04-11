@@ -2799,7 +2799,7 @@ Builds:
       - app/src/main/jni/moonlight-core/libopus
     build:
       - lib="$PWD/src/main/jni/moonlight-core"
-      - PATH=$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
+      - export PATH=$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
       - pushd $$opus$$
       - ./autogen.sh
       - CC=armv7a-linux-androideabi16-clang ./configure --host=arm-linux-androideabi
@@ -2821,24 +2821,16 @@ Builds:
       - cp -R include/ ${lib}/libopus/
       - popd
       - pushd $$OpenSSL$$
-      - CC=armv7a-linux-androideabi16-clang ./Configure android-arm no-shared no-ssl3
-        no-engine no-dso no-asm no-hw no-comp no-stdio -fPIC -DOPENSSL_PIC -D__ANDROID_API__=16
-        -ffast-math -O3 -funroll-loops
+      - ./Configure android-arm -D__ANDROID_API__=16 no-stdio
       - make clean build_libs -j`nproc`
       - cp lib*.a ${lib}/openssl/armeabi-v7a/
-      - CC=aarch64-linux-android21-clang ./Configure android-arm64 no-shared no-ssl3
-        no-engine no-dso no-asm no-hw no-comp no-stdio -fPIC -DOPENSSL_PIC -D__ANDROID_API__=21
-        -ffast-math -O3 -funroll-loops
+      - ./Configure android-arm64 -D__ANDROID_API__=21 no-stdio
       - make clean build_libs -j`nproc`
       - cp lib*.a ${lib}/openssl/arm64-v8a/
-      - CC=i686-linux-android16-clang ./Configure android-x86 no-shared no-ssl3 no-engine
-        no-dso no-asm no-hw no-comp no-stdio -fPIC -DOPENSSL_PIC -D__ANDROID_API__=16
-        -ffast-math -O3 -funroll-loops
+      - ./Configure android-x86 -D__ANDROID_API__=16 no-stdio
       - make clean build_libs -j`nproc`
       - cp lib*.a ${lib}/openssl/x86/
-      - CC=x86_64-linux-android21-clang ./Configure android-x86_64 no-shared no-ssl3
-        no-engine no-dso no-asm no-hw no-comp no-stdio -fPIC -DOPENSSL_PIC -D__ANDROID_API__=21
-        -ffast-math -O3 -funroll-loops
+      - ./Configure android-x86_64 -D__ANDROID_API__=21 no-stdio
       - make clean build_libs -j`nproc`
       - cp lib*.a ${lib}/openssl/x86_64/
       - cp -R include/ ${lib}/openssl/
