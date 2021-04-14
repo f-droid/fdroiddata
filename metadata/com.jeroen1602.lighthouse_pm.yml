@@ -37,7 +37,26 @@ Builds:
       - cd ../
       - $$flutter$$/bin/flutter build apk --shrink --no-obfuscate --release
 
+  - versionName: 1.2.0
+    versionCode: 8
+    commit: 1.2.0+8
+    output: build/app/outputs/apk/release/app-release-unsigned.apk
+    srclibs:
+      - flutter@2.0.4
+    rm:
+      - ios
+      - test
+      - local_assets
+    prebuild:
+      - echo "flutter.sdk=$$flutter$$" >> android/local.properties
+      - $$flutter$$/bin/flutter config --suppress-analytics --enable-android
+      - $$flutter$$/bin/flutter doctor --suppress-analytics
+      - $$flutter$$/bin/flutter packages pub get
+      - $$flutter$$/bin/flutter packages pub run build_runner build
+    build: $$flutter$$/bin/flutter build apk --no-obfuscate --release
+
 AutoUpdateMode: Version %v+%c
-UpdateCheckMode: Tags
-CurrentVersion: 1.1.2
-CurrentVersionCode: 7
+UpdateCheckMode: HTTP
+UpdateCheckData: https://raw.githubusercontent.com/jeroen1602/lighthouse_pm/master/pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 1.2.0
+CurrentVersionCode: 8
