@@ -218,9 +218,31 @@ Builds:
       - make -C .. assets
       - make -C .. packer
 
+  - versionName: 0.19.1
+    versionCode: 20
+    commit: 0.19.1
+    subdir: android
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y python3-pip python3-setuptools imagemagick-6.q16
+    gradle:
+      - yes
+    rm:
+      - tools/packr.jar
+    prebuild:
+      - sed -i -e 's#./gradlew#gradle#' ../Makefile
+      - git cherry-pick --no-commit 4a56032cc4e823ba8d3fd35d5b1941951537b208
+    scandelete:
+      - android/libs/
+    build:
+      - pip3 install --user -r ../requirements.txt
+      - gradle tools:dist -b ../build.gradle
+      - make -C .. assets
+      - make -C .. packer
+
 AutoUpdateMode: Version %v
 UpdateCheckMode: HTTP
 UpdateCheckIgnore: (alpha|beta|rc)
 UpdateCheckData: https://raw.githubusercontent.com/agateau/pixelwheels/master/version.properties|VERSION_CODE=(.*)|.|VERSION=(.*)
-CurrentVersion: 0.19.0
-CurrentVersionCode: 19
+CurrentVersion: 0.19.1
+CurrentVersionCode: 20
