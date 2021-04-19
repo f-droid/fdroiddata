@@ -1,0 +1,300 @@
+diff --git a/app/build.gradle b/app/build.gradle
+index fc0aff75..4f44b8eb 100644
+--- a/app/build.gradle
++++ b/app/build.gradle
+@@ -81,9 +81,6 @@ dependencies {
+     implementation library.activity
+     implementation library.fragment
+ 
+-    // Google Play
+-    implementation library.playcore
+-
+     // UI
+     implementation library.appcompat
+     implementation library.materialdesign
+diff --git a/app/src/main/kotlin/com/brackeys/ui/feature/main/activities/MainActivity.kt b/app/src/main/kotlin/com/brackeys/ui/feature/main/activities/MainActivity.kt
+index d95c518a..e6867a5e 100644
+--- a/app/src/main/kotlin/com/brackeys/ui/feature/main/activities/MainActivity.kt
++++ b/app/src/main/kotlin/com/brackeys/ui/feature/main/activities/MainActivity.kt
+@@ -30,7 +30,6 @@ import com.brackeys.ui.feature.main.utils.OnBackPressedHandler
+ import com.brackeys.ui.feature.main.viewmodel.MainViewModel
+ import com.brackeys.ui.utils.extensions.fragment
+ import com.brackeys.ui.utils.extensions.multiplyDraggingEdgeSizeBy
+-import com.brackeys.ui.utils.inappupdate.InAppUpdate
+ import com.google.android.material.snackbar.Snackbar
+ import dagger.hilt.android.AndroidEntryPoint
+ import javax.inject.Inject
+@@ -38,9 +37,6 @@ import javax.inject.Inject
+ @AndroidEntryPoint
+ class MainActivity : AppCompatActivity() {
+ 
+-    @Inject
+-    lateinit var inAppUpdate: InAppUpdate
+-
+     private val viewModel: MainViewModel by viewModels()
+ 
+     private lateinit var binding: ActivityMainBinding
+@@ -60,12 +56,6 @@ class MainActivity : AppCompatActivity() {
+             .fragment<ExplorerFragment>(R.id.fragment_explorer)
+ 
+         binding.drawerLayout?.multiplyDraggingEdgeSizeBy(2)
+-
+-        inAppUpdate.checkForUpdates(this) {
+-            Snackbar.make(binding.root, R.string.message_in_app_update_ready, Snackbar.LENGTH_INDEFINITE)
+-                .setAction(R.string.action_restart) { inAppUpdate.completeUpdate() }
+-                .show()
+-        }
+     }
+ 
+     override fun onResume() {
+@@ -101,4 +91,4 @@ class MainActivity : AppCompatActivity() {
+             binding.drawerLayout?.closeDrawer(GravityCompat.START)
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/app/src/main/kotlin/com/brackeys/ui/internal/di/app/AppModule.kt b/app/src/main/kotlin/com/brackeys/ui/internal/di/app/AppModule.kt
+index bf19cec5..3a54bcf9 100644
+--- a/app/src/main/kotlin/com/brackeys/ui/internal/di/app/AppModule.kt
++++ b/app/src/main/kotlin/com/brackeys/ui/internal/di/app/AppModule.kt
+@@ -20,9 +20,6 @@ import android.content.Context
+ import com.brackeys.ui.BuildConfig
+ import com.brackeys.ui.domain.providers.coroutines.DispatcherProvider
+ import com.brackeys.ui.internal.providers.coroutines.DispatcherProviderImpl
+-import com.brackeys.ui.utils.inappupdate.InAppUpdate
+-import com.brackeys.ui.utils.inappupdate.InAppUpdateImpl
+-import com.brackeys.ui.utils.inappupdate.InAppUpdateStub
+ import dagger.Module
+ import dagger.Provides
+ import dagger.hilt.InstallIn
+@@ -39,14 +36,4 @@ object AppModule {
+     fun provideDispatcherProvider(): DispatcherProvider {
+         return DispatcherProviderImpl()
+     }
+-
+-    @Provides
+-    @Singleton
+-    fun provideInAppUpdate(@ApplicationContext context: Context): InAppUpdate {
+-        return if (!BuildConfig.DEBUG) {
+-            InAppUpdateImpl(context)
+-        } else {
+-            InAppUpdateStub()
+-        }
+-    }
+-}
+\ No newline at end of file
++}
+diff --git a/app/src/main/kotlin/com/brackeys/ui/utils/inappupdate/InAppUpdate.kt b/app/src/main/kotlin/com/brackeys/ui/utils/inappupdate/InAppUpdate.kt
+deleted file mode 100644
+index 7896a9cc..00000000
+--- a/app/src/main/kotlin/com/brackeys/ui/utils/inappupdate/InAppUpdate.kt
++++ /dev/null
+@@ -1,24 +0,0 @@
+-/*
+- * Copyright 2021 Brackeys IDE contributors.
+- *
+- * Licensed under the Apache License, Version 2.0 (the "License");
+- * you may not use this file except in compliance with the License.
+- * You may obtain a copy of the License at
+- *
+- *     http://www.apache.org/licenses/LICENSE-2.0
+- *
+- * Unless required by applicable law or agreed to in writing, software
+- * distributed under the License is distributed on an "AS IS" BASIS,
+- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+- * See the License for the specific language governing permissions and
+- * limitations under the License.
+- */
+-
+-package com.brackeys.ui.utils.inappupdate
+-
+-import android.app.Activity
+-
+-interface InAppUpdate {
+-    fun checkForUpdates(activity: Activity, onComplete: () -> Unit)
+-    fun completeUpdate()
+-}
+\ No newline at end of file
+diff --git a/app/src/main/kotlin/com/brackeys/ui/utils/inappupdate/InAppUpdateImpl.kt b/app/src/main/kotlin/com/brackeys/ui/utils/inappupdate/InAppUpdateImpl.kt
+deleted file mode 100644
+index a757ad25..00000000
+--- a/app/src/main/kotlin/com/brackeys/ui/utils/inappupdate/InAppUpdateImpl.kt
++++ /dev/null
+@@ -1,102 +0,0 @@
+-/*
+- * Copyright 2021 Brackeys IDE contributors.
+- *
+- * Licensed under the Apache License, Version 2.0 (the "License");
+- * you may not use this file except in compliance with the License.
+- * You may obtain a copy of the License at
+- *
+- *     http://www.apache.org/licenses/LICENSE-2.0
+- *
+- * Unless required by applicable law or agreed to in writing, software
+- * distributed under the License is distributed on an "AS IS" BASIS,
+- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+- * See the License for the specific language governing permissions and
+- * limitations under the License.
+- */
+-
+-package com.brackeys.ui.utils.inappupdate
+-
+-import android.app.Activity
+-import android.content.Context
+-import android.util.Log
+-import com.google.android.play.core.appupdate.AppUpdateInfo
+-import com.google.android.play.core.appupdate.AppUpdateManagerFactory
+-import com.google.android.play.core.install.InstallState
+-import com.google.android.play.core.install.InstallStateUpdatedListener
+-import com.google.android.play.core.install.model.AppUpdateType
+-import com.google.android.play.core.install.model.InstallStatus
+-import com.google.android.play.core.install.model.UpdateAvailability
+-import com.google.android.play.core.ktx.*
+-
+-class InAppUpdateImpl(context: Context) : InAppUpdate {
+-
+-    companion object {
+-
+-        private const val TAG = "InAppUpdateImpl"
+-
+-        private const val PRIORITY_HIGH = 5
+-        private const val PRIORITY_MEDIUM = 3
+-        private const val PRIORITY_LOW = 1
+-
+-        private const val UPDATE_REQUEST_CODE = 500
+-    }
+-
+-    private val appUpdateManager by lazy { AppUpdateManagerFactory.create(context) }
+-
+-    override fun checkForUpdates(activity: Activity, onComplete: () -> Unit) {
+-        appUpdateManager.registerListener(object : InstallStateUpdatedListener {
+-            override fun onStateUpdate(state: InstallState) {
+-                if (state.installStatus == InstallStatus.DOWNLOADED) {
+-                    appUpdateManager.unregisterListener(this)
+-                    onComplete.invoke()
+-                }
+-            }
+-        })
+-        appUpdateManager.appUpdateInfo
+-            .addOnSuccessListener { info ->
+-                if (info.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE) {
+-                    val clientStalenessDays = info.clientVersionStalenessDays ?: 0
+-                    when (info.updatePriority) {
+-                        PRIORITY_HIGH -> {
+-                            startUpdate(activity, info, AppUpdateType.IMMEDIATE)
+-                        }
+-                        PRIORITY_HIGH - 1 -> {
+-                            if (clientStalenessDays >= 5 && info.isImmediateUpdateAllowed) {
+-                                startUpdate(activity, info, AppUpdateType.IMMEDIATE)
+-                            } else if (info.isFlexibleUpdateAllowed) {
+-                                startUpdate(activity, info, AppUpdateType.FLEXIBLE)
+-                            }
+-                        }
+-                        PRIORITY_MEDIUM -> {
+-                            if (clientStalenessDays >= 30 && info.isImmediateUpdateAllowed) {
+-                                startUpdate(activity, info, AppUpdateType.IMMEDIATE)
+-                            } else if (info.isFlexibleUpdateAllowed) {
+-                                startUpdate(activity, info, AppUpdateType.FLEXIBLE)
+-                            }
+-                        }
+-                        PRIORITY_LOW + 1 -> {
+-                            if (clientStalenessDays >= 90 && info.isImmediateUpdateAllowed) {
+-                                startUpdate(activity, info, AppUpdateType.IMMEDIATE)
+-                            } else if (info.isFlexibleUpdateAllowed) {
+-                                startUpdate(activity, info, AppUpdateType.FLEXIBLE)
+-                            }
+-                        }
+-                        PRIORITY_LOW -> {
+-                            startUpdate(activity, info, AppUpdateType.FLEXIBLE)
+-                        }
+-                    }
+-                }
+-            }
+-            .addOnFailureListener {
+-                Log.e(TAG, it.message, it)
+-            }
+-    }
+-
+-    override fun completeUpdate() {
+-        appUpdateManager.completeUpdate()
+-    }
+-
+-    private fun startUpdate(activity: Activity, info: AppUpdateInfo, type: Int) {
+-        appUpdateManager.startUpdateFlowForResult(info, type, activity, UPDATE_REQUEST_CODE)
+-    }
+-}
+\ No newline at end of file
+diff --git a/app/src/main/kotlin/com/brackeys/ui/utils/inappupdate/InAppUpdateStub.kt b/app/src/main/kotlin/com/brackeys/ui/utils/inappupdate/InAppUpdateStub.kt
+deleted file mode 100644
+index 5ea3bbd2..00000000
+--- a/app/src/main/kotlin/com/brackeys/ui/utils/inappupdate/InAppUpdateStub.kt
++++ /dev/null
+@@ -1,35 +0,0 @@
+-/*
+- * Copyright 2021 Brackeys IDE contributors.
+- *
+- * Licensed under the Apache License, Version 2.0 (the "License");
+- * you may not use this file except in compliance with the License.
+- * You may obtain a copy of the License at
+- *
+- *     http://www.apache.org/licenses/LICENSE-2.0
+- *
+- * Unless required by applicable law or agreed to in writing, software
+- * distributed under the License is distributed on an "AS IS" BASIS,
+- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+- * See the License for the specific language governing permissions and
+- * limitations under the License.
+- */
+-
+-package com.brackeys.ui.utils.inappupdate
+-
+-import android.app.Activity
+-import android.util.Log
+-
+-class InAppUpdateStub : InAppUpdate {
+-
+-    companion object {
+-        private const val TAG = "InAppUpdateStub"
+-    }
+-
+-    override fun checkForUpdates(activity: Activity, onComplete: () -> Unit) {
+-        Log.d(TAG, "checkForUpdates")
+-    }
+-
+-    override fun completeUpdate() {
+-        Log.d(TAG, "completeUpdate")
+-    }
+-}
+\ No newline at end of file
+diff --git a/gradle/versions.gradle b/gradle/versions.gradle
+index 67294efa..3c095553 100644
+--- a/gradle/versions.gradle
++++ b/gradle/versions.gradle
+@@ -36,9 +36,6 @@ ext {
+     activity_version = '1.3.0-alpha02'
+     fragment_version = '1.3.0'
+ 
+-    // Google Play
+-    playcore_version = '1.8.1'
+-
+     // UI
+     appcompat_version = '1.3.0-beta01'
+     materialdesign_version = '1.3.0'
+@@ -93,9 +90,6 @@ ext {
+             activity: "androidx.activity:activity-ktx:$activity_version",
+             fragment: "androidx.fragment:fragment-ktx:$fragment_version",
+ 
+-            // Google Play
+-            playcore: "com.google.android.play:core-ktx:$playcore_version",
+-
+             // UI
+             appcompat: "androidx.appcompat:appcompat:$appcompat_version",
+             materialdesign: "com.google.android.material:material:$materialdesign_version",
+@@ -145,4 +139,4 @@ ext {
+             test_runner: "androidx.test:runner:$test_runner_version",
+             espresso_core: "androidx.test.espresso:espresso-core:$espresso_core_version"
+     ]
+-}
+\ No newline at end of file
++}
