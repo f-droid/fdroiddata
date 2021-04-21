@@ -243,7 +243,9 @@ fdroid build:
           chown -R vagrant $VAGRANT_HOME;
           $fdroid fetchsrclibs $build --verbose;
           $fdroid build --verbose --test --scan-binary --on-server --no-tarball $build;
-          ./tools/should-run-publish.py $build && (apt-get install sudo; $fdroid publish --verbose $build);
+          ./tools/build-contains-signatures.py $build || continue;
+          apt-get install sudo;
+          $fdroid publish --verbose $build;
       done
 
 
