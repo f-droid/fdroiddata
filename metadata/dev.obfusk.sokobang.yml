@@ -89,10 +89,46 @@ Builds:
       - make android-release-armeabi-v7a
     ndk: r20b
 
+  - versionName: 0.2.4
+    versionCode: 1000204001
+    commit: v0.2.4
+    sudo:
+      - ( apt-get update || apt-get update )
+      - apt-get install -y build-essential git
+      - apt-get install -y openjdk-11-jdk-headless
+      - apt-get install -y zlib1g-dev zip unzip pkg-config libffi-dev
+      - apt-get install -y libltdl-dev
+      - apt-get install -y libsqlite3-dev
+      - apt-get install -y lld-7
+      - ln -fs lld-7 /usr/bin/lld
+      - cd build/srclib/cpython
+      - ./configure --enable-loadable-sqlite-extensions
+      - make -j`nproc`
+      - make altinstall
+    output: bin/sokobang-$$VERSION$$-armeabi-v7a-release-unsigned.apk
+    srclibs:
+      - cpython@v3.7.8
+      - buildozer@1.2.0
+      - python-for-android@7a934f3
+    prebuild:
+      - python3.7 -mvenv ../../env
+      - source ../../env/bin/activate
+      - sed -r "s:#?android.sdk_path =.*:android.sdk_path = $$SDK$$:" -i buildozer.spec
+      - sed -r "s:#?android.ndk_path =.*:android.ndk_path = $$NDK$$:" -i buildozer.spec
+      - sed -r "s:#?android.accept_sdk_license =.*:android.accept_sdk_license = False:"
+        -i buildozer.spec
+      - sed -r "s:#?p4a.source_dir =.*:p4a.source_dir = $$python-for-android$$:" -i
+        buildozer.spec
+      - make _android_setup_user BUILDOZER="$$buildozer$$"
+    build:
+      - source ../../env/bin/activate
+      - make android-release-armeabi-v7a
+    ndk: r20b
+
 AutoUpdateMode: Version v%v
 UpdateCheckMode: HTTP
 VercodeOperation: '%c - 1'
 UpdateCheckData: https://raw.githubusercontent.com/obfusk/sokobang/HEAD/buildozer.spec|android.numeric_version
     *= *([0-9]+)|.|version *= *([0-9.a-g-]+)
-CurrentVersion: 0.2.3
-CurrentVersionCode: 1000203001
+CurrentVersion: 0.2.4
+CurrentVersionCode: 1000204001
