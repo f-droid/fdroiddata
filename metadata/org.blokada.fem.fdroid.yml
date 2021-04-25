@@ -190,51 +190,23 @@ Builds:
       - ./build.blocka.sh
     ndk: r21d
 
-  - versionName: 5.11.0
-    versionCode: 511000000
-    disable: not yet released
-    commit: android-v5.11.0
-    subdir: android5/app
-    gradle:
-      - droid
-    srclibs:
-      - rustup@1.22.1
-    rm:
-      - android5/app/src/engine/jniLibs
-    prebuild:
-      - unzip -P default_blocklist src/main/assets/default_blocklist.zip default_blocklist
-        -d src/main/assets
-      - rm src/main/assets/default_blocklist.zip
-      - sed -i -e 's/6.6-rc-6/6.6/' ../gradle/wrapper/gradle-wrapper.properties
-    build:
-      - $$rustup$$/rustup-init.sh -y
-      - source $HOME/.cargo/env
-      - rustup default stable
-      - rustup target add armv7-linux-androideabi
-      - rustup target add aarch64-linux-android
-      - cargo install cargo-ndk --version 1.0.0
-      - git submodule update --init --recursive
-      - export ANDROID_NDK=$$NDK$$
-      - cd ./../..
-      - ./build.boringtun.sh
-      - ./build.blocka.sh
-    ndk: r21e
-
   - versionName: 5.11.1
     versionCode: 511000001
-    commit: ios-v5.10.1
+    disable: https://github.com/blokadaorg/blokada/issues/860
+    commit: android-v5.11.1
     subdir: android5/app
+    submodules: true
     gradle:
       - droid
     srclibs:
-      - rustup@1.22.1
+      - rustup@1.23.1
     rm:
       - android5/app/src/engine/jniLibs
     prebuild:
       - unzip -P default_blocklist src/main/assets/default_blocklist.zip default_blocklist
         -d src/main/assets
       - rm src/main/assets/default_blocklist.zip
-      - sed -i -e 's/6.6-rc-6/6.6/' ../gradle/wrapper/gradle-wrapper.properties
+      - sed -i -e 's/21.3.6528147/21.4.7075529/' build.gradle
     build:
       - $$rustup$$/rustup-init.sh -y
       - source $HOME/.cargo/env
@@ -242,14 +214,13 @@ Builds:
       - rustup target add armv7-linux-androideabi
       - rustup target add aarch64-linux-android
       - cargo install cargo-ndk --version 1.0.0
-      - git submodule update --init --recursive
       - export ANDROID_NDK=$$NDK$$
-      - cd ./../..
+      - cd ../..
       - ./build.boringtun.sh
       - ./build.blocka.sh
     ndk: r21e
 
 AutoUpdateMode: Version android-v%v
-UpdateCheckMode: Tags .*[0-9]$
+UpdateCheckMode: Tags ^android-v[0-9.]+$
 CurrentVersion: 5.11.1
 CurrentVersionCode: 511000001
