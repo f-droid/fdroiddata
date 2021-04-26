@@ -559,14 +559,13 @@ Builds:
 
   - versionName: 1.1.251
     versionCode: 83
-    disable: fails to build https://gitlab.com/fdroid/fdroiddata/-/merge_requests/8720
     commit: v1.1.251
     subdir: k9mail
     sudo:
       - apt-get update || apt-get update
       - apt-get purge asn1c
-      - apt-get install -y --no-install-recommends mercurial g++ clang nettle-dev
-        capnproto libsqlite3-dev libtool python3-lxml
+      - apt-get install -y --no-install-recommends mercurial g++ clang capnproto libsqlite3-dev
+        libtool python3-lxml automake
       - git clone https://github.com/vlm/asn1c /tmp/asn1c || true
       - cd /tmp/asn1c
       - git checkout v0.9.28
@@ -584,7 +583,7 @@ Builds:
     prebuild:
       - wget https://sh.rustup.rs -O ~/rustup.sh
       - chmod +x ~/rustup.sh
-      - ~/rustup.sh -v -y --no-modify-path --default-toolchain nightly --default-host
+      - ~/rustup.sh -v -y --no-modify-path --default-toolchain 1.46.0 --default-host
         x86_64-unknown-linux-gnu -t i686-linux-android -t x86_64-linux-android -t
         armv7-linux-androideabi -t aarch64-linux-android
       - ~/.cargo/bin/rustup -v component add rust-src
@@ -592,27 +591,23 @@ Builds:
       - echo -e "[target.aarch64-linux-android]\nar = \"${NDKB}aarch64-linux-android-ar\"\nlinker
         = \"${NDKB}aarch64-linux-android21-clang\"\n" > ~/.cargo/config
       - echo -e "[target.armv7-linux-androideabi]\nar = \"${NDKB}arm-linux-androideabi-ar\"\nlinker
-        = \"${NDKB}armv7a-linux-androideabi18-clang\"\n" >> ~/.cargo/config
+        = \"${NDKB}armv7a-linux-androideabi21-clang\"\n" >> ~/.cargo/config
       - echo -e "[target.x86_64-linux-android]\nar = \"${NDKB}x86_64-linux-android-ar\"\nlinker
         = \"${NDKB}x86_64-linux-android21-clang\"\n" >> ~/.cargo/config
       - echo -e "[target.i686-linux-android]\nar = \"${NDKB}i686-linux-android-ar\"\nlinker
-        = \"${NDKB}i686-linux-android18-clang\"" >> ~/.cargo/config
+        = \"${NDKB}i686-linux-android21-clang\"" >> ~/.cargo/config
       - echo -e "\norg.gradle.jvmargs=-Xms1024m -Xmx4096m -XX:MaxPermSize=4096m" >>
         ../gradle.properties
-      - sed -i 's:include.*arm64-v8a.*armeabi-v7a.*x86.*x86_64.*:include "arm64-v8a":'
-        build.gradle
       - sed -i 's:universalApk false:universalApk true:' build.gradle
       - sed -i 's:enable true:enable false:' build.gradle
       - sed -i 's:file("../pEpJNIAdapter/android"):file("../srclib/pEpJNIAdapter/android"):'
         ../settings.gradle
-      - sed -i 's:20.0:20.1:' ../build.gradle
-      - sed -i 's:21.0.6113669:20.1.5948944:' $$pEpJNIAdapter$$/android/build.gradle
-      - echo -e "DEBUG=0\nYML2_PATH=$$yml2$$" > $$pEpEngine$$/local.conf
       - echo -e "DEBUG=0\nYML2_PATH=$$yml2$$\nENGINE_INC_PATH=$$pEpEngine$$/src\nAD_INC_PATH=$$pEpJNIAdapter$$/src/"
         > $$pEpJNIAdapter$$/local.conf
+      - echo -e "DEBUG=0\nYML2_PATH=$$yml2$$" > $$pEpEngine$$/local.conf
       - ln -s $$pEpEngine$$/src/ $$pEpEngine$$/src/pEp
-      - sed -i 's:cargo build:~/.cargo/bin/cargo build:' $$pEpJNIAdapter$$/android/external/**/Makefile
-      - sed -i 's:rustup run:~/.cargo/bin/rustup run:' $$pEpJNIAdapter$$/android/external/**/Makefile
+      - sed -i 's:rustup run nightly cargo:~/.cargo/bin/cargo:' $$pEpJNIAdapter$$/android/external/**/Makefile
+      - sed -i 's:\-Z build-std=core,alloc,std::' $$pEpJNIAdapter$$/android/external/**/Makefile
       - sed -i 's:downloads/::' $$pEpJNIAdapter$$/android/external/downloads/gmp-6.2.1.tar.bz2.md5
     ndk: r20b
 
