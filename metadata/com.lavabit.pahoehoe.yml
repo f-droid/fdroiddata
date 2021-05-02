@@ -1,0 +1,57 @@
+Categories:
+  - Internet
+  - Security
+License: GPL-3.0-only
+AuthorName: Lavabit LLC
+WebSite: https://lavabit.com
+SourceCode: https://github.com/lavabit/pahoehoe
+IssueTracker: https://github.com/lavabit/pahoehoe/issues
+Changelog: https://github.com/lavabit/pahoehoe/releases
+
+AutoName: Lavabit Encrypted Proxy
+
+RepoType: git
+Repo: https://github.com/lavabit/pahoehoe.git
+
+Builds:
+  - versionName: 1.0.1
+    versionCode: 201
+    commit: 1.0.1
+    subdir: android/app
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y -t testing golang-go
+    gradle:
+      - lavabitProductionFat
+    rm:
+      - vpnweb/
+      - daemon/
+      - desktop/
+    prebuild:
+      - sed -i -e "/^task updateSdkLicences/,/^}/d; /commandLine 'git'/d" build.gradle
+      - $$SDK$$/tools/bin/sdkmanager 'platforms;android-30' 'build-tools;30.0.3' |
+        grep -v '=' || true
+    scandelete:
+      - android/go/
+      - android/ics-openvpn/
+    build:
+      - export ANDROID_NDK_ROOT=$$NDK$$
+      - cd ../go
+      - export GOPATH="$PWD"
+      - export PATH="$PWD/bin:$PATH"
+      - go get golang.org/x/mobile/cmd/gomobile
+      - ./bin/gomobile init
+      - mkdir -p ./lib
+      - gomobile bind -target=android -o ./lib/bitmask-web-core.aar se.leap.bitmaskclient/shapeshifter/
+        se.leap.bitmaskclient/pgpverify
+      - cp lib/bitmask-web-core* ../bitmask-web-core/.
+      - gomobile bind -target=android -o ./lib/bitmask-core.aar se.leap.bitmaskclient/shapeshifter/
+      - cp lib/bitmask-core* ../bitmask-core/.
+      - cd ../ics-openvpn
+      - gradle main:externalNativeBuildCleanSkeletonRelease main:externalNativeBuildSkeletonRelease
+    ndk: r21e
+
+AutoUpdateMode: Version %v
+UpdateCheckMode: Tags ^[0-9]+\.[0-9]+\.[0-9]+$
+CurrentVersion: 1.0.1
+CurrentVersionCode: 201
