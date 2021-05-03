@@ -1,0 +1,44 @@
+Categories:
+  - Games
+License: GPL-3.0-only
+AuthorName: Calcitem Studio and Sanmill Developers
+SourceCode: https://github.com/calcitem/Sanmill
+IssueTracker: https://github.com/calcitem/Sanmill/issues
+Changelog: https://github.com/calcitem/Sanmill/releases
+
+AutoName: Sanmill
+
+RepoType: git
+Repo: https://github.com/calcitem/Sanmill.git
+
+Builds:
+  - versionName: 1.0.3
+    versionCode: 1768
+    commit: v1.0.3-fdroid
+    output: src/ui/flutter_app/build/app/outputs/flutter-apk/app-fdroid-release.apk
+    srclibs:
+      - flutter@2.0.6
+    rm:
+      - src/ui/flutter_app/ios
+    prebuild:
+      - rm src/ui/flutter_app/android/app/build.gradle
+      - mv src/ui/flutter_app/android/app/build.gradle_fdroid src/ui/flutter_app/android/app/build.gradle
+    build:
+      - export PATH=$$flutter$$/bin:$PATH
+      - flutter config --no-analytics
+      - cd src/ui/flutter_app
+      - flutter pub get
+      - flutter pub global activate intl_utils
+      - flutter --no-color pub global run intl_utils:generate
+      - flutter build apk -v --flavor fdroid
+
+MaintainerNotes: |-
+    Builds will fail when the srclib ref of flutter and the version with which
+    upstream has been built with differ.
+    In that case we need to manually give the correct ref to srclib.
+
+AutoUpdateMode: Version v%v-fdroid
+UpdateCheckMode: HTTP
+UpdateCheckData: https://raw.githubusercontent.com/calcitem/Sanmill/master/src/ui/flutter_app/pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 1.0.3
+CurrentVersionCode: 1768
