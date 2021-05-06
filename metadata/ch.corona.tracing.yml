@@ -30,11 +30,44 @@ Builds:
     gradleprops:
       - versionNoGaen=+nogaen-1
 
+  - versionName: 1.4.1+nogaen-2
+    versionCode: 14010
+    commit: nogaen-2
+    subdir: app
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y openjdk-11-jdk
+      - update-alternatives --auto java
+    gradle:
+      - prod
+    srclibs:
+      - kotlinx-coroutines@1.4.1
+      - dp3t-sdk@nogaen-2
+    rm:
+      - app/testKeystore
+    build:
+      - pushd $$kotlinx-coroutines$$
+      - JDK_16=$( dirname $( realpath $( which java ) ) )/.. ./gradlew kotlinx-coroutines-play-services:assemble
+      - popd
+      - pushd $$dp3t-sdk$$/dp3t-sdk
+      - mkdir -p ./sdk/libs
+      - cp $$kotlinx-coroutines$$/integration/kotlinx-coroutines-play-services/build/libs/kotlinx-coroutines-play-services-1.4.1-SNAPSHOT.jar
+        ./sdk/libs/
+      - ./gradlew assembleProdRelease -PversionNoGaen=+nogaen-2
+      - popd
+      - mkdir -p ./libs
+      - cp $$dp3t-sdk$$/dp3t-sdk/sdk/build/outputs/aar/sdk-production-release.aar
+        ./libs/
+      - cp $$kotlinx-coroutines$$/integration/kotlinx-coroutines-play-services/build/libs/kotlinx-coroutines-play-services-1.4.1-SNAPSHOT.jar
+        ./libs/
+    gradleprops:
+      - versionNoGaen=+nogaen-2
+
 MaintainerNotes: |-
     There is a lint error during the build phase that has not yet been worked out.
     It is currently ignored and should have no consequence on the app.
 
 AutoUpdateMode: None
 UpdateCheckMode: Tags nogaen-\d+$
-CurrentVersion: 1.4.1
+CurrentVersion: 1.4.1+nogaen-2
 CurrentVersionCode: 14010
