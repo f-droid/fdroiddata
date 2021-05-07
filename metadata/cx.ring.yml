@@ -1378,6 +1378,42 @@ Builds:
       - ./compile.sh --release --daemon
     ndk: r22b
 
+  - versionName: 20210504-01
+    versionCode: 297
+    commit: android/release_297
+    timeout: 10800
+    subdir: client-android/ring-android/app
+    submodules: true
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y -t testing swig
+      - apt-get install -y -t stretch-backports-sloppy libarchive13
+      - apt-get install -y -t stretch-backports cmake
+    gradle:
+      - noPush
+    rm:
+      - client-electron
+      - client-gnome
+      - client-ios
+      - client-macosx
+      - client-uwp
+      - client-qt
+      - plugins
+      - docker
+      - docs
+      - lrc
+      - packaging
+      - scripts
+    prebuild:
+      - $ANDROID_HOME/tools/bin/sdkmanager 'platforms;android-30' 'build-tools;30.0.3'
+      - sed -i -e "s/ndkVersion '.*'/ndkVersion '22.1.7171670'/" build.gradle
+    build:
+      - cd ../..
+      - export ANDROID_NDK_ROOT="$ANDROID_NDK"
+      - export ANDROID_ABI="armeabi-v7a arm64-v8a x86_64"
+      - ./compile.sh --release --daemon
+    ndk: r22b
+
 MaintainerNotes: |-
     Ring has a lot of native dependencies, the source tarballs of these are all downloaded and build for all enabled architectures.
     Build failed with swig 2.0.12 from jessie but works with 3.0.10 from jessie-backports.
@@ -1388,5 +1424,5 @@ MaintainerNotes: |-
 AutoUpdateMode: Version android/release_%c
 UpdateCheckMode: HTTP
 UpdateCheckData: https://git.jami.net/savoirfairelinux/ring-client-android/-/raw/master/ring-android/app/build.gradle|versionCode\s(\d+)|.|versionName\s"([\d-]+)"
-CurrentVersion: 20210503-01
-CurrentVersionCode: 296
+CurrentVersion: 20210504-01
+CurrentVersionCode: 297
