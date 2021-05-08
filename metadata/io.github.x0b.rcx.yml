@@ -39,7 +39,32 @@ Builds:
     preassemble:
       - rclone:buildNative
 
+  - versionName: 1.12.0
+    versionCode: 200
+    commit: v1.12.0
+    gradle:
+      - oss
+    output: app/build/outputs/apk/oss/release/app-oss-universal-release-unsigned.apk
+    build:
+      - curl -o go.tar.gz https://dl.google.com/go/go1.15.8.linux-amd64.tar.gz
+      - echo 'd3379c32a90fdf9382166f8f48034c459a8cc433730bc9476d39d9082c94583b  go.tar.gz'
+        | sha256sum -c
+      - mkdir -p golang
+      - tar -C golang -xzf go.tar.gz
+      - export GOPATH="$PWD"
+      - export GOROOT="$PWD/golang/go"
+      - export PATH="$GOROOT/bin:$PATH"
+      - sed -i "27i    environment 'GO111MODULE', 'off'" rclone/build.gradle
+      - sed -i "27i    ignoreExitValue true" rclone/build.gradle
+      - sed -i -e 's/commandLine '\''go'\''/commandLine '\''\/home\/vagrant\/build\/io.github.x0b.rcx\/golang\/go\/bin\/go'\''/g'
+        rclone/build.gradle
+      - sed -i -e 's/'\''ndk-bundle'\'',/'\''..\/android-ndk'\'', '\''r20b'\'',/g'
+        rclone/build.gradle
+    ndk: r20b
+    preassemble:
+      - rclone:buildNative
+
 AutoUpdateMode: Version v%v
 UpdateCheckMode: Tags ^v?[.0-9]*$
-CurrentVersion: 1.11.4
-CurrentVersionCode: 170
+CurrentVersion: 1.12.0
+CurrentVersionCode: 200
