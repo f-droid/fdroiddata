@@ -43,16 +43,31 @@ Builds:
     scanignore:
       - mobile-core/res/raw/trust_store_bks
 
-  - versionName: '1.6'
-    versionCode: 15
-    disable: contains GMS
-    commit: '1.6'
-    subdir: mobile-phone-pro
-    maven: 'yes'
+  - versionName: 3.0.27.f
+    versionCode: 90
+    commit: 554fc7a6063bf1bf947c6ea772fa289bec331385
+    subdir: app
+    gradle:
+      - free
+    srclibs:
+      - tigase-xmltools@tigase-xmltools-4.0.0
+      - jaxmpp@3.3.0
+    prebuild:
+      - $$SDK$$/tools/bin/sdkmanager 'platforms;android-28' 'build-tools;28.0.3' >
+        /dev/null
+      - sed -i -e '/firebase/d' -e '/com.google.gms/d' ../build.gradle build.gradle
+      - sed -i -e '/maven-repo.tigase.org/d' ../build.gradle
     scanignore:
-      - mobile-core/res/raw/trust_store_bks
+      - app/src/main/res/raw/trust_store_bks
+    build:
+      - pushd $$tigase-xmltools$$
+      - mvn -DskipTests clean install
+      - popd
+      - pushd $$jaxmpp$$
+      - mvn -Pandroid -DskipTests clean install
+      - popd
 
 AutoUpdateMode: None
 UpdateCheckMode: Tags
-CurrentVersion: 3.0.27
+CurrentVersion: 3.0.27.f
 CurrentVersionCode: 90
