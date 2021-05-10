@@ -1169,7 +1169,43 @@ Builds:
       - ./ndk-make.sh
     ndk: r20b
 
+  - versionName: 1.20.1
+    versionCode: 606
+    commit: v1.20.1
+    timeout: 20000
+    submodules: true
+    gradle:
+      - fat
+    srclibs:
+      - rustup@1.21.1
+    prebuild: sed -i -e '/applicationIdSuffix/d' build.gradle
+    build:
+      - cd jni/deltachat-core-rust
+      - $$rustup$$/rustup-init.sh -y
+      - export PATH=$PATH:$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin/
+      - source $HOME/.cargo/env
+      - rustup default $(cat rust-toolchain)
+      - rustup target add aarch64-linux-android
+      - echo "[target.aarch64-linux-android]" > $HOME/.cargo/config
+      - echo 'linker = "$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android21-clang"'
+        >> $HOME/.cargo/config
+      - rustup target add i686-linux-android
+      - echo "[target.i686-linux-android]" >> $HOME/.cargo/config
+      - echo 'linker = "$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin/i686-linux-android18-clang"'
+        >> $HOME/.cargo/config
+      - rustup target add armv7-linux-androideabi
+      - echo "[target.armv7-linux-androideabi]" >> $HOME/.cargo/config
+      - echo 'linker = "$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin/armv7a-linux-androideabi18-clang"'
+        >> $HOME/.cargo/config
+      - rustup target add x86_64-linux-android
+      - echo "[target.x86_64-linux-android]" >> $HOME/.cargo/config
+      - echo 'linker = "$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin/x86_64-linux-android21-clang"'
+        >> $HOME/.cargo/config
+      - cd ../..
+      - ./ndk-make.sh
+    ndk: r20b
+
 AutoUpdateMode: Version v%v
 UpdateCheckMode: Tags ^v[0-9]+\.[0-9]+\.[0-9]+$
-CurrentVersion: 1.14.5
-CurrentVersionCode: 600
+CurrentVersion: 1.20.1
+CurrentVersionCode: 606
