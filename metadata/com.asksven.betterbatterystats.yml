@@ -1,5 +1,3 @@
-AntiFeatures:
-  - UpstreamNonFree
 Categories:
   - System
 License: Apache-2.0
@@ -47,6 +45,8 @@ Builds:
       - sed -i 's@\(reference.3=\).*@\1$$ActionBarSherlock$$@' project.properties
       - sed -i '75,87d' AndroidManifest.xml
       - rm -rf libs/libGoogleAnalytics.jar src/com/asksven/betterbatterystats/localeplugin
+    antifeatures:
+      - UpstreamNonFree
 
   - versionName: 1.13.4.0
     versionCode: 38
@@ -62,26 +62,8 @@ Builds:
       - sed -i 's@\(reference.3=\).*@\1$$ActionBarSherlock$$@' project.properties
       - sed -i '104,116d' AndroidManifest.xml
       - rm -rf libs/libGoogleAnalytics.jar src/com/asksven/betterbatterystats/localeplugin
-
-  - versionName: 1.14.0.0
-    versionCode: 39
-    disable: missing part of Common-AskSven library v1.14.0.0
-    commit: unknown - see disabled
-    subdir: BetterBatteryStats
-    srclibs:
-      - ActionBarSherlock@4.4.0
-      - NoAnalytics@a63142b59
-      - Common-AskSven@b09bb8b6cd
-    prebuild:
-      - echo "android.library.reference.1=$$Common-AskSven$$" >> project.properties
-      - echo "android.library.reference.2=$$NoAnalytics$$" >> project.properties
-      - echo "android.library.reference.3=$$ActionBarSherlock$$" >> project.properties
-      - sed -i '106,140d' AndroidManifest.xml
-      - rm -rf libs/libGoogleAnalytics.jar     src/com/asksven/betterbatterystats/localeplugin
-
-  - versionName: 1.15.0.0_B1
-    versionCode: 40
-    disable: beta
+    antifeatures:
+      - UpstreamNonFree
 
   - versionName: 1.15.0.0_RC8
     versionCode: 43
@@ -96,6 +78,8 @@ Builds:
       - BetterBatteryStats/libs/libGoogleAnalytics.jar
       - BetterBatteryStats/src/com/asksven/betterbatterystats/localeplugin
     prebuild: sed -i '115,127d' AndroidManifest.xml
+    antifeatures:
+      - UpstreamNonFree
 
   - versionName: 1.15.0.0
     versionCode: 44
@@ -110,30 +94,8 @@ Builds:
       - BetterBatteryStats/libs/libGoogleAnalytics.jar
       - BetterBatteryStats/src/com/asksven/betterbatterystats/localeplugin
     prebuild: sed -i '115,127d' AndroidManifest.xml
-
-  - versionName: 1.16.0.0
-    versionCode: 49
-    disable: wip
-    commit: 440495c1a4df0dc349edea8d776c5b26ce3db2f6
-    subdir: BetterBatteryStats
-    srclibs:
-      - Common-AskSven@v0.9.0.0
-      - 1:ActionBarSherlock@4.4.0
-      - 2:NoAnalytics@af5e6573bf5e221c66a0ee3ea45337fa05e812d9
-      - Google-Gson@gson-2.2.4
-      - RootTools@3.4
-    rm:
-      - BetterBatteryStats/libs/libGoogleAnalytics.jar
-      - BetterBatteryStats/libs/gson-2.2.2.jar
-      - BetterBatteryStats/src/com/asksven/betterbatterystats/localeplugin
-    prebuild:
-      - sed -i '115,127d' AndroidManifest.xml
-      - cp -r $$Google-Gson$$/src/main/java/com/ src/ &&cp -r $$RootTools$$/RootTools/src/main/java/com/
-        src/
-      - cp -r $$Common-AskSven$$/src/com/ src/
-      - sed -i -e '/AndroidCommon/d' -e '/LocalePluginLib/d' -e '/..\/..\/ActionBarSherlock\/actionbarsherlock/d'
-        project.properties
-      - cp $$ActionBarSherlock$$/libs/android-support-v4.jar libs/
+    antifeatures:
+      - UpstreamNonFree
 
   - versionName: '2.3'
     versionCode: 85
@@ -142,10 +104,32 @@ Builds:
     gradle:
       - gplay
 
-MaintainerNotes: Newer builds require firebase/play-services again.
+  - versionName: '2.6'
+    versionCode: 99
+    commit: f7a16050f6bb38e2b4275399ee051d7b12c6c788
+    subdir: app
+    gradle:
+      - gplay
+    srclibs:
+      - RootShell@1.6
+      - RootTools@5.0
+    rm:
+      - app/libs/*.aar
+      - secret-env-cipher
+    build:
+      - pushd $$RootShell$$
+      - sed -i -e 's/4.0-rc-1/4.0/' gradle/wrapper/gradle-wrapper.properties
+      - gradle assembleRelease
+      - popd
+      - rm $$RootTools$$/RootShell/RootShell.aar
+      - cp $$RootShell$$/build/outputs/aar/RootShell-release.aar $$RootTools$$/RootShell/RootShell.aar
+      - cp $$RootShell$$/build/outputs/aar/RootShell-release.aar libs/RootShell-1.6.aar
+      - pushd $$RootTools$$
+      - gradle assembleRelease
+      - popd
+      - cp $$RootTools$$/build/outputs/aar/RootTools-release.aar libs/RootTools-5.0.aar
 
-ArchivePolicy: 0 versions
 AutoUpdateMode: None
-UpdateCheckMode: Static
-CurrentVersion: '2.3'
-CurrentVersionCode: 85
+UpdateCheckMode: None
+CurrentVersion: '2.6'
+CurrentVersionCode: 99
