@@ -202,15 +202,28 @@ Builds:
       - ninja android/apk/mpd-unsigned.apk
     ndk: r18b
 
-  - versionName: 0.21.19
-    versionCode: 42
-    disable: crashes on start
-    commit: v0.21.19
+  - versionName: 0.22.6
+    versionCode: 54
+    commit: v0.22.6
     sudo:
       - apt-get update || apt-get update
-      - apt-get install -y g++ imagemagick-6.q16 meson -t stretch-backports
+      - apt-get install -y ninja-build imagemagick-6.q16 -t stretch-backports
+      - apt-get install -y clang-7 libc++-7-dev libc++abi-7-dev
+      - pip3 install meson
+      - update-alternatives --install /usr/bin/cc cc /usr/bin/clang-7 100
+      - update-alternatives --install /usr/bin/c++ c++ /usr/bin/clang++-7 100
     output: output/android/android/apk/mpd-unsigned.apk
-    prebuild: mkdir -p output/android/android/classes/
+    prebuild:
+      - mkdir -p output/android/android/classes/
+      - sed -i -e 's|source/openssl|source/old/3.0/openssl|' python/build/libs.py
+      - sed -i -e 's|dl.bintray.com/boostorg|boostorg.jfrog.io/artifactory/main|'
+        python/build/libs.py
+      - $$SDK$$/tools/bin/sdkmanager 'platforms;android-29' 'build-tools;29.0.3' >
+        /dev/null
+      - sed -i -e "/native/a cpp_args:['-stdlib=libc++','-nostdinc++','-I/usr/lib/llvm-7/include/c++/v1',],"
+        src/tag/meson.build
+      - sed -i -e "/native/a link_args:['-lc++abi','-L/usr/lib/llvm-7/lib','-Wl,-rpath,/usr/lib/llvm-7/lib',],"
+        src/tag/meson.build
     scandelete:
       - src/haiku/
     build:
@@ -218,34 +231,11 @@ Builds:
       - ../../android/build.py $$SDK$$ $$NDK$$ arm64-v8a
       - meson configure
       - ninja android/apk/mpd-unsigned.apk
-    ndk: r20b
-
-  - versionName: 0.21.20
-    versionCode: 43
-    disable: crashes on start
-    commit: v0.21.20
-    sudo:
-      - apt-get update || apt-get update
-      - apt-get install -y g++ imagemagick-6.q16 meson -t stretch-backports
-    output: output/android/android/apk/mpd-unsigned.apk
-    prebuild: mkdir -p output/android/android/classes/
-    scandelete:
-      - src/haiku/
-    build:
-      - cd output/android/
-      - ../../android/build.py $$SDK$$ $$NDK$$ arm64-v8a
-      - meson configure
-      - ninja android/apk/mpd-unsigned.apk
-    ndk: r20b
+    ndk: r22b
 
 MaintainerNotes: |-
     armeabi-v7a and x86 versions crash on daemon start, so we provide
     only arm64-v8a. See https://gitlab.com/fdroid/fdroiddata/issues/1583.
-
-    0.21.19 and 0.21.20 crash on mpd start with "java.lang.RuntimeException:
-    invalid channel for service notification" (Android 8.1) or
-    "java.lang.SecurityException: Permission Denial: startForeground requires
-    android.permission.FOREGROUND_SERVICE" (Android 9.0).
 
 AutoUpdateMode: None
 UpdateCheckMode: Tags
