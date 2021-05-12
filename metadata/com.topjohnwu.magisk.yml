@@ -98,12 +98,55 @@ Builds:
       - python3.9 ./build.py -rv app
     ndk: r21e
 
+  - versionName: '23.0'
+    versionCode: 23000
+    commit: v23.0
+    submodules: true
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y g++
+      - pushd build/srclib/cpython
+      - ./configure
+      - make -j`nproc`
+      - make altinstall
+      - popd
+    output: app/build/outputs/apk/release/app-release-unsigned.apk
+    srclibs:
+      - cpython@v3.9.5
+      - vboot@release-R91-13904.B
+    prebuild:
+      - echo -e 'version=$$VERSION$$' > ./config.prop
+      - sed -i -e 's/versionCode=.\+/versionCode=$$VERCODE$$/' gradle.properties
+      - sed -i -e '/buildTypes/,+11d' ./build.gradle.kts
+      - sed -i -e 's/ndkPath.*/ndkPath = "${System.getenv("ANDROID_NDK_HOME")}"/'
+        ./build.gradle.kts
+      - sed -i -e '/android.ndkPath/d' -e '/ndk.dir/d' ./local.properties
+      - sed -i -e "s/op.join(ndk_root, 'magisk')/os.environ['ANDROID_NDK_HOME']/"
+        ./build.py
+      - sed -i -e 's/Key.CHECK_UPDATES, true/Key.CHECK_UPDATES, false/' ./app/src/main/java/com/topjohnwu/magisk/core/Config.kt
+    scanignore:
+      - app/shared/src/main/java/com/topjohnwu/magisk/utils/DynamicClassLoader.java
+    scandelete:
+      - native/jni/external
+      - tools
+    build:
+      - pushd $$vboot$$
+      - make ARCH=arm futil
+      - popd
+      - cp $$vboot$$/build/futility/futility tools
+      - ln -s `which gradle` ./gradlew
+      - python3.9 ./build.py -rv stub
+      - mv stub/build/outputs/apk/release/stub-release-unsigned.apk out/stub-release.apk
+      - python3.9 ./build.py -rv binary
+      - python3.9 ./build.py -rv app
+    ndk: r21e
+
 MaintainerNotes: |-
-    https://github.com/topjohnwu/ndk-busybox/commit/31b2b5780bf9fe982e1f3d9df0bd4b1b44d6e394
+    22.1: https://github.com/topjohnwu/ndk-busybox/commit/31b2b5780bf9fe982e1f3d9df0bd4b1b44d6e394
     in submodule is removed for some unkonwn reasons. Re-add it to fix the multiple definition error.
 
 AutoUpdateMode: Version v%v
 UpdateCheckMode: HTTP
 UpdateCheckData: https://topjohnwu.github.io/magisk-files/stable.json|"versionCode":\s"(\d+)"|.|"version":\s"([\d.]+)"
-CurrentVersion: '22.1'
-CurrentVersionCode: 22100
+CurrentVersion: '23.0'
+CurrentVersionCode: 23000
