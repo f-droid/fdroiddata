@@ -153,6 +153,25 @@ Builds:
         -e '/Crashlytics./i/*'
       - sed -i -e '32d' src/main/java/com/matejdro/pebbledialer/PebbleDialerApplication.java
 
+  - versionName: 3.3.1
+    versionCode: 41
+    commit: fe3b32a2d3a63103a814011f7a17403ec8bfd4f6
+    subdir: app
+    submodules: true
+    gradle:
+      - yes
+    extlibs:
+      - android/android-support-v13.jar
+    prebuild:
+      - sed -i -e '1,16d' build.gradle
+      - "sed -i -e '/android {/iapply plugin: \"com.android.application\"' build.gradle"
+      - sed -i -e '/crashlytics/,+2d' build.gradle
+      - sed -i -e '/android {/a lintOptions {abortOnError false}' build.gradle
+      - sed -i -e '/if (!isDebuggable)/,+1d' src/main/java/com/matejdro/pebbledialer/PebbleDialerApplication.java
+      - find . -type f -name *.java -print0 | xargs -0 sed -i -e '/import io.fabric.sdk.android.Fabric/d'
+        -e '/import com.crashlytics.android.Crashlytics/d' -e '/Crashlytics./a*/'
+        -e '/Crashlytics./i/*'
+
 AutoUpdateMode: None
 UpdateCheckMode: Tags
 CurrentVersion: 3.3.1
