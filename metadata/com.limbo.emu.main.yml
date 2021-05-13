@@ -69,6 +69,47 @@ Builds:
       - make -C ../limbo-android-lib/src/main/jni/ all-release-x86 BUILD_HOST=armeabi-v7a
     ndk: r17b
 
+  - versionName: 5.1.0-x86
+    versionCode: 50100
+    commit: v5.1.0-LimboEmulator
+    subdir: limbo-android-x86
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y libltdl-dev g++-multilib texinfo
+    gradle:
+      - yes
+    srclibs:
+      - qemu@v5.1.0
+      - glib@2.56.1
+      - libffi@v3.2.1
+      - pixman@pixman-0.34.0
+      - SDL@release-2.0.8
+    prebuild:
+      - cd ../limbo-android-lib/src/main/jni
+      - export PATH=$PATH:$$NDK$$
+      - export NDK_MODULE_PATH=$$NDK$$/sources/
+      - sed -i -e '/NDK_ROOT/d' android-config/android-limbo-config.mak
+      - cp -r $$qemu$$ qemu
+      - cp -r $$glib$$ glib
+      - cp -r $$libffi$$ libffi
+      - cp -r $$pixman$$ pixman
+      - cp -r $$SDL$$ SDL2
+      - patch -d qemu -p1 < patches/qemu-5.1.0.patch
+      - patch -d glib -p1 < patches/glib-2.56.1.patch
+      - make clean
+    scandelete:
+      - limbo-android-lib
+    build:
+      - cd ../limbo-android-lib/src/main/jni
+      - export NDK_ROOT=$$NDK$$
+      - export NDK_MODULE_PATH=$$NDK$$/sources/
+      - make -C qemu/roms bios seavgabios
+      - export BUILD_GUEST=x86_64-softmmu
+      - make limbo BUILD_HOST=arm64-v8a
+      - make distclean
+      - make limbo BUILD_HOST=armeabi-v7a
+    ndk: r14b
+
 MaintainerNotes: |-
     We only build x86 emulation on ARM devices for now.
     ARM emulation on x86 devices would require a separate build recipe (the app ID is different).
