@@ -1,0 +1,62 @@
+Categories:
+  - Navigation
+License: Apache-2.0
+WebSite: https://organicmaps.app/
+SourceCode: https://github.com/organicmaps/organicmaps/tree/HEAD
+IssueTracker: https://github.com/organicmaps/organicmaps/issues
+
+Summary: Offline maps with turn-by-turn navigation
+Description: |-
+    Organic Maps offers fast offline maps of all the cities, all countries of the world. Travel with full confidence: wherever you are, Organic Maps helps to locate yourself on the map, find the nearest restaurant, hotel, bank, gas station etc. It doesn’t require internet connection.
+
+    * Offline maps — Save mobile data; no internet is required.
+    * Navigation — Use driving, walking and cycle navigation anywhere in the world.
+    * Up-to-date — Maps are updated by millions of OpenStreetMap contributors daily.
+    * Fast and reliable — Offline search, GPS navigation along with optimized maps to effectively save memory space.
+    * Bookmarks — Save locations you love and share them with your friends.
+
+RepoType: git
+Repo: https://github.com/organicmaps/organicmaps.git
+
+Builds:
+  - versionName: 2021.05.21-6-g6cfa29a770-FDroid
+    versionCode: 21052106
+    commit: '2021-05-21'
+    subdir: android
+    submodules: true
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y g++
+    gradle:
+      - fdroid
+    rm:
+      - iphone
+      - qt
+      - tools/shaders_compiler
+      - xcode
+    prebuild:
+      - sed -i -e '/com.google.firebase/d; /com.google.gms/d; /com.google.android.gms/d'
+        build.gradle
+      - touch secure.properties
+      - cp ../private_default.h ../private.h
+    scanignore:
+      - data/*.bin
+    scandelete:
+      - 3party
+    build:
+      - cd ../3party/boost
+      - ./bootstrap.sh
+      - ./b2 headers
+    ndk: r21e
+
+MaintainerNotes: |-
+    Version name and version code are generated dynamically from the head
+    commit date:
+
+        date --date="@$(git log -1 --format=%ct)" +%Y.%m.%d-%-H-g$(git rev-parse --short HEAD)-FDroid
+        date --date="@$(git log -1 --format=%ct)" +%y%m%d%H
+
+AutoUpdateMode: None
+UpdateCheckMode: None
+CurrentVersion: 2021.05.21-6-g6cfa29a770-FDroid
+CurrentVersionCode: 21052106
