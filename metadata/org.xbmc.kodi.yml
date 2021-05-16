@@ -242,6 +242,42 @@ Builds:
       - make -C build apk-unsigned
     ndk: r20b
 
+  - versionName: '19.1'
+    versionCode: 1901000
+    commit: 19.1-Matrix
+    timeout: 7200
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y build-essential default-jdk gawk lib32stdc++6 lib32z1 lib32z1-dev
+        libcurl4-openssl-dev zlib1g-dev groovy libcommons-lang-java python-dev
+    patch:
+      - 19.0-groovy.patch
+    output: build/tools/android/packaging/xbmc/build/outputs/apk/releaseUnsigned/xbmc-releaseUnsigned-unsigned.apk
+    rm:
+      - tools/codegenerator/groovy/
+    prebuild:
+      - sed -i -e '/gradlew/d' -e '/gradle-wrapper.jar/d' cmake/scripts/android/Install.cmake
+      - sed -i -e 's#./gradlew#gradle#' tools/android/packaging/Makefile.in
+    scanignore:
+      - addons/webinterface.default/lib/soundmanager/swf/soundmanager2_flash_xdomain.zip
+    scandelete:
+      - lib/
+      - project/
+      - tools/
+      - xbmc/filesystem/test
+    build:
+      - pushd tools/depends/
+      - ./bootstrap
+      - ./configure --host=arm-linux-androideabi --with-sdk-path=$$SDK$$ --with-ndk-path=$$NDK$$
+        --prefix=$PWD/output --disable-debug
+      - make -j`nproc`
+      - popd
+      - make -C tools/depends/target/binary-addons -j`nproc`
+      - make -C tools/depends/target/cmakebuildsys
+      - make -C build -j`nproc`
+      - make -C build apk-unsigned
+    ndk: r20b
+
 MaintainerNotes: |-
     18.0-groovy.patch was [https://github.com/xbmc/xbmc/issues/6860#issuecomment-461122155 provided by upstream]; it makes the build use the Debian groovy package instead of a prebuilt JAR.
 
@@ -249,5 +285,5 @@ MaintainerNotes: |-
 
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: '19.0'
-CurrentVersionCode: 1900000
+CurrentVersion: '19.1'
+CurrentVersionCode: 1901000
