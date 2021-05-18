@@ -394,9 +394,83 @@ Builds:
       - popd
     ndk: r21e
 
+  - versionName: 3.6.8
+    versionCode: 3000278
+    commit: 3.6.8
+    subdir: android/app/
+    sudo:
+      - sysctl fs.inotify.max_user_watches=524288
+      - curl -Lo node.tar.gz https://nodejs.org/dist/v14.16.0/node-v14.16.0-linux-x64.tar.gz
+      - echo "7212031d7468718d7c8f5e1766380daaabe09d54611675338e7a88a97c3e31b6 node.tar.gz"
+        | sha256sum -c -
+      - tar xf node.tar.gz
+      - cp -a node-v14.16.0-linux-x64/. /usr/local/
+      - npm -g install yarn
+    init:
+      - cd ../..
+      - yarn cache clean snjs
+      - npm_config_build_from_source=true yarn --force
+    patch:
+      - bugsnag.patch
+    gradle:
+      - prod
+    srclibs:
+      - libsodium@1.0.18
+    rm:
+      - .gitmodules
+    prebuild:
+      - $ANDROID_HOME/tools/bin/sdkmanager 'cmake;3.10.2.4988404' > /dev/null
+      - sed -i -e '/splits\ {/,+7d' -e '/detox/d' -e '/DETOX_CI/d' build.gradle
+      - sed -i -e "s/versionName appVersionName/versionName \"$$VERSION$$\"/" -e "s/versionCode
+        appVersionCode/versionCode $$VERCODE$$/" build.gradle
+      - sed -i -e "/appVersionName/d" -e "/appVersionCode/d" build.gradle
+      - sed -i -e "/@bugsnag\/react-native/d" -e "/bugsnag-sourcemaps/d" ../../package.json
+    scanignore:
+      - android/build.gradle
+      - node_modules/hermes-engine
+      - node_modules/jsc-android
+      - node_modules/react-native
+      - node_modules/detox/android/build.gradle
+      - node_modules/detox/android/detox/detox-publishing.gradle
+      - node_modules/sn-textview/android/build.gradle
+      - node_modules/standard-notes-rn/android/build.gradle
+      - node_modules/@react-native-community/async-storage/android/build.gradle
+      - node_modules/@react-native-community/masked-view/android/build.gradle
+    scandelete:
+      - node_modules/
+    build:
+      - lib="$PWD/../../node_modules/react-native-sodium/libsodium"
+      - target_sdk_version=`sed -n -E 's/.*targetSdkVersion = ([0-9]{1,2}).*/\1/p'
+        ../build.gradle`
+      - pushd $$libsodium$$
+      - CC="$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin/armv7a-linux-androideabi${target_sdk_version}-clang"
+        CFLAGS="-Os -fPIC -mfloat-abi=softfp -mfpu=vfpv3-d16 -mthumb -marm -march=armv7-a"
+        ./configure --prefix=${lib}/libsodium-android-armv7-a/ --host=arm-linux-androideabi
+      - make -j${nproc}
+      - make install
+      - make distclean
+      - CC="$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android${target_sdk_version}-clang"
+        CFLAGS="-fPIC -O2" ./configure --prefix=${lib}/libsodium-android-armv8-a/
+        --host=aarch64-linux-android
+      - make -j${nproc}
+      - make install
+      - make distclean
+      - CC="$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin/i686-linux-android${target_sdk_version}-clang"
+        CFLAGS="-fPIC -O2" ./configure --prefix=${lib}/libsodium-android-i686/ --host=i686-linux-android
+      - make -j${nproc}
+      - make install
+      - make distclean
+      - CC="$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin/x86_64-linux-android${target_sdk_version}-clang"
+        CFLAGS="-fPIC -O2" ./configure --prefix=${lib}/libsodium-android-westmere/
+        --host=x86_64-linux-android
+      - make -j${nproc}
+      - make install
+      - popd
+    ndk: r21e
+
 AutoUpdateMode: Version %v
 UpdateCheckMode: HTTP
 VercodeOperation: 3000220 + %c
 UpdateCheckData: https://github.com/standardnotes/mobile/actions/workflows/build-prod.yml|(\d+)\sworkflow\sruns|https://github.com/standardnotes/mobile/releases/latest|tree/([\d.]+)
-CurrentVersion: 3.6.7
-CurrentVersionCode: 3000277
+CurrentVersion: 3.6.8
+CurrentVersionCode: 3000278
