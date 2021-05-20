@@ -611,7 +611,58 @@ Builds:
       - sed -i 's:downloads/::' $$pEpJNIAdapter$$/android/external/downloads/gmp-6.2.1.tar.bz2.md5
     ndk: r20b
 
+  - versionName: 1.1.264
+    versionCode: 88
+    commit: v1.1.264
+    subdir: k9mail
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get purge asn1c
+      - apt-get install -y --no-install-recommends g++ clang capnproto libsqlite3-dev
+      - cd build/srclib/asn1c
+      - autoreconf -iv
+      - ./configure
+      - make
+      - make install
+    gradle:
+      - WithkeysyncFDroid
+    srclibs:
+      - asn1c@v0.9.28
+      - yml2@2.6.3
+      - pEpEngine@Release_2.1.33
+      - pEpJNIAdapter@Release_2.1.26
+      - libpEpAdapter@Release_2.1.21
+    prebuild:
+      - wget https://sh.rustup.rs -O ~/rustup.sh
+      - chmod +x ~/rustup.sh
+      - ~/rustup.sh -v -y --no-modify-path --default-toolchain 1.46.0 --default-host
+        x86_64-unknown-linux-gnu -t i686-linux-android -t x86_64-linux-android -t
+        armv7-linux-androideabi -t aarch64-linux-android
+      - ~/.cargo/bin/rustup -v component add rust-src
+      - export NDKB=${NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/
+      - echo -e "[target.aarch64-linux-android]\nar = \"${NDKB}aarch64-linux-android-ar\"\nlinker
+        = \"${NDKB}aarch64-linux-android21-clang\"\n" > ~/.cargo/config
+      - echo -e "[target.armv7-linux-androideabi]\nar = \"${NDKB}arm-linux-androideabi-ar\"\nlinker
+        = \"${NDKB}armv7a-linux-androideabi21-clang\"\n" >> ~/.cargo/config
+      - echo -e "[target.x86_64-linux-android]\nar = \"${NDKB}x86_64-linux-android-ar\"\nlinker
+        = \"${NDKB}x86_64-linux-android21-clang\"\n" >> ~/.cargo/config
+      - echo -e "[target.i686-linux-android]\nar = \"${NDKB}i686-linux-android-ar\"\nlinker
+        = \"${NDKB}i686-linux-android21-clang\"" >> ~/.cargo/config
+      - echo -e "\norg.gradle.jvmargs=-Xms1024m -Xmx4096m -XX:MaxPermSize=4096m" >>
+        ../gradle.properties
+      - sed -i 's:universalApk false:universalApk true:' build.gradle
+      - sed -i 's:enable true:enable false:' build.gradle
+      - sed -i 's:file("../pEpJNIAdapter/android"):file("../srclib/pEpJNIAdapter/android"):'
+        ../settings.gradle
+      - echo -e "DEBUG=0\nYML2_PATH=$$yml2$$\nENGINE_INC_PATH=$$pEpEngine$$/src\nAD_INC_PATH=$$pEpJNIAdapter$$/src/"
+        > $$pEpJNIAdapter$$/local.conf
+      - echo -e "DEBUG=0\nYML2_PATH=$$yml2$$" > $$pEpEngine$$/local.conf
+      - ln -s $$pEpEngine$$/src/ $$pEpEngine$$/src/pEp
+      - sed -i 's:rustup run nightly cargo:~/.cargo/bin/cargo:' $$pEpJNIAdapter$$/android/external/**/Makefile
+      - sed -i 's:\-Z build-std=core,alloc,std::' $$pEpJNIAdapter$$/android/external/**/Makefile
+    ndk: r20b
+
 AutoUpdateMode: None
 UpdateCheckMode: Tags
-CurrentVersion: 1.1.251
-CurrentVersionCode: 83
+CurrentVersion: 1.1.264
+CurrentVersionCode: 88
