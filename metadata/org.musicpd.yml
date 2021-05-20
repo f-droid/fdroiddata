@@ -233,11 +233,35 @@ Builds:
       - ninja android/apk/mpd-unsigned.apk
     ndk: r22b
 
-MaintainerNotes: |-
-    armeabi-v7a and x86 versions crash on daemon start, so we provide
-    only arm64-v8a. See https://gitlab.com/fdroid/fdroiddata/issues/1583.
+  - versionName: 0.22.7
+    versionCode: 55
+    commit: v0.22.7
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y ninja-build imagemagick-6.q16 -t stretch-backports
+      - apt-get install -y clang-7 libc++-7-dev libc++abi-7-dev
+      - pip3 install meson
+      - update-alternatives --install /usr/bin/cc cc /usr/bin/clang-7 100
+      - update-alternatives --install /usr/bin/c++ c++ /usr/bin/clang++-7 100
+    output: output/android/android/apk/mpd-unsigned.apk
+    prebuild:
+      - mkdir -p output/android/android/classes/
+      - $$SDK$$/tools/bin/sdkmanager 'platforms;android-29' 'build-tools;29.0.3' >
+        /dev/null
+      - sed -i -e "/native/a cpp_args:['-stdlib=libc++','-nostdinc++','-I/usr/lib/llvm-7/include/c++/v1',],"
+        src/tag/meson.build
+      - sed -i -e "/native/a link_args:['-lc++abi','-L/usr/lib/llvm-7/lib','-Wl,-rpath,/usr/lib/llvm-7/lib',],"
+        src/tag/meson.build
+    scandelete:
+      - src/haiku/
+    build:
+      - cd output/android/
+      - ../../android/build.py $$SDK$$ $$NDK$$ armeabi-v7a
+      - meson configure
+      - ninja android/apk/mpd-unsigned.apk
+    ndk: r22b
 
-AutoUpdateMode: None
+AutoUpdateMode: Version v%v
 UpdateCheckMode: Tags
 CurrentVersion: 0.22.7
 CurrentVersionCode: 55
