@@ -57,7 +57,25 @@ Builds:
     preassemble:
       - rclone:buildNative
 
+  - versionName: 1.12.1
+    versionCode: 210
+    commit: v1.12.1
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y -t testing golang-go
+    gradle:
+      - oss
+    output: app/build/outputs/apk/oss/release/app-oss-universal-release-unsigned.apk
+    build:
+      - export GOPATH="$PWD"
+      - sed -i -e 's|System.getenv('\''ANDROID_HOME'\''), '\''ndk'\'', '\''21.3.6528147'\'',|'\'''"$$NDK$$"''\'',
+        |g' rclone/build.gradle
+      - sed -i -e 's|21.3.6528147|21.4.7075529|g' app/build.gradle
+    ndk: r21e
+    preassemble:
+      - rclone:buildNative
+
 AutoUpdateMode: Version v%v
 UpdateCheckMode: Tags ^v?[.0-9]*$
-CurrentVersion: 1.12.0
-CurrentVersionCode: 200
+CurrentVersion: 1.12.1
+CurrentVersionCode: 210
