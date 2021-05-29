@@ -5,7 +5,7 @@ import os
 
 os.chdir(os.path.join(os.path.dirname(__file__), '..'))
 
-for f in glob.glob('metadata/*/*/*.txt') +  glob.glob('metadata/*/*/*/*.txt'):
+for f in glob.glob('metadata/*/*/*.txt') + glob.glob('metadata/*/*/*/*.txt'):
     if os.path.getsize(f) == 0:
         os.remove(f)
         continue

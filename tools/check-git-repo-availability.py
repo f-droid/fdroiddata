@@ -5,8 +5,10 @@ import os
 import re
 import subprocess
 import sys
+
 import yaml
 from colorama import Fore, Style
+
 try:
     from yaml import CSafeLoader as SafeLoader
 except ImportError:
@@ -91,7 +93,7 @@ for f in files:
                     fp.write("\nNoSourceSince: %s" % versionName)
                 fp.write('\n')
 
-errorcount = len(errors)
-if errorcount > 0:
-    print(Fore.RED + '\nFound', errorcount, 'errors.' + Style.RESET_ALL)
-sys.exit(errorcount)
+error_count = len(errors)
+if error_count > 0:
+    print(Fore.RED + '\nFound', error_count, 'errors.' + Style.RESET_ALL)
+sys.exit(error_count)

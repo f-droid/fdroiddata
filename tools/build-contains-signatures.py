@@ -2,9 +2,8 @@
 
 import glob
 import os
-import subprocess
 import sys
-import yaml
+
 from colorama import Fore, Style
 
 if len(sys.argv) != 2:
@@ -27,7 +26,6 @@ for f in glob.glob('tmp/%s_%s.apk' % (appid, versionCode)):
 if not glob.glob('unsigned/%s_%s.apk' % (appid, versionCode)):
     print('no unsigned APK found, skipping publish')
     exit(1)
-
 
 print(
     Fore.GREEN

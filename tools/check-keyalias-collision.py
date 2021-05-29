@@ -6,22 +6,24 @@ import inspect
 import os
 import sys
 
+
 def generate_keyalias(s):
     m = hashlib.md5()
     m.update(s.encode())
     return m.hexdigest()[:8]
 
+
 base = os.path.realpath(
     os.path.join(os.path.dirname(inspect.getfile(inspect.currentframe())), '..'))
-metadatafiles = sorted(glob.glob(base + '/metadata/*.txt')
-                       + glob.glob(base + '/metadata/*.yml'))
+metadata_files = sorted(glob.glob(base + '/metadata/*.txt')
+                        + glob.glob(base + '/metadata/*.yml'))
 
-if not metadatafiles:
+if not metadata_files:
     print('No metadata files found!')
     sys.exit(1)
 
 keyaliases = dict()
-for f in metadatafiles:
+for f in metadata_files:
     appid = os.path.basename(f)[:-4]
     keyalias = generate_keyalias(appid)
     if keyalias in keyaliases:

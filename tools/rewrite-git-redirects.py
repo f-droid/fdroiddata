@@ -8,6 +8,7 @@ import glob
 import os
 import re
 import sys
+
 import yaml
 
 os.chdir(os.path.dirname(__file__) + '/../')
