@@ -1,0 +1,110 @@
+diff --git a/src/Aircraft.cpp b/src/Aircraft.cpp
+index ffef8e11..bd7ae153 100644
+--- a/src/Aircraft.cpp
++++ b/src/Aircraft.cpp
+@@ -21,6 +21,7 @@
+ #include "Aircraft.h"
+ 
+ #include <QtGlobal>
++#include <QPointer>
+ 
+ // Static instance of this class. Do not analyze, because of many unwanted warnings.
+ #ifndef __clang_analyzer__
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index 251e4d45..c0c6b0f1 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -187,9 +187,9 @@ if( ANDROID )
+     configure_file(AndroidManifest.xml.in android/AndroidManifest.xml)
+     configure_file(android/build.gradle android/build.gradle COPYONLY)
+     configure_file(android/gradle/wrapper/gradle-wrapper.properties android/gradle/wrapper/gradle-wrapper.properties COPYONLY)
+-    configure_file(android/gradle/wrapper/gradle-wrapper.jar android/gradle/wrapper/gradle-wrapper.jar COPYONLY)
+-    configure_file(android/gradlew android/gradlew COPYONLY)
+-    configure_file(android/gradlew.bat android/gradlew.bat COPYONLY)
++#    configure_file(android/gradle/wrapper/gradle-wrapper.jar android/gradle/wrapper/gradle-wrapper.jar COPYONLY)
++#    configure_file(android/gradlew android/gradlew COPYONLY)
++#    configure_file(android/gradlew.bat android/gradlew.bat COPYONLY)
+     configure_file(android/res/drawable/splash.xml android/res/drawable/splash.xml COPYONLY)
+     configure_file(android/res/values/apptheme.xml android/res/values/apptheme.xml COPYONLY)
+     configure_file(android/res/values/apptheme.xml android/res/values/apptheme.xml COPYONLY)
+@@ -232,14 +232,14 @@ if( ANDROID )
+ 
+     # The android target depends on our own copy of openssl
+     set(ANDROID_EXTRA_LIBS
+-        ${openssl_SOURCE_DIR}/arm/libcrypto_1_1.so
+-        ${openssl_SOURCE_DIR}/arm/libssl_1_1.so
+-        ${openssl_SOURCE_DIR}/arm64/libcrypto_1_1.so
+-        ${openssl_SOURCE_DIR}/arm64/libssl_1_1.so
+-        ${openssl_SOURCE_DIR}/x86/libcrypto_1_1.so
+-        ${openssl_SOURCE_DIR}/x86/libssl_1_1.so
+-        ${openssl_SOURCE_DIR}/x86_64/libcrypto_1_1.so
+-        ${openssl_SOURCE_DIR}/x86_64/libssl_1_1.so
++        ${CMAKE_SOURCE_DIR}/libs/arm/libcrypto_1_1.so
++        ${CMAKE_SOURCE_DIR}/libs/arm/libssl_1_1.so
++        ${CMAKE_SOURCE_DIR}/libs/arm64/libcrypto_1_1.so
++        ${CMAKE_SOURCE_DIR}/libs/arm64/libssl_1_1.so
++        ${CMAKE_SOURCE_DIR}/libs/x86/libcrypto_1_1.so
++        ${CMAKE_SOURCE_DIR}/libs/x86/libssl_1_1.so
++        ${CMAKE_SOURCE_DIR}/libs/x86_64/libcrypto_1_1.so
++        ${CMAKE_SOURCE_DIR}/libs/x86_64/libssl_1_1.so
+         CACHE INTERNAL ""
+         )
+ 
+diff --git a/src/MobileAdaptor.cpp b/src/MobileAdaptor.cpp
+index 093a2a8b..d43d6dd8 100644
+--- a/src/MobileAdaptor.cpp
++++ b/src/MobileAdaptor.cpp
+@@ -201,14 +201,13 @@ extern "C" {
+ JNIEXPORT void JNICALL Java_de_akaflieg_1freiburg_enroute_MobileAdaptor_onWifiConnected(JNIEnv* /*unused*/, jobject /*unused*/)
+ {
+ 
+-    if (mobileAdaptorStatic.isNull()) {
++    if (Global::mobileAdaptor() == nullptr) {
+         return;
+     }
+-    mobileAdaptorStatic->emitWifiConnected();
++    Global::mobileAdaptor()->emitWifiConnected();
+ 
+ }
+ 
+ 
+ }
+ #endif
+-
+diff --git a/src/MobileAdaptor_share.cpp b/src/MobileAdaptor_share.cpp
+index 598feea1..e0ce7385 100644
+--- a/src/MobileAdaptor_share.cpp
++++ b/src/MobileAdaptor_share.cpp
+@@ -20,6 +20,7 @@
+ 
+ 
+ #include "MobileAdaptor.h"
++#include "Global.h"
+ 
+ #include <QDateTime>
+ #include <QDebug>
+@@ -227,11 +228,10 @@ extern "C" {
+ JNIEXPORT void JNICALL Java_de_akaflieg_1freiburg_enroute_ShareActivity_setFileReceived(JNIEnv* env, jobject /*unused*/, jstring jfname)
+ {
+     const char* fname = env->GetStringUTFChars(jfname, nullptr);
+-    MobileAdaptor::globalInstance()->processFileOpenRequest(QString::fromUtf8(fname));
++    Global::mobileAdaptor()->processFileOpenRequest(QString::fromUtf8(fname));
+     env->ReleaseStringUTFChars(jfname, fname);
+ }
+ 
+ 
+ }
+ #endif
+-
+diff --git a/src/weather/Wind.cpp b/src/weather/Wind.cpp
+index 7db61972..a3191c73 100644
+--- a/src/weather/Wind.cpp
++++ b/src/weather/Wind.cpp
+@@ -19,6 +19,7 @@
+  ***************************************************************************/
+ 
+ #include <QtGlobal>
++#include <QPointer>
+ 
+ #include "weather/Wind.h"
+ 
