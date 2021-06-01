@@ -1,14 +1,14 @@
 Categories:
   - Writing
 License: GPL-3.0-only
-WebSite: https://github.com/rhornig/anysoftkeyboard-hungarian/wiki
-SourceCode: https://github.com/rhornig/anysoftkeyboard-hungarian
-IssueTracker: https://github.com/rhornig/anysoftkeyboard-hungarian/issues
-Donate: https://anysoftkeyboard.github.io/
+SourceCode: https://github.com/AnySoftKeyboard/AnySoftKeyboard/
+IssueTracker: https://github.com/AnySoftKeyboard/AnySoftKeyboard/issues
+Donate: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=KDYBGNUNMMN94&lc=US&item_name=AnySoftKeyboard
 
-Name: 'AnySoftKeyboard: Magyar'
 AutoName: AnySoftKeyboard - Hungarian Language Pack
 Description: |-
+    <b>This app has been deprecated in favor of https://f-droid.org/en/packages/com.anysoftkeyboard.languagepack.hungarian_oss/</b>
+
     Layouts and dictionaries for for the Hungarian language. See the Google Play
     description for usage tips.
 
@@ -18,7 +18,7 @@ Description: |-
     layout from AnySoftKeyboard's Settings->Keyboards menu.
 
 RepoType: git
-Repo: https://github.com/rhornig/anysoftkeyboard-hungarian
+Repo: https://github.com/AnySoftKeyboard/AnySoftKeyboard.git
 
 Builds:
   - versionName: '20120208'
@@ -67,9 +67,30 @@ Builds:
       - rm -rf assets/ dic/
     build: java -jar $$AnySoftKeyboardTools$$/makedict/makedict.jar
 
-MaintainerNotes: Tags not always reliable.
+  - versionName: 4.0.1396
+    versionCode: 2908
+    commit: 1.10-r4
+    subdir: addons/languages/hungarian
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -t stretch-backports openjdk-11-jdk-headless openjdk-11-jre-headless
+      - update-alternatives --auto java
+    gradle:
+      - yes
+    output: ../../../outputs/apks/release/*
+    prebuild:
+      - echo "//gradleVersion = '6.8.3'" | tee build.gradle
+      - sed -i -e "s calculateApplicationId(project) 'com.anysoftkeyboard.languagepack.hungarian'
+        " ../../../gradle/apk_module.gradle
+      - sed -i -e '/Data\.versionCode/ c versionCode $$VERCODE$$' -e '/Data\.versionName/
+        c versionName "$$VERSION$$"' ../../../gradle/versioning_apk.gradle
+    scanignore:
+      - addons/languages/*/pack/dictionary/*.gz
+    ndk: r14b
+
+MaintainerNotes: Package ID is now com.anysoftkeyboard.languagepack.hungarian_oss
 
 AutoUpdateMode: None
-UpdateCheckMode: RepoManifest
-CurrentVersion: '20180709'
-CurrentVersionCode: 18
+UpdateCheckMode: None
+CurrentVersion: 4.0.1396
+CurrentVersionCode: 2908

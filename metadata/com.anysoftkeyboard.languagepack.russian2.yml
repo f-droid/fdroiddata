@@ -1,22 +1,21 @@
 Categories:
   - Writing
 License: Apache-2.0
-SourceCode: https://github.com/AnySoftKeyboard/LanguagePack/tree/Russian
-IssueTracker: https://github.com/AnySoftKeyboard/LanguagePack/issues
+SourceCode: https://github.com/AnySoftKeyboard/AnySoftKeyboard/
+IssueTracker: https://github.com/AnySoftKeyboard/AnySoftKeyboard/issues
 Donate: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=KDYBGNUNMMN94&lc=US&item_name=AnySoftKeyboard
 
-Name: 'AnySoftKeyboard: Русский'
 AutoName: AnySoftKeyboard - Russian Language Pack
 Description: |-
     Russian layouts and a dictionary for auto-complete for AnySoftKeyboard.
 
-    Dictionary comes from AOSP. The source code is in another branch to the default.
+    Dictionary comes from AOSP.
 
     Install https://f-droid.org/packages/com.menny.android.anysoftkeyboard first, then select the desired
     layout from AnySoftKeyboard's Settings->Keyboards menu.
 
 RepoType: git
-Repo: https://github.com/AnySoftKeyboard/LanguagePack.git
+Repo: https://github.com/AnySoftKeyboard/AnySoftKeyboard.git
 
 Builds:
   - versionName: '20121016'
@@ -61,7 +60,26 @@ Builds:
     preassemble:
       - :makeDictionary
 
+  - versionName: 4.0.1396
+    versionCode: 2908
+    commit: 1.10-r4
+    subdir: addons/languages/russian2
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -t stretch-backports openjdk-11-jdk-headless openjdk-11-jre-headless
+      - update-alternatives --auto java
+    gradle:
+      - yes
+    output: ../../../outputs/apks/release/*
+    prebuild:
+      - echo "//gradleVersion = '6.8.3'" | tee build.gradle
+      - sed -i -e '/Data\.versionCode/ c versionCode $$VERCODE$$' -e '/Data\.versionName/
+        c versionName "$$VERSION$$"' ../../../gradle/versioning_apk.gradle
+    scanignore:
+      - addons/languages/*/pack/dictionary/*.gz
+    ndk: r14b
+
 AutoUpdateMode: None
-UpdateCheckMode: RepoManifest/Russian
-CurrentVersion: 2.0.1
-CurrentVersionCode: 101
+UpdateCheckMode: None
+CurrentVersion: 4.0.1396
+CurrentVersionCode: 2908
