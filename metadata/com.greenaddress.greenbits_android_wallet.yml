@@ -1974,12 +1974,33 @@ Builds:
       - find src/main/jniLibs -type f -name "libgreenaddress.a" -exec rm -f {} \;
     ndk: r19c
 
+  - versionName: 3.6.0
+    versionCode: 22000360
+    commit: release_3.6.0
+    timeout: 25200
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y build-essential clang virtualenv
+    gradle:
+      - production
+    output: green/build/outputs/apk/production/release/*.apk
+    scanignore:
+      - bitcoinj/core/src/main/resources/org/bitcoinj/crypto/cacerts
+      - bitcoinj/core/src/test
+      - app/src/main/assets/production/checkpoints
+    scandelete:
+      - app/src/main/assets/btctestnet/checkpoints
+    build:
+      - cd crypto
+      - JAVA_HOME=$(readlink -f /usr/bin/javac | sed "s:/bin/javac::") ./prepare_gdk_clang.sh
+    ndk: r19c
+
 MaintainerNotes: |-
-    Watch prepare_fdroid.sh for changes on new builds.
+    Watch prepare_gdk_clang.sh for changes on new builds.
 
     The two files app/src/main/assets/btctestnet/checkpoints and app/src/main/assets/production/checkpoints are hashes of the blocks of the respective chains (testnet3 and mainnet) and are re-generated ad-hoc occasionally by using the tool ./buildCheckpoints.sh inside the repo while having a bitcoin full node for each chain runnin on localhost. They are used to speed up SPV verification when possible and they can be verified independently by checking each hash against the blockchain.
 
 AutoUpdateMode: Version release_%v
 UpdateCheckMode: Tags
-CurrentVersion: 3.5.4
-CurrentVersionCode: 354
+CurrentVersion: 3.6.0
+CurrentVersionCode: 22000360
