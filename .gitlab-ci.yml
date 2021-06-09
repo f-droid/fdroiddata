@@ -38,8 +38,9 @@ lint:
         set +x;
       fi
     - export EXITVALUE=0
+    - function set_error() { export EXITVALUE=1; printf "\x1b[31mERROR `history|tail -2|head -1|cut -b 6-500`\x1b[0m\n"; }
     - fdroid lint -f $CHANGED || {
-          export EXITVALUE=1;
+          set_error;
           printf "\nThese files have lint issues:\n";
           fdroid rewritemeta -l $CHANGED;
           printf "\nThese are the formatting issues:\n";
@@ -51,11 +52,11 @@ lint:
     - find metadata/ -name '*.jp*g' -o -name '*.png' | xargs exiftool -all=
     - echo "these images have EXIF that must be stripped:"
     - git --no-pager diff --stat
-    - git --no-pager diff --name-only --exit-code || export EXITVALUE=1
-    - ./tools/check-localized-metadata.py || export EXITVALUE=1
-    - ./tools/check-keyalias-collision.py || export EXITVALUE=1
-    - ./tools/check-metadata-summary-whitespace.py || export EXITVALUE=1
-    - ./tools/check-for-unattached-signatures.py || export EXITVALUE=1
+    - git --no-pager diff --name-only --exit-code || set_error
+    - ./tools/check-localized-metadata.py || set_error
+    - ./tools/check-keyalias-collision.py || set_error
+    - ./tools/check-metadata-summary-whitespace.py || set_error
+    - ./tools/check-for-unattached-signatures.py || set_error
     - exit $EXITVALUE
 
 trigger-issuebot:
