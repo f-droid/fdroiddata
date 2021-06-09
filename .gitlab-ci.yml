@@ -29,14 +29,12 @@ lint:
            appid=`echo $f | sed -n -e 's,^metadata/\([^/][^/]*\)\.yml,\1,p'`;
            if [ -n "$appid" ]; then
              export CHANGED="$CHANGED $appid";
-             testcmd="git -C build clone `sed -En 's,^Repo\W +(https?://),\1u:p@,p' $f`";
            fi;
         done;
         set -x;
         apt-get install python3-colorama yamllint;
         for f in $files; do [[ $f == *'.yml' ]] && yamllint "$f"; done;
         ./tools/check-git-repo-availability.py $files;
-        ./tools/audit-gradle.py $CHANGED;
         set +x;
       fi
     - export EXITVALUE=0
@@ -244,6 +242,8 @@ fdroid build:
           apt-get install sudo;
           $fdroid publish --verbose $build;
       done
+
+    - ./tools/audit-gradle.py $CHANGED;
 
 
 # issuebot needs secrets to run, so it has to run under the 'fdroid'
