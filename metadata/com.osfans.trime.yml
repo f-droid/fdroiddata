@@ -42,12 +42,22 @@ Builds:
 
   - versionName: 3.2.0
     versionCode: 20210604
-    disable: https://github.com/osfans/trime/issues/418
     commit: v3.2.0
     subdir: app
     submodules: true
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get -y install g++
+      - pushd build/srclib/capnproto/c++
+      - autoreconf -i
+      - ./configure
+      - make -j`nproc` check
+      - make install
+      - popd
     gradle:
       - yes
+    srclibs:
+      - capnproto@v0.8.0
     prebuild: $$SDK$$/tools/bin/sdkmanager 'cmake;3.18.1' > /dev/null
     scandelete:
       - app/src/main/jni
