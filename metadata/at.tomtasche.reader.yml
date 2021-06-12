@@ -1,24 +1,17 @@
 AntiFeatures:
-  - Tracking
   - UpstreamNonFree
 Categories:
   - Reading
 License: GPL-3.0-or-later
+AuthorName: Thomas Taschauer
+AuthorEmail: support@opendocument.app
+AuthorWebSite: https://tomtasche.at
 WebSite: https://opendocument.app/
 SourceCode: https://github.com/TomTasche/OpenDocument.droid
 IssueTracker: https://github.com/TomTasche/OpenDocument.droid/issues
 FlattrID: '117140'
 
 AutoName: OpenDocument Reader
-Description: |-
-    Read odf documents. ODF is a document format that can be read by a wide variety
-    of programs, including OpenOffice and LibreOffice.
-
-    Anti-feature: Tracking. A recent version had code for sending some device info
-    via HTTP POST to a appspot.com server.
-
-    A proprietary ad library was removed before building. More recent versions have
-    several more proprietary binaries.
 
 RepoType: git
 Repo: https://github.com/TomTasche/OpenDocument.droid.git
@@ -55,24 +48,6 @@ Builds:
       - cp -r $$JOpenDocument$$/src/* src/
       - rm -rf src/test/
 
-  - versionName: 2.0.6
-    versionCode: 33
-    disable: unknown build server problems b88d8bf6d
-    commit: unknown - see disabled
-    srclibs:
-      - BillingLibrary@3ecc7cad9c
-      - MobAdMob@2d5736
-      - FilePicker@d12f209e8
-      - aFileChooser@c3197bb151
-    prebuild:
-      - sed -i 's@\(android.library.reference.1=\).*@\1$$aFileChooser$$@' project.properties
-      - sed -i 's@\(android.library.reference.2=\).*@\1$$FilePicker$$@' project.properties
-      - echo "android.library.reference.3=$$BillingLibrary$$" >> project.properties
-      - echo "android.library.reference.4=$$MobAdMob$$" >> project.properties
-      - cp $$aFileChooser$$/libs/android-support-v4.jar $$FilePicker$$/libs/
-      - rm -rf libs/GoogleAdMobAdsSdk-6.1.0.jar libs/androidbillinglibrary_22092012.jar
-        tests
-
   - versionName: 2.0.7
     versionCode: 34
     commit: 771437a702
@@ -96,114 +71,41 @@ Builds:
       - AndroidBillingLibrary/AndroidBillingLibrary
       - Android-AppMsg/library
 
-  - versionName: 2.0.8
-    versionCode: 35
-    disable: broken v2.0.8
-    commit: unknown - see disabled
-    init:
-      - rm -rf odf2html/.gitmodules odf2html/library/dep/commons
-      - git submodule update --init
-      - git clone https://github.com/andiwand/commons.git odf2html/library/dep/commons
-      - cd odf2html/
-      - git checkout 008034b70714
-    srclibs:
-      - MobAdMob@2d5736
+  - versionName: 3.10.2
+    versionCode: 152
+    commit: a86727d4c267215ba907210c2b18148b6562324f
+    subdir: app
+    init: git submodule update --init
+    gradle:
+      - pro
     prebuild:
-      - echo "source.dir=src;$$MobAdMob$$/src" >> project.properties
-      - rm -rf libs/GoogleAdMobAdsSdk*.jar libs/android-support-v4.jar odf2html/library/odf2html.jar
-      - cp aFileChooser/aFileChooser/libs/android-support-v4.jar filepicker-android/libs/
-      - cp aFileChooser/aFileChooser/libs/android-support-v4.jar ActionBarSherlock/library/libs/
-    androidupdate:
-      - .
-      - aFileChooser/aFileChooser
-      - ActionBarSherlock/library
-      - AndroidBillingLibrary/AndroidBillingLibrary
-      - Android-AppMsg/library
-    build:
-      - cd odf2html/library/
-      - ant -f dep/commons/library/build.xml
-      - mkdir -p lib/
-      - mv dep/commons/library/commons.jar lib/
-      - cp lib/commons.jar ../../libs/
-      - ant
-      - mv odf2html.jar ../../libs/
+      - sed -i -e '/com.google/d' ../build.gradle
+      - sed -i -e '/com.google.firebase/d' -e '/firebaseCrashlytics/d' -e '/com.google.android.play/d'
+        -e '/com.android.billingclient/d' -e '/com.google.gms/d' -e '/ratethisapp/,/^    }/d'
+        -e '/pro"/d' build.gradle
+      - sed -i -e '/INTERNET/d' -e '/BILLING/d' -e '/^        <meta-data/,+5d' src/main/AndroidManifest.xml
+      - cd src/main/java/at/tomtasche/reader
+      - sed -i -e '/com.google.firebase/d' background/FileLoader.java
+      - sed -i -e '/gms/d' -e '/play.core/d' -e '/firebase/d' ui/activity/*.java
+      - sed -i -e '/com.google/d' -e '/Firebase/d' -e '/Storage/d' -e '/auth == null/i}'
+        -e '/auth == null/,/^    }/d' -e '/auth /d' -e '/storage /d' background/OnlineLoader.java
+      - sed -i -e '/getBooleanConfig/,/^            });/d' -e '/void offerUpload/,/^    }/d'
+        -e '/offerUpload/d' ui/activity/DocumentFragment.java
+      - sed -i -e '/void initializeProprietaryLibraries/,/^    }/d' -e '/initializeProprietaryLibraries/d'
+        -e '/void initializeRatingDialog/,/^    }/d' -e '/initializeRatingDialog/d'
+        -e '/RateThisApp/d' -e 's/billingManager.hasPurchased()/true/' -e 's/billingManager.isEnabled()/false/'
+        ui/activity/MainActivity.java
+      - for class in AdManager AnalyticsManager BillingManager ConfigManager CrashManager
+        HelpManager; do echo "package at.tomtasche.reader.nonfree; public class ${class}
+        {}" > nonfree/${class}.java; sed -i -e "/${class}\./Id" background/*.java
+        ui/*/*.java ui/*.java; done
+      - $$SDK$$/tools/bin/sdkmanager 'cmake;3.18.1' > /dev/null
+    ndk: r22
 
-  - versionName: 2.0.8.2
-    versionCode: 37
-    disable: broken v2.0.8.2
-    commit: unknown - see disabled
-    init:
-      - rm -rf $(find . -name bin)
-      - rm -rf $(find . -name gen)
-      - rm -rf odf2html/.gitmodules odf2html/library/dep/commons
-      - git submodule update --init
-      - git clone https://github.com/andiwand/commons.git odf2html/library/dep/commons
-      - cd odf2html/library/dep/commons
-      - git checkout f9ba1a9
-    srclibs:
-      - MobAdMob@2d5736
-    prebuild:
-      - echo "source.dir=src;$$MobAdMob$$/src" >> project.properties
-      - rm -rf libs/GoogleAdMobAdsSdk*.jar libs/android-support-v4.jar odf2html/library/odf2html.jar
-      - cp aFileChooser/aFileChooser/libs/android-support-v4.jar filepicker-android/libs/
-      - cp aFileChooser/aFileChooser/libs/android-support-v4.jar ActionBarSherlock/library/libs/
-    androidupdate:
-      - .
-      - aFileChooser/aFileChooser
-      - ActionBarSherlock/library
-      - AndroidBillingLibrary/AndroidBillingLibrary
-      - Android-AppMsg/library
-    build:
-      - cd odf2html/library/
-      - ant -f dep/commons/library/build.xml
-      - mkdir -p lib/
-      - mv dep/commons/library/commons.jar lib/
-      - cp lib/commons.jar ../../libs/
-      - ant
-      - mv odf2html.jar ../../libs/
-
-  - versionName: 2.10.1
-    versionCode: 45
-    disable: won't build and probably crashy at v2.10.1
-    commit: v2.10.1
-    submodules: true
-    init:
-      - rm -rf $(find . -name bin)
-      - rm -rf $(find . -name gen)
-      - cd odf2html/library/dep
-      - rm -rf commons
-      - git clone https://github.com/andiwand/commons.git
-      - cd commons/
-      - git checkout cf34f179f
-    srclibs:
-      - MobAdMob@2d5736
-      - NoAnalytics@533c6c1
-    prebuild:
-      - echo -e "android.library.reference.6=$$MobAdMob$$\nandroid.library.reference.7=$$NoAnalytics$$"
-        >> project.properties
-      - sed -i 's/1.6/1.7/g' odf2html/library/build.xml
-      - sed -i 's/1.6/1.7/g' odf2html/library/dep/commons/library/build.xml
-      - rm -rf libs/GoogleAdMobAdsSdk*.jar libs/libGoogleAnalytics*.jar libs/android-support-v4.jar
-    androidupdate:
-      - .
-      - aFileChooser/aFileChooser
-      - ActionBarSherlock/actionbarsherlock
-      - Android-RateThisApp/library
-      - Android-AppMsg/library
-      - pay-me/library
-    build:
-      - cd odf2html/library/dep/commons/library
-      - ant
-      - cd ../../../
-      - ant
-      - mv dep/commons/library/commons.jar ../../libs/
-      - mv odf2html.jar ../../libs/
-
-  - versionName: 2.12.6
-    versionCode: 59
-    disable: mutiple proprietary libraries (at least 3)
+MaintainerNotes: Init submodule manully because there is private recursive submodule
 
 AutoUpdateMode: None
-UpdateCheckMode: Static
-CurrentVersion: 2.12.6
-CurrentVersionCode: 59
+UpdateCheckMode: HTTP
+UpdateCheckData: https://raw.githubusercontent.com/opendocument-app/OpenDocument.droid/master/app/src/main/AndroidManifest.xml|versionCode="(\d+)|.|versionName="([\d.]+)
+CurrentVersion: 3.10.2
+CurrentVersionCode: 152
