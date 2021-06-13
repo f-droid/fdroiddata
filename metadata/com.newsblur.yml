@@ -1,6 +1,9 @@
 Categories:
   - Reading
 License: MIT
+AuthorName: Samuel Clay
+AuthorEmail: samuel@ofbrooklyn.com
+AuthorWebSite: http://www.samuelclay.com
 WebSite: http://newsblur.com
 SourceCode: https://github.com/samuelclay/NewsBlur
 IssueTracker: https://github.com/samuelclay/NewsBlur/issues
@@ -1362,6 +1365,38 @@ Builds:
       - '[_a-z]*.*'
       - clients/android/NewsBlur/libs/*.jar
       - clients/android/NewsBlur/buildtools/*.jar
+
+  - versionName: 10.3.0
+    versionCode: 184
+    commit: d13fd172aaeb7e65ac272ad3416e140bffc6a2de
+    subdir: clients/android/NewsBlur
+    gradle:
+      - yes
+    rm:
+      - api
+      - apps
+      - clients/ios
+      - config
+      - docker
+      - documents
+      - flask
+      - logs
+      - media
+      - node
+      - r
+      - templates
+      - utils
+      - vendor
+      - '[_a-z]*.*'
+      - clients/android/NewsBlur/libs/*.jar
+      - clients/android/NewsBlur/buildtools/*.jar
+    prebuild:
+      - sed -i -e '/com.google.android.play/d' -e '/billingclient/d' build.gradle
+      - sed -i -e '/play.core/d' -e '/void checkInAppReview/,/^    }/d' -e '/checkInAppReview/d'
+        -e '/void onBackPressed/a super.onBackPressed();}' -e '/reviewInfo != null/,/^    }/d'
+        -e '/Review/d' src/com/newsblur/activity/FeedItemsList.java
+      - echo 'package com.newsblur.activity;public class Premium extends NbActivity{}'
+        > src/com/newsblur/activity/Premium.java
 
 AutoUpdateMode: None
 UpdateCheckMode: RepoManifest
