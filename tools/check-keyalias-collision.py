@@ -14,9 +14,11 @@ def generate_keyalias(s):
 
 
 base = os.path.realpath(
-    os.path.join(os.path.dirname(inspect.getfile(inspect.currentframe())), '..'))
-metadata_files = sorted(glob.glob(base + '/metadata/*.txt')
-                        + glob.glob(base + '/metadata/*.yml'))
+    os.path.join(os.path.dirname(inspect.getfile(inspect.currentframe())), '..')
+)
+metadata_files = sorted(
+    glob.glob(base + '/metadata/*.txt') + glob.glob(base + '/metadata/*.yml')
+)
 
 if not metadata_files:
     print('No metadata files found!')

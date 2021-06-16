@@ -25,7 +25,11 @@ for f in files:
     repo_url = None
     if 'Repo' in data:
         repo_url = data['Repo'].strip().rstrip('/')
-    if repo_url and not repo_url.endswith('.git') and repo_url.startswith('https://gitlab'):
+    if (
+        repo_url
+        and not repo_url.endswith('.git')
+        and repo_url.startswith('https://gitlab')
+    ):
         new_url = repo_url + '.git'
         print("Repo:", data['Repo'], "\n -->  " + new_url + "'")
         with open(f) as fp:

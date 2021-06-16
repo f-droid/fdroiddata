@@ -27,7 +27,9 @@ for mr in project.mergerequests.list(state='opened', order_by='updated_at'):
                 if m:
                     commit_ids.append(m.group(1))
     if not commit_ids and found_issuebot_post:
-        print(mr.iid, 'issuebot has posted without trigger commit ID, not running again')
+        print(
+            mr.iid, 'issuebot has posted without trigger commit ID, not running again'
+        )
     elif mr.sha in commit_ids:
         print(mr.iid, 'issuebot has run on %s, not running again' % mr.sha)
     else:
