@@ -14,7 +14,7 @@ Description: |-
     website.
 
 RepoType: git
-Repo: https://github.com/libxmp/xmp-cli.git
+Repo: https://git.code.sf.net/p/xmp/xmp-android.git
 
 Builds:
   - versionName: 2.1.0
@@ -164,6 +164,27 @@ Builds:
     buildjni:
       - yes
     ndk: r12b
+
+  - versionName: 4.12.0
+    versionCode: 87
+    commit: 8a42a3327d76649d70a7c17c46e926e3275079c3
+    subdir: app
+    gradle:
+      - yes
+    srclibs:
+      - Volley@1.1.0
+      - Groundy@e90baf9901a8be20b348bd1575d5ad782560cec8
+    prebuild: mv $$Volley$$/* ../volley
+    scandelete:
+      - app/libs
+    build:
+      - pushd $$Groundy$$
+      - sed -i -e "s/, 'compiler', 'examples'//"  -e '/compiler/d' ../settings.gradle
+      - sed -i -e '/repo.maven.apache.org/a jcenter()' ../build.gradle
+      - gradle build
+      - popd
+      - mv $$Groundy$$/build/libs/groundy-1.5.jar libs
+    ndk: r21e
 
 MaintainerNotes: The most recent libxmp version should be fine for all builds.
 
