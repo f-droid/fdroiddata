@@ -14,8 +14,6 @@ Description: |-
     Client for the Softcatalà Catalan on-line <a href="http://www.softcatala.org/traductor
     translation">service</a>.
 
-    The non-free AdMob advertising library was removed from the builds.
-
 RepoType: git
 Repo: https://github.com/Softcatala/TraductorSoftcatalaAndroid.git
 
@@ -41,20 +39,23 @@ Builds:
     scandelete:
       - app/libs
 
-  - versionName: '0.81'
-    versionCode: 20
-    disable: play-services
-    commit: v0.8.1
+  - versionName: 0.92.2
+    versionCode: 39
+    commit: v0.9.2.2
     subdir: app
     gradle:
       - yes
-    srclibs:
-      - MobAdMob@3bd7888479e4
-    prebuild: cp -r $$MobAdMob$$/src/com src/main/java/
-    scandelete:
-      - app/libs
+    rm:
+      - app/src/main/java/org/softcatala/traductor/AdBanner.java
+      - app/src/main/java/org/softcatala/traductor/Analytics.java
+    prebuild:
+      - sed -i -e '/gms/d' build.gradle
+      - sed -i -e '/gms/,/>$/d' -e '/meta-data/d' src/main/AndroidManifest.xml
+      - cd src/main/java/org/softcatala/traductor
+      - sed -i -e '/void loadAdBanner/,/^    }/d' -e '/loadAdBanner/d' TraductorSoftcatalaActivity.java
+      - sed -i -e '/_analytics/d' TraductorSoftcatalaActivity.java
 
-AutoUpdateMode: None
+AutoUpdateMode: Version
 UpdateCheckMode: Tags
 CurrentVersion: 0.92.2
 CurrentVersionCode: 39
