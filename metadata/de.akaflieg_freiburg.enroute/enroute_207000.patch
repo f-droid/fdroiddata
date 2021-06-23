@@ -51,18 +51,24 @@ index 251e4d45..c0c6b0f1 100644
          )
  
 diff --git a/src/MobileAdaptor.cpp b/src/MobileAdaptor.cpp
-index 093a2a8b..d43d6dd8 100644
+index 093a2a8b..30acdfc8 100644
 --- a/src/MobileAdaptor.cpp
 +++ b/src/MobileAdaptor.cpp
-@@ -201,14 +201,13 @@ extern "C" {
+@@ -200,15 +200,18 @@ extern "C" {
+ 
  JNIEXPORT void JNICALL Java_de_akaflieg_1freiburg_enroute_MobileAdaptor_onWifiConnected(JNIEnv* /*unused*/, jobject /*unused*/)
  {
- 
+-
 -    if (mobileAdaptorStatic.isNull()) {
-+    if (Global::mobileAdaptor() == nullptr) {
++    // This method gets called from Java before main() has executed
++    // and thus before a QApplication instance has been constructed.
++    // In these cases, the methods of the Global class must not be called
++    // and we simply return.
++    if (QCoreApplication::instance() == nullptr) {
          return;
      }
 -    mobileAdaptorStatic->emitWifiConnected();
++
 +    Global::mobileAdaptor()->emitWifiConnected();
  
  }
