@@ -630,7 +630,32 @@ Builds:
       - cp $$Material-Dialogs$$/bottomsheets/build/outputs/aar/bottomsheets-release.aar
         libs/
 
+  - versionName: 3.7.1
+    versionCode: 30701
+    commit: c2912d120a8b88d391fb815394beb2d180115db8
+    subdir: app
+    gradle:
+      - firebasefree
+    srclibs:
+      - Material-Dialogs@3.3.0
+    rm:
+      - app/libs/bottomsheets-release.aar
+    prebuild:
+      - sed -i -e 's|= uri("https://jitpack\.io")|"https://jitpack.io"|' ../build.gradle
+      - sed -i -e '/com\.google\.firebase/d; /com\.google\.gms/d' ../build.gradle
+        build.gradle
+      - sed -i -e '/firebaseCrashlytics/d' -e '/^android\.applicationVariants\.all
+        {/,/^}$/d' build.gradle
+      - pushd $$Material-Dialogs$$
+      - sed -i -e '241d' bottomsheets/src/main/java/com/afollestad/materialdialogs/bottomsheets/BottomSheet.kt
+    build:
+      - pushd $$Material-Dialogs$$
+      - gradle bottomsheets:assembleRelease
+      - popd
+      - cp $$Material-Dialogs$$/bottomsheets/build/outputs/aar/bottomsheets-release.aar
+        libs/
+
 AutoUpdateMode: Version %v
 UpdateCheckMode: Tags
-CurrentVersion: 3.7.0
-CurrentVersionCode: 30700
+CurrentVersion: 3.7.1
+CurrentVersionCode: 30701
