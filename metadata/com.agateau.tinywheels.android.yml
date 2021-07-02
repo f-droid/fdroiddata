@@ -238,8 +238,28 @@ Builds:
       - make -C .. assets
       - make -C .. packer
 
+  - versionName: 0.20.0
+    versionCode: 21
+    commit: 4aaf2b3af0ea10aeb9745ee2a35d52878f7f0b9c
+    subdir: android
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y imagemagick-6.q16
+    gradle:
+      - itchio
+    prebuild:
+      - sed -i -e 's#./gradlew#gradle#' ../Makefile
+      - git cherry-pick --no-commit 4a56032cc4e823ba8d3fd35d5b1941951537b208
+    scandelete:
+      - android/libs/
+    build:
+      - pip3 install --user -r ../requirements.txt
+      - gradle tools:dist -b ../build.gradle
+      - make -C .. assets
+      - make -C .. packer
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^[0-9.]*$
 UpdateCheckData: version.properties|VERSION_CODE=(.*)|.|VERSION=(.*)
-CurrentVersion: 0.19.1
-CurrentVersionCode: 20
+CurrentVersion: 0.20.0
+CurrentVersionCode: 21
