@@ -178,6 +178,38 @@ Builds:
       - ./b2 headers
     ndk: r21e
 
+  - versionName: 2021.07.04-16-g05a2bc44cf-FDroid
+    versionCode: 21070416
+    commit: 2021.07.04-2
+    subdir: android
+    submodules: true
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y g++
+    gradle:
+      - fdroid
+    rm:
+      - iphone
+      - qt
+      - tools/shaders_compiler
+      - xcode
+    prebuild:
+      - sed -i -e '/com.google.firebase/d; /com.google.gms/d; /com.google.android.gms/d'
+        build.gradle
+      - touch secure.properties
+      - echo '<?xml version="1.0" encoding="utf-8"?><network-security-config/>' >
+        res/xml/network_security_config.xml
+      - cp ../private_default.h ../private.h
+    scanignore:
+      - data/*.bin
+    scandelete:
+      - 3party
+    build:
+      - cd ../3party/boost
+      - ./bootstrap.sh
+      - ./b2 headers
+    ndk: r21e
+
 MaintainerNotes: |-
     Version name and version code are generated dynamically from the head
     commit date:
@@ -187,5 +219,5 @@ MaintainerNotes: |-
 
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: 2021.06.23-9-gc3f05a1646-FDroid
-CurrentVersionCode: 21062309
+CurrentVersion: 2021.07.04-16-g05a2bc44cf-FDroid
+CurrentVersionCode: 21070416
