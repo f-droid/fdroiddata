@@ -1431,10 +1431,46 @@ Builds:
       - popd
     ndk: r20
 
+  - versionName: 2.6.2
+    versionCode: 206020
+    commit: 94ca72782e9f923209d69ac77235a152aa727bfc
+    subdir: aTalk
+    gradle:
+      - fdroid
+    rm:
+      - aTalk/lib/src_reference/
+      - aTalk/jni/ffmpeg/android/
+      - aTalk/jni/openssl/android/
+      - aTalk/jni/vpx/android/
+    prebuild:
+      - $$SDK$$/tools/bin/sdkmanager 'ndk;18.1.5063045' > /dev/null
+      - sed -i -e 's|dl.bintray.com/google/exoplayer/|jitpack.io|' build.gradle
+      - sed -i -e '/export ANDROID_NDK_HOME/d' jni/static_library_built/openssl/_settings.sh
+    scanignore:
+      - aTalk/build.gradle
+    scandelete:
+      - aTalk/jni/static_library_built
+      - aTalk/third_party/m2
+    build:
+      - pushd jni/static_library_built/openssl/
+      - ./init_libopenssl.sh
+      - ./build-openssl4android.sh
+      - popd
+      - export ANDROID_NDK=/opt/android-sdk/ndk/18.1.5063045
+      - pushd jni/static_library_built/ffmpeg-x264/
+      - ./init_update_libs.sh
+      - ./build-ffmpeg4android.sh
+      - popd
+      - pushd jni/static_library_built/libvpx/
+      - ./init_libvpx.sh
+      - ./build-libvpx4android.sh
+      - popd
+    ndk: r20
+
 MaintainerNotes: scanignore is used to allow the local "third_party/m2" Gradle repository
     (which is populated by libraries we build).
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 2.6.1
-CurrentVersionCode: 206010
+CurrentVersion: 2.6.2
+CurrentVersionCode: 206020
