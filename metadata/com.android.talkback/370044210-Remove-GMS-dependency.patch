@@ -1,0 +1,350 @@
+diff --git a/shared.gradle b/shared.gradle
+index c82c3db..a56cf95 100644
+--- a/shared.gradle
++++ b/shared.gradle
+@@ -22,7 +22,6 @@ dependencies {
+ 
+     // Google common
+     implementation 'com.google.guava:guava:22.0'
+-    implementation 'com.google.android.gms:play-services-vision:20.1.3'
+     implementation 'com.google.android.material:material:1.1.0'
+ 
+     // Support library
+diff --git a/talkback/src/main/AndroidManifest.xml b/talkback/src/main/AndroidManifest.xml
+index 7fd86dd..e60201a 100644
+--- a/talkback/src/main/AndroidManifest.xml
++++ b/talkback/src/main/AndroidManifest.xml
+@@ -55,10 +55,6 @@
+     <!-- Required for App Enumeration -->
+     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"/>
+ 
+-    <!-- Required for sending data to Google Analytics. -->
+-    <uses-permission android:name="android.permission.INTERNET" />
+-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+-
+     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+ 
+     <!-- Required for reading bluetooth headphone state. -->
+@@ -67,12 +63,6 @@
+     <!-- Required for calling Service.startForeground after API 28. -->
+     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+ 
+-    <!-- Required for Primes. -->
+-    <uses-permission android:name="android.permission.GET_PACKAGE_SIZE" />
+-
+-    <!-- Used to control Primes collection using Gservices flags -->
+-    <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES" />
+-
+     <!-- Hardware compatibility. -->
+     <uses-feature
+         android:name="android.hardware.touchscreen"
+diff --git a/talkback/src/main/java/com/android/talkback/TalkBackPreferencesActivity.java b/talkback/src/main/java/com/android/talkback/TalkBackPreferencesActivity.java
+index 5776e16..a395302 100644
+--- a/talkback/src/main/java/com/android/talkback/TalkBackPreferencesActivity.java
++++ b/talkback/src/main/java/com/android/talkback/TalkBackPreferencesActivity.java
+@@ -112,19 +112,11 @@ public class TalkBackPreferencesActivity extends BasePreferencesActivity {
+       assignNewFeaturesIntent();
+       updateSpeakPasswordsPreference();
+ 
+-      showTalkBackVersion();
+-
+       if (SettingsUtils.allowLinksOutOfSettings(context)) {
+         assignTtsSettingsIntent();
+-
+-        // We should never try to open the play store in WebActivity.
+-        assignPlayStoreIntentToPreference(R.string.pref_play_store_key);
+       } else {
+         // During setup, do not allow access to web.
+-        PreferenceSettingsUtils.hidePreference(
+-            context, getPreferenceScreen(), R.string.pref_play_store_key);
+         removeCategory(R.string.pref_category_legal_and_privacy_key);
+-
+         // During setup, do not allow access to other apps via custom-labeling.
+         removePreference(R.string.pref_category_advanced_key, R.string.pref_manage_labels_key);
+ 
+@@ -170,38 +162,6 @@ public class TalkBackPreferencesActivity extends BasePreferencesActivity {
+       }
+     }
+ 
+-    private void assignPlayStoreIntentToPreference(int preferenceId) {
+-      final Preference pref = findPreferenceByResId(preferenceId);
+-      if (pref == null) {
+-        return;
+-      }
+-      String packageName = PackageManagerUtils.TALBACK_PACKAGE;
+-
+-      // Only for watches, try the "market://" URL first. If there is a Play Store on the
+-      // device, this should succeed. Only for LE devices, there will be no Play Store.
+-      if (isWatch) {
+-        Uri uri = Uri.parse("market://details?id=" + packageName);
+-        Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+-        if (canHandleIntent(intent)) {
+-          pref.setIntent(intent);
+-          return;
+-        }
+-      }
+-
+-      Uri uri = Uri.parse("https://play.google.com/store/apps/details?id=" + packageName);
+-      Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+-      if (isWatch) {
+-        // The play.google.com URL goes to ClockworkHome which needs an extra permission,
+-        // just redirect to the phone.
+-        intent = RemoteIntentUtils.intentToOpenUriOnPhone(uri);
+-      } else if (!canHandleIntent(intent)) {
+-        getPreferenceScreen().removePreference(pref);
+-        return;
+-      }
+-
+-      pref.setIntent(intent);
+-    }
+-
+     private boolean canHandleIntent(Intent intent) {
+       Activity activity = getActivity();
+       if (activity == null) {
+@@ -285,32 +245,6 @@ public class TalkBackPreferencesActivity extends BasePreferencesActivity {
+       }
+     }
+ 
+-    /** Show TalkBack version in the Play Store button. */
+-    private void showTalkBackVersion() {
+-      Activity activity = getActivity();
+-      if (activity == null) {
+-        return;
+-      }
+-      PackageInfo packageInfo = getPackageInfo(activity);
+-      if (packageInfo == null) {
+-        return;
+-      }
+-      final Preference playStoreButton = findPreferenceByResId(R.string.pref_play_store_key);
+-      if (playStoreButton == null) {
+-        return;
+-      }
+-      Pattern pattern = Pattern.compile("[0-9]+\\.[0-9]+");
+-      Matcher matcher = pattern.matcher(String.valueOf(packageInfo.versionName));
+-      String summary;
+-      if (matcher.find()) {
+-        summary = getString(R.string.summary_pref_play_store, matcher.group());
+-      } else {
+-        summary =
+-            getString(R.string.summary_pref_play_store, String.valueOf(packageInfo.versionName));
+-      }
+-      playStoreButton.setSummary(summary);
+-    }
+-
+     /**
+      * Returns the preference associated with the specified resource identifier.
+      *
+diff --git a/talkback/src/main/java/com/google/android/accessibility/talkback/TalkBackService.java b/talkback/src/main/java/com/google/android/accessibility/talkback/TalkBackService.java
+index 5793173..57a9977 100644
+--- a/talkback/src/main/java/com/google/android/accessibility/talkback/TalkBackService.java
++++ b/talkback/src/main/java/com/google/android/accessibility/talkback/TalkBackService.java
+@@ -71,7 +71,6 @@ import com.google.android.accessibility.brailleime.TalkBackForBrailleIme;
+ import com.google.android.accessibility.compositor.Compositor;
+ import com.google.android.accessibility.compositor.EventFilter;
+ import com.google.android.accessibility.compositor.GlobalVariables;
+-import com.google.android.accessibility.talkback.PrimesController.Timer;
+ import com.google.android.accessibility.talkback.actor.AutoScrollActor;
+ import com.google.android.accessibility.talkback.actor.DimScreenActor;
+ import com.google.android.accessibility.talkback.actor.DirectionNavigationActor;
+@@ -381,7 +380,6 @@ public class TalkBackService extends AccessibilityService
+ 
+   private GestureShortcutMapping gestureShortcutMapping;
+   private NodeMenuRuleProcessor nodeMenuRuleProcessor;
+-  private PrimesController primesController;
+   private SpeechLanguage speechLanguage;
+   private boolean isBrailleKeyboardActivated;
+ 
+@@ -740,7 +738,6 @@ public class TalkBackService extends AccessibilityService
+     }
+     Performance perf = Performance.getInstance();
+     EventId eventId = perf.onGestureEventReceived(gestureId);
+-    primesController.startTimer(Timer.GESTURE_EVENT);
+ 
+     analytics.onGesture(gestureId);
+     feedbackController.playAuditory(R.raw.gesture_end, eventId);
+@@ -751,7 +748,6 @@ public class TalkBackService extends AccessibilityService
+     // Preceding event handling frequently initiates a framework action, which in turn
+     // cascades a focus event, which in turn generates feedback.
+     perf.onHandlerDone(eventId);
+-    primesController.stopTimer(Timer.GESTURE_EVENT);
+     return true;
+   }
+ 
+@@ -931,10 +927,6 @@ public class TalkBackService extends AccessibilityService
+   protected void onServiceConnected() {
+     LogUtils.v(TAG, "System bound to service.");
+ 
+-    primesController = new PrimesController();
+-    primesController.initialize(getApplication());
+-    primesController.startTimer(Timer.START_UP);
+-
+     SharedPreferencesUtils.migrateSharedPreferences(this);
+     prefs = SharedPreferencesUtils.getSharedPreferences(this);
+     initializeInfrastructure();
+@@ -996,8 +988,6 @@ public class TalkBackService extends AccessibilityService
+     if (!FeatureSupport.isTv(getApplicationContext())) {
+       OnboardingInitiator.showOnboarding91IfNecessary(this);
+     }
+-
+-    primesController.stopTimer(Timer.START_UP);
+   }
+ 
+   /**
+@@ -1182,7 +1172,7 @@ public class TalkBackService extends AccessibilityService
+     dimScreenController = new DimScreenActor(this, gestureShortcutMapping);
+ 
+     accessibilityFocusInterpreter =
+-        new AccessibilityFocusInterpreter(focusFinder, accessibilityFocusMonitor, primesController);
++        new AccessibilityFocusInterpreter(focusFinder, accessibilityFocusMonitor);
+ 
+     proximitySensorListener = new ProximitySensorListener(/* service= */ this);
+     speechLanguage = new SpeechLanguage();
+@@ -1230,7 +1220,7 @@ public class TalkBackService extends AccessibilityService
+                 feedbackController,
+                 scroller,
+                 focuser,
+-                new FocusActorForScreenStateChange(focusFinder, primesController),
++                new FocusActorForScreenStateChange(focusFinder),
+                 new FocusActorForTapAndTouchExploration(),
+                 directionNavigationActor,
+                 new SearchScreenNodeStrategy(/* observer= */ null, labelManager),
+diff --git a/talkback/src/main/java/com/google/android/accessibility/talkback/actor/FocusActorForScreenStateChange.java b/talkback/src/main/java/com/google/android/accessibility/talkback/actor/FocusActorForScreenStateChange.java
+index 80914fc..14bb0bc 100644
+--- a/talkback/src/main/java/com/google/android/accessibility/talkback/actor/FocusActorForScreenStateChange.java
++++ b/talkback/src/main/java/com/google/android/accessibility/talkback/actor/FocusActorForScreenStateChange.java
+@@ -25,8 +25,6 @@ import android.view.accessibility.AccessibilityWindowInfo;
+ import com.google.android.accessibility.talkback.ActorState;
+ import com.google.android.accessibility.talkback.Feedback;
+ import com.google.android.accessibility.talkback.Pipeline;
+-import com.google.android.accessibility.talkback.PrimesController;
+-import com.google.android.accessibility.talkback.PrimesController.Timer;
+ import com.google.android.accessibility.talkback.focusmanagement.NavigationTarget;
+ import com.google.android.accessibility.talkback.focusmanagement.interpreter.ScreenState;
+ import com.google.android.accessibility.talkback.focusmanagement.record.AccessibilityFocusActionHistory;
+@@ -72,7 +70,6 @@ public class FocusActorForScreenStateChange {
+ 
+   private Pipeline.FeedbackReturner pipeline;
+   private ActorState actorState;
+-  private final PrimesController primesController;
+ 
+   private final FocusFinder focusFinder;
+ 
+@@ -80,8 +77,7 @@ public class FocusActorForScreenStateChange {
+   // Construction methods
+ 
+   public FocusActorForScreenStateChange(
+-      FocusFinder focusFinder, PrimesController primesController) {
+-    this.primesController = primesController;
++      FocusFinder focusFinder) {
+     this.focusFinder = focusFinder;
+   }
+ 
+@@ -104,7 +100,6 @@ public class FocusActorForScreenStateChange {
+       return false;
+     }
+ 
+-    primesController.startTimer(Timer.INITIAL_FOCUS_RESTORE);
+     AccessibilityNodeInfoCompat root = null;
+     AccessibilityNodeInfoCompat nodeToRestoreFocus = null;
+     try {
+@@ -149,7 +144,6 @@ public class FocusActorForScreenStateChange {
+ 
+     } finally {
+       AccessibilityNodeInfoUtils.recycleNodes(root, nodeToRestoreFocus);
+-      primesController.stopTimer(Timer.INITIAL_FOCUS_RESTORE);
+     }
+   }
+ 
+@@ -182,7 +176,6 @@ public class FocusActorForScreenStateChange {
+   /** Sets accessibility focus to EditText in the active window. */
+   public boolean syncA11yFocusToInputFocusedEditText(ScreenState screenState, EventId eventId) {
+ 
+-    primesController.startTimer(Timer.INITIAL_FOCUS_FOLLOW_INPUT);
+     AccessibilityNodeInfoCompat inputFocusedNode = null;
+     try {
+       inputFocusedNode = focusFinder.findFocusCompat(FOCUS_INPUT);
+@@ -193,7 +186,6 @@ public class FocusActorForScreenStateChange {
+               eventId, Feedback.focus(inputFocusedNode, FOCUS_ACTION_INFO_SYNCED_EDIT_TEXT));
+     } finally {
+       AccessibilityNodeInfoUtils.recycleNodes(inputFocusedNode);
+-      primesController.stopTimer(Timer.INITIAL_FOCUS_FOLLOW_INPUT);
+     }
+   }
+ 
+@@ -205,7 +197,6 @@ public class FocusActorForScreenStateChange {
+       return false;
+     }
+ 
+-    primesController.startTimer(Timer.INITIAL_FOCUS_FIRST_CONTENT);
+     AccessibilityNodeInfoCompat root = null;
+     AccessibilityNodeInfoCompat nodeToFocus = null;
+     TraversalStrategy traversalStrategy = null;
+@@ -259,7 +250,6 @@ public class FocusActorForScreenStateChange {
+     } finally {
+       AccessibilityNodeInfoUtils.recycleNodes(nodeToFocus, root);
+       TraversalStrategyUtils.recycle(traversalStrategy);
+-      primesController.stopTimer(Timer.INITIAL_FOCUS_FIRST_CONTENT);
+     }
+   }
+ 
+diff --git a/talkback/src/main/java/com/google/android/accessibility/talkback/interpreters/AccessibilityFocusInterpreter.java b/talkback/src/main/java/com/google/android/accessibility/talkback/interpreters/AccessibilityFocusInterpreter.java
+index 604bdb3..b0b25ae 100644
+--- a/talkback/src/main/java/com/google/android/accessibility/talkback/interpreters/AccessibilityFocusInterpreter.java
++++ b/talkback/src/main/java/com/google/android/accessibility/talkback/interpreters/AccessibilityFocusInterpreter.java
+@@ -26,7 +26,6 @@ import com.google.android.accessibility.compositor.AccessibilityFocusEventInterp
+ import com.google.android.accessibility.talkback.ActorState;
+ import com.google.android.accessibility.talkback.Interpretation;
+ import com.google.android.accessibility.talkback.Pipeline;
+-import com.google.android.accessibility.talkback.PrimesController;
+ import com.google.android.accessibility.talkback.ScrollEventInterpreter;
+ import com.google.android.accessibility.talkback.ScrollEventInterpreter.ScrollEventHandler;
+ import com.google.android.accessibility.talkback.ScrollEventInterpreter.ScrollEventInterpretation;
+@@ -74,8 +73,7 @@ public class AccessibilityFocusInterpreter
+ 
+   public AccessibilityFocusInterpreter(
+       FocusFinder focusFinder,
+-      AccessibilityFocusMonitor accessibilityFocusMonitor,
+-      PrimesController primesController) {
++      AccessibilityFocusMonitor accessibilityFocusMonitor) {
+ 
+     this.accessibilityFocusMonitor = accessibilityFocusMonitor;
+ 
+diff --git a/talkback/src/main/res/xml/preferences.xml b/talkback/src/main/res/xml/preferences.xml
+index f45bef3..f2701b1 100644
+--- a/talkback/src/main/res/xml/preferences.xml
++++ b/talkback/src/main/res/xml/preferences.xml
+@@ -71,8 +71,4 @@
+         android:title="@string/title_pref_advanced_settings">
+         <intent android:action=".preference.TalkBackAdvancedPreferencesActivity" />
+     </Preference>
+-    <Preference
+-        android:key="@string/pref_play_store_key"
+-        android:title="@string/title_pref_play_store">
+-    </Preference>
+ </PreferenceScreen>
+diff --git a/utils/src/main/java/com/google/android/accessibility/utils/PackageManagerUtils.java b/utils/src/main/java/com/google/android/accessibility/utils/PackageManagerUtils.java
+index dc1a107..654ee50 100644
+--- a/utils/src/main/java/com/google/android/accessibility/utils/PackageManagerUtils.java
++++ b/utils/src/main/java/com/google/android/accessibility/utils/PackageManagerUtils.java
+@@ -38,11 +38,6 @@ public class PackageManagerUtils {
+   public static final String TALKBACK_SERVICE_NAME =
+       "com.google.android.marvin.talkback.TalkBackService";
+ 
+-  /** gmscore-package-name constants */
+-  private static final String GMSCORE_PACKAGE_NAME = "com.google.android.gms";
+-
+-  private static final int MIN_GMSCORE_VERSION = 9200000; // Version should be at least V4.
+-
+   /**
+    * @return The package version code or {@link #INVALID_VERSION_CODE} if the package does not
+    *     exist.
+@@ -98,7 +93,7 @@ public class PackageManagerUtils {
+ 
+   /** Returns {@code true} if the package supports help and feedback. */
+   public static boolean supportsHelpAndFeedback(Context context) {
+-    return getVersionCode(context, GMSCORE_PACKAGE_NAME) > MIN_GMSCORE_VERSION;
++    return false;
+   }
+ 
+   private static @Nullable PackageInfo getPackageInfo(Context context, CharSequence packageName) {
+
