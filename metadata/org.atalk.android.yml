@@ -1445,26 +1445,18 @@ Builds:
     prebuild:
       - $$SDK$$/tools/bin/sdkmanager 'ndk;18.1.5063045' > /dev/null
       - sed -i -e 's|dl.bintray.com/google/exoplayer/|jitpack.io|' build.gradle
-      - sed -i -e '/export ANDROID_NDK_HOME/d' jni/static_library_built/openssl/_settings.sh
+      - cd jni/static_library_built
+      - sed -i -e '/export ANDROID_NDK_HOME/d' openssl/_settings.sh
+      - sed -i -e 's|android/android-ndk-r18b|android-sdk/ndk/18.1.5063045|' ffmpeg-x264/_settings.sh
+        libvpx/_settings.sh
     scanignore:
       - aTalk/build.gradle
     scandelete:
       - aTalk/jni/static_library_built
       - aTalk/third_party/m2
     build:
-      - pushd jni/static_library_built/openssl/
-      - ./init_libopenssl.sh
-      - ./build-openssl4android.sh
-      - popd
-      - export ANDROID_NDK=/opt/android-sdk/ndk/18.1.5063045
-      - pushd jni/static_library_built/ffmpeg-x264/
-      - ./init_update_libs.sh
-      - ./build-ffmpeg4android.sh
-      - popd
-      - pushd jni/static_library_built/libvpx/
-      - ./init_libvpx.sh
-      - ./build-libvpx4android.sh
-      - popd
+      - cd jni/static_library_built
+      - ./build-jnilibs4atalk.sh
     ndk: r20
 
 MaintainerNotes: scanignore is used to allow the local "third_party/m2" Gradle repository
