@@ -108,6 +108,68 @@ Builds:
       - mv sifir-rs-sdk/sifir-android/app/tor/build/outputs/aar/tor-release.aar node_modules/react-native-tor/android/libs/sifir_android.aar
     ndk: r21e
 
+  - versionName: 0.5.2
+    versionCode: 25
+    commit: v0.5.2
+    subdir: android/app
+    sudo:
+      - sysctl fs.inotify.max_user_watches=524288
+      - apt-get update || apt-get update
+      - apt-get install -y g++
+      - apt-get install -y -t stretch-backports npm
+    gradle:
+      - yes
+    output: build/outputs/apk/release/app-universal-release-unsigned.apk
+    srclibs:
+      - rustup@1.24.3
+      - sifir-rs-sdk@ef6de5f0d37528ce74addbd3dc2178998d7dec00
+    prebuild:
+      - echo -e '\n' 'org.gradle.jvmargs=-Xmx2048m -XX:MaxPermSize=512m -XX:+HeapDumpOnOutOfMemoryError
+        -Dfile.encoding=UTF-8' >> ../gradle.properties
+      - cd ../..
+      - npm install
+      - npm run postinstall
+      - npm run patch-android-release
+      - cp -r $$sifir-rs-sdk$$ .
+    scanignore:
+      - android/build.gradle
+      - node_modules/jsc-android
+      - node_modules/v8-android
+      - node_modules/react-native/android
+      - node_modules/react-native-v8/dist/com/facebook/react/react-native
+      - node_modules/react-native/template/android/build.gradle
+      - node_modules/react-native-gesture-handler/android/lib/build.gradle
+      - node_modules/react-native-permissions/android/build.gradle
+      - node_modules/react-native-reanimated/android/build.gradle
+      - node_modules/react-native-safe-area-context/android/build.gradle
+      - node_modules/react-native-screens/android/build.gradle
+      - node_modules/react-native-secure-key-store/example/android/build.gradle
+      - node_modules/react-native-svg/android/build.gradle
+      - node_modules/react-native-tor/android/build.gradle
+      - node_modules/react-native-vector-icons/android/build.gradle
+      - node_modules/@react-native-community/async-storage/android/build.gradle
+      - node_modules/@react-native-community/masked-view/android/build.gradle
+      - node_modules/@react-navigation/native/node_modules/react-native-screens/android/build.gradle
+    scandelete:
+      - node_modules
+      - sifir-rs-sdk
+    build:
+      - $$rustup$$/rustup-init.sh -y
+      - source $HOME/.cargo/env
+      - rustup default stable
+      - rustup target add aarch64-linux-android armv7-linux-androideabi x86_64-linux-android
+        i686-linux-android
+      - cargo install cargo-ndk
+      - export ANDROID_NDK=$$NDK$$
+      - cd ../../sifir-rs-sdk/sifir-android
+      - cargo ndk --platform 30 -t arm64-v8a -t armeabi-v7a -t x86 -t x86_64 -o app/tor/src/main/jniLibs
+        build -p sifir-android --release
+      - cd app
+      - gradle assembleRelease
+      - cd ../../..
+      - mv sifir-rs-sdk/sifir-android/app/tor/build/outputs/aar/tor-release.aar node_modules/react-native-tor/android/libs/sifir_android.aar
+    ndk: r21e
+
 AutoUpdateMode: None
 UpdateCheckMode: Tags .*[0-9]$
 CurrentVersion: 0.5.2
