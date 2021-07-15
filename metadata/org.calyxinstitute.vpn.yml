@@ -2,11 +2,13 @@ Categories:
   - Internet
   - Security
 License: GPL-3.0-only
+AuthorName: Calyx Institute
+AuthorWebSite: https://calyxinstitute.org/
 WebSite: https://calyx.net
-SourceCode: https://gitlab.com/calyxos/bitmask_android
-IssueTracker: https://gitlab.com/calyxos/bitmask_android/issues
+SourceCode: https://gitlab.com/CalyxOS/bitmask_android
+IssueTracker: https://gitlab.com/CalyxOS/bitmask_android/issues
 Translation: https://www.transifex.com/otf/bitmask-android/
-Changelog: https://gitlab.com/calyxos/bitmask_android/blob/HEAD/CHANGELOG
+Changelog: https://gitlab.com/CalyxOS/bitmask_android/blob/HEAD/CHANGELOG
 Donate: https://calyxinstitute.org/
 Bitcoin: 14wntQ8cBdnhUVfYmDjXz6PbpSSX8nCtkr
 
@@ -21,7 +23,7 @@ Description: |-
     servers, CalyxVPN is able to prevent many forms of censorship and surveillance.
 
 RepoType: git
-Repo: https://gitlab.com/calyxos/bitmask_android.git
+Repo: https://gitlab.com/CalyxOS/bitmask_android.git
 
 Builds:
   - versionName: 0.9.10
@@ -129,9 +131,47 @@ Builds:
       - gradle main:externalNativeBuildCleanSkeletonRelease main:externalNativeBuildSkeletonRelease
     ndk: r20b
 
+  - versionName: 1.0.9
+    versionCode: 155
+    commit: calyx/1.0.9-2
+    subdir: app
+    submodules: true
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y -t testing golang-go
+    gradle:
+      - customProductionFat
+    prebuild:
+      - $$SDK$$/tools/bin/sdkmanager 'platforms;android-30' 'build-tools;30.0.3' >
+        /dev/null
+      - sed -i -e "/^task updateSdkLicences/,/^}/d; /commandLine 'git'/d" build.gradle
+      - sed -i -e '/android {/a ndkVersion = "20.1.5948944"' ../ics-openvpn/main/build.gradle.kts
+    scandelete:
+      - bitmask-core
+      - bitmask-web-core
+      - go/src
+      - ics-openvpn/main/src/main/cpp
+    build:
+      - cd ../go
+      - export GOPATH="$PWD"
+      - export GO_COMPILED="$PWD/bin"
+      - export PATH="$GO_COMPILED:$PATH"
+      - go get golang.org/x/mobile/cmd/gomobile
+      - gomobile init
+      - mkdir -p ./lib
+      - gomobile bind -target=android -o ./lib/bitmask-web-core.aar se.leap.bitmaskclient/shapeshifter/
+        se.leap.bitmaskclient/pgpverify
+      - cp lib/bitmask-web-core* ../bitmask-web-core/.
+      - gomobile bind -target=android -o ./lib/bitmask-core.aar se.leap.bitmaskclient/shapeshifter/
+      - cp lib/bitmask-core* ../bitmask-core/.
+      - cd ../ics-openvpn
+      - gradle main:externalNativeBuildCleanSkeletonRelease main:externalNativeBuildSkeletonRelease
+    ndk: r20b
+
 MaintainerNotes: The "build" commands are extracted from build_deps.sh.
 
-AutoUpdateMode: None
-UpdateCheckMode: None
-CurrentVersion: 1.0.5
-CurrentVersionCode: 149
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^calyx\/[0-9.]+$
+UpdateCheckName: se.leap.bitmaskclient
+CurrentVersion: 1.0.9
+CurrentVersionCode: 155
