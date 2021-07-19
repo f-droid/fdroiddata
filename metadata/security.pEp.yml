@@ -713,6 +713,52 @@ Builds:
       - sed -i 's:\-Z build-std=core,alloc,std::' $$pEpJNIAdapter$$/android/external/**/Makefile
     ndk: r20b
 
+  - versionName: 1.1.271
+    versionCode: 95
+    commit: v1.1.271
+    subdir: k9mail
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -t testing asn1c
+      - apt-get install -y --no-install-recommends g++ clang capnproto libsqlite3-dev
+        libclang-3.9-dev
+    gradle:
+      - WithkeysyncFDroid
+    srclibs:
+      - yml2@2.6.3
+      - pEpEngine@Release_2.1.37
+      - pEpJNIAdapter@Release_2.1.30
+      - libpEpAdapter@Release_2.1.21
+      - foldable-folder-list@v0.2-Licensed
+      - sequoia-pgp@openpgp/v1.3.0
+      - rustup@1.24.3
+    prebuild:
+      - $$rustup$$/rustup-init.sh -v -y --default-toolchain $(cat $$sequoia-pgp$$/rust-toolchain)
+        -t i686-linux-android -t x86_64-linux-android -t armv7-linux-androideabi -t
+        aarch64-linux-android
+      - ~/.cargo/bin/rustup -v component add rust-src
+      - echo '[target.aarch64-linux-android]'               > ~/.cargo/config
+      - echo 'ar     = "aarch64-linux-android-ar"'         >> ~/.cargo/config
+      - echo 'linker = "aarch64-linux-android21-clang"'    >> ~/.cargo/config
+      - echo '[target.armv7-linux-androideabi]'            >> ~/.cargo/config
+      - echo 'ar     = "arm-linux-androideabi-ar"'         >> ~/.cargo/config
+      - echo 'linker = "armv7a-linux-androideabi21-clang"' >> ~/.cargo/config
+      - echo '[target.x86_64-linux-android]'               >> ~/.cargo/config
+      - echo 'ar     = "x86_64-linux-android-ar"'          >> ~/.cargo/config
+      - echo 'linker = "x86_64-linux-android21-clang"'     >> ~/.cargo/config
+      - echo '[target.i686-linux-android]'                 >> ~/.cargo/config
+      - echo 'ar     = "i686-linux-android-ar"'            >> ~/.cargo/config
+      - echo 'linker = "i686-linux-android21-clang"'       >> ~/.cargo/config
+      - echo "org.gradle.jvmargs=-Xms1g -Xmx4g -XX:MaxPermSize=4g" >> ../gradle.properties
+      - echo "YML2_PATH=$$yml2$$" >> $$pEpEngine$$/local.conf
+      - echo "YML2_PATH=$$yml2$$" >> $$pEpJNIAdapter$$/local.conf
+      - echo "ENGINE_INC_PATH=$$pEpEngine$$" >> $$pEpJNIAdapter$$/local.conf
+      - ln -s $$pEpEngine$$/src $$pEpEngine$$/pEp
+      - sed -i 's:enable true:enable false:' build.gradle
+      - sed -i 's:../:../srclib/:' ../settings.gradle
+      - sed -i 's:cargo:~/.cargo/bin/cargo:' $$pEpJNIAdapter$$/android/external/**/Makefile
+    ndk: r21
+
 AutoUpdateMode: None
 UpdateCheckMode: Tags ^v[0-9.]*$
 UpdateCheckData: build.gradle|versionCode'\s*:\s*(\d+)|.|versionName'\s*:\s*'([\d.]+)'
