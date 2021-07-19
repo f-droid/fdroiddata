@@ -66,8 +66,57 @@ Builds:
       - find -maxdepth 1 -type f -name "*.apk")
     ndk: r20b
 
+  - versionName: 1.3.2
+    versionCode: 7
+    commit: a3374cc65e0023d8817c4fcd74aa697bd494af0a
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y lib32z1
+      - curl -Lo node.tar.gz https://nodejs.org/dist/v10.23.1/node-v10.23.1-linux-x64.tar.gz
+      - echo "2a5f9d862468a4c677630923531e52339526cfd075cc6df30da4636782eb7bda node.tar.gz"
+        | sha256sum -c -
+      - tar xzf node.tar.gz
+      - cp -a node-v10.23.1-linux-x64/. /usr/local/
+      - npm -g install nativescript
+      - "sed -i 's/: \".\\/gradlew\"\\;/: \"\\/home\\/vagrant\\/fdroidserver\\/gradlew-fdroid\"\
+        \\;/' /usr/local/lib/node_modules/nativescript/lib/services/android/gradle-command-service.js"
+    init:
+      - $$SDK$$/tools/bin/sdkmanager "platforms;android-30" "build-tools;30.0.3" >
+        /dev/null
+      - npm install --unsafe-perm
+    output: platforms/android/app/build/outputs/apk/release/app-release-unsigned.apk
+    srclibs:
+      - NativeScript_android-runtime@v7.0.1
+      - NativeScript_NativeScript@8.0.8-core
+    scandelete:
+      - node_modules
+    build:
+      - pushd $$NativeScript_NativeScript$$/packages/ui-mobile-base/android/widgets
+      - gradle assembleRelease
+      - popd
+      - mkdir -p node_modules/@nativescript/core/platforms/android
+      - cp $$NativeScript_NativeScript$$/packages/ui-mobile-base/android/widgets/build/outputs/aar/widgets-release.aar
+        node_modules/@nativescript/core/platforms/android/widgets-release.aar
+      - rm -rf $$NativeScript_NativeScript$$
+      - pushd $$NativeScript_android-runtime$$
+      - export JAVA_HOME=$(readlink -f /usr/bin/javac | sed "s:/bin/javac::")
+      - cp $$SDK$$/build-tools/30.0.3/lib/dx.jar test-app/build-tools/android-metadata-generator/src/libs/dx.jar
+      - gradle
+      - popd
+      - mkdir -p node_modules/@nativescript/android
+      - rm -rf node_modules/@nativescript/android/framework
+      - cp -r $$NativeScript_android-runtime$$/dist/framework node_modules/@nativescript/android
+      - rm -rf $$NativeScript_android-runtime$$
+      - ns prepare android
+      - sed -i 's/\(signingConfig[[:space:]]\)signingConfigs\.release/\1null/' platforms/android/app/build.gradle
+      - ns build android --release --env.uglify --key-store-path /dev/null --key-store-alias
+        NULL --key-store-password NULL --key-store-alias-password NULL || (cd platforms/android/app/build/outputs/apk/release
+      - echo "The following files were found:"
+      - find -maxdepth 1 -type f -name "*.apk")
+    ndk: r20b
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: app/resources/Android/app.gradle|versionCode\s(\d+)|.|versionName\s'(.+)'
-CurrentVersion: 2.0.0
-CurrentVersionCode: 1
+CurrentVersion: 1.3.2
+CurrentVersionCode: 7
