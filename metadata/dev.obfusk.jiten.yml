@@ -95,6 +95,13 @@ Builds:
       - cc -shared -fPIC -ldl -lm -lpthread -o libsqlite3.so sqlite3.c
       - mv libsqlite3.so /usr/lib/x86_64-linux-gnu/
       - mv *.h /usr/include/
+      - if mount | grep -qF /opt/android-sdk/tools; then umount /opt/android-sdk/tools;
+        fi
+      - wget -O tools.zip -- https://dl.google.com/android/repository/commandlinetools-linux-6514223_latest.zip
+      - printf '39aea82cd958e60ffed8f8dd9bacdce4f1fd22a2e0c97b25b348f56309dd671533109e0e39aa5ca6d0fff36dc653fb5ff270773d2ee94d6b2fab7905bd2c85a9  tools.zip\n'
+        | sha512sum -c
+      - unzip -q tools.zip
+      - mount --bind $PWD/tools /opt/android-sdk/tools
     output: bin/jiten-$$VERSION$$-armeabi-v7a-release-unsigned.apk
     srclibs:
       - cpython@v3.9.6
@@ -109,12 +116,6 @@ Builds:
       - sed -r "s:#?p4a.source_dir =.*:p4a.source_dir = $$python-for-android$$:" -i
         buildozer.spec
       - make _setup_user BUILDOZER="$$buildozer$$"
-      - cd /opt/android-sdk
-      - rm -r tools
-      - wget -O tools.zip -- https://dl.google.com/android/repository/commandlinetools-linux-6514223_latest.zip
-      - printf '39aea82cd958e60ffed8f8dd9bacdce4f1fd22a2e0c97b25b348f56309dd671533109e0e39aa5ca6d0fff36dc653fb5ff270773d2ee94d6b2fab7905bd2c85a9  tools.zip\n'
-        | sha512sum -c
-      - unzip -q tools.zip
     scanignore:
       - jiten/res/jmdict/jmdict-unpatched.xml.gz
       - jiten/res/jmdict/kanjidic2-unpatched.xml.gz
@@ -161,6 +162,13 @@ Builds:
       - cc -shared -fPIC -ldl -lm -lpthread -o libsqlite3.so sqlite3.c
       - mv libsqlite3.so /usr/lib/x86_64-linux-gnu/
       - mv *.h /usr/include/
+      - if mount | grep -qF /opt/android-sdk/tools; then umount /opt/android-sdk/tools;
+        fi
+      - wget -O tools.zip -- https://dl.google.com/android/repository/commandlinetools-linux-6514223_latest.zip
+      - printf '39aea82cd958e60ffed8f8dd9bacdce4f1fd22a2e0c97b25b348f56309dd671533109e0e39aa5ca6d0fff36dc653fb5ff270773d2ee94d6b2fab7905bd2c85a9  tools.zip\n'
+        | sha512sum -c
+      - unzip -q tools.zip
+      - mount --bind $PWD/tools /opt/android-sdk/tools
     output: bin/jiten-$$VERSION$$-arm64-v8a-release-unsigned.apk
     srclibs:
       - cpython@v3.9.6
@@ -175,12 +183,6 @@ Builds:
       - sed -r "s:#?p4a.source_dir =.*:p4a.source_dir = $$python-for-android$$:" -i
         buildozer.spec
       - make _setup_user BUILDOZER="$$buildozer$$"
-      - cd /opt/android-sdk
-      - rm -r tools
-      - wget -O tools.zip -- https://dl.google.com/android/repository/commandlinetools-linux-6514223_latest.zip
-      - printf '39aea82cd958e60ffed8f8dd9bacdce4f1fd22a2e0c97b25b348f56309dd671533109e0e39aa5ca6d0fff36dc653fb5ff270773d2ee94d6b2fab7905bd2c85a9  tools.zip\n'
-        | sha512sum -c
-      - unzip -q tools.zip
     scanignore:
       - jiten/res/jmdict/jmdict-unpatched.xml.gz
       - jiten/res/jmdict/kanjidic2-unpatched.xml.gz
@@ -198,6 +200,6 @@ MaintainerNotes: We're excluding some *.xml.gz files from the scan process becau
     services.
 
 AutoUpdateMode: None
-UpdateCheckMode: None
+UpdateCheckMode: Static
 CurrentVersion: 1.1.0
 CurrentVersionCode: 1010100002
