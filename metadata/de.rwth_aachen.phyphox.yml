@@ -102,25 +102,21 @@ Builds:
       - regular
     ndk: r16b
 
-  - versionName: 1.1.8
-    versionCode: 1010803
-    disable: unknown maven
-    commit: v1.1.8
-    subdir: app
-    submodules: true
-    gradle:
-      - regular
-    ndk: r16b
-
   - versionName: 1.1.9
     versionCode: 1010901
-    disable: contains binaries https://github.com/Staacks/phyphox-android/issues/18
     commit: v1.1.9
     subdir: app
     submodules: true
     gradle:
       - regular
-    ndk: r16b
+    rm:
+      - app/libs
+    prebuild:
+      - sed -i -e '/org.eclipse.paho/d' -e '/dependencies {/a implementation "org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.5"'
+        -e '/dependencies {/a implementation "org.eclipse.paho:org.eclipse.paho.android.service:1.1.1"'
+        build.gradle
+      - sed -i -e '/jcenter/a mavenCentral()' ../build.gradle
+    ndk: r21e
 
 AutoUpdateMode: Version v%v
 UpdateCheckMode: Tags
