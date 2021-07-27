@@ -11,22 +11,6 @@ Changelog: https://codeberg.org/Freeyourgadget/Gadgetbridge/src/branch/master/CH
 LiberapayID: '11276'
 
 AutoName: Gadgetbridge
-Description: |-
-    Use your Pebble/Mi Band/Amazfit Bip/Hplus device without the vendor’s closed
-    source application and without the need to create an account and transmit any of
-    your data to the vendor’s servers.
-
-    You can get notifications on your wrist and (depending on the device):
-
-    * collect data from the device sensors
-    * control music playing on your android device
-    * see the weather (no additional app needed on LineageOS or Omnirom, on other ROMS https://f-droid.org/packages/ru.gelin.android.weather.notification is needed)
-    * get directions (e.g. by using https://f-droid.org/packages/net.osmand.plus)
-    * sync the workouts GPS tracks with phone (e.g. using the embedded GPS of Amazfit bip)
-
-    Gadgetbridge is under active development, for an up to date list of supported
-    devices and an overview of current features, please refer to the
-    <a href="https://codeberg.org/Freeyourgadget/Gadgetbridge/src/branch/master/README.md">README</a>.
 
 RepoType: git
 Repo: https://codeberg.org/Freeyourgadget/Gadgetbridge.git
@@ -1368,6 +1352,24 @@ Builds:
     subdir: app
     gradle:
       - yes
+    srclibs:
+      - jerryscript@v2.1.0
+      - fossil-hr-watchface@71374ce959655a56e71ddf70c626f9feba399a89
+    rm:
+      - app/src/main/assets/fossil_hr/*.bin
+    build:
+      - pushd $$jerryscript$$
+      - python3 tools/build.py --jerry-cmdline-snapshot ON
+      - popd
+      - pushd $$fossil-hr-watchface$$
+      - export jerry=$$jerryscript$$/build/bin/jerry-snapshot
+      - $jerry generate -f '' open_source_watchface.js -o openSourceWatchface.bin
+      - $jerry generate -f '' widget_date.js -o widgetDate.bin
+      - $jerry generate -f '' widget_weather.js -o widgetWeather.bin
+      - $jerry generate -f '' widget_steps.js -o widgetSteps.bin
+      - $jerry generate -f '' widget_hr.js -o widgetHR.bin
+      - popd
+      - mv $$fossil-hr-watchface$$/*.bin src/main/assets/fossil_hr/
 
 AutoUpdateMode: Version %v
 UpdateCheckMode: Tags
