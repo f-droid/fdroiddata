@@ -126,7 +126,133 @@ Builds:
       - make android-release-armeabi-v7a
     ndk: r22b
 
+  - versionName: 0.2.5
+    versionCode: 1000205001
+    commit: v0.2.5
+    sudo:
+      - ( apt-get update || apt-get update )
+      - apt-get upgrade -y
+      - apt-get install -y git lsb-release wget
+      - apt-get install -y build-essential git automake
+      - apt-get install -y python3-pip python3-dev libpcre3-dev liblzma-dev
+      - apt-get install -y zlib1g-dev zip unzip pkg-config libffi-dev
+      - apt-get install -y libltdl-dev libssl-dev
+      - apt-get install -y openjdk-11-jdk-headless
+      - update-java-alternatives --set java-1.11.0-openjdk-amd64
+      - apt-get remove -y libsqlite3-dev
+      - apt-get install -y lld-7
+      - ( test -e /usr/bin/lld || ln -s lld-7 /usr/bin/lld )
+      - ( test -e /bin/install || ln -s /usr/bin/install /bin/install )
+      - if ! which python3.9; then git clone build/srclib/cpython
+      - cd cpython
+      - ./configure
+      - make -j`nproc`
+      - make altinstall
+      - cd ..
+      - rm -fr cpython; fi
+      - wget -O sqlite-amalgamation-3360000.zip -- https://www.sqlite.org/2021/sqlite-amalgamation-3360000.zip
+      - printf '5c18f158a599b1e91d95c91de3aa5c5de52f986845ad0cb49dfd56b650587e55e24d469571b5b864229b870d0eaf85d78893f61ef950b95389cb41692be37f58  sqlite-amalgamation-3360000.zip\n'
+        | sha512sum -c
+      - rm -fr sqlite-amalgamation-3360000
+      - unzip sqlite-amalgamation-3360000.zip
+      - cd sqlite-amalgamation-3360000
+      - cc -shared -fPIC -ldl -lm -lpthread -o libsqlite3.so sqlite3.c
+      - mv libsqlite3.so /usr/lib/x86_64-linux-gnu/
+      - mv *.h /usr/include/
+      - cd /opt/android-sdk
+      - rm -r tools
+      - wget -O tools.zip -- https://dl.google.com/android/repository/commandlinetools-linux-6514223_latest.zip
+      - printf '39aea82cd958e60ffed8f8dd9bacdce4f1fd22a2e0c97b25b348f56309dd671533109e0e39aa5ca6d0fff36dc653fb5ff270773d2ee94d6b2fab7905bd2c85a9  tools.zip\n'
+        | sha512sum -c
+      - unzip -q tools.zip
+      - ( [ -z "$CI_JOB_ID" ] || chown -R vagrant . )
+    output: bin/sokobang-$$VERSION$$-armeabi-v7a-release-unsigned.apk
+    srclibs:
+      - cpython@v3.9.6
+      - buildozer@1.2.0
+      - python-for-android@dc2806ee31b2316e51dfc059f5061a820543ace7
+    prebuild:
+      - ( test -e ../../env || python3.9 -mvenv ../../env )
+      - source ../../env/bin/activate
+      - ln -sf "$$python-for-android$$" .p4a
+      - sed -r "s:#?android.sdk_path =.*:android.sdk_path = $$SDK$$:" -i buildozer.spec
+      - sed -r "s:#?android.ndk_path =.*:android.ndk_path = $$NDK$$:" -i buildozer.spec
+      - sed -r "s:#?p4a.source_dir =.*:p4a.source_dir = $$python-for-android$$:" -i
+        buildozer.spec
+      - ( [ -z "$CI_JOB_ID" ] || sed -r 's:warn_on_root = 1:warn_on_root = 0:' -i
+        buildozer.spec )
+      - make _android_setup_user BUILDOZER="$$buildozer$$"
+    build:
+      - export PATH=/usr/local/bin:/bin:/usr/bin
+      - source ../../env/bin/activate
+      - unset PYTHONPATH PYTHONUNBUFFERED
+      - make android-release-armeabi-v7a
+    ndk: r22b
+
+  - versionName: 0.2.5
+    versionCode: 1000205002
+    commit: v0.2.5
+    sudo:
+      - ( apt-get update || apt-get update )
+      - apt-get upgrade -y
+      - apt-get install -y git lsb-release wget
+      - apt-get install -y build-essential git automake
+      - apt-get install -y python3-pip python3-dev libpcre3-dev liblzma-dev
+      - apt-get install -y zlib1g-dev zip unzip pkg-config libffi-dev
+      - apt-get install -y libltdl-dev libssl-dev
+      - apt-get install -y openjdk-11-jdk-headless
+      - update-java-alternatives --set java-1.11.0-openjdk-amd64
+      - apt-get remove -y libsqlite3-dev
+      - apt-get install -y lld-7
+      - ( test -e /usr/bin/lld || ln -s lld-7 /usr/bin/lld )
+      - ( test -e /bin/install || ln -s /usr/bin/install /bin/install )
+      - if ! which python3.9; then git clone build/srclib/cpython
+      - cd cpython
+      - ./configure
+      - make -j`nproc`
+      - make altinstall
+      - cd ..
+      - rm -fr cpython; fi
+      - wget -O sqlite-amalgamation-3360000.zip -- https://www.sqlite.org/2021/sqlite-amalgamation-3360000.zip
+      - printf '5c18f158a599b1e91d95c91de3aa5c5de52f986845ad0cb49dfd56b650587e55e24d469571b5b864229b870d0eaf85d78893f61ef950b95389cb41692be37f58  sqlite-amalgamation-3360000.zip\n'
+        | sha512sum -c
+      - rm -fr sqlite-amalgamation-3360000
+      - unzip sqlite-amalgamation-3360000.zip
+      - cd sqlite-amalgamation-3360000
+      - cc -shared -fPIC -ldl -lm -lpthread -o libsqlite3.so sqlite3.c
+      - mv libsqlite3.so /usr/lib/x86_64-linux-gnu/
+      - mv *.h /usr/include/
+      - cd /opt/android-sdk
+      - rm -r tools
+      - wget -O tools.zip -- https://dl.google.com/android/repository/commandlinetools-linux-6514223_latest.zip
+      - printf '39aea82cd958e60ffed8f8dd9bacdce4f1fd22a2e0c97b25b348f56309dd671533109e0e39aa5ca6d0fff36dc653fb5ff270773d2ee94d6b2fab7905bd2c85a9  tools.zip\n'
+        | sha512sum -c
+      - unzip -q tools.zip
+      - ( [ -z "$CI_JOB_ID" ] || chown -R vagrant . )
+    output: bin/sokobang-$$VERSION$$-arm64-v8a-release-unsigned.apk
+    srclibs:
+      - cpython@v3.9.6
+      - buildozer@1.2.0
+      - python-for-android@dc2806ee31b2316e51dfc059f5061a820543ace7
+    prebuild:
+      - ( test -e ../../env || python3.9 -mvenv ../../env )
+      - source ../../env/bin/activate
+      - ln -sf "$$python-for-android$$" .p4a
+      - sed -r "s:#?android.sdk_path =.*:android.sdk_path = $$SDK$$:" -i buildozer.spec
+      - sed -r "s:#?android.ndk_path =.*:android.ndk_path = $$NDK$$:" -i buildozer.spec
+      - sed -r "s:#?p4a.source_dir =.*:p4a.source_dir = $$python-for-android$$:" -i
+        buildozer.spec
+      - ( [ -z "$CI_JOB_ID" ] || sed -r 's:warn_on_root = 1:warn_on_root = 0:' -i
+        buildozer.spec )
+      - make _android_setup_user BUILDOZER="$$buildozer$$"
+    build:
+      - export PATH=/usr/local/bin:/bin:/usr/bin
+      - source ../../env/bin/activate
+      - unset PYTHONPATH PYTHONUNBUFFERED
+      - make android-release-arm64-v8a
+    ndk: r22b
+
 AutoUpdateMode: None
-UpdateCheckMode: None
-CurrentVersion: 0.2.4
-CurrentVersionCode: 1000204001
+UpdateCheckMode: Static
+CurrentVersion: 0.2.5
+CurrentVersionCode: 1000205002
