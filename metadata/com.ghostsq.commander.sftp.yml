@@ -2,11 +2,11 @@ Categories:
   - System
 License: GPL-3.0-only
 WebSite: https://sites.google.com/site/ghostcommander1
-SourceCode: https://sourceforge.net/p/gc-sftp/code
+SourceCode: https://sourceforge.net/p/gc-sftp/svn
 IssueTracker: https://sourceforge.net/p/ghostcommander/_list/tickets
 Donate: https://sourceforge.net/p/ghostcommander/donate
 
-AutoName: Ghost Commander - SFTP plugin
+AutoName: Ghost Commander - SFTP plugin (new)
 Description: |-
     A plug-in for https://f-droid.org/packages/com.ghostsq.commander to access secure FTP sites. Launch Ghost
     Commander and go to 'Menu > Location > Home > SFTP site'. Alternatively, scroll
@@ -14,7 +14,7 @@ Description: |-
     credentials.
 
 RepoType: git-svn
-Repo: https://svn.code.sf.net/p/gc-sftp/code/trunk/
+Repo: https://svn.code.sf.net/p/gc-sftp/svn/
 
 Builds:
   - versionName: 1.10b1
@@ -118,6 +118,31 @@ Builds:
       - mv ch src/.
     target: android-23
 
+  - versionName: 2.1.1
+    versionCode: 55
+    commit: '14'
+    gradle:
+      - yes
+    srclibs:
+      - GhostCommander@73
+    prebuild:
+      - sed -i -e '/task clean/,/^}/d' $$GhostCommander$$/build.gradle.root
+      - cp $$GhostCommander$$/build.gradle.root build.gradle.root
+      - pushd $$GhostCommander$$
+      - cat build.gradle >> build.gradle.root
+      - mv build.gradle.root build.gradle
+      - popd
+      - cat build.gradle >> build.gradle.root
+      - mv build.gradle.root build.gradle
+      - sed -i -e "s/'\.\.'/'.'/" build.gradle
+    build:
+      - pushd $$GhostCommander$$
+      - gradle assembleFreeRelease
+      - jar c -C build/intermediates/javac/freeRelease/compileFreeReleaseJavaWithJavac/classes/
+        com > com.jar
+      - popd
+      - mv $$GhostCommander$$/com.jar com.jar
+
 MaintainerNotes: |-
     No commit comments whatsoever!
 
@@ -130,7 +155,9 @@ MaintainerNotes: |-
     no way of referencing which version of the main GhostCommander API jar should
     be used.
 
+    As of 1.60a the repo has changed from https://svn.code.sf.net/p/ghostcommander/code/ to https://svn.code.sf.net/p/ghostcommander/svn/
+
 AutoUpdateMode: None
 UpdateCheckMode: RepoManifest
-CurrentVersion: 1.14.7b1
-CurrentVersionCode: 37
+CurrentVersion: 2.1.1
+CurrentVersionCode: 55
