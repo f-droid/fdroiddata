@@ -15,9 +15,6 @@ Builds:
     versionCode: 74
     commit: 5.9.2
     subdir: src/frontends/android/app
-    sudo:
-      - apt-get update || apt-get update
-      - apt-get install -y --no-install-recommends libgmp-dev
     gradle:
       - yes
     srclibs:
@@ -35,7 +32,6 @@ Builds:
       - make -j $(nproc)
       - mkdir -p "${lib}/armeabi-v7a"
       - cp libcrypto.a ${lib}/armeabi-v7a/
-      - cp libssl.a ${lib}/armeabi-v7a/
       - make distclean
       - CC=aarch64-linux-android21-clang ./Configure android-arm64 no-shared no-ssl3
         no-engine no-dso no-asm no-hw no-comp no-stdio -fPIC -DOPENSSL_PIC -D__ANDROID_API__=21
@@ -43,7 +39,6 @@ Builds:
       - make -j $(nproc)
       - mkdir -p "${lib}/arm64-v8a"
       - cp libcrypto.a ${lib}/arm64-v8a/
-      - cp libssl.a ${lib}/arm64-v8a/
       - make distclean
       - CC=i686-linux-android16-clang ./Configure android-x86 no-shared no-ssl3 no-engine
         no-dso no-asm no-hw no-comp no-stdio -fPIC -DOPENSSL_PIC -D__ANDROID_API__=16
@@ -51,7 +46,6 @@ Builds:
       - make -j $(nproc)
       - mkdir -p "${lib}/x86"
       - cp libcrypto.a ${lib}/x86/
-      - cp libssl.a ${lib}/x86/
       - make distclean
       - CC=x86_64-linux-android21-clang ./Configure android-x86_64 no-shared no-ssl3
         no-engine no-dso no-asm no-hw no-comp no-stdio -fPIC -DOPENSSL_PIC -D__ANDROID_API__=21
@@ -59,7 +53,6 @@ Builds:
       - make -j $(nproc)
       - mkdir -p "${lib}/x86_64"
       - cp libcrypto.a ${lib}/x86_64/
-      - cp libssl.a ${lib}/x86_64/
       - cp -R include/ ${lib}/
       - make distclean
       - popd
@@ -67,11 +60,6 @@ Builds:
       - echo "include \$(CLEAR_VARS)" >>"${lib}/Android.mk"
       - echo "LOCAL_MODULE := libcrypto_static" >>"${lib}/Android.mk"
       - echo "LOCAL_SRC_FILES := \$(TARGET_ARCH_ABI)/libcrypto.a" >>"${lib}/Android.mk"
-      - echo "LOCAL_EXPORT_C_INCLUDES := \$(LOCAL_PATH)/include" >>"${lib}/Android.mk"
-      - echo "include \$(PREBUILT_STATIC_LIBRARY)" >>"${lib}/Android.mk"
-      - echo "include \$(CLEAR_VARS)" >>"${lib}/Android.mk"
-      - echo "LOCAL_MODULE := libssl_static" >>"${lib}/Android.mk"
-      - echo "LOCAL_SRC_FILES := \$(TARGET_ARCH_ABI)/libssl.a" >>"${lib}/Android.mk"
       - echo "LOCAL_EXPORT_C_INCLUDES := \$(LOCAL_PATH)/include" >>"${lib}/Android.mk"
       - echo "include \$(PREBUILT_STATIC_LIBRARY)" >>"${lib}/Android.mk"
       - cd ../../../../
