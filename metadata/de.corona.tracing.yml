@@ -269,7 +269,33 @@ Builds:
     scandelete:
       - protobuf/build
 
+  - versionName: 2.6.1.0
+    versionCode: 2060101
+    commit: v2.6.1.0
+    subdir: Corona-Warn-App
+    submodules: true
+    gradle:
+      - device
+    srclibs:
+      - certlogic@v.0.75-kotlin
+    prebuild:
+      - sed -i -e '/afterEvaluate/,+39d' ../dgc-certlogic-android/engine/build.gradle
+      - sed -i -e 's/fileTree(.*)/"eu.ehn.dcc.certlogic:certlogic-kotlin:latest"/'
+        ../dgc-certlogic-android/engine/build.gradle
+      - sed -i -e '/maven {/,+2d' ../dgc-certlogic-android/build.gradle
+      - sed -i -e 's/google()/mavenLocal(); google()/g' ../dgc-certlogic-android/build.gradle
+      - sed -i -e 's/google()/mavenLocal(); google()/g' ../build.gradle
+    scanignore:
+      - Corona-Warn-App/src/main/assets/default_app_config_android.bin
+      - Corona-Warn-App/src/main/assets/default_qr_code_poster_template_android.bin
+    scandelete:
+      - protobuf/build
+      - dgc-certlogic-android/engine/libs/
+
 MaintainerNotes: |-
+    Needs some hoop-jumping with the included dgc-certlogic dependency, which vendors another jar dependency
+    which we instead build to mavenLocal in srclib prepare step.
+
     scanignored are some protobuf encoded config files, view them with:
     protoc --decode de.rki.coronawarnapp.server.protocols.internal.v2.ApplicationConfigurationAndroid \
     Server-Protocol-Buffer/src/main/proto/internal/v2/app_config_android.proto --proto_path \
