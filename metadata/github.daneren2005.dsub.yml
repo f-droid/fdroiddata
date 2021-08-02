@@ -184,15 +184,37 @@ Builds:
     gradle:
       - yes
 
-  - versionName: 5.4.3
-    versionCode: 200
-    disable: unknown maven repo 'http://4thline.org/m2'
-    commit: 5.4.3
+  - versionName: 5.5.2
+    versionCode: 207
+    commit: 5.5.2R2
     subdir: app
     submodules: true
     gradle:
       - floss
-    prebuild: sed -i -e '/com.google.android.gms/d' build.gradle
+    srclibs:
+      - Cling@2.1.1
+      - kryo@kryo-2.21.1
+    prebuild:
+      - sed -i -e 's|http://4thline.org/m2|https://jitpack.io|' -e '/jcenter/a mavenLocal()'
+        ../build.gradle
+      - pushd $$Cling$$
+      - sed -i -e '/<pluginRepositories>/,/<\/pluginRepositories>/d' -e 's|http://4thline.org/m2|https://jitpack.io|'
+        -e '/<groupId>org.fourthline.lemma/,/<plugin>/d' -e '/lemma.version/d' -e
+        's/org.seamless/com.github.4thline.seamless/' pom.xml */pom.xml
+      - popd
+      - pushd $$kryo$$
+      - sed -i -e '/Embed-Dependency/d' pom.xml
+      - popd
+    scandelete:
+      - app/libs
+    build:
+      - pushd $$Cling$$
+      - mvn --projects core,support -am clean install -Dmaven.javadoc.skip=true
+      - popd
+      - pushd $$kryo$$
+      - mvn package -Dmaven.test.skip=true
+      - popd
+      - mv $$kryo$$/target/kryo-2.21.1.jar libs
 
 MaintainerNotes: |-
     DSub 5.4.1 has a vulnerability: https://www.cvedetails.com/cve/CVE-2018-1000664/
@@ -200,7 +222,9 @@ MaintainerNotes: |-
     Check whether it's fixed before adding a new version. If not, add a KnownVuln
     antifeature.
 
-AutoUpdateMode: None
+    kryo-2.21 is available in MavenCentral but includes some dependencies causing conflict.
+
+AutoUpdateMode: Version
 UpdateCheckMode: Tags
 CurrentVersion: 5.5.2
 CurrentVersionCode: 207
