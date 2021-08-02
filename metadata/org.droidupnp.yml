@@ -77,26 +77,28 @@ Builds:
       - $$MVN3$$ install
       - popd
 
-  - versionName: 2.4.0
-    versionCode: 17
-    disable: 'cling fails    '
-    commit: v2.4.0
+  - versionName: 2.4.1
+    versionCode: 18
+    commit: v2.4.1
     gradle:
       - yes
     srclibs:
-      - Cling@2.1.0
+      - Cling@2.1.1
     prebuild:
-      - sed -i -e '/4thline.org/,+1d' -e '/maven {/d'  build.gradle
+      - sed -i -e 's|http://4thline.org/m2|https://jitpack.io|' -e 's/2.3.0/3.2.1/'
+        -e '/mavenCentral/a google()' build.gradle
+      - sed -i -e 's/3.3/4.6/' gradle/wrapper/gradle-wrapper.properties
       - pushd $$Cling$$
-      - $$MVN3$$ install -Dmaven.test.skip=true
+      - sed -i -e '/<pluginRepositories>/,/<\/pluginRepositories>/d' -e 's|http://4thline.org/m2|https://jitpack.io|'
+        -e '/<groupId>org.fourthline.lemma/,/<plugin>/d' -e '/lemma.version/d' -e
+        's/org.seamless/com.github.4thline.seamless/' pom.xml */pom.xml
+      - popd
+    build:
+      - pushd $$Cling$$
+      - mvn --projects core,support -am clean install -Dmaven.javadoc.skip=true -Dmaven.test.skip=true
       - popd
 
-MaintainerNotes: |-
-    The app itself uses the official 4thline repo to get Cling and dependencies. While
-    this is replaced with a srclib, we are still not "good": The srclib itself pulls
-    in quite some jars from different untrusted repos, even 4thline again...
-
 AutoUpdateMode: None
-UpdateCheckMode: Tags
+UpdateCheckMode: None
 CurrentVersion: 2.4.1
 CurrentVersionCode: 18
