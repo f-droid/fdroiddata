@@ -2026,6 +2026,36 @@ Builds:
         ./prepare_gdk_clang.sh
     ndk: r19c
 
+  - versionName: 3.6.4
+    versionCode: 22000364
+    commit: 95987f9de6b69899c2400af4508befdf9f483b7e
+    timeout: 25200
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y build-essential clang virtualenv
+      - pushd build/srclib/cpython
+      - ./configure
+      - make -j`nproc`
+      - make altinstall
+      - popd
+    gradle:
+      - production
+    output: green/build/outputs/apk/production/release/*.apk
+    srclibs:
+      - cpython@v3.9.6
+    prebuild: sed -i -e 's/-p python3/-p python3.9/' crypto/prepare_gdk_clang.sh
+    scanignore:
+      - bitcoinj/core/src/main/resources/org/bitcoinj/crypto/cacerts
+      - bitcoinj/core/src/test
+      - app/src/main/assets/production/checkpoints
+    scandelete:
+      - app/src/main/assets/btctestnet/checkpoints
+    build:
+      - cd crypto
+      - JAVA_HOME=$(readlink -f /usr/bin/javac | sed "s:/bin/javac::") PATH=$HOME/.local/bin:$PATH
+        ./prepare_gdk_clang.sh
+    ndk: r19c
+
 MaintainerNotes: |-
     Watch prepare_gdk_clang.sh for changes on new builds.
 
@@ -2034,5 +2064,5 @@ MaintainerNotes: |-
 AutoUpdateMode: Version release_%v
 UpdateCheckMode: Tags
 VercodeOperation: 22000000 + %c
-CurrentVersion: 3.6.3
-CurrentVersionCode: 22000363
+CurrentVersion: 3.6.4
+CurrentVersionCode: 22000364
