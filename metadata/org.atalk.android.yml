@@ -1459,10 +1459,38 @@ Builds:
       - ./build-jnilibs4atalk.sh
     ndk: r20
 
+  - versionName: 2.6.3
+    versionCode: 206030
+    commit: e06fa832f1119ca822c9f3244a9891d34d2dffea
+    subdir: aTalk
+    gradle:
+      - fdroid
+    rm:
+      - aTalk/lib/src_reference/
+      - aTalk/jni/ffmpeg/android/
+      - aTalk/jni/openssl/android/
+      - aTalk/jni/vpx/android/
+    prebuild:
+      - $$SDK$$/tools/bin/sdkmanager 'ndk;18.1.5063045' > /dev/null
+      - sed -i -e 's|dl.bintray.com/google/exoplayer/|jitpack.io|' build.gradle
+      - cd jni/static_library_built
+      - sed -i -e '/export ANDROID_NDK_HOME/d' openssl/_settings.sh
+      - sed -i -e 's|android/android-ndk-r18b|android-sdk/ndk/18.1.5063045|' ffmpeg-x264/_settings.sh
+        libvpx/_settings.sh
+    scanignore:
+      - aTalk/build.gradle
+    scandelete:
+      - aTalk/jni/static_library_built
+      - aTalk/third_party/m2
+    build:
+      - cd jni/static_library_built
+      - ./build-jnilibs4atalk.sh
+    ndk: r20
+
 MaintainerNotes: scanignore is used to allow the local "third_party/m2" Gradle repository
     (which is populated by libraries we build).
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 2.6.2
-CurrentVersionCode: 206020
+CurrentVersion: 2.6.3
+CurrentVersionCode: 206030
