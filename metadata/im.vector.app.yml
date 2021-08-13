@@ -484,11 +484,41 @@ Builds:
       - cp -r node_modules/jsc-android/dist/org/webkit/android-jsc "$HOME/.m2/repository/org/webkit"
     ndk: r21d
 
+  - versionName: 1.2.0
+    versionCode: 40102000
+    commit: v1.2.0
+    subdir: vector
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y -t stretch-backports npm jq
+      - sysctl fs.inotify.max_user_watches=524288
+      - sysctl -p
+    gradle:
+      - fdroid
+    srclibs:
+      - jitsi-meet@android-sdk-3.1.0
+    prebuild:
+      - sed -i -e '/com.google.gms.google-services/d' build.gradle ../build.gradle
+      - sed -i -e 's/enable true/enable false/g' build.gradle
+      - sed -i -e '/Jitsi repo/,/}/d' ../build.gradle
+      - sed -i -e '/google()/a\        mavenLocal()' ../build.gradle
+      - sed -i -e '/gplayImplementation(.*) {/,/}/d; /gplayImplementation/d' build.gradle
+    build:
+      - cd $$jitsi-meet$$
+      - export LIBRE_BUILD=true
+      - npm install webpack-bundle-analyzer
+      - npm install
+      - mkdir -p "$HOME/.m2"
+      - bash android/scripts/release-sdk.sh "$HOME/.m2/repository"
+      - mkdir -p "$HOME/.m2/repository/org/webkit"
+      - cp -r node_modules/jsc-android/dist/org/webkit/android-jsc "$HOME/.m2/repository/org/webkit"
+    ndk: r21d
+
 MaintainerNotes: Do not update unless requested by the Element team! The Element team
     will ping us whenever they feel a new release is ready. See https://github.com/vector-im/element-android/issues/3728
     as an example of their release process.
 
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: 1.1.14
-CurrentVersionCode: 40101140
+CurrentVersion: 1.2.0
+CurrentVersionCode: 40102000
