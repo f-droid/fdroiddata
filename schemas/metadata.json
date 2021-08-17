@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema",
   "$id": "https://f-droid.org/metadata.yml",
-  "title": "F-Droid metadata for Android apps",
+  "title": "F-Droid Data metadata",
   "description": "For every app on F-Droid a metadata file in the format of <application-id>.yml have to be provided, in order to build an app or check or if it has been updated. See https://f-droid.org/docs/Build_Metadata_Reference for a complete reference of a metadata file.",
   "type": "object",
   "properties": {
@@ -34,6 +34,7 @@
           "Writing"
         ]
       },
+      "uniqueItems": true,
       "minItems": 1
     },
     "License": {
@@ -248,30 +249,31 @@
       "type": "string"
     },
     "Donate": {
-      "description": "The URL to donate to the project. This should be the project’s donate page if it has one."
+      "description": "The URL to donate to the project.",
+      "type": "string"
     },
     "FlattrID": {
-      "description": "The project’s Flattr (https://flattr.com) ID, if it has one.",
+      "description": "The project’s Flattr (https://flattr.com) ID.",
       "type": "string"
     },
     "Liberapay": {
-      "description": "The project’s Liberapay (https://liberapay.com) user or group name, if it has one.",
+      "description": "The project’s Liberapay (https://liberapay.com) user or group name.",
       "type": "string"
     },
     "LiberapayID": {
-      "description": "The project’s Liberapay (https://liberapay.com) user or group ID, if it has one.",
+      "description": "The project’s Liberapay (https://liberapay.com) user or group ID.",
       "type": "string"
     },
     "OpenCollective": {
-      "description": "The project’s OpenCollective (https://opencollective.com) user or group name, if it has one.",
+      "description": "The project’s OpenCollective (https://opencollective.com) user or group name.",
       "type": "string"
     },
     "Bitcoin": {
-      "description": "A bitcoin address for donating to the project.",
+      "description": "A Bitcoin address for donating to the project.",
       "type": "string"
     },
     "Litecoin": {
-      "description": "A litecoin address for donating to the project.",
+      "description": "A Litecoin address for donating to the project.",
       "type": "string"
     },
     "Name": {
@@ -291,6 +293,24 @@
       "description": "DEPRECATED. A full description of the application, relevant to the latest version. Should rather be provided via Fastlane.",
       "type": "string",
       "maxLength": 4000
+    },
+    "AllowedAPKSigningKeys": {
+      "description": "The lowercase hex value of the SHA-256 fingerprint of the signing certificate of an app. If an APK of that app is not signed by one of these keys, it will not be included in the repository.",
+      "anyOf": [
+        {
+          "type": "string",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 64,
+            "maxLength": 64
+          }
+        }
+      ]
     },
     "MaintainerNotes": {
       "description": "This is a multi-line field using the same rules and syntax as the description. It’s used to record notes for F-Droid maintainers to assist in maintaining and updating the application in the repository.",
@@ -318,7 +338,7 @@
       "type": "string"
     },
     "Builds": {
-      "description": "Any number of sub-entries can be present, each specifying a version to automatically build from source",
+      "description": "Any number of sub-entries can be present, each specifying a version to automatically build from source.",
       "type": "array",
       "items": {
         "type": "object",
@@ -336,7 +356,7 @@
             "type": "string"
           },
           "disable": {
-            "description": "Disables this build, giving a reason why. (For backwards compatibility, this can also be achieved by starting the commit ID with ’!’)",
+            "description": "Disables this build, giving a reason why.",
             "type": "string"
           },
           "subdir": {
@@ -349,11 +369,11 @@
             "enum": [true]
           },
           "sudo": {
-            "description": "Specifies a script to be run using sudo bash -x -c \"xxxx\" in the buildserver VM guest. This script is run with full root privileges, but the state will be reset after each build.",
+            "description": "Specifies a script to be run using sudo bash -x -c \"xxxx\" in the Buildserver VM guest. This script is run with full root privileges, but the state will be reset after each build.",
             "$ref": "#/definitions/string_list"
           },
           "timeout": {
-            "description": "Time limit for this build (in seconds). After time is up, buildserver VM is forcefully terminated. The default is 7200 (2 hours); 0 means no limit.",
+            "description": "Time limit for this build (in seconds). After time is up, Buildserver VM is forcefully terminated. The default is 7200 (2 hours); 0 means no limit.",
             "type": "integer"
           },
           "init": {
@@ -371,7 +391,7 @@
           },
           "androidupdate": {
             "description": "By default, ’android update’ is used in Ant builds to generate or update the project and all its referenced projects. Specifying update=no bypasses that. Note that this is useless in builds that don’t use Ant.",
-            "oneOf": [
+            "anyOf": [
               {
                 "type": "string",
                 "enum": ["auto"]
@@ -403,7 +423,7 @@
             "$ref": "#/definitions/string_list"
           },
           "extlibs": {
-            "description": "Comma-separated list of external libraries (jar files) from the build/extlib library, which will be placed in the libs directory of the project.",
+            "description": "List of external libraries (jar files) from the build/extlib library, which will be placed in the libs directory of the project.",
             "$ref": "#/definitions/string_list"
           },
           "srclibs": {
@@ -432,7 +452,7 @@
           },
           "buildjni": {
             "description": "Enables building of native code via the ndk-build script before doing the main Ant build.",
-            "oneOf": [
+            "anyOf": [
               {
                 "type": "string",
                 "enum": ["yes", "no"]
@@ -513,6 +533,7 @@
         ],
         "additionalProperties": false
       },
+      "uniqueItems": true,
       "minItems": 1
     },
     "Disabled": {
@@ -522,7 +543,7 @@
     "RequiresRoot": {
       "description": "Set this optional field to “Yes” if the application requires root privileges to be usable.",
       "type": "string",
-      "enum": ["yes"]
+      "enum": ["True"]
     },
     "ArchivePolicy": {
       "description": "This determines the policy for moving old versions of an app to the archive repo, if one is configured. Currently the only supported format is “n versions”, where n is the number of versions to keep. Defaults to “3 versions”.",
@@ -537,7 +558,10 @@
         },
         {
           "type": "string",
-          "enum": ["None"]
+          "enum": [
+            "None",
+            "Version"
+          ]
         }
       ]
     },
@@ -624,10 +648,12 @@
           "ApplicationDebuggable",
           "NoSourceSince"
         ]
-      }
+      },
+      "uniqueItems": true,
+      "minItems": 1
     },
     "string_list": {
-      "oneOf": [
+      "anyOf": [
         {
           "type": "string"
         },
