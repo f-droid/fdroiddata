@@ -1,0 +1,326 @@
+diff --git a/build.gradle b/build.gradle
+index 6731ca7..4d6e4d1 100644
+--- a/build.gradle
++++ b/build.gradle
+@@ -9,6 +9,7 @@ buildscript {
+         google()
+         mavenCentral()
+         maven { url 'https://jitpack.io' }
++        mavenLocal()
+     }
+     dependencies {
+         classpath 'com.android.tools.build:gradle:7.0.0'
+@@ -44,20 +45,13 @@ subprojects {
+     def isAndroidProject = project.file('src/main/AndroidManifest.xml').exists()
+     def isPlatformProject = project.name.endsWith('-bom')
+     def isTestProject = project.name.endsWith('-test') || project.name == 'test'
+-    def shouldPublish = isLibraryProject && project.name.startsWith("covpass-")
+     def isThirdPartyProject = project.name == "covpass-dgc-certlogic"
+     def kotlinExplicitApiMode = !isThirdPartyProject
+ 
+     apply from: "$rootDir/dependencies.gradle"
+ 
+     repositories {
+-        maven {
+-            url 'https://maven.pkg.github.com/ehn-dcc-development/*'
+-            credentials {
+-                username repoConfig.githubUsername ?: System.getenv("GITHUB_PACKAGES_USERNAME")
+-                password repoConfig.githubPassword ?: System.getenv("GITHUB_PACKAGES_PASSWORD")
+-            }
+-        }
++        mavenLocal()
+     }
+ 
+     if (!isPlatformProject) {
+@@ -184,44 +178,5 @@ subprojects {
+             apply from: "$rootDir/gradle/common/coverage.gradle"
+             trackCoverage(enableTestCoverage: isOnCI, trackUI: false)
+         }
+-        if (!isLibraryProject && (System.getenv("PUBLISH_APPS") ?: "true") == "true") {
+-            apply plugin: 'maven-publish'
+-            afterEvaluate {
+-                publishing {
+-                    publications {
+-                        release(MavenPublication) {
+-                            from components.release_apk
+-                        }
+-                    }
+-                    repositories {
+-                        maven {
+-                            url "https://nexus.open-insurance-platform.com/repository/covpass-releases"
+-                            credentials {
+-                                username repoConfig.nexusUsername
+-                                password repoConfig.nexusPassword
+-                            }
+-                        }
+-                    }
+-                }
+-            }
+-        }
+-    }
+-
+-    if (shouldPublish) {
+-        apply from: "$rootDir/gradle/common/publish.gradle"
+-        publish(
+-            url: System.getenv("PUBLICATION_URL") ?: nexus.egaPublic,
+-            username: repoConfig.nexusUsername ?: System.getenv("PUBLICATION_USERNAME"),
+-            password: repoConfig.nexusPassword ?: System.getenv("PUBLICATION_PASSWORD"),
+-            repoUrl: "https://github.com/Digitaler-Impfnachweis/covpass-android",
+-            pomAction: {
+-                description = "The official CovPass(-Check) SDK"
+-                url = "https://github.com/Digitaler-Impfnachweis/covpass-android"
+-                licenses {
+-                    license(LICENSE.APACHE2)
+-                }
+-            },
+-            isPlatformProject: isPlatformProject,
+-        )
+     }
+ }
+diff --git a/common-app/build.gradle b/common-app/build.gradle
+index 80e0f7b..36d9f88 100644
+--- a/common-app/build.gradle
++++ b/common-app/build.gradle
+@@ -12,6 +12,5 @@ dependencies {
+     api project(":securityprovider")
+     api project(':covpass-sdk')
+     androidUI()
+-    inAppUpdate()
+     zxing()
+ }
+diff --git a/common-app/src/main/java/de/rki/covpass/commonapp/BaseActivity.kt b/common-app/src/main/java/de/rki/covpass/commonapp/BaseActivity.kt
+index fdc198b..bd94554 100644
+--- a/common-app/src/main/java/de/rki/covpass/commonapp/BaseActivity.kt
++++ b/common-app/src/main/java/de/rki/covpass/commonapp/BaseActivity.kt
+@@ -11,8 +11,6 @@ import android.net.Uri
+ import android.os.Bundle
+ import android.view.WindowManager
+ import androidx.annotation.LayoutRes
+-import com.google.android.play.core.appupdate.AppUpdateManager
+-import com.google.android.play.core.appupdate.AppUpdateManagerFactory
+ import com.ibm.health.common.android.utils.BaseHookedActivity
+ import com.ibm.health.common.android.utils.isDebuggable
+ import com.ibm.health.common.annotations.Continue
+@@ -21,7 +19,6 @@ import com.ibm.health.common.navigation.android.NavigatorOwner
+ import de.rki.covpass.commonapp.dependencies.commonDeps
+ import de.rki.covpass.commonapp.dialog.DialogAction
+ import de.rki.covpass.commonapp.dialog.DialogListener
+-import de.rki.covpass.commonapp.utils.startLookingForUpdate
+ 
+ /** Common base activity with some common functionality like error handling or loading behaviour. */
+ public abstract class BaseActivity(@LayoutRes contentLayoutId: Int = 0) :
+@@ -39,8 +36,6 @@ public abstract class BaseActivity(@LayoutRes contentLayoutId: Int = 0) :
+             )
+         }
+         super.onCreate(savedInstanceState)
+-
+-        lookForUpdates(AppUpdateManagerFactory.create(this))
+     }
+ 
+     override fun onBackPressed() {
+@@ -55,10 +50,6 @@ public abstract class BaseActivity(@LayoutRes contentLayoutId: Int = 0) :
+ 
+     override fun setLoading(isLoading: Boolean) {}
+ 
+-    private fun lookForUpdates(appUpdateManager: AppUpdateManager) {
+-        startLookingForUpdate(appUpdateManager, navigator)
+-    }
+-
+     override fun onDialogAction(tag: String, action: DialogAction) {
+         if (tag == UPDATE_AVAILABLE_TAG && action == DialogAction.POSITIVE) {
+             try {
+diff --git a/common-app/src/main/java/de/rki/covpass/commonapp/utils/InAppUpdateUtils.kt b/common-app/src/main/java/de/rki/covpass/commonapp/utils/InAppUpdateUtils.kt
+index 7b32d81..e69de29 100644
+--- a/common-app/src/main/java/de/rki/covpass/commonapp/utils/InAppUpdateUtils.kt
++++ b/common-app/src/main/java/de/rki/covpass/commonapp/utils/InAppUpdateUtils.kt
+@@ -1,34 +0,0 @@
+-/*
+- * (C) Copyright IBM Deutschland GmbH 2021
+- * (C) Copyright IBM Corp. 2021
+- */
+-
+-package de.rki.covpass.commonapp.utils
+-
+-import com.google.android.play.core.appupdate.AppUpdateManager
+-import com.google.android.play.core.install.model.UpdateAvailability
+-import com.ibm.health.common.android.utils.getString
+-import com.ibm.health.common.navigation.android.Navigator
+-import de.rki.covpass.commonapp.BaseActivity.Companion.UPDATE_AVAILABLE_TAG
+-import de.rki.covpass.commonapp.R
+-import de.rki.covpass.commonapp.dialog.DialogModel
+-import de.rki.covpass.commonapp.dialog.showDialog
+-
+-internal fun startLookingForUpdate(appUpdateManager: AppUpdateManager, navigator: Navigator) {
+-    // Returns an intent object that you use to check for an update.
+-    val appUpdateInfoTask = appUpdateManager.appUpdateInfo
+-
+-    // Checks if there is an update available
+-    appUpdateInfoTask.addOnSuccessListener { appUpdateInfo ->
+-        if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE) {
+-            val dialogModel = DialogModel(
+-                titleRes = R.string.dialog_start_screen_title,
+-                messageString = getString(R.string.dialog_start_screen_message),
+-                positiveButtonTextRes = R.string.dialog_start_screen_button_update,
+-                negativeButtonTextRes = R.string.dialog_start_screen_button_later,
+-                tag = UPDATE_AVAILABLE_TAG
+-            )
+-            showDialog(dialogModel, navigator.fragmentManager)
+-        }
+-    }
+-}
+diff --git a/dependencies.gradle b/dependencies.gradle
+index fc5bc11..b02b1e2 100644
+--- a/dependencies.gradle
++++ b/dependencies.gradle
+@@ -213,16 +213,12 @@ dependencies {
+         }
+ 
+         certLogic = {
+-            api 'eu.ehn.dcc.certlogic:certlogic-kotlin:v0.7.7-kotlin'
++            api 'eu.ehn.dcc.certlogic:certlogic-kotlin:latest'
+             api 'com.squareup.retrofit2:retrofit:2.9.0'
+             api 'com.squareup.retrofit2:converter-jackson:2.1.0'
+             api 'androidx.room:room-ktx:2.4.0-alpha03'
+             api 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+             api 'androidx.room:room-runtime:2.3.0'
+         }
+-
+-        inAppUpdate = {
+-            api 'com.google.android.play:core-ktx:1.8.1'
+-        }
+     }
+ }
+diff --git a/gradle/common/publish.gradle b/gradle/common/publish.gradle
+index b932ed6..e69de29 100644
+--- a/gradle/common/publish.gradle
++++ b/gradle/common/publish.gradle
+@@ -1,129 +0,0 @@
+-/*
+- * (C) Copyright IBM Deutschland GmbH 2021
+- * (C) Copyright IBM Corp. 2021
+- */
+-
+-class PublishingConfig {
+-    String url
+-    String username
+-    String password
+-    String name
+-    String repoUrl
+-    Object pomAction
+-    Boolean withSources = true
+-    Boolean withPublication = true
+-    Boolean isPlatformProject = false
+-    Boolean sign = false
+-}
+-
+-ext.LICENSE = [
+-    MIT: {
+-        name = "The MIT License"
+-        url = "https://opensource.org/licenses/mit-license.php"
+-    },
+-    APACHE2: {
+-        name = "The Apache Software License, Version 2.0"
+-        url = "https://www.apache.org/licenses/LICENSE-2.0.txt"
+-    },
+-]
+-
+-ext.publish = { args ->
+-    PublishingConfig config = new PublishingConfig(args)
+-
+-    apply plugin: "maven-publish"
+-    apply plugin: "signing"
+-
+-    if (!config.name) {
+-        config.name = "$rootProject.name: $project.name"
+-    }
+-
+-    def isMultiplatform = !project.file("src/main").exists() && !config.isPlatformProject
+-    def isAndroidProject = ["main", "androidMain"].any { project.file("src/$it/AndroidManifest.xml").exists() }
+-
+-    if (config.withPublication) {
+-        if (!config.isPlatformProject && config.withSources) {
+-            task javadocJar(type: Jar) {
+-                archiveClassifier.set('javadoc')
+-            }
+-            if (!isMultiplatform) {
+-                task sourcesJar(type: Jar) {
+-                    archiveClassifier.set('sources')
+-                    if (isAndroidProject) {
+-                        from android.sourceSets.main.java.srcDirs
+-                        from android.sourceSets.main.kotlin.srcDirs
+-                    } else {
+-                        if (project.file("src/main/java").exists()) {
+-                            from sourceSets.main.java.srcDirs
+-                        }
+-                        if (project.file("src/main/kotlin").exists()) {
+-                            from sourceSets.main.kotlin.srcDirs
+-                        }
+-                    }
+-                }
+-            }
+-        }
+-
+-        // Some components are only available in the afterEvaluate phase (e.g. components.release)
+-        afterEvaluate {
+-            publishing {
+-                publications {
+-                    if (!isMultiplatform) {
+-                        maven(MavenPublication) {
+-                            if (isAndroidProject) {
+-                                from components.release
+-                            } else if (config.isPlatformProject) {
+-                                from components.javaPlatform
+-                            } else {
+-                                from components.java
+-                            }
+-                            if (!config.isPlatformProject && config.withSources) {
+-                                artifact sourcesJar
+-                            }
+-                        }
+-                    }
+-                }
+-
+-                publications.all {
+-                    if (!config.isPlatformProject) {
+-                        artifact javadocJar
+-                    }
+-
+-                    pom {
+-                        name = config.name
+-                        if (config.repoUrl) {
+-                            scm {
+-                                url = config.repoUrl
+-                                def regex = ~"^https://(github.com/[^/]+/[^/]+).*"
+-                                def (_, path) = (config.repoUrl =~ regex)[0]
+-                                if (path) {
+-                                    connection = "scm:git:git://${path}.git"
+-                                    developerConnection = "scm:git:ssh://${path}.git"
+-                                }
+-                            }
+-                        }
+-                    }
+-                    if (config.pomAction) {
+-                        pom(config.pomAction)
+-                    }
+-                }
+-            }
+-            if (config.sign) {
+-                signing {
+-                    sign publishing.publications
+-                }
+-            }
+-        }
+-    }
+-
+-    publishing {
+-        repositories {
+-            maven {
+-                url config.url
+-                credentials {
+-                    username config.username
+-                    password config.password
+-                }
+-            }
+-        }
+-    }
+-}
