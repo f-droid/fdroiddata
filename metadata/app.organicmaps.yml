@@ -296,8 +296,40 @@ Builds:
       - ./b2 headers
     ndk: r21e
 
+  - versionName: 2021.08.19-6-FDroid
+    versionCode: 21081906
+    commit: cf9ff528da7fbbdfd944c8af2115fc4f6fd98562
+    subdir: android
+    submodules: true
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y g++
+    gradle:
+      - fdroid
+    rm:
+      - iphone
+      - qt
+      - tools/shaders_compiler
+      - xcode
+    prebuild:
+      - sed -i -e '/com.google.firebase/d; /com.google.gms/d; /com.google.android.gms/d'
+        build.gradle
+      - touch secure.properties
+      - echo '<?xml version="1.0" encoding="utf-8"?><network-security-config/>' >
+        res/xml/network_security_config.xml
+      - cp ../private_default.h ../private.h
+    scanignore:
+      - data/*.bin
+    scandelete:
+      - 3party
+    build:
+      - cd ../3party/boost
+      - ./bootstrap.sh
+      - ./b2 headers
+    ndk: r21e
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags .*android$
 UpdateCheckData: android/src/fdroid/play/version.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 2021.08.14-4-FDroid
-CurrentVersionCode: 21081404
+CurrentVersion: 2021.08.19-6-FDroid
+CurrentVersionCode: 21081906
