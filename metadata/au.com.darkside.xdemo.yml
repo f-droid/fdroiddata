@@ -22,7 +22,6 @@ Builds:
 
   - versionName: '1.31'
     versionCode: 31
-    disable: build failed
     commit: '1.31'
     timeout: 14400
     subdir: demo
@@ -38,7 +37,7 @@ Builds:
       - pushd $$nwrkbiz-static-build$$
       - mv ./packages ./packages_orig
       - mkdir -p ./packages
-      - cd ./packages
+      - pushd ./packages
       - ln -s ../packages_orig/GENERAL.mk
       - ln -s ../packages_orig/000_expat
       - ln -s ../packages_orig/000_libpthread-stubs
@@ -61,22 +60,27 @@ Builds:
       - ln -s ../packages_orig/008_fltk
       - sed -i -e 's/-lXft -lXinerama -lXcursor -lfontconfig -lXrender -lXext -lXfixes
         -lharfbuzz -lfreetype -lharfbuzz //g' ./008_fltk/Makefile
-      - cd ..
+      - popd
+      - pushd ./unused_packages/
+      - ln -s ../packages_orig/GENERAL.mk
+      - popd
       - sed -i -e 's/-lXcursor -lXinerama -lXft  -lXrender -lXfixes -lXext //g' ./unused_packages/009_flwm/Makefile
       - ln -s ./build_settings/linux_armhf_musl.mk
       - ln -s ./build_settings/linux_aarch64_musl.mk
-      - sed -i -e 's/unzip -o/unzip -q -o/' compiler_packages/musl/Makefile
-      - sed -i -e 's/wget/wget -q/' compiler_packages/GENERAL.mk
+      - sed -i -e 's/MAKE_VERBOSE=1/MAKE_VERBOSE=0/' build_settings/globals.mk
+      - sed -i -e 's/unzip -o/unzip -q -o/' -e 's/xvzf/xzf/' compiler_packages/musl/Makefile
+        packages/*/Makefile unused_packages/009_flwm/Makefile
+      - sed -i -e 's/wget/wget -q/' */GENERAL.mk
+      - sed -i -e $'/strip \$(MAKE)/a\\\tsed -i -e "s/xvf/xf/" -e "s/wget/wget -q/"
+        \$(WORKDIR)/\$(DIRNAME)/Makefile' compiler_packages/GENERAL.mk
       - popd
     scandelete:
       - demo/src/main/jniLibs
     build:
       - pushd $$nwrkbiz-static-build$$
-      - make > /dev/null
-      - cd ./unused_packages/
-      - ln -s ../packages_orig/GENERAL.mk
-      - cd ./009_flwm/
-      - make > /dev/null
+      - make
+      - pushd ./unused_packages/009_flwm/
+      - make
       - popd
       - cp -rf $$nwrkbiz-static-build$$/3rdParty/linux_aarch64_musl/bin/flwm ./src/main/jniLibs/arm64-v8a/libwm.so
       - cp -rf $$nwrkbiz-static-build$$/3rdParty/linux_armhf_musl/bin/flwm ./src/main/jniLibs/armeabi-v7a/libwm.so
