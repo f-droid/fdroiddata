@@ -357,7 +357,33 @@ Builds:
       - make TARGET=ANDROID DEBUG=n TESTING=n -j`nproc`
     ndk: r22b
 
+  - versionName: '7.16'
+    versionCode: 137
+    commit: 58f0eb628e9c52bfdb0f7237f912c6891d14c8b1
+    submodules: true
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y ninja-build g++ vorbis-tools librsvg2-bin imagemagick
+      - pushd build/srclib/cpython
+      - ./configure
+      - make -j`nproc`
+      - make altinstall
+      - popd
+    output: output/ANDROID/opt/build/unsigned.apk
+    srclibs:
+      - cpython@v3.9.6
+    prebuild: $$SDK$$/tools/bin/sdkmanager 'platforms;android-29' 'build-tools;29.0.3'
+        > /dev/null
+    scandelete:
+      - android/ioio
+      - android/UsbSerial/usbserial/eclipse_lib
+    build:
+      - python3.9 -m venv .
+      - source bin/activate
+      - make TARGET=ANDROID DEBUG=n TESTING=n -j`nproc`
+    ndk: r22b
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: '7.15'
-CurrentVersionCode: 136
+CurrentVersion: '7.16'
+CurrentVersionCode: 137
