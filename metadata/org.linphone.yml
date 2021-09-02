@@ -755,9 +755,57 @@ Builds:
     antifeatures:
       - UpstreamNonFree
 
+  - versionName: 4.5.2
+    versionCode: 4520
+    commit: 4.5.2
+    timeout: 20000
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y doxygen pkgconf python3-pystache python3-six yasm
+      - apt-get install -y -t stretch-backports-sloppy libarchive13
+      - apt-get install -y -t stretch-backports cmake
+    gradle:
+      - yes
+    output: app/build/outputs/apk/release/linphone-android-release-*.apk
+    srclibs:
+      - linphone-sdk@5.0.14
+    rm:
+      - app/google-services.json
+    prebuild:
+      - pushd $$linphone-sdk$$
+      - git submodule update --init --recursive
+      - rm -R liblinphone/wrappers/java/classes/org/linphone/core/tools/firebase
+      - sed -i -e '/import com.google.firebase.FirebaseApp/d' -e '/FirebaseApp.initializeApp/d'
+        liblinphone/wrappers/java/classes/org/linphone/core/tools/PushNotificationUtils.java
+      - popd
+      - sed -i -e '/com.google.firebase/d' $$linphone-sdk$$/cmake/Android/gradle/build.gradle.cmake
+        build.gradle app/build.gradle
+      - sed -i -e '/google-services/d' build.gradle
+      - sed -i -e '/keystore/d' -e '/repositories/,+17d' -e 's/${project.version}/$$VERSION$$/g'
+        -e '/com.google.gms.google-services/d' -e '/org.linphone:linphone-sdk-android/d'
+        -e "s/'\*.jar'/'linphone-sdk-android-release.aar'/" app/build.gradle
+      - sed -i -e '/FirebaseCrashlytics/d' app/src/main/java/org/linphone/core/CoreContext.kt
+      - sed -i -e 's|https://www.linphone.org/releases||' -e 's|push_notification=.*|push_notification=0|'
+        app/src/main/assets/linphonerc_default
+      - sed -i -e '/ndk.dir/d' local.properties
+    build:
+      - pushd $$linphone-sdk$$
+      - mkdir build-sdk
+      - cd build-sdk
+      - cmake .. -DLINPHONESDK_PLATFORM=Android -DLINPHONESDK_ANDROID_ARCHS="arm64,
+        armv7, x86" -DCMAKE_BUILD_TYPE=Release
+      - cmake --build . --parallel $(nproc)
+      - popd
+      - mkdir app/libs
+      - cp $$linphone-sdk$$/build-sdk/linphone-sdk/bin/outputs/aar/linphone-sdk-android-release.aar
+        app/libs/
+    ndk: r21e
+    antifeatures:
+      - UpstreamNonFree
+
 MaintainerNotes: We patch linphone-sdk to remove GMS and Firebase, thus UpstreamNonFree.
 
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: 4.5.1
-CurrentVersionCode: 4510
+CurrentVersion: 4.5.2
+CurrentVersionCode: 4520
