@@ -1,0 +1,42 @@
+--- a/app/src/main/res/layout/settings_network_fragment.xml
++++ b/app/src/main/res/layout/settings_network_fragment.xml
+@@ -79,13 +79,6 @@
+ 
+                 <include
+                     layout="@layout/settings_widget_switch"
+-                    linphone:title="@{@string/network_settings_push_notifications_title}"
+-                    linphone:listener="@{viewModel.pushNotificationsListener}"
+-                    linphone:checked="@={viewModel.pushNotifications}"
+-                    linphone:enabled="@{viewModel.pushNotificationsAvailable}"/>
+-
+-                <include
+-                    layout="@layout/settings_widget_switch"
+                     linphone:title="@{@string/network_settings_random_ports_title}"
+                     linphone:listener="@{viewModel.randomPortsListener}"
+                     linphone:checked="@={viewModel.randomPorts}"/>
+--- a/app/src/main/java/org/linphone/activities/main/settings/viewmodels/NetworkSettingsViewModel.kt
++++ b/app/src/main/java/org/linphone/activities/main/settings/viewmodels/NetworkSettingsViewModel.kt
+@@ -38,14 +38,6 @@
+     }
+     val allowIpv6 = MutableLiveData<Boolean>()
+ 
+-    val pushNotificationsListener = object : SettingListenerStub() {
+-        override fun onBoolValueChanged(newValue: Boolean) {
+-            core.isPushNotificationEnabled = newValue
+-        }
+-    }
+-    val pushNotifications = MutableLiveData<Boolean>()
+-    val pushNotificationsAvailable = MutableLiveData<Boolean>()
+-
+     val randomPortsListener = object : SettingListenerStub() {
+         override fun onBoolValueChanged(newValue: Boolean) {
+             val port = if (newValue) -1 else 5060
+@@ -69,8 +61,6 @@
+     init {
+         wifiOnly.value = core.wifiOnlyEnabled()
+         allowIpv6.value = core.ipv6Enabled()
+-        pushNotifications.value = core.isPushNotificationEnabled
+-        pushNotificationsAvailable.value = core.isPushNotificationAvailable
+         randomPorts.value = getTransportPort() == -1
+         sipPort.value = getTransportPort()
+     }
