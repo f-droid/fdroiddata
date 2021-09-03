@@ -166,7 +166,8 @@ checkupdates_runner:
     - echo "${CHECKUPDATES_SSH_DEPLOY_KEY}" | tr -d '\r' | ssh-add -
     - url_host=$(echo "${CI_REPOSITORY_URL}" | sed -e 's|https\?://gitlab-ci-token:.*@|ssh://git@|g')
     - git remote set-url --push origin "${url_host}"
-    - git rebase --abort
+    # somehow there is an old rebase in the image
+    - git rebase --abort || true
     - rm -fr ".git/rebase-apply"
   script:
     - fdroid checkupdates --allow-dirty --auto --commit ${CHECKUPDATES_APPIDS} 2>&1 | tee /tmp/out || true
