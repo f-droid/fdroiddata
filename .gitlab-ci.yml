@@ -166,9 +166,11 @@ checkupdates_runner:
     - echo "${CHECKUPDATES_SSH_DEPLOY_KEY}" | tr -d '\r' | ssh-add -
     - url_host=$(echo "${CI_REPOSITORY_URL}" | sed -e 's|https\?://gitlab-ci-token:.*@|ssh://git@|g')
     - git remote set-url --push origin "${url_host}"
-    # somehow there is an old rebase in the image
+    # reset repo to origin state before adding new commits
     - git rebase --abort || true
     - rm -fr ".git/rebase-apply"
+    - git checkout master || true
+    - git reset --hard origin/master || true
   script:
     - fdroid checkupdates --allow-dirty --auto --commit ${CHECKUPDATES_APPIDS} 2>&1 | tee /tmp/out || true
     - git pull --rebase origin master
