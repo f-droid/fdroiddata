@@ -296,41 +296,6 @@ Builds:
       - ./b2 headers
     ndk: r21e
 
-  - versionName: 2021.08.19-6-FDroid
-    versionCode: 21081906
-    disable: sdkmanager doesn't work with java 11
-    commit: cf9ff528da7fbbdfd944c8af2115fc4f6fd98562
-    subdir: android
-    submodules: true
-    sudo:
-      - apt-get update || apt-get update
-      - apt-get install -y g++ openjdk-11-jdk
-      - update-alternatives --auto java
-    gradle:
-      - fdroid
-    rm:
-      - iphone
-      - qt
-      - tools/shaders_compiler
-      - xcode
-    prebuild:
-      - $$SDK$$/tools/bin/sdkmanager 'cmake;3.18.1' > /dev/null
-      - sed -i -e '/com.google.firebase/d; /com.google.gms/d; /com.google.android.gms/d'
-        build.gradle
-      - touch secure.properties
-      - echo '<?xml version="1.0" encoding="utf-8"?><network-security-config/>' >
-        res/xml/network_security_config.xml
-      - cp ../private_default.h ../private.h
-    scanignore:
-      - data/*.bin
-    scandelete:
-      - 3party
-    build:
-      - cd ../3party/boost
-      - ./bootstrap.sh
-      - ./b2 headers
-    ndk: r21e
-
   - versionName: 2021.09.01-6-FDroid
     versionCode: 21090106
     commit: f8414535cf76bf3fb2b5a9775ae0218ee4d10d8a
@@ -339,7 +304,6 @@ Builds:
     sudo:
       - apt-get update || apt-get update
       - apt-get install -y g++ openjdk-11-jdk
-      - update-alternatives --auto java
     gradle:
       - fdroid
     rm:
@@ -355,6 +319,7 @@ Builds:
       - echo '<?xml version="1.0" encoding="utf-8"?><network-security-config/>' >
         res/xml/network_security_config.xml
       - cp ../private_default.h ../private.h
+      - echo "org.gradle.java.home=/usr/lib/jvm/java-11-openjdk-amd64" >> gradle.properties
     scanignore:
       - data/*.bin
     scandelete:
