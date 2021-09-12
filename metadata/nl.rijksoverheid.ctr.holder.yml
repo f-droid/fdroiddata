@@ -1,6 +1,3 @@
-AntiFeatures:
-  - NonFreeAssets
-  - Tracking
 Categories:
   - Sports & Health
 License: EUPL-1.2
@@ -8,27 +5,6 @@ SourceCode: https://github.com/obfusk/nl-covid19-coronacheck-app-android
 IssueTracker: https://github.com/obfusk/nl-covid19-coronacheck-app-android/issues
 
 AutoName: CoronaCheck
-Description: |-
-    CoronaCheck is the official Dutch declaration app developed by the Ministry of Health, Welfare and Sport. This digital tool allows access to certain locations in the Netherlands. You can also travel internationally using the app. But only if you've been vaccinated, didn’t have coronavirus at the time of testing or if you’ve had coronavirus.
-
-    How does the app work?
-
-    Important: first book an appointment for a vaccination or for a corona test.
-
-    - Retrieve your vaccination or test results with the app
-    When your test results are available, you retrieve them with the app by entering the code provided by the test location. You can also retrieve a vaccination record in the app.
-
-    - Convert your vaccination record or test result into a QR code
-    The app converts your vaccination record or positive / negative test results into a QR code.
-
-    - Show your QR code at the entrance
-    You can have your QR code scanned at the entrance to certain locations. This is also mandatory for access to other countries. This proves you've been vaccinated, you’ve already had coronavirus or didn’t have coronavirus at the time of testing.
-
-    QR codes for the Netherlands and international
-
-    This app generates a QR code for the Netherlands and one for other countries. You can find both QR codes in the app. Travelling outside of the Netherlands? Then use your international QR code.
-
-    Privacy policy: https://coronacheck.nl/nl/privacy
 
 RepoType: git
 Repo: https://github.com/obfusk/nl-covid19-coronacheck-app-android
@@ -48,9 +24,45 @@ Builds:
       - ./build-mobilecore.sh
     ndk: r20b
 
+  - versionName: '2.3'
+    versionCode: 2137
+    commit: holder-foss-2.3
+    subdir: holder
+    submodules: true
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y openjdk-11-jdk
+      - update-alternatives --auto java
+    gradle:
+      - prod
+    prebuild: JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 $$SDK$$/tools/bin/sdkmanager
+        'platforms;android-30' 'build-tools;30.0.2' > /dev/null
+    build:
+      - cd ..
+      - mkdir -p ../tmp-go
+      - pushd ../tmp-go
+      - if [ ! -e golang ]; then wget -O go.tar.gz -- https://dl.google.com/go/go1.16.7.linux-amd64.tar.gz
+      - printf '349f846599ca816f95f57adc41f789fdd6ade0ffcd325076de4fc3dcf06c72ae1474170ed5760e505a54a3ab10b1aa65d127f14a63cba27dec6672a1bcd2fbc6  go.tar.gz\n'
+        | sha512sum -c
+      - tar xzf go.tar.gz
+      - mv go golang; fi
+      - export GOPATH="$PWD"
+      - export GO_LANG="$PWD/golang/bin"
+      - export GO_COMPILED="$PWD/bin"
+      - export PATH="$GO_LANG:$GO_COMPILED:$PATH"
+      - popd
+      - cd mobilecore-src
+      - go get golang.org/x/mobile/cmd/gomobile
+      - go get golang.org/x/mobile/cmd/gobind@latest
+      - gomobile init
+      - gomobile bind -target android -o mobilecore.aar github.com/minvws/nl-covid19-coronacheck-mobile-core
+      - cd ..
+      - cp mobilecore-src/mobilecore.aar mobilecore/
+    ndk: r20b
+
 MaintainerNotes: versionCode == $GITHUB_RUN_NUMBER
 
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: 2.2.2
-CurrentVersionCode: 1897
+CurrentVersion: '2.3'
+CurrentVersionCode: 2137
