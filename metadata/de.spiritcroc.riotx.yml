@@ -589,31 +589,32 @@ Builds:
     versionCode: 40100640
     commit: 832f0e0e5bc3074422dc2ed4e3c703f26d2db247
     subdir: vector
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y -t stretch-backports npm jq openjdk-11-jdk-headless openjdk-11-jre-headless
+      - update-alternatives --auto java
+      - sysctl fs.inotify.max_user_watches=524288
+      - sysctl -p
     gradle:
       - fdroid
     srclibs:
-      - piasy@v1.7.1
+      - jitsi-meet@android-sdk-3.1.0
     prebuild:
-      - tac ../build.gradle | awk '/dl.bintray.com\/piasy\/maven/{getline;$0="mavenLocal
-        {"}{print $0}' | tac > ../build.gradle.new
-      - mv ../build.gradle.new ../build.gradle
-      - sed -i -e '/firebase-messaging/,+5d' build.gradle
-      - sed -i -e '/com.google.gms.google-services/d' build.gradle
-      - sed -i -e 's/21.3.6528147/21.4.7075529/g' build.gradle
+      - sed -i -e '/com.google.gms.google-services/d' build.gradle ../build.gradle
       - sed -i -e 's/enable true/enable false/g' build.gradle
-    scanignore:
-      - build.gradle
-    ndk: r21e
-
-MaintainerNotes: |-
-    Uses piasy/BigImageViewer which gets build and installed to a local maven repo in srclib prepare step.
-
-    In prebuild we do weird stuff for replacing `maven {` with `mavenLocal {`. tac reverses the lines so we can match the following repo url.
-    The awk call then matches the url, deletes the matching line and replaces the following line. No idea how it works, but it does.
-    Finally reverse the lines again and move back to original build.gradle file.
-
-    Upstream builds and publishes a libre build of the jitsi sdk. The maven repo can be recreated by using tools/jitsi/build_jitsi_libs.sh
-    We use that build instead of doing our own for now as jitsi embeds a timstamp in the version number and it's a major pain to maintain.
+      - sed -i -e '/Jitsi repo/,/}/d' ../build.gradle
+      - sed -i -e '/google()/a\        mavenLocal()' ../build.gradle
+      - sed -i -e '/gplayImplementation(.*) {/,/}/d; /gplayImplementation/d' build.gradle
+    build:
+      - cd $$jitsi-meet$$
+      - export LIBRE_BUILD=true
+      - npm install webpack-bundle-analyzer
+      - npm install
+      - mkdir -p "$HOME/.m2"
+      - bash android/scripts/release-sdk.sh "$HOME/.m2/repository"
+      - mkdir -p "$HOME/.m2/repository/org/webkit"
+      - cp -r node_modules/jsc-android/dist/org/webkit/android-jsc "$HOME/.m2/repository/org/webkit"
+    ndk: r21d
 
 AutoUpdateMode: Version sc_v%v
 UpdateCheckMode: Tags
