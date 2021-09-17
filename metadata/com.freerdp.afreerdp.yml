@@ -170,15 +170,30 @@ Builds:
       - popd
     ndk: r21e
 
+  - versionName: 2.4.0
+    versionCode: 23
+    commit: 2.4.0
+    subdir: client/Android/Studio/aFreeRDP
+    gradle:
+      - yes
+    build:
+      - $$SDK$$/tools/bin/sdkmanager 'cmake;3.10.2.4988404'
+      - sed -i -e 's/WITH_OPENH264=1/WITH_OPENH264=0/' ../../../../scripts/android-build-release.conf
+      - ../../../../scripts/android-build-freerdp.sh --ndk $$NDK$$ --sdk $$SDK$$ --conf
+        ../../../../scripts/android-build-release.conf
+      - sed -i '/VERSION_CODE/s/22/23/' ../build.gradle
+    ndk: r21e
+
 MaintainerNotes: |-
     * Keep OpenH264 at 1.8.0 as the newer versions have issues with reference frames and
       the H264 data sent by microsoft RDP servers.
     * OpenH264 need maximum NDK r15c, so we assume that is available on the buildserver
       next to the one we are using in the rest of the build
+    * Android dropped support for r15c, so since 2.4.0 we need disable OpenH264 support
+      until the prolem mentioned above is solved.
     * Need to update NDK target to 21 for tmerfd_create
-    * The build script argument passing is buggy, provide NDK and SDK via environment too
 
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: 2.3.2
-CurrentVersionCode: 22
+CurrentVersion: 2.4.0
+CurrentVersionCode: 23
