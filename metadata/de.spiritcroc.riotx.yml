@@ -647,7 +647,38 @@ Builds:
       - cp -r node_modules/jsc-android/dist/org/webkit/android-jsc "$HOME/.m2/repository/org/webkit"
     ndk: r21d
 
+  - versionName: 1.2.2.sc44
+    versionCode: 40100660
+    commit: f97549073e1d0933c4c59e614dcab938e9a0c2c2
+    subdir: vector
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y -t stretch-backports npm jq openjdk-11-jdk-headless openjdk-11-jre-headless
+      - update-alternatives --auto java
+      - sysctl fs.inotify.max_user_watches=524288
+      - sysctl -p
+    gradle:
+      - fdroid
+    srclibs:
+      - jitsi-meet@android-sdk-3.1.0
+    prebuild:
+      - sed -i -e '/com.google.gms.google-services/d' build.gradle ../build.gradle
+      - sed -i -e 's/enable true/enable false/g' build.gradle
+      - sed -i -e '/Jitsi repo/,/}/d' ../build.gradle
+      - sed -i -e '/google()/a\        mavenLocal()' ../build.gradle
+      - sed -i -e '/gplayImplementation(.*) {/,/}/d; /gplayImplementation/d' build.gradle
+    build:
+      - cd $$jitsi-meet$$
+      - export LIBRE_BUILD=true
+      - npm install webpack-bundle-analyzer
+      - npm install
+      - mkdir -p "$HOME/.m2"
+      - bash android/scripts/release-sdk.sh "$HOME/.m2/repository"
+      - mkdir -p "$HOME/.m2/repository/org/webkit"
+      - cp -r node_modules/jsc-android/dist/org/webkit/android-jsc "$HOME/.m2/repository/org/webkit"
+    ndk: r21d
+
 AutoUpdateMode: Version sc_v%v
 UpdateCheckMode: Tags
-CurrentVersion: 1.2.2.sc43
-CurrentVersionCode: 40100650
+CurrentVersion: 1.2.2.sc44
+CurrentVersionCode: 40100660
