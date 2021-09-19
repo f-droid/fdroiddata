@@ -2102,12 +2102,18 @@ Builds:
     output: green/build/outputs/apk/production/release/*.apk
     srclibs:
       - cpython@v3.9.6
+      - rustup@1.24.3
     prebuild: sed -i -e 's/-p python3/-p python3.9/' crypto/prepare_gdk_clang.sh
     scanignore:
       - app/src/main/assets/production/checkpoints
     scandelete:
       - app/src/main/assets/btctestnet/checkpoints
     build:
+      - $$rustup$$/rustup-init.sh -y
+      - source $HOME/.cargo/env
+      - rustup install 1.49.0
+      - rustup target add aarch64-linux-android armv7-linux-androideabi x86_64-linux-android
+        i686-linux-android
       - cd crypto
       - JAVA_HOME=$(readlink -f /usr/bin/javac | sed "s:/bin/javac::") PATH=$HOME/.local/bin:$PATH
         ./prepare_gdk_clang.sh
@@ -2116,7 +2122,11 @@ Builds:
 MaintainerNotes: |-
     Watch prepare_gdk_clang.sh for changes on new builds.
 
-    The two files app/src/main/assets/btctestnet/checkpoints and app/src/main/assets/production/checkpoints are hashes of the blocks of the respective chains (testnet3 and mainnet) and are re-generated ad-hoc occasionally by using the tool ./buildCheckpoints.sh inside the repo while having a bitcoin full node for each chain runnin on localhost. They are used to speed up SPV verification when possible and they can be verified independently by checking each hash against the blockchain.
+    The two files app/src/main/assets/btctestnet/checkpoints and app/src/main/assets/production/checkpoints
+    are hashes of the blocks of the respective chains (testnet3 and mainnet) and are re-generated ad-hoc
+    occasionally by using the tool ./buildCheckpoints.sh inside the repo while having a bitcoin full node
+    for each chain runnin on localhost. They are used to speed up SPV verification when possible and they
+    can be verified independently by checking each hash against the blockchain.
 
 AutoUpdateMode: Version release_%v
 UpdateCheckMode: Tags
