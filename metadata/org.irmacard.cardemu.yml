@@ -203,10 +203,43 @@ Builds:
       - $$flutter$$/bin/flutter build apk --flavor beta
     ndk: r21e
 
+  - versionName: 6.2.1
+    versionCode: 134
+    commit: v6.2.1
+    submodules: true
+    output: build/app/outputs/flutter-apk/app-beta-release.apk
+    srclibs:
+      - flutter@2.2.3
+    rm:
+      - ios
+      - test
+      - .idea
+      - .reuse
+      - .vscode
+      - irmagobridge/mock_export
+      - irmagobridge/structodart
+    prebuild: $$SDK$$/tools/bin/sdkmanager 'platforms;android-28' 'build-tools;28.0.3'
+        > /dev/null
+    build:
+      - curl -Lso go.tar.gz https://golang.org/dl/go1.17.1.linux-amd64.tar.gz
+      - echo "dab7d9c34361dc21ec237d584590d72500652e7c909bf082758fb63064fca0ef  go.tar.gz"
+        | sha256sum -c
+      - mkdir -p golang gopath
+      - tar -C golang -xzf go.tar.gz
+      - export GOPATH="$PWD/gopath"
+      - export PATH="$PWD/golang/go/bin:$PWD/gopath/bin:$PATH"
+      - GO111MODULE=off go get golang.org/x/mobile/cmd/gomobile
+      - GO111MODULE=off gomobile init
+      - gomobile bind -target android -o android/irmagobridge/irmagobridge.aar github.com/privacybydesign/irmamobile/irmagobridge
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+      - $$flutter$$/bin/flutter build apk --flavor beta
+    ndk: r21e
+
 MaintainerNotes: uses Sentry.io configured as opt-in
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v.*$
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 6.2.0
-CurrentVersionCode: 133
+CurrentVersion: 6.2.1
+CurrentVersionCode: 134
