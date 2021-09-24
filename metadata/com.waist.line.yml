@@ -474,21 +474,26 @@ Builds:
   - versionName: 3.1.7
     versionCode: 30107
     commit: 44ddec1b74d858dc97eb8f8ead0e1e10147dbc8d
-    subdir: platforms/android/app
-    gradle:
-      - yes
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -t testing nodejs npm
+      - npm install -g cordova
+    output: platforms/android/app/build/outputs/apk/release/app-release-unsigned.apk
     srclibs:
       - BarcodeScanner@0fc1fd2ff00683d2a2803ba6da63320bcb29fd2c
-    rm:
+    prebuild: sed -i -e '/gradleVersion/d' platforms/android/app/build.gradle
+    scandelete:
       - platforms/android/app/libs/barcodescanner-release-2.1.5.aar
-    prebuild: sed -i -e '/gradleVersion/d' build.gradle
     build:
+      - npm install
+      - cordova platform add android
       - pushd $$BarcodeScanner$$
       - rm local.properties
       - gradle clean assembleRelease
       - popd
       - cp $$BarcodeScanner$$/barcodescanner/build/outputs/aar/barcodescanner-release.aar
-        libs/barcodescanner-release-2.1.5.aar
+        platforms/android/app/libs/barcodescanner-release-2.1.5.aar
+      - cordova build android --release
 
 AutoUpdateMode: None
 UpdateCheckMode: None
