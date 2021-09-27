@@ -60,9 +60,81 @@ Builds:
       - cp mobilecore-src/mobilecore.aar mobilecore/
     ndk: r20b
 
+  - versionName: 2.3.0
+    versionCode: 2161
+    commit: verifier-foss-2.3.0
+    subdir: verifier
+    submodules: true
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y openjdk-11-jdk
+      - update-alternatives --auto java
+    gradle:
+      - prod
+    prebuild: JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 $$SDK$$/tools/bin/sdkmanager
+        'platforms;android-30' 'build-tools;30.0.2' > /dev/null
+    build:
+      - cd ..
+      - mkdir -p ../tmp-go
+      - pushd ../tmp-go
+      - if [ ! -e golang ]; then wget -O go.tar.gz -- https://dl.google.com/go/go1.16.7.linux-amd64.tar.gz
+      - printf '349f846599ca816f95f57adc41f789fdd6ade0ffcd325076de4fc3dcf06c72ae1474170ed5760e505a54a3ab10b1aa65d127f14a63cba27dec6672a1bcd2fbc6  go.tar.gz\n'
+        | sha512sum -c
+      - tar xzf go.tar.gz
+      - mv go golang; fi
+      - export GOPATH="$PWD"
+      - export GO_LANG="$PWD/golang/bin"
+      - export GO_COMPILED="$PWD/bin"
+      - export PATH="$GO_LANG:$GO_COMPILED:$PATH"
+      - popd
+      - cd mobilecore-src
+      - go get golang.org/x/mobile/cmd/gomobile
+      - go get golang.org/x/mobile/cmd/gobind@latest
+      - gomobile init
+      - gomobile bind -target android -o mobilecore.aar github.com/minvws/nl-covid19-coronacheck-mobile-core
+      - cd ..
+      - cp mobilecore-src/mobilecore.aar mobilecore/
+    ndk: r20b
+
+  - versionName: 2.3.1
+    versionCode: 2162
+    commit: verifier-foss-2.3.1
+    subdir: verifier
+    submodules: true
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y openjdk-11-jdk
+      - update-alternatives --auto java
+    gradle:
+      - prod
+    prebuild: JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 $$SDK$$/tools/bin/sdkmanager
+        'platforms;android-30' 'build-tools;30.0.2' > /dev/null
+    build:
+      - cd ..
+      - mkdir -p ../tmp-go
+      - pushd ../tmp-go
+      - if [ ! -e golang ]; then wget -O go.tar.gz -- https://dl.google.com/go/go1.16.7.linux-amd64.tar.gz
+      - printf '349f846599ca816f95f57adc41f789fdd6ade0ffcd325076de4fc3dcf06c72ae1474170ed5760e505a54a3ab10b1aa65d127f14a63cba27dec6672a1bcd2fbc6  go.tar.gz\n'
+        | sha512sum -c
+      - tar xzf go.tar.gz
+      - mv go golang; fi
+      - export GOPATH="$PWD"
+      - export GO_LANG="$PWD/golang/bin"
+      - export GO_COMPILED="$PWD/bin"
+      - export PATH="$GO_LANG:$GO_COMPILED:$PATH"
+      - popd
+      - cd mobilecore-src
+      - go get golang.org/x/mobile/cmd/gomobile
+      - go get golang.org/x/mobile/cmd/gobind@latest
+      - gomobile init
+      - gomobile bind -target android -o mobilecore.aar github.com/minvws/nl-covid19-coronacheck-mobile-core
+      - cd ..
+      - cp mobilecore-src/mobilecore.aar mobilecore/
+    ndk: r20b
+
 MaintainerNotes: versionCode == $GITHUB_RUN_NUMBER
 
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: 2.2.0
-CurrentVersionCode: 2046
+CurrentVersion: 2.3.0
+CurrentVersionCode: 2161
