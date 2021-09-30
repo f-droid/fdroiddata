@@ -2154,6 +2154,41 @@ Builds:
         ./prepare_gdk_clang.sh
     ndk: r19c
 
+  - versionName: 3.7.3
+    versionCode: 22000373
+    commit: a2ce021d7752fe489314728ef6a6e25225aecb5d
+    timeout: 25200
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y build-essential clang jq libffi-dev virtualenv openjdk-11-jdk
+      - update-alternatives --auto java
+      - pushd build/srclib/cpython
+      - ./configure
+      - make -j`nproc`
+      - make altinstall
+      - popd
+    gradle:
+      - production
+    output: green/build/outputs/apk/production/release/*.apk
+    srclibs:
+      - cpython@v3.9.6
+      - rustup@1.24.3
+    prebuild: sed -i -e 's/-p python3/-p python3.9/' crypto/prepare_gdk_clang.sh
+    scanignore:
+      - app/src/main/assets/production/checkpoints
+    scandelete:
+      - app/src/main/assets/btctestnet/checkpoints
+    build:
+      - $$rustup$$/rustup-init.sh -y
+      - source $HOME/.cargo/env
+      - rustup install 1.49.0
+      - rustup target add aarch64-linux-android armv7-linux-androideabi x86_64-linux-android
+        i686-linux-android
+      - cd crypto
+      - JAVA_HOME=$(readlink -f /usr/bin/javac | sed "s:/bin/javac::") PATH=$HOME/.local/bin:$PATH
+        ./prepare_gdk_clang.sh
+    ndk: r19c
+
 MaintainerNotes: |-
     Watch prepare_gdk_clang.sh for changes on new builds.
 
@@ -2166,5 +2201,5 @@ MaintainerNotes: |-
 AutoUpdateMode: Version release_%v
 UpdateCheckMode: Tags
 VercodeOperation: 22000000 + %c
-CurrentVersion: 3.7.2
-CurrentVersionCode: 22000372
+CurrentVersion: 3.7.3
+CurrentVersionCode: 22000373
