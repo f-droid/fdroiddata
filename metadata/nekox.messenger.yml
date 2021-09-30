@@ -375,8 +375,88 @@ Builds:
       - ./run fdroid build
     ndk: r21e
 
+  - versionName: 8.1.1-arm
+    versionCode: 419
+    commit: v8.1.1
+    timeout: 10800
+    subdir: TMessagesProj
+    submodules: true
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y ninja-build openjdk-11-jdk-headless
+      - update-alternatives --auto java
+    gradle:
+      - miniFdroidArm
+    output: build/outputs/apk/mini/*/*.apk
+    prebuild:
+      - wget -O /tmp/cmdline-tools.zip -t 5 "https://dl.google.com/android/repository/commandlinetools-linux-7583922_latest.zip"
+      - echo "124f2d5115eee365df6cf3228ffbca6fc3911d16f8025bebd5b1c6e2fcfa7faf /tmp/cmdline-tools.zip"  |
+        sha256sum -c -
+      - unzip -q -o /tmp/cmdline-tools.zip -d /tmp/cmdline-tools
+      - rm /tmp/cmdline-tools.zip
+      - mkdir -p ${ANDROID_SDK_ROOT}/cmdline-tools/tools
+      - mv /tmp/cmdline-tools/cmdline-tools/* ${ANDROID_SDK_ROOT}/cmdline-tools/tools
+        || true
+      - export PATH=${ANDROID_SDK_ROOT}/cmdline-tools/tools/bin:${PATH}
+      - yes | sdkmanager --licenses
+      - yes | sdkmanager --update
+      - sdkmanager "build-tools;30.0.3" "build-tools;31.0.0" "platforms;android-31"
+      - pushd ..
+      - ./run fdroid prebuild
+    scandelete:
+      - TMessagesProj
+    build:
+      - export NINJA_PATH=/usr/bin/ninja
+      - pushd ..
+      - ./run fdroid build
+      - source bin/init/env.sh
+      - go clean -cache
+      - git rev-parse HEAD
+      - git gc --prune=now
+    ndk: r21e
+
+  - versionName: 8.1.1-arm64
+    versionCode: 420
+    commit: v8.1.1
+    timeout: 10800
+    subdir: TMessagesProj
+    submodules: true
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y ninja-build openjdk-11-jdk-headless
+      - update-alternatives --auto java
+    gradle:
+      - miniFdroidArm64
+    output: build/outputs/apk/mini/*/*.apk
+    prebuild:
+      - wget -O /tmp/cmdline-tools.zip -t 5 "https://dl.google.com/android/repository/commandlinetools-linux-7583922_latest.zip"
+      - echo "124f2d5115eee365df6cf3228ffbca6fc3911d16f8025bebd5b1c6e2fcfa7faf /tmp/cmdline-tools.zip"  |
+        sha256sum -c -
+      - unzip -q -o /tmp/cmdline-tools.zip -d /tmp/cmdline-tools
+      - rm /tmp/cmdline-tools.zip
+      - mkdir -p ${ANDROID_SDK_ROOT}/cmdline-tools/tools
+      - mv /tmp/cmdline-tools/cmdline-tools/* ${ANDROID_SDK_ROOT}/cmdline-tools/tools
+        || true
+      - export PATH=${ANDROID_SDK_ROOT}/cmdline-tools/tools/bin:${PATH}
+      - yes | sdkmanager --licenses
+      - yes | sdkmanager --update
+      - sdkmanager "build-tools;30.0.3" "build-tools;31.0.0" "platforms;android-31"
+      - pushd ..
+      - ./run fdroid prebuild
+    scandelete:
+      - TMessagesProj
+    build:
+      - export NINJA_PATH=/usr/bin/ninja
+      - pushd ..
+      - ./run fdroid build
+      - source bin/init/env.sh
+      - go clean -cache
+      - git rev-parse HEAD
+      - git gc --prune=now
+    ndk: r21e
+
 ArchivePolicy: 6 versions
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: 7.8.0-1-arm64
-CurrentVersionCode: 340
+CurrentVersion: 8.1.1-arm64
+CurrentVersionCode: 420
