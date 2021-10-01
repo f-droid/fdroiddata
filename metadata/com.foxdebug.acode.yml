@@ -146,8 +146,44 @@ Builds:
       - cd platforms/android/app
       - gradle assembleRelease
 
+  - versionName: 1.4.164
+    versionCode: 164
+    commit: 12d7c6cc1932b5d2879022db111b4eecf2ddedf9
+    sudo:
+      - sysctl fs.inotify.max_user_watches=524288
+      - curl -Lo node.tar.xz https://nodejs.org/dist/v14.17.6/node-v14.17.6-linux-x64.tar.xz
+      - echo "3bbe4faf356738d88b45be222bf5e858330541ff16bd0d4cfad36540c331461b node.tar.xz"
+        | sha256sum -c -
+      - tar xJf node.tar.xz --strip-components=1 -C /usr/local/
+      - npm install -g npm@latest
+      - npm install -g cordova
+    output: platforms/android/app/build/outputs/apk/release/app-release-unsigned.apk
+    srclibs:
+      - ftp4j@86
+    rm:
+      - test
+    prebuild:
+      - sed -i -e '/const promotion/,/^  });/d' src/lib/main.js
+      - npm install
+      - ./node_modules/.bin/webpack
+      - cordova platform add android
+      - sed -i -e '/signingConfig signingConfigs.release/d' -e '/gms/d' -e '/core-google-shortcuts/d'
+        platforms/android/app/build.gradle
+    scandelete:
+      - src/plugins
+      - platforms/android
+      - plugins
+    build:
+      - pushd $$ftp4j$$/tags/1.7.2
+      - sed -i -e 's/else="rv\${revision}"/else="1.7.2"/' build.xml
+      - ant jar
+      - popd
+      - cp $$ftp4j$$/tags/1.7.2/ftp4j-1.7.2.jar platforms/android/app/libs/
+      - cd platforms/android/app
+      - gradle assembleRelease
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: config.xml|android-versionCode="(\d+)"|.|version="([\d.]+)"
-CurrentVersion: 1.4.159
-CurrentVersionCode: 159
+CurrentVersion: 1.4.164
+CurrentVersionCode: 164
