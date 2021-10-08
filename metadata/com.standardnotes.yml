@@ -1654,7 +1654,6 @@ Builds:
 
   - versionName: 3.6.24
     versionCode: 3000304
-    disable: patch doesn't apply
     commit: 3.6.24
     subdir: android/app/
     sudo:
@@ -1670,7 +1669,7 @@ Builds:
       - yarn cache clean snjs
       - npm_config_build_from_source=true yarn --force
     patch:
-      - bugsnag-3.6.11.patch
+      - bugsnag-3.6.24.patch
     gradle:
       - prod
     srclibs:
@@ -1702,28 +1701,10 @@ Builds:
       - target_sdk_version=`sed -n -E 's/.*targetSdkVersion = ([0-9]{1,2}).*/\1/p'
         ../build.gradle`
       - pushd $$libsodium$$
-      - CC="$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin/armv7a-linux-androideabi${target_sdk_version}-clang"
-        CFLAGS="-Os -fPIC -mfloat-abi=softfp -mfpu=vfpv3-d16 -mthumb -marm -march=armv7-a"
-        ./configure --prefix=${lib}/libsodium-android-armv7-a/ --host=arm-linux-androideabi
-      - make -j${nproc}
-      - make install
-      - make distclean
-      - CC="$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android${target_sdk_version}-clang"
-        CFLAGS="-fPIC -O2" ./configure --prefix=${lib}/libsodium-android-armv8-a/
-        --host=aarch64-linux-android
-      - make -j${nproc}
-      - make install
-      - make distclean
-      - CC="$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin/i686-linux-android${target_sdk_version}-clang"
-        CFLAGS="-fPIC -O2" ./configure --prefix=${lib}/libsodium-android-i686/ --host=i686-linux-android
-      - make -j${nproc}
-      - make install
-      - make distclean
-      - CC="$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin/x86_64-linux-android${target_sdk_version}-clang"
-        CFLAGS="-fPIC -O2" ./configure --prefix=${lib}/libsodium-android-westmere/
-        --host=x86_64-linux-android
-      - make -j${nproc}
-      - make install
+      - ./dist-build/android-armv7-a.sh
+      - ./dist-build/android-armv8-a.sh
+      - ./dist-build/android-x86.sh
+      - ./dist-build/android-x86_64.sh
       - popd
     ndk: r21e
 
