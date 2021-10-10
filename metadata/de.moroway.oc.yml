@@ -140,10 +140,18 @@ Builds:
 
   - versionName: 7.2.4
     versionCode: 70204
+    disable: https://github.com/MOROway/moroway-app-oc/issues/2
     commit: a36ec8a26c4dc40795989fabed0ae78ace63353f
-    subdir: platforms/android/app
-    gradle:
-      - yes
+    sudo:
+      - sysctl fs.inotify.max_user_watches=524288
+      - curl -Lo node.tar.xz https://nodejs.org/dist/v14.17.6/node-v14.17.6-linux-x64.tar.xz
+      - echo "3bbe4faf356738d88b45be222bf5e858330541ff16bd0d4cfad36540c331461b node.tar.xz"
+        | sha256sum -c -
+      - tar xJf node.tar.xz --strip-components=1 -C /usr/local/
+      - npm install -g npm@latest
+      - npm install -g cordova
+    output: platforms/android/app/build/outputs/apk/release/app-release-unsigned.apk
+    build: cordova build android --release
 
 AutoUpdateMode: Version v%v
 UpdateCheckMode: Tags
