@@ -59,7 +59,56 @@ Builds:
       - ./buildall.sh
     ndk: r22
 
+  - versionName: 2021-10-10-release
+    versionCode: 25
+    commit: mpv-android-2021-10-10
+    subdir: app
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y openjdk-11-jdk-headless ninja-build
+      - update-alternatives --auto java
+      - pip3 install wheel
+      - pip3 install meson
+    gradle:
+      - yes
+    srclibs:
+      - mbedtls@v2.27.0
+      - dav1d@f52aee04fbd711cddab23d0aa9b196e9c963e7b8
+      - FFmpeg@d115eec97929e23fd1b06df2d95f48cf5000eb87
+      - freetype2@VER-2-11-0
+      - fribidi@v1.0.10
+      - harfbuzz@2.9.0
+      - libass@7bf4bee0fc9a1d6257a105a3c19df6cf08733f8e
+      - mpv@564f3dba56f3b05e913ef7c10604cccd9e7f8d16
+    prebuild:
+      - cd ../buildscripts/
+      - mkdir -p sdk
+      - ln -s $$NDK$$ sdk/android-ndk-r23
+      - mkdir -p deps
+      - pushd deps/
+      - cp -r $$mbedtls$$ mbedtls
+      - cp -r $$dav1d$$ dav1d
+      - cp -r $$FFmpeg$$ ffmpeg
+      - cp -r $$freetype2$$ freetype2
+      - cp -r $$fribidi$$ fribidi
+      - cp -r $$harfbuzz$$ harfbuzz
+      - cp -r $$libass$$ libass
+      - mkdir lua
+      - wget https://www.lua.org/ftp/lua-5.2.4.tar.gz -O - | tar -xz --strip-components=1
+        -C lua
+      - cp -r $$mpv$$ mpv
+      - popd
+      - sed -i -e '/gradlew/d' scripts/mpv-android.sh
+      - sed -i -e '/"$target" == "mpv-android"/,/ls -lh/d' buildall.sh
+    scandelete:
+      - buildscripts/deps/mbedtls/
+    build:
+      - cd ../buildscripts/
+      - ./buildall.sh --arch arm64 mpv
+      - ./buildall.sh
+    ndk: r23
+
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: 2021-03-10-release
-CurrentVersionCode: 24
+CurrentVersion: 2021-10-10-release
+CurrentVersionCode: 25
