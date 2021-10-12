@@ -140,7 +140,6 @@ Builds:
 
   - versionName: 7.2.4
     versionCode: 70204
-    disable: https://github.com/MOROway/moroway-app-oc/issues/2
     commit: a36ec8a26c4dc40795989fabed0ae78ace63353f
     sudo:
       - sysctl fs.inotify.max_user_watches=524288
@@ -151,7 +150,12 @@ Builds:
       - npm install -g npm@latest
       - npm install -g cordova
     output: platforms/android/app/build/outputs/apk/release/app-release-unsigned.apk
-    build: cordova build android --release
+    prebuild: $$SDK$$/tools/bin/sdkmanager 'platforms;android-30' 'build-tools;30.0.3'
+        > /dev/null
+    build:
+      - rm -rf platforms
+      - cordova platform add android@10.1.1
+      - cordova build android --release -- --packageType=apk
 
 AutoUpdateMode: Version v%v
 UpdateCheckMode: Tags
