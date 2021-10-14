@@ -1464,6 +1464,43 @@ Builds:
       - echo 'package com.newsblur.activity;public class Premium extends NbActivity{}'
         > src/com/newsblur/activity/Premium.java
 
+  - versionName: 11.1.1
+    versionCode: 196
+    commit: 82ff87481b656cc12e29a2627860f8e47d18a647
+    subdir: clients/android/NewsBlur
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y openjdk-11-jdk-headless
+      - update-alternatives --auto java
+    gradle:
+      - yes
+    rm:
+      - api
+      - apps
+      - clients/ios
+      - config
+      - docker
+      - documents
+      - flask_monitor
+      - logs
+      - media
+      - newsblur_web
+      - node
+      - perf
+      - templates
+      - terraform
+      - utils
+      - vendor
+      - '[_a-z]*.*'
+      - clients/android/NewsBlur/libs/*.jar
+      - clients/android/NewsBlur/buildtools/*.jar
+    prebuild:
+      - sed -i -e '/com.google.android.play/d' -e '/billingclient/d' build.gradle
+      - sed -i -e '/play.core/d' -e '/void checkInAppReview/,/^    }/d' -e '/checkInAppReview/d'
+        -e '/void onBackPressed/a super.onBackPressed();}' -e '/reviewInfo != null/,/^    }/d'
+        -e '/Review/d' src/com/newsblur/activity/FeedItemsList.java
+      - echo 'package com.newsblur.activity;class Premium:NbActivity() {}' > src/com/newsblur/activity/Premium.kt
+
 AutoUpdateMode: None
 UpdateCheckMode: RepoManifest
 CurrentVersion: 11.1.1
