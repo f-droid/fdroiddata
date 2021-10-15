@@ -1,0 +1,40 @@
+Categories:
+  - Multimedia
+License: MIT
+AuthorName: MATHEMA GmbH
+AuthorEmail: mobile@mathema.de
+AuthorWebSite: https://www.mathema.de/
+WebSite: https://privacyblur.app/
+SourceCode: https://github.com/MATHEMA-GmbH/privacyblur
+IssueTracker: https://github.com/MATHEMA-GmbH/privacyblur/issues
+Translation: https://github.com/MATHEMA-GmbH/privacyblur#internationalization
+
+AutoName: PrivacyBlur
+
+RepoType: git
+Repo: https://github.com/MATHEMA-GmbH/privacyblur
+
+Builds:
+  - versionName: 2.1.2-foss
+    versionCode: 37
+    commit: c50c45f061e260f02afc022037a2882f7668d231
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y openjdk-11-jdk
+      - update-alternatives --auto java
+    output: build/app/outputs/flutter-apk/app-foss-release.apk
+    srclibs:
+      - flutter@2.5.2
+    rm:
+      - ios
+    prebuild: echo "flutter.sdk=$$flutter$$" >> ../local.properties
+    build:
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter packages pub get
+      - $$flutter$$/bin/flutter build apk --flavor foss -t lib/main-foss.dart
+
+AutoUpdateMode: Version +-foss v%v
+UpdateCheckMode: Tags
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 2.1.2-foss
+CurrentVersionCode: 37
