@@ -223,22 +223,58 @@ Builds:
       - gradle -Pcompile_sdk_version=29 -Pbuild_tools_ver=29.0.3 assembleRelease
     ndk: r20b
 
+  - versionName: '1.3'
+    versionCode: 298
+    commit: ec1775ebedb9cfa41b8099f980325271f80a007b
+    subdir: android
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get remove nasm
+      - apt-get install -y advancecomp imagemagick libjpeg-progs libogg-dev pngquant
+        vorbis-tools yasm
+      - apt-get install -y -t stretch-backports-sloppy libarchive13
+      - apt-get install -y -t stretch-backports cmake
+    output: build/outputs/apk/release/android-release-unsigned.apk
+    prebuild:
+      - sed -i -e 's#./gradlew#gradle#' -e '/Check\ if\ we\ have\ key/,+25d' -e '/ANDROID_HOME/,+9d'
+        -e 's/bundleRelease/assembleRelease/' make.sh
+      - sed -i -e '/keystore/,+3d' build.gradle
+      - sed -i -e 's#../../stk-assets#stk-assets#' generate_assets.sh
+      - wget https://github.com/supertuxkart/stk-assets-mobile/releases/download/$$VERSION$$/stk-assets-full.zip
+      - echo 'cf540c3f459cab32c6fb194808a342a294422fe63f17c3c2486e06dd7565c4e8  stk-assets-full.zip'
+        | sha256sum -c -
+      - unzip stk-assets-full.zip -d stk-assets
+      - wget https://github.com/supertuxkart/dependencies/releases/download/$$VERSION$$/dependencies-android-src.tar.xz
+      - echo '9e2f6273cdc8e782e2a1f17df0d4e2a2a4385396433b8a71f420b6c359ab5612  dependencies-android-src.tar.xz'
+        | sha256sum -c -
+      - tar -C '../lib' -xf dependencies-android-src.tar.xz
+    scanignore:
+      - android/stk-assets/textures/
+    scandelete:
+      - android/stk-assets-full.zip
+      - lib/curl/tests
+      - lib/harfbuzz/test/
+      - lib/mbedtls/programs/fuzz/corpuses/*
+      - lib/mbedtls/tests/data_files/hash_file_*
+      - lib/sdl2/Xcode/SDL/pkg-support/resources/SDL_DS_Store
+    build:
+      - export BUILD_TYPE=release
+      - export COMPILE_ARCH=all
+      - export SDK_PATH=$$SDK$$
+      - export NDK_PATH=$$NDK$$
+      - export PROJECT_VERSION=$$VERSION$$
+      - export PROJECT_CODE=$$VERCODE$$
+      - ./generate_assets.sh
+      - ./make_deps.sh
+      - ./make.sh
+    ndk: r20b
+
 MaintainerNotes: |-
-    We remove the gradle steps from make.sh so we can run it only after *all* the arches are build.
-
-    We need to regenerate the assets after clean up and before make for each arch.
-
-    make.sh has a '()' bashism so we explicitely use bash to run in.
-
-    make.sh needs to clean up before building each arch so we save the built libs first and bring them back right before gradle is run.
-
-    The resulting APK is 112Mb per arch, but per arch lib is only 10-20Mb so either we have 4 APKs (one per arch) each 112Mbs (3 versions mean 12 APKs, right?_or one for all at 140Mb.
+    The resulting APK is ~118Mb per arch, but per arch lib is only 10-20Mb so either we have 4 APKs (one per arch) each 118Mb (3 versions means 12 APKs!) or one for all at ~145Mb.
 
     Upstream sets the version manually during the build so we can't enable auto update.
 
-    Starting with 1.1, git-svn crashes when cloning the assets repository, so we have to use a Zip archive instead.
-
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: '1.2'
-CurrentVersionCode: 205
+CurrentVersion: '1.3'
+CurrentVersionCode: 298
