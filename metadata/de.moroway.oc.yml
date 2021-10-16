@@ -140,6 +140,7 @@ Builds:
 
   - versionName: 7.2.4
     versionCode: 70204
+    disable: fatal error on start
     commit: a36ec8a26c4dc40795989fabed0ae78ace63353f
     sudo:
       - sysctl fs.inotify.max_user_watches=524288
@@ -154,10 +155,28 @@ Builds:
         > /dev/null
     build:
       - rm -rf platforms
-      - cordova platform add android@10.1.1
+      - cordova platform add android
       - cordova build android --release -- --packageType=apk
 
-AutoUpdateMode: Version v%v
-UpdateCheckMode: Tags
-CurrentVersion: 7.2.4
-CurrentVersionCode: 70204
+  - versionName: 7.2.5
+    versionCode: 70205
+    commit: 4a0ef4d493090d652b8d964f0b98621e888ec7c7
+    sudo:
+      - sysctl fs.inotify.max_user_watches=524288
+      - curl -Lo node.tar.xz https://nodejs.org/dist/v14.17.6/node-v14.17.6-linux-x64.tar.xz
+      - echo "3bbe4faf356738d88b45be222bf5e858330541ff16bd0d4cfad36540c331461b node.tar.xz"
+        | sha256sum -c -
+      - tar xJf node.tar.xz --strip-components=1 -C /usr/local/
+      - npm install -g npm@latest
+      - npm install -g cordova
+    output: platforms/android/app/build/outputs/apk/release/app-release-unsigned.apk
+    prebuild: $$SDK$$/tools/bin/sdkmanager 'platforms;android-30' 'build-tools;30.0.3'
+        > /dev/null
+    build:
+      - cordova platform add android
+      - cordova build android --release -- --packageType=apk
+
+AutoUpdateMode: None
+UpdateCheckMode: None
+CurrentVersion: 7.2.5
+CurrentVersionCode: 70205
