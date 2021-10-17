@@ -1,0 +1,56 @@
+Categories:
+  - Internet
+License: GPL-3.0-or-later
+AuthorName: nekohasekai
+AuthorEmail: sekai@neko.services
+SourceCode: https://github.com/XTLS/AnXray
+IssueTracker: https://github.com/XTLS/AnXray/issues
+
+AutoName: AnXray
+Summary: A universal proxy toolchain with XTLS support
+Description: |-
+    * Full basic features
+    * Xray WebSocket browser dialer
+    * Option to change the notification update interval
+    * A Chinese apps scanner (based on dex classpath scanning, so it may be slower)
+    * Proxy chain
+    * Balancer
+    * Advanced routing with outbound profile selection
+    * Reverse proxy
+    * Custom config (Xray / Trojan-Go)
+    * Traffic statistics support, including real-time display and cumulative statistics
+    * Foreground status based routing support
+
+RepoType: git
+Repo: https://github.com/XTLS/AnXray
+
+Builds:
+  - versionName: 0.4-rc06
+    versionCode: 175
+    commit: fa74109c00f8f333d8185d886c4667a8beb490f3
+    subdir: app
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y openjdk-11-jdk-headless
+      - update-alternatives --auto java
+    patch:
+      - disable-splits-abi.patch
+    gradle:
+      - fdroid
+    prebuild:
+      - pushd ..
+      - ./run fdroid prebuild
+    scandelete:
+      - library
+      - external
+    build:
+      - pushd ..
+      - ./run fdroid build
+    ndk: r21e
+
+AutoUpdateMode: Version %v
+UpdateCheckMode: Tags
+VercodeOperation: '%c * 5'
+UpdateCheckData: sager.properties|VERSION_CODE=(\d+)||
+CurrentVersion: 0.4-rc06
+CurrentVersionCode: 175
