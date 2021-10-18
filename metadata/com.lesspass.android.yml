@@ -216,6 +216,38 @@ Builds:
     scandelete:
       - mobile/node_modules/
 
+  - versionName: 9.3.0
+    versionCode: 90300
+    commit: mobile-v9.3.0
+    subdir: mobile/android/app/
+    sudo:
+      - curl -Lo node.tar.xz https://nodejs.org/dist/v14.18.1/node-v14.18.1-linux-x64.tar.xz
+      - echo "ad1e3baa1aee8028b43206da3b2be9b8867cb598b4318bc88a0ae4518cc062a2  node.tar.xz"
+        | sha256sum -c -
+      - tar xJf node.tar.xz
+      - cp -a node-v14.18.1-linux-x64/. /usr/local/
+      - npm -g install yarn
+    init: yarn install
+    gradle:
+      - yes
+    rm:
+      - mobile/node_modules/react-native/template/android/build.gradle
+    prebuild:
+      - sed -i -e 's#../package.json#../../package.json#' ../build.gradle
+      - sed -i -e '/enable enableSeparateBuildPerCPUArchitecture/d' build.gradle
+      - sed -i -e '/enableHermes/s/true/false/' build.gradle
+    scanignore:
+      - mobile/android/build.gradle
+      - mobile/node_modules/react-native/android/com/facebook/react/react-native
+      - mobile/node_modules/jsc-android/dist/org/webkit/android-jsc
+      - mobile/node_modules/react-native-screens/android/build.gradle
+      - mobile/node_modules/@react-native-community/async-storage/android/build.gradle
+      - mobile/node_modules/react-native-vector-icons/android/build.gradle
+      - mobile/node_modules/@react-native-community/masked-view/android/build.gradle
+      - mobile/node_modules/react-native-safe-area-context/android/build.gradle
+    scandelete:
+      - mobile/node_modules/
+
 MaintainerNotes: |-
     scanignore is used to allow the "node_modules/react-native/android" local Maven repository.
 
@@ -223,5 +255,5 @@ MaintainerNotes: |-
 
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: 9.1.9
-CurrentVersionCode: 90109
+CurrentVersion: 9.3.0
+CurrentVersionCode: 90300
