@@ -35,13 +35,13 @@ for f in files:
         print(Fore.RED + msg + Style.RESET_ALL)
         errors[f] = msg
         continue
+    if 'NoSourceSince' in data.keys():
+        continue
     url = data.get('Repo')
     if not url:
         msg = 'ERROR: %s: no Repo: set!' % f
         print(Fore.RED + msg + Style.RESET_ALL)
         errors[f] = msg
-        continue
-    if 'NoSourceSince' in data.keys():
         continue
     if data.get('RepoType') != 'git':
         continue
