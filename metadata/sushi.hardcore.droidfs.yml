@@ -130,14 +130,18 @@ Builds:
 
   - versionName: 1.6.0
     versionCode: 19
+    disable: need ndk r23
     commit: 26153d44b9aee926373704290d66ab963f9d0167
     subdir: app
     submodules: true
     sudo:
       - apt-get update || apt-get update
-      - apt-get install -y -t testing golang-go
       - apt-get install -y openjdk-11-jdk
       - update-alternatives --auto java
+      - curl -Lso go.tar.gz https://golang.org/dl/go1.16.4.linux-amd64.tar.gz
+      - echo "7154e88f5a8047aad4b80ebace58a059e36e7e2e4eb3b383127a28c711b4ff59 go.tar.gz"
+        | sha256sum -c -
+      - tar xzf go.tar.gz --strip-components=1 -C /usr/local/
     gradle:
       - yes
     output: build/outputs/apk/release/app-universal-release-unsigned.apk
@@ -148,7 +152,6 @@ Builds:
     build:
       - cd libgocryptfs
       - OPENSSL_PATH="$$OpenSSL$$" ./build.sh
-    ndk: r21e
 
 AutoUpdateMode: Version v%v
 UpdateCheckMode: Tags
