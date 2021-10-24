@@ -176,7 +176,26 @@ Builds:
       - cordova platform add android
       - cordova build android --release -- --packageType=apk
 
-AutoUpdateMode: None
-UpdateCheckMode: None
-CurrentVersion: 7.2.5
-CurrentVersionCode: 70205
+  - versionName: 7.3.0
+    versionCode: 70300
+    commit: bda1e810530cf005fa0c16619168df9a28ab615d
+    sudo:
+      - sysctl fs.inotify.max_user_watches=524288
+      - curl -Lo node.tar.xz https://nodejs.org/dist/v14.17.6/node-v14.17.6-linux-x64.tar.xz
+      - echo "3bbe4faf356738d88b45be222bf5e858330541ff16bd0d4cfad36540c331461b node.tar.xz"
+        | sha256sum -c -
+      - tar xJf node.tar.xz --strip-components=1 -C /usr/local/
+      - npm install -g npm@latest
+      - npm install -g cordova
+    output: platforms/android/app/build/outputs/apk/release/app-release-unsigned.apk
+    prebuild: $$SDK$$/tools/bin/sdkmanager 'platforms;android-30' 'build-tools;30.0.3'
+        > /dev/null
+    build:
+      - cordova platform add android
+      - cordova build android --release -- --packageType=apk
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: fdroid_version.txt|.+,(\d+)|.|(.+),\d+
+CurrentVersion: 7.3.0
+CurrentVersionCode: 70300
