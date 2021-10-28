@@ -169,7 +169,36 @@ Builds:
       - gradle publishToMavenLocal
       - popd
 
+  - versionName: 1.12.1
+    versionCode: 59
+    commit: b8fcfff917880498567b9fd9096fdd54c0cab239
+    subdir: pretixscan/app
+    submodules: true
+    gradle:
+      - pretix
+    srclibs:
+      - saki4510t-libcommon@2.12.4
+      - covpass-android@v-1.38.0
+    prebuild:
+      - sed -i -e 's|maven.pkg.github.com/Digitaler-Impfnachweis/covpass-android|jitpack.io|'
+        -i -e '/repositories {/a mavenLocal()' ../build.gradle
+      - sed -i -e "s/(project(':libuvccamera'))/('com.github.raphaelm.UVCCamera:libuvccamera:53d043fea2')
+        {exclude group:'com.serenegiant',module:'common'}/" -i -e "s/(project(':usbCameraCommon'))/('com.github.raphaelm.UVCCamera:usbCameraCommon:53d043fea2')
+        {exclude group:'com.serenegiant',module:'common'}/" -i -e '/maven {/,/^    }/d'
+        -i -e '/repositories {/a mavenLocal()' ../libpretixui-repo/libpretixui-android/build.gradle
+    scandelete:
+      - pretixscan/libpretixui-repo
+    build:
+      - pushd $$saki4510t-libcommon$$/common
+      - gradle uploadArchives
+      - popd
+      - mv $$saki4510t-libcommon$$/repository/com/serenegiant/common/2.12.4/common-2.12.4.aar
+        ../libpretixui-repo/common/common.aar
+      - pushd $$covpass-android$$
+      - gradle publishToMavenLocal
+      - popd
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 1.11.9
-CurrentVersionCode: 56
+CurrentVersion: 1.12.1
+CurrentVersionCode: 59
