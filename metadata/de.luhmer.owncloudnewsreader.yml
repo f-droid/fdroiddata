@@ -7,23 +7,6 @@ Translation: https://www.transifex.com/nextcloud/nextcloud/
 Changelog: https://github.com/nextcloud/news-android/blob/HEAD/CHANGELOG.md
 
 AutoName: News
-Description: |-
-    The <a href="https://github.com/nextcloud/news-android">Nextcloud News Reader App</a> makes
-    it possible to synchronize feeds between Android and the Nextcloud/ownCloud News
-    App and let’s you read RSS feeds on the go.
-
-    <b>Features:</b>
-
-    * Offline reading
-    * Cache images offline
-    * Background synchronization
-    * Customizable Listview
-    * Mark as read while scrolling
-    * Dark/Light Theme
-    * Customizable font
-    * Widget
-    * Pull-To-Refresh
-    * and many more!
 
 RepoType: git
 Repo: https://github.com/nextcloud/news-android.git
@@ -1586,33 +1569,24 @@ Builds:
     versionCode: 166
     commit: f922eccbb66539c481b8c2f6ca6ca796c6e41470
     subdir: News-Android-App
-    init:
-      - sed -i -e '/com.nbsp:library/d' build.gradle
-      - sed -i -e '/com.gu:option/d' build.gradle
-      - sed -i -e '/guardian.github.com/d; /dl.bintray.com/d' build.gradle
-      - sed -i -e '/signingConfigs {/,+3d' build.gradle
-      - sed -i "/repositories {/a\    flatDir { dirs 'libs' }" build.gradle
-      - sed -i "/dependencies {/a\    implementation(name:'MaterialFilePicker-1.8',
-        ext:'aar')" build.gradle
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y openjdk-11-jdk-headless
+      - update-alternatives --auto java
+    init: sed -i -e '/signingConfigs {/d' build.gradle
     gradle:
       - oss
     srclibs:
-      - MaterialFilePicker@7f3679f
       - JavaOptionClass@e933c3a
     prebuild:
-      - rm -rf $$MaterialFilePicker$$/app
-      - pushd $$MaterialFilePicker$$/library
-      - sed -i -e '/apply from/d' build.gradle
-      - gradle assembleRelease
-      - popd
+      - sed -i -e "/repositories {/a flatDir { dirs 'libs' }" -e '/guardian.github.io/d'
+        build.gradle
       - pushd $$JavaOptionClass$$
       - $$MVN3$$ package -Dmaven.compiler.source=1.6 -Dmaven.compiler.target=1.6 -DskipTests
       - popd
       - mkdir libs
       - mv $$JavaOptionClass$$/target/option-1.3-SNAPSHOT.jar libs/option-1.3.jar
-      - mv $$MaterialFilePicker$$/library/build/outputs/aar/library-release.aar libs/MaterialFilePicker-1.8.aar
     scanignore:
-      - News-Android-App/libs/MaterialFilePicker-1.8.aar
       - News-Android-App/libs/option-1.3.jar
 
 MaintainerNotes: |-
