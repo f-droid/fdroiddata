@@ -86,6 +86,27 @@ lint:
     - ./tools/check-for-unattached-signatures.py || set_error
     - exit $EXITVALUE
 
+schema validation:
+  image: node:alpine
+  except:
+    - master@fdroid/fdroiddata
+    - pipelines
+    - schedules
+    - triggers
+  before_script:
+    - apk add git
+    - npm -g install ajv-cli
+  script:
+    - ajv compile -s schemas/*.json || exit 1
+    - git fetch https://gitlab.com/fdroid/fdroiddata.git
+    - set -xe
+    - app_ids=$(git diff --name-only --diff-filter=d FETCH_HEAD...HEAD "metadata/*.yml")
+    - if [ -n "$appids" ]; then
+        for app_id in $app_ids; do
+          ajv validate -s schemas/metadata.json -d "$app_id";
+        done
+      fi
+
 trigger-issuebot:
   image: alpine
   except:
