@@ -1980,10 +1980,31 @@ Builds:
       - popd
     ndk: r21e
 
+  - versionName: 35.1.0
+    versionCode: 181
+    commit: 6c3f5e6a2463faf339c17fd73b4b69feb348c20a
+    subdir: app
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y openjdk-11-jdk-headless
+      - update-alternatives --auto java
+    gradle:
+      - yes
+    srclibs:
+      - libbaresip-android@22.0
+    build:
+      - pushd $$libbaresip-android$$
+      - sed -i -e 's!$(shell ls -d -1 /opt/Android/ndk/\* | tail -1)!$$NDK$$!' -e
+        's|/usr/src/baresip-studio|../../com.tutpro.baresip|' Makefile
+      - make download-sources
+      - make install-all
+      - popd
+    ndk: r23
+
 MaintainerNotes: make download-sources checks out master branches of several libraries;
     this can cause build failures.
 
-AutoUpdateMode: None
+AutoUpdateMode: Version
 UpdateCheckMode: Tags ^[0-9.]+$
 CurrentVersion: 35.1.0
 CurrentVersionCode: 181
