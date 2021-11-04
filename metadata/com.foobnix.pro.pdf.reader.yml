@@ -537,17 +537,19 @@ Builds:
   - versionName: 8.4.1-fdroid
     versionCode: 4145
     commit: ea0739a07d45c05d0d29a4f90000658e91698924
-    subdir: app/
+    subdir: app
     sudo:
       - apt-get update || apt-get update
       - apt-get install -y g++ mesa-common-dev libxcursor-dev libxrandr-dev libxinerama-dev
         libglu1-mesa-dev libxi-dev
+      - apt-get install -y openjdk-11-jdk-headless
+      - update-alternatives --auto java
     gradle:
       - fdroid
     srclibs:
       - MuPDF@1.16.1
     rm:
-      - Builder/libs/
+      - Builder/libs
     prebuild:
       - sed -i -e '/F-DROID REMOVE THIS LINE/,+1d' ../build.gradle
       - sed -i -e '/com.google.gms.google-services/d' -e '/com.google.android.gms/d'
@@ -555,14 +557,13 @@ Builds:
       - sed -i -e '/^#!/a\set -e' -e 's|git clone .*|ln -s $$MuPDF$$ mupdf-$VERSION|'
         -e 's/ndk-build $1/& -j`nproc` || exit 1/' ../Builder/link_to_mupdf_1.16.1.sh
       - mkdir src/main/jniLibs/
-      - sed -i -e 's/21.2.6472646/21.3.6528147/' build.gradle
     scanignore:
       - Builder/fonts/fonts.zip
       - app/src/fdroid/assets/fonts.zip
     build:
       - pushd ../Builder/
       - ./link_to_mupdf_1.16.1.sh
-    ndk: r21d
+    ndk: r21e
 
 MaintainerNotes: |-
     * Upstream builds separate APKs for each architecture but we build an universal APK.
