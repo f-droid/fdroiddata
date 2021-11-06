@@ -136,7 +136,63 @@ Builds:
       - cp $ANDROID_RUST_KEYLOCK_LIB $ANDROID_JAVA_NATIVE
     ndk: r10e
 
+  - versionName: 0.14.0
+    versionCode: 1400
+    commit: 8541418d33bceabf17c5b1a1629cca87e3a43906
+    subdir: java
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get -y install build-essential
+    maven: 'yes'
+    output: ./target/rust-keylock-android-$$VERSION$$-unsigned.apk
+    srclibs:
+      - rustup@1.23.1
+      - OpenSSL@OpenSSL_1_1_0j
+    build:
+      - mkdir -p ../tools
+      - $$rustup$$/rustup-init.sh -y
+      - source $HOME/.cargo/env
+      - rustup target add arm-linux-androideabi
+      - cd ..
+      - BASEDIR=`pwd`
+      - cd $$OpenSSL$$
+      - export OPENSSL_SRC_DIR=`pwd`
+      - export OPENSSL_BUILD_DIR=${OPENSSL_SRC_DIR}/build
+      - cd $BASEDIR
+      - export ANDROID_NDK_HOME=${ANDROID_NDK}
+      - mkdir $BASEDIR/android-toolchain
+      - cd android-toolchain
+      - export ANDROID_TOOLCHAIN_DIR=`pwd`
+      - cd $HOME
+      - mkdir -p .cargo
+      - cd .cargo
+      - printf "[target]\n [target.arm-linux-androideabi]\n linker = \"${ANDROID_TOOLCHAIN_DIR}/bin/arm-linux-androideabi-gcc\""
+        > config
+      - export ANDROID_TOOLCHAIN=$ANDROID_TOOLCHAIN_DIR/bin
+      - export ANDROID_NDK_ROOT=${ANDROID_NDK}
+      - export ANDROID_RUST="$BASEDIR/rust"
+      - export ANDROID_RUST_KEYLOCK_LIB="$ANDROID_RUST/target/arm-linux-androideabi/release/librustkeylockandroid.so"
+      - export ANDROID_JAVA_NATIVE="$BASEDIR/java/libs/armeabi/"
+      - mkdir -p $ANDROID_JAVA_NATIVE
+      - sed -i 's/-mandroid //g' ${OPENSSL_SRC_DIR}/Configurations/10-main.conf
+      - cd ${OPENSSL_SRC_DIR}
+      - $ANDROID_NDK/build/tools/make-standalone-toolchain.sh --platform=android-16
+        --arch=arm --install-dir=$BASEDIR/android-toolchain  > /dev/null
+      - . $BASEDIR/rust-build/setenv-android.sh
+      - ./Configure android-armeabi shared no-ssl3 no-comp no-hw no-asm --openssldir=$OPENSSL_SRC_DIR/build
+        --prefix=$OPENSSL_SRC_DIR/build
+      - make all
+      - make install CC=$ANDROID_TOOLCHAIN/arm-linux-androideabi-clang RANLIB=$ANDROID_TOOLCHAIN/arm-linux-androideabi-ranlib
+      - cd $ANDROID_RUST
+      - CC_arm_linux_androideabi="${ANDROID_TOOLCHAIN_DIR}/bin/arm-linux-androideabi-gcc"
+        AR_arm_linux_androideabi="${ANDROID_TOOLCHAIN_DIR}/bin/arm-linux-androideabi-ar"
+        OPENSSL_DIR=${OPENSSL_BUILD_DIR} OPENSSL_LIB_DIR=${OPENSSL_BUILD_DIR}/lib
+        OPENSSL_INCLUDE_DIR=${OPENSSL_BUILD_DIR}/include OPENSSL_STATIC=true cargo
+        build --target=arm-linux-androideabi --release
+      - cp $ANDROID_RUST_KEYLOCK_LIB $ANDROID_JAVA_NATIVE
+    ndk: r10e
+
 AutoUpdateMode: Version v%v
 UpdateCheckMode: Tags
-CurrentVersion: 0.13.0
-CurrentVersionCode: 1300
+CurrentVersion: 0.14.0
+CurrentVersionCode: 1400
