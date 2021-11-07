@@ -944,10 +944,32 @@ Builds:
       - popd
     ndk: r23
 
+  - versionName: 22.2.0
+    versionCode: 60
+    commit: 813938f141e488c36c6d5e82222cc80e4f02e5dd
+    subdir: app
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y --no-install-recommends -t testing nasm
+      - apt-get install -y openjdk-11-jdk-headless
+      - update-alternatives --auto java
+    gradle:
+      - yes
+    srclibs:
+      - libbaresip-android@v15.0
+    build:
+      - pushd $$libbaresip-android$$
+      - sed -i -e 's!$(shell ls -d -1 /opt/Android/ndk/\* | tail -1)!$$NDK$$!' -e
+        's|/usr/src/baresip-studio|../../com.tutpro.baresip.plus|' Makefile
+      - make download-sources
+      - make install-all
+      - popd
+    ndk: r23
+
 MaintainerNotes: make download-sources checks out master branches of several libraries;
     this can cause build failures.
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags v.*[0-9]$
-CurrentVersion: 22.1.0
-CurrentVersionCode: 59
+CurrentVersion: 22.2.0
+CurrentVersionCode: 60
