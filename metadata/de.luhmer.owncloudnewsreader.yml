@@ -1589,11 +1589,35 @@ Builds:
     scanignore:
       - News-Android-App/libs/option-1.3.jar
 
+  - versionName: 0.9.9.64
+    versionCode: 167
+    commit: 2547e36a8d7146a7a987eafe2ade6446c425a99a
+    subdir: News-Android-App
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y openjdk-11-jdk-headless
+      - update-alternatives --auto java
+    init: sed -i -e '/signingConfigs {/d' build.gradle
+    gradle:
+      - oss
+    srclibs:
+      - JavaOptionClass@e933c3a
+    prebuild:
+      - sed -i -e "/repositories {/a flatDir { dirs 'libs' }" -e '/guardian.github.io/d'
+        build.gradle
+      - pushd $$JavaOptionClass$$
+      - $$MVN3$$ package -Dmaven.compiler.source=1.6 -Dmaven.compiler.target=1.6 -DskipTests
+      - popd
+      - mkdir libs
+      - mv $$JavaOptionClass$$/target/option-1.3-SNAPSHOT.jar libs/option-1.3.jar
+    scanignore:
+      - News-Android-App/libs/option-1.3.jar
+
 MaintainerNotes: |-
     MaterialShowcaseView/build.gradle misses the google() repo but it's specified at top level.
     So deleting this file prevents it from overriding the top level one.
 
 AutoUpdateMode: Version v.%v
 UpdateCheckMode: Tags
-CurrentVersion: 0.9.9.63
-CurrentVersionCode: 166
+CurrentVersion: 0.9.9.64
+CurrentVersionCode: 167
