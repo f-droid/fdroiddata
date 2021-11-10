@@ -1404,7 +1404,34 @@ Builds:
     scandelete:
       - node_modules/**
 
+  - versionName: 3.89.14
+    versionCode: 389140
+    commit: 9dfee6d97a28b4beaf4e063c926b9e00920f9540
+    subdir: app-android/app
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y openjdk-11-jdk-headless
+      - update-alternatives --auto java
+      - curl -Lo node.tar.xz https://nodejs.org/download/release/v16.3.0/node-v16.3.0-linux-x64.tar.xz
+      - echo "5347ece975747e4d9768d4ed3f8b2220c955ac01f8a695347cd7f71ff5efa318 node.tar.xz"
+        | sha256sum -c -
+      - tar xJf node.tar.xz
+      - cp -a node-v16.3.0-linux-x64/. /usr/local/
+      - npm install -g npm@latest
+    gradle:
+      - fdroid
+    rm:
+      - app-ios
+    prebuild:
+      - cd ../..
+      - node buildSrc/fixFdroidDeps.js
+      - npm install
+      - node dist prod
+      - node buildSrc/prepareMobileBuild.js dist
+    scandelete:
+      - node_modules/**
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags tutanota-android-release-*
-CurrentVersion: 3.89.10
-CurrentVersionCode: 389100
+CurrentVersion: 3.89.14
+CurrentVersionCode: 389140
