@@ -128,54 +128,31 @@ Builds:
       - OPENSSL_PATH="$$OpenSSL$$" ./build.sh
     ndk: r21e
 
-  - versionName: 1.6.0
-    versionCode: 19
-    disable: need ndk r23
-    commit: 26153d44b9aee926373704290d66ab963f9d0167
-    subdir: app
-    submodules: true
-    sudo:
-      - apt-get update || apt-get update
-      - apt-get install -y openjdk-11-jdk
-      - update-alternatives --auto java
-      - curl -Lso go.tar.gz https://golang.org/dl/go1.16.4.linux-amd64.tar.gz
-      - echo "7154e88f5a8047aad4b80ebace58a059e36e7e2e4eb3b383127a28c711b4ff59 go.tar.gz"
-        | sha256sum -c -
-      - tar xzf go.tar.gz --strip-components=1 -C /usr/local/
-    gradle:
-      - yes
-    output: build/outputs/apk/release/app-universal-release-unsigned.apk
-    srclibs:
-      - OpenSSL@OpenSSL_1_1_1
-    prebuild: go get golang.org/x/sys/unix golang.org/x/sys/cpu golang.org/x/crypto/hkdf
-        github.com/jacobsa/crypto/siv github.com/rfjakob/eme
-    build:
-      - cd libgocryptfs
-      - OPENSSL_PATH="$$OpenSSL$$" ./build.sh
-
   - versionName: 1.7.0
     versionCode: 20
-    commit: 4f8bf860e0eaf72ea7b65294918013bef1df1ce5
+    commit: v1.7.0
     subdir: app
     submodules: true
     sudo:
       - apt-get update || apt-get update
-      - apt-get install -y openjdk-11-jdk
+      - apt-get install -y openjdk-11-jdk-headless
       - update-alternatives --auto java
-      - curl -Lso go.tar.gz https://golang.org/dl/go1.16.4.linux-amd64.tar.gz
-      - echo "7154e88f5a8047aad4b80ebace58a059e36e7e2e4eb3b383127a28c711b4ff59 go.tar.gz"
+      - curl -Lso go.tar.gz https://golang.org/dl/go1.17.3.linux-amd64.tar.gz
+      - echo "550f9845451c0c94be679faf116291e7807a8d78b43149f9506c1b15eb89008c go.tar.gz"
         | sha256sum -c -
       - tar xzf go.tar.gz --strip-components=1 -C /usr/local/
     gradle:
       - yes
-    output: build/outputs/apk/release/app-universal-release-unsigned.apk
     srclibs:
-      - OpenSSL@OpenSSL_1_1_1
-    prebuild: go get golang.org/x/sys/unix golang.org/x/sys/cpu golang.org/x/crypto/hkdf
-        github.com/jacobsa/crypto/siv github.com/rfjakob/eme
+      - OpenSSL@OpenSSL_1_1_1l
+      - FFmpeg@n4.4
+    prebuild: touch fdroid
     build:
       - cd libgocryptfs
       - OPENSSL_PATH="$$OpenSSL$$" ./build.sh
+      - cd ../ffmpeg
+      - ./build.sh $$FFmpeg$$
+    ndk: r23
 
 AutoUpdateMode: Version v%v
 UpdateCheckMode: Tags
