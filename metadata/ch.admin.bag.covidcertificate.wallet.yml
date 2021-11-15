@@ -13,7 +13,7 @@ AutoName: Covid Cert
 
 RepoType: git
 Repo: https://github.com/admin-ch/CovidCertificate-App-Android
-Binaries: https://github.com/admin-ch/CovidCertificate-App-Android/releases/download/v%v-%c-wallet-fdroid/wallet-prod-%v-%c-signed.apk
+Binaries: https://github.com/admin-ch/CovidCertificate-App-Android/releases/download/v%v-%c-wallet/wallet-prod-%v-%c-fdroid-signed.apk
 
 Builds:
   - versionName: 1.2.0
@@ -158,7 +158,24 @@ Builds:
         "$(curl -sL https://github.com/admin-ch/CovidCertificate-App-Android/releases/download/v$$VERSION$$-$$VERCODE$$-wallet-fdroid/wallet-prod-$$VERSION$$-$$VERCODE$$-buildtimestamp.txt
         | tr -cd '0-9')" >> gradle.properties
 
+  - versionName: 2.8.0
+    versionCode: 2800
+    commit: e6ff4cd41fb72a0c600acf062999763bf11a95bc
+    subdir: wallet
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y openjdk-11-jdk-headless
+      - update-alternatives --auto java
+    gradle:
+      - prod
+    rm:
+      - wallet/testKeystore
+      - verifier/testKeystore
+    prebuild: printf '\nbranch=release/version-$$VERSION$$\nminSdkVersion=24\nbuildTimestamp=%s\n'
+        "$(curl -sL https://github.com/admin-ch/CovidCertificate-App-Android/releases/download/v$$VERSION$$-$$VERCODE$$-wallet/wallet-prod-$$VERSION$$-$$VERCODE$$-buildtimestamp.txt
+        | tr -cd '0-9')" >> gradle.properties
+
 AutoUpdateMode: Version
-UpdateCheckMode: Tags ^v[\d.]+-\d+-wallet-fdroid$
-CurrentVersion: 2.7.0
-CurrentVersionCode: 2701
+UpdateCheckMode: Tags ^v[\d.]+-\d+-wallet$
+CurrentVersion: 2.8.0
+CurrentVersionCode: 2800
