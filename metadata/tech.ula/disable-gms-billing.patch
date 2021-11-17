@@ -1,0 +1,252 @@
+diff --git a/app/src/main/java/tech/ula/MainActivity.kt b/app/src/main/java/tech/ula/MainActivity.kt
+index ee2daa7..93209aa 100644
+--- a/app/src/main/java/tech/ula/MainActivity.kt
++++ b/app/src/main/java/tech/ula/MainActivity.kt
+@@ -83,7 +83,7 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection,
+     }
+ 
+     val billingManager by lazy {
+-        BillingManager(this, contributionPrompter.onEntitledSubPurchases, contributionPrompter.onEntitledInAppPurchases, contributionPrompter.onPurchase, contributionPrompter.onSubscriptionSupportedChecked)
++        BillingManager(this, contributionPrompter.onSubscriptionSupportedChecked)
+     }
+ 
+     private val contributionPrompter by lazy {
+@@ -735,4 +735,4 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection,
+             else -> true
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/app/src/main/java/tech/ula/utils/BillingManager.kt b/app/src/main/java/tech/ula/utils/BillingManager.kt
+index 5e44366..f725d9a 100644
+--- a/app/src/main/java/tech/ula/utils/BillingManager.kt
++++ b/app/src/main/java/tech/ula/utils/BillingManager.kt
+@@ -2,17 +2,6 @@ package tech.ula.utils
+ 
+ import android.app.Activity
+ import android.util.Log
+-import com.android.billingclient.api.AcknowledgePurchaseParams
+-import com.android.billingclient.api.BillingClient
+-import com.android.billingclient.api.BillingClient.BillingResponseCode
+-import com.android.billingclient.api.BillingClient.FeatureType
+-import com.android.billingclient.api.BillingClientStateListener
+-import com.android.billingclient.api.BillingFlowParams
+-import com.android.billingclient.api.BillingResult
+-import com.android.billingclient.api.Purchase
+-import com.android.billingclient.api.PurchasesUpdatedListener
+-import com.android.billingclient.api.SkuDetails
+-import com.android.billingclient.api.SkuDetailsParams
+ import java.util.* // ktlint-disable no-wildcard-imports
+ import kotlin.collections.HashMap
+ 
+@@ -25,58 +14,11 @@ import kotlin.collections.HashMap
+  */
+ class BillingManager(
+     private val activity: Activity,
+-    private val onEntitledSubPurchases: (List<Purchase>) -> Unit,
+-    private val onEntitledInAppPurchases: (List<Purchase>) -> Unit,
+-    private val onPurchase: (Purchase) -> Unit,
+     private val onSubscriptionSupportedChecked: (Boolean) -> Unit
+ ) {
+ 
+-    private val purchasesUpdatedListener = PurchasesUpdatedListener { billingResult, purchases ->
+-        when (billingResult.responseCode) {
+-            BillingResponseCode.OK -> {
+-                purchases?.let {
+-                    for (purchase in purchases) {
+-                        when (purchase.purchaseState) {
+-                            Purchase.PurchaseState.PURCHASED -> {
+-                                onPurchase(purchase)
+-                                if (!purchase.isAcknowledged) {
+-                                    val acknowledgePurchaseParams = AcknowledgePurchaseParams.newBuilder()
+-                                        .setPurchaseToken(purchase.purchaseToken)
+-                                        .build()
+-                                    billingClient.acknowledgePurchase(acknowledgePurchaseParams) { billingResult ->
+-                                        log("acknowledgePurchase(), billingResult=$billingResult")
+-                                    }
+-                                }
+-                            }
+-                            Purchase.PurchaseState.PENDING -> {
+-                                // Here you can confirm to the user that they've started the pending
+-                                // purchase, and to complete it, they should follow instructions that
+-                                // are given to them. You can also choose to remind the user in the
+-                                // future to complete the purchase if you detect that it is still
+-                                // pending.
+-                            }
+-                        }
+-                    }
+-                }
+-                log("onPurchasesUpdated(), $purchases")
+-            }
+-            BillingResponseCode.USER_CANCELED -> log("onPurchasesUpdated() - user cancelled the purchase flow - skipping")
+-            else -> log("onPurchasesUpdated() got unknown resultCode: ${billingResult.responseCode}")
+-        }
+-    }
+-
+-    private val skuDetailsMap = HashMap<String, SkuDetails>()
+-
+-    private val billingClient: BillingClient = BillingClient.newBuilder(activity)
+-        .enablePendingPurchases()
+-        .setListener(purchasesUpdatedListener)
+-        .build()
+-
+     private var isBillingServiceConnected = false
+ 
+-    val populateSkus: (List<SkuDetails>) -> Unit = {
+-        it.forEach { skuDetailsMap.put(it.sku, it) }
+-    }
+     private fun handlePopulateSkuError(code: Int, message: String) {
+         log("Error trying to populate skus.  code: $code message: $message")
+     }
+@@ -84,102 +26,27 @@ class BillingManager(
+     init {
+         startServiceConnection {
+             onSubscriptionSupportedChecked(isSubscriptionPurchaseSupported())
+-            querySubPurchases()
+-            queryInAppPurchases()
+-            querySubscriptionSkuDetails(listOf(Sku.US1_MONTHLY, Sku.US5_MONTHLY, Sku.US10_MONTHLY, Sku.US20_MONTHLY, Sku.US1_YEARLY, Sku.US5_YEARLY, Sku.US10_YEARLY, Sku.US20_YEARLY), populateSkus, ::handlePopulateSkuError)
+-            queryInAppSkuDetails(listOf(Sku.US1_ONETIME, Sku.US5_ONETIME, Sku.US10_ONETIME, Sku.US20_ONETIME), populateSkus, ::handlePopulateSkuError)
+         }
+     }
+ 
+     fun querySubPurchases() {
+-        if (isSubscriptionPurchaseSupported()) {
+-            val purchasesResult = billingClient.queryPurchases(BillingClient.SkuType.SUBS)
+-            if (purchasesResult.responseCode == BillingResponseCode.OK) {
+-                onEntitledSubPurchases(Collections.unmodifiableList(purchasesResult.purchasesList))
+-            } else {
+-                log("Error trying to query purchases: $purchasesResult")
+-            }
+-        }
+     }
+ 
+     fun queryInAppPurchases() {
+-        val purchasesResult = billingClient.queryPurchases(BillingClient.SkuType.INAPP)
+-        if (purchasesResult.responseCode == BillingResponseCode.OK) {
+-            onEntitledInAppPurchases(Collections.unmodifiableList(purchasesResult.purchasesList))
+-        } else {
+-            log("Error trying to query purchases: $purchasesResult")
+-        }
+     }
+ 
+     fun startPurchaseFlow(productId: String) {
+-        val sku = skuDetailsMap.get(productId)
+-        if (sku != null) {
+-            startServiceConnection {
+-                val flowParams = BillingFlowParams.newBuilder().setSkuDetails(sku).build()
+-                val billingResult = billingClient.launchBillingFlow(activity, flowParams)
+-                log("startPurchaseFlow(...), billingResult=$billingResult")
+-            }
+-        }
+     }
+ 
+     fun destroy() {
+         log("destroy()")
+-        if (billingClient.isReady) {
+-            billingClient.endConnection()
+-        }
+     }
+ 
+     private fun startServiceConnection(task: () -> Unit) {
+-        if (isBillingServiceConnected) {
+-            task()
+-        } else {
+-            billingClient.startConnection(object : BillingClientStateListener {
+-                override fun onBillingSetupFinished(billingResult: BillingResult) {
+-                    log("onBillingSetupFinished(...), billingResult=$billingResult")
+-                    if (billingResult.responseCode == BillingResponseCode.OK) {
+-                        isBillingServiceConnected = true
+-                        task()
+-                    }
+-                }
+-
+-                override fun onBillingServiceDisconnected() {
+-                    log("onBillingServiceDisconnected()")
+-                    isBillingServiceConnected = false
+-                    // Try to restart the connection on the next request to
+-                    // Google Play by calling the startConnection() method.
+-                }
+-            })
+-        }
+-    }
+-
+-    private fun querySubscriptionSkuDetails(skus: List<String>, onSuccess: (List<SkuDetails>) -> Unit, onError: (code: Int, message: String) -> Unit) {
+-        val params = SkuDetailsParams.newBuilder().setSkusList(skus).setType(BillingClient.SkuType.SUBS)
+-        billingClient.querySkuDetailsAsync(params.build()) { billingResult, skuDetailsList ->
+-            if (billingResult.responseCode == BillingResponseCode.OK && skuDetailsList != null) {
+-                onSuccess(skuDetailsList)
+-            } else {
+-                onError(billingResult.responseCode, billingResult.debugMessage)
+-            }
+-        }
+-    }
+-
+-    private fun queryInAppSkuDetails(skus: List<String>, onSuccess: (List<SkuDetails>) -> Unit, onError: (code: Int, message: String) -> Unit) {
+-        val params = SkuDetailsParams.newBuilder().setSkusList(skus).setType(BillingClient.SkuType.INAPP)
+-        billingClient.querySkuDetailsAsync(params.build()) { billingResult, skuDetailsList ->
+-            if (billingResult.responseCode == BillingResponseCode.OK && skuDetailsList != null) {
+-                onSuccess(skuDetailsList)
+-            } else {
+-                onError(billingResult.responseCode, billingResult.debugMessage)
+-            }
+-        }
+     }
+ 
+     private fun isSubscriptionPurchaseSupported(): Boolean {
+-        val response = billingClient.isFeatureSupported(FeatureType.SUBSCRIPTIONS)
+-        if (response.responseCode != BillingResponseCode.OK) {
+-            log("isSubscriptionPurchaseSupported(), not supported, error response: $response")
+-        }
+-        return response.responseCode == BillingResponseCode.OK
++        return false
+     }
+ 
+     private fun log(message: String) {
+diff --git a/app/src/main/java/tech/ula/utils/UserPrompter.kt b/app/src/main/java/tech/ula/utils/UserPrompter.kt
+index b61a5a3..1e0aae4 100644
+--- a/app/src/main/java/tech/ula/utils/UserPrompter.kt
++++ b/app/src/main/java/tech/ula/utils/UserPrompter.kt
+@@ -11,7 +11,6 @@ import android.widget.SeekBar
+ import android.widget.TextView
+ import android.widget.Toast
+ import androidx.annotation.StringRes
+-import com.android.billingclient.api.Purchase
+ import tech.ula.MainActivity
+ import tech.ula.R
+ 
+@@ -358,34 +357,6 @@ class ContributionPrompter(private val activity: MainActivity, private val viewG
+         subscriptionSupported = it
+     }
+ 
+-    val onEntitledSubPurchases: (List<Purchase>) -> Unit = {
+-        processSubPurchases(it)
+-    }
+-
+-    val onEntitledInAppPurchases: (List<Purchase>) -> Unit = {
+-        processInAppPurchases(it)
+-    }
+-
+-    val onPurchase: (Purchase) -> Unit = {
+-        processPurchase(it)
+-    }
+-
+-    private fun processSubPurchases(purchases: List<Purchase>) {
+-        setHasMadeSubPurchase(!purchases.isEmpty())
+-    }
+-
+-    private fun processInAppPurchases(purchases: List<Purchase>) {
+-        setHasMadeInAppPurchase(!purchases.isEmpty())
+-    }
+-
+-    private fun processPurchase(purchase: Purchase) {
+-        if (purchase.sku.endsWith("onetime"))
+-            setHasMadeInAppPurchase(true)
+-        else
+-            setHasMadeSubPurchase(true)
+-        Toast.makeText(savedActivity, "Thanks for your contribution", Toast.LENGTH_LONG).show()
+-    }
+-
+     override val initialPrompt: Int
+         get() = R.string.contribution_primary
+     override val initialPosBtnText: Int

@@ -8,30 +8,6 @@ IssueTracker: https://github.com/CypherpunkArmory/UserLAnd/issues
 Changelog: https://github.com/CypherpunkArmory/UserLAnd/releases
 
 AutoName: UserLAnd
-Description: |-
-    UserLAnd provides the easiest way to run GNU/Linux Distros on Android.
-
-    <b>Features:</b>
-    * Run full linux distros or specific applications on top of Android.
-    * Install and uninstall like a regular app.
-    * No root required.
-
-    There are two ways to use UserLAnd
-
-    Using single-click apps:
-    * Click an app.
-    * Fill out the required information.
-    * You're good to go!
-    Using user-defined custom sessions:
-
-    * Define a session - This describes what filesystem you are going to use, and
-    what kind of service you want to use when connecting to it (ssh or vnc).
-    * Define a filesystem - This describes what distribution of Linux you want to
-    install.
-    * Once defined, just tap on the session to start up. This will download
-    necessary assets, setup the filesystem, start the server, and connect to it.
-    This will take several minutes for the first start up, but will be quicker
-    afterwards.
 
 RepoType: git
 Repo: https://github.com/CypherpunkArmory/UserLAnd
@@ -232,6 +208,28 @@ Builds:
       - echo "tracepotHttpsEndpoint=\"\"" >> tracepot.properties
       - sed -i -e 's/versionCode vcode/versionCode $$VERCODE$$/' build.gradle
 
+  - versionName: 2.8.3
+    versionCode: 7438725
+    commit: v2.8.3
+    subdir: app
+    patch:
+      - disable-gms-billing.patch
+    gradle:
+      - yes
+    prebuild:
+      - echo "tracepotHttpsEndpoint=\"\"" >> tracepot.properties
+      - sed -i -e 's/versionCode vcode/versionCode $$VERCODE$$/' build.gradle
+      - sed -i -e '/com.google.firebase/d' -e '/firebaseCrashlytics/d' -e '/com.google.android.play/d'
+        -e '/com.google.gms/d' -e '/com.google.android.gms/d' -e '/billingclient/d'
+        build.gradle
+      - sed -i -e "s/buildConfigField 'boolean', 'ENABLE_PLAY_SERVICES', 'true'/buildConfigField
+        'boolean', 'ENABLE_PLAY_SERVICES', 'false'/" build.gradle
+    buildjni:
+      - ../termux-app/terminal-emulator/src/main/jni
+    ndk: r21b
+    preassemble:
+      - androidDependencies
+
 MaintainerNotes: |-
     We can't enable AUM since 2.5.14, versionCode is generated at build time and depends on the actual date.
     Actual versionCode is copied from the upstream release.
@@ -240,5 +238,5 @@ MaintainerNotes: |-
 
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: 2.7.2
-CurrentVersionCode: 2927098
+CurrentVersion: 2.8.3
+CurrentVersionCode: 7438725
