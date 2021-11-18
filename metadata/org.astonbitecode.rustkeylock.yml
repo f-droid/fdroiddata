@@ -5,20 +5,6 @@ WebSite: https://rust-keylock.github.io/
 SourceCode: https://github.com/rust-keylock/rust-keylock-android
 
 AutoName: rust-keylock
-Description: |-
-    rust-keylock is a password manager and its goals are to be:
-
-    * Secure
-    * Simple to use
-    * Portable
-    * Extensible
-
-    rust-keylock-android is an Android app that provides access to [rust-keylock-lib](https://github.com/rust-keylock/rust-keylock-lib).
-
-    The minimum supported Android API level is 16 (4.1.2 is tested as a minimum version).
-
-    Warning:
-    The project has not yet received any formal / official security reviews. Use it at your own risk.
 
 RepoType: git
 Repo: https://github.com/rust-keylock/rust-keylock-android
@@ -192,7 +178,59 @@ Builds:
       - cp $ANDROID_RUST_KEYLOCK_LIB $ANDROID_JAVA_NATIVE
     ndk: r10e
 
+  - versionName: 0.14.1
+    versionCode: 1401
+    commit: v0.14.1
+    subdir: java
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get -y install build-essential
+    maven: 'yes'
+    output: target/rust-keylock-android-$$VERSION$$-unsigned.apk
+    srclibs:
+      - rustup@1.24.3
+      - OpenSSL@OpenSSL_1_1_1l
+    prebuild: $$SDK$$/tools/bin/sdkmanager 'platforms;android-16' > /dev/null
+    target: android-16
+    build:
+      - mkdir -p ../tools
+      - $$rustup$$/rustup-init.sh -y
+      - source $HOME/.cargo/env
+      - rustup target add arm-linux-androideabi
+      - cd ..
+      - BASEDIR=`pwd`
+      - cd $$OpenSSL$$
+      - export OPENSSL_SRC_DIR=`pwd`
+      - export OPENSSL_BUILD_DIR=${OPENSSL_SRC_DIR}/build
+      - cd $BASEDIR
+      - export ANDROID_NDK_HOME=${ANDROID_NDK}
+      - export ANDROID_TOOLCHAIN_DIR="$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64"
+      - cd $HOME
+      - mkdir -p .cargo
+      - cd .cargo
+      - printf "[target]\n [target.arm-linux-androideabi]\n linker = \"${ANDROID_TOOLCHAIN_DIR}/bin/armv7a-linux-androideabi16-clang\""
+        > config
+      - export ANDROID_TOOLCHAIN=$ANDROID_TOOLCHAIN_DIR/bin
+      - export ANDROID_NDK_ROOT=${ANDROID_NDK}
+      - export ANDROID_RUST="$BASEDIR/rust"
+      - export ANDROID_RUST_KEYLOCK_LIB="$ANDROID_RUST/target/arm-linux-androideabi/release/librustkeylockandroid.so"
+      - export ANDROID_JAVA_NATIVE="$BASEDIR/java/libs/armeabi/"
+      - mkdir -p $ANDROID_JAVA_NATIVE
+      - cd ${OPENSSL_SRC_DIR}
+      - . $BASEDIR/rust-build/setenv-android.sh
+      - ./Configure ${architecture} -D__ANDROID_API__=$ANDROID_API --openssldir=$OPENSSL_SRC_DIR/build
+        --prefix=$OPENSSL_SRC_DIR/build
+      - make > /dev/null
+      - make install > /dev/null
+      - cd $ANDROID_RUST
+      - CC_arm_linux_androideabi="${ANDROID_TOOLCHAIN_DIR}/bin/armv7a-linux-androideabi16-clang"
+        AR_arm_linux_androideabi="${ANDROID_TOOLCHAIN_DIR}/bin/llvm-ar" ARM_LINUX_ANDROIDEABI_OPENSSL_DIR=${OPENSSL_BUILD_DIR}
+        ARM_LINUX_ANDROIDEABI_OPENSSL_LIB_DIR=${OPENSSL_BUILD_DIR}/lib ARM_LINUX_ANDROIDEABI_OPENSSL_INCLUDE_DIR=${OPENSSL_BUILD_DIR}/include
+        OPENSSL_STATIC=true cargo build --target=arm-linux-androideabi --release
+      - cp $ANDROID_RUST_KEYLOCK_LIB $ANDROID_JAVA_NATIVE
+    ndk: r22b
+
 AutoUpdateMode: Version v%v
 UpdateCheckMode: Tags
-CurrentVersion: 0.14.0
-CurrentVersionCode: 1400
+CurrentVersion: 0.14.1
+CurrentVersionCode: 1401
