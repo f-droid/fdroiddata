@@ -133,7 +133,6 @@ Builds:
   - versionName: 1.2.16
     versionCode: 10216
     commit: 208e76c1b93ed9beba2a03954e18c28b70f92ea1
-    subdir: platforms/android/app
     sudo:
       - sysctl fs.inotify.max_user_watches=524288
       - curl -Lo node.tar.xz https://nodejs.org/dist/v14.17.4/node-v14.17.4-linux-x64.tar.xz
@@ -141,14 +140,13 @@ Builds:
         | sha256sum -c -
       - tar xJf node.tar.xz --strip-components=1 -C /usr/local/
       - npm install -g cordova
-    gradle:
-      - yes
+    output: platforms/android/app/build/outputs/apk/release/app-release-unsigned.apk
     prebuild:
-      - cd ../../..
-      - rm -rf platforms
+      - npm install
       - cordova platform add android
     scandelete:
       - node_modules
+    build: cordova build android --release -- --packageType=apk
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
