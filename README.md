@@ -17,8 +17,6 @@
 
 ## Build status
 
-[![for_the_badge](https://img.shields.io/badge/current-buildserver_activity-green?style=for-the-badge&labelColor=B0EA05&color=1976D2)](https://f-droid.org/wiki/index.php?title=Special:RecentChanges&days=7&from=&hidebots=0&hideanons=1&hideliu=1&limit=500)
-
 [![for_the_badge](https://img.shields.io/badge/fdroid-monitor-green?style=for-the-badge&labelColor=B0EA05&color=1976D2)](https://monitor.f-droid.org/builds)
 
 > Build logs can be found at `https://f-droid.org/repo/$APPID_$VERCODE.log.gz`.
