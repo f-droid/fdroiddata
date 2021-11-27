@@ -621,10 +621,40 @@ Builds:
       - git gc --prune=now
     ndk: r21e
 
-  - versionName: 8.2.7
+  - versionName: 8.2.7-arm
+    versionCode: 469
+    commit: v8.2.7
+    timeout: 10800
+    subdir: TMessagesProj
+    submodules: true
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y ninja-build openjdk-11-jdk-headless
+      - update-alternatives --auto java
+    gradle:
+      - miniFdroidArm
+    output: build/outputs/apk/mini/*/*.apk
+    prebuild:
+      - echo -e "\norg.gradle.jvmargs=-Xms1024m -Xmx4096m -XX:MaxPermSize=4096m" >>
+        ../gradle.properties
+      - pushd ..
+      - ./run fdroid prebuild
+    scandelete:
+      - TMessagesProj
+    build:
+      - export NINJA_PATH=/usr/bin/ninja
+      - pushd ..
+      - ./run fdroid build
+      - source bin/init/env.sh
+      - go clean -cache
+      - git rev-parse HEAD
+      - git gc --prune=now
+      - sed -i -e 's/def disableCMakeRelWithDebInfo = System.getenv("COMPILE_NATIVE")
+        == null/def disableCMakeRelWithDebInfo = false/' TMessagesProj/build.gradle
+    ndk: r21e
+
+  - versionName: 8.2.7-arm64
     versionCode: 470
-    disable: /home/vagrant/build/nekox.messenger/TMessagesProj/.cxx/RelWithDebInfo/465m52b3/armeabi-v7a/android_gradle_build.json
-        (No such file or directory)
     commit: v8.2.7
     timeout: 10800
     subdir: TMessagesProj
@@ -639,18 +669,6 @@ Builds:
     prebuild:
       - echo -e "\norg.gradle.jvmargs=-Xms1024m -Xmx4096m -XX:MaxPermSize=4096m" >>
         ../gradle.properties
-      - sed -i -e '/splits/,+20d' build.gradle
-      - wget -O /tmp/cmdline-tools.zip -t 5 "https://dl.google.com/android/repository/commandlinetools-linux-7583922_latest.zip"
-      - echo "124f2d5115eee365df6cf3228ffbca6fc3911d16f8025bebd5b1c6e2fcfa7faf /tmp/cmdline-tools.zip"  |
-        sha256sum -c -
-      - unzip -q -o /tmp/cmdline-tools.zip -d /tmp/cmdline-tools
-      - rm /tmp/cmdline-tools.zip
-      - mkdir -p ${ANDROID_SDK_ROOT}/cmdline-tools/tools
-      - mv /tmp/cmdline-tools/cmdline-tools/* ${ANDROID_SDK_ROOT}/cmdline-tools/tools
-        || true
-      - export PATH=${ANDROID_SDK_ROOT}/cmdline-tools/tools/bin:${PATH}
-      - yes | sdkmanager --licenses
-      - sdkmanager "build-tools;30.0.3" "build-tools;31.0.0" "platforms;android-31"
       - pushd ..
       - ./run fdroid prebuild
     scandelete:
@@ -663,14 +681,17 @@ Builds:
       - go clean -cache
       - git rev-parse HEAD
       - git gc --prune=now
-      - gradle :TMessagesProj:externalNativeBuildMiniFdroidArmRelease --rerun-tasks
+      - sed -i -e 's/def disableCMakeRelWithDebInfo = System.getenv("COMPILE_NATIVE")
+        == null/def disableCMakeRelWithDebInfo = false/' TMessagesProj/build.gradle
     ndk: r21e
 
 MaintainerNotes: |
-    Due to `android_gradle_build.json (No such file or directory)` error, temperarily we run `--rerun-tasks` to clear caches. Should be removed later.
+    The best we can do now is auto update the arm64 version. The arm version has to be updated manually for now.
+
+    According to https://github.com/NekoX-Dev/NekoX/pull/681#issuecomment-980631578, we have to force enable the native libs compilation.
 
 ArchivePolicy: 6 versions
-AutoUpdateMode: Version v%v
+AutoUpdateMode: Version %v-arm64
 UpdateCheckMode: Tags
 UpdateCheckData: TMessagesProj/build.gradle|verCode\s=\s(\d+)||v([\d.]+)
 CurrentVersion: 8.2.7
