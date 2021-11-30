@@ -1,0 +1,192 @@
+diff --git a/lib/audio/tracksPage.dart b/lib/audio/tracksPage.dart
+index 20a6a38..5f2bb77 100644
+--- a/lib/audio/tracksPage.dart
++++ b/lib/audio/tracksPage.dart
+@@ -11,7 +11,6 @@ import 'package:mighty_plug_manager/audio/widgets/media_library/media_browse.dar
+ import 'package:path/path.dart';
+ import 'audioEditor.dart';
+ import 'models/jamTrack.dart';
+-import 'online_sources/YoutubeSource.dart';
+ import 'online_sources/onlineTrack.dart';
+ import 'trackdata/trackData.dart';
+ import 'widgets/online_source/online_source.dart';
+@@ -333,24 +332,6 @@ class _TracksPageState extends State<TracksPage>
+     });
+   }
+ 
+-  void addFromYoutubeSource(BuildContext context) {
+-    Navigator.of(context)
+-        .push(MaterialPageRoute(
+-            builder: (context) => OnlineSearchScreen(source: YoutubeSource())))
+-        .then((value) {
+-      if (value is List<OnlineTrack>) {
+-        for (int i = 0; i < value.length; i++) {
+-          var name = "${value[i].artist} - ${value[i].title}";
+-          TrackData().addTrack(value[i].url, name);
+-        }
+-        //clear filter and scroll to bottom
+-        searchCtrl.text = "";
+-        setState(() {});
+-        _scollToNewSongs();
+-      }
+-    });
+-  }
+-
+   void _scollToNewSongs() async {
+     await Future.delayed(Duration(milliseconds: 300));
+     scrollController.animateTo(scrollController.position.maxScrollExtent,
+@@ -426,18 +407,6 @@ class _TracksPageState extends State<TracksPage>
+                           // Menu items
+                           items: [
+                             // Floating action menu item
+-                            if (kDebugMode)
+-                              Bubble(
+-                                  title: "Youtube",
+-                                  iconColor: Colors.white,
+-                                  bubbleColor: Colors.red,
+-                                  icon: Icons.ondemand_video_outlined,
+-                                  titleStyle: TextStyle(
+-                                      fontSize: 16, color: Colors.white),
+-                                  onPress: () {
+-                                    _animationController.reverse();
+-                                    addFromYoutubeSource(context);
+-                                  }),
+                             if (kDebugMode)
+                               Bubble(
+                                 title: "Online Source",
+diff --git a/lib/bluetooth/NuxDeviceControl.dart b/lib/bluetooth/NuxDeviceControl.dart
+index b4d1f0c..c8cd568 100644
+--- a/lib/bluetooth/NuxDeviceControl.dart
++++ b/lib/bluetooth/NuxDeviceControl.dart
+@@ -8,7 +8,6 @@ import 'package:flutter/material.dart';
+ import 'package:flutter_blue/flutter_blue.dart';
+ import 'package:mighty_plug_manager/bluetooth/devices/NuxMighty8BT.dart';
+ import 'package:mighty_plug_manager/platform/simpleSharedPrefs.dart';
+-import 'package:sentry_flutter/sentry_flutter.dart';
+ import 'package:undo/undo.dart';
+ 
+ import 'bleMidiHandler.dart';
+@@ -628,12 +627,6 @@ class NuxDeviceControl extends ChangeNotifier {
+ 
+     diagData.device = "${_device.productName} ${_device.productVersion}";
+     if (connected != null) diagData.connected = connected;
+-
+-    Sentry.configureScope((scope) {
+-      scope.setTag(
+-          "nuxDevice", "${_device.productName} ${_device.productVersion}");
+-      scope.setContexts('NUX', diagData.toMap(includeJsonPreset));
+-    });
+   }
+ 
+   NuxDevice get device => _device;
+diff --git a/lib/main.dart b/lib/main.dart
+index adcfaa7..9570ef8 100644
+--- a/lib/main.dart
++++ b/lib/main.dart
+@@ -11,7 +11,6 @@ import 'package:mighty_plug_manager/bluetooth/devices/presets/presetsStorage.dar
+ import 'package:mighty_plug_manager/midi/MidiControllerManager.dart';
+ import 'package:mighty_plug_manager/platform/simpleSharedPrefs.dart';
+ import 'package:permission_handler/permission_handler.dart';
+-import 'package:sentry_flutter/sentry_flutter.dart';
+ import 'UI/popups/alertDialogs.dart';
+ import 'UI/widgets/NuxAppBar.dart' as NuxAppBar;
+ import 'UI/widgets/nestedWillPopScope.dart';
+@@ -30,7 +29,6 @@ import 'UI/pages/jamTracks.dart';
+ import 'UI/pages/settings.dart';
+ 
+ //recreate this file with your own api keys
+-import 'configKeys.dart';
+ 
+ //able to create snackbars/messages everywhere
+ final navigatorKey = GlobalKey<NavigatorState>();
+@@ -49,53 +47,9 @@ void main() {
+   WidgetsFlutterBinding.ensureInitialized();
+   SharedPrefs prefs = SharedPrefs();
+ 
+-  //capture flutter errors
+-  if (!kDebugMode)
+-    FlutterError.onError = (FlutterErrorDetails details) {
+-      print("");
+-      DebugConsole.print("Flutter error: ${details.toString()}");
+-
+-      //update diagnostics with json preset
+-      NuxDeviceControl().updateDiagnosticsData(includeJsonPreset: true);
+-
+-      // Send report
+-      Sentry.captureException(
+-        details,
+-        stackTrace: details.stack,
+-      );
+-    };
+-
+-  if (!kDebugMode) {
+-    runZonedGuarded(() {
+-      prefs.waitLoading().then((value) async {
+-        if (!kDebugMode) {
+-          await SentryFlutter.init((options) {
+-            options.dsn = sentryDsn;
+-          });
+-        }
+-        mainRunApp();
+-      });
+-    }, (Object error, StackTrace stackTrace) async {
+-      // Whenever an error occurs, call the `_reportError` function. This sends
+-      // Dart errors to the dev console or Sentry depending on the environment.
+-      //_reportError(error, stackTrace);
+-
+-      DebugConsole.print("Dart error: ${error.toString()}");
+-      DebugConsole.print(stackTrace);
+-
+-      //update diagnostics with json preset
+-      NuxDeviceControl().updateDiagnosticsData(includeJsonPreset: true);
+-
+-      await Sentry.captureException(
+-        error,
+-        stackTrace: stackTrace,
+-      );
+-    });
+-  } else {
+     prefs.waitLoading().then((value) {
+       mainRunApp();
+     });
+-  }
+ }
+ 
+ mainRunApp() {
+diff --git a/pubspec.lock b/pubspec.lock
+index b29468b..63c54c7 100644
+--- a/pubspec.lock
++++ b/pubspec.lock
+@@ -506,20 +506,6 @@ packages:
+       url: "https://pub.dartlang.org"
+     source: hosted
+     version: "1.2.3"
+-  sentry:
+-    dependency: transitive
+-    description:
+-      name: sentry
+-      url: "https://pub.dartlang.org"
+-    source: hosted
+-    version: "6.0.0"
+-  sentry_flutter:
+-    dependency: "direct main"
+-    description:
+-      name: sentry_flutter
+-      url: "https://pub.dartlang.org"
+-    source: hosted
+-    version: "6.0.1"
+   share_plus:
+     dependency: "direct main"
+     description:
+diff --git a/pubspec.yaml b/pubspec.yaml
+index 3c014fd..55c5abd 100644
+--- a/pubspec.yaml
++++ b/pubspec.yaml
+@@ -55,7 +55,6 @@ dependencies:
+   page_view_indicators: ^2.0.0
+   uuid: ^3.0.1
+   marquee_text: ^2.0.0
+-  sentry_flutter: ^6.0.1
+ 
+   #some fixes added to flutter_blue library,
+   flutter_blue:
