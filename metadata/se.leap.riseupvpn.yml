@@ -185,10 +185,47 @@ Builds:
       - gradle main:externalNativeBuildCleanSkeletonRelease main:externalNativeBuildSkeletonRelease
     ndk: r20b
 
+  - versionName: 1.1.0
+    versionCode: 158
+    commit: 7dd9277d6410c2aa1b00283294ba87ab3c143a38
+    subdir: app
+    submodules: true
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y -t testing golang-go
+    gradle:
+      - customProductionFat
+    prebuild:
+      - $$SDK$$/tools/bin/sdkmanager 'platforms;android-30' 'build-tools;30.0.3' >
+        /dev/null
+      - sed -i -e "/^task updateSdkLicences/,/^}/d; /commandLine 'git'/d" build.gradle
+      - sed -i -e '/android {/a ndkVersion = "20.1.5948944"' ../ics-openvpn/main/build.gradle.kts
+    scandelete:
+      - bitmask-core
+      - bitmask-web-core
+      - go/src
+      - ics-openvpn/main/src/main/cpp
+    build:
+      - cd ../go
+      - export GOPATH="$PWD"
+      - export GO_COMPILED="$PWD/bin"
+      - export PATH="$GO_COMPILED:$PATH"
+      - go get golang.org/x/mobile/cmd/gomobile
+      - gomobile init
+      - mkdir -p ./lib
+      - gomobile bind -target=android -o ./lib/bitmask-web-core.aar se.leap.bitmaskclient/shapeshifter/
+        se.leap.bitmaskclient/pgpverify
+      - cp lib/bitmask-web-core* ../bitmask-web-core/.
+      - gomobile bind -target=android -o ./lib/bitmask-core.aar se.leap.bitmaskclient/shapeshifter/
+      - cp lib/bitmask-core* ../bitmask-core/.
+      - cd ../ics-openvpn
+      - gradle main:externalNativeBuildCleanSkeletonRelease main:externalNativeBuildSkeletonRelease
+    ndk: r20b
+
 MaintainerNotes: The "build" commands are extracted from build_deps.sh.
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^[0-9.]+$
 UpdateCheckName: se.leap.bitmaskclient
-CurrentVersion: 1.0.9
-CurrentVersionCode: 155
+CurrentVersion: 1.1.0
+CurrentVersionCode: 158
