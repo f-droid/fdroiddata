@@ -685,6 +685,38 @@ Builds:
         == null/def disableCMakeRelWithDebInfo = false/' TMessagesProj/build.gradle
     ndk: r21e
 
+  - versionName: 8.2.7
+    versionCode: 485
+    commit: a6f4408cd7047dcffa8c146fe78c62e76463a7cd
+    timeout: 10800
+    subdir: TMessagesProj
+    submodules: true
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y ninja-build openjdk-11-jdk-headless
+      - update-alternatives --auto java
+    gradle:
+      - miniFdroidArm64
+    output: build/outputs/apk/mini/*/*.apk
+    prebuild:
+      - echo -e "\norg.gradle.jvmargs=-Xms1024m -Xmx4096m -XX:MaxPermSize=4096m" >>
+        ../gradle.properties
+      - pushd ..
+      - ./run fdroid prebuild
+    scandelete:
+      - TMessagesProj
+    build:
+      - export NINJA_PATH=/usr/bin/ninja
+      - pushd ..
+      - ./run fdroid build
+      - source bin/init/env.sh
+      - go clean -cache
+      - git rev-parse HEAD
+      - git gc --prune=now
+      - sed -i -e 's/def disableCMakeRelWithDebInfo = System.getenv("COMPILE_NATIVE")
+        == null/def disableCMakeRelWithDebInfo = false/' TMessagesProj/build.gradle
+    ndk: r21e
+
 MaintainerNotes: |
     The best we can do now is auto update the arm64 version. The arm version has to be updated manually for now.
 
@@ -695,4 +727,4 @@ AutoUpdateMode: Version %v-arm64
 UpdateCheckMode: Tags
 UpdateCheckData: TMessagesProj/build.gradle|verCode\s=\s(\d+)||v([\d.]+)
 CurrentVersion: 8.2.7
-CurrentVersionCode: 470
+CurrentVersionCode: 485
