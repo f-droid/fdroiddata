@@ -100,12 +100,11 @@ schema validation:
     - ajv compile -s schemas/*.json || exit 1
     - git fetch https://gitlab.com/fdroid/fdroiddata.git
     - set -xe
-    - app_ids=$(git diff --name-only --diff-filter=d FETCH_HEAD...HEAD "metadata/*.yml")
-    - if [ -n "$app_ids" ]; then
-        for app_id in $app_ids; do
-          ajv validate -s schemas/metadata.json -d "$app_id";
-        done
-      fi
+    - for file in
+        $(git diff --name-only --diff-filter=d FETCH_HEAD...HEAD -- "metadata/*.yml");
+      do
+        ajv validate -s schemas/metadata.json -d "$file";
+      done
 
 trigger-issuebot:
   image: alpine
