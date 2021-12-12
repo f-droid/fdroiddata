@@ -1,3 +1,5 @@
+include:
+  - template: Security/SAST.gitlab-ci.yml
 
 variables:
   pip: pip3 --timeout 100 --retries 10
@@ -395,3 +397,21 @@ check_git_repos:
     - test -d public || mkdir public
     - cp `git status | grep -Eo 'metadata/.*\.yml'` public/ || true
     - exit $EXITVALUE
+
+sast:
+  variables:
+    MOBSF_API_KEY: key
+    SAST_EXPERIMENTAL_FEATURES: "true"
+    SAST_EXCLUDED_ANALYZERS:
+      bandit, brakeman, eslint, flawfinder, gosec, kubesec,
+      nodejs-scan, phpcs-security-audit, pmd-apex, security-code-scan, semgrep, sobelow,
+      spotbugs
+
+    # Make sure the apk is searched before the manifest, so only apks are scanned
+    ANALYZER_TARGET_DIR: $CI_PROJECT_DIR/tmp/
+  needs:
+    - fdroid build
+
+mobsf-ios-sast:
+  rules:
+    - when: never
