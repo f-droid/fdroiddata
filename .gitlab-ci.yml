@@ -1,6 +1,11 @@
 include:
   - template: Security/SAST.gitlab-ci.yml
 
+stages:
+  - build
+  - test
+  - report
+
 variables:
   pip: pip3 --timeout 100 --retries 10
 
@@ -399,6 +404,7 @@ check_git_repos:
     - exit $EXITVALUE
 
 sast:
+  stage: report
   variables:
     MOBSF_API_KEY: key
     SAST_EXPERIMENTAL_FEATURES: "true"
@@ -409,17 +415,10 @@ sast:
 
     # Make sure the apk is searched before the manifest, so only apks are scanned
     ANALYZER_TARGET_DIR: $CI_PROJECT_DIR/tmp/
-  needs:
-    - fdroid build
   rules:
-    - if: '$CI_DEFAULT_BRANCH && $CI_PROJECT_PATH == "fdroid/fdroiddata"'
+    - if: '$CI_PIPELINE_SOURCE != "merge_request_event"'
       when: never
-    - if: '$CI_PIPELINE_SOURCE == "pipeline"'
-      when: never
-    - if: '$CI_PIPELINE_SOURCE == "schedule"'
-      when: never
-    - if: '$CI_PIPELINE_SOURCE == "trigger"'
-      when: never
+  allow_failure: true
 
 mobsf-ios-sast:
   rules:
