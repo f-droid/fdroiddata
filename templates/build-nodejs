@@ -1,0 +1,40 @@
+# PLEASE REMOVE ALL COMMENTS BEFORE SUBMITTING TO F-DROID DATA!
+
+# Starting from the following template and grep for "npm" in the metadata
+# directory to see other examples.
+
+Builds:
+  - versionName: "1.0"
+    versionCode: 1
+    commit: "1.0"
+    subdir: android/app/
+    sudo:
+      - sysctl fs.inotify.max_user_watches=524288
+      # Find the nodejs download URL at https://nodejs.org/en/download/releases/
+      - curl -Lo node.tar.gz https://nodejs.org/download/release/v14.18.2/node-v14.18.2-linux-x64.tar.gz
+      # Find the checksum at https://nodejs.org/dist/v${VERSION}/SHASUMS256.txt.asc
+      - echo "83fa18a0e3642235446b66653eb27c169224ae9c1a15a32d6c3d9ddefb154ed4 node.tar.gz" | sha256sum -c -
+      - tar xf node.tar.gz
+      - cp -a node-v*-linux-x64/. /usr/local/
+      - rm -rf node-v*-linux-x64/
+      # If you use yarn
+      - npm -g install yarn
+    init:
+      - cd ../..
+      # For NPM
+      - npm cache clean
+      - npm install --build-from-source
+      # For Yarn
+      - yarn cache clean
+      - npm_config_build_from_source=true yarn --force
+    gradle:
+      - yes
+    scanignore:
+      - android/build.gradle
+    scandelete:
+      - node_modules/
+
+AutoUpdateMode: Version %v
+UpdateCheckMode: Tags
+CurrentVersion: "1.0"
+CurrentVersionCode: 1
