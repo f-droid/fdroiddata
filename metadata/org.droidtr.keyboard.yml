@@ -231,14 +231,14 @@ Builds:
     versionCode: 66
     disable: https://gitlab.com/droidtr/org.droidtr.keyboard/-/issues/5
     commit: 59ea13047fa2b8eab670e0c89af2289e83fc01e2
-    output: bin/app.apk
+    output: gnubuild/bin/app.apk
     prebuild:
-      - sed -i -e 's|~/Android/Sdk|$$SDK$$|' -e 's/ sign//' Makefile
-      - android update sdk --no-ui --filter android-28
+      - sed -i -e 's|~/Android/Sdk|$$SDK$$|' -e '/all:/s/ sign//' gnubuild/Makefile
+      - android update sdk --no-ui --filter android-30
     build:
-      - JAVA_HOME=$(file /etc/alternatives/javac | cut -d " " -f 5|cut -d "/" -f 1-5)
-        make
-      - mv bin/app.ap_ bin/app.apk
+      - $$SDK$$/tools/bin/sdkmanager 'platforms;android-30' 'build-tools;30.0.3'
+      - JAVA_HOME=$(readlink -f /usr/bin/javac | sed "s:/bin/javac::") make
+      - mv gnubuild/bin/app.{ap_,apk}
 
 AutoUpdateMode: Version %v
 UpdateCheckMode: Tags
