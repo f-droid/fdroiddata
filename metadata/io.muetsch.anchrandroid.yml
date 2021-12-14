@@ -29,14 +29,19 @@ Builds:
 
   - versionName: 1.2.3
     versionCode: 31
-    disable: https://monitor.f-droid.org/builds/log/io.muetsch.anchrandroid/31#site-footer
     commit: e60f305b9d9cbb010bf5d3cf21cc8e01ab2f41de
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y openjdk-11-jdk-headless
+      - update-alternatives --auto java
     output: build/app/outputs/apk/fdroid/release/app-fdroid-release.apk
     srclibs:
       - flutter@2.5.3
     rm:
       - ios
-    prebuild: $$flutter$$/bin/flutter pub get
+    prebuild:
+      - sed -i -e '/org.gradle.java.home/d' android/gradle.properties
+      - $$flutter$$/bin/flutter pub get
     build: $$flutter$$/bin/flutter build apk --flavor fdroid
 
 AutoUpdateMode: Version
