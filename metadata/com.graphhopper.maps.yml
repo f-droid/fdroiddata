@@ -1,0 +1,45 @@
+Categories:
+  - Navigation
+License: Apache-2.0
+WebSite: https://www.graphhopper.com/
+SourceCode: https://github.com/boldtrn/graphhopper-maps-capacitor
+IssueTracker: https://github.com/boldtrn/graphhopper-maps-capacitor/issues
+
+AutoName: GraphHopper Maps
+
+RepoType: git
+Repo: https://github.com/boldtrn/graphhopper-maps-capacitor.git
+
+Builds:
+  - versionName: '1.0'
+    versionCode: 1
+    commit: v1.0
+    subdir: android/app
+    submodules: true
+    sudo:
+      - sysctl fs.inotify.max_user_watches=524288
+      - curl -Lo node.tar.xz https://nodejs.org/dist/v16.2.0/node-v16.2.0-linux-x64.tar.xz
+      - echo "e134c8738761ab908aac3b62efa4865d8a7c73e40cc7758c6e99244921696216 node.tar.xz"
+        | sha256sum -c -
+      - tar xJf node.tar.xz
+      - cp -a node-v16.2.0-linux-x64/. /usr/local/
+    init:
+      - cd ../..
+      - cp config.js graphhopper-maps/
+      - cd graphhopper-maps
+      - npm install
+      - npm run build
+      - cd ..
+      - npm install
+      - npm run build
+      - npx cap sync
+    gradle:
+      - yes
+    scandelete:
+      - node_modules/
+      - graphhopper-maps/node_modules/
+
+AutoUpdateMode: Version v%v
+UpdateCheckMode: Tags
+CurrentVersion: '1.0'
+CurrentVersionCode: 1
