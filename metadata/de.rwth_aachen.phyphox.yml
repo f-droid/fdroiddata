@@ -84,7 +84,6 @@ Builds:
 
   - versionName: 1.1.10
     versionCode: 1011002
-    disable: unknown maven repo
     commit: bc0df2d379f50b4408c9f0f373c8302c3f26bcd2
     subdir: app
     submodules: true
@@ -94,11 +93,14 @@ Builds:
       - update-alternatives --auto java
     gradle:
       - regular
+    rm:
+      - paho.mqtt.android/org.eclipse.paho.android.sample
+      - paho.mqtt.android/paho.mqtt.android.example
     prebuild:
-      - sed -i -e '/org.eclipse.paho/d' -e '/dependencies {/a implementation "org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.5"'
-        -e '/dependencies {/a implementation "org.eclipse.paho:org.eclipse.paho.android.service:1.1.1"'
+      - cd ../paho.mqtt.android
+      - sed -i -e 's|file://$sdkDir/extras/android/m2repository/|https://jitpack.io|'
         build.gradle
-      - sed -i -e '/jcenter/a mavenCentral()' ../build.gradle
+      - sed -i -e '/publishing {/,/^}/d' -e '/maven-publish/d' org.eclipse.paho.android.service/build.gradle
     ndk: r21e
 
 AutoUpdateMode: Version v%v
