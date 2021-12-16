@@ -1050,9 +1050,38 @@ Builds:
       - build-cache
     ndk: r21
 
+  - versionName: 5.105.1
+    versionCode: 51051000
+    commit: 5.105.1
+    submodules: true
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y openjdk-11-jdk-headless
+      - update-alternatives --auto java
+    gradle:
+      - fdroid
+    output: app/build/outputs/apk/fdroid/release/duckduckgo-$$VERSION$$-fdroid-release-unsigned.apk
+    rm:
+      - app/src/play/res/raw/https_mobile_v2_bloom.bin
+    prebuild:
+      - wget -O /tmp/cmdline-tools.zip -t 5 "https://dl.google.com/android/repository/commandlinetools-linux-7583922_latest.zip"
+      - echo "124f2d5115eee365df6cf3228ffbca6fc3911d16f8025bebd5b1c6e2fcfa7faf /tmp/cmdline-tools.zip"  |
+        sha256sum -c -
+      - unzip -q -o /tmp/cmdline-tools.zip -d /tmp/cmdline-tools
+      - rm /tmp/cmdline-tools.zip
+      - mkdir -p ${ANDROID_SDK_ROOT}/cmdline-tools/tools
+      - mv /tmp/cmdline-tools/cmdline-tools/* ${ANDROID_SDK_ROOT}/cmdline-tools/tools
+        || true
+      - export PATH=${ANDROID_SDK_ROOT}/cmdline-tools/tools/bin:${PATH}
+      - yes | sdkmanager --licenses
+      - sdkmanager "build-tools;31.0.0" "platforms;android-31"
+    scandelete:
+      - build-cache
+    ndk: r21
+
 MaintainerNotes: Cannot use AUM/UCM because version code and version name are dynamic.
 
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: 5.102.3
-CurrentVersionCode: 51023000
+CurrentVersion: 5.105.1
+CurrentVersionCode: 51051000
