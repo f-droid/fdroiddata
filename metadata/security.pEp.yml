@@ -43,7 +43,7 @@ Description: |-
     Just install the app and you can communicate in confidence with your peers.
 
 RepoType: git
-Repo: https://letsencrypt.pep-security.lu/gitlab/android/pep.git
+Repo: https://pep-security.lu/gitlab/android/pep.git
 
 Builds:
   - versionName: 1.1.008
@@ -805,7 +805,55 @@ Builds:
       - sed -i 's:cargo:~/.cargo/bin/cargo:' $$pEpJNIAdapter$$/android/external/**/Makefile
     ndk: r21
 
+  - versionName: v1.1.273
+    versionCode: 470
+    commit: v1.1.273
+    subdir: k9mail
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -t testing asn1c
+      - apt-get install -y --no-install-recommends g++ clang capnproto libsqlite3-dev
+        libclang-3.9-dev
+    gradle:
+      - WithkeysyncFDroid
+    srclibs:
+      - yml2@2.6.3
+      - pEpEngine@Release_2.1.45
+      - pEpJNIAdapter@Release_2.1.35-sequoia_1.3.1
+      - libpEpAdapter@Release_2.1.21
+      - foldable-folder-list@v0.2-Licensed
+      - sequoia-pgp@openpgp/v1.3.0
+      - rustup@1.24.3
+    prebuild:
+      - $$rustup$$/rustup-init.sh -v -y --default-toolchain $(cat $$sequoia-pgp$$/rust-toolchain)
+        -t i686-linux-android -t x86_64-linux-android -t armv7-linux-androideabi -t
+        aarch64-linux-android
+      - ~/.cargo/bin/rustup -v component add rust-src
+      - echo '[target.aarch64-linux-android]'               > ~/.cargo/config
+      - echo 'ar     = "aarch64-linux-android-ar"'         >> ~/.cargo/config
+      - echo 'linker = "aarch64-linux-android21-clang"'    >> ~/.cargo/config
+      - echo '[target.armv7-linux-androideabi]'            >> ~/.cargo/config
+      - echo 'ar     = "arm-linux-androideabi-ar"'         >> ~/.cargo/config
+      - echo 'linker = "armv7a-linux-androideabi21-clang"' >> ~/.cargo/config
+      - echo '[target.x86_64-linux-android]'               >> ~/.cargo/config
+      - echo 'ar     = "x86_64-linux-android-ar"'          >> ~/.cargo/config
+      - echo 'linker = "x86_64-linux-android21-clang"'     >> ~/.cargo/config
+      - echo '[target.i686-linux-android]'                 >> ~/.cargo/config
+      - echo 'ar     = "i686-linux-android-ar"'            >> ~/.cargo/config
+      - echo 'linker = "i686-linux-android21-clang"'       >> ~/.cargo/config
+      - echo "org.gradle.jvmargs=-Xms1g -Xmx4g -XX:MaxPermSize=4g" >> ../gradle.properties
+      - echo "YML2_PATH=$$yml2$$" >> $$pEpEngine$$/local.conf
+      - echo "YML2_PATH=$$yml2$$" >> $$pEpJNIAdapter$$/local.conf
+      - echo "ENGINE_INC_PATH=$$pEpEngine$$" >> $$pEpJNIAdapter$$/local.conf
+      - ln -s $$pEpEngine$$/src $$pEpEngine$$/pEp
+      - sed -i 's:enable true:enable false:' build.gradle
+      - sed -i 's:../:../srclib/:' ../settings.gradle
+      - sed -i 's:cargo:~/.cargo/bin/cargo:' $$pEpJNIAdapter$$/android/external/**/Makefile
+      - sed -i 's/grgit-gradle:4.1.0/grgit-gradle:4.1.1/' ../gradle/plugins/utils/git-version.gradle
+      - sed -i 's/appVersionOffset = 50/appVersionOffset = 423/' ../gradle/plugins/utils/git-version.gradle
+    ndk: r21
+
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: v1.1.272
-CurrentVersionCode: 469
+CurrentVersion: v1.1.273
+CurrentVersionCode: 470
