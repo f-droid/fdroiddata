@@ -276,7 +276,93 @@ Builds:
       - make apk_release
     ndk: r18b
 
+  - versionName: '2.0'
+    versionCode: 20000
+    commit: V2.0
+    submodules: true
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y -t stretch-backports-sloppy libarchive13
+      - apt-get install -y -t stretch-backports cmake libncurses5
+      - apt-get install -y libgl1-mesa-dev g++ zlib1g-dev
+    output: android-build/android/GCompris-Android-release-armeabi-v7a-dl-$$VERSION$$.apk
+    srclibs:
+      - extra-cmake-modules@v5.63.0
+      - OpenSSL@OpenSSL_1_1_1m
+    prebuild: mkdir qt/ android-build/
+    scandelete:
+      - installer/
+    build:
+      - export ANDROID_NDK=$$NDK$$
+      - export ANDROID_NDK_ROOT=$$NDK$$
+      - export ANDROID_SDK_ROOT=$$SDK$$
+      - export QT_VERSION=5.12.9
+      - export PREFIX=$(pwd)/qt/install/
+      - export OPENSSL_LIBS=-L$PREFIX'/lib -lssl -lcrypto'
+      - pushd $$OpenSSL$$
+      - PATH=$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH ./Configure shared
+        android-arm -D__ANDROID_API__=21 --prefix=$PREFIX
+      - PATH=$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH make depend
+      - PATH=$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH make build_libs
+        SHLIB_VERSION_NUMBER= SHLIB_EXT=.so
+      - PATH=$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH make install_sw
+        SHLIB_VERSION_NUMBER= SHLIB_EXT=.so
+      - popd
+      - pushd qt/
+      - git clone https://code.qt.io/cgit/qt/qtbase.git --single-branch --branch $QT_VERSION
+      - pushd qtbase
+      - sed -i '/<string.h>/a \#include <limits>\n\#include <algorithm>' src/corelib/global/qendian.h
+      - sed -i '/<QtCore\/qbytearray.h>/a \#include <limits>\n\#include <algorithm>'
+        src/corelib/tools/qbytearraymatcher.h
+      - sed -i '/<stdio.h>/a \#include <limits>\n\#include <algorithm>' src/tools/moc/generator.cpp
+      - ./configure -xplatform android-clang --disable-rpath -openssl-linked -nomake
+        tests -nomake examples -android-ndk $$NDK$$ -android-sdk $$SDK$$ -no-warnings-are-errors
+        -opensource -confirm-license -prefix $PREFIX -I$PREFIX/include
+      - make -j$(nproc)
+      - make install
+      - popd
+      - export CMAKE_QT_LIB=${PREFIX}/lib/cmake/
+      - git clone https://code.qt.io/qt/qtdeclarative.git --single-branch --branch=$QT_VERSION
+      - pushd qtdeclarative
+      - sed -i '/qv4global_p.h>/a \#include <limits>\n\#include <algorithm>\n' src/qml/jsruntime/qv4propertykey_p.h
+      - QMAKESPEC=android-clang $PREFIX/bin/qmake .
+      - make -j$(nproc)
+      - make install
+      - popd
+      - for module in qtquickcontrols qtsvg qtandroidextras qtgraphicaleffects qttools
+        qtmultimedia qtimageformats qtsensors qttranslations; do git clone https://code.qt.io/qt/${module}.git
+        --single-branch --branch=$QT_VERSION
+      - pushd ${module}
+      - QMAKESPEC=android-clang $PREFIX/bin/qmake .
+      - make -j$(nproc)
+      - make install
+      - popd; done
+      - popd
+      - mkdir $$extra-cmake-modules$$/build
+      - pushd $$extra-cmake-modules$$/build
+      - cmake -DCMAKE_INSTALL_PREFIX=. -DBUILD_HTML_DOCS=OFF -DBUILD_MAN_DOCS=OFF
+        -DBUILD_TESTING=OFF ..
+      - make
+      - make install
+      - popd
+      - sed -i 's=${OPENSSL_DIR}/libcrypto.so.1.1=$$OpenSSL$$/libcrypto.so=g' android/CMakeLists.txt
+      - sed -i 's=${OPENSSL_DIR}/libssl.so.1.1=$$OpenSSL$$/libssl.so=g' android/CMakeLists.txt
+      - pushd android-build
+      - cmake -DANDROID_PLATFORM=android-21 -DANDROID_API_LEVEL=21 -DCMAKE_ANDROID_API=21
+        -DCMAKE_TOOLCHAIN_FILE=$$NDK$$/build/cmake/android.toolchain.cmake -DQt5_DIR=${CMAKE_QT_LIB}/Qt5/
+        -DQt5Core_DIR=${CMAKE_QT_LIB}/Qt5Core/ -DQt5Widgets_DIR=${CMAKE_QT_LIB}/Qt5Widgets
+        -DQt5Qml_DIR=${CMAKE_QT_LIB}/Qt5Qml -DQt5Gui_DIR=${CMAKE_QT_LIB}/Qt5Gui -DQt5Svg_DIR=${CMAKE_QT_LIB}/Qt5Svg
+        -DQt5Sensors_DIR=${CMAKE_QT_LIB}/Qt5Sensors -DQt5AndroidExtras_DIR=${CMAKE_QT_LIB}/Qt5AndroidExtras
+        -DQt5LinguistTools_DIR=${CMAKE_QT_LIB}/Qt5LinguistTools -DQt5Quick_DIR=${CMAKE_QT_LIB}/Qt5Quick
+        -DQt5Multimedia_DIR=${CMAKE_QT_LIB}/Qt5Multimedia -DQt5Network_DIR=${CMAKE_QT_LIB}/Qt5Network
+        -Wno-dev ../
+      - make getSvnTranslations
+      - cmake -DCMAKE_TOOLCHAIN_FILE=/usr/share/ECM/toolchain/Android.cmake ../
+      - make
+      - make apk_release
+    ndk: r21e
+
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: '1.1'
-CurrentVersionCode: 10100
+CurrentVersion: '2.0'
+CurrentVersionCode: 20000
