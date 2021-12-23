@@ -209,7 +209,7 @@ checkupdates_runner:
     - 'grep -v "INFO: Processing" /tmp/out || true'
 
 fdroid build:
-  image: registry.gitlab.com/fdroid/ci-images-client:latest
+  image: registry.gitlab.com/fdroid/fdroidserver:buildserver
   artifacts:
     name: "${CI_PROJECT_PATH}_${CI_JOB_STAGE}_${CI_COMMIT_REF_NAME}_${CI_COMMIT_SHA}"
     paths:
@@ -244,48 +244,37 @@ fdroid build:
     - test -n "$(printf "$CHANGED" | tr -d '[:space:]')"
           || { echo "no packages need processing, exiting"; exit 0; }
 
-    - test -d fdroidserver || mkdir fdroidserver
+    - apt-get update
+    - apt-get dist-upgrade
+
+    - source /etc/profile.d/bsenv.sh
+
+    # TODO remove sdkmanager install once it is included in the buildserver image
+    - git clone --depth=1 --branch=0.5.2 https://gitlab.com/fdroid/sdkmanager.git
+    - git -C sdkmanager checkout -B master 59374827baed7020c9761d9c8f51dcf9b490ba28
+    - pip3 install -e sdkmanager
+    - rm -rf $ANDROID_HOME/tools  # TODO remove once sdkmanager can upgrade installed packages
+    - sdkmanager "tools" "platform-tools" "build-tools;31.0.0"
+
+    - test -d $fdroidserver || mkdir $fdroidserver
     - git ls-remote https://gitlab.com/fdroid/fdroidserver.git master
     - curl --silent https://gitlab.com/fdroid/fdroidserver/-/archive/master/fdroidserver-master.tar.gz
-          | tar -xz --directory=fdroidserver --strip-components=1
+          | tar -xz --directory=$fdroidserver --strip-components=1
 
-    - adduser --disabled-password --gecos "" vagrant
-    - test -d /etc/sudoers.d || mkdir /etc/sudoers.d
-    - echo "vagrant ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/vagrant
-
-    - export VAGRANT_HOME=/home/vagrant
-    - ln -s $CI_PROJECT_DIR/fdroidserver $VAGRANT_HOME/fdroidserver
-    - cp -r $HOME/.android $VAGRANT_HOME/.android
-    - for d in build logs tmp unsigned $ANDROID_HOME $VAGRANT_HOME/.android; do
+    - for d in logs tmp unsigned $home_vagrant/build $home_vagrant/.android; do
           test -d $d || mkdir $d;
           chown -R vagrant $d;
       done
-    - mv $CI_PROJECT_DIR/build $VAGRANT_HOME/
-    - ln -s $VAGRANT_HOME/build $CI_PROJECT_DIR/build
+    - ln -s $home_vagrant/build $CI_PROJECT_DIR/build
 
-    - bash fdroidserver/buildserver/setup-env-vars $ANDROID_HOME
-    - bash fdroidserver/buildserver/provision-gradle
-    - bash fdroidserver/buildserver/provision-apt-get-install http://deb.debian.org/debian
-    - source /etc/profile.d/bsenv.sh
-    - apt-get dist-upgrade
-
-    # install fdroidserver from git, with deps from Debian, until fdroidserver
-    # is stable enough to include all the things needed here
-    - apt-get install -t stretch-backports
-         fdroidserver
-         python3-asn1crypto
-         python3-ruamel.yaml
-         yamllint
-    - apt-get purge fdroidserver
-
-    - export GRADLE_USER_HOME=$VAGRANT_HOME/.gradle
+    - export GRADLE_USER_HOME=$home_vagrant/.gradle
     # each `fdroid build --on-server` run expects sudo, then uninstalls it
     - export fdroid="sudo --preserve-env --user vagrant
-          env PATH=$VAGRANT_HOME/fdroidserver:$PATH
-          env PYTHONPATH=$VAGRANT_HOME/fdroidserver:$VAGRANT_HOME/fdroidserver/examples
+          env PATH=$fdroidserver:$PATH
+          env PYTHONPATH=$fdroidserver:$fdroidserver/examples
           env PYTHONUNBUFFERED=true
           env TERM=$TERM
-          env HOME=$VAGRANT_HOME
+          env HOME=$home_vagrant
           fdroid"
 
     # use fdroidserver test keystore as placeholder since `fdroid publish` requires it
@@ -293,14 +282,14 @@ fdroid build:
     - printf 'keystorepass\x3a r9aquRHYoI8+dYz6jKrLntQ5/NJNASFBacJh7Jv2BlI=\n' >> config.yml
     - printf 'keypass\x3a r9aquRHYoI8+dYz6jKrLntQ5/NJNASFBacJh7Jv2BlI=\n' >> config.yml
     - printf 'keydname\x3a "CN=Birdman, OU=Cell, O=Alcatraz, L=Alcatraz, S=California, C=US"\n' >> config.yml
-    - keystore=$CI_PROJECT_DIR/fdroidserver/tests/keystore.jks
+    - keystore=$fdroidserver/tests/keystore.jks
     - printf "keystore\x3a $keystore\n" >> config.yml
     - chown vagrant $keystore
 
     - for build in `./tools/find-changed-builds.py`; do
           set -x;
           apt-get install sudo;
-          chown -R vagrant $VAGRANT_HOME;
+          chown -R vagrant $home_vagrant;
           $fdroid fetchsrclibs $build --verbose;
           $fdroid build --verbose --test --scan-binary --on-server --no-tarball $build;
           rm -rf "build/${build%:*}";
@@ -323,7 +312,7 @@ fdroid build:
 # This job has to be called 'pages' because it deploys the JSON API
 # to GitLab Pages.
 pages:
-  image: registry.gitlab.com/fdroid/ci-images-client:latest
+  image: registry.gitlab.com/fdroid/fdroidserver:buildserver
   only:
     refs:
       - branches
@@ -345,20 +334,13 @@ pages:
   script:
     - apt-get update
     - apt-get dist-upgrade
-    # install fdroidserver from git, with deps from Debian, until fdroidserver
-    # is stable enough to include all the things needed here
-    - apt-get install -t stretch-backports
-         fdroidserver
-         python3-asn1crypto
-         python3-ruamel.yaml
-         python3-venv
-    - apt-get purge fdroidserver
-    - test -d fdroidserver || mkdir fdroidserver
+
+    - test -d $fdroidserver || mkdir $fdroidserver
     - git ls-remote https://gitlab.com/fdroid/fdroidserver.git master
     - curl --silent https://gitlab.com/fdroid/fdroidserver/-/archive/master/fdroidserver-master.tar.gz
-        | tar -xz --directory=$CI_PROJECT_DIR/fdroidserver --strip-components=1
-    - export PATH="$CI_PROJECT_DIR/fdroidserver:$PATH"
-    - export PYTHONPATH="$CI_PROJECT_DIR/fdroidserver:$CI_PROJECT_DIR/fdroidserver/examples"
+        | tar -xz --directory=$fdroidserver --strip-components=1
+    - export PATH="$fdroidserver:$PATH"
+    - export PYTHONPATH="$fdroidserver:$fdroidserver/examples"
     - export PYTHONUNBUFFERED=true
 
     - export GRADLE_USER_HOME=$PWD/.gradle
