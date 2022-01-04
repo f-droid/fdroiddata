@@ -2459,9 +2459,78 @@ Builds:
       - popd
     ndk: r21e
 
+  - versionName: 3.9.6
+    versionCode: 3000320
+    commit: 3.9.6
+    subdir: android/app/
+    sudo:
+      - sysctl fs.inotify.max_user_watches=524288
+      - curl -Lo node.tar.gz https://nodejs.org/download/release/v14.18.2/node-v14.18.2-linux-x64.tar.gz
+      - echo "83fa18a0e3642235446b66653eb27c169224ae9c1a15a32d6c3d9ddefb154ed4 node.tar.gz"
+        | sha256sum -c -
+      - tar xf node.tar.gz
+      - cp -a node-v*-linux-x64/. /usr/local/
+      - rm -rf node-v*-linux-x64/
+      - npm -g install yarn
+    init:
+      - cd ../..
+      - yarn cache clean snjs
+      - npm_config_build_from_source=true yarn --force
+    patch:
+      - bugsnag-3.9.4.patch
+    gradle:
+      - prod
+    srclibs:
+      - libsodium@1.0.18
+    rm:
+      - .gitmodules
+    prebuild:
+      - wget -O /tmp/cmdline-tools.zip -t 5 "https://dl.google.com/android/repository/commandlinetools-linux-7583922_latest.zip"
+      - echo "124f2d5115eee365df6cf3228ffbca6fc3911d16f8025bebd5b1c6e2fcfa7faf /tmp/cmdline-tools.zip"  |
+        sha256sum -c -
+      - unzip -q -o /tmp/cmdline-tools.zip -d /tmp/cmdline-tools
+      - rm /tmp/cmdline-tools.zip
+      - mkdir -p ${ANDROID_SDK_ROOT}/cmdline-tools/tools
+      - mv /tmp/cmdline-tools/cmdline-tools/* ${ANDROID_SDK_ROOT}/cmdline-tools/tools
+        || true
+      - export PATH=${ANDROID_SDK_ROOT}/cmdline-tools/tools/bin:${PATH}
+      - yes | sdkmanager --licenses
+      - sdkmanager 'cmake;3.10.2.4988404' > /dev/null
+      - sed -i -e '/detox/d' -e '/DETOX_CI/d' build.gradle
+      - echo "android { splits { abi { enable false } } }" >> build.gradle
+      - sed -i -e "s/versionName appVersionName/versionName \"$$VERSION$$\"/" -e "s/versionCode
+        appVersionCode/versionCode $$VERCODE$$/" build.gradle
+      - sed -i -e "/appVersionName/d" -e "/appVersionCode/d" build.gradle
+      - sed -i -e "/@bugsnag\/react-native/d" -e "/bugsnag-sourcemaps/d" ../../package.json
+    scanignore:
+      - android/build.gradle
+      - node_modules/hermes-engine
+      - node_modules/jsc-android
+      - node_modules/react-native
+      - node_modules/detox/android/build.gradle
+      - node_modules/detox/android/detox/detox-publishing.gradle
+      - node_modules/sn-textview/android/build.gradle
+      - node_modules/standard-notes-rn/android/build.gradle
+      - node_modules/@react-native-community/async-storage/android/build.gradle
+      - node_modules/@react-native-community/masked-view/android/build.gradle
+      - node_modules/@react-native-community/netinfo/android/build.gradle
+    scandelete:
+      - node_modules/
+    build:
+      - lib="$PWD/../../node_modules/react-native-sodium/libsodium"
+      - target_sdk_version=`sed -n -E 's/.*targetSdkVersion = ([0-9]{1,2}).*/\1/p'
+        ../build.gradle`
+      - pushd $$libsodium$$
+      - ./dist-build/android-armv7-a.sh
+      - ./dist-build/android-armv8-a.sh
+      - ./dist-build/android-x86.sh
+      - ./dist-build/android-x86_64.sh
+      - popd
+    ndk: r21e
+
 AutoUpdateMode: Version %v
 UpdateCheckMode: HTTP
 VercodeOperation: 3000220 + %c
 UpdateCheckData: https://github.com/standardnotes/mobile/actions/workflows/build-prod.yml|(\d+)\sworkflow\sruns|https://github.com/standardnotes/mobile/releases/latest|tree/([\d.]+)
 CurrentVersion: 3.9.6
-CurrentVersionCode: 3000319
+CurrentVersionCode: 3000320
