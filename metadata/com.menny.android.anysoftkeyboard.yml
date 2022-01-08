@@ -516,14 +516,18 @@ Builds:
     commit: 2f7fd6e13e9375047768320c4bf2509cb0736e15
     sudo:
       - apt-get update || apt-get update
-      - apt-get install -t stretch-backports openjdk-11-jdk-headless openjdk-11-jre-headless
+      - apt-get install openjdk-11-jdk-headless
       - update-alternatives --auto java
     gradle:
       - yes
     output: outputs/apks/release/ime-app-7137.apk
     forceversion: true
-    prebuild: sed -i -e '/versionCode/d' -e '/versionName/aversionCode $$VERCODE$$'
-        build.gradle
+    prebuild:
+      - JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 $$SDK$$/tools/bin/sdkmanager 'build-tools;31.0.0'
+        'build-tools;30.0.3' 'platforms;android-31' > /dev/null
+      - cp $$SDK$$/build-tools/30.0.3/lib/dx.jar $$SDK$$/build-tools/31.0.0/lib/dx.jar
+      - cp $$SDK$$/build-tools/30.0.3/dx $$SDK$$/build-tools/31.0.0/dx
+      - sed -i -e '/versionCode/d' -e '/versionName/aversionCode $$VERCODE$$' build.gradle
     scanignore:
       - addons/languages/*/pack/dictionary/*.gz
     ndk: r23
