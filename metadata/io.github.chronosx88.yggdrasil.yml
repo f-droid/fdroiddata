@@ -93,7 +93,34 @@ Builds:
       - cd ../yggdrasil; make
     ndk: r21e
 
+  - versionName: 2.0.19
+    versionCode: 37
+    commit: 02694abab7ff804e09917aa1d1fdd4f00c254530
+    subdir: app
+    gradle:
+      - yes
+    build:
+      - sed -i '/signingConfig\ signing/d' build.gradle
+      - sed -i '/ndkVersion/d' build.gradle
+      - curl -Lso go.tar.gz https://golang.org/dl/go1.15.4.linux-amd64.tar.gz
+      - echo "eb61005f0b932c93b424a3a4eaa67d72196c79129d9a3ea8578047683e2c80d5 go.tar.gz"
+        | sha256sum -c -
+      - mkdir -p golang
+      - tar -C golang -xzf go.tar.gz
+      - export GOPATH="$PWD"
+      - export GO_LANG="$PWD/golang/go/bin"
+      - export GO_COMPILED="$PWD/bin"
+      - export PATH="$GO_LANG:$GO_COMPILED:$PATH"
+      - export ANDROID_SDK_ROOT=$$SDK$$
+      - export ANDROID_NDK_ROOT=$$NDK$$
+      - export PATH=$(pwd)/go/bin:$PATH
+      - go version
+      - ./golang/go/bin/go get golang.org/x/mobile/cmd/gomobile
+      - ./bin/gomobile init
+      - cd ../yggdrasil; make
+    ndk: r21e
+
 AutoUpdateMode: Version v%v
 UpdateCheckMode: Tags
-CurrentVersion: '1.7'
-CurrentVersionCode: 18
+CurrentVersion: 2.0.19
+CurrentVersionCode: 37
