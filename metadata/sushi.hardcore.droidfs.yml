@@ -180,7 +180,33 @@ Builds:
       - ./build.sh $$FFmpeg$$
     ndk: r23b
 
+  - versionName: 1.7.2
+    versionCode: 22
+    commit: 822aba9481e4cf0a980180f7816910535cdc6885
+    subdir: app
+    submodules: true
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y openjdk-11-jdk-headless
+      - update-alternatives --auto java
+      - curl -Lso go.tar.gz https://golang.org/dl/go1.17.3.linux-amd64.tar.gz
+      - echo "550f9845451c0c94be679faf116291e7807a8d78b43149f9506c1b15eb89008c go.tar.gz"
+        | sha256sum -c -
+      - tar xzf go.tar.gz --strip-components=1 -C /usr/local/
+    gradle:
+      - yes
+    srclibs:
+      - OpenSSL@OpenSSL_1_1_1l
+      - FFmpeg@n4.4
+    prebuild: touch fdroid
+    build:
+      - cd libgocryptfs
+      - OPENSSL_PATH="$$OpenSSL$$" ./build.sh
+      - cd ../ffmpeg
+      - ./build.sh $$FFmpeg$$
+    ndk: r23b
+
 AutoUpdateMode: Version v%v
 UpdateCheckMode: Tags
-CurrentVersion: 1.7.1
-CurrentVersionCode: 21
+CurrentVersion: 1.7.2
+CurrentVersionCode: 22
