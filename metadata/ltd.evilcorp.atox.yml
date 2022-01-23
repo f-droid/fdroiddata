@@ -25,19 +25,31 @@ Builds:
     gradle:
       - yes
 
-  - versionName: 0.7.0
-    versionCode: 10
-    disable: https://github.com/evilcorpltd/aTox/issues/933
-    commit: 5934fe8e0a2a31cab742d80522d1c3abd31c3b92
+  - versionName: 0.7.1
+    versionCode: 11
+    commit: c6d95765865cc88e449401918cb607d8623d3097
     subdir: atox
     sudo:
       - apt-get update || apt-get update
+      - apt-get install -y g++ yasm
       - apt-get install -y openjdk-11-jdk-headless
       - update-alternatives --auto java
+      - curl -Lo sbt.tgz https://github.com/sbt/sbt/releases/download/v1.6.1/sbt-1.6.1.tgz
+      - echo "60286bf1b875b31e2955f8a699888cd2612e9afd94d03cde0a2e71efd7492ffc sbt.tgz"
+        | sha256sum -c -
+      - tar xzf sbt.tgz --strip-components=1 -C /usr/local/
     gradle:
       - yes
+    build:
+      - cd ..
+      - ./scripts/build-host -j$(nproc)
+      - ./scripts/build-aarch64-linux-android -j$(nproc) release
+      - ./scripts/build-arm-linux-androideabi -j$(nproc) release
+      - ./scripts/build-i686-linux-android -j$(nproc) release
+      - ./scripts/build-x86_64-linux-android -j$(nproc) release
+    ndk: r21e
 
 AutoUpdateMode: Version v%v
 UpdateCheckMode: Tags
-CurrentVersion: 0.7.0
-CurrentVersionCode: 10
+CurrentVersion: 0.7.1
+CurrentVersionCode: 11
