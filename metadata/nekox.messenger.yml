@@ -895,9 +895,38 @@ Builds:
       - git gc --prune=now
     ndk: r21e
 
+  - versionName: 8.4.4-rc02
+    versionCode: 550
+    commit: 2c4fdbc001f41a6cf7438cf55d30a93eea203784
+    timeout: 10800
+    subdir: TMessagesProj
+    submodules: true
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y ninja-build yasm
+      - apt-get install -y openjdk-11-jdk-headless
+      - update-alternatives --auto java
+    gradle:
+      - miniFdroid
+    output: build/outputs/apk/mini/*/*.apk
+    prebuild:
+      - echo -e "\norg.gradle.jvmargs=-Xms1024m -Xmx4096m -XX:MaxPermSize=4096m" >>
+        ../gradle.properties
+      - pushd ..
+      - ./run fdroid prebuild
+    build:
+      - export NINJA_PATH=/usr/bin/ninja
+      - pushd ..
+      - ./run fdroid build
+      - source bin/init/env.sh
+      - go clean -cache
+      - git rev-parse HEAD
+      - git gc --prune=now
+    ndk: r21e
+
 ArchivePolicy: 6 versions
 AutoUpdateMode: Version %v
 UpdateCheckMode: Tags
 UpdateCheckData: TMessagesProj/build.gradle|verCode\s=\s(\d+)|.|verName\s=\s"(.+)"
-CurrentVersion: 8.4.4-rc01
-CurrentVersionCode: 545
+CurrentVersion: 8.4.4-rc02
+CurrentVersionCode: 550
