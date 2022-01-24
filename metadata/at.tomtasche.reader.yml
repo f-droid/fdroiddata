@@ -7,14 +7,14 @@ AuthorName: Thomas Taschauer
 AuthorEmail: support@opendocument.app
 AuthorWebSite: https://tomtasche.at
 WebSite: https://opendocument.app/
-SourceCode: https://github.com/TomTasche/OpenDocument.droid
-IssueTracker: https://github.com/TomTasche/OpenDocument.droid/issues
+SourceCode: https://github.com/opendocument-app/OpenDocument.droid
+IssueTracker: https://github.com/opendocument-app/OpenDocument.droid/issues
 FlattrID: '117140'
 
 AutoName: OpenDocument Reader
 
 RepoType: git
-Repo: https://github.com/TomTasche/OpenDocument.droid.git
+Repo: https://github.com/opendocument-app/OpenDocument.droid.git
 
 Builds:
   - versionName: 1.1.9
@@ -165,6 +165,54 @@ Builds:
         ui/*/*.java ui/*.java; done
       - JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 $$SDK$$/tools/bin/sdkmanager 'cmake;3.18.1'
         > /dev/null
+    ndk: r23b
+
+  - versionName: '3.15'
+    versionCode: 167
+    commit: c681a0c8c0d51164fee2e5fb87ac62d4c156c060
+    subdir: app
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y openjdk-11-jdk-headless
+      - update-alternatives --auto java
+      - apt-get install -y ninja-build
+      - pip3 install wheel
+      - pip3 install conan
+      - curl -Lo cmake.tar.gz https://github.com/Kitware/CMake/releases/download/v3.22.1/cmake-3.22.1-linux-x86_64.tar.gz
+      - echo "73565c72355c6652e9db149249af36bcab44d9d478c5546fd926e69ad6b43640 cmake.tar.gz"
+        | sha256sum -c -
+      - tar xzf cmake.tar.gz --strip-components=1 -C /usr/local/
+    gradle:
+      - pro
+    prebuild:
+      - sed -i -e '/com.google/d' ../build.gradle
+      - sed -i -e '/com.google.firebase/d' -e '/firebaseCrashlytics/d' -e '/com.google.android.play/d'
+        -e '/com.android.billingclient/d' -e '/com.google.gms/d' -e '/pro"/d' -e '/com.google.android.gms/d'
+        build.gradle
+      - sed -i -e '/INTERNET/d' -e '/BILLING/d' -e '/^        <meta-data/,+5d' src/main/AndroidManifest.xml
+      - cd src/main/java/at/tomtasche/reader
+      - sed -i -e '/com.google.firebase/d' background/FileLoader.java
+      - sed -i -e '/gms/d' -e '/play.core/d' -e '/firebase/d' ui/activity/*.java
+      - sed -i -e '/com.google/d' -e '/Firebase/d' -e '/Storage/d' -e '/auth == null/i}'
+        -e '/auth == null/,/^    }/d' -e '/auth /d' -e '/storage /d' background/OnlineLoader.java
+      - sed -i -e '/void initializeProprietaryLibraries/,/^    }/d' -e '/initializeProprietaryLibraries/d'
+        -e '/void buyAdRemoval/,/^    }/d' -e '/buyAdRemoval/d' -e 's/billingManager.hasPurchased()/true/'
+        -e 's/billingManager.isEnabled()/false/' -e '/addOnPreDrawListener/,/});/d'
+        ui/activity/MainActivity.java
+      - sed -i -e '/getBooleanConfig/,/^            });/d' -e '/void offerUpload/,/^    }/d'
+        -e '/offerUpload/d' ui/activity/DocumentFragment.java
+      - echo "package at.tomtasche.reader.nonfree; public class ConfigManager{public
+        ConfigManager(){} public void initialize(){} public boolean isLoaded(){return
+        true;} public void setEnabled(boolean enabled){} public void getBooleanConfig(String
+        key, ConfigListener<Boolean> configListener){} public Boolean getBooleanConfig(String
+        key){return null;} public interface ConfigListener<T>{public void onConfig(String
+        key, T value);}}" > nonfree/ConfigManager.java
+      - for class in AdManager AnalyticsManager BillingManager CrashManager HelpManager;
+        do echo "package at.tomtasche.reader.nonfree; public class ${class} {}" >
+        nonfree/${class}.java; sed -i -e "/${class}\./Id" background/*.java ui/*/*.java
+        ui/*.java; done
+      - conan config set general.revisions_enabled=1
+      - conan remote add odr https://odr.jfrog.io/artifactory/api/conan/odr-conan
     ndk: r23b
 
 MaintainerNotes: Init submodule manully because there is private recursive submodule
