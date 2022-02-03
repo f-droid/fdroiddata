@@ -720,6 +720,37 @@ Builds:
       - ./link_to_mupdf_1.16.1.sh
     ndk: r21e
 
+  - versionName: 8.4.52-fdroid
+    versionCode: 4370
+    commit: cad7803c206410f67b13ba403c7f5de5f9833c1d
+    subdir: app
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y g++ mesa-common-dev libxcursor-dev libxrandr-dev libxinerama-dev
+        libglu1-mesa-dev libxi-dev
+      - apt-get install -y openjdk-11-jdk-headless
+      - update-alternatives --auto java
+    gradle:
+      - fdroid
+    srclibs:
+      - MuPDF@1.16.1
+    rm:
+      - Builder/libs
+    prebuild:
+      - sed -i -e '/F-DROID REMOVE THIS LINE/,+1d' ../build.gradle
+      - sed -i -e '/com.google.gms.google-services/d' -e '/com.google.android.gms/d'
+        -e '/com.cloudrail/d' -e '/include "x86"/d' build.gradle
+      - sed -i -e '/^#!/a\set -e' -e 's|git clone .*|ln -s $$MuPDF$$ mupdf-$VERSION|'
+        -e 's/ndk-build $1/& -j`nproc` || exit 1/' ../Builder/link_to_mupdf_1.16.1.sh
+      - mkdir src/main/jniLibs/
+    scanignore:
+      - Builder/fonts/fonts.zip
+      - app/src/fdroid/assets/fonts.zip
+    build:
+      - pushd ../Builder/
+      - ./link_to_mupdf_1.16.1.sh
+    ndk: r21e
+
 MaintainerNotes: |-
     * Upstream builds separate APKs for each architecture but we build an universal APK.
     * scanner will detect GMS (/com/google/android/gms) in these APKs; those are only stubs here, see https://gitlab.com/fdroid/fdroiddata/-/issues/2272#note_493741256
@@ -728,5 +759,5 @@ AutoUpdateMode: Version +-fdroid %v
 UpdateCheckMode: Tags
 UpdateCheckData: app/build.gradle|\s+FDroidCodeNumber = (\d+)|.|\s+FDroidVersionNumber
     = "([^\"]+)"
-CurrentVersion: 8.4.44
-CurrentVersionCode: 4334
+CurrentVersion: 8.4.52
+CurrentVersionCode: 4370
