@@ -1,0 +1,52 @@
+AntiFeatures:
+  - NonFreeNet
+  - Tracking
+Categories:
+  - Phone & SMS
+License: GPL-2.0-or-later
+SourceCode: https://github.com/simlar/simlar-android
+IssueTracker: https://github.com/simlar/simlar-android/issues
+
+AutoName: Simlar
+
+RepoType: git
+Repo: https://github.com/simlar/simlar-android.git
+
+Builds:
+  - versionName: 2.5.5 (alwaysOnline)
+    versionCode: 70
+    commit: 2.5.5
+    timeout: 20000
+    subdir: app
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y doxygen pkgconf python-pystache yasm
+      - apt-get install -y -t stretch-backports-sloppy libarchive13
+      - apt-get install -y -t stretch-backports cmake
+    gradle:
+      - alwaysOnline
+    srclibs:
+      - linphone-sdk@4.4.35
+    prebuild: sed -i -e '/repositories/,+5d' build.gradle
+    build:
+      - pushd $$linphone-sdk$$
+      - git submodule update --init --recursive
+      - mkdir build-sdk
+      - cd build-sdk
+      - cmake .. -DLINPHONESDK_PLATFORM=Android -DLINPHONESDK_ANDROID_ARCHS="arm64,
+        armv7, x86" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_MESSAGE=NEVER
+      - cmake --build . --parallel $(nproc)
+      - popd
+      - mkdir -p libs/
+      - cp $$linphone-sdk$$/build-sdk/linphone-sdk/bin/outputs/aar/linphone-sdk-android-release.aar
+        libs/
+      - rm -rf $$linphone-sdk$$/build-sdk/
+    ndk: r21e
+    gradleprops:
+      - no-google-services
+      - ignore-git-dirty-version
+
+AutoUpdateMode: None
+UpdateCheckMode: None
+CurrentVersion: 2.5.5 (alwaysOnline)
+CurrentVersionCode: 70
