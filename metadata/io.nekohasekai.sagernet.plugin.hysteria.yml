@@ -1,0 +1,43 @@
+Categories:
+  - Internet
+License: GPL-3.0-or-later
+AuthorName: nekohasekai
+AuthorEmail: sekai@neko.services
+WebSite: https://sagernet.org/
+SourceCode: https://github.com/SagerNet/SagerNet
+IssueTracker: https://github.com/SagerNet/SagerNet/issues
+Translation: https://hosted.weblate.org/projects/sagernet/
+
+Name: Hysteria Plugin - SagerNet
+AutoName: Hysteria Plugin
+
+RepoType: git
+Repo: https://github.com/SagerNet/SagerNet
+
+Builds:
+  - versionName: 0.9.6
+    versionCode: 55
+    commit: 8ae22625c1c798b48e10903739a95c3008bc0b84
+    subdir: plugin/hysteria
+    submodules: true
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y openjdk-11-jdk-headless
+      - update-alternatives --auto java
+    gradle:
+      - fdroid
+    prebuild:
+      - pushd ../..
+      - sed -i -e 's/1.18beta1/1.17.5/' bin/fdroid/install_golang.sh
+      - ./run fdroid prebuild_plugin_golang hysteria
+    scandelete:
+      - external
+      - plugin
+    ndk: r23b
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^hysteria-plugin-.*
+VercodeOperation: '%c * 5'
+UpdateCheckData: sager.properties|HYSTERIA_VERSION=(\d+)|.|HYSTERIA_VERSION_NAME=(.*)
+CurrentVersion: 0.9.6
+CurrentVersionCode: 55
