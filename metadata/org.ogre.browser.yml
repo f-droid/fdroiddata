@@ -4,7 +4,7 @@ License: MIT
 WebSite: https://www.ogre3d.org/
 SourceCode: https://github.com/OGRECave/ogre
 IssueTracker: https://github.com/OGRECave/ogre/issues
-Changelog: https://github.com/OGRECave/ogre/blob/v1.11.0/Docs/ChangeLog.md#change-log
+Changelog: https://github.com/OGRECave/ogre/releases
 Donate: https://www.patreon.com/ogre1
 
 Description: |-
@@ -249,11 +249,35 @@ Builds:
       - gradle -b SampleBrowserNDK/build.gradle assembleRelease
     ndk: r18b
 
+  - versionName: 13.2.4
+    versionCode: 17
+    commit: v13.2.4
+    output: SampleBrowserNDK/app/build/outputs/apk/release/app-release-unsigned.apk
+    prebuild:
+      - sed -i 's/android:versionCode="1"/android:versionCode="$$VERCODE$$"/' CMake/Templates/AndroidManifest.xml.in
+      - sed -i 's/jcenter/mavenCentral/' CMake/Templates/project.gradle
+      - sed -i 's/gradle:3.4.1/gradle:4.2.0/' CMake/Templates/project.gradle
+      - sed -i '4ilintOptions { abortOnError false }' CMake/Templates/app.gradle.in
+      - JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 $$SDK$$/tools/bin/sdkmanager 'cmake;3.18.1'
+        > /dev/null
+    scanignore:
+      - Media/packs/
+      - Samples/Media/packs/
+      - Samples/Media/volumeTerrain/
+      - Tests/Media/misc/
+    build:
+      - $$SDK$$/cmake/3.18.1/bin/cmake -DCMAKE_BUILD_TYPE=Release -DOGRE_BUILD_COMPONENT_JAVA=OFF
+        -DANDROID_PLATFORM=android-16 -DANDROID_ABI=x86 -DCMAKE_TOOLCHAIN_FILE=$$NDK$$/build/cmake/android.toolchain.cmake
+        .
+      - cmake --build . -- -j $(nproc)
+      - gradle -b SampleBrowserNDK/build.gradle assembleRelease
+    ndk: r21e
+
 MaintainerNotes: |-
     For documentation of cmake options see:
-    http://www.ogre3d.org/2017/09/02/ogre-1-10-mid-term-report > Compile Time Options
+    https://ogrecave.github.io/ogre/api/latest/building-ogre.html#autotoc_md260
 
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: 1.12.5
-CurrentVersionCode: 15
+CurrentVersion: 13.2.4
+CurrentVersionCode: 17
