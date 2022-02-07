@@ -1,0 +1,49 @@
+Categories:
+  - System
+License: Apache-2.0
+AuthorEmail: contact@zidon.net
+WebSite: https://www.freezeyou.net
+SourceCode: https://github.com/FreezeYou/FreezeYou
+IssueTracker: https://github.com/FreezeYou/FreezeYou/issues
+Translation: https://github.com/FreezeYou/FreezeYou/blob/master/README_Translation.md
+
+AutoName: FreezeYou!
+
+RepoType: git
+Repo: https://github.com/FreezeYou/FreezeYou.git
+
+Builds:
+  - versionName: 11.0.146.20220206
+    versionCode: 146
+    commit: c57356666928b57974999fe76657e4cd8cfcc4b4
+    subdir: app
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y openjdk-11-jdk-headless
+      - update-alternatives --auto java
+    gradle:
+      - yes
+    srclibs:
+      - MMKV@49bbae1a97a118a435b5f1a1ae42d87be121571a
+    prebuild:
+      - sed -i -e '/dependencies {/a implementation "com.github.GCX-HCI:tray:v0.12.0"'
+        build.gradle
+      - sed -i -e '/repositories {/a maven { url "https://jitpack.io" }' ../build.gradle
+      - JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 $$SDK$$/tools/bin/sdkmanager 'cmake;3.18.1'
+        > /dev/null
+      - sed -i -e '/#define MMKV_DISABLE_CRYPT/s|//||' -e '/#define MMKV_DISABLE_FLUTTER/s|//||'
+        $$MMKV$$/Core/MMKVPredef.h
+    scandelete:
+      - app/libs/*.aar
+    build:
+      - pushd $$MMKV$$/Android/MMKV/mmkv
+      - gradle assembleRelease
+      - popd
+      - mv $$MMKV$$/Android/MMKV/mmkv/build/outputs/aar/mmkv-DefaultCpp-release.aar
+        libs
+    ndk: r21e
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^V[\d.]+\(
+CurrentVersion: 11.0.146.20220206
+CurrentVersionCode: 146
