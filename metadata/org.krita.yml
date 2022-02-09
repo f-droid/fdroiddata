@@ -72,6 +72,56 @@ Builds:
         -p=apk
     ndk: r21d
 
+  - versionName: 5.0.2
+    versionCode: 1050006
+    commit: v5.0.2
+    timeout: 30000
+    sudo:
+      - find /opt/android-sdk/platforms -type d -mindepth 1 -maxdepth 1 -not -name
+        "android-28" -exec rm -rf {} \;
+      - apt-get update || apt-get update
+      - apt-get install -y build-essential
+      - apt-get install -y -t stretch-backports-sloppy libarchive13
+      - apt-get install -y -t stretch-backports cmake
+    init: sed -i '/com.android.billingclient/d' packaging/android/apk/build.gradle
+    patch:
+      - v5.0.2.patch
+    output: build/krita_build_apk/build/outputs/apk/release/krita-armeabi-v7a-$$VERSION$$-release-unsigned.apk
+    scanignore:
+      - plugins/extensions/pykrita/plugin/krita/sceditor/rope.zip
+      - libs/flake/tests/data/store.zip
+      - libs/flake/tests/data/odf_frame_resource_store.zip
+    build:
+      - export DEP_COMMIT=3ce8590a94407ea17a6f3ce8d2772ea8a7e86075
+      - export ANDROID_ABI=armeabi-v7a
+      - export BUILD_ROOT=$(pwd)
+      - export ANDROID_API_LEVEL=23
+      - export CMAKE_ANDROID_NDK=$$NDK$$
+      - export ANDROID_SDK_ROOT=$$SDK$$
+      - export SUBDIR=${BUILD_ROOT}/packaging/android
+      - mkdir ${BUILD_ROOT}/build
+      - git reset --hard $DEP_COMMIT
+      - git apply 0001-fix-exiv2-url.patch
+      - echo 'gradle "$@"' > ${SUBDIR}/apk/gradlew
+      - ${SUBDIR}/androidbuild.sh --src=${BUILD_ROOT} --build-type=Release --build-root=${BUILD_ROOT}/build
+        -p=boost
+      - ${SUBDIR}/androidbuild.sh --src=${BUILD_ROOT} --build-type=Release --build-root=${BUILD_ROOT}/build
+        -p=qt
+      - ${SUBDIR}/androidbuild.sh --src=${BUILD_ROOT} --build-type=Release --build-root=${BUILD_ROOT}/build
+        -p=3rdparty
+      - ${SUBDIR}/androidbuild.sh --src=${BUILD_ROOT} --build-type=Release --build-root=${BUILD_ROOT}/build
+        -p=kf5
+      - git reset --hard $$COMMIT$$
+      - mkdir ${BUILD_ROOT}/po
+      - python3 ${BUILD_ROOT}/build-tools/copy_po.py
+      - git apply 0001-remove_billing.patch
+      - git apply 0002-restore_abi.patch
+      - ${SUBDIR}/androidbuild.sh --src=${BUILD_ROOT} --build-type=Release --build-root=${BUILD_ROOT}/build
+        -p=krita-bin
+      - ${SUBDIR}/androidbuild.sh --src=${BUILD_ROOT} --build-type=Release --build-root=${BUILD_ROOT}/build
+        -p=apk
+    ndk: r22b
+
   - versionName: 4.4.2
     versionCode: 2040404
     commit: v4.4.2
@@ -116,6 +166,56 @@ Builds:
       - ${SUBDIR}/androidbuild.sh --src=${BUILD_ROOT} --build-type=Release --build-root=${BUILD_ROOT}/build
         -p=apk
     ndk: r21d
+
+  - versionName: 5.0.2
+    versionCode: 2050006
+    commit: v5.0.2
+    timeout: 30000
+    sudo:
+      - find /opt/android-sdk/platforms -type d -mindepth 1 -maxdepth 1 -not -name
+        "android-28" -exec rm -rf {} \;
+      - apt-get update || apt-get update
+      - apt-get install -y build-essential
+      - apt-get install -y -t stretch-backports-sloppy libarchive13
+      - apt-get install -y -t stretch-backports cmake
+    init: sed -i '/com.android.billingclient/d' packaging/android/apk/build.gradle
+    patch:
+      - v5.0.2.patch
+    output: build/krita_build_apk/build/outputs/apk/release/krita-arm64-v8a-$$VERSION$$-release-unsigned.apk
+    scanignore:
+      - plugins/extensions/pykrita/plugin/krita/sceditor/rope.zip
+      - libs/flake/tests/data/store.zip
+      - libs/flake/tests/data/odf_frame_resource_store.zip
+    build:
+      - export DEP_COMMIT=3ce8590a94407ea17a6f3ce8d2772ea8a7e86075
+      - export ANDROID_ABI=arm64-v8a
+      - export BUILD_ROOT=$(pwd)
+      - export ANDROID_API_LEVEL=23
+      - export CMAKE_ANDROID_NDK=$$NDK$$
+      - export ANDROID_SDK_ROOT=$$SDK$$
+      - export SUBDIR=${BUILD_ROOT}/packaging/android
+      - mkdir ${BUILD_ROOT}/build
+      - git reset --hard $DEP_COMMIT
+      - git apply 0001-fix-exiv2-url.patch
+      - echo 'gradle "$@"' > ${SUBDIR}/apk/gradlew
+      - ${SUBDIR}/androidbuild.sh --src=${BUILD_ROOT} --build-type=Release --build-root=${BUILD_ROOT}/build
+        -p=boost
+      - ${SUBDIR}/androidbuild.sh --src=${BUILD_ROOT} --build-type=Release --build-root=${BUILD_ROOT}/build
+        -p=qt
+      - ${SUBDIR}/androidbuild.sh --src=${BUILD_ROOT} --build-type=Release --build-root=${BUILD_ROOT}/build
+        -p=3rdparty
+      - ${SUBDIR}/androidbuild.sh --src=${BUILD_ROOT} --build-type=Release --build-root=${BUILD_ROOT}/build
+        -p=kf5
+      - git reset --hard $$COMMIT$$
+      - mkdir ${BUILD_ROOT}/po
+      - python3 ${BUILD_ROOT}/build-tools/copy_po.py
+      - git apply 0001-remove_billing.patch
+      - git apply 0002-restore_abi.patch
+      - ${SUBDIR}/androidbuild.sh --src=${BUILD_ROOT} --build-type=Release --build-root=${BUILD_ROOT}/build
+        -p=krita-bin
+      - ${SUBDIR}/androidbuild.sh --src=${BUILD_ROOT} --build-type=Release --build-root=${BUILD_ROOT}/build
+        -p=apk
+    ndk: r22b
 
   - versionName: 4.4.2
     versionCode: 3040404
@@ -162,6 +262,56 @@ Builds:
         -p=apk
     ndk: r21d
 
+  - versionName: 5.0.2
+    versionCode: 3050006
+    commit: v5.0.2
+    timeout: 30000
+    sudo:
+      - find /opt/android-sdk/platforms -type d -mindepth 1 -maxdepth 1 -not -name
+        "android-28" -exec rm -rf {} \;
+      - apt-get update || apt-get update
+      - apt-get install -y build-essential
+      - apt-get install -y -t stretch-backports-sloppy libarchive13
+      - apt-get install -y -t stretch-backports cmake
+    init: sed -i '/com.android.billingclient/d' packaging/android/apk/build.gradle
+    patch:
+      - v5.0.2.patch
+    output: build/krita_build_apk/build/outputs/apk/release/krita-x86-$$VERSION$$-release-unsigned.apk
+    scanignore:
+      - plugins/extensions/pykrita/plugin/krita/sceditor/rope.zip
+      - libs/flake/tests/data/store.zip
+      - libs/flake/tests/data/odf_frame_resource_store.zip
+    build:
+      - export DEP_COMMIT=7175ca9c9f4cea94cea11f6709a74e25f31ff137
+      - export ANDROID_ABI=x86
+      - export BUILD_ROOT=$(pwd)
+      - export ANDROID_API_LEVEL=23
+      - export CMAKE_ANDROID_NDK=$$NDK$$
+      - export ANDROID_SDK_ROOT=$$SDK$$
+      - export SUBDIR=${BUILD_ROOT}/packaging/android
+      - mkdir ${BUILD_ROOT}/build
+      - git reset --hard $DEP_COMMIT
+      - git apply 0001-fix-exiv2-url.patch
+      - echo 'gradle "$@"' > ${SUBDIR}/apk/gradlew
+      - ${SUBDIR}/androidbuild.sh --src=${BUILD_ROOT} --build-type=Release --build-root=${BUILD_ROOT}/build
+        -p=boost
+      - ${SUBDIR}/androidbuild.sh --src=${BUILD_ROOT} --build-type=Release --build-root=${BUILD_ROOT}/build
+        -p=qt
+      - ${SUBDIR}/androidbuild.sh --src=${BUILD_ROOT} --build-type=Release --build-root=${BUILD_ROOT}/build
+        -p=3rdparty
+      - ${SUBDIR}/androidbuild.sh --src=${BUILD_ROOT} --build-type=Release --build-root=${BUILD_ROOT}/build
+        -p=kf5
+      - git reset --hard $$COMMIT$$
+      - mkdir ${BUILD_ROOT}/po
+      - python3 ${BUILD_ROOT}/build-tools/copy_po.py
+      - git apply 0001-remove_billing.patch
+      - git apply 0002-restore_abi.patch
+      - ${SUBDIR}/androidbuild.sh --src=${BUILD_ROOT} --build-type=Release --build-root=${BUILD_ROOT}/build
+        -p=krita-bin
+      - ${SUBDIR}/androidbuild.sh --src=${BUILD_ROOT} --build-type=Release --build-root=${BUILD_ROOT}/build
+        -p=apk
+    ndk: r22b
+
   - versionName: 4.4.2
     versionCode: 4040404
     commit: v4.4.2
@@ -207,21 +357,83 @@ Builds:
         -p=apk
     ndk: r21d
 
+  - versionName: 5.0.2
+    versionCode: 4050006
+    commit: v5.0.2
+    timeout: 30000
+    sudo:
+      - find /opt/android-sdk/platforms -type d -mindepth 1 -maxdepth 1 -not -name
+        "android-28" -exec rm -rf {} \;
+      - apt-get update || apt-get update
+      - apt-get install -y build-essential
+      - apt-get install -y -t stretch-backports-sloppy libarchive13
+      - apt-get install -y -t stretch-backports cmake
+    init: sed -i '/com.android.billingclient/d' packaging/android/apk/build.gradle
+    patch:
+      - v5.0.2.patch
+    output: build/krita_build_apk/build/outputs/apk/release/krita-x86_64-$$VERSION$$-release-unsigned.apk
+    scanignore:
+      - plugins/extensions/pykrita/plugin/krita/sceditor/rope.zip
+      - libs/flake/tests/data/store.zip
+      - libs/flake/tests/data/odf_frame_resource_store.zip
+    build:
+      - export DEP_COMMIT=3ce8590a94407ea17a6f3ce8d2772ea8a7e86075
+      - export ANDROID_ABI=x86_64
+      - export BUILD_ROOT=$(pwd)
+      - export ANDROID_API_LEVEL=23
+      - export CMAKE_ANDROID_NDK=$$NDK$$
+      - export ANDROID_SDK_ROOT=$$SDK$$
+      - export SUBDIR=${BUILD_ROOT}/packaging/android
+      - mkdir ${BUILD_ROOT}/build
+      - git reset --hard $DEP_COMMIT
+      - git apply 0001-fix-exiv2-url.patch
+      - echo 'gradle "$@"' > ${SUBDIR}/apk/gradlew
+      - ${SUBDIR}/androidbuild.sh --src=${BUILD_ROOT} --build-type=Release --build-root=${BUILD_ROOT}/build
+        -p=boost
+      - ${SUBDIR}/androidbuild.sh --src=${BUILD_ROOT} --build-type=Release --build-root=${BUILD_ROOT}/build
+        -p=qt
+      - ${SUBDIR}/androidbuild.sh --src=${BUILD_ROOT} --build-type=Release --build-root=${BUILD_ROOT}/build
+        -p=3rdparty
+      - ${SUBDIR}/androidbuild.sh --src=${BUILD_ROOT} --build-type=Release --build-root=${BUILD_ROOT}/build
+        -p=kf5
+      - git reset --hard $$COMMIT$$
+      - mkdir ${BUILD_ROOT}/po
+      - python3 ${BUILD_ROOT}/build-tools/copy_po.py
+      - git apply 0001-remove_billing.patch
+      - git apply 0002-restore_abi.patch
+      - ${SUBDIR}/androidbuild.sh --src=${BUILD_ROOT} --build-type=Release --build-root=${BUILD_ROOT}/build
+        -p=krita-bin
+      - ${SUBDIR}/androidbuild.sh --src=${BUILD_ROOT} --build-type=Release --build-root=${BUILD_ROOT}/build
+        -p=apk
+    ndk: r22b
+
 MaintainerNotes: |-
-    - Dependencies are built using different commit than the app itself.
-    - All google play donation code was added in 5e323fb7, remove_billing.patch is based on that commit.
-    - Compilation fails unless only SDK versions 21 and are present in SDK, so we're removing them.
-    - Patch at metadata/org.krita/remove_billing.patch actually creates another patch in project's
-    - Root dir since otherwise fdroid lint fails with unused file.
-    - New versions and exact commits for deps and app itself can be found on KDE jenkins:
-    - https://binary-factory.kde.org/job/Krita_Release_Android_arm64-v8a_Build
-    - https://binary-factory.kde.org/job/Krita_Android_arm64-v8a_Dependency_Build
-    - Version code schema, taken from build.gradle:
+    - (1) Compilation fails if older versions of the SDK are present, so we're
+    - removing unneeded ones.
+    - (2) Dependencies are built using a recent commit from the master branch.
+    - The exact commits and the logs for the deps and the app builds can be
+    - found on KDE jenkins:
+    -   https://binary-factory.kde.org/job/Krita_Release_Android_arm64-v8a_Build
+    -   https://binary-factory.kde.org/job/Krita_Android_arm64-v8a_Dependency_Build
+    - (3) Translations are downloaded as part of the release process. They are
+    - included in the release tarball, and the official builds are based upon it.
+    - We can add FETCH_TRANSLATIONS to the build options or just run copy_po.py
+    - before building krita.
+    - (4) Patches at metadata/org.krita/*.patch actually create another patches
+    - in the project's root directory, since otherwise fdroid lint fails with
+    - unused file.
+    - (5) All google play donation code was added in 5e323fb7 (for branch 4)
+    - and 23b73112 (for branch 5), and remove-billing patches are (loosely)
+    - based on those commits.
+    - (6) Starting from the commit b517d988, which went to the version 5,
+    - versionCode no longer depends on abi; we revert that with restore-abi
+    - patches.
+    - (7) Version code schema, taken from build.gradle:
     - project.ext.versionCodes = ['armeabi-v7a': 1, 'arm64-v8a': 2, 'x86': 3, 'x86_64': 4]
     - project.ext.versionCodes[abi] * 1000000 + versionMajor * 10000 + versionMinor * 100 + versionRelease
 
 ArchivePolicy: 12 versions
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: 4.4.2
-CurrentVersionCode: 4040404
+CurrentVersion: 5.0.2
+CurrentVersionCode: 2050006
