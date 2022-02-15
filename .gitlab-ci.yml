@@ -32,7 +32,7 @@ checkupdates:
     set -xe
     if [ "$CI_PROJECT_NAMESPACE" = "fdroid" ]; then echo "not testing in fdroid"; exit 0; fi
     git fetch https://gitlab.com/fdroid/fdroiddata.git
-    appids=$(git diff --name-only --diff-filter=d FETCH_HEAD...HEAD "metadata/*.yml" | sed -n -e 's,^metadata/\([^/][^/]*\)\.yml,\1,p')
+    appids=$(git diff --name-only --diff-filter=d FETCH_HEAD...${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA:-HEAD} "metadata/*.yml" | sed -n -e 's,^metadata/\([^/][^/]*\)\.yml,\1,p')
     if [ -n "$appids" ]; then
       fdroid checkupdates --auto -v $appids
       git --no-pager diff --color=always --exit-code
@@ -58,7 +58,7 @@ lint:
     - if [ "$CI_PROJECT_NAMESPACE" != "fdroid" ]; then
         git fetch https://gitlab.com/fdroid/fdroiddata.git;
         test -d build || mkdir build;
-        files=`git diff --name-only --diff-filter=d FETCH_HEAD...HEAD`;
+        files=`git diff --name-only --diff-filter=d FETCH_HEAD...${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA:-HEAD}`;
         for f in $files; do
            appid=`echo $f | sed -n -e 's,^metadata/\([^/][^/]*\)\.yml,\1,p'`;
            if [ -n "$appid" ]; then
@@ -110,7 +110,7 @@ schema validation:
     - git fetch https://gitlab.com/fdroid/fdroiddata.git
     - set -xe
     - for file in
-        $(git diff --name-only --diff-filter=d FETCH_HEAD...HEAD -- "metadata/*.yml");
+        $(git diff --name-only --diff-filter=d FETCH_HEAD...${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA:-HEAD} -- "metadata/*.yml");
       do
         ajv validate -s schemas/metadata.json -d "$file";
       done
@@ -231,10 +231,10 @@ fdroid build:
     - git fetch https://gitlab.com/fdroid/fdroiddata.git;
     - test -d build || mkdir build
     - for f in
-          `git diff --name-only --diff-filter=d FETCH_HEAD...HEAD -- metadata/*.yml`
-          `git diff --name-only --diff-filter=d FETCH_HEAD...HEAD -- metadata/*/signatures`;
+          `git diff --name-only --diff-filter=d FETCH_HEAD...${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA:-HEAD} -- metadata/*.yml`
+          `git diff --name-only --diff-filter=d FETCH_HEAD...${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA:-HEAD} -- metadata/*/signatures`;
       do
-          diff=$(git diff FETCH_HEAD...HEAD -- $f);
+          diff=$(git diff FETCH_HEAD...${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA:-HEAD} -- $f);
           echo "$diff";
           test $(echo "$diff" | grep '^[+-] ' | grep -v '^+  *disable:' | wc -l) = 0 && continue;
           echo "$diff" | grep -E '^\+ *(NoSourceSince|Disabled):' && continue;
