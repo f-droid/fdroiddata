@@ -59,7 +59,52 @@ Builds:
       - ./tool build wrapper --architecture:amd64
     ndk: r23b
 
+  - versionName: '0.7'
+    versionCode: 8
+    commit: 89190213f34feef31c486d4036fc084a22eb13e1
+    subdir: app
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y openjdk-11-jdk-headless
+      - update-alternatives --auto java
+    gradle:
+      - yes
+    srclibs:
+      - Nim@v1.6.2
+      - Nim-csources@561b417
+    prebuild: sed -i '/splits {/,/^    }/d' build.gradle
+    build:
+      - export TOOL_DIR=$(realpath ./src/main/jni/tool)
+      - cp --recursive $$Nim-csources$$ $$Nim$$/csources_v1
+      - cd $$Nim$$/csources_v1
+      - make --jobs
+      - cd ..
+      - ./bin/nim compile ./koch.nim
+      - ./koch boot
+      - ./koch nimble
+      - export PATH=$(realpath ./bin):${PATH}
+      - cd ${TOOL_DIR}
+      - nimble install --define:ssl --accept
+      - ./tool download pcre
+      - chmod 777 --recursive ../pcre
+      - ./tool build pcre --architecture:arm
+      - ./tool build pcre --architecture:arm64
+      - ./tool build pcre --architecture:i386
+      - ./tool build pcre --architecture:amd64
+      - ./tool download libressl
+      - chmod 777 --recursive ../libressl
+      - ./tool patch libressl
+      - ./tool build libressl --architecture:arm
+      - ./tool build libressl --architecture:arm64
+      - ./tool build libressl --architecture:i386
+      - ./tool build libressl --architecture:amd64
+      - ./tool build wrapper --architecture:arm
+      - ./tool build wrapper --architecture:arm64
+      - ./tool build wrapper --architecture:i386
+      - ./tool build wrapper --architecture:amd64
+    ndk: r23b
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 0.6.1
-CurrentVersionCode: 7
+CurrentVersion: '0.7'
+CurrentVersionCode: 8
