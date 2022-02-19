@@ -169,7 +169,6 @@ Builds:
 
   - versionName: '3.15'
     versionCode: 167
-    disable: https://gitlab.com/fdroid/fdroiddata/-/issues/2594
     commit: c681a0c8c0d51164fee2e5fb87ac62d4c156c060
     subdir: app
     sudo:
@@ -202,16 +201,11 @@ Builds:
         ui/activity/MainActivity.java
       - sed -i -e '/getBooleanConfig/,/^            });/d' -e '/void offerUpload/,/^    }/d'
         -e '/offerUpload/d' ui/activity/DocumentFragment.java
-      - echo "package at.tomtasche.reader.nonfree; public class ConfigManager{public
-        ConfigManager(){} public void initialize(){} public boolean isLoaded(){return
-        true;} public void setEnabled(boolean enabled){} public void getBooleanConfig(String
-        key, ConfigListener<Boolean> configListener){} public Boolean getBooleanConfig(String
-        key){return null;} public interface ConfigListener<T>{public void onConfig(String
-        key, T value);}}" > nonfree/ConfigManager.java
-      - for class in AdManager AnalyticsManager BillingManager CrashManager HelpManager;
-        do echo "package at.tomtasche.reader.nonfree; public class ${class} {}" >
-        nonfree/${class}.java; sed -i -e "/${class}\./Id" background/*.java ui/*/*.java
-        ui/*.java; done
+      - sed -i -e 's/configManager.getBooleanConfig(".*")/null/' background/OdfLoader.java
+      - for class in AdManager AnalyticsManager BillingManager ConfigManager CrashManager
+        HelpManager; do echo "package at.tomtasche.reader.nonfree; public class ${class}
+        {}" > nonfree/${class}.java; sed -i -e "/${class}\./Id" background/*.java
+        ui/*/*.java ui/*.java; done
       - conan config set general.revisions_enabled=1
       - conan remote add odr https://odr.jfrog.io/artifactory/api/conan/odr-conan
     ndk: r23b
