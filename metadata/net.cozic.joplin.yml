@@ -1,0 +1,116 @@
+Categories:
+  - Writing
+License: MIT
+WebSite: https://joplinapp.org/
+SourceCode: https://github.com/laurent22/joplin
+IssueTracker: https://github.com/laurent22/joplin/issues
+Donate: https://joplinapp.org/donate/
+
+AutoName: Joplin
+Description: |-
+    An open source note taking and to-do application with synchronisation capabilities
+
+    Joplin is a free, open source note taking and to-do application, which can handle a large number of notes organised into notebooks. The notes are searchable, can be copied, tagged and modified either from the applications directly or from your own text editor. The notes are in Markdown format.
+
+    Notes exported from Evernote via .enex files can be imported into Joplin, including the formatted content (which is converted to Markdown), resources (images, attachments, etc.) and complete metadata (geolocation, updated time, created time, etc.). Plain Markdown files can also be imported.
+
+    The notes can be synchronised with various cloud services including Nextcloud, Dropbox, OneDrive, WebDAV or the file system (for example with a network directory). When synchronising the notes, notebooks, tags and other metadata are saved to plain text files which can be easily inspected, backed up and moved around.
+
+RepoType: git
+Repo: https://github.com/laurent22/joplin.git
+
+Builds:
+  - versionName: 2.7.2
+    versionCode: 2097667
+    commit: android-v2.7.2
+    subdir: packages/app-mobile/android/app
+    sudo:
+      - sysctl fs.inotify.max_user_watches=524288
+      - apt-get update || apt-get update
+      - apt-get install -y --no-install-recommends g++ build-essential libexpat1-dev
+        gtk-doc-tools gobject-introspection libtiff5-dev libjpeg62-turbo-dev libpng-dev
+        librsvg2-dev libexif-dev libgif-dev libpoppler-glib-dev liblcms2-dev libpango1.0-dev
+      - curl -Lo node.tar.xz https://nodejs.org/dist/v16.14.0/node-v16.14.0-linux-x64.tar.xz
+      - echo "0570b9354959f651b814e56a4ce98d4a067bf2385b9a0e6be075739bc65b0fae node.tar.xz"
+        | sha256sum -c -
+      - tar xJf node.tar.xz
+      - cp -a node-v16.14.0-linux-x64/. /usr/local/
+      - corepack enable
+    gradle:
+      - yes
+    srclibs:
+      - react-native-sharp@v0.26.3
+      - libvips@v8.10.0
+    rm:
+      - packages/tools/PortableAppsLauncher/
+      - packages/app-cli
+      - packages/plugin-repo-cli
+      - packages/app-desktop
+      - packages/app-clipper
+      - packages/server
+    prebuild:
+      - sed -i -e '\!ACCESS_NETWORK_STATE!a<uses-permission android:name="com.android.vending.CHECK_LICENSE"
+        tools:node="remove" />' -e 's!xmlns:android!xmlns:tools="http://schemas.android.com/tools"
+        xmlns:android!' src/main/AndroidManifest.xml
+      - pushd ../../../..
+      - find -name "package-lock.json" -delete
+      - yarn install
+      - sed -i -e '13,15d' packages/app-mobile/node_modules/react-native-rsa-native/android/build.gradle
+      - sed -i -e '10,12d' packages/app-mobile/node_modules/react-native-rsa-native/android/bin/build.gradle
+      - rm -rf packages/app-mobile/node_modules/sharp/vendor/lib/*
+      - rm -rf packages/tools/node_modules/sharp/vendor/lib/*
+      - rm packages/app-mobile/node_modules/sharp/build/Release/sharp.node
+      - rm packages/app-mobile/node_modules/sqlite3/lib/binding/napi-v3-linux-x64/node_sqlite3.node
+      - rm packages/lib/node_modules/sharp/build/Release/sharp.node
+      - rm packages/lib/node_modules/sqlite3/lib/binding/napi-v3-linux-x64/node_sqlite3.node
+      - rm packages/tools/node_modules/sharp/build/Release/sharp.node
+      - rm packages/tools/node_modules/sqlite3/lib/binding/napi-v3-linux-x64/node_sqlite3.node
+    scanignore:
+      - packages/app-mobile/android/build.gradle
+      - packages/app-mobile/node_modules/joplin-rn-alarm-notification/android/build.gradle
+      - packages/app-mobile/node_modules/@react-native-community/netinfo/android/build.gradle
+      - packages/app-mobile/node_modules/react-native-get-random-values/android/build.gradle
+      - packages/app-mobile/node_modules/react-native-securerandom/android/build.gradle
+      - packages/app-mobile/node_modules/react-native-vector-icons/android/build.gradle
+      - packages/app-mobile/node_modules/react-native-image-picker/android/build.gradle
+      - packages/app-mobile/node_modules/react-native-rsa-native/android/build.gradle
+      - packages/app-mobile/node_modules/react-native-webview/android/build.gradle
+      - packages/app-mobile/node_modules/react-native-camera/android/build.gradle
+      - packages/app-mobile/node_modules/react-native-share/android/build.gradle
+      - packages/app-mobile/node_modules/react-native/android
+      - packages/app-mobile/node_modules/jsc-android
+      - packages/app-mobile/node_modules/hermes-engine
+      - packages/app-mobile/node_modules/react-native/ReactAndroid/build.gradle
+      - packages/app-mobile/node_modules/react-native-rsa-native/android/bin/build.gradle
+    scandelete:
+      - packages/fork-htmlparser2/node_modules
+      - packages/generator-joplin/node_modules
+      - packages/app-mobile/node_modules
+      - packages/renderer/node_modules
+      - packages/tools/node_modules
+      - packages/lib/node_modules
+      - node_modules
+      - .yarn/cache/
+      - .yarn/install-state.gz
+    build:
+      - pushd $$libvips$$
+      - mkdir build
+      - ./autogen.sh --prefix=$$libvips$$/build/
+      - make -j$(nproc)
+      - make install
+      - popd
+      - pushd $$react-native-sharp$$
+      - export PKG_CONFIG_PATH=$$libvips$$/build/lib/pkgconfig/
+      - npm install --build-from-source
+      - popd
+
+MaintainerNotes: |-
+    * "g++" is needed for a dependency built by "npm install".
+    * "scanignore" of "build.gradle" are for local Maven repositories, the React Native folder
+      is for "react-native-0.66.1.aar", and the JSC Android folder for "android-jsc-intl-r241213.jar".
+    - we build libvips from source for the sharp library
+
+AutoUpdateMode: None
+UpdateCheckMode: Tags android-.*
+CurrentVersion: 2.7.2
+CurrentVersionCode: 2097667
