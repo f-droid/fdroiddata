@@ -42,7 +42,31 @@ Builds:
       - popd
     ndk: r23b
 
+  - versionName: 2.41.0
+    versionCode: 24100
+    commit: 4ee4f94c18a68d3a478ecf32bc615b85b7a4b533
+    subdir: app
+    submodules: true
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y g++ rename
+    gradle:
+      - yes
+    rm:
+      - app/jni/openssl/fuzz
+      - app/jni/openssl/boringssl/fuzz
+    prebuild:
+      - sed -i -e 's/enable true/enable false/' build.gradle
+      - sed -i -e 's/d+2/d+0/' jni/boost/build-android.sh
+    build:
+      - pushd jni
+      - ./build_boost.sh
+      - ./build_openssl.sh
+      - ./build_miniupnpc.sh
+      - popd
+    ndk: r23b
+
 AutoUpdateMode: Version %v
 UpdateCheckMode: Tags
-CurrentVersion: 2.40.0
-CurrentVersionCode: 24000
+CurrentVersion: 2.41.0
+CurrentVersionCode: 24100
