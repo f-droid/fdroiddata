@@ -46,11 +46,13 @@ Builds:
     subdir: app
     sudo:
       - apt-get update || apt-get update
-      - apt-get install -y openjdk-11-jdk
+      - apt-get install -y openjdk-11-jdk-headless
       - update-alternatives --auto java
     gradle:
       - fdroid
-    prebuild: echo 'android { lintOptions { isAbortOnError = false }}' >> build.gradle.kts
+    prebuild: sed -i -e '/val keystorePropertiesFile/,/^}/d' build.gradle.kts
+    scandelete:
+      - app
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
