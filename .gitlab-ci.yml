@@ -167,6 +167,8 @@ checkupdates_trigger:
   image: archlinux:latest
   before_script:
     - pacman -Sy --noconfirm parallel
+    # workaround broken parallel version 20220222 not distributing jobs equally
+    - pacman -U --noconfirm "https://archive.archlinux.org/packages/p/parallel/parallel-20220122-1-any.pkg.tar.zst"
   script:
     - parallel --verbose --delay 90 -X --jobs 10 'curl -X POST -F "token=$CI_JOB_TOKEN" -F "ref=master" -F "variables[CHECKUPDATES]=true" -F "variables[CHECKUPDATES_APPIDS]= {/.} " https://gitlab.com/api/v4/projects/${CI_PROJECT_ID}/trigger/pipeline' ":::" metadata/*.yml
 
