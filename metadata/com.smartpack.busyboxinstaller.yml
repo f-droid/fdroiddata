@@ -139,7 +139,40 @@ Builds:
       - mv $$ndk-box-kitchen$$/jni/libs/x86/busybox src/main/assets/i686
     ndk: r21e
 
+  - versionName: v2.7
+    versionCode: 18
+    commit: a192540bf9404198fefa699bb917438fd98ac37a
+    subdir: app
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y openjdk-11-jdk-headless
+      - update-alternatives --auto java
+    gradle:
+      - fdroid
+    srclibs:
+      - ndk-box-kitchen@87ca6f75aad8a1f4d12857d994ea15b33b31a8b4
+      - Busybox@1_33_1
+      - SELinux@3.2
+      - pcre@android-mainline-11.0.0_r44
+    scandelete:
+      - app/src/main/assets
+    build:
+      - pushd $$ndk-box-kitchen$$
+      - cp -r $$Busybox$$ busybox
+      - cp -r $$SELinux$$ jni/selinux
+      - cp -r $$pcre$$ jni/pcre
+      - ./busybox.sh patch
+      - ./busybox.sh generate
+      - cd jni
+      - sed -i -e 's/x86_64//' Application.mk
+      - $$NDK$$/ndk-build NDK_PROJECT_PATH=. NDK_APPLICATION_MK=Application.mk APP_BUILD_SCRIPT=Android.mk
+      - popd
+      - mv $$ndk-box-kitchen$$/jni/libs/armeabi-v7a/busybox src/main/assets/armv7l
+      - mv $$ndk-box-kitchen$$/jni/libs/arm64-v8a/busybox src/main/assets/aarch64
+      - mv $$ndk-box-kitchen$$/jni/libs/x86/busybox src/main/assets/i686
+    ndk: r21e
+
 AutoUpdateMode: Version %v
 UpdateCheckMode: Tags
-CurrentVersion: v2.6
-CurrentVersionCode: 17
+CurrentVersion: v2.7
+CurrentVersionCode: 18
