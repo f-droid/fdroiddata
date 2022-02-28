@@ -210,6 +210,51 @@ Builds:
       - conan remote add odr https://odr.jfrog.io/artifactory/api/conan/odr-conan
     ndk: r23b
 
+  - versionName: '3.19'
+    versionCode: 172
+    commit: 5c5463d04d485b434e3eb7a61c5390095d302e8e
+    subdir: app
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y openjdk-11-jdk-headless
+      - update-alternatives --auto java
+      - apt-get install -y ninja-build
+      - pip3 install wheel
+      - pip3 install conan
+      - curl -Lo cmake.tar.gz https://github.com/Kitware/CMake/releases/download/v3.22.1/cmake-3.22.1-linux-x86_64.tar.gz
+      - echo "73565c72355c6652e9db149249af36bcab44d9d478c5546fd926e69ad6b43640 cmake.tar.gz"
+        | sha256sum -c -
+      - tar xzf cmake.tar.gz --strip-components=1 -C /usr/local/
+    gradle:
+      - pro
+    prebuild:
+      - sed -i -e '/com.google/d' ../build.gradle
+      - sed -i -e '/com.google.firebase/d' -e '/firebaseCrashlytics/d' -e '/com.google.android.play/d'
+        -e '/com.android.billingclient/d' -e '/com.google.gms/d' -e '/pro"/d' -e '/com.google.android.gms/d'
+        build.gradle
+      - sed -i -e '/INTERNET/d' -e '/BILLING/d' -e '/^        <meta-data/,+5d' src/main/AndroidManifest.xml
+      - cd src/main/java/at/tomtasche/reader
+      - sed -i -e '/com.google.firebase/d' background/FileLoader.java
+      - sed -i -e '/gms/d' -e '/play.core/d' -e '/firebase/d' ui/activity/*.java
+      - sed -i -e '/private Uri doFirebaseConvert/,/^    }/d' -e 's/viewerUri = doFirebaseConvert(options)/return/'
+        -e '/com.google/d' -e '/Firebase/d' -e '/Storage/d' -e '/auth /d' -e '/storage
+        /d' background/OnlineLoader.java
+      - sed -i -e '/void initializeProprietaryLibraries/,/^    }/d' -e '/initializeProprietaryLibraries/d'
+        -e '/void buyAdRemoval/,/^    }/d' -e '/buyAdRemoval/d' -e 's/billingManager.hasPurchased()/true/'
+        -e 's/billingManager.isEnabled()/false/' -e '/addOnPreDrawListener/,/});/d'
+        ui/activity/MainActivity.java
+      - sed -i -e '/getBooleanConfig("show_in_app_rating/,/^                });/d'
+        -e '/void offerUpload/,/^    }/d' -e '/offerUpload/d' -e '/void requestInAppRating/,/^    }/d'
+        -e '/requestInAppRating/d' ui/activity/DocumentFragment.java
+      - sed -i -e 's/configManager.getBooleanConfig(".*")/null/' background/OdfLoader.java
+      - for class in AdManager AnalyticsManager BillingManager ConfigManager CrashManager
+        HelpManager; do echo "package at.tomtasche.reader.nonfree; public class ${class}
+        {}" > nonfree/${class}.java; sed -i -e "/${class}\./Id" background/*.java
+        ui/*/*.java ui/*.java; done
+      - conan config set general.revisions_enabled=1
+      - conan remote add odr https://odr.jfrog.io/artifactory/api/conan/odr-conan
+    ndk: r23b
+
 MaintainerNotes: Init submodule manully because there is private recursive submodule
 
 AutoUpdateMode: None
