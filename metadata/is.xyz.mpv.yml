@@ -171,7 +171,59 @@ Builds:
       - ./buildall.sh --arch arm64 mpv
       - ./buildall.sh
 
+  - versionName: 2022-03-06-release-oldapi
+    versionCode: 27
+    commit: 903919ed32b47755f6e4c04561d380c74390c64c
+    subdir: app
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y openjdk-11-jdk-headless ninja-build
+      - update-alternatives --auto java
+      - pip3 install wheel
+      - pip3 install meson
+    gradle:
+      - api29
+    srclibs:
+      - mbedtls@v2.28.0
+      - dav1d@4124eded3b316f457ce8616fecd6f5c1734952b3
+      - FFmpeg@37480b1b85b0405563962b581dc2899b1b4bec59
+      - freetype2@VER-2-11-1
+      - fribidi@v1.0.11
+      - harfbuzz@4.0.0
+      - libass@5f0e8450f834894b2745238e3d32ff4878710ec8
+      - mpv@7f67a553f68a9df87997fdcb6484ffd243ca2162
+    prebuild:
+      - cd ../buildscripts/
+      - mkdir -p sdk
+      - ln -s $$NDK$$ sdk/android-ndk-r23b
+      - mkdir -p deps
+      - pushd deps/
+      - cp -r $$mbedtls$$ mbedtls
+      - cp -r $$dav1d$$ dav1d
+      - cp -r $$FFmpeg$$ ffmpeg
+      - cp -r $$freetype2$$ freetype2
+      - cp -r $$fribidi$$ fribidi
+      - cp -r $$harfbuzz$$ harfbuzz
+      - cp -r $$libass$$ libass
+      - cp -r $$mpv$$ mpv
+      - mkdir lua
+      - curl -Lo lua.tar.gz https://www.lua.org/ftp/lua-5.2.4.tar.gz
+      - echo "b9e2e4aad6789b3b63a056d442f7b39f0ecfca3ae0f1fc0ae4e9614401b69f4b lua.tar.gz"
+        | sha256sum -c -
+      - tar -xz --strip-components=1 -C lua -f lua.tar.gz
+      - popd
+      - sed -i -e '/gradlew/d' scripts/mpv-android.sh
+      - sed -i -e '/"$target" == "mpv-android"/,/ls -lh/d' buildall.sh
+    scandelete:
+      - buildscripts/deps/mbedtls/
+      - buildscripts/deps/lua.tar.gz
+    build:
+      - cd ../buildscripts/
+      - ./buildall.sh --arch arm64 mpv
+      - ./buildall.sh
+    ndk: r23b
+
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: 2021-10-28-release
-CurrentVersionCode: 26
+CurrentVersion: 2022-03-06-release-oldapi
+CurrentVersionCode: 27
