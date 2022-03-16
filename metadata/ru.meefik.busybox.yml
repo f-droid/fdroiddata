@@ -262,7 +262,44 @@ Builds:
       - popd
     ndk: r15c
 
+  - versionName: 1.34.1
+    versionCode: 51
+    commit: 4ac309d98962fa36d749ad63ad42fedb9da749ba
+    subdir: app
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y --no-install-recommends g++ openjdk-11-jdk-headless
+      - update-alternatives --auto java
+    gradle:
+      - yes
+    rm:
+      - app/src/main/_libs/arm*/*
+      - app/src/main/_libs/x8*/*
+      - app/src/main/jniLibs/arm*/*
+      - app/src/main/jniLibs/x8*/*
+    prebuild: sed -i -e '/android-ndk-r15c/d' -e 's!${BUILD_DIR}/${NDK}!$$NDK$$!'
+        -e '/dl.google.com/d' ../contrib/build.sh
+    build:
+      - pushd ../contrib
+      - ./build.sh all
+      - popd
+      - cp -r ../contrib/build/dist/* src/main/_libs/
+      - cp -r ../contrib/build/dist/* src/main/jniLibs/
+      - pushd src/main/jniLibs/armeabi-v7a
+      - ln -s busybox libbusybox.so ; ln -s ssl_helper libssl_helper.so
+      - popd
+      - pushd src/main/jniLibs/arm64-v8a
+      - ln -s busybox libbusybox.so ; ln -s ssl_helper libssl_helper.so
+      - popd
+      - pushd src/main/jniLibs/x86
+      - ln -s busybox libbusybox.so ; ln -s ssl_helper libssl_helper.so
+      - popd
+      - pushd src/main/jniLibs/x86_64
+      - ln -s busybox libbusybox.so ; ln -s ssl_helper libssl_helper.so
+      - popd
+    ndk: r15c
+
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: 1.31.1
-CurrentVersionCode: 46
+CurrentVersion: 1.34.1
+CurrentVersionCode: 51
