@@ -1,0 +1,42 @@
+Categories:
+  - Sports & Health
+License: BSD-3-Clause
+AuthorName: Sean E. Russell
+AuthorEmail: ser@ser1.net
+AuthorWebSite: https://www.ser1.net
+WebSite: https://sr.ht/~ser/forage
+SourceCode: https://hg.sr.ht/~ser/forage
+IssueTracker: https://todo.sr.ht/~ser/forage
+Changelog: https://hg.sr.ht/~ser/forage/raw/CHANGELOG.md
+Bitcoin: 1Fecf9PDu96iwwwV7ueRAiCEYVwWnttFdz
+
+AutoName: Forage
+
+RepoType: hg
+Repo: https://hg.sr.ht/~ser/forage
+
+Builds:
+  - versionName: 1.1.2
+    versionCode: 39
+    commit: v1.1.2
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y libgl1-mesa-dev xorg-dev
+      - curl -Lo go.tar.gz https://golang.org/dl/go1.17.5.linux-amd64.tar.gz
+      - echo 'bd78114b0d441b029c8fe0341f4910370925a4d270a6a590668840675b0c653e go.tar.gz'
+        | sha256sum -c -
+      - tar xzf go.tar.gz --strip-components=1 -C /usr/local/
+    output: Forage.apk
+    prebuild:
+      - export GOPATH=${HOME}/go
+      - go install fyne.io/fyne/v2/cmd/fyne@v2.1.4
+    build:
+      - export GOPATH=${HOME}/go
+      - ${HOME}/go/bin/fyne package -os android -release
+    ndk: r23b
+
+AutoUpdateMode: Version +-fdroid v%v
+UpdateCheckMode: Tags ^v[0-9].[0-9].[0-9]
+UpdateCheckData: FyneApp.toml|Build\s=\s(\d+)|.|Version\s=\s"([\d.]+)"
+CurrentVersion: 1.1.2
+CurrentVersionCode: 39
