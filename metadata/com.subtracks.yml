@@ -181,20 +181,22 @@ Builds:
       - tar xJf node.tar.xz
       - cp -a node-v14.17.5-linux-x64/. /usr/local/
       - npm -g install yarn
+      - apt-get update || apt-get update
+      - apt-get install -y wget
     gradle:
       - yes
     srclibs:
-      - react-native-reanimated@2.2.0
+      - react-native-reanimated@2.3.1
     prebuild:
       - echo -e '\norg.gradle.jvmargs=-Xmx4g -XX:MaxPermSize=4g' >> ../gradle.properties
       - echo -e "android { packagingOptions { pickFirst 'lib/**/*.so' } }" >> build.gradle
       - cd ../..
       - mkdir .yarncache
-      - yarn install --cache-folder ./.yarncache
+      - yarn install --network-concurrency 1 --cache-folder ./.yarncache
       - rm -rf .yarncache
       - cd $$react-native-reanimated$$
       - echo -e "android { ndkVersion '21.4.7075529' }" >> build.gradle
-      - yarn add react-native@0.64.1
+      - yarn add react-native@0.67.1
     scanignore:
       - android/build.gradle
       - node_modules/jsc-android
