@@ -183,6 +183,8 @@ Builds:
       - npm -g install yarn
       - apt-get update || apt-get update
       - apt-get install -y wget
+      - apt-get install -y openjdk-11-jdk-headless
+      - update-alternatives --auto java
     gradle:
       - yes
     srclibs:
@@ -217,10 +219,15 @@ Builds:
       - submodules
     build:
       - ../../scripts/prepare-exoplayer-ffmpeg.sh
+      - REACT_NATIVE_VERSION=`npm pkg get 'dependencies.react-native' | sed -E 's/^"([0-9]+\.[0-9]+\.[0-9]+)"/\1/'`
+      - REACT_NATIVE_VERSION_MINOR=`echo ${REACT_NATIVE_VERSION} | sed -E 's/^[0-9]+\.([0-9]+)\.[0-9]+/\1/'`
       - pushd $$react-native-reanimated$$
+      - pushd ..
+      - yarn add react-native@"${REACT_NATIVE_VERSION}"
+      - popd
       - FOR_HERMES=True gradle :assembleRelease
       - popd
-      - mv $$react-native-reanimated$$/build/outputs/aar/android-release.aar ../../node_modules/react-native-reanimated/android/react-native-reanimated-64-hermes.aar
+      - mv $$react-native-reanimated$$/build/outputs/aar/android-release.aar ../../node_modules/react-native-reanimated/android/react-native-reanimated-${REACT_NATIVE_VERSION_MINOR}-hermes.aar
     ndk: r21e
 
 AutoUpdateMode: Version v%v
