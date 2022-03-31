@@ -3037,16 +3037,18 @@ Builds:
 
   - versionName: 3.14.0
     versionCode: 3000338
-    disable: build failed
     commit: 3.14.0
     subdir: android/app
     sudo:
       - sysctl fs.inotify.max_user_watches=524288
-      - curl -Lo node.tar.xz https://nodejs.org/dist/v16.13.2/node-v16.13.2-linux-x64.tar.xz
-      - echo "7f5e9a42d6e86147867d35643c7b1680c27ccd45db85666fc52798ead5e74421 node.tar.xz"
+      - curl -Lo /tmp/node.tar.xz https://nodejs.org/dist/v16.13.2/node-v16.13.2-linux-x64.tar.xz
+      - echo "7f5e9a42d6e86147867d35643c7b1680c27ccd45db85666fc52798ead5e74421 /tmp/node.tar.xz"
         | sha256sum -c -
-      - tar xJf node.tar.xz --strip-components=1 -C /usr/local/
+      - tar xJf /tmp/node.tar.xz --strip-components=1 -C /usr/local/
       - npm -g install yarn
+      - apt-get update || apt-get update
+      - apt-get install -y openjdk-11-jdk-headless
+      - update-alternatives --auto java
     init:
       - cd ../..
       - yarn cache clean snjs
@@ -3074,10 +3076,13 @@ Builds:
       - node_modules/jsc-android
       - node_modules/react-native
       - node_modules/detox/android/build.gradle
-      - node_modules/detox/android/detox/detox-publishing.gradle
+      - node_modules/detox/android/detox/publishing.gradle
       - node_modules/standard-notes-rn/android/build.gradle
       - node_modules/@react-native-community/async-storage/android/build.gradle
       - node_modules/@react-native-community/masked-view/android/build.gradle
+      - node_modules/@standardnotes/react-native-utils/android/build.gradle
+      - node_modules/@standardnotes/react-native-textview/android/build.gradle
+      - node_modules/@standardnotes/react-native-aes/android/build.gradle
     scandelete:
       - node_modules/
     build:
