@@ -368,10 +368,49 @@ Builds:
       - node_modules/
     ndk: r21e
 
+  - versionName: 0.6.0
+    versionCode: 60
+    commit: 2992ac1e5047bb680661258cdab868919b65976c
+    subdir: android/app
+    sudo:
+      - sysctl fs.inotify.max_user_watches=524288
+      - curl -Lo node.tar.xz https://nodejs.org/dist/v16.14.2/node-v16.14.2-linux-x64.tar.xz
+      - echo "e40c6f81bfd078976d85296b5e657be19e06862497741ad82902d0704b34bb1b node.tar.xz"
+        | sha256sum -c -
+      - tar xJf node.tar.xz
+      - cp -a node-v16.14.2-linux-x64/. /usr/local/
+    init: npm install
+    gradle:
+      - yes
+    prebuild:
+      - sed -i -e '\!WRITE_EXTERNAL_STORAGE!a<uses-permission android:name="com.google.android.finsky.permission.BIND_GET_INSTALL_REFERRER_SERVICE"
+        tools:node="remove" />' -e 's!xmlns:android!xmlns:tools="http://schemas.android.com/tools"
+        xmlns:android!' -e '/INTERNET/d' -e '/SYSTEM_ALERT_WINDOW/d' -e '/VIBRATE/d'
+        -e 's/EXTERNAL_STORAGE"/EXTERNAL_STORAGE" tools:node="remove"/g' src/main/AndroidManifest.xml
+      - sed -i -e '/play-services/d' ../../node_modules/react-native-device-info/android/build.gradle
+      - sed -i -e '/installReferrerVersion/,+11d' ../../node_modules/react-native-device-info/android/build.gradle
+      - sed -i -e "/swiperefreshlayout/a implementation(project(':react-native-device-info'))
+        { exclude group\x3a 'com.google.firebase'\\ exclude group\x3a 'com.google.android.gms'\\
+        exclude group\x3a 'com.android.installreferrer'\\ }" build.gradle
+    scanignore:
+      - android/build.gradle
+      - android/app/build.gradle
+      - node_modules/hermes-engine
+      - node_modules/jsc-android
+      - node_modules/react-native/android/com/facebook/react/react-native/*/
+      - node_modules/react-native-device-info/android/build.gradle
+      - node_modules/react-native-safe-area-context/android/build.gradle
+      - node_modules/react-native-screens/android/build.gradle
+      - node_modules/react-native-vector-icons/android/build.gradle
+      - node_modules/react-native/ReactAndroid/build.gradle
+    scandelete:
+      - node_modules/
+    ndk: r21e
+
 MaintainerNotes: scanignore is used to allow the "node_modules/react-native/android"
     local Maven repository.
 
 AutoUpdateMode: Version %v
 UpdateCheckMode: Tags
-CurrentVersion: 0.5.0
-CurrentVersionCode: 50
+CurrentVersion: 0.6.0
+CurrentVersionCode: 60
