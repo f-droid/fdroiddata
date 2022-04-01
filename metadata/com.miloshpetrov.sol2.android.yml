@@ -13,9 +13,9 @@ RepoType: git
 Repo: https://github.com/MovingBlocks/DestSolAndroid
 
 Builds:
-  - versionName: 2.0.0
-    versionCode: 11
-    commit: 1b1c0db
+  - versionName: 2.1.0
+    versionCode: 13
+    commit: 1b1c0db0baf00c62ced328a690ffa0f85c8e9d71
     patch:
       - 2.0.0-android-backport.patch
     gradle:
@@ -28,6 +28,7 @@ Builds:
     forceversion: true
     forcevercode: true
     prebuild:
+      - $$SDK$$/tools/bin/sdkmanager 'build-tools;30.0.3' > /dev/nulls
       - printf '\nrootProject.projectDir = file("engine_workspace"); include ":android";
         project(":android").projectDir = file(".\"); project(":android").buildFileName
         = "android.gradle"; apply from:"engine_workspace/settings.gradle";' >> settings.gradle
@@ -66,47 +67,6 @@ Builds:
       - sed -i "s/.*com\.android\.tools\.build:gradle:.*/$(grep 'com\.android\.tools\.build:gradle:3.*'
         android.gradle)/g" engine_workspace/libs/gestalt/build.gradle
 
-  - versionName: 2.1.0-SNAPSHOT
-    versionCode: 13
-    disable: not anywhere near release yet but this is to make sure it builds at least
-        under the current development branch.
-    commit: develop
-    gradle:
-      - yes
-    srclibs:
-      - MovingBlocks-DestinationSol-engine@develop
-      - MovingBlocks-gestalt@release/v7.x
-      - MovingBlocks-nui@v3.1.0
-      - MovingBlocks-joml-ext@v0.1.0
-      - MovingBlocks-org-reflections-fork@4fe6bd5
-      - antilaby-jsemver-fork@0.10.0
-    forceversion: true
-    forcevercode: true
-    prebuild:
-      - printf '\nrootProject.projectDir = file("engine_workspace"); include ":android";
-        project(":android").projectDir = file(".\"); project(":android").buildFileName
-        = "android.gradle"; apply from:"engine_workspace/settings.gradle";' >> settings.gradle
-      - mv build.gradle android.gradle
-      - ln -s $$MovingBlocks-DestinationSol-engine$$ engine_workspace
-      - ln -s engine_workspace/gradle gradle
-      - pushd engine_workspace
-      - ln -s $$MovingBlocks-gestalt$$ libs/gestalt
-      - ln -s $$MovingBlocks-nui$$ libs/TeraNUI
-      - ln -s $$MovingBlocks-joml-ext$$ libs/joml-ext
-      - ln -s $$MovingBlocks-org-reflections-fork$$ libs/reflections
-      - ln -s $$antilaby-jsemver-fork$$ libs/jsemver
-      - pushd $$MovingBlocks-org-reflections-fork$$
-      - gradle init --type pom
-      - popd
-      - echo 'sdk.dir=$$SDK$$' > local.properties
-      - echo 'sdk.dir=$$SDK$$' > libs/gestalt/local.properties
-      - popd
-      - sed -i '/artifactory.terasology.org/d' android.gradle engine_workspace/build.gradle
-        engine_workspace/config/gradle/common.gradle engine_workspace/engine/build.gradle
-      - sed -i -e '/heisluft.de/d' -e '/com.github.zafarkhaja:java-semver/d' android.gradle
-      - sed -i "s/.*com\.android\.tools\.build:gradle:.*/$(grep 'com\.android\.tools\.build:gradle:.*'
-        android.gradle)/g" engine_workspace/libs/gestalt/build.gradle
-
 MaintainerNotes: |
     The main engine code is at https://github.com/MovingBlocks/DestinationSol but the actual android application
     can be found at https://github.com/MovingBlocks/DestSolAndroid.
@@ -140,6 +100,6 @@ MaintainerNotes: |
     Because the newer commit was intended for a later version, the version and version code need to be forced here.
 
 AutoUpdateMode: None
-UpdateCheckMode: Tags v\d+\.\d+\.\d+([-]alpha|beta)?$
+UpdateCheckMode: Tags ^v[\d.]+$
 CurrentVersion: 2.1.0
-CurrentVersionCode: 12
+CurrentVersionCode: 13
