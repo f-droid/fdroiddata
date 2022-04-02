@@ -387,6 +387,27 @@ Builds:
     scandelete:
       - protobuf/build
 
+  - versionName: 2.18.1.0
+    versionCode: 2180100
+    commit: v2.18.1.0
+    subdir: Corona-Warn-App
+    submodules: true
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y openjdk-11-jdk-headless
+      - update-alternatives --auto java
+    gradle:
+      - device
+    scanignore:
+      - Corona-Warn-App/src/main/assets/default_app_config_android.bin
+      - Corona-Warn-App/src/main/assets/default_qr_code_poster_template_android.bin
+      - Corona-Warn-App/src/main/assets/default_dsc_list.bin
+      - Corona-Warn-App/src/main/assets/ccl/ccl-configuration.bin
+      - GmsCore/firebase-auth-core/build.gradle
+      - GmsCore/play-services-core/build.gradle
+    scandelete:
+      - protobuf/build
+
 MaintainerNotes: |-
     Needs some hoop-jumping with the included dgc-certlogic dependency, which vendors another jar dependency
     which we instead build to mavenLocal in srclib prepare step.
@@ -406,6 +427,9 @@ MaintainerNotes: |-
     Server-Protocol-Buffer/src/main/proto/internal/dgc/dsc_list.proto \
     --proto_path Server-Protocol-Buffer/src/main/proto/ < \
     Corona-Warn-App/src/main/assets/default_dsc_list.bin > default_dsc_list.txt
+
+    CCL (Common Covid Logic) configuration file (CBOR encoded JSON):
+    cat Corona-Warn-App/src/main/assets/ccl/ccl-configuration.bin | python -m cbor2.tool --pretty
 
     Also microG isn't firebase, so we scanignore that as well.
 
