@@ -3035,14 +3035,14 @@ Builds:
       - popd
     ndk: r21e
 
-  - versionName: 3.14.0
+  - versionName: 3.14.1
     versionCode: 3000338
-    commit: 3.14.0
+    commit: 3.14.1
     subdir: android/app
     sudo:
       - sysctl fs.inotify.max_user_watches=524288
-      - curl -Lo /tmp/node.tar.xz https://nodejs.org/dist/v16.13.2/node-v16.13.2-linux-x64.tar.xz
-      - echo "7f5e9a42d6e86147867d35643c7b1680c27ccd45db85666fc52798ead5e74421 /tmp/node.tar.xz"
+      - curl -Lo /tmp/node.tar.xz https://nodejs.org/dist/v14.19.1/node-v14.19.1-linux-x64.tar.xz
+      - echo "2a28ee68c58e2c3a2a4deecdf9ee1d7080afd69ebe211cf5141d45df8f4ecc77 /tmp/node.tar.xz"
         | sha256sum -c -
       - tar xJf /tmp/node.tar.xz --strip-components=1 -C /usr/local/
       - npm -g install yarn
@@ -3066,8 +3066,8 @@ Builds:
       - ios
       - android/app/gradle
     prebuild:
-      - JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 $$SDK$$/tools/bin/sdkmanager 'cmake;3.10.2.4988404'
-        > /dev/null
+      - yes | JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 $$SDK$$/tools/bin/sdkmanager --licenses
+      - JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 $$SDK$$/tools/bin/sdkmanager 'cmake;3.18.1'
       - sed -i -e '/detox/Id' -e 's/versionName appVersionName/versionName "$$VERSION$$"/'
         -e 's/versionCode appVersionCode/versionCode $$VERCODE$$/' build.gradle
     scanignore:
@@ -3093,6 +3093,9 @@ Builds:
       - ./dist-build/android-armv8-a.sh
       - ./dist-build/android-x86.sh
       - ./dist-build/android-x86_64.sh
+      - popd
+      - pushd ../..
+      - yarn run android:bundle
       - popd
     ndk: r21e
 
