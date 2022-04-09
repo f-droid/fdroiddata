@@ -43,7 +43,37 @@ Builds:
         libs
     ndk: r21e
 
+  - versionName: 11.2.148.20220409-gh
+    versionCode: 148
+    commit: 417f55571c89a2ed56788e9c59ae835f86e51949
+    subdir: app
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y openjdk-11-jdk-headless
+      - update-alternatives --auto java
+    gradle:
+      - yes
+    srclibs:
+      - MMKV@49bbae1a97a118a435b5f1a1ae42d87be121571a
+    prebuild:
+      - sed -i -e '/dependencies {/a implementation "com.github.GCX-HCI:tray:v0.12.0"'
+        build.gradle
+      - sed -i -e '/repositories {/a maven { url "https://jitpack.io" }' ../build.gradle
+      - JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 $$SDK$$/tools/bin/sdkmanager 'cmake;3.18.1'
+        > /dev/null
+      - sed -i -e '/#define MMKV_DISABLE_CRYPT/s|//||' -e '/#define MMKV_DISABLE_FLUTTER/s|//||'
+        $$MMKV$$/Core/MMKVPredef.h
+    scandelete:
+      - app/libs/*.aar
+    build:
+      - pushd $$MMKV$$/Android/MMKV/mmkv
+      - gradle assembleRelease
+      - popd
+      - mv $$MMKV$$/Android/MMKV/mmkv/build/outputs/aar/mmkv-DefaultCpp-release.aar
+        libs
+    ndk: r21e
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^V[\d.]+\(
-CurrentVersion: 11.0.146.20220206
-CurrentVersionCode: 146
+CurrentVersion: 11.2.148.20220409-gh
+CurrentVersionCode: 148
