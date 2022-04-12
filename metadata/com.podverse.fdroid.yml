@@ -1182,8 +1182,65 @@ Builds:
       - mv $$react-native-reanimated$$/build/outputs/aar/android-release.aar ../../node_modules/react-native-reanimated/android/react-native-reanimated-66-jsc.aar
     ndk: r23b
 
+  - versionName: 4.3.5
+    versionCode: 30
+    commit: a315e8fd3c96bda3695995ce792564d2b3d4aa0d
+    subdir: android/app
+    sudo:
+      - curl -Lo node.tar.xz https://nodejs.org/download/release/v14.17.6/node-v14.17.6-linux-x64.tar.xz
+      - echo "3bbe4faf356738d88b45be222bf5e858330541ff16bd0d4cfad36540c331461b node.tar.xz"
+        | sha256sum -c -
+      - tar xJf node.tar.xz
+      - cp -a node-v14.17.6-linux-x64/. /usr/local/
+      - npm -g install yarn
+    init:
+      - yarn install
+      - yarn add jetifier --dev
+      - yarn jetify
+    gradle:
+      - yes
+    srclibs:
+      - react-native-reanimated@2.2.3
+    rm:
+      - functions
+    prebuild:
+      - echo -e '\norg.gradle.jvmargs=-Xmx4g -XX:MaxPermSize=4g' >> ../gradle.properties
+      - echo -e "android { packagingOptions { pickFirst 'lib/**/*.so' } }" >> build.gradle
+      - cd $$react-native-reanimated$$
+      - yarn install
+    scanignore:
+      - android/build.gradle
+      - node_modules/hermes-engine
+      - node_modules/jsc-android
+      - node_modules/react-native/android
+      - node_modules/react-native/ReactAndroid/build.gradle
+      - node_modules/react-native-document-picker/android/build.gradle
+      - node_modules/react-native-localize/android/build.gradle
+      - node_modules/react-native-safe-area-context/android/build.gradle
+      - node_modules/react-native-screens/android/build.gradle
+      - node_modules/react-native-share/android/build.gradle
+      - node_modules/react-native-svg/android/build.gradle
+      - node_modules/react-native-track-player/android/build.gradle
+      - node_modules/react-native-vector-icons/android/build.gradle
+      - node_modules/react-native-webview/android/build.gradle
+      - node_modules/@react-native-community/async-storage/android/build.gradle
+      - node_modules/@react-native-community/masked-view/android/build.gradle
+      - node_modules/@react-native-community/netinfo/android/build.gradle
+    scandelete:
+      - node_modules
+    build:
+      - pushd $$react-native-reanimated$$
+      - FOR_HERMES=True gradle :assembleRelease
+      - popd
+      - mv $$react-native-reanimated$$/build/outputs/aar/android-release.aar ../../node_modules/react-native-reanimated/android/react-native-reanimated-66-hermes.aar
+      - pushd $$react-native-reanimated$$
+      - gradle :assembleRelease
+      - popd
+      - mv $$react-native-reanimated$$/build/outputs/aar/android-release.aar ../../node_modules/react-native-reanimated/android/react-native-reanimated-66-jsc.aar
+    ndk: r23b
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^[0-9.]+$
 UpdateCheckData: android/app/build.gradle|versionCode\s(\d+)|.|versionName\s"(.+)"
-CurrentVersion: 4.3.4
-CurrentVersionCode: 29
+CurrentVersion: 4.3.5
+CurrentVersionCode: 30
