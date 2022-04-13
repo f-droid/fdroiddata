@@ -156,6 +156,26 @@ Builds:
       - ios
     build: make release-fdroid BUILD_NUMBER=$$VERCODE$$
 
+  - versionName: 1.19.0
+    versionCode: 2022032811
+    commit: d6a6c41dd3ff06b057d2226644583ef57e7347da
+    timeout: 10800
+    sudo:
+      - cd build/im.status.ethereum
+      - make fdroid-build-env
+    init: nix/scripts/setup.sh
+    output: result/app-release-unsigned.apk
+    prebuild:
+      - sed -i '/react-native-notifications/d' scripts/google-free.sh package.json
+      - sed -i '/react-native-notifications/,+4d' yarn.lock
+      - sed -i '6i <uses-permission tools:node="remove" android:name="com.android.vending.CHECK_LICENSE"/>' android/app/src/release/AndroidManifest.xml
+    scanignore:
+      - android/build.gradle
+      - android/app/build.gradle
+    scandelete:
+      - ios
+    build: make release-fdroid BUILD_NUMBER=$$VERCODE$$
+
 MaintainerNotes: |-
     Status.im mobile app is built in a deterministic way using Nix package manager.
     Because of this we disable Gradle builds via F-Droid and run `make release-android`.
@@ -164,5 +184,5 @@ MaintainerNotes: |-
 
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: 1.18.2
-CurrentVersionCode: 2022021419
+CurrentVersion: 1.19.0
+CurrentVersionCode: 2022032811
