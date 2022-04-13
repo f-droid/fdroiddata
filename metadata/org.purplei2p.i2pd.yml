@@ -20,6 +20,7 @@ Repo: https://github.com/PurpleI2P/i2pd-android.git
 Builds:
   - versionName: 2.40.0
     versionCode: 24000
+    disable: versions below 2.41.0 may crash due to new SSU2 transport protocol
     commit: 98f3cae41570caf5906d37245d7bfce90d60c447
     subdir: app
     submodules: true
@@ -66,7 +67,33 @@ Builds:
       - popd
     ndk: r23b
 
+  - versionName: 2.41.0.1
+    versionCode: 2410001
+    commit: 7611296f63b7ae1562e1f45644f4180d1e1f1727
+    subdir: app
+    submodules: true
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y g++ rename
+      - apt-get install -y openjdk-11-jdk-headless
+      - update-alternatives --auto java
+    gradle:
+      - yes
+    rm:
+      - app/jni/openssl/fuzz
+      - app/jni/openssl/boringssl/fuzz
+    prebuild:
+      - sed -i -e 's/enable true/enable false/' build.gradle
+      - sed -i -e 's/d+2/d+0/' jni/boost/build-android.sh
+    build:
+      - pushd jni
+      - ./build_boost.sh
+      - ./build_openssl.sh
+      - ./build_miniupnpc.sh
+      - popd
+    ndk: r21e
+
 AutoUpdateMode: Version %v
 UpdateCheckMode: Tags
-CurrentVersion: 2.41.0
-CurrentVersionCode: 24100
+CurrentVersion: 2.41.0.1
+CurrentVersionCode: 2410001
