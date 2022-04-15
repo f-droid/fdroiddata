@@ -86,24 +86,18 @@ Please read the [General Recommendations](#general-recommendations) before you s
 
 #### Setting up fdroidserver
 
-> Note that to use the `master` branch of _fdroiddata_ you will need the
-master branch of _fdroidserver_. Using the latest stable release of
-fdroidserver would probably work, but it is not guaranteed.
-
-Install [fdroidserver](https://gitlab.com/fdroid/fdroidserver), or just
-use it directly from master:
+Install [F-Droid Server](https://gitlab.com/fdroid/fdroidserver):
 ```shell
-git clone https://gitlab.com/fdroid/fdroidserver.git
-export PATH="$PATH:$PWD/fdroidserver"
+pip install git+https://gitlab.com/fdroid/fdroidserver.git
 ```
 
-Clone your fork of fdroiddata and enter it:
+Clone your fork of [F-Droid Data](https://gitlab.com/fdroid/fdroiddata/) and enter it:
 ```shell
 git clone https://gitlab.com/YOUR_USERNAME/fdroiddata.git
 cd fdroiddata
 ```
 
-Make sure fdroid works and reads the metadata files properly:
+Make sure `fdroid` works and reads the metadata files properly:
 ```shell
 fdroid readmeta
 ```
