@@ -169,6 +169,33 @@ Builds:
       - make _build/juloo.keyboard2.unsigned-apk
       - mv _build/juloo.keyboard2.unsigned-apk unsigned.apk
 
+  - versionName: 1.14.2
+    versionCode: 21
+    commit: 65cc0c736edcf1de89af77f7d69c4ad73ec4621f
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y openjdk-11-jdk-headless
+      - update-alternatives --auto java
+      - apt-get install libjpeg-dev libtiff5-dev libpng-dev libfreetype6-dev libgif-dev
+        libgtk-3-dev libxml2-dev libpango1.0-dev libcairo2-dev libspiro-dev libuninameslist-dev
+        python3-dev ninja-build build-essential
+      - curl -LO https://github.com/fontforge/fontforge/releases/download/20201107/fontforge-20201107.tar.xz
+      - echo "68bcba8f602819eddc29cd356ee13fafbad7a80d19b652d354c6791343476c78  fontforge-20201107.tar.xz"
+        | sha256sum -c -
+      - tar xf fontforge-20201107.tar.xz
+      - cd fontforge-20201107
+      - mkdir build
+      - cd build
+      - cmake -GNinja ..
+      - ninja
+      - ninja install
+    output: unsigned.apk
+    prebuild: JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 $$SDK$$/tools/bin/sdkmanager
+        'platforms;android-30' > /dev/null
+    build:
+      - make _build/juloo.keyboard2.unsigned-apk
+      - mv _build/juloo.keyboard2.unsigned-apk unsigned.apk
+
 MaintainerNotes: |-
     Until version 1.13.1,
     required the 'dx' tool from Android Build Tools <= 30.0.3.
@@ -177,5 +204,5 @@ MaintainerNotes: |-
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 1.14.1
-CurrentVersionCode: 20
+CurrentVersion: 1.14.2
+CurrentVersionCode: 21
