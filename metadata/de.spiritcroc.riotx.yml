@@ -843,7 +843,43 @@ Builds:
       - cp -r node_modules/jsc-android/dist/org/webkit/android-jsc "$HOME/.m2/repository/org/webkit"
     ndk: r21d
 
+  - versionName: 1.4.11.sc51
+    versionCode: 40100810
+    commit: 616a121ccfd6b9f5bd825073fbc5fcf054d7236b
+    subdir: vector
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y openjdk-11-jdk-headless
+      - apt-get install -y -t stretch-backports npm jq
+      - update-alternatives --auto java
+      - sysctl fs.inotify.max_user_watches=524288
+      - sysctl -p
+    gradle:
+      - fdroid
+    srclibs:
+      - jitsi-meet@android-sdk-3.10.0
+    prebuild:
+      - sed -i -e '/com.google.gms.google-services/d' build.gradle ../build.gradle
+      - sed -i -e 's/enable true/enable false/g' build.gradle
+      - sed -i -e 's|"https://github.com/vector-im.*"|"https://jitpack.io/"|' -e "s|'https://gitlab.matrix.org.*'|'https://jitpack.io/'|"
+        ../build.gradle
+      - sed -i -e '/repositories {/a mavenLocal()' -e '/repositories {/a mavenCentral()'
+        ../build.gradle
+      - sed -i -e '/gplayImplementation(.*) {/,/}/d; /gplayImplementation/d' build.gradle
+      - sed -i -e 's/org.matrix.android:olm:3.2.7/org.matrix.android:olm-sdk:3.2.10/'
+        ../matrix-sdk-android/build.gradle
+    build:
+      - cd $$jitsi-meet$$
+      - export LIBRE_BUILD=true
+      - npm install webpack-bundle-analyzer
+      - npm install
+      - mkdir -p "$HOME/.m2"
+      - bash android/scripts/release-sdk.sh "$HOME/.m2/repository"
+      - mkdir -p "$HOME/.m2/repository/org/webkit"
+      - cp -r node_modules/jsc-android/dist/org/webkit/android-jsc "$HOME/.m2/repository/org/webkit"
+    ndk: r21d
+
 AutoUpdateMode: Version sc_v%v
 UpdateCheckMode: Tags
-CurrentVersion: 1.4.4.sc50
-CurrentVersionCode: 40100780
+CurrentVersion: 1.4.11.sc51
+CurrentVersionCode: 40100810
