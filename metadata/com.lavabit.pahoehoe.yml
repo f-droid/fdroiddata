@@ -51,9 +51,46 @@ Builds:
       - gradle main:externalNativeBuildCleanSkeletonRelease main:externalNativeBuildSkeletonRelease
     ndk: r21e
 
+  - versionName: 1.0.2
+    versionCode: 202
+    commit: c963c732689186b7f7bfdfb95220714b4d6f2dea
+    subdir: android/app
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y -t testing golang-go
+    gradle:
+      - lavabitProductionFat
+    rm:
+      - vpnweb/
+      - daemon/
+      - desktop/
+    prebuild:
+      - sed -i -e "/^task updateSdkLicences/,/^}/d; /commandLine 'git'/d" build.gradle
+      - $$SDK$$/tools/bin/sdkmanager 'platforms;android-30' 'build-tools;30.0.3' |
+        grep -v '=' || true
+    scandelete:
+      - android/go/
+      - android/ics-openvpn/
+    build:
+      - export ANDROID_NDK_ROOT=$$NDK$$
+      - cd ../go
+      - export GOPATH="$PWD"
+      - export PATH="$PWD/bin:$PATH"
+      - go get golang.org/x/mobile/cmd/gomobile
+      - ./bin/gomobile init
+      - mkdir -p ./lib
+      - gomobile bind -target=android -o ./lib/bitmask-web-core.aar se.leap.bitmaskclient/shapeshifter/
+        se.leap.bitmaskclient/pgpverify
+      - cp lib/bitmask-web-core* ../bitmask-web-core/.
+      - gomobile bind -target=android -o ./lib/bitmask-core.aar se.leap.bitmaskclient/shapeshifter/
+      - cp lib/bitmask-core* ../bitmask-core/.
+      - cd ../ics-openvpn
+      - gradle main:externalNativeBuildCleanSkeletonRelease main:externalNativeBuildSkeletonRelease
+    ndk: r21e
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^[\d.]+$
 UpdateCheckData: android/app/build.gradle|      versionCode (\d+)|.|      versionName
     "([\d.]+)"
-CurrentVersion: 1.0.1
-CurrentVersionCode: 201
+CurrentVersion: 1.0.2
+CurrentVersionCode: 202
