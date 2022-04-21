@@ -5,46 +5,15 @@ Categories:
 License: Apache-2.0
 AuthorName: tomanders
 AuthorEmail: easyxkcd@gmail.com
-SourceCode: https://github.com/T-Rex96/Easy_xkcd
-IssueTracker: https://github.com/T-Rex96/Easy_xkcd/issues
-Changelog: https://github.com/T-Rex96/Easy_xkcd/blob/HEAD/CHANGELOG.md
+SourceCode: https://github.com/tom-anders/Easy_xkcd
+IssueTracker: https://github.com/tom-anders/Easy_xkcd/issues
+Changelog: https://github.com/tom-anders/Easy_xkcd/blob/HEAD/CHANGELOG.md
+Donate: https://www.paypal.com/donate/?hosted_button_id=9P95ACMNTXPM6
 
 AutoName: Easy xkcd
-Description: |-
-    A fast and beautiful way to view your favorite <a href="https://xkcd.com/">xkcd</a> comics.
-
-    Comic Browser:
-
-    * Offline Mode
-    * Notifications
-    * Long press to view alt text
-    * Search for title, transcript or number
-    * Share comic url or image
-    * Add comic to favorites
-    * Favorites are saved for offline use
-    * Open links from xkcd.com and m.xkcd.com
-    * Support for large images (e.g comic 657)
-    * Explain xkcd integration
-    * Option to display alt text by default
-
-    What If?:
-
-    * Full support for footnotes, formulas and alt text
-    * Offline mode and notifications
-    * Mark articles as read and hide them
-    * Swipe between articles (disabled by default)
-    * Night mode
-    * Quick search for article titles
-    * Random articles
-
-    General:
-
-    * Themes (blue, green, black...)
-    * Material design elements like Snackbars, Floating Action Button, tinted Status Bar, animations...
-    * Lock orientation
 
 RepoType: git
-Repo: https://github.com/T-Rex96/Easy_xkcd
+Repo: https://github.com/tom-anders/Easy_xkcd
 
 Builds:
   - versionName: 1.2.3
@@ -1276,71 +1245,6 @@ Builds:
         -e 's/com.nbsp:library:1.03/com.github.nbsp-team:MaterialFilePicker:fc275cba7b/g'
         build.gradle
 
-  - versionName: 8.0-beta2
-    versionCode: 175
-    disable: com.android.billingclient
-    commit: 8ccdfd7d014eedf4327d6725d61c044efafaa261
-    subdir: app
-    sudo:
-      - apt-get update || apt-get update
-      - apt-get install -y openjdk-11-jdk-headless
-      - update-alternatives --auto java
-    gradle:
-      - yes
-    srclibs:
-      - ShiftColorPicker@v0.5
-    rm:
-      - app/libs/*.aar
-    prebuild: sed -i -e 's|dl.bintray.com.*"|jitpack.io"|' build.gradle
-    build:
-      - pushd $$ShiftColorPicker$$
-      - JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 gradle assembleRelease
-      - popd
-      - mv $$ShiftColorPicker$$/build/outputs/aar/shiftcolorpicker-release.aar libs
-
-  - versionName: 8.0.1
-    versionCode: 181
-    disable: https://github.com/tom-anders/Easy_xkcd/issues/292
-    commit: cd917cf66e4a3161ea25d6826d04c82ac7d091bc
-    subdir: app
-    sudo:
-      - apt-get update || apt-get update
-      - apt-get install -y openjdk-11-jdk-headless
-      - update-alternatives --auto java
-    gradle:
-      - yes
-    srclibs:
-      - ShiftColorPicker@v0.5
-    rm:
-      - app/libs/*.aar
-    prebuild: sed -i -e 's|dl.bintray.com.*"|jitpack.io"|' build.gradle
-    build:
-      - pushd $$ShiftColorPicker$$
-      - JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 gradle assembleRelease
-      - popd
-      - mv $$ShiftColorPicker$$/build/outputs/aar/shiftcolorpicker-release.aar libs
-
-  - versionName: 8.0.2
-    versionCode: 183
-    commit: 8ad49ab94d68f72b97af55e633b2b9838535dbc3
-    subdir: app
-    sudo:
-      - apt-get update || apt-get update
-      - apt-get install -y openjdk-11-jdk-headless
-      - update-alternatives --auto java
-    gradle:
-      - yes
-    srclibs:
-      - ShiftColorPicker@v0.5
-    rm:
-      - app/libs/*.aar
-    prebuild: sed -i -e 's|dl.bintray.com.*"|jitpack.io"|' build.gradle
-    build:
-      - pushd $$ShiftColorPicker$$
-      - JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 gradle assembleRelease
-      - popd
-      - mv $$ShiftColorPicker$$/build/outputs/aar/shiftcolorpicker-release.aar libs
-
   - versionName: 8.0.4
     versionCode: 185
     commit: 786717e762929472dda50569afcb437e2525f450
@@ -1350,14 +1254,20 @@ Builds:
       - apt-get install -y openjdk-11-jdk-headless
       - update-alternatives --auto java
     gradle:
-      - yes
+      - fdroid
     srclibs:
       - ShiftColorPicker@v0.5
     rm:
       - app/libs/*.aar
-    prebuild: sed -i -e 's|dl.bintray.com.*"|jitpack.io"|' build.gradle
+    prebuild:
+      - sed -i -e 's|dl.bintray.com.*"|jitpack.io"|' build.gradle
+      - JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 $$SDK$$/tools/bin/sdkmanager 'platforms;android-25'
+        'build-tools;25.0.3' > /dev/null
     build:
       - pushd $$ShiftColorPicker$$
+      - echo "include ':shiftcolorpicker'" > ../settings.gradle
+      - sed -i -e '/buildToolsVersion/s/22.0.1/25.0.3/' -e '/SdkVersion/s/22/25/'
+        build.gradle
       - JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 gradle assembleRelease
       - popd
       - mv $$ShiftColorPicker$$/build/outputs/aar/shiftcolorpicker-release.aar libs
