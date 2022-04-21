@@ -57,7 +57,12 @@ Builds:
     subdir: android/app
     sudo:
       - apt-get update || apt-get update
-      - apt-get install -y -t testing golang-go
+      - apt-get install -y openjdk-11-jdk-headless
+      - update-alternatives --auto java
+      - curl -Lso go.tar.gz https://dl.google.com/go/go1.14.2.linux-amd64.tar.gz
+      - echo '6272d6e940ecb71ea5636ddb5fab3933e087c1356173c61f4a803895e947ebb3 go.tar.gz'
+        | sha256sum -c -
+      - tar xzf go.tar.gz --strip-components=1 -C /usr/local/
     gradle:
       - lavabitProductionFat
     rm:
@@ -66,8 +71,8 @@ Builds:
       - desktop/
     prebuild:
       - sed -i -e "/^task updateSdkLicences/,/^}/d; /commandLine 'git'/d" build.gradle
-      - $$SDK$$/tools/bin/sdkmanager 'platforms;android-30' 'build-tools;30.0.3' |
-        grep -v '=' || true
+      - JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 $$SDK$$/tools/bin/sdkmanager 'platforms;android-30'
+        'build-tools;30.0.3' > /dev/null
     scandelete:
       - android/go/
       - android/ics-openvpn/
