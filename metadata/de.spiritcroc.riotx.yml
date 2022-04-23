@@ -848,9 +848,12 @@ Builds:
     commit: 616a121ccfd6b9f5bd825073fbc5fcf054d7236b
     subdir: vector
     sudo:
+      - curl -Lo node.tar.xz https://nodejs.org/dist/v16.14.2/node-v16.14.2-linux-x64.tar.xz
+      - echo "e40c6f81bfd078976d85296b5e657be19e06862497741ad82902d0704b34bb1b node.tar.xz"
+        | sha256sum -c -
+      - tar xJf node.tar.xz --strip-components=1 -C /usr/local/
       - apt-get update || apt-get update
-      - apt-get install -y openjdk-11-jdk-headless
-      - apt-get install -y -t stretch-backports npm jq
+      - apt-get install -y -t stretch-backports jq openjdk-11-jdk-headless openjdk-11-jre-headless
       - update-alternatives --auto java
       - sysctl fs.inotify.max_user_watches=524288
       - sysctl -p
@@ -867,8 +870,8 @@ Builds:
     build:
       - cd $$jitsi-meet$$
       - export LIBRE_BUILD=true
-      - npm install webpack-bundle-analyzer
-      - npm install
+      - npm install --save false webpack-bundle-analyzer
+      - npm ci
       - mkdir -p "$HOME/.m2"
       - bash android/scripts/release-sdk.sh "$HOME/.m2/repository"
       - mkdir -p "$HOME/.m2/repository/org/webkit"
