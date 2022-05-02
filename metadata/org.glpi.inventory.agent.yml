@@ -1,0 +1,39 @@
+Categories:
+  - System
+License: GPL-3.0-only
+AuthorName: GLPI Project
+AuthorEmail: glpi@teclib.com
+SourceCode: https://github.com/glpi-project/android-inventory-agent
+Changelog: https://github.com/glpi-project/android-inventory-agent/blob/HEAD/CHANGELOG.md
+
+AutoName: GLPI Agent
+Description: |-
+    The Inventory Agent for Android is part of GLPI Android Inventory Agent project.
+    It allows you to collect a complete inventory of your Android device and sent it
+    to your management software.
+
+RepoType: git
+Repo: https://github.com/glpi-project/android-inventory-agent.git
+
+Builds:
+  - versionName: 1.2.0
+    versionCode: 39351
+    commit: be37e39dddeb8bd0de2527ca088eeb01779dc04d
+    subdir: app
+    gradle:
+      - yes
+    rm:
+      - app/libs/*.aar
+    prebuild:
+      - sed -i -e '/firebase/d' -e '/gms/d' build.gradle ../build.gradle
+      - sed -i -e '/dependencies {/a implementation "com.github.flyve-mdm:android-inventory-library:5d28aee9bc@aar"'
+        build.gradle
+      - sed -i -e 's|maven.fabric.io/public|jitpack.io|' -e '/repositories {/a maven{
+        url "https://jitpack.io" }' ../build.gradle
+      - sed -i -e 's/android:versionName=\"/android:versionName=\"$$VERSION$$/' src/main/AndroidManifest.xml
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: app/src/main/AndroidManifest.xml|android:versionCode="(\d+)"||
+CurrentVersion: 1.2.0
+CurrentVersionCode: 39351
