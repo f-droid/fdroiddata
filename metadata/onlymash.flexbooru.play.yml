@@ -1,0 +1,63 @@
+AntiFeatures:
+  - NonFreeNet
+Categories:
+  - Internet
+  - Multimedia
+License: GPL-3.0-only
+AuthorName: Flexbooru
+AuthorEmail: im@fiepi.me
+SourceCode: https://github.com/flexbooru/flexbooru
+IssueTracker: https://github.com/flexbooru/flexbooru/issues
+Translation: https://crowdin.com/project/flexbooru
+
+AutoName: Flexbooru
+Summary: A booru client, support Danbooru, Moebooru, Gelbooru, Shimmie
+Description: |-
+    A booru client for Android, support Danbooru, Moebooru, Gelbooru, Shimmie.
+    QR code scanning function is patched out due to non-free dependencies.
+
+RepoType: git
+Repo: https://github.com/flexbooru/flexbooru
+
+Builds:
+  - versionName: 3.0.4
+    versionCode: 1255
+    commit: afb540707a794662bc2431ea0fd5460be36ebceb
+    subdir: android
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y openjdk-11-jdk-headless
+      - update-alternatives --auto java
+    gradle:
+      - yes
+    rm:
+      - android/src/main/java/onlymash/flexbooru/ui/activity/ScannerActivity.kt
+      - android/src/main/res/layout/activity_scanner.xml
+      - android/src/main/java/onlymash/flexbooru/ui/activity/PurchaseActivity.kt
+      - android/src/main/res/layout/activity_purchase.xml
+    prebuild:
+      - sed -i -e 's/.c$verCode//' build.gradle.kts
+      - sed -i -e '/gms/d' -e '/billing/d' -e '/firebase/d' ../build.gradle.kts build.gradle.kts
+        proguard-rules.pro
+      - sed -i -e '/xyz.belvi.mobilevision:barcodescanner/d' -e '/navigation-dynamic-features-fragment/d'
+        build.gradle.kts
+      - sed -i -e '/ScannerActivity/,/<activity/d' -e '/PurchaseActivity/,/<activity/d'
+        -e '/BILLING/d' -e '/CAMERA/d' src/main/AndroidManifest.xml
+      - cd src/main/java/onlymash/flexbooru
+      - sed -i -e '/fun checkOrder/,/^    }/d' -e '/checkOrder/d' -e '/billing/d'
+        app/App.kt
+      - sed -i -e '/gms/d' -e '/isOrderSuccess) {/,/^        }/d' app/App.kt ui/activity/BooruActivity.kt
+        ui/activity/DetailActivity.kt
+      - sed -i -e '/OssLicensesMenuActivity/d' ui/fragment/AboutFragment.kt
+      - sed -i -e '/ScannerActivity/d' ui/activity/BooruActivity.kt ui/base/BaseActivity.kt
+      - sed -i -e '/PurchaseActivity/d' app/App.kt ui/activity/MainActivity.kt ui/activity/SauceNaoActivity.kt
+        ui/activity/WhatAnimeActivity.kt ui/fragment/PoolFragment.kt
+      - sed -i -e '/^\s\+checkUpdate()$/d' ui/activity/MainActivity.kt
+      - sed -i -e '/ORDER_SUCCESS_KEY/s/false/true/' -e '/isDohEnable/s/true/false/'
+        app/Settings.kt
+
+AutoUpdateMode: Version %v
+UpdateCheckMode: HTTP
+UpdateCheckData: https://github.com/flexbooru/flexbooru/releases/latest|flexbooru_[\d.]+c(\d+).apk|.|flexbooru_([\d.]+)c\d+.apk
+CurrentVersion: 3.0.4
+CurrentVersionCode: 1255
