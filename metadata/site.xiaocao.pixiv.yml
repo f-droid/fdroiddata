@@ -1,0 +1,58 @@
+AntiFeatures:
+  - NonFreeNet
+Categories:
+  - Internet
+  - Reading
+License: AGPL-3.0-only
+AuthorName: 小草
+AuthorEmail: xiao-cao-x@hotmail.com
+SourceCode: https://github.com/git-xiaocao/pixiv_func_mobile
+IssueTracker: https://github.com/git-xiaocao/pixiv_func_mobile/issues
+
+AutoName: Pixiv Func
+
+RepoType: git
+Repo: https://github.com/git-xiaocao/pixiv_func_mobile
+
+Builds:
+  - versionName: 1.0.0-preview7
+    versionCode: 7
+    commit: ba7ac2bfe45ed42fabb126a63b398e90556d9487
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y openjdk-11-jdk-headless
+      - update-alternatives --auto java
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@2.13.0-0.4.pre
+      - pixiv-local-reverse-proxy@9713dd24dcc4a9c4060ae139aa7a018c52d9011a
+    rm:
+      - ios
+      - android/app/libs/*.aar
+    prebuild:
+      - JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 $$SDK$$/tools/bin/sdkmanager 'platforms;android-31'
+        'build-tools;31.0.0' > /dev/null
+      - sed -i -e '/signingConfigs {/,/^    }/d' -e '/signingConfig/d' android/app/build.gradle
+      - sed -i -e '/loadLatestReleaseInfo();/d' lib/app/version_info/version_info.dart
+    build:
+      - pushd $$pixiv-local-reverse-proxy$$
+      - curl -Lso go.tar.gz https://go.dev/dl/go1.18.1.linux-amd64.tar.gz
+      - echo "b3b815f47ababac13810fc6021eb73d65478e0b2db4b09d348eefad9581a2334 go.tar.gz"
+        | sha256sum -c -
+      - tar xzf go.tar.gz
+      - export GOPATH="$PWD/golang"
+      - export PATH="$GOPATH/bin:$PWD/go/bin:$PATH"
+      - go install golang.org/x/mobile/cmd/gomobile
+      - gomobile init
+      - gomobile bind -target android -o pixiv_local_reverse_proxy.aar
+      - popd
+      - mv $$pixiv-local-reverse-proxy$$/pixiv_local_reverse_proxy.aar android/app/libs/
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter build apk
+    ndk: r23b
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 1.0.0-preview7
+CurrentVersionCode: 7
