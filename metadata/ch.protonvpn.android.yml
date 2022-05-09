@@ -1018,13 +1018,14 @@ Builds:
 
   - versionName: 3.3.58.0
     versionCode: 103035800
-    disable: https://github.com/ProtonVPN/android-app/issues/84
-    commit: 82b04550aef5f86487194db7cdf3519319e89142
+    commit: 3.3.58.0
+    timeout: 7200
     subdir: app
-    submodules: true
     sudo:
       - apt-get update || apt-get update
       - apt-get install -y --no-install-recommends libgmp-dev
+      - apt-get install -y openjdk-11-jdk-headless
+      - update-alternatives --auto java
     gradle:
       - prod
     output: build/outputs/apk/prod/release/ProtonVPN-*-prod-release-unsigned.apk
@@ -1035,19 +1036,30 @@ Builds:
       - app/src/main/jniLibs/arm64-v8a/*
       - openvpn/src/main/cpp/mbedtls/tests
       - openvpn/src/main/cpp/openvpn3/test/unittests
-      - strongswan/testing/hosts/alice/etc/raddb/certs/random
       - openvpn/src/main/cpp/mbedtls/programs/fuzz/corpuses/*
     prebuild:
+      - JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 $$SDK$$/tools/bin/sdkmanager 'cmake;3.18.1'
       - sed -i -e '/triple/d' -e '/play\ {/,+4d' build.gradle
-      - sed -i -e '/kotlinx/d' ../build.gradle
-      - sed -i -e 's/21.3.6528147/21.4.7075529/' ../openvpn/build.gradle.kts
-      - sed -i -e 's/21.3.6528147/21.4.7075529/' build.gradle
-      - pushd ../strongswan
+      - git submodule update --init --recursive ../strongswan
+      - cd ../strongswan
       - git clone git://git.strongswan.org/android-ndk-boringssl.git -b ndk-static
         src/frontends/android/app/src/main/jni/openssl
+      - cd ..
+      - echo ndk.dir="$(pwd)"/ndk/android-ndk-r21e > strongswan/src/frontends/android/local.properties
+    scandelete:
+      - strongswan/testing
+      - openvpn/src/main/cpp/lz4/tmp
     build:
+      - pushd ..
+      - mkdir -p ndk
+      - pushd ndk
+      - curl -Lo ndk.zip https://dl.google.com/android/repository/android-ndk-r21e-linux-x86_64.zip
+      - echo "ad7ce5467e18d40050dc51b8e7affc3e635c85bd8c59be62de32352328ed467e ndk.zip"
+        | sha256sum -c -
+      - unzip -q ndk.zip
+      - popd
+      - popd
       - pushd ../strongswan
-      - export PATH=$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
       - ./autogen.sh
       - ./configure
       - make dist
@@ -1060,13 +1072,13 @@ Builds:
       - rm -fr ../strongswan/src/frontends/android/app/src/main/libs/*
       - rm -fr ../strongswan/src/frontends/android/app/build
       - pushd ..
-      - gradle openvpn:assemble
+      - gradle openvpn:assembleRelease
       - rm -fr openvpn/build/intermediates
       - rm -fr openvpn/build/kotlin
       - rm -fr openvpn/build/tmp
       - rm -fr openvpn/.cxx
       - popd
-    ndk: r21e
+    ndk: r23b
     gradleprops:
       - buildUniversalApk
 
