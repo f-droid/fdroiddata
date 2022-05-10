@@ -1,0 +1,52 @@
+AntiFeatures:
+  - NonFreeNet
+Categories:
+  - Internet
+  - Reading
+License: Apache-2.0
+AuthorName: Zhengfa Dang
+AuthorWebSite: https://zfdang.com
+WebSite: https://zsmth.zfdang.com
+SourceCode: https://github.com/zfdang/zSMTH-Android
+IssueTracker: https://github.com/zfdang/zSMTH-Android/issues
+
+AutoName: zSMTH
+Summary: Client for SMTH BBS
+Description: Client for <a href="https://www.mysmth.net">SMTH</a> BBS
+
+RepoType: git
+Repo: https://github.com/zfdang/zSMTH-Android
+
+Builds:
+  - versionName: 22.04.29
+    versionCode: 961
+    commit: d1b80f6f3024695bf998c2ac26f62166f1398315
+    subdir: app
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y openjdk-11-jdk-headless
+      - update-alternatives --auto java
+    gradle:
+      - yes
+    rm:
+      - docs
+      - app/MobSDK.gradle
+      - app/qqwry/SQLiteCompare.zip
+    prebuild:
+      - sed -i -e '/versionName/s/appVersion/"$$VERSION$$"/' build.gradle
+      - sed -i -e 's|http://mvn.mob.com/android/|https://jitpack.io|' -e '/MobSDK/d'
+        -e '/ben-manes/d' ../build.gradle
+      - sed -i -e '/MobSDK/d' ../gradle.properties
+      - sed -i -e '/MobSDK/d' -e '/umeng/d' build.gradle
+      - cd src/main/java/com/zfdang
+      - sed -i -e '/MobSDK/d' -e '/UMConfigure/d' SMTHApplication.java
+      - sed -i -e '/MobSDK/d' -e '/MobclickAgent/d' zsmth_android/MainActivity.java
+      - sed -i -e '/void sharePost/,/^  }/d' -e '/sharePost(post)/d' -e '/sharesdk/d'
+        zsmth_android/PostListActivity.java
+    ndk: r21e
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: '|tag-(\d+)|docs/release.html|zSMTH-release-v([\d.]+).apk'
+CurrentVersion: 22.04.29
+CurrentVersionCode: 961
