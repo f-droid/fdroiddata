@@ -660,16 +660,16 @@ Builds:
 
   - versionName: 2.6.1
     versionCode: 4048
-    disable: https://github.com/equeim/tremotesf-android/issues/129
-    commit: 887e914399cbed5bd3a4cdf293792fab92e7309f
+    commit: 2.6.1
     subdir: app
     submodules: true
     sudo:
       - apt-get update || apt-get update
-      - apt-get install -y clang-7 libc++-7-dev libc++abi-7-dev ninja-build make patch
-        perl
-      - apt-get install -y openjdk-11-jdk-headless
+      - apt-get install -y clang-11 libc++-11-dev libc++abi-11-dev ninja-build make
+        patch perl openjdk-11-jdk-headless
       - update-alternatives --auto java
+      - update-alternatives --auto javac
+      - update-alternatives --auto jar
     gradle:
       - fdroid
     prebuild: JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 $$SDK$$/tools/bin/sdkmanager
@@ -680,14 +680,15 @@ Builds:
       - 3rdparty
     ndk: r24
     gradleprops:
-      - org.equeim.tremotesf.host-qt-cmake-flags=-DCMAKE_C_COMPILER=clang-7 -DCMAKE_CXX_COMPILER=clang++-7
+      - org.equeim.tremotesf.host-qt-cmake-flags=-DCMAKE_C_COMPILER=clang-11 -DCMAKE_CXX_COMPILER=clang++-11
         -DCMAKE_CXX_FLAGS=-stdlib=libc++
       - org.equeim.tremotesf.print-3rdparty-build-log-on-error=true
 
 MaintainerNotes: |
-    We need host C++ compiler with C++17 support, so we use clang-7 as it is the only one available in Debian Stretch
-    Tremotesf also uses Gradle plugin in its build process, which is compiled from source on first Gradle invocation
-    Since it happens before scanning for binaries, we need to scanignore plugin's build directory
+    We need host C++ compiler with proper C++17 support, and the only ones available in Debian Stretch are clang-7 and clang-11.
+    clang-7 has a bug that causes compilation errors, so use clang-11.
+    Tremotesf also uses Gradle plugin in its build process, which is compiled from source on first Gradle invocation.
+    Since it happens before scanning for binaries, we need to scanignore plugin's build directory.
 
 AutoUpdateMode: Version %v
 UpdateCheckMode: Tags
