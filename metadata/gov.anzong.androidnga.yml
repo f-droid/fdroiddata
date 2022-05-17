@@ -1,0 +1,72 @@
+AntiFeatures:
+  - NonFreeNet
+Categories:
+  - Reading
+  - Internet
+License: GPL-2.0-only
+AuthorName: Yihang Yang
+AuthorEmail: yihang.yang26@gmail.com
+SourceCode: https://github.com/Justwen/NGA-CLIENT-VER-OPEN-SOURCE
+IssueTracker: https://github.com/Justwen/NGA-CLIENT-VER-OPEN-SOURCE/issues
+
+AutoName: NGA
+Summary: NGA client
+Description: |-
+    An FOSS client for National Gay Alliance forum.
+
+    This APP is based on the open source with GNU GPL v2 license published by grpubr@gmail.com
+    at https://code.google.com/p/ngacnphone/, and as they said they stoped update their
+    project at the revision of 580, we start to take over the project, we fork the
+    project to <a href="https://github.com/ymback/NGA-CLIENT-VER-OPEN-SOURCE">github</a>
+    and still use GNU GPL v2 as our code license, you can see the README.md file on
+    our github site that shows this APP in Google Play is completely compile with our
+    codes. This APP use the open APIs of the forum "Nation Geography of Azeroth" which
+    are opened to everyone as the thread said http://bbs.ngacn.cc/read.php?tid=6406100,
+    users just need to login as they did on the PC site, and the APIs use cookie to
+    authorization users, if the user login with our APP, they should have the rights
+    to get all data from the APIs. and those APIs also used in many different places
+    such as the forum's PC and mobile site, other developers' APPs and so on. We state
+    we have not violated the legitimate rights of the forum "Nation Geography of Azeroth",
+    our APP is free and does not contain advertising, our code is based on a open source
+    project and is also opend in github.
+
+RepoType: git
+Repo: https://github.com/Justwen/NGA-CLIENT-VER-OPEN-SOURCE
+
+Builds:
+  - versionName: 3.7.6
+    versionCode: 3076
+    commit: 30845a9e58979b0e5d58b850e0c519775697988c
+    subdir: nga_phone_base_3.0
+    gradle:
+      - yes
+    srclibs:
+      - android-floating-action-button@2396953e0f8a1f329756320bd0663d250aadac83
+    rm:
+      - nga_phone_base_3.0/libs/*.aar
+      - lib_common/libs/*.jar
+      - lib_cloud
+    prebuild:
+      - sed -i -e '/bintray/d' -e '/aliyun/d' -e '/sonatype/d' ../build.gradle
+      - sed -i -e '/lib_cloud/d' -e '/arouter-api/s/com.alibaba/com.github.alibaba.ARouter/'
+        -e 's/com.alibaba:arouter-compiler:1.1.4/com.github.alibaba.ARouter:arouter-compiler:1.1.1/'
+        build.gradle
+      - sed -i -e 's/com.nshmura:recyclertablayout:1.5.0/com.github.nshmura:RecyclerTabLayout:1.4.0/'
+        -e 's/com.zhouyou:signseekbar:1.0.6/com.github.zhou-you:EasySignSeekBar:8c52404ab6/'
+        -e 's/net.steamcrafted:load-toast/com.github.code-mc:loadtoast/' -e 's/me.imid.swipebacklayout.lib:library:1.1.0/com.github.ikew0ng:SwipeBackLayout:e1d109e5fe/'
+        -e "s|files('libs/commons-io-2.4.jar')|'commons-io:commons-io:2.4'|" ../lib_common/build.gradle
+      - sed -i -e "s/':lib_cloud',//" ../settings.gradle
+      - find -type f -name "*.java" -exec sed -i -e '/CloudServerManager/d' {} +
+    scanignore:
+      - nga_phone_base_3.0/src/main/java/sp/phone/util/PluginUtils.java
+    build:
+      - pushd $$android-floating-action-button$$
+      - gradle assembleRelease
+      - popd
+      - mv $$android-floating-action-button$$/build/outputs/aar/*.aar libs/floatingactionmenu.aar
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: build.gradle|appVersionCode\s=\s(\d+)|.|appVersionName\s=\s'([\d.]+)'
+CurrentVersion: 3.7.6
+CurrentVersionCode: 3076
