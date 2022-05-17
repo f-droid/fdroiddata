@@ -1,8 +1,12 @@
+AntiFeatures:
+  - NonFreeNet
+  - Tracking
 Categories:
   - Security
 License: GPL-3.0-only
 WebSite: https://opensource.srlabs.de/projects/snoopsnitch
-SourceCode: https://opensource.srlabs.de/projects/snoopsnitch/repository/revisions/master/show
+SourceCode: https://github.com/srlabs/snoopsnitch
+IssueTracker: https://github.com/srlabs/snoopsnitch/issues
 Translation: https://opensource.srlabs.de/projects/snoopsnitch/wiki/FAQ#Can-you-translate-SnoopSnitch-in-my-language
 Changelog: https://opensource.srlabs.de/projects/snoopsnitch#Version-history
 
@@ -30,7 +34,7 @@ Description: |-
 RequiresRoot: 'yes'
 
 RepoType: git
-Repo: https://opensource.srlabs.de/git/snoopsnitch.git
+Repo: https://github.com/srlabs/snoopsnitch.git
 
 Builds:
   - versionName: 0.9.0
@@ -358,7 +362,37 @@ Builds:
       - bash copy.sh
     ndk: r20b
 
-AutoUpdateMode: None
+  - versionName: 2.0.12-nbc
+    versionCode: 50
+    commit: SnoopSnitch-2.0.12
+    timeout: 10800
+    subdir: SnoopSnitch/app
+    submodules: true
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y texinfo
+    gradle:
+      - nobuildcheck
+    rm:
+      - SnoopSnitch/app/src/main/jniLibs/*/*.so
+      - contrib/prebuilt/*/*.so
+    scandelete:
+      - SnoopSnitch/patchanalysis
+      - contrib
+    build:
+      - export NDK_DIR=$$NDK$$
+      - cd ../../contrib
+      - bash compile.sh -a -g -u
+      - cd ../SnoopSnitch/patchanalysis/contrib
+      - bash compile.sh -a
+      - bash copy.sh
+      - cp builds/32/*.so ../../../contrib/prebuilt/32
+      - cp builds/64/*.so ../../../contrib/prebuilt/64
+      - cd ../..
+      - bash copy.sh
+    ndk: r20b
+
+AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 2.0.11
-CurrentVersionCode: 40
+CurrentVersion: 2.0.12-nbc
+CurrentVersionCode: 50
