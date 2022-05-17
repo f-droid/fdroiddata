@@ -126,7 +126,40 @@ Builds:
       - make
     ndk: r21e
 
+  - versionName: 2.1.2
+    versionCode: 39
+    commit: 96b48aab11dc2a4f43a065f1eff4b435d7a127cf
+    subdir: app
+    submodules: true
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y openjdk-11-jdk-headless
+      - update-alternatives --auto java
+      - curl -Lso go.tar.gz https://golang.org/dl/go1.16.4.linux-amd64.tar.gz
+      - echo "7154e88f5a8047aad4b80ebace58a059e36e7e2e4eb3b383127a28c711b4ff59 go.tar.gz"
+        | sha256sum -c -
+      - tar xzf go.tar.gz --strip-components=1 -C /usr/local/
+    gradle:
+      - yes
+    prebuild:
+      - JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 $$SDK$$/tools/bin/sdkmanager 'platforms;android-31'
+        'build-tools;31.0.0' > /dev/null
+      - mv ../acra.properties.sample ../acra.properties
+      - sed -i -e '/signingConfig\ signing/d' -e '/ndkVersion/d' build.gradle
+    build:
+      - export ANDROID_SDK_ROOT=$$SDK$$
+      - export ANDROID_NDK_ROOT=$$NDK$$
+      - export GOPATH="$PWD"
+      - export GO_COMPILED="$PWD/bin"
+      - export PATH="$GO_COMPILED:$PATH"
+      - go get golang.org/x/mobile/cmd/gomobile
+      - cd ../yggdrasil/yggdrasil-extras
+      - gomobile init
+      - cd ..
+      - make
+    ndk: r21e
+
 AutoUpdateMode: Version v%v
 UpdateCheckMode: Tags
-CurrentVersion: 2.0.19
-CurrentVersionCode: 37
+CurrentVersion: 2.1.2
+CurrentVersionCode: 39
