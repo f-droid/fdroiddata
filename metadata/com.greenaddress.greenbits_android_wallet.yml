@@ -2428,8 +2428,10 @@ Builds:
 
   - versionName: 3.8.2
     versionCode: 22000382
+    disable: https://github.com/Blockstream/green_android/issues/140
     commit: 2f7a778af047332d1b41f99715b91c97c375c943
     timeout: 25200
+    subdir: green
     sudo:
       - apt-get update || apt-get update
       - apt-get install -y build-essential clang jq libffi-dev virtualenv openjdk-11-jdk
@@ -2441,21 +2443,22 @@ Builds:
       - popd
     gradle:
       - production
-    output: green/build/outputs/apk/production/release/*.apk
     srclibs:
       - cpython@v3.9.6
       - rustup@1.24.3
-    prebuild: sed -i -e 's/-p python3/-p python3.9/' crypto/prepare_gdk_clang.sh
+    prebuild:
+      - sed -i -e 's/-p python3/-p python3.9/' ../crypto/prepare_gdk_clang.sh
+      - sed -i -e '/signingConfigs/,/^            }/d' build.gradle
     build:
       - $$rustup$$/rustup-init.sh -y
       - source $HOME/.cargo/env
-      - rustup install 1.49.0
+      - rustup install 1.60.0
       - rustup target add aarch64-linux-android armv7-linux-androideabi x86_64-linux-android
         i686-linux-android
-      - cd crypto
+      - cd ../crypto
       - JAVA_HOME=$(readlink -f /usr/bin/javac | sed "s:/bin/javac::") PATH=$HOME/.local/bin:$PATH
         ./prepare_gdk_clang.sh
-    ndk: r19c
+    ndk: r23b
 
 MaintainerNotes: |-
     Watch prepare_gdk_clang.sh for changes on new builds.
