@@ -46,8 +46,36 @@ Builds:
       - $$flutter$$/bin/flutter pub run build_runner build
       - $$flutter$$/bin/flutter build apk --release --dart-define=ANDROID_FLOSS=true
 
+  - versionName: 2.0.7
+    versionCode: 207
+    commit: abf6f12c8835bfb94a7a82b4ab7b772605ac4992
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y openjdk-11-jdk-headless
+      - update-alternatives --auto java
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@2.13.0-0.4.pre
+    rm:
+      - .github
+      - .vscode
+      - ios
+      - linux
+      - macos
+      - test
+      - web
+      - windows
+    prebuild: sed -i -e 's|git@github.com:|https://github.com/|' pubspec.lock pubspec.yaml
+    build:
+      - echo 'var mapAccessToken = "pk.eyJ1IjoiZGVycXVycHMiLCJhIjoiY2wzY3dqeGhkMDJxeTNja2p1cHZmNWJhYSJ9.dnnM2GDwtxAVog4xvJzTJw";'>
+        lib/auth/secrets.dart
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+      - $$flutter$$/bin/flutter pub run build_runner build
+      - $$flutter$$/bin/flutter build apk --release --dart-define=ANDROID_FLOSS=true
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags v\d+.\d+.\d+
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 2.0.6
-CurrentVersionCode: 206
+CurrentVersion: 2.0.7
+CurrentVersionCode: 207
