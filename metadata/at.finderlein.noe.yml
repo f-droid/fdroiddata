@@ -102,8 +102,36 @@ Builds:
       - $$flutter$$/bin/flutter pub run build_runner build
       - $$flutter$$/bin/flutter build apk --release --dart-define=ANDROID_FLOSS=true
 
+  - versionName: 2.0.12
+    versionCode: 2012
+    commit: 8a002e9090aea01b03f51ab925be97ad4a58c054
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y openjdk-11-jdk-headless
+      - update-alternatives --auto java
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@2.13.0-0.4.pre
+    rm:
+      - .github
+      - .vscode
+      - ios
+      - linux
+      - macos
+      - test
+      - web
+      - windows
+    prebuild: sed -i -e 's|git@github.com:|https://github.com/|' pubspec.lock pubspec.yaml
+    build:
+      - echo 'var mapAccessToken = "pk.eyJ1IjoiZGVycXVycHMiLCJhIjoiY2wzY3dqeGhkMDJxeTNja2p1cHZmNWJhYSJ9.dnnM2GDwtxAVog4xvJzTJw";'>
+        lib/auth/secrets.dart
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+      - $$flutter$$/bin/flutter pub run build_runner build
+      - $$flutter$$/bin/flutter build apk --release --dart-define=ANDROID_FLOSS=true
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags v\d+.\d+.\d+
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 2.0.10
-CurrentVersionCode: 2010
+CurrentVersion: 2.0.12
+CurrentVersionCode: 2012
