@@ -116,7 +116,30 @@ Builds:
       - popd
     ndk: r21e
 
+  - versionName: 2.42.1
+    versionCode: 2420100
+    commit: d72e3aeea60ec2d18137a3201704c85a4c45a177
+    subdir: app
+    submodules: true
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y g++ openjdk-11-jdk-headless
+      - update-alternatives --auto java
+    gradle:
+      - yes
+    rm:
+      - app/jni/openssl/fuzz
+      - app/jni/openssl/boringssl/fuzz
+    prebuild: sed -i -e 's/enable true/enable false/' build.gradle
+    build:
+      - pushd jni
+      - ./build_boost.sh
+      - ./build_openssl.sh
+      - ./build_miniupnpc.sh
+      - popd
+    ndk: r21e
+
 AutoUpdateMode: Version %v
 UpdateCheckMode: Tags
-CurrentVersion: 2.42.0
-CurrentVersionCode: 2420000
+CurrentVersion: 2.42.1
+CurrentVersionCode: 2420100
