@@ -128,18 +128,13 @@ Builds:
 
   - versionName: 2.1.2
     versionCode: 39
-    disable: https://github.com/yggdrasil-network/crispa-android/issues/66
-    commit: 96b48aab11dc2a4f43a065f1eff4b435d7a127cf
+    commit: 04c58d2a57e671d41e32bf5f6749a6ea8fae9559
     subdir: app
     submodules: true
     sudo:
       - apt-get update || apt-get update
       - apt-get install -y openjdk-11-jdk-headless
       - update-alternatives --auto java
-      - curl -Lso go.tar.gz https://golang.org/dl/go1.16.4.linux-amd64.tar.gz
-      - echo "7154e88f5a8047aad4b80ebace58a059e36e7e2e4eb3b383127a28c711b4ff59 go.tar.gz"
-        | sha256sum -c -
-      - tar xzf go.tar.gz --strip-components=1 -C /usr/local/
     gradle:
       - yes
     prebuild:
@@ -150,11 +145,14 @@ Builds:
     build:
       - export ANDROID_SDK_ROOT=$$SDK$$
       - export ANDROID_NDK_ROOT=$$NDK$$
-      - export GOPATH="$PWD"
-      - export GO_COMPILED="$PWD/bin"
-      - export PATH="$GO_COMPILED:$PATH"
-      - go get golang.org/x/mobile/cmd/gomobile
-      - cd ../yggdrasil/yggdrasil-extras
+      - curl -Lso go.tar.gz https://go.dev/dl/go1.18.1.linux-amd64.tar.gz
+      - echo "b3b815f47ababac13810fc6021eb73d65478e0b2db4b09d348eefad9581a2334 go.tar.gz"
+        | sha256sum -c -
+      - tar xzf go.tar.gz
+      - export GOPATH="$PWD/golang"
+      - export PATH="$GOPATH/bin:$PWD/go/bin:$PATH"
+      - cd ../yggdrasil/yggdrasil-go
+      - go install golang.org/x/mobile/cmd/gomobile
       - gomobile init
       - cd ..
       - make
