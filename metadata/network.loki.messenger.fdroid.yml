@@ -1,0 +1,94 @@
+AntiFeatures:
+  - UpstreamNonFree
+Categories:
+  - Internet
+  - Phone & SMS
+License: GPL-3.0-only
+AuthorName: Oxen
+AuthorEmail: team@oxen.io
+AuthorWebSite: https://oxen.io
+WebSite: https://getsession.org
+SourceCode: https://github.com/oxen-io/session-android
+IssueTracker: https://github.com/oxen-io/session-android/issues
+Translation: https://crowdin.com/project/session-android
+Changelog: https://github.com/oxen-io/session-android/releases
+
+AutoName: Session
+Summary: Encrypted private messenger
+Description: |-
+    This is an unofficial rebrand of Session without Firebase push service so the
+    <a href="https://getsession.org/faq#push-notifications">"fast mode"<a> can't
+    be enabled. If you want to use the "fast mode" please use the official Session
+    client from <a href="https://fdroid.getsession.org/">their own repo</a>.
+
+    Session is a new breed of encrypted private messenger, built on a unique network
+    of user-operated servers spread all over the world. With no central servers,
+    Session can’t leak or sell your data. You don't need a phone number or email
+    to sign up — your Session ID can stay completely anonymous. And Session’s private
+    routing protocols keep your messages secret and secure. No one ever knows who
+    you’re talking to, what you’re saying, or even your IP address.
+
+    • Fully anonymous account creation, no phone number or email required
+
+    • Decentralised server network: No data breaches and no central point of failure
+
+    • No metadata logging: Session doesn't store, track, or log your messaging metadata
+
+    • IP address protection: Device IP addresses are never exposed to the person
+    you're talking to or the servers holding your data
+
+    • Closed groups: Private, end-to-end encrypted group chats for up to 100 people
+
+    • Encrypted attachments: Share voice snippets, photos, and files with Session's
+    security and privacy protections
+
+    • Free and fully open-source: Don’t take our word for it — check Session's code
+    yourself
+
+    Session is free as in free speech, free as in free beer, and free of ads and
+    trackers. Session is built and maintained by the Loki Foundation, Australia’s
+    first privacy tech not-for-profit organisation. Take back your online privacy
+    today — download Session. Want to build from source, report a bug, or just take
+    a look at our code? Check out Session on GitHub: https://github.com/oxen-io/session-android
+
+RepoType: git
+Repo: https://github.com/oxen-io/session-android.git
+
+Builds:
+  - versionName: 1.13.1
+    versionCode: 2795
+    commit: e1a033d0eef0d7f1203316a26350fdc17e647268
+    subdir: app
+    gradle:
+      - website
+    rm:
+      - app/src/main/java/org/thoughtcrime/securesms/notifications/FcmUtils.kt
+      - app/src/main/java/org/thoughtcrime/securesms/notifications/LokiPushNotificationManager.kt
+      - app/src/main/java/org/thoughtcrime/securesms/notifications/PushNotificationService.kt
+    prebuild:
+      - sed -i -e '/gms/d' -e 's/raw.github.com.*"/jitpack.io"/' ../build.gradle
+      - sed -i -e '/gms/d' -e '/firebase-messaging/,/^    }/d' -e '/enable true/d'
+        -e '/circular-progress-button/s/1.1.3-S2/1.1.3/' -e '/android-database-sqlcipher/s/org.signal/net.zetetic/'
+        -e '/android-database-sqlcipher/s/3.5.9-S3/4.0.0/' -e 's|https://github.com/oxen-io/session-android/releases|null|'
+        -e '/defaultConfig/a applicationId "network.loki.messenger.fdroid"' build.gradle
+      - sed -i -z -E -e 's/<[^<]+pref_key_use_fcm[^>]+>//' src/main/res/xml/preferences_notifications.xml
+      - sed -i -E -e '/app_name/s/>(.+)</>\1 F-Droid</' src/main/res/*/strings.xml
+      - sed -i -e '/READ_PHONE_STATE/d' src/main/AndroidManifest.xml
+      - cd src/main/java/org/thoughtcrime/securesms
+      - sed -i -e '/fun toggleFCM()/,/^    }/d' -e 's/toggleFCM/toggleBackgroundPolling/'
+        onboarding/PNModeActivity.kt
+      - sed -i -e '/void registerForFCMIfNeeded/,/^    }/s/^        .*//' -e '/FcmUtils/d'
+        -e '/LokiPushNotificationManager/d' ApplicationContext.java
+      - sed -i -e '/pref_key_use_fcm/,/^      });/d' preferences/NotificationsPreferenceFragment.java
+      - sed -i -e 's/Strings.isEmptyOrWhitespace(passphrase)/(passphrase?.trim()?.isEmpty()?:true)/'
+        -e '/Strings/d' backup/BackupRestoreActivity.kt
+      - sed -i -e 's/IOUtils.readInputStreamFully(bodyStream);/new byte[bodyStream.available()];bodyStream.read(data);/'
+        -e '/IOUtils/d' linkpreview/LinkPreviewRepository.java
+    ndk: r23b
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+VercodeOperation: 10*%c+5
+UpdateCheckData: app/build.gradle|canonicalVersionCode\s=\s(\d+)|.|canonicalVersionName\s=\s"([\d.]+)"
+CurrentVersion: 1.13.1
+CurrentVersionCode: 2795
