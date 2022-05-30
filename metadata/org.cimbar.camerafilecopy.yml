@@ -1,0 +1,46 @@
+Categories:
+  - Multimedia
+License: MIT
+WebSite: https://cimbar.org/
+SourceCode: https://github.com/sz3/cfc
+IssueTracker: https://github.com/sz3/cfc/issues
+Changelog: https://github.com/sz3/cfc/releases
+
+AutoName: CameraFileCopy
+
+RepoType: git
+Repo: https://github.com/sz3/cfc
+
+Builds:
+  - versionName: 0.5.11
+    versionCode: 7
+    commit: 1278719cd94a595f6347068ecd34d975018c7419
+    subdir: app
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y ninja-build
+    gradle:
+      - yes
+    srclibs:
+      - opencv@4.5.5
+    prebuild:
+      - sed -i -e "s:^opencvsdk=.*:opencvsdk=$$opencv$$/build/install/:" ../gradle.properties
+      - pushd $$opencv$$
+      - mkdir -p build
+      - cd build
+      - cmake -GNinja -DBUILD_ANDROID_EXAMPLES='OFF' -DINSTALL_ANDROID_EXAMPLES='OFF'
+        -DBUILD_DOCS='OFF' -DBUILD_TESTS='OFF' -DBUILD_EXAMPLES='OFF' -DANDROID_ABI='arm64-v8a'
+        -DANDROID_TOOLCHAIN='clang' -DANDROID_PLATFORM_ID='3' -DBUILD_PERF_TESTS='OFF'
+        -DINSTALL_CREATE_DISTRIB='ON' -DANDROID_STL='c++_shared' -DWITH_TBB='ON' -DANDROID_GRADLE_PLUGIN_VERSION='4.1.2'
+        -DWITH_OPENCL='OFF' -DCMAKE_TOOLCHAIN_FILE="$$NDK$$/build/cmake/android.toolchain.cmake"
+        -DGRADLE_VERSION='6.5' -DWITH_IPP='OFF' -DANDROID_PROJECTS_BUILD_TYPE='GRADLE'
+        -DBUILD_KOTLIN_EXTENSIONS='OFF' ..
+      - ninja opencv_modules
+      - ninja install/strip
+      - popd
+    ndk: r22b
+
+AutoUpdateMode: Version v%v
+UpdateCheckMode: Tags
+CurrentVersion: 0.5.11
+CurrentVersionCode: 7
