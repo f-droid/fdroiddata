@@ -1,0 +1,68 @@
+Categories:
+  - Games
+License: MIT
+SourceCode: https://github.com/mgerdes/Open-Golf
+IssueTracker: https://github.com/mgerdes/Open-Golf/issues
+
+Summary: A mini golf game currently featuring about 20 levels
+Description: Beat all the levels and try to compete to get the lowest score on each!
+
+RepoType: git
+Repo: https://github.com/mgerdes/Open-Golf
+
+Builds:
+  - versionName: '1.0'
+    versionCode: 1
+    commit: 30b10d6c4a4c77aea2e8c28e864b8cbf5fe24048
+    subdir: build/android/OpenGolf/app
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y build-essential libasound2-dev libgl1-mesa-dev openjdk-11-jdk-headless
+        xorg-dev
+      - apt-get install -y -t stretch-backports-sloppy libarchive13
+      - apt-get install -y -t stretch-backports cmake
+      - update-alternatives --auto java
+    gradle:
+      - yes
+    srclibs:
+      - fips@c8cfda1838ee74a968b926a08a7507879b9f0590
+      - glslcc@21c9a956fc5a364098c61d41958fbf4d0012d3c2
+      - sokol-tools@aed2419d1d853c0fe5165ddb10591e290337236b
+    rm:
+      - tools/glslcc/linux/glslcc
+      - tools/glslcc/win64/glslcc.exe
+      - tools/sokol-tools/osx/sokol-shdc
+      - tools/sokol-tools/linux/sokol-shdc
+      - tools/sokol-tools/win32/sokol-shdc.exe
+      - tools/cembed/osx/cembed
+      - tools/cembed/linux/cembed
+      - tools/cembed/win64/cembed.exe
+    build:
+      - export PATH=$$fips$$:$PATH
+      - pushd ../../../../tools/cembed
+      - gcc -O3 -Wall -Wextra -std=c99 -o linux/cembed cembed.c
+      - strip linux/cembed
+      - popd
+      - pushd $$sokol-tools$$
+      - python fips build linux-make-release
+      - cmake .
+      - make -j$(nproc)
+      - popd
+      - cp $$sokol-tools$$/../fips-deploy/sokol-tools/linux-make-release/sokol-shdc
+        ../../../../tools/sokol-tools/linux/
+      - pushd $$glslcc$$
+      - mkdir build
+      - cmake -S . -B build
+      - cd build
+      - make -j$(nproc)
+      - popd
+      - cp $$glslcc$$/build/src/glslcc ../../../../tools/glslcc/linux/
+      - pushd ../../../..
+      - ./build/build-linux.sh
+      - popd
+    ndk: r22b
+
+AutoUpdateMode: None
+UpdateCheckMode: None
+CurrentVersion: '1.0'
+CurrentVersionCode: 1
