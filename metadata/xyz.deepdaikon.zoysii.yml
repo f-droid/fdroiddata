@@ -3,18 +3,18 @@ Categories:
 License: GPL-3.0-or-later
 AuthorName: DeepDaikon
 AuthorEmail: deepdaikon@tuta.io
-WebSite: https://gitlab.com/DeepDaikon/Zoysii
-SourceCode: https://gitlab.com/DeepDaikon/Zoysii/tree/HEAD
-IssueTracker: https://gitlab.com/DeepDaikon/Zoysii/issues
+WebSite: https://gitlab.com/deepdaikon/Zoysii
+SourceCode: https://gitlab.com/deepdaikon/Zoysii/tree/HEAD
+IssueTracker: https://gitlab.com/deepdaikon/Zoysii/issues
 Translation: https://translate.deepdaikon.xyz/engage/zoysii/
-Changelog: https://gitlab.com/DeepDaikon/Zoysii/tree/HEAD/CHANGELOG
+Changelog: https://gitlab.com/deepdaikon/Zoysii/tree/HEAD/CHANGELOG
 Donate: https://deepdaikon.xyz/donate
 Liberapay: deepdaikon
 
 AutoName: Zoysii
 
 RepoType: git
-Repo: https://gitlab.com/DeepDaikon/Zoysii.git
+Repo: https://gitlab.com/deepdaikon/Zoysii.git
 
 Builds:
   - versionName: 1.0.1
@@ -132,15 +132,22 @@ Builds:
   - versionName: 2.4.0
     versionCode: 12
     commit: 32d02a6be4b8d7e02e98ec345a8ead554f15974f
-    output: build/app/outputs/apk/release/app-release.apk
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y openjdk-11-jdk-headless
+      - update-alternatives --auto java
+    output: build/app/outputs/flutter-apk/app-release.apk
     srclibs:
-      - flutter@1.22.5
+      - flutter@3.0.1
     rm:
       - ios
-    prebuild: echo 'android.applicationVariants.all { variant -> variant.outputs.all
-        { output -> outputFileName = "app-${output.baseName}.apk" } }' >> android/app/build.gradle
+      - linux
+      - macos
+      - web
+      - windows
     build:
       - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
       - $$flutter$$/bin/flutter build apk
 
 AutoUpdateMode: Version v%v
