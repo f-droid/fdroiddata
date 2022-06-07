@@ -1,0 +1,58 @@
+Categories:
+  - Games
+  - Security
+  - Science & Education
+License: AGPL-3.0-only
+AuthorName: La Boussole
+AuthorEmail: contact@gaoandblaze.org
+AuthorWebSite: https://laboussole.coop/
+WebSite: https://gaoandblaze.org/
+SourceCode: https://gitlab.com/la-boussole/gaoblaze/track
+IssueTracker: https://gitlab.com/la-boussole/gaoblaze/track/issues
+
+AutoName: GaoAndBlaze
+
+RepoType: git
+Repo: https://gitlab.com/la-boussole/gaoblaze/track.git
+
+Builds:
+  - versionName: 5.0.1-gao-full
+    versionCode: 50010
+    commit: 289ef311a37d60006274e6d3e3c27d51c59bb92d
+    subdir: android/app
+    sudo:
+      - curl -Lo node.tar.xz https://nodejs.org/dist/v10.18.1/node-v10.18.1-linux-x64.tar.xz
+      - echo "8cc40f45c2c62529b15e83a6bbe0ac1febf57af3c5720df68067c96c0fddbbdf node.tar.xz"
+        | sha256sum -c -
+      - tar xJf node.tar.xz
+      - cp -a node-v10.18.1-linux-x64/. /usr/local/
+      - npm -g install yarn
+    init: npm install
+    gradle:
+      - fullGaoGames
+    forceversion: true
+    forcevercode: true
+    prebuild: sed -i -e '\!ACCESS_FINE_LOCATION!a<uses-permission android:name="com.android.vending.CHECK_LICENSE"
+        tools:node="remove" />' -e 's!xmlns:android!xmlns:tools="http://schemas.android.com/tools"
+        xmlns:android!' -e '/com.google.android.gms/d' src/main/AndroidManifest.xml
+    scanignore:
+      - android/build.gradle
+      - node_modules/jsc-android
+      - node_modules/react-native/android/com/facebook/react/react-native/*/
+      - node_modules/react-native-safe-area-context/android/build.gradle
+      - node_modules/react-native-screens/android/build.gradle
+      - node_modules/react-native-vector-icons/android/build.gradle
+      - node_modules/@react-native-community/async-storage/android/build.gradle
+      - node_modules/react-native-shake/android/build.gradle
+      - node_modules/react-native-permissions/android/build.gradle
+      - node_modules/react-native-localize/android/build.gradle
+      - node_modules/react-native-fast-image/android/build.gradle
+      - node_modules/@react-native-community/masked-view/android/build.gradle
+    scandelete:
+      - node_modules/
+    ndk: r23b
+
+AutoUpdateMode: None
+UpdateCheckMode: RepoManifest
+CurrentVersion: 5.0.1
+CurrentVersionCode: 50010
