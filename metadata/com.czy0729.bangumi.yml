@@ -1,0 +1,83 @@
+AntiFeatures:
+  - NonFreeNet
+Categories:
+  - Internet
+  - Multimedia
+License: MIT
+AuthorName: Chan
+AuthorEmail: 402731062@qq.com
+SourceCode: https://github.com/czy0729/Bangumi
+IssueTracker: https://github.com/czy0729/Bangumi/issues
+Changelog: https://github.com/czy0729/Bangumi/blob/HEAD/web/CHANGELOG.MD
+Donate: https://github.com/czy0729/Bangumi#%E6%8A%95%E9%A3%9F
+
+AutoName: Bangumi
+
+RepoType: git
+Repo: https://github.com/czy0729/Bangumi.git
+
+Builds:
+  - versionName: 6.4.2
+    versionCode: 60420
+    commit: 5ef141f7019509e8ae0233f61e87d3e2fe5dade8
+    subdir: android/app
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y openjdk-11-jdk-headless
+      - update-alternatives --auto java
+      - sysctl fs.inotify.max_user_watches=524288
+      - curl -Lo node.tar.xz https://nodejs.org/dist/v16.14.2/node-v16.14.2-linux-x64.tar.xz
+      - echo "e40c6f81bfd078976d85296b5e657be19e06862497741ad82902d0704b34bb1b node.tar.xz"
+        | sha256sum -c -
+      - tar xJf node.tar.xz --strip-components=1 -C /usr/local/
+      - npm -g install yarn
+    init:
+      - cd ../..
+      - patch -p1 < patches/diff.patch
+      - yarn install
+    gradle:
+      - yes
+    srclibs:
+      - react-native-reanimated@2.1.0
+    rm:
+      - node_modules/expo-location
+    prebuild:
+      - mv ../gradle_yours.properties ../gradle.properties
+      - sed -i -e '/aliyun/d' -e '/bintray/d' ../build.gradle
+      - sed -i -e 's|../app.json|../../app.json|' -e '/enableSeparateBuild/d' -e '/signingConfigs.release/d'
+        build.gradle
+      - sed -i -e '/installreferrer/,+11d' ../../node_modules/react-native-device-info/android/build.gradle
+      - sed -i -e "s|files('libs/jcifs-1.3.18.jar')|'org.codelibs:jcifs:1.3.18.3'|"
+        ../../node_modules/react-native-smb/android/build.gradle
+      - sed -i -e '/function xhr/,/^}/s/^  .*//' ../../src/utils/track.ts
+      - sed -i -e '/baidu/d' ../../web/manga.html
+    scanignore:
+      - android/build.gradle
+      - node_modules/hermes-engine
+      - node_modules/react-native/android/com/facebook/react/react-native/*/
+      - node_modules/react-native-device-info/android/build.gradle
+      - node_modules/react-native-webview/android/build.gradle
+      - node_modules/react-native-screens/android/build.gradle
+      - node_modules/react-native-safe-area-context/android/build.gradle
+      - node_modules/react-native-fast-image/android/build.gradle
+      - node_modules/react-navigation/node_modules/react-native-screens/android/build.gradle
+      - node_modules/@react-native-masked-view/masked-view/android/build.gradle
+      - node_modules/@react-native-community/async-storage/android/build.gradle
+      - node_modules/expo/node_modules/react-native-safe-area-context/android/build.gradle
+    scandelete:
+      - node_modules
+    build:
+      - RN_VER=$(sed -n -E -e 's/.*"react-native":\s"([0-9.]+)".*/\1/p' ../../package.json)
+      - RN_MVER=$(sed -n -E -e 's/.*"react-native":\s"0\.([0-9]+).*/\1/p' ../../package.json)
+      - pushd $$react-native-reanimated$$
+      - yarn add react-native@"${RN_VER}"
+      - FOR_HERMES=True gradle assembleRelease
+      - popd
+      - mv $$react-native-reanimated$$/build/outputs/aar/android-release.aar ../../node_modules/react-native-reanimated/android/react-native-reanimated-$RN_MVER.aar
+    ndk: r21e
+
+AutoUpdateMode: None
+UpdateCheckMode: Tags
+UpdateCheckData: app.json|"versionCode":\s(\d+)|.|"version":\s"([\d.]+)"
+CurrentVersion: 6.4.2
+CurrentVersionCode: 60420
