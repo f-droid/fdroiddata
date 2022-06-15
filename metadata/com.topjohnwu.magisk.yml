@@ -24,6 +24,26 @@ RepoType: git
 Repo: https://github.com/topjohnwu/Magisk
 
 Builds:
+  - versionName: '1.0'
+    versionCode: 1
+    commit: cacf8736454b9c586a0b9f0af86451f6c87e200a
+    subdir: stub
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y openjdk-11-jdk-headless
+      - update-alternatives --auto java
+    gradle:
+      - yes
+    rm:
+      - native
+      - tools
+    prebuild:
+      - echo -e 'version=25.0' > ../config.prop
+      - sed -i -e 's|"https://.*"|"https://f-droid.org/repo/com.topjohnwu.magisk_${Config.versionCode}.apk"|'
+        -e '/versionCode/s/1/$$VERCODE$$/' build.gradle.kts
+    scanignore:
+      - app/shared/src/main/java/com/topjohnwu/magisk/utils/DynamicClassLoader.java
+
   - versionName: '22.0'
     versionCode: 22000
     commit: v22.0
@@ -234,7 +254,11 @@ MaintainerNotes: |-
     22.1: https://github.com/topjohnwu/ndk-busybox/commit/31b2b5780bf9fe982e1f3d9df0bd4b1b44d6e394
     in submodule is removed for some unkonwn reasons. Re-add it to fix the multiple definition error.
 
-AutoUpdateMode: Version v%v
+    The stub apk is built as a standalone apk first. It goes into the archive directly. It's downloaded
+    from f-droid.org later when building the corresponding main apk. The stub apk needs to be added
+    first and the main apk should be built in the next build cycle.
+
+AutoUpdateMode: None
 UpdateCheckMode: HTTP
 UpdateCheckData: https://topjohnwu.github.io/magisk-files/stable.json|"versionCode":\s"(\d+)"|.|"version":\s"([\d.]+)"
 CurrentVersion: '24.3'
