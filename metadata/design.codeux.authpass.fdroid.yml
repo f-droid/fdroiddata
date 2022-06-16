@@ -546,29 +546,6 @@ Builds:
       - tmp/flutter/bin/flutter build apk -t lib/env/fdroid.dart --flavor fdroid --release
     ndk: r21d
 
-  - versionName: 1.9.5
-    versionCode: 160
-    commit: 41d9cb23c955c38a4e000ae4919ec4c1a3af1681
-    subdir: authpass
-    submodules: true
-    sudo:
-      - apt-get update || apt-get update
-      - apt-get install -y openjdk-11-jdk-headless
-      - update-alternatives --auto java
-    output: build/app/outputs/apk/fdroid/release/app-fdroid-release.apk
-    rm:
-      - authpass/ios
-      - authpass/macos
-      - deps/kdbx.dart/libargon2*
-      - authpass/_tools/blackbox.go.linux
-    build:
-      - echo 'systemProp.design.codeux.ndkVersion=21.3.6528147' >> android/gradle.properties
-      - mkdir tmp
-      - DEPS=./tmp _tools/install_flutter.sh
-      - tmp/flutter/bin/flutter config --no-analytics
-      - tmp/flutter/bin/flutter build apk -t lib/env/fdroid.dart --flavor fdroid --release
-    ndk: r21d
-
   - versionName: 1.9.6
     versionCode: 161
     commit: 6a835981e32b1e7bb17a59dea1c7cd59cb05ada8
@@ -584,13 +561,14 @@ Builds:
       - authpass/macos
       - deps/kdbx.dart/libargon2*
       - authpass/_tools/blackbox.go.linux
+    prebuild: JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 $$SDK$$/tools/bin/sdkmanager 'cmake;3.10.2.4988404'
+        > /dev/null
     build:
-      - echo 'systemProp.design.codeux.ndkVersion=21.3.6528147' >> android/gradle.properties
       - mkdir tmp
       - DEPS=./tmp _tools/install_flutter.sh
       - tmp/flutter/bin/flutter config --no-analytics
       - tmp/flutter/bin/flutter build apk -t lib/env/fdroid.dart --flavor fdroid --release
-    ndk: r21d
+    ndk: r22b
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^fdroid-v[0-9.]+$
