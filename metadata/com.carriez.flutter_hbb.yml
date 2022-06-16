@@ -1,0 +1,87 @@
+AntiFeatures:
+  - Tracking
+Categories:
+  - System
+License: GPL-3.0-only
+WebSite: https://rustdesk.com
+SourceCode: https://github.com/rustdesk/rustdesk
+IssueTracker: https://github.com/rustdesk/rustdesk/issues
+Changelog: https://github.com/rustdesk/rustdesk/releases
+Donate: https://github.com/sponsors/rustdesk
+
+RepoType: git
+Repo: https://github.com/rustdesk/rustdesk
+
+Builds:
+  - versionName: 1.1.10-1
+    versionCode: 28
+    commit: 6ae988ba88cfcf454db7118cd186e73f8805ce5b
+    subdir: flutter
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y libclang-11-dev clang-11 llvm-11 gcc-multilib g++-multilib
+        openjdk-11-jdk-headless
+      - update-alternatives --auto java
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@3.0.1
+      - rustup@1.24.3
+      - vcpkg@2021.12.31
+    rm:
+      - flutter/ios
+      - flutter/test
+      - flutter/web
+    prebuild:
+      - sed -i -e '/gms/d' android/build.gradle android/app/build.gradle
+      - sed -i -e '/firebase_analytics/d' pubspec.yaml
+      - sed -i -e '/  firebase/,/    version/d' pubspec.lock
+      - sed -i -e '/firebase/Id' -e '/await b/d' lib/main.dart
+    build:
+      - pushd $$vcpkg$$
+      - ./bootstrap-vcpkg.sh -disableMetrics
+      - popd
+      - export VCPKG_ROOT=$$vcpkg$$
+      - ./build_android_deps.sh
+      - rm -rf build
+      - export PATH=$$flutter$$/bin/:/usr/lib/llvm-11/bin/:$PATH
+      - pushd ..
+      - $$rustup$$/rustup-init.sh -y
+      - source $HOME/.cargo/env
+      - rustup install 1.61.0
+      - cargo install cargo-ndk --version 2.6.0
+      - rustup target add aarch64-linux-android armv7-linux-androideabi
+      - dart pub global activate ffigen 5.0.1
+      - LIBCLANG_PATH=/usr/lib/llvm-11/lib/ cargo ndk --platform 21 --target aarch64-linux-android
+        build --release
+      - popd
+      - mkdir -p android/app/src/main/jniLibs/arm64-v8a
+      - cp ../target/aarch64-linux-android/release/liblibrustdesk.so android/app/src/main/jniLibs/arm64-v8a/librustdesk.so
+      - rm -rf ../target
+      - cp $$NDK$$/sources/cxx-stl/llvm-libc++/libs/arm64-v8a/libc++_shared.so android/app/src/main/jniLibs/arm64-v8a/
+      - $$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android-strip
+        android/app/src/main/jniLibs/arm64-v8a/*
+      - pushd ..
+      - LIBCLANG_PATH=/usr/lib/llvm-11/lib/ cargo ndk --platform 21 --target armv7-linux-androideabi
+        build --release
+      - popd
+      - mkdir -p android/app/src/main/jniLibs/armeabi-v7a
+      - cp ../target/armv7-linux-androideabi/release/liblibrustdesk.so android/app/src/main/jniLibs/armeabi-v7a/librustdesk.so
+      - rm -rf ../target
+      - cp $$NDK$$/sources/cxx-stl/llvm-libc++/libs/armeabi-v7a/libc++_shared.so android/app/src/main/jniLibs/armeabi-v7a/
+      - $$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android-strip
+        android/app/src/main/jniLibs/armeabi-v7a/*
+      - rm -rf $$vcpkg$$/*
+      - flutter config --no-analytics
+      - flutter packages pub get
+      - flutter build apk --release --target-platform android-arm64,android-arm
+    ndk: r22b
+
+MaintainerNotes: |-
+    flutter_rust_bridge_codegen requires cargo-ndk < 2.6.0 and ffigen which requires
+    clang 9+. scrap requires clang-sys which requires libclang. cargo-ndk doesn't
+    work with NDK > r22. ffigen 6.0.0 doesn't work with flutter_rust_bridge.
+
+AutoUpdateMode: None
+UpdateCheckMode: None
+CurrentVersion: 1.1.10-1
+CurrentVersionCode: 28
