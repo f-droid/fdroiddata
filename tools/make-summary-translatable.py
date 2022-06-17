@@ -11,7 +11,7 @@ os.chdir(os.path.dirname(__file__) + '/../')
 for f in glob.glob('metadata/*.yml'):
     with open(f) as fp:
         raw = fp.read()
-        data = yaml.load(raw)
+        data = yaml.safe_load(raw)
     archive_policy = data.get('ArchivePolicy')
     if (
         'Disabled' not in data

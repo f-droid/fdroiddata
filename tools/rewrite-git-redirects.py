@@ -21,7 +21,7 @@ else:
 pattern = re.compile(r'Repo: .*')
 for f in files:
     with open(f) as fp:
-        data = yaml.load(fp)
+        data = yaml.safe_load(fp)
     repo_url = None
     if 'Repo' in data:
         repo_url = data['Repo'].strip().rstrip('/')
