@@ -19,6 +19,7 @@ Repo: https://github.com/DanXi-Dev/DanXi
 Builds:
   - versionName: 1.3.5
     versionCode: 143
+    disable: GMS
     commit: 5f4eeec48d2a390a771e131e8b2f9f042f3bae46
     sudo:
       - apt-get update || apt-get update
@@ -43,8 +44,36 @@ Builds:
       - $$flutter$$/bin/flutter pub global run intl_utils:generate
       - $$flutter$$/bin/flutter build apk
 
+  - versionName: 1.3.10
+    versionCode: 178
+    commit: 389b802b52fbc286e17ac6b948b5a7084e25da01
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y openjdk-11-jdk-headless
+      - update-alternatives --auto java
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@3.0.2
+    rm:
+      - .github
+      - .gradle
+      - CI
+      - ios
+      - macos
+      - test
+      - web
+      - windows
+      - android/app/proguard-rules.pro
+    prebuild: sed -i -e '/minifyEnabled/,+2d' android/app/build.gradle
+    build:
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+      - $$flutter$$/bin/flutter pub global activate intl_utils
+      - $$flutter$$/bin/flutter pub global run intl_utils:generate
+      - $$flutter$$/bin/flutter build apk --release
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^foss-v
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 1.3.5
-CurrentVersionCode: 143
+CurrentVersion: 1.3.10
+CurrentVersionCode: 178
