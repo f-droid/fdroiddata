@@ -464,24 +464,30 @@ Builds:
 
   - versionName: 6.0.3
     versionCode: 600000300
+    disable: https://github.com/blokadaorg/blokada/issues/943
     commit: 8053ba26827d19f436c4e6d4a18ede8a2bf856fa
     subdir: android5/app
     submodules: true
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y openjdk-11-jdk-headless
+      - update-alternatives --auto java
     gradle:
       - droid
     srclibs:
-      - rustup@1.23.1
+      - rustup@1.24.3
     rm:
       - android5/app/src/engine/jniLibs
+      - android5/app/src/libre/jniLibs
     prebuild:
-      - unzip -P default_blocklist src/main/assets/default_blocklist.zip default_blocklist
-        -d src/main/assets
-      - rm src/main/assets/default_blocklist.zip
+      - unzip -P default_blocklist src/libre/assets/default_blocklist.zip default_blocklist
+        -d src/libre/assets
+      - rm src/libre/assets/default_blocklist.zip
       - sed -i -e 's/24.0.7856742/24.0.8215888/' build.gradle
     build:
       - $$rustup$$/rustup-init.sh -y
       - source $HOME/.cargo/env
-      - rustup default stable
+      - rustup default 1.61.0
       - rustup target add armv7-linux-androideabi
       - rustup target add aarch64-linux-android
       - cargo install cargo-ndk --version 1.0.0
