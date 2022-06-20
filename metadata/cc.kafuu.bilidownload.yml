@@ -1,0 +1,46 @@
+AntiFeatures:
+  - NonFreeNet
+Categories:
+  - Internet
+  - Navigation
+License: GPL-3.0-only
+AuthorName: Kafuu Neko
+AuthorEmail: kafuuneko@gmail.com
+AuthorWebSite: kafuuneko@gmail.com
+SourceCode: https://github.com/KafuuNeko/BiliDownload
+Changelog: https://github.com/KafuuNeko/BiliDownload/releases
+
+AutoName: BVD
+
+RepoType: git
+Repo: https://github.com/KafuuNeko/BiliDownload.git
+
+Builds:
+  - versionName: 1.9.1
+    versionCode: 17
+    commit: 020a9fbcaa6f6943b726ae09e590e786a9ba0a8c
+    subdir: app
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y openjdk-11-jdk-headless
+      - update-alternatives --auto java
+    gradle:
+      - yes
+    srclibs:
+      - ffmpeg-android-maker@v2.7
+    rm:
+      - app/src/main/cpp/ffmpeg/libs
+    prebuild:
+      - JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 $$SDK$$/tools/bin/sdkmanager 'cmake;3.10.2.4988404'
+        > /dev/null
+      - sed -i -e '/enable true/d'  build.gradle
+    build:
+      - ANDROID_SDK_HOME=$$SDK$$ $$ffmpeg-android-maker$$/ffmpeg-android-maker.sh
+        --source-tar=4.4.2
+      - mv $$ffmpeg-android-maker$$/output/lib src/main/cpp/ffmpeg/libs
+    ndk: r23b
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: 1.9.1
+CurrentVersionCode: 17
