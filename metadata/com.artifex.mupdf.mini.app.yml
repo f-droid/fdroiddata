@@ -172,11 +172,15 @@ Builds:
     commit: 8385dc885948ac3fc7b96ce74dad47cb26858532
     subdir: app
     submodules: true
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install openjdk-11-jdk-headless
+      - update-alternatives --auto java
     gradle:
       - yes
     prebuild:
       - sed -i -e '/maven.ghostscript.com/d' ../build.gradle
-      - sed -i -e '/MAVEN_REPO/,+2d' ../build.gradle
+      - sed -i -e '/MAVEN_REPO/,+4d' ../build.gradle ../jni/build.gradle ../lib/build.gradle
       - sed -i -e 's/enable true/enable false/' build.gradle
       - sed -i -e "s/'-j4'/'-j`nproc`'/" ../jni/build.gradle
       - echo 'ABI_FILTERS=armeabi-v7a,arm64-v8a,x86' >> ../gradle.properties
