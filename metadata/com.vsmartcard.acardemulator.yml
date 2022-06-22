@@ -2,7 +2,7 @@ Categories:
   - Development
 License: GPL-3.0-only
 WebSite: https://frankmorgner.github.io/vsmartcard/ACardEmulator/README.html
-SourceCode: https://github.com/frankmorgner/vsmartcard
+SourceCode: https://github.com/frankmorgner/vsmartcard/tree/HEAD/ACardEmulator
 IssueTracker: https://github.com/frankmorgner/vsmartcard/issues
 
 AutoName: Smart Card Emulator
@@ -75,24 +75,28 @@ Builds:
 
   - versionName: '3.5'
     versionCode: 8
-    disable: prebuilt jars
     commit: 84ed47b4626977a996a34971ba565c0941913326
     subdir: ACardEmulator/app
-    submodules: true
-    gradle:
-      - fdroid
-    prebuild:
+    init:
       - git clean -xfd
       - git submodule foreach --recursive git clean -xfd
       - git reset --hard
       - git submodule foreach --recursive git reset --hard
       - git submodule update --init --recursive
-      - sed -i -e '/applicationIdSuffix/d' build.gradle
+    gradle:
+      - fdroid
+    rm:
+      - TCardEmulator
+      - android-ssl1
+      - ccid
+      - eID_gui
+      - npa
+      - pcsc-relay
+      - remote-reader
+      - virtualsmartcard
+      - ACardEmulator/app/libs
+    prebuild: sed -i -e '/applicationIdSuffix/d' -e '/libs\/sdk/d' build.gradle
     scandelete:
-      - virtualsmartcard/npa-example-data
-      - ccid/src/OpenSC/etc/
-      - ccid/src/OpenSC/src/tests/regression/bintest
-      - ACardEmulator/app/libs/
       - ACardEmulator/app/src/main/external/
 
 AutoUpdateMode: Version ACardEmulator-%v
