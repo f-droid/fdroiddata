@@ -570,8 +570,32 @@ Builds:
       - tmp/flutter/bin/flutter build apk -t lib/env/fdroid.dart --flavor fdroid --release
     ndk: r22b
 
+  - versionName: 1.9.7
+    versionCode: 162
+    commit: fc574cb6d5b719a1f472001c4ab2ae30277a57ae
+    subdir: authpass
+    submodules: true
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y openjdk-11-jdk-headless
+      - update-alternatives --auto java
+    output: build/app/outputs/apk/fdroid/release/app-fdroid-release.apk
+    rm:
+      - authpass/ios
+      - authpass/macos
+      - deps/kdbx.dart/libargon2*
+      - authpass/_tools/blackbox.go.linux
+    prebuild: JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 $$SDK$$/tools/bin/sdkmanager
+        'cmake;3.10.2.4988404' > /dev/null
+    build:
+      - mkdir tmp
+      - DEPS=./tmp _tools/install_flutter.sh
+      - tmp/flutter/bin/flutter config --no-analytics
+      - tmp/flutter/bin/flutter build apk -t lib/env/fdroid.dart --flavor fdroid --release
+    ndk: r22b
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^fdroid-v[0-9.]+$
 UpdateCheckData: authpass/pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 1.9.6
-CurrentVersionCode: 161
+CurrentVersion: 1.9.7
+CurrentVersionCode: 162
