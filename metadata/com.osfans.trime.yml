@@ -213,23 +213,23 @@ Builds:
       - update-alternatives --auto java
     gradle:
       - yes
-    srclibs:
-      - capnproto@v0.9.1
     prebuild:
       - JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 $$SDK$$/tools/bin/sdkmanager 'cmake;3.10.2.4988404'
         > /dev/null
-      - sed -i -e '/set.CMAKE_MODULE_PATH/a\set(CMAKE_PREFIX_PATH "$$capnproto$$/c++")'
+      - sed -i -e '/set.CMAKE_MODULE_PATH/a\set(CMAKE_PREFIX_PATH "${CMAKE_CURRENT_SOURCE_DIR}/capnproto/c++")'
         src/main/jni/CMakeLists.txt
       - sed -i -e '/Enables building multiple APKs per ABI/,/enable true/d' build.gradle
+    scanignore:
+      - app/src/main/jni/capnproto/c++/src/capnp/testdata
     scandelete:
       - app/src/main/jni
     build:
-      - cd $$capnproto$$/c++
+      - cd src/main/jni/capnproto/c++
       - autoreconf -i
       - ./configure --prefix="$PWD"
       - make -j$(nproc)
       - make install
-    ndk: r23b
+    ndk: r24
 
 AutoUpdateMode: Version %v
 UpdateCheckMode: Tags
