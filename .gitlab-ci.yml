@@ -1,5 +1,6 @@
 include:
   - template: Security/SAST.gitlab-ci.yml
+  - template: 'Workflows/MergeRequest-Pipelines.gitlab-ci.yml'
 
 stages:
   - build
@@ -404,9 +405,6 @@ sast:
 
     # Make sure the apk is searched before the manifest, so only apks are scanned
     ANALYZER_TARGET_DIR: $CI_PROJECT_DIR/tmp/
-  rules:
-    - if: '$CI_PIPELINE_SOURCE != "merge_request_event"'
-      when: never
   allow_failure: true
   artifacts:
     reports:
@@ -415,3 +413,9 @@ sast:
 mobsf-ios-sast:
   rules:
     - when: never
+
+mobsf-android-sast:
+  rules:
+    - changes:
+        - metadata/**/*
+        - srclibs/**/*
