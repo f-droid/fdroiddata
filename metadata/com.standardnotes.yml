@@ -3783,7 +3783,7 @@ Builds:
     commit: '@standardnotes/mobile@3.30.20'
     subdir: packages/mobile/android/app
     sudo:
-      - sysctl fs.inotify.max_user_watches=524288
+      - sysctl fs.inotify.max_user_watches=524288 || true
       - curl -Lo /tmp/node.tar.xz https://nodejs.org/dist/v16.15.1/node-v16.15.1-linux-x64.tar.xz
       - echo "b749f7a76e56dfd6dfb8a910b8a2a871159661557680aa95acf13c9514422c12 /tmp/node.tar.xz"
         | sha256sum -c -
@@ -3799,8 +3799,12 @@ Builds:
       - make install
       - popd
     init:
+      - pushd ../../../..
+      - npm_config_build_from_source=true yarn --immutable
+      - popd
       - pushd ../..
-      - npm_config_build_from_source=true yarn remove react-native-store-review
+      - npm_config_build_from_source=true yarn --immutable
+      - yarn remove react-native-store-review
       - popd
     patch:
       - disable-splits-abi.patch
@@ -3832,6 +3836,9 @@ Builds:
       - packages/components/dist
       - .yarn/
     build:
+      - pushd ../../../..
+      - yarn run build:mobile
+      - popd
       - pushd ../..
       - yarn run android:bundle
       - popd
