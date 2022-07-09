@@ -4,15 +4,18 @@ include:
   - template: Workflows/Branch-Pipelines.gitlab-ci.yml
 
 stages:
+  - update
   - build
   - test
   - report
+  - deploy
 
 variables:
   pip: pip3 --timeout 100 --retries 10
 
 
 checkupdates:
+  stage: update
   image: registry.gitlab.com/fdroid/ci-images-checkupdates:latest
   except:
     - pipelines
@@ -41,11 +44,14 @@ checkupdates:
     fi
 
 lint:
+  stage: test
   image: registry.gitlab.com/fdroid/ci-images-base
   except:
     - pipelines
     - schedules
     - triggers
+  needs:
+    - fdroid build
   before_script:
     - apt-get update
     - apt-get -qy dist-upgrade
@@ -97,6 +103,8 @@ lint:
     - exit $EXITVALUE
 
 schema validation:
+  stage: test
+  needs: []
   image: node:alpine
   except:
     - master@fdroid/fdroiddata
@@ -119,6 +127,8 @@ schema validation:
       done
 
 trigger-issuebot:
+  stage: test
+  needs: []
   image: alpine
   except:
     - master@fdroid/fdroiddata
@@ -140,6 +150,8 @@ trigger-issuebot:
     - ./tools/trigger-issuebot
 
 schedule-issuebot:
+  stage: test
+  needs: []
   image: alpine
   only:
     variables:
@@ -161,6 +173,7 @@ schedule-issuebot:
     - ./tools/schedule-issuebot.py
 
 checkupdates_trigger:
+  stage: update
   only:
     refs:
       - schedules
@@ -175,6 +188,7 @@ checkupdates_trigger:
     - parallel --verbose --delay 90 -X --jobs 10 'curl -X POST -F "token=$CI_JOB_TOKEN" -F "ref=master" -F "variables[CHECKUPDATES]=true" -F "variables[CHECKUPDATES_APPIDS]= {/.} " https://gitlab.com/api/v4/projects/${CI_PROJECT_ID}/trigger/pipeline' ":::" metadata/*.yml
 
 checkupdates_runner:
+  stage: update
   image: registry.gitlab.com/fdroid/ci-images-checkupdates:latest
   tags:
     - checkupdates-runner
@@ -214,6 +228,7 @@ checkupdates_runner:
     - 'grep -v "INFO: Processing" /tmp/out || true'
 
 fdroid build:
+  stage: build
   image: registry.gitlab.com/fdroid/fdroidserver:buildserver
   artifacts:
     name: "${CI_PROJECT_PATH}_${CI_JOB_STAGE}_${CI_COMMIT_REF_NAME}_${CI_COMMIT_SHA}"
@@ -321,6 +336,7 @@ fdroid build:
 # This job has to be called 'pages' because it deploys the JSON API
 # to GitLab Pages.
 pages:
+  stage: deploy
   image: registry.gitlab.com/fdroid/fdroidserver:buildserver
   only:
     refs:
@@ -378,6 +394,7 @@ pages:
 check_git_repos:
   image: debian:buster-slim
   stage: test
+  needs: []
   only:
     refs:
       - schedules
@@ -398,6 +415,8 @@ check_git_repos:
 
 sast:
   stage: report
+  needs:
+    - fdroid build
   variables:
     MOBSF_API_KEY: key
     SAST_EXPERIMENTAL_FEATURES: "true"
