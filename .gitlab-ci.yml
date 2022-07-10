@@ -13,6 +13,39 @@ stages:
 variables:
   pip: pip3 --timeout 100 --retries 10
 
+.install_fdroid_server: &install_fdroid_server
+  - rm -rf $fdroidserver
+  - mkdir $fdroidserver
+  - git ls-remote https://gitlab.com/fdroid/fdroidserver.git master
+  - curl --silent https://gitlab.com/fdroid/fdroidserver/-/archive/master/fdroidserver-master.tar.gz
+        | tar -xz --directory=$fdroidserver --strip-components=1
+  - export PATH="$fdroidserver:$PATH"
+  - export PYTHONPATH="$fdroidserver:$fdroidserver/examples"
+  - export PYTHONUNBUFFERED=true
+
+.get_target_source_refs: &get_target_source_refs
+  - |
+    if [ "$CI_PROJECT_PATH" = "fdroid/fdroiddata" ] && [ "$CI_COMMIT_BRANCH" = "$CI_DEFAULT_BRANCH" ]; then
+        export TARGET_REF="${CI_COMMIT_SHA}^"
+        export SOURCE_REF="${CI_COMMIT_SHA}"
+    else
+        git fetch https://gitlab.com/fdroid/fdroiddata.git $CI_DEFAULT_BRANCH
+        export TARGET_REF="FETCH_HEAD"
+        export SOURCE_REF="${CI_COMMIT_SHA}"
+    fi;
+
+.get_changed_apps: &get_changed_apps
+  - *get_target_source_refs
+  - echo $TARGET_REF
+  - |
+    for f in $(git diff --name-only --diff-filter=d "${TARGET_REF}...${SOURCE_REF}" -- metadata/*.yml) $(git diff --name-only --diff-filter=d "${TARGET_REF}...${SOURCE_REF}" -- metadata/*/signatures); do
+        diff=$(git diff "${TARGET_REF}...${SOURCE_REF}" -- "$f")
+        echo "$diff"
+        test $(echo "$diff" | grep '^[+-] ' | grep -v -c '^+  *disable:') = 0 && continue
+        echo "$diff" | grep -E '^\+ *(NoSourceSince|Disabled):' && continue
+        appid=$(echo "$f" | sed -E -n 's,^metadata/([^/][^/]*)(\.yml|/signatures/.*),\1,p')
+        export CHANGED="$CHANGED $appid"
+    done
 
 checkupdates:
   stage: test
@@ -27,22 +60,18 @@ checkupdates:
       set -xe
       apt-get --allow-releaseinfo-change update
       apt-get -qy dist-upgrade
-      cd ..
-      rm -rf fdroidserver
-      mkdir fdroidserver
-      git ls-remote https://gitlab.com/fdroid/fdroidserver.git master
-      curl --silent https://gitlab.com/fdroid/fdroidserver/-/archive/master/fdroidserver-master.tar.gz | tar -xz --directory=fdroidserver --strip-components=1
-      export PATH="$PWD/fdroidserver:$PATH"
-      cd -
-  script: |
-    set -xe
-    if [ "$CI_PROJECT_NAMESPACE" = "fdroid" ]; then echo "not testing in fdroid"; exit 0; fi
-    git fetch https://gitlab.com/fdroid/fdroiddata.git
-    appids=$(git diff --name-only --diff-filter=d ${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA:-FETCH_HEAD^}...HEAD "metadata/*.yml" | sed -n -e 's,^metadata/\([^/][^/]*\)\.yml,\1,p')
-    if [ -n "$appids" ]; then
-      fdroid checkupdates --auto -v $appids
-      git --no-pager diff --color=always --exit-code
-    fi
+    - export fdroidserver=../fdroidserver
+    - *install_fdroid_server
+  script: 
+    - |
+      set -xe
+      if [ "$CI_PROJECT_NAMESPACE" = "fdroid" ]; then echo "not testing in fdroid"; exit 0; fi
+    - *get_changed_apps
+    - |
+      if [ -n "$CHANGED" ]; then
+        fdroid checkupdates --auto -v $CHANGED
+        git --no-pager diff --color=always --exit-code
+      fi
 
 lint:
   stage: test
@@ -57,30 +86,10 @@ lint:
     - apt-get update
     - apt-get -qy dist-upgrade
     - apt-get -qy clean
-    - rm -rf fdroidserver
-    - mkdir fdroidserver
-    - git ls-remote https://gitlab.com/fdroid/fdroidserver.git master
-    - curl --silent https://gitlab.com/fdroid/fdroidserver/-/archive/master/fdroidserver-master.tar.gz
-        | tar -xz --directory=fdroidserver --strip-components=1
-    - export PATH="$PWD/fdroidserver:$PATH"
+    - export fdroidserver=$PWD/fdroidserver
+    - *install_fdroid_server
   script:
-    # if this is a merge request fork, then only check relevant apps
-    - if [ "$CI_PROJECT_NAMESPACE" != "fdroid" ]; then
-        git fetch https://gitlab.com/fdroid/fdroiddata.git;
-        test -d build || mkdir build;
-        files=`git diff --name-only --diff-filter=d ${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA:-FETCH_HEAD^}...HEAD`;
-        for f in $files; do
-           appid=`echo $f | sed -n -e 's,^metadata/\([^/][^/]*\)\.yml,\1,p'`;
-           if [ -n "$appid" ]; then
-             export CHANGED="$CHANGED $appid";
-           fi;
-        done;
-        set -x;
-        apt-get install python3-colorama yamllint;
-        for f in $files; do [[ $f == *'.yml' ]] && yamllint "$f"; done;
-        ./tools/check-git-repo-availability.py $files;
-        set +x;
-      fi
+    - *get_changed_apps
     - export EXITVALUE=0
     - function set_error() { export EXITVALUE=1; printf "\x1b[31mERROR `history|tail -2|head -1|cut -b 6-500`\x1b[0m\n"; }
     - fdroid lint -f $CHANGED || {
@@ -119,12 +128,12 @@ schema validation:
     - npm -g install ajv-cli
   script:
     - ajv compile -s schemas/*.json || exit 1
-    - git fetch https://gitlab.com/fdroid/fdroiddata.git
     - set -xe
-    - for file in
-        $(git diff --name-only --diff-filter=d ${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA:-FETCH_HEAD^}...HEAD -- "metadata/*.yml");
+    - *get_changed_apps
+    - |
+      for app_id in $CHANGED
       do
-        ajv validate -s schemas/metadata.json -d "$file";
+        ajv validate -s schemas/metadata.json -d "metadata/${app_id}.yml";
       done
 
 trigger-issuebot:
@@ -199,12 +208,8 @@ checkupdates_runner:
     variables:
       - $CHECKUPDATES == "true"
   before_script:
-    - rm -rf fdroidserver
-    - mkdir fdroidserver
-    - git ls-remote https://gitlab.com/fdroid/fdroidserver.git master
-    - curl --silent https://gitlab.com/fdroid/fdroidserver/-/archive/master/fdroidserver-master.tar.gz
-        | tar -xz --directory=fdroidserver --strip-components=1
-    - export PATH="$PWD/fdroidserver:$PATH"
+    - export fdroidserver=$PWD/fdroidserver
+    - *install_fdroid_server
     - git config --global user.email "fdroidci@bubu1.eu"
     - git config --global user.name "F-Droid checkupdates bot"
     - mkdir -p ~/.ssh
@@ -253,32 +258,7 @@ fdroid build:
   script:
     - unset CI
     - test -d build || mkdir build
-    - if [ "$CI_PROJECT_PATH" = "fdroid/fdroiddata" ] && [ "$CI_COMMIT_BRANCH" = "$CI_DEFAULT_BRANCH" ]; then
-          for f in
-              `git diff --name-only --diff-filter=d -- metadata/*.yml`
-              `git diff --name-only --diff-filter=d -- metadata/*/signatures`;
-          do
-              diff=$(git diff -- $f);
-              echo "$diff";
-              test $(echo "$diff" | grep '^[+-] ' | grep -v '^+  *disable:' | wc -l) = 0 && continue;
-              echo "$diff" | grep -E '^\+ *(NoSourceSince|Disabled):' && continue;
-              appid=`echo $f | sed -E -n 's,^metadata/([^/][^/]*)(\.yml|/signatures/.*),\1,p'`;
-              export CHANGED="$CHANGED $appid";
-          done;
-      else
-          git fetch https://gitlab.com/fdroid/fdroiddata.git;
-          for f in
-              `git diff --name-only --diff-filter=d ${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA:-FETCH_HEAD^}...HEAD -- metadata/*.yml`
-              `git diff --name-only --diff-filter=d ${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA:-FETCH_HEAD^}...HEAD -- metadata/*/signatures`;
-          do
-              diff=$(git diff ${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA:-FETCH_HEAD^}...HEAD -- $f);
-              echo "$diff";
-              test $(echo "$diff" | grep '^[+-] ' | grep -v '^+  *disable:' | wc -l) = 0 && continue;
-              echo "$diff" | grep -E '^\+ *(NoSourceSince|Disabled):' && continue;
-              appid=`echo $f | sed -E -n 's,^metadata/([^/][^/]*)(\.yml|/signatures/.*),\1,p'`;
-              export CHANGED="$CHANGED $appid";
-          done;
-      fi;
+    - *get_changed_apps
     - test -n "$(printf "$CHANGED" | tr -d '[:space:]')"
           || { echo "no packages need processing, exiting"; exit 0; }
 
@@ -295,10 +275,7 @@ fdroid build:
     - rm -rf $ANDROID_HOME/tools  # TODO remove once sdkmanager can upgrade installed packages
     - sdkmanager "tools" "platform-tools" "build-tools;31.0.0"
 
-    - test -d $fdroidserver || mkdir $fdroidserver
-    - git ls-remote https://gitlab.com/fdroid/fdroidserver.git master
-    - curl --silent https://gitlab.com/fdroid/fdroidserver/-/archive/master/fdroidserver-master.tar.gz
-          | tar -xz --directory=$fdroidserver --strip-components=1
+    - *install_fdroid_server
 
     - for d in logs tmp unsigned $home_vagrant/build $home_vagrant/.android; do
           test -d $d || mkdir $d;
@@ -377,13 +354,7 @@ pages:
     - apt-get install python3-venv
 
     - test -n "$fdroidserver" || source /etc/profile.d/bsenv.sh
-    - test -d $fdroidserver || mkdir $fdroidserver
-    - git ls-remote https://gitlab.com/fdroid/fdroidserver.git master
-    - curl --silent https://gitlab.com/fdroid/fdroidserver/-/archive/master/fdroidserver-master.tar.gz
-        | tar -xz --directory=$fdroidserver --strip-components=1
-    - export PATH="$fdroidserver:$PATH"
-    - export PYTHONPATH="$fdroidserver:$fdroidserver/examples"
-    - export PYTHONUNBUFFERED=true
+    - *install_fdroid_server
 
     - export GRADLE_USER_HOME=$PWD/.gradle
     - rm -rf $GRADLE_USER_HOME/fdroid
