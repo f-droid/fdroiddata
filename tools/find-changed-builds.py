@@ -14,7 +14,7 @@ for appid in sorted(changed):
     metadata_file = 'metadata/%s.yml' % appid
     diff = subprocess.check_output(
         (
-            'git diff --no-color --diff-filter=d FETCH_HEAD...HEAD -- ' + metadata_file
+            'git diff --no-color --diff-filter=d HEAD^...HEAD -- ' + metadata_file
         ).split(' ')
     )
 
