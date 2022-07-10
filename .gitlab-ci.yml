@@ -4,7 +4,7 @@ include:
   - template: Workflows/Branch-Pipelines.gitlab-ci.yml
 
 stages:
-  - update
+  - prepare
   - build
   - test
   - report
@@ -15,7 +15,8 @@ variables:
 
 
 checkupdates:
-  stage: update
+  stage: test
+  needs: []
   image: registry.gitlab.com/fdroid/ci-images-checkupdates:latest
   except:
     - pipelines
@@ -127,7 +128,7 @@ schema validation:
       done
 
 trigger-issuebot:
-  stage: test
+  stage: prepare
   needs: []
   image: alpine
   except:
@@ -173,7 +174,7 @@ schedule-issuebot:
     - ./tools/schedule-issuebot.py
 
 checkupdates_trigger:
-  stage: update
+  stage: prepare
   only:
     refs:
       - schedules
@@ -188,7 +189,7 @@ checkupdates_trigger:
     - parallel --verbose --delay 90 -X --jobs 10 'curl -X POST -F "token=$CI_JOB_TOKEN" -F "ref=master" -F "variables[CHECKUPDATES]=true" -F "variables[CHECKUPDATES_APPIDS]= {/.} " https://gitlab.com/api/v4/projects/${CI_PROJECT_ID}/trigger/pipeline' ":::" metadata/*.yml
 
 checkupdates_runner:
-  stage: update
+  stage: prepare
   image: registry.gitlab.com/fdroid/ci-images-checkupdates:latest
   tags:
     - checkupdates-runner
@@ -229,6 +230,7 @@ checkupdates_runner:
 
 fdroid build:
   stage: build
+  needs: []
   image: registry.gitlab.com/fdroid/fdroidserver:buildserver
   artifacts:
     name: "${CI_PROJECT_PATH}_${CI_JOB_STAGE}_${CI_COMMIT_REF_NAME}_${CI_COMMIT_SHA}"
