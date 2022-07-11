@@ -41,7 +41,7 @@ variables:
     for f in $(git diff --name-only --diff-filter=d "${TARGET_REF}...${SOURCE_REF}" -- metadata/*.yml) $(git diff --name-only --diff-filter=d "${TARGET_REF}...${SOURCE_REF}" -- metadata/*/signatures); do
         diff=$(git diff "${TARGET_REF}...${SOURCE_REF}" -- "$f")
         echo "$diff"
-        test $(echo "$diff" | grep '^[+-] ' | grep -v -c '^+  *disable:') = 0 && continue
+        test $(echo "$diff" | grep '^[+-] *\w' | grep -v -c '^+ *disable:') = 0 && continue
         echo "$diff" | grep -E '^\+ *(NoSourceSince|Disabled):' && continue
         appid=$(echo "$f" | sed -E -n 's,^metadata/([^/][^/]*)(\.yml|/signatures/.*),\1,p')
         export CHANGED="$CHANGED $appid"
