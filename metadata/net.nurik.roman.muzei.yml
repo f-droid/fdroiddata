@@ -116,6 +116,7 @@ Builds:
 
   - versionName: 3.4.3
     versionCode: 340300
+    disable: https://gitlab.com/fdroid/fdroidserver/-/issues/1004#note_1023595443
     commit: v3.4.3-rc01
     subdir: main
     patch:
@@ -128,11 +129,12 @@ Builds:
 
   - versionName: 3.4.5-rc03
     versionCode: 340504
+    disable: https://gitlab.com/fdroid/fdroidserver/-/issues/1004#note_1023595443
     commit: ebc22dc741c247586f6973affc1b0227099973c3
     subdir: main
     sudo:
       - apt-get update || apt-get update
-      - apt-get install -y openjdk-11-jdk
+      - apt-get install -y openjdk-11-jdk-headless
       - update-alternatives --auto java
     gradle:
       - yes
@@ -147,7 +149,8 @@ Builds:
       - main/src/main/java/com/google/android/apps/muzei/wearable
     prebuild:
       - sed -i -e '/gms/d' -e '/firebase/d' ../build.gradle ../*/build.gradle
-      - sed -i -e '/signingConfigs.release/d' -e '/FirebasePerformance/,/}$/d' build.gradle
+      - sed -i -e '/signingConfigs.release/d' -e '/FirebasePerformance/,/}$/d' -e '/kotlinx-coroutines-play-services/d'
+        build.gradle
       - sed -i -e '/props/d' ../muzei-api/build.gradle
       - pushd src/main/java/com/google/android/apps/muzei
       - sed -i -e '/com.google.firebase/d' -e '/Firebase.analytics.logEvent.*)$/d'
