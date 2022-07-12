@@ -64,6 +64,7 @@ Builds:
 
   - versionName: 1.6.0
     versionCode: 8
+    disable: https://gitlab.com/fdroid/fdroidserver/-/issues/1004
     commit: 5bac619d3907c1084a672356bff061d5c85d664b
     output: build/app/outputs/apk/release/app-release.apk
     srclibs:
@@ -76,15 +77,17 @@ Builds:
 
   - versionName: 1.6.1
     versionCode: 9
+    disable: https://gitlab.com/fdroid/fdroidserver/-/issues/1004
     commit: d2e1ce6113155afe27004fa8e215cf6c6eb236d9
-    output: build/app/outputs/apk/release/app-release.apk
+    output: build/app/outputs/flutter-apk/app-release.apk
     srclibs:
       - flutter@2.5.3
-    prebuild:
-      - echo 'android.applicationVariants.all { variant -> variant.outputs.all { output
-        -> outputFileName = "app-${output.baseName}.apk" } }' >> android/app/build.gradle
+    rm:
+      - ios
+      - android/app/proguard-rules.pro
+    build:
       - $$flutter$$/bin/flutter config --no-analytics
-    build: $$flutter$$/bin/flutter build apk
+      - $$flutter$$/bin/flutter build apk
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v.*$
