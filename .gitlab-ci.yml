@@ -47,14 +47,19 @@ variables:
         export CHANGED="$CHANGED $appid"
     done
 
+.app_verification_rules: 
+  rules: &app_verification_rules
+    - if: $CI_PIPELINE_SOURCE == "pipeline" || $CI_PIPELINE_SOURCE == "schedule" || $CI_PIPELINE_SOURCE == "trigger"
+      when: never
+    - changes:
+        - metadata/**/*
+        - srclibs/**/*
+
 checkupdates:
   stage: test
   needs: []
   image: registry.gitlab.com/fdroid/ci-images-checkupdates:latest
-  except:
-    - pipelines
-    - schedules
-    - triggers
+  rules: *app_verification_rules
   before_script:
     - |
       set -xe
@@ -75,13 +80,12 @@ checkupdates:
 
 lint:
   stage: test
+  needs: []
   image: registry.gitlab.com/fdroid/ci-images-base
   except:
     - pipelines
     - schedules
     - triggers
-  dependencies:
-    - fdroid build
   before_script:
     - apt-get update
     - apt-get -qy dist-upgrade
@@ -116,11 +120,7 @@ schema validation:
   stage: test
   needs: []
   image: node:alpine
-  except:
-    - master@fdroid/fdroiddata
-    - pipelines
-    - schedules
-    - triggers
+  rules: *app_verification_rules
   allow_failure:
     exit_codes: 128
   before_script:
@@ -139,12 +139,8 @@ schema validation:
 trigger-issuebot:
   stage: prepare
   needs: []
+  rules: *app_verification_rules
   image: alpine
-  except:
-    - master@fdroid/fdroiddata
-    - pipelines
-    - schedules
-    - triggers
   variables:
     GIT_DEPTH: "1"
   artifacts:
@@ -245,12 +241,7 @@ fdroid build:
       - tmp/
     when: always
     expire_in: 1 month
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "pipeline" || $CI_PIPELINE_SOURCE == "schedule" || $CI_PIPELINE_SOURCE == "trigger"
-      when: never
-    - changes:
-        - metadata/**/*
-        - srclibs/**/*
+  rules: *app_verification_rules
   cache:
     key: "$CI_JOB_NAME"
     paths:
@@ -401,6 +392,8 @@ check_git_repos:
 
 sast:
   stage: report
+  needs:
+    - fdroid build
   dependencies:
     - fdroid build
   variables:
@@ -423,7 +416,4 @@ mobsf-ios-sast:
     - when: never
 
 mobsf-android-sast:
-  rules:
-    - changes:
-        - metadata/**/*
-        - srclibs/**/*
+  rules: *app_verification_rules
