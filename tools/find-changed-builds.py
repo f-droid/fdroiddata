@@ -50,6 +50,10 @@ for appid in sorted(changed):
             previous_builds[build['versionCode']] = build
 
         for build in current['Builds']:
+            # skip disabled builds
+            if build.get('disable'):
+                continue
+
             vc = build['versionCode']
             if vc not in previous_builds:
                 to_build.append(vc)
@@ -69,6 +73,10 @@ for appid in sorted(changed):
         with open(metadata_file) as fp:
             data = yaml.safe_load(fp)
         for build in data['Builds']:
+            # skip disabled builds
+            if build.get('disable'):
+                continue
+
             to_build.append(build['versionCode'])
 
     signatures_dir = 'metadata/%s/signatures/' % appid
