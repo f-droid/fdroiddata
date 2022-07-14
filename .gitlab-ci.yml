@@ -12,6 +12,8 @@ stages:
 
 variables:
   pip: pip3 --timeout 100 --retries 10
+  ANDROID_CMDLINE_TOOLS: 8512546
+  ANDROID_CMDLINE_TOOLS_SHA256: 2ccbda4302db862a28ada25aa7425d99dce9462046003c1714b059b5c47970d8
 
 .install_fdroid_server: &install_fdroid_server
   - rm -rf $fdroidserver
@@ -24,15 +26,16 @@ variables:
   - export PYTHONUNBUFFERED=true
 
 .install_sdkmanager: &install_sdkmanager
-  - curl -Lo /tmp/cmdline-tools.zip -t 5 "https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip"
-  - echo "2ccbda4302db862a28ada25aa7425d99dce9462046003c1714b059b5c47970d8 /tmp/cmdline-tools.zip"  |
-    sha256sum -c -
+  - curl -Lo /tmp/cmdline-tools.zip -t 5 "https://dl.google.com/android/repository/commandlinetools-linux-${ANDROID_CMDLINE_TOOLS}.zip"
+  - echo "${ANDROID_CMDLINE_TOOLS_SHA256} /tmp/cmdline-tools.zip" | sha256sum -c -
   - unzip -q -o /tmp/cmdline-tools.zip -d /tmp/cmdline-tools
-  - mkdir -p ${ANDROID_SDK_ROOT}/cmdline-tools/tools
-  - mv /tmp/cmdline-tools/cmdline-tools/* ${ANDROID_SDK_ROOT}/cmdline-tools/tools
+  - mkdir -p ${ANDROID_HOME}/cmdline-tools/tools
+  - mv /tmp/cmdline-tools/cmdline-tools/* ${ANDROID_HOME}/cmdline-tools/tools
     || true
-  - export PATH=${ANDROID_SDK_ROOT}/cmdline-tools/tools/bin:${PATH}
-  - yes | sdkmanager --licenses
+  - export PATH=${ANDROID_HOME}/cmdline-tools/tools/bin:${PATH}
+  - set +o pipefail
+  - yes | sdkmanager --licenses > /dev/null
+  - set -o pipefail
 
 .get_target_source_refs: &get_target_source_refs
   - |
@@ -257,6 +260,9 @@ fdroid build:
     key: "$CI_JOB_NAME"
     paths:
       - /home/vagrant/.gradle
+  variables: 
+    ANDROID_HOME: /opt/android-sdk
+    ANDROID_SDK_ROOT: ${ANDROID_HOME}
   script:
     - unset CI
     - test -d build || mkdir build
