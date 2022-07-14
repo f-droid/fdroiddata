@@ -23,6 +23,17 @@ variables:
   - export PYTHONPATH="$fdroidserver:$fdroidserver/examples"
   - export PYTHONUNBUFFERED=true
 
+.install_sdkmanager: &install_sdkmanager
+  - curl -Lo /tmp/cmdline-tools.zip -t 5 "https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip"
+  - echo "2ccbda4302db862a28ada25aa7425d99dce9462046003c1714b059b5c47970d8 /tmp/cmdline-tools.zip"  |
+    sha256sum -c -
+  - unzip -q -o /tmp/cmdline-tools.zip -d /tmp/cmdline-tools
+  - mkdir -p ${ANDROID_SDK_ROOT}/cmdline-tools/tools
+  - mv /tmp/cmdline-tools/cmdline-tools/* ${ANDROID_SDK_ROOT}/cmdline-tools/tools
+    || true
+  - export PATH=${ANDROID_SDK_ROOT}/cmdline-tools/tools/bin:${PATH}
+  - yes | sdkmanager --licenses
+
 .get_target_source_refs: &get_target_source_refs
   - |
     if [ "$CI_PROJECT_PATH" = "fdroid/fdroiddata" ] && [ "$CI_COMMIT_BRANCH" = "$CI_DEFAULT_BRANCH" ]; then
@@ -259,11 +270,8 @@ fdroid build:
 
     - test -n "$fdroidserver" || source /etc/profile.d/bsenv.sh
 
-    # TODO remove sdkmanager install once it is included in the buildserver image
-    - git clone --depth=1 --branch=0.5.2 https://gitlab.com/fdroid/sdkmanager.git
-    - git -C sdkmanager checkout -B master 59374827baed7020c9761d9c8f51dcf9b490ba28
-    - pip3 install -e sdkmanager
-    - rm -rf $ANDROID_HOME/tools  # TODO remove once sdkmanager can upgrade installed packages
+    - *install_sdkmanager
+
     - sdkmanager "tools" "platform-tools" "build-tools;31.0.0"
 
     - *install_fdroid_server
