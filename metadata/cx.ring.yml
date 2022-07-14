@@ -1926,6 +1926,7 @@ Builds:
 
   - versionName: 20220707-01
     versionCode: 336
+    disable: https://git.jami.net/savoirfairelinux/jami-client-android/-/issues/1110
     commit: android/release_336
     timeout: 10800
     subdir: client-android/ring-android/app
@@ -1947,12 +1948,9 @@ Builds:
     srclibs:
       - swig@v4.0.2
     rm:
-      - client-gnome
       - client-ios
       - client-macosx
       - client-qt
-      - client-uwp
-      - lrc
       - plugins
       - docker
       - docs
@@ -1960,14 +1958,16 @@ Builds:
       - packaging
       - patches
       - scripts
-    prebuild: JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 $$SDK$$/tools/bin/sdkmanager
-        'platforms;android-32' 'build-tools;32.0.0' > /dev/null
+    prebuild:
+      - JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 $$SDK$$/tools/bin/sdkmanager 'platforms;android-32'
+        'build-tools;32.0.0' > /dev/null
+      - sed -i -e '/ndkVersion/s/25.0.8528842/24.0.8215888/' build.gradle.kts
     build:
       - cd ../..
       - export ANDROID_NDK_ROOT="$ANDROID_NDK"
       - export ANDROID_ABI="armeabi-v7a arm64-v8a x86_64"
       - ./compile.sh --release --daemon
-    ndk: r23c
+    ndk: r24
 
 MaintainerNotes: |-
     Ring has a lot of native dependencies, the source tarballs of these are all downloaded and build for all enabled architectures.
