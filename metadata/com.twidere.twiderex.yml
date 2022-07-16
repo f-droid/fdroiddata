@@ -119,8 +119,26 @@ Builds:
       - fdroid
     prebuild: sed -i -e '/START Non-FOSS component/,/END Non-FOSS component/d' build.gradle.kts
 
+  - versionName: 1.6.0
+    versionCode: 59
+    commit: f1b1ad71a671bb01b34a2c58c4b0463f4cbe13b6
+    subdir: android
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y openjdk-11-jdk
+      - update-alternatives --auto java
+    gradle:
+      - fdroid
+    prebuild:
+      - sed -i -e '/START Non-FOSS component/,/END Non-FOSS component/d' build.gradle.kts
+      - sed -i -e 's/const val jvmTarget = "17"/const val jvmTarget = "11"/' -e 's/val
+        java = JavaVersion.VERSION_17/val java = JavaVersion.VERSION_11/' ../buildSrc/src/main/kotlin/Versions.kt
+
+MaintainerNotes: |
+    Force it to build against Java 11 because our build environment is still Debian Stretch
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^[\d.]+$
-UpdateCheckData: buildSrc/src/main/kotlin/Package.kt|versionCode\s+=\s+(\d+)|.|versionName\s+=\s+"([\d.]+)"
-CurrentVersion: 1.5.1
-CurrentVersionCode: 55
+UpdateCheckData: buildSrc/src/main/kotlin/Package.kt|const val build = (\d+)||
+CurrentVersion: 1.6.0
+CurrentVersionCode: 59
