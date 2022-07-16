@@ -1,0 +1,45 @@
+AntiFeatures:
+  - NonFreeNet
+Categories:
+  - Science & Education
+License: GPL-3.0-only
+AuthorName: HoSo Chueh
+AuthorEmail: chueh044@gmail.com
+SourceCode: https://github.com/hschueh/oh_tai_gi
+IssueTracker: https://github.com/hschueh/oh_tai_gi/issues
+
+AutoName: O̍h Tâi Gí
+
+RepoType: git
+Repo: https://github.com/hschueh/oh_tai_gi.git
+
+Builds:
+  - versionName: 1.0.21
+    versionCode: 22
+    commit: faaaf142e7b368b2fd0782913dece97858eaae8b
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@1.22.6
+    rm:
+      - ios
+      - server
+      - test
+    prebuild:
+      - sed -i -e '/firebase/d' -e '/admob/d' pubspec.yaml
+      - sed -i -e '/firebase/,/version/d' -e '/admob/,/version/d' pubspec.lock
+      - sed -i -e 's|maven.fabric.io/public|jitpack.io|' android/build.gradle
+      - sed -i -e '/gms/d' -e '/fabric/d' android/build.gradle android/app/build.gradle
+      - sed -i -e '/firebase/d' -e '/admob/d' -e '/analytics/d' -e '/Crashlytics/d'
+        -e '/if(USE_FIREBASE_ADMOB)/,/}$/d' lib/main.dart
+      - sed -i -e '/secret.dart/d' -e '/getAdAppId/,/^}/d' -e '/getBannerAdUnitId/,/^}/d'
+        lib/utils/utils.dart
+    build:
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+      - $$flutter$$/bin/flutter build apk --release
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 1.0.21
+CurrentVersionCode: 22
