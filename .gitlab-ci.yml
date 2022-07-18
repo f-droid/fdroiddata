@@ -15,6 +15,9 @@ variables:
   ANDROID_CMDLINE_TOOLS: 8512546
   ANDROID_CMDLINE_TOOLS_SHA256: 2ccbda4302db862a28ada25aa7425d99dce9462046003c1714b059b5c47970d8
 
+  # needs lots of git history since it has to compare the merge request to current master
+  GIT_DEPTH: "5000"
+
 .install_fdroid_server: &install_fdroid_server
   - rm -rf $fdroidserver
   - mkdir $fdroidserver
@@ -195,6 +198,8 @@ schedule-issuebot:
     - ./tools/schedule-issuebot.py
 
 checkupdates_trigger:
+  variables: 
+    GIT_DEPTH: "1"
   stage: prepare
   only:
     refs:
@@ -210,6 +215,8 @@ checkupdates_trigger:
 checkupdates_runner:
   stage: prepare
   image: registry.gitlab.com/fdroid/ci-images-checkupdates:latest
+  variables: 
+    GIT_DEPTH: "1"
   tags:
     - checkupdates-runner
   only:
@@ -354,9 +361,6 @@ pages:
       - tmp/apkcache.json
       - unsigned/
     when: always
-  # needs lots of git history since it has to compare the merge request to current master
-  variables:
-    GIT_DEPTH: "5000"
   script:
     - apt-get update
     - apt-get dist-upgrade
@@ -414,7 +418,9 @@ sast:
     - fdroid build
   dependencies:
     - fdroid build
-  variables:
+  variables: 
+    GIT_DEPTH: "1"
+
     MOBSF_API_KEY: key
     SAST_EXPERIMENTAL_FEATURES: "true"
     SAST_EXCLUDED_ANALYZERS:
