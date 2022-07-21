@@ -1,0 +1,39 @@
+Categories:
+  - Internet
+License: Apache-2.0
+WebSite: https://idiomreplacex.de/
+SourceCode: https://github.com/idiomReplaceX/IdiomReplaceX-app
+IssueTracker: https://github.com/idiomReplaceX/IdiomReplaceX-app/issues
+Donate: https://www.paypal.me/LorenzoPichilli
+
+AutoName: IdiomReplaceX Browser
+
+RepoType: git
+Repo: https://github.com/idiomReplaceX/IdiomReplaceX-app
+
+Builds:
+  - versionName: 1.1.0
+    versionCode: 1
+    commit: 968fd086e6d957519a71b8247142a286a842d02c
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y openjdk-11-jdk-headless
+      - update-alternatives --auto java
+    output: build/app/outputs/apk/release/app-release-unsigned.apk
+    srclibs:
+      - flutter@2.5.3
+    rm:
+      - bundletool-all-0.15.0.jar
+      - AppIcons.zip
+    prebuild: sed -i -e '/ndk/,+2d' android/app/build.gradle
+    build:
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter packages pub get
+      - $$flutter$$/bin/flutter build apk
+    ndk: r23c
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 1.1.0
+CurrentVersionCode: 1
