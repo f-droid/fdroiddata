@@ -1,60 +1,94 @@
-Disabled: wip
 Categories:
   - Reading
-License: GPL-2.0-only
-WebSite: http://videlibri.sourceforge.net
-SourceCode: https://sourceforge.net/p/videlibri/code/ci/default/tree
+License: GPL-3.0-only
+AuthorName: Benito van der Zander
+AuthorEmail: benito@benibela.de
+AuthorWebSite: https://www.benibela.de/
+WebSite: https://www.videlibri.de/
+SourceCode: https://sourceforge.net/p/videlibri/code/ci/default/tree/
 IssueTracker: https://sourceforge.net/p/videlibri/tickets
 
-Name: VideLibri
 AutoName: VideLibri
-Summary: A client for (German) public libraries
-Description: |-
-    VideLibri watches over the books you have lend in public libraries. It will
-    automatically renew the loan period, warn you if some books are due, and keep a
-    history of all ever lend books. You can also search new books in the catalog and
-    order the found books. It has been tested with over 100 libraries in
-    Germany/Austria/Switzerland.
 
-    A custom programming language based on XQuery with pattern matching and a
-    corresponding interpreter have been developed for VideLibri, so you can add
-    support for any existing library without changing anything in the App itself.
-    Due to the pattern matching many libraries can be added by inserting annotations
-    on downloaded library webpages without writing any source in the custom
-    programming language, too.
-
-RepoType: hg
-Repo: http://hg.code.sf.net/p/videlibri/code
+RepoType: git
+Repo: https://github.com/benibela/videlibri.git
 
 Builds:
-  - versionName: '1.650'
-    versionCode: 1650
-    disable: see maintainer notes
-    commit: VIDELIBRI 1.650
-    subdir: programs/internet/VideLibri/android/android/
+  - versionName: '2.592'
+    versionCode: 2592
+    commit: VIDELIBRI_2.592
+    subdir: android/android
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y --no-install-recommends fpc openjdk-11-jdk-headless
+      - update-alternatives --auto java
+    gradle:
+      - yes
     srclibs:
-      - ACRA@acra-4.5.0
-      - 1:ActionBarSherlock@4.4.0
-    extlibs:
-      - android/android-support-v4.jar
-    prebuild:
-      - pushd $$ACRA$$
-      - $$MVN3$$ package
+      - fpc@fixes_3_2
+      - internettools@40c3d53a69b50faf877a96e79c595b6dad025fea
+      - pucu@ae5b4ddeb8f5e1831026b45f074dab05f9a71826
+      - flre@d70569ebba120dfec407cd469c0e8b7a6507598c
+      - rcmdline@618dbee077d2d1d3deb98d1a0612af968e55e77d
+    build:
+      - pushd $$fpc$$
+      - mkdir -p install
+      - pushd compiler
+      - make cycle
+      - make install INSTALL_PREFIX=$$fpc$$/install
       - popd
-      - cp $$ACRA$$/target/acra-4.5.0.jar libs/
-      - cp libs/android-support-v4.jar $$ActionBarSherlock$$/libs/
-      - android update project -p ./
-    build: sh ../manage.sh
+      - export PATH=$$NDK$$/toolchains/arm-linux-androideabi-4.9/prebuilt/linux-x86_64/bin:$PATH
+      - export PATH=$$NDK$$/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64/bin:$PATH
+      - export PATH=$$NDK$$/toolchains/x86-4.9/prebuilt/linux-x86_64/bin:$PATH
+      - export PATH=$$NDK$$/toolchains/x86_64-4.9/prebuilt/linux-x86_64/bin:$PATH
+      - echo $PATH > path.txt
+      - make crossinstall OS_TARGET=android CPU_TARGET=arm INSTALL_PREFIX=$(pwd)/install
+        PP=$$fpc$$/install/lib/fpc/3.0.0/ppcx64
+      - make crossinstall OS_TARGET=android CPU_TARGET=aarch64 INSTALL_PREFIX=$(pwd)/install
+        PP=$$fpc$$/install/lib/fpc/3.0.0/ppcx64
+      - make crossinstall OS_TARGET=android CPU_TARGET=i386 INSTALL_PREFIX=$(pwd)/install
+        PP=$$fpc$$/install/lib/fpc/3.0.0/ppcx64
+      - make crossinstall OS_TARGET=android CPU_TARGET=x86_64 INSTALL_PREFIX=$(pwd)/install
+        PP=$$fpc$$/install/lib/fpc/3.0.0/ppcx64
+      - popd
+      - sed -i -e '/PASDBL/d' $$internettools$$/internettoolsconfig.inc
+      - mkdir -p libs/armeabi/ libs/x86/ libs/arm64-v8a/ libs/x86_64/
+      - cd ..
+      - $$fpc$$/install/lib/fpc/3.2.3/ppcrossarm -Parm -B -Tandroid -MObjFPC -Scghi
+        -O1 -Xs -XX -l -vewnhibq -dANDROID -Xd -gl -Fu.. -Fu$$fpc$$/install/lib/fpc/3.2.3/units/*
+        -Fu$$fpc$$/install/lib/fpc/3.2.3/units/arm-android/* -Fu$$internettools$$/data
+        -Fi$$internettools$$/data -Fu$$internettools$$/internet -Fu$$internettools$$/system
+        -Fu$$pucu$$/src -Fu$$flre$$/src -Fu$$rcmdline$$ -Fl$$NDK$$/platforms/android-30/arch-arm/usr/lib
+        -oandroid/libs/armeabi/liblclapp.so videlibriandroid.pas
+      - $$fpc$$/install/lib/fpc/3.2.3/ppcrossa64 -Paarch64 -B -Tandroid -MObjFPC -Scghi
+        -O1 -Xs -XX -l -vewnhibq -dANDROID -Xd -gl -Fu.. -Fu$$fpc$$/install/lib/fpc/3.2.3/units/*
+        -Fu$$fpc$$/install/lib/fpc/3.2.3/units/aarch64-android/* -Fu$$internettools$$/data
+        -Fi$$internettools$$/data -Fu$$internettools$$/internet -Fu$$internettools$$/system
+        -Fu$$pucu$$/src -Fu$$flre$$/src -Fu$$rcmdline$$ -Fl$$NDK$$/platforms/android-30/arch-arm64/usr/lib
+        -oandroid/libs/arm64-v8a/liblclapp.so videlibriandroid.pas
+      - $$fpc$$/install/lib/fpc/3.2.3/ppcross386 -Pi386 -B -Tandroid -MObjFPC -Scghi
+        -O1 -Xs -XX -l -vewnhibq -dANDROID -Xd -gl -Fu.. -Fu$$fpc$$/install/lib/fpc/3.2.3/units/*
+        -Fu$$fpc$$/install/lib/fpc/3.2.3/units/i386-android/* -Fu$$internettools$$/data
+        -Fi$$internettools$$/data -Fu$$internettools$$/internet -Fu$$internettools$$/system
+        -Fu$$pucu$$/src -Fu$$flre$$/src -Fu$$rcmdline$$ -Fl$$NDK$$/platforms/android-30/arch-x86/usr/lib
+        -oandroid/libs/x86/liblclapp.so videlibriandroid.pas
+      - $$fpc$$/install/lib/fpc/3.2.3/ppcrossx64 -Px86_64 -B -Tandroid -MObjFPC -Scghi
+        -O1 -Xs -XX -l -vewnhibq -dANDROID -Xd -gl -Fu.. -Fu$$fpc$$/install/lib/fpc/3.2.3/units/*
+        -Fu$$fpc$$/install/lib/fpc/3.2.3/units/x86_64-android/* -Fu$$internettools$$/data
+        -Fi$$internettools$$/data -Fu$$internettools$$/internet -Fu$$internettools$$/system
+        -Fu$$pucu$$/src -Fu$$flre$$/src -Fu$$rcmdline$$ -Fl$$NDK$$/platforms/android-30/arch-x86_64/usr/lib64
+        -oandroid/libs/x86_64/liblclapp.so videlibriandroid.pas
+      - arm-linux-androideabi-strip --strip-all android/libs/armeabi/liblclapp.so
+      - aarch64-linux-android-strip --strip-all android/libs/arm64-v8a/liblclapp.so
+      - i686-linux-android-strip --strip-all android/libs/x86/liblclapp.so
+      - x86_64-linux-android-strip --strip-all android/libs/x86_64/liblclapp.so
+    ndk: r21e
 
-  - versionName: '1.666'
-    versionCode: 1666
-    disable: see maintainer notes
-
-MaintainerNotes: |-
-    * requires freepsacal fpc-2.7
-    * add all *.pas files to fpc.cfg
-    * lazarus pascal IDE with it's component library
-    * try to get manager.sh content over here
+MaintainerNotes: AutoUpdate is disabled, because srclibs need to be updated manually.
+    To find out which commit to use, go to https://github.com/benibela/videlibri/actions
+    and find out at which date and time the specific version was built. Then look
+    at the srclibs repos and find out which exact commit was origin/HEAD at that point
+    in time. Use this commit when specifying the srclib version here.
 
 AutoUpdateMode: None
 UpdateCheckMode: Tags ^VIDELIBRI
