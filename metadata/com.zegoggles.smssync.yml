@@ -303,11 +303,20 @@ Builds:
 
   - versionName: 1.5.11
     versionCode: 1576
-    disable: https://gitlab.com/fdroid/fdroiddata/-/issues/2294
-    commit: 1.5.11s
+    commit: 1.5.11
     subdir: app
     gradle:
       - yes
+    prebuild:
+      - sed -i -e '/import com.zegoggles.smssync.compat.GooglePlayServices;/d' -e
+        's/GooglePlayServices.isAvailable(this)/false/' src/main/java/com/zegoggles/smssync/App.java
+      - sed -i -e '/.activity.donation.DonationActivity/d' src/main/AndroidManifest.xml
+      - sed -i -e '/DonationActivity.checkUserDonationStatus/,+12d' -e '/DonationActivity/d'
+        src/main/java/com/zegoggles/smssync/activity/fragments/MainSettings.java
+      - sed -i -e '/com.android.billingclient:billing/d' build.gradle
+      - rm -r src/main/java/com/zegoggles/smssync/compat/GooglePlayServices.java src/main/java/com/zegoggles/smssync/activity/donation
+        src/test/java/com/zegoggles/smssync/activity/donation/DonationActivityTest.java
+        src/test/java/com/zegoggles/smssync/activity/donation/SkuTest.java
 
 AutoUpdateMode: Version %v
 UpdateCheckMode: Tags ^[0-9.]*$
