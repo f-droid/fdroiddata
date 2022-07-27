@@ -98,18 +98,14 @@ checkupdates:
         git --no-pager diff --color=always --exit-code
       fi
 
-lint:
+fdroid lint:
   stage: test
   needs: []
   image: registry.gitlab.com/fdroid/ci-images-base
-  except:
-    - pipelines
-    - schedules
-    - triggers
+  rules: *app_verification_rules
   before_script:
     - apt-get update
     - apt-get -qy dist-upgrade
-    - apt-get -qy clean
     - export fdroidserver=$PWD/fdroidserver
     - *install_fdroid_server
   script:
@@ -124,8 +120,19 @@ lint:
           fdroid rewritemeta $CHANGED;
           git --no-pager diff --color=always;
       }
+    - exit $EXITVALUE
+
+lint:
+  stage: test
+  needs: []
+  image: registry.gitlab.com/fdroid/ci-images-base
+  rules: *app_verification_rules
+  script:
     - apt-get -qy update
     - apt-get -qy install --no-install-recommends exiftool
+    - export EXITVALUE=0
+    - function set_error() { export EXITVALUE=1; printf "\x1b[31mERROR `history|tail -2|head -1|cut -b 6-500`\x1b[0m\n"; }
+
     - find metadata/ -name '*.jp*g' -o -name '*.png' | xargs exiftool -all=
     - echo "these images have EXIF that must be stripped:"
     - git --no-pager diff --stat
@@ -134,6 +141,7 @@ lint:
     - ./tools/check-keyalias-collision.py || set_error
     - ./tools/check-metadata-summary-whitespace.py || set_error
     - ./tools/check-for-unattached-signatures.py || set_error
+
     - exit $EXITVALUE
 
 schema validation:
