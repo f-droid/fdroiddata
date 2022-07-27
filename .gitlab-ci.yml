@@ -204,8 +204,6 @@ checkupdates_runner:
   variables: 
     GIT_DEPTH: "1"
   parallel: 10
-  tags:
-    - checkupdates-runner
   rules:
     - if: $CI_PIPELINE_SOURCE == 'schedule' && $CHECKUPDATES == 'true'
   before_script:
@@ -228,7 +226,15 @@ checkupdates_runner:
     - git reset --hard origin/master || true
   script:
     # Get app IDs in this batch
-    - export APPIDS=(metadata/*.yml)
+    - |
+      metadata_files=(metadata/*.yml)
+      declare -a APPIDS
+      for file in "${metadata_files[@]}"
+      do
+        filename="${file##*/}"
+        filename_without_extension="${filename%.*}"
+        APPIDS=("${APPIDS[@]}" "$filename_without_extension")
+      done
     - export APPIDS_COUNT=${#APPIDS[@]}
     - export APPIDS_BATCH_SIZE=$(($APPIDS_COUNT / $CI_NODE_TOTAL + 1))
     - export CHECKUPDATES_APPIDS=${APPIDS[@]:$((($CI_NODE_INDEX - 1) * $APPIDS_BATCH_SIZE)):$(($CI_NODE_INDEX * $APPIDS_BATCH_SIZE))}
