@@ -198,35 +198,16 @@ schedule-issuebot:
     - $pip install python-gitlab
     - ./tools/schedule-issuebot.py
 
-checkupdates_trigger:
-  variables: 
-    GIT_DEPTH: "1"
-  stage: prepare
-  only:
-    refs:
-      - schedules
-    variables:
-      - $CHECKUPDATES == "true"
-  image: archlinux:latest
-  before_script:
-    - pacman -Sy --noconfirm parallel
-    # workaround broken parallel version 20220222 not distributing jobs equally
-    - pacman -U --noconfirm "https://archive.archlinux.org/packages/p/parallel/parallel-20220122-1-any.pkg.tar.zst"
-  script:
-    - parallel --verbose --delay 90 -X --jobs 10 'curl -X POST -F "token=$CI_JOB_TOKEN" -F "ref=master" -F "variables[CHECKUPDATES]=true" -F "variables[CHECKUPDATES_APPIDS]= {/.} " https://gitlab.com/api/v4/projects/${CI_PROJECT_ID}/trigger/pipeline' ":::" metadata/*.yml
-
 checkupdates_runner:
   stage: prepare
   image: registry.gitlab.com/fdroid/ci-images-checkupdates:latest
   variables: 
     GIT_DEPTH: "1"
+  parallel: 10
   tags:
     - checkupdates-runner
-  only:
-    refs:
-      - pipelines
-    variables:
-      - $CHECKUPDATES == "true"
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'schedule' && $CHECKUPDATES == 'true'
   before_script:
     - export fdroidserver=$PWD/fdroidserver
     - *install_fdroid_server
@@ -246,6 +227,16 @@ checkupdates_runner:
     - git checkout master || true
     - git reset --hard origin/master || true
   script:
+    # Get app IDs in this batch
+    - export APPIDS=(metadata/*.yml)
+    - export APPIDS_COUNT=${#APPIDS[@]}
+    - export APPIDS_BATCH_SIZE=$(($APPIDS_COUNT / $CI_NODE_TOTAL + 1))
+    - export CHECKUPDATES_APPIDS=${APPIDS[@]:$((($CI_NODE_INDEX - 1) * $APPIDS_BATCH_SIZE)):$(($CI_NODE_INDEX * $APPIDS_BATCH_SIZE))}
+
+    - echo $APPIDS_COUNT
+    - echo $APPIDS_BATCH_SIZE
+    - echo $CHECKUPDATES_APPIDS
+
     - fdroid checkupdates --allow-dirty --auto --commit ${CHECKUPDATES_APPIDS} 2>&1 | tee /tmp/out || true
     - git pull --rebase origin master
     # when two jobs try to push at the same time they occasionally fail, so try one more time if it fails
