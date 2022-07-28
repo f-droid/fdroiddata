@@ -238,22 +238,27 @@ checkupdates_runner:
     # Get app IDs in this batch
     - |
       metadata_files=(metadata/*.yml)
-      declare -a APPIDS
-      for file in ${metadata_files}
-      do
+      metadata_files_count=${#metadata_files[@]}
+      batch_size=$((metadata_files_count / CI_NODE_TOTAL + 1))
+      metadata_files_batch=("${metadata_files[@]:$(((CI_NODE_INDEX - 1) * batch_size)):$batch_size}")
+
+      declare -a CHECKUPDATES_APPIDS
+      for file in "${metadata_files_batch[@]}"; do
         filename="${file##*/}"
         filename_without_extension="${filename%.*}"
-        APPIDS=("${APPIDS[@]}" "$filename_without_extension")
+        CHECKUPDATES_APPIDS=("${CHECKUPDATES_APPIDS[@]}" "$filename_without_extension")
       done
-    - export APPIDS_COUNT=${#APPIDS[@]}
-    - export APPIDS_BATCH_SIZE=$(($APPIDS_COUNT / $CI_NODE_TOTAL + 1))
-    - export CHECKUPDATES_APPIDS=$(${APPIDS[@]:$((($CI_NODE_INDEX - 1) * $APPIDS_BATCH_SIZE)):$(($CI_NODE_INDEX * $APPIDS_BATCH_SIZE))})
 
-    - echo $APPIDS_COUNT
-    - echo $APPIDS_BATCH_SIZE
-    - echo $CHECKUPDATES_APPIDS
+      export CHECKUPDATES_APPIDS
 
-    - fdroid checkupdates --allow-dirty --auto --commit ${CHECKUPDATES_APPIDS} 2>&1 | tee /tmp/out || true
+    - echo "$metadata_files_count"
+    - echo "$batch_size"
+    - echo "${metadata_files_batch[@]}"
+    - echo "${#metadata_files_batch[@]}"
+    - echo "${CHECKUPDATES_APPIDS[@]}"
+    - echo "${#CHECKUPDATES_APPIDS[@]}"
+
+    - fdroid checkupdates --allow-dirty --auto --commit "${CHECKUPDATES_APPIDS[@]}" 2>&1 | tee /tmp/out || true
     - git pull --rebase origin master
     # when two jobs try to push at the same time they occasionally fail, so try one more time if it fails
     - git push origin HEAD:master || (git pull --rebase origin master && git push origin HEAD:master)
