@@ -41,8 +41,34 @@ Builds:
       - deactivate
       - rm -rf env
 
+  - versionName: 0.33.0
+    versionCode: 1658941276
+    commit: v0.33.0
+    subdir: mobile/app
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y build-essential libffi-dev libltdl-dev libssl-dev virtualenv
+        zlib1g-dev
+      - cd build/srclib/cpython
+      - ./configure
+      - make -j`nproc`
+      - make altinstall
+    gradle:
+      - yes
+    srclibs:
+      - cpython@v3.7.7
+    prebuild:
+      - cd ../..
+      - virtualenv --python=python3.7 env
+      - source env/bin/activate
+      - echo "builds={'fdroid':{'post_build':['build_mobile.py'],'gradle_buildtype':'copyonly'}}"
+        >> localbuildsettings.py
+      - ./build.py fdroid
+      - deactivate
+      - rm -rf env
+
 AutoUpdateMode: Version v%v
 UpdateCheckMode: HTTP
 UpdateCheckData: https://iitc.app/build/release/version_fdroid.txt|versionCode=(\d+)|.|versionName=(.+)
-CurrentVersion: 0.32.1
-CurrentVersionCode: 1638281989
+CurrentVersion: 0.33.0
+CurrentVersionCode: 1658941276
