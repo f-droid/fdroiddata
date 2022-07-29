@@ -28,6 +28,11 @@ variables:
   - export PYTHONPATH="$fdroidserver:$fdroidserver/examples"
   - export PYTHONUNBUFFERED=true
 
+.install_fdroid_server_deb: &install_fdroid_server_deb
+  - apt-get --allow-releaseinfo-change update
+  - apt-get -qy dist-upgrade
+  - apt-get install -qy --no-install-recommends fdroidserver apksigner mercurial git git-svn bzr
+
 .install_sdkmanager: &install_sdkmanager
   - curl -Lo /tmp/cmdline-tools.zip -t 5 "https://dl.google.com/android/repository/commandlinetools-linux-${ANDROID_CMDLINE_TOOLS}_latest.zip"
   - echo "${ANDROID_CMDLINE_TOOLS_SHA256} /tmp/cmdline-tools.zip" | sha256sum -c -
@@ -78,13 +83,10 @@ variables:
 checkupdates:
   stage: test
   needs: []
-  image: registry.gitlab.com/fdroid/ci-images-checkupdates:latest
+  image: debian:bullseye-slim
   rules: *app_verification_rules
   before_script:
-    - |
-      set -xe
-      apt-get --allow-releaseinfo-change update
-      apt-get -qy dist-upgrade
+    - *install_fdroid_server_deb
     - export fdroidserver=../fdroidserver
     - *install_fdroid_server
   script: 
@@ -208,7 +210,7 @@ schedule-issuebot:
 
 checkupdates_runner:
   stage: prepare
-  image: registry.gitlab.com/fdroid/ci-images-checkupdates:latest
+  image: debian:bullseye-slim
   variables: 
     GIT_DEPTH: "1"
   parallel: 10
@@ -217,7 +219,8 @@ checkupdates_runner:
   rules:
     - if: $CI_PIPELINE_SOURCE == 'schedule' && $CHECKUPDATES == 'true'
   before_script:
-    - export fdroidserver=$PWD/fdroidserver
+    - *install_fdroid_server_deb
+    - export fdroidserver=../fdroidserver
     - *install_fdroid_server
     - git config --global user.email "fdroidci@bubu1.eu"
     - git config --global user.name "F-Droid checkupdates bot"
