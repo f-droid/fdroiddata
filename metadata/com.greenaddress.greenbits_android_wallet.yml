@@ -2526,6 +2526,39 @@ Builds:
         ./prepare_gdk_clang.sh
     ndk: r23b
 
+  - versionName: 3.8.6
+    versionCode: 22000386
+    commit: e9548081648e77390a917ab3a34aa0934b230e43
+    timeout: 25200
+    subdir: green
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y build-essential clang jq libffi-dev virtualenv openjdk-11-jdk
+      - update-alternatives --auto java
+      - pushd build/srclib/cpython
+      - ./configure
+      - make -j`nproc`
+      - make altinstall
+      - popd
+    gradle:
+      - production
+    srclibs:
+      - cpython@v3.9.6
+      - rustup@1.24.3
+    prebuild:
+      - sed -i -e 's/-p python3/-p python3.9/' ../crypto/prepare_gdk_clang.sh
+      - sed -i -e '/signingConfigs/,/^            }/d' build.gradle
+    build:
+      - $$rustup$$/rustup-init.sh -y
+      - source $HOME/.cargo/env
+      - rustup install 1.56.0
+      - rustup target add aarch64-linux-android armv7-linux-androideabi x86_64-linux-android
+        i686-linux-android
+      - cd ../crypto
+      - JAVA_HOME=$(readlink -f /usr/bin/javac | sed "s:/bin/javac::") PATH=$HOME/.local/bin:$PATH
+        ./prepare_gdk_clang.sh
+    ndk: r23b
+
 MaintainerNotes: |-
     Watch prepare_gdk_clang.sh for changes on new builds.
 
@@ -2538,5 +2571,5 @@ MaintainerNotes: |-
 AutoUpdateMode: Version release_%v
 UpdateCheckMode: Tags
 VercodeOperation: 22000000 + %c
-CurrentVersion: 3.8.5
-CurrentVersionCode: 22000385
+CurrentVersion: 3.8.6
+CurrentVersionCode: 22000386
