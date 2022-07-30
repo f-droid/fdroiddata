@@ -1,0 +1,44 @@
+Categories:
+  - Internet
+License: MIT
+AuthorName: Ray Yuan Liu
+AuthorEmail: louis383@gmail.com
+AuthorWebSite: https://rayuan.tw/
+SourceCode: https://github.com/YuanLiou/TaiwanEbookSearch
+IssueTracker: https://github.com/YuanLiou/TaiwanEbookSearch/issues
+Donate: https://paypal.me/juiyuanliu
+
+AutoName: TaiwanEbookSearcher
+
+RepoType: git
+Repo: https://github.com/YuanLiou/TaiwanEbookSearch.git
+
+Builds:
+  - versionName: 2.0.0
+    versionCode: 1922012821
+    commit: 2d3813f9646a97e865d608b55798e3699bb51fc8
+    subdir: app
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y openjdk-11-jdk-headless
+      - update-alternatives --auto java
+    gradle:
+      - yes
+    prebuild:
+      - sed -i -e '/firebase/d' -e '/gms/d' ../build.gradle.kts build.gradle.kts
+      - sed -i -e '/Firebase/,/GooglePlayService/d' -e '/CrashlyticsExtension/,+2d'
+        -e '/ADMOB/d' -e '/localProperties.getProperty/d' build.gradle.kts
+      - sed -i -e '/Firebase/,/^    }/d' -e '/GooglePlayService/,/^    }/d' ../buildSrc/src/main/java/AppDependencies.kt
+      - sed -i -z -E -e 's|<[^>]+gms[^>]+/>||' src/main/AndroidManifest.xml src/main/res/layout/admob_view_header.xml
+      - cd src/main/java/liou/rayyuan/ebooksearchtaiwan
+      - sed -i -e '/FirebaseAnalytics/d' EBookSearchApplication.kt
+      - sed -i -e '/firebase/d' model/EventTracker.kt
+      - sed -i -e '/fun loadAds/,/^    }/d' -e '/loadAds/d' -e '/gms/d' booksearch/BookResultListFragment.kt
+      - sed -i -e '/class AdViewHolder/,/^    }/d' -e '/header -> {/,/^\s\{12\}}/d'
+        -e '/AdViewHolder/d' -e '/gms/d' booksearch/FullBookStoreResultAdapter.kt
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: buildSrc/src/main/java/AppSettings.kt|VERSION_CODE\s=\s(\d+)|.|VERSION_NAME\s=\s"(.+)"
+CurrentVersion: 2.0.0
+CurrentVersionCode: 1922012821
