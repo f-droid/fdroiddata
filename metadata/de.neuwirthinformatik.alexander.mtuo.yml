@@ -1,0 +1,47 @@
+AntiFeatures:
+  - NonFreeNet
+Categories:
+  - Games
+License: MIT
+AuthorName: Alexander Puck Neuwirth
+AuthorEmail: apnpucky@gmail.com
+SourceCode: https://github.com/APN-Pucky/mTUO
+IssueTracker: https://github.com/APN-Pucky/mTUO/issues
+Donate: https://paypal.me/apnpucky
+
+AutoName: mTUO
+
+RepoType: git
+Repo: https://github.com/APN-Pucky/mTUO
+
+Builds:
+  - versionName: 4.4.1-r7
+    versionCode: 25
+    commit: c645bfe9cf9c850fb5c9e9b68ed02688d0224c37
+    subdir: app
+    submodules: true
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y librsvg2-bin openjdk-11-jdk-headless wget build-essential
+      - update-alternatives --auto java
+    gradle:
+      - yes
+    srclibs:
+      - boost@boost-1.79.0
+      - Boost-for-Android@ndk_25_boost_1.79.0
+    scandelete:
+      - app/src/main/cpp/tyrant_optimize/*.exe
+      - app/prebuilt/ndk_25_boost_1.79.0/*
+    build:
+      - pushd $$Boost-for-Android$$
+      - mkdir -p build/install/libs/{arm64-v8a,armeabi-v7a,x86,x86_64}
+      - NDK_DIR=$$NDK$$ ABI_NAMES="arm64-v8a armeabi-v7a x86 x86_64" LINKAGES="static"
+        BOOST_DIR=$$boost$$ ./__build.sh
+      - popd
+      - cp -rf $$Boost-for-Android$$/build/install/* prebuilt/ndk_25_boost_1.79.0/
+    ndk: r25
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: 4.4.1-r7
+CurrentVersionCode: 25
