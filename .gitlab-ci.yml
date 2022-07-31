@@ -31,7 +31,8 @@ variables:
 .install_fdroid_server_deb: &install_fdroid_server_deb
   - apt-get --allow-releaseinfo-change update
   - apt-get -qy dist-upgrade
-  - apt-get install -qy --no-install-recommends fdroidserver apksigner mercurial git git-svn bzr
+  - echo "locales locales/locales_to_be_generated multiselect en_US.UTF-8 UTF-8" | debconf-set-selections
+  - apt-get install -qy --no-install-recommends fdroidserver apksigner mercurial git git-svn brz locales
 
 .install_sdkmanager: &install_sdkmanager
   - curl -Lo /tmp/cmdline-tools.zip -t 5 "https://dl.google.com/android/repository/commandlinetools-linux-${ANDROID_CMDLINE_TOOLS}_latest.zip"
@@ -235,6 +236,8 @@ checkupdates_runner:
     # reset repo to origin state before adding new commits
     - git rebase --abort || true
     - rm -fr ".git/rebase-apply"
+    # https://gitlab.com/gitlab-org/gitlab-runner/-/issues/29187
+    - rm -f ".git/logs/HEAD.lock"
     - git checkout master || true
     - git reset --hard origin/master || true
   script:
