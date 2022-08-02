@@ -1,11 +1,11 @@
-#!/bin/bash -e
+#!/bin/sh -e
 
 get_merge_request_iid() {
     for page in 1 2 3 4 5; do
-	for mr in `curl --silent "${CI_API_V4_URL}/projects/${project_id}/merge_requests?page=${page}&per_page=50&state=opened&order_by=updated_at" | grep -Eo '"iid": *[0-9]+' | grep -Eo '[0-9]+$'`; do
-	    if curl --silent ${CI_API_V4_URL}/projects/${project_id}/merge_requests/$mr/pipelines \
+	for mr in $(curl --silent "${CI_API_V4_URL}/projects/${project_id}/merge_requests?page=${page}&per_page=50&state=opened&order_by=updated_at" | grep -Eo '"iid": *[0-9]+' | grep -Eo '[0-9]+$'); do
+	    if curl --silent "${CI_API_V4_URL}"/projects/"${project_id}"/merge_requests/"${mr}"/pipelines \
 		    | grep -Eo "\"id\": *${CI_PIPELINE_ID}," > /dev/null; then
-		echo $mr
+		echo "${mr}"
 		return 0
 	    fi
 	    1>&2 printf '.'
@@ -14,20 +14,20 @@ get_merge_request_iid() {
 }
 
 # insecure "captcha"
-s=$((4`printf "$CI_COMMIT_SHA" | wc -c`-10))
-e=$((s+`echo "$CI_SERVER_HOST" | wc -c`+18))
-issuebot=`cat .issuebot | cut -b${s}-${e}`
+s=$((4$(printf "$CI_COMMIT_SHA" | wc -c)-10))
+e=$((s+$(echo "$CI_SERVER_HOST" | wc -c)+18))
+issuebot=$(cat .issuebot | cut -b${s}-${e})
 project_id=36528
 
-if test -z $CI_API_V4_URL; then
+if test -z "$CI_API_V4_URL"; then
     echo CI_API_V4_URL is not set
     exit 1
-elif test -z $CI_PIPELINE_ID; then
+elif test -z "$CI_PIPELINE_ID"; then
     echo CI_PIPELINE_ID is not set
     exit 1
 fi
 
-CI_MERGE_REQUEST_IID=`get_merge_request_iid`
+CI_MERGE_REQUEST_IID=$(get_merge_request_iid)
 
 if test -z "$CI_MERGE_REQUEST_IID"; then
     echo "$0 No merge request found, not triggering"
@@ -35,7 +35,7 @@ if test -z "$CI_MERGE_REQUEST_IID"; then
 fi
 
 curl --silent --request POST \
-     --form token=$issuebot \
+     --form token="$issuebot" \
      --form ref=master \
      --form "variables[FROM_CI_COMMIT_REF_NAME]=$CI_COMMIT_REF_NAME" \
      --form "variables[FROM_CI_COMMIT_REF_SLUG]=$CI_COMMIT_REF_SLUG" \
@@ -45,5 +45,5 @@ curl --silent --request POST \
      --form "variables[FROM_CI_PIPELINE_ID]=$CI_PIPELINE_ID" \
      --form "variables[FROM_CI_PROJECT_PATH]=$CI_PROJECT_PATH" \
      --form "variables[FROM_CI_PROJECT_URL]=$CI_PROJECT_URL" \
-     ${CI_API_V4_URL}/projects/${project_id}/trigger/pipeline > logs/result.json \
+     "${CI_API_V4_URL}"/projects/${project_id}/trigger/pipeline > logs/result.json \
     || echo "$0 failed to post to a merge request"
