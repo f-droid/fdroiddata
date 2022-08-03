@@ -34,18 +34,6 @@ variables:
   - echo "locales locales/locales_to_be_generated multiselect en_US.UTF-8 UTF-8" | debconf-set-selections
   - apt-get install -qy --no-install-recommends fdroidserver apksigner mercurial git git-svn brz locales
 
-.install_sdkmanager: &install_sdkmanager
-  - curl -Lo /tmp/cmdline-tools.zip -t 5 "https://dl.google.com/android/repository/commandlinetools-linux-${ANDROID_CMDLINE_TOOLS}_latest.zip"
-  - echo "${ANDROID_CMDLINE_TOOLS_SHA256} /tmp/cmdline-tools.zip" | sha256sum -c -
-  - unzip -q -o /tmp/cmdline-tools.zip -d /tmp/cmdline-tools
-  - mkdir -p ${ANDROID_HOME}/cmdline-tools/tools
-  - mv /tmp/cmdline-tools/cmdline-tools/* ${ANDROID_HOME}/cmdline-tools/tools
-    || true
-  - export PATH=${ANDROID_HOME}/cmdline-tools/tools/bin:${PATH}
-  - set +o pipefail
-  - yes | sdkmanager --licenses > /dev/null
-  - set -o pipefail
-
 .get_target_source_refs: &get_target_source_refs
   - |
     if [ "$CI_PROJECT_PATH" = "fdroid/fdroiddata" ] && [ "$CI_COMMIT_BRANCH" = "$CI_DEFAULT_BRANCH" ]; then
@@ -271,6 +259,14 @@ checkupdates_runner:
     - echo "============== Summary ====================="
     - 'grep -v "INFO: Processing" /tmp/out || true'
 
+# This job is should be as close as possible to the production
+# buildserver.  It should not include custom setup or methods, except
+# when there is no other way to make this job work.  The docker image
+# is created using the same provisioning as the producion buildserver,
+# via the "docker" job in fdroid/fdroidserver.
+#
+# This job is tied to the buildserver.  Changes must be reviewed by
+# the buildserver maintainers.
 fdroid build:
   stage: build
   needs: []
@@ -292,7 +288,6 @@ fdroid build:
     ANDROID_HOME: /opt/android-sdk
     ANDROID_SDK_ROOT: ${ANDROID_HOME}
   script:
-    - unset CI
     - test -d build || mkdir build
     - *get_changed_apps
     - test -n "$(printf "$CHANGED" | tr -d '[:space:]')"
@@ -303,8 +298,12 @@ fdroid build:
 
     - test -n "$fdroidserver" || source /etc/profile.d/bsenv.sh
 
-    - *install_sdkmanager
-
+    # TODO remove sdkmanager install once it is included in the buildserver image
+    - git clone --depth=1 --branch=0.6.1 https://gitlab.com/fdroid/sdkmanager.git
+    - git -C sdkmanager checkout -B master f7e1064a78462a74cfc4ce3b1214c29644e438d7
+    - pip3 install -e sdkmanager
+    - rm -rf $ANDROID_HOME/tools  # TODO remove once sdkmanager can upgrade installed packages
+    # These packages are needed to make this env like the production buildserver.
     - sdkmanager "tools" "platform-tools" "build-tools;31.0.0"
 
     - *install_fdroid_server
