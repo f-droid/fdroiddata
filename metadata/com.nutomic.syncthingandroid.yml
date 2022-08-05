@@ -1919,6 +1919,28 @@ Builds:
     preassemble:
       - buildNative
 
+  - versionName: 1.20.4
+    versionCode: 4316
+    commit: 7c82d6e851ccd83ca7f20de61d5a5bd8472e67f0
+    submodules: true
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y openjdk-11-jdk-headless
+      - update-alternatives --auto java
+      - curl -Lso go.tar.gz https://golang.org/dl/go1.17.2.linux-amd64.tar.gz
+      - echo "f242a9db6a0ad1846de7b6d94d507915d14062660616a61ef7c808a76e4f1676 go.tar.gz"
+        | sha256sum -c -
+      - tar xzf go.tar.gz --strip-components=1 -C /usr/local/
+    gradle:
+      - yes
+    output: app/build/outputs/apk/release/app-release-unsigned.apk
+    prebuild: sed -i -e '/signingConfig/d' app/build.gradle
+    scanignore:
+      - syncthing/src/github.com/syncthing/syncthing/lib/model/testdata
+    ndk: r23
+    preassemble:
+      - buildNative
+
 MaintainerNotes: |-
     The submodule in syncthing/src/github.com/syncthing/syncthing must be
     pristine, as the version/release information is taken from git.
@@ -1929,5 +1951,5 @@ MaintainerNotes: |-
 
 AutoUpdateMode: Version %v
 UpdateCheckMode: Tags ^[0-9.]*$
-CurrentVersion: 1.20.3
-CurrentVersionCode: 4314
+CurrentVersion: 1.20.4
+CurrentVersionCode: 4316
