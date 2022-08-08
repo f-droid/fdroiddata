@@ -246,15 +246,21 @@ Builds:
   - versionName: 0.9.0
     versionCode: 618
     commit: v0.9.0
-    sudo: rm -fr /opt/android-sdk/ndk/*
+    sudo:
+      - rm -fr /opt/android-sdk/ndk/*
+      - apt-get update || apt-get update
+      - apt-get install -y openjdk-11-jdk-headless
+      - update-alternatives --auto java
     output: build/app/outputs/flutter-apk/app-release.apk
     srclibs:
-      - flutter@1.22.6
+      - flutter@3.0.5
     rm:
       - ios
       - test
+    prebuild: sed -i -e '/bool skipIOS/s/false/true/' scripts/buildLocalizedStrings
     build:
-      - $$SDK$$/tools/bin/sdkmanager 'build-tools;31.0.0' 'build-tools;30.0.3' > /dev/null
+      - JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 $$SDK$$/tools/bin/sdkmanager 'build-tools;31.0.0'
+        'build-tools;30.0.3' > /dev/null
       - cp $$SDK$$/build-tools/30.0.3/lib/dx.jar $$SDK$$/build-tools/31.0.0/lib/dx.jar
       - cp $$SDK$$/build-tools/30.0.3/dx $$SDK$$/build-tools/31.0.0/dx
       - $$flutter$$/bin/flutter config --no-analytics

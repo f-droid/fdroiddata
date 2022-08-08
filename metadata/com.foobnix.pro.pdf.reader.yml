@@ -109,7 +109,7 @@ Builds:
 
   - versionName: 8.5.43-fdroid
     versionCode: 4578
-    disable: https://gitlab.com/fdroid/fdroiddata/-/jobs/2826861210#L4837 google ads
+    disable: https://gitlab.com/fdroid/fdroiddata/-/jobs/2826861210#L4837
     commit: 17ee4a601ada554d3d9f4d0efa07609d07782925
     subdir: app
     sudo:
@@ -121,13 +121,12 @@ Builds:
     gradle:
       - fdroid
     srclibs:
-      - MuPDF@1.20.0-rc2
+      - MuPDF@1.20.2
     rm:
       - Builder/libs
     prebuild:
       - sed -i -e '/F-DROID REMOVE THIS LINE/,+1d' ../build.gradle
-      - sed -i -e '/gms/d' -e '/firebase/d' -e '/com.cloudrail/d' -e '/enable true/d'
-        -e '/junrar/d' -e '/google_ads/d' build.gradle
+      - sed -i -e '/^if.*Fdroid/,/^}/d' -e '/enable true/d' build.gradle
       - sed -i -e '/^#!/a\set -e' -e 's|git clone .*|cp -r $$MuPDF$$ mupdf-$VERSION_TAG|'
         -e '/mkdir mupdf/d' -e 's/ndk-build $1/& -j`nproc` || exit 1/' ../Builder/link_to_mupdf_1.20.2.sh
       - mkdir src/main/jniLibs/
