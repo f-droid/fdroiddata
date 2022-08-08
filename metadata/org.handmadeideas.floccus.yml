@@ -116,7 +116,32 @@ Builds:
     scandelete:
       - node_modules
 
+  - versionName: 4.17.0
+    versionCode: 4017000
+    commit: a06b4d692079016b198f9ed85b9af3e3e7f5f07b
+    subdir: android/app
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y openjdk-11-jdk-headless build-essential
+      - update-alternatives --auto java
+      - curl -Lo node.tar.xz https://nodejs.org/dist/v14.18.2/node-v14.18.2-linux-x64.tar.xz
+      - echo "dae683f911fe5af11f1dc9d7746d80fccdb1e7b4bef31a570f5daffadd897c42 node.tar.xz"
+        | sha256sum -c -
+      - tar xJf node.tar.xz
+      - cp -a node-v14.18.2-linux-x64/. /usr/local/
+      - npm install -g npm@7
+    gradle:
+      - yes
+    prebuild:
+      - cd ../..
+      - npm install
+      - npx gulp
+      - cp dist/html/index.html dist/index.html
+      - npx cap sync
+    scandelete:
+      - node_modules
+
 AutoUpdateMode: Version v%v
 UpdateCheckMode: Tags
-CurrentVersion: 4.16.0
-CurrentVersionCode: 4016000
+CurrentVersion: 4.17.0
+CurrentVersionCode: 4017000
