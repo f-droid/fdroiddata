@@ -128,7 +128,39 @@ Builds:
       - popd
       - cp $$RootTools$$/build/outputs/aar/RootTools-release.aar libs/RootTools-5.0.aar
 
+  - versionName: '3.0'
+    versionCode: 102
+    commit: 2816ac210c7645f5de572ad8a128e1c845df3385
+    subdir: app
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y openjdk-11-jdk-headless
+      - update-alternatives --auto java
+    gradle:
+      - gplay
+    srclibs:
+      - RootShell@89c3b49401b2a2e8d8331c4e4b8d78d8319e1a80
+      - RootTools@10fd55fb6d078a3d83f88d50c9d7878a25929d51
+    rm:
+      - app/libs/*.aar
+      - secret-env-cipher
+    build:
+      - export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+      - pushd $$RootShell$$
+      - sed -i -e 's/4.0-rc-1/4.0/' gradle/wrapper/gradle-wrapper.properties
+      - gradle assembleRelease
+      - popd
+      - rm $$RootTools$$/RootShell/RootShell.aar
+      - cp $$RootShell$$/build/outputs/aar/RootShell-release.aar $$RootTools$$/RootShell/RootShell.aar
+      - cp $$RootShell$$/build/outputs/aar/RootShell-release.aar libs/RootShell-1.6.aar
+      - pushd $$RootTools$$
+      - gradle assembleRelease
+      - popd
+      - cp $$RootTools$$/build/outputs/aar/RootTools-release.aar libs/RootTools-5.0.aar
+      - export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+
 AutoUpdateMode: None
-UpdateCheckMode: None
-CurrentVersion: '2.6'
-CurrentVersionCode: 99
+UpdateCheckMode: HTTP
+UpdateCheckData: https://raw.githubusercontent.com/asksven/BetterBatteryStats/master/app/build.gradle|versionCode\s(\d+)|.|versionName\s"([\d.]+)"
+CurrentVersion: '3.0'
+CurrentVersionCode: 102
