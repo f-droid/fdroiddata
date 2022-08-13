@@ -180,94 +180,13 @@ Builds:
       - npm install --build-from-source
       - popd
 
-  - versionName: 2.9.1
-    versionCode: 2097669
-    commit: 6d4181445546526cd2538e51451024b3c6a9db6b
-    subdir: packages/app-mobile/android/app
-    sudo:
-      - sysctl fs.inotify.max_user_watches=524288
-      - apt-get update || apt-get update
-      - apt-get install -y --no-install-recommends g++ build-essential libexpat1-dev
-        gtk-doc-tools gobject-introspection libtiff5-dev libjpeg62-turbo-dev libpng-dev
-        librsvg2-dev libexif-dev libgif-dev libpoppler-glib-dev liblcms2-dev libpango1.0-dev
-      - curl -Lo node.tar.xz https://nodejs.org/dist/v16.14.0/node-v16.14.0-linux-x64.tar.xz
-      - echo "0570b9354959f651b814e56a4ce98d4a067bf2385b9a0e6be075739bc65b0fae node.tar.xz"
-        | sha256sum -c -
-      - tar xJf node.tar.xz --strip-components=1 -C /usr/local/
-      - corepack enable
-      - pushd build/srclib/cpython
-      - ./configure
-      - make -j`nproc`
-      - make altinstall
-      - popd
-    init:
-      - pushd ../../../..
-      - PYTHON=python3.9 YARN_ENABLE_IMMUTABLE_INSTALLS=false yarn install
-    gradle:
-      - yes
-    srclibs:
-      - react-native-sharp@v0.26.3
-      - libvips@v8.10.0
-      - cpython@v3.9.6
-    rm:
-      - packages/tools/PortableAppsLauncher/
-      - packages/app-cli
-      - packages/plugin-repo-cli
-      - packages/app-desktop
-      - packages/app-clipper
-      - packages/server
-    prebuild:
-      - sed -i -e '\!ACCESS_NETWORK_STATE!a<uses-permission android:name="com.android.vending.CHECK_LICENSE"
-        tools:node="remove" />' -e 's!xmlns:android!xmlns:tools="http://schemas.android.com/tools"
-        xmlns:android!' src/main/AndroidManifest.xml
-      - cd ../../../../packages/app-mobile/node_modules/react-native-rsa-native/android
-      - sed -i -e 's|maven.fabric.io/public|jitpack.io|' build.gradle bin/build.gradle
-    scanignore:
-      - packages/app-mobile/android/build.gradle
-      - packages/app-mobile/node_modules/joplin-rn-alarm-notification/android/build.gradle
-      - packages/app-mobile/node_modules/@react-native-community/netinfo/android/build.gradle
-      - packages/app-mobile/node_modules/react-native-get-random-values/android/build.gradle
-      - packages/app-mobile/node_modules/react-native-securerandom/android/build.gradle
-      - packages/app-mobile/node_modules/react-native-vector-icons/android/build.gradle
-      - packages/app-mobile/node_modules/react-native-image-picker/android/build.gradle
-      - packages/app-mobile/node_modules/react-native-rsa-native/android/build.gradle
-      - packages/app-mobile/node_modules/react-native-webview/android/build.gradle
-      - packages/app-mobile/node_modules/react-native-camera/android/build.gradle
-      - packages/app-mobile/node_modules/react-native-share/android/build.gradle
-      - packages/app-mobile/node_modules/react-native/android
-      - packages/app-mobile/node_modules/jsc-android
-      - packages/app-mobile/node_modules/hermes-engine
-      - packages/app-mobile/node_modules/react-native/ReactAndroid/build.gradle
-      - packages/app-mobile/node_modules/react-native-rsa-native/android/bin/build.gradle
-    scandelete:
-      - packages/fork-htmlparser2/node_modules
-      - packages/generator-joplin/node_modules
-      - packages/app-mobile/node_modules
-      - packages/renderer/node_modules
-      - packages/tools/node_modules
-      - packages/lib/node_modules
-      - node_modules
-      - .yarn/cache/
-      - .yarn/install-state.gz
-    build:
-      - pushd $$libvips$$
-      - mkdir build
-      - ./autogen.sh --prefix=$$libvips$$/build/
-      - make -j$(nproc)
-      - make install
-      - popd
-      - pushd $$react-native-sharp$$
-      - export PKG_CONFIG_PATH=$$libvips$$/build/lib/pkgconfig/
-      - npm install --build-from-source
-      - popd
-
 MaintainerNotes: |-
     * "g++" is needed for a dependency built by "npm install".
     * "scanignore" of "build.gradle" are for local Maven repositories, the React Native folder
       is for "react-native-0.66.1.aar", and the JSC Android folder for "android-jsc-intl-r241213.jar".
     - we build libvips from source for the sharp library
 
-AutoUpdateMode: Version
+AutoUpdateMode: None
 UpdateCheckMode: Tags android-.*
 CurrentVersion: 2.9.1
 CurrentVersionCode: 2097669
