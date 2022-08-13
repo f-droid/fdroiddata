@@ -1,0 +1,43 @@
+Categories:
+  - Internet
+License: MIT
+AuthorName: Kido Zhang
+AuthorEmail: kidozh@gmail.com
+AuthorWebSite: https://kidozh.com
+WebSite: https://discuzhub.kidozh.com
+SourceCode: https://github.com/kidozh/DiscuzHub
+IssueTracker: https://github.com/kidozh/DiscuzHub/issues
+Changelog: https://github.com/kidozh/DiscuzHub/releases
+
+AutoName: Discuz Hub
+
+RepoType: git
+Repo: https://github.com/kidozh/DiscuzHub.git
+
+Builds:
+  - versionName: '5.5'
+    versionCode: 48
+    commit: b523f1338416db81cb9ead399dc1c300bbc2443a
+    subdir: app
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y openjdk-11-jdk-headless
+      - update-alternatives --auto java
+    gradle:
+      - yes
+    rm:
+      - app/src/main/java/com/kidozh/discuzhub/activities/PushTokenActivity.kt
+      - app/src/main/java/com/kidozh/discuzhub/results/PushDevicesResult.kt
+      - app/src/main/java/com/kidozh/discuzhub/services/FirebasePushService.kt
+    prebuild:
+      - sed -i -e '/gms/d' -e '/firebase/d' -e 's/discuzhub/discuzhub.fdroid/' build.gradle
+      - sed -i -z -E -e 's|<activity[^>]+PushTokenActivity[^>]+/>||' -e 's|<service.*</service>||'
+        -e 's|<meta-data[^>]+firebase[^>]+/>||' src/main/AndroidManifest.xml
+      - sed -i -e '/PushTokenActivity/,/startActivity/d' -e '/pushNotification,/d'
+        src/main/java/com/kidozh/discuzhub/activities/DrawerActivity.kt
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckName: com.kidozh.discuzhub
+CurrentVersion: '5.5'
+CurrentVersionCode: 48
