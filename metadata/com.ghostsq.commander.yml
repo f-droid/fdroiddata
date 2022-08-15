@@ -16,8 +16,7 @@ Description: |-
 
     * Ability to copy and move files between its two panels
     * Create or extract (unzip) ZIP archives
-    * Transfer files via SFTP - plugin required: https://f-droid.org/packages/com.ghostsq.commander.sftp
-    * Transfer files via SMB - plugin required: https://f-droid.org/packages/com.ghostsq.commander.smb
+    * Transfer files via FTP/SFTP/SMB
     * Full-featured app manager able to access extra info and share apks
 
     Requires root: No, but if provided you can remount filesystems and mess around
@@ -608,6 +607,22 @@ Builds:
   - versionName: 1.61b4
     versionCode: 434
     commit: '84'
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y openjdk-11-jdk-headless
+      - update-alternatives --auto java
+    gradle:
+      - free
+    prebuild:
+      - cat build.gradle >> build.gradle.root
+      - mv build.gradle.root build.gradle
+      - sed -i -e '/task clean/,/^}/d' -e 's/lint/lintOptions/' build.gradle
+    scanignore:
+      - src/main/java/com/ghostsq/commander/adapters/CA.java
+
+  - versionName: 1.61b7
+    versionCode: 437
+    commit: '89'
     sudo:
       - apt-get update || apt-get update
       - apt-get install -y openjdk-11-jdk-headless
