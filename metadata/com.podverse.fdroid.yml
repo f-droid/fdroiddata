@@ -1905,8 +1905,53 @@ Builds:
       - node_modules
     ndk: r23c
 
+  - versionName: 4.6.0
+    versionCode: 46
+    commit: fd459da37bcbbc4bad98927d3aa81ebb32b319ca
+    subdir: android/app
+    sudo:
+      - sysctl fs.inotify.max_user_watches=524288
+      - curl -Lo node.tar.xz https://nodejs.org/download/release/v14.17.6/node-v14.17.6-linux-x64.tar.xz
+      - echo "3bbe4faf356738d88b45be222bf5e858330541ff16bd0d4cfad36540c331461b node.tar.xz"
+        | sha256sum -c -
+      - tar xJf node.tar.xz --strip-components=1 -C /usr/local/
+      - npm -g install yarn
+    init:
+      - yarn install
+      - yarn add jetifier --dev
+      - yarn jetify
+    gradle:
+      - yes
+    rm:
+      - functions
+    prebuild:
+      - echo -e '\norg.gradle.jvmargs=-Xmx4g -XX:MaxPermSize=4g' >> ../gradle.properties
+      - echo -e "android { packagingOptions { pickFirst 'lib/**/*.so' } }" >> build.gradle
+    scanignore:
+      - android/build.gradle
+      - node_modules/hermes-engine
+      - node_modules/jsc-android
+      - node_modules/react-native/android
+      - node_modules/react-native/ReactAndroid/build.gradle
+      - node_modules/react-native-document-picker/android/build.gradle
+      - node_modules/react-native-localize/android/build.gradle
+      - node_modules/react-native-reanimated/android/build.gradle
+      - node_modules/react-native-safe-area-context/android/build.gradle
+      - node_modules/react-native-screens/android/build.gradle
+      - node_modules/react-native-share/android/build.gradle
+      - node_modules/react-native-svg/android/build.gradle
+      - node_modules/react-native-track-player/android/build.gradle
+      - node_modules/react-native-vector-icons/android/build.gradle
+      - node_modules/react-native-webview/android/build.gradle
+      - node_modules/@react-native-community/async-storage/android/build.gradle
+      - node_modules/@react-native-community/masked-view/android/build.gradle
+      - node_modules/@react-native-community/netinfo/android/build.gradle
+    scandelete:
+      - node_modules
+    ndk: r23c
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^[0-9.]+$
 UpdateCheckData: android/app/build.gradle|versionCode\s(\d+)|.|versionName\s"(.+)"
-CurrentVersion: 4.5.17
-CurrentVersionCode: 45
+CurrentVersion: 4.6.0
+CurrentVersionCode: 46
