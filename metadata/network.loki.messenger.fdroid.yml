@@ -108,42 +108,6 @@ Builds:
         -e '/IOUtils/d' linkpreview/LinkPreviewRepository.java
     ndk: r23b
 
-  - versionName: 1.14.0
-    versionCode: 2925
-    commit: 865a69c49f4d7938f893610f0ee9868f75c651ba
-    subdir: app
-    gradle:
-      - play
-    rm:
-      - app/src/main/java/org/thoughtcrime/securesms/notifications/FcmUtils.kt
-      - app/src/main/java/org/thoughtcrime/securesms/notifications/LokiPushNotificationManager.kt
-      - app/src/main/java/org/thoughtcrime/securesms/notifications/PushNotificationService.kt
-    prebuild:
-      - echo -e '\nandroid.jetifier.blacklist=protobuf-lite-3.0.1.jar' >> ../gradle.properties
-      - sed -i -e '/gms/d' -e 's/raw.github.com.*"/jitpack.io"/' ../build.gradle
-      - sed -i -e '/gms/d' -e '/firebase-messaging/,/^    }/d' -e '/enable true/d'
-        -e '/circular-progress-button/s/1.1.3-S2/1.1.3/' -e '/android-database-sqlcipher/s/org.signal/net.zetetic/'
-        -e '/android-database-sqlcipher/s/3.5.9-S3/4.0.0/' -e '/defaultConfig/a applicationId
-        "network.loki.messenger.fdroid"' build.gradle
-      - sed -i -z -E -e 's/<[^<]+pref_key_use_fcm[^>]+>//' src/main/res/xml/preferences_notifications.xml
-      - sed -i -E -e '/app_name/s/>(.+)</>\1 F-Droid</' src/main/res/*/strings.xml
-      - for uri in $(sed -n -E 's/android:authorities="network.loki.(.*)"/\1/p' src/main/AndroidManifest.xml);
-        do find src/main/java/org/thoughtcrime/securesms -type f -exec sed -i -e "s/network.loki.$uri/network.loki.fdroid.$uri/"
-        {} +; done
-      - sed -i -e '/READ_PHONE_STATE/d' -e '/c2dm/d' -e 's/ACCESS_SESSION_SECRETS/fdroid.ACCESS_SESSION_SECRETS/'
-        -e '/android:authorities/s/network.loki/network.loki.fdroid/' src/main/AndroidManifest.xml
-      - cd src/main/java/org/thoughtcrime/securesms
-      - sed -i -e '/fun toggleFCM()/,/^    }/d' -e 's/toggleFCM/toggleBackgroundPolling/'
-        onboarding/PNModeActivity.kt
-      - sed -i -e '/void registerForFCMIfNeeded/,/^    }/s/^        .*//' -e '/FcmUtils/d'
-        -e '/LokiPushNotificationManager/d' ApplicationContext.java
-      - sed -i -e '/pref_key_use_fcm/,/^      });/d' preferences/NotificationsPreferenceFragment.java
-      - sed -i -e 's/Strings.isEmptyOrWhitespace(passphrase)/(passphrase?.trim()?.isEmpty()?:true)/'
-        -e '/Strings/d' backup/BackupRestoreActivity.kt
-      - sed -i -e 's/IOUtils.readInputStreamFully(bodyStream);/new byte[bodyStream.available()];bodyStream.read(data);/'
-        -e '/IOUtils/d' linkpreview/LinkPreviewRepository.java
-    ndk: r23b
-
   - versionName: 1.14.1
     versionCode: 2935
     commit: c65feba6832755967da5859335fc83cea38ad685
@@ -154,6 +118,7 @@ Builds:
       - app/src/main/java/org/thoughtcrime/securesms/notifications/FcmUtils.kt
       - app/src/main/java/org/thoughtcrime/securesms/notifications/LokiPushNotificationManager.kt
       - app/src/main/java/org/thoughtcrime/securesms/notifications/PushNotificationService.kt
+      - liblazysodium/lazysodium.aar
     prebuild:
       - echo -e '\nandroid.jetifier.blacklist=protobuf-lite-3.0.1.jar' >> ../gradle.properties
       - sed -i -e '/gms/d' -e 's/raw.github.com.*"/jitpack.io"/' ../build.gradle
