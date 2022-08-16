@@ -114,6 +114,8 @@ Builds:
     subdir: app
     gradle:
       - play
+    srclibs:
+      - session-lazysodium-android@883c0aada48d4211d5fca30d025a90f9b2919edf
     rm:
       - app/src/main/java/org/thoughtcrime/securesms/notifications/FcmUtils.kt
       - app/src/main/java/org/thoughtcrime/securesms/notifications/LokiPushNotificationManager.kt
@@ -143,7 +145,12 @@ Builds:
         -e '/Strings/d' backup/BackupRestoreActivity.kt
       - sed -i -e 's/IOUtils.readInputStreamFully(bodyStream);/new byte[bodyStream.available()];bodyStream.read(data);/'
         -e '/IOUtils/d' linkpreview/LinkPreviewRepository.java
-    ndk: r23b
+    build:
+      - pushd $$session-lazysodium-android$$/app
+      - gradle assembleRelease
+      - popd
+      - mv $$session-lazysodium-android$$/app/build/outputs/aar/*.aar ../liblazysodium/lazysodium.aar
+    ndk: r25
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
