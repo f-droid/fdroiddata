@@ -779,10 +779,48 @@ Builds:
       - node_modules/
     ndk: r21e
 
+  - versionName: 3.1.0
+    versionCode: 310
+    commit: f7af24b9fbe351fa40012399d0c3e68b04303b16
+    subdir: android/app
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y openjdk-11-jdk-headless
+      - update-alternatives --auto java
+      - sysctl fs.inotify.max_user_watches=524288
+      - curl -Lo node.tar.xz https://nodejs.org/dist/latest-gallium/node-v16.17.0-linux-x64.tar.xz
+      - echo "f0867d7a17a4d0df7dbb7df9ac3f9126c2b58f75450647146749ef296b31b49b node.tar.xz"
+        | sha256sum -c -
+      - tar xJf node.tar.xz --strip-components=1 -C /usr/local/
+      - npm install -g npm@8.15.0
+    init: npm install
+    gradle:
+      - yes
+    prebuild:
+      - sed -i -e '/installReferrerVersion/,+11d' ../../node_modules/react-native-device-info/android/build.gradle
+      - sed -i -e "/swiperefreshlayout/a implementation(project(':react-native-device-info'))
+        { exclude group\x3a 'com.google.firebase'\\ exclude group\x3a 'com.google.android.gms'\\
+        exclude group\x3a 'com.android.installreferrer'\\ }" build.gradle
+    scanignore:
+      - android/build.gradle
+      - android/app/build.gradle
+      - node_modules/hermes-engine
+      - node_modules/jsc-android
+      - node_modules/react-native/android/com/facebook/react/react-native/*/
+      - node_modules/react-native-device-info/android/build.gradle
+      - node_modules/react-native-encrypted-storage/android/build.gradle
+      - node_modules/react-native-safe-area-context/android/build.gradle
+      - node_modules/react-native-screens/android/build.gradle
+      - node_modules/react-native-vector-icons/android/build.gradle
+      - node_modules/react-native/ReactAndroid/build.gradle
+    scandelete:
+      - node_modules/
+    ndk: r21e
+
 MaintainerNotes: scanignore is used to allow the "node_modules/react-native/android"
     local Maven repository.
 
 AutoUpdateMode: Version %v
 UpdateCheckMode: Tags
-CurrentVersion: 3.0.1
-CurrentVersionCode: 301
+CurrentVersion: 3.1.0
+CurrentVersionCode: 310
