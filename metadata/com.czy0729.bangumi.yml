@@ -261,8 +261,69 @@ Builds:
       - mv $$react-native-reanimated$$/build/outputs/aar/android-release.aar ../../node_modules/react-native-reanimated/android/react-native-reanimated-$RN_MVER.aar
     ndk: r21e
 
+  - versionName: 6.8.0
+    versionCode: 60801
+    commit: 01ee66eb7be0a5edccb7dc28396fea02fd63a87e
+    subdir: android/app
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y openjdk-11-jdk-headless
+      - update-alternatives --auto java
+      - sysctl fs.inotify.max_user_watches=524288
+      - curl -Lo node.tar.xz https://nodejs.org/dist/v16.14.2/node-v16.14.2-linux-x64.tar.xz
+      - echo "e40c6f81bfd078976d85296b5e657be19e06862497741ad82902d0704b34bb1b node.tar.xz"
+        | sha256sum -c -
+      - tar xJf node.tar.xz --strip-components=1 -C /usr/local/
+      - npm -g install yarn
+    init:
+      - cd ../..
+      - patch -p1 < patches/diff.patch
+      - yarn install
+    gradle:
+      - yes
+    srclibs:
+      - react-native-reanimated@2.1.0
+    rm:
+      - node_modules/expo-location
+    prebuild:
+      - mv ../gradle_yours.properties ../gradle.properties
+      - sed -i -e '/aliyun/d' -e '/bintray/d' ../build.gradle
+      - sed -i -e 's|../app.json|../../app.json|' -e '/enableSeparateBuild/d' -e '/signingConfigs.release/d'
+        build.gradle
+      - sed -i -e '/installreferrer/,+11d' ../../node_modules/react-native-device-info/android/build.gradle
+      - sed -i -e "s|files('libs/jcifs-1.3.18.jar')|'org.codelibs:jcifs:1.3.18.3'|"
+        ../../node_modules/react-native-smb/android/build.gradle
+      - sed -i -e '/function xhr/,/^}/s/^  .*//' ../../src/utils/track.ts
+      - sed -i -e '/baidu/d' ../../web/manga.html
+    scanignore:
+      - android/build.gradle
+      - node_modules/hermes-engine
+      - node_modules/react-native/android/com/facebook/react/react-native/*/
+      - node_modules/react-native-device-info/android/build.gradle
+      - node_modules/react-native-webview/android/build.gradle
+      - node_modules/react-native-screens/android/build.gradle
+      - node_modules/react-native-safe-area-context/android/build.gradle
+      - node_modules/react-native-fast-image/android/build.gradle
+      - node_modules/react-navigation/node_modules/react-native-screens/android/build.gradle
+      - node_modules/@react-native-masked-view/masked-view/android/build.gradle
+      - node_modules/@react-native-community/async-storage/android/build.gradle
+      - node_modules/expo/node_modules/react-native-safe-area-context/android/build.gradle
+    scandelete:
+      - node_modules
+    build:
+      - RN_VER=$(sed -n -E -e 's/.*"react-native":\s"([0-9.]+)".*/\1/p' ../../package.json
+        | head -n 1)
+      - RN_MVER=$(sed -n -E -e 's/.*"react-native":\s"0\.([0-9]+).*/\1/p' ../../package.json
+        | head -n 1)
+      - pushd $$react-native-reanimated$$
+      - yarn add react-native@"${RN_VER}"
+      - FOR_HERMES=True gradle assembleRelease
+      - popd
+      - mv $$react-native-reanimated$$/build/outputs/aar/android-release.aar ../../node_modules/react-native-reanimated/android/react-native-reanimated-$RN_MVER.aar
+    ndk: r21e
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: app.json|"versionCode":\s(\d+)|.|"version":\s"([\d.]+)"
-CurrentVersion: 6.7.1
-CurrentVersionCode: 60710
+CurrentVersion: 6.8.0
+CurrentVersionCode: 60801
