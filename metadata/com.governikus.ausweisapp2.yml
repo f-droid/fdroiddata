@@ -291,8 +291,42 @@ Builds:
       - make apk
     ndk: r21e
 
+  - versionName: 1.24.0
+    versionCode: 98
+    commit: 1.24.0
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y g++
+      - apt-get install -y -t stretch-backports-sloppy libarchive13
+      - apt-get install -y -t stretch-backports cmake
+      - sed -i '26iset(_CMAKE_TOOLCHAIN_PREFIX \"${CMAKE_ANDROID_ARCH_TRIPLE}-\")'
+        /usr/share/cmake-3.16/Modules/Platform/Android/Determine-Compiler-NDK.cmake
+    output: build/dist/AusweisApp2-$$VERSION$$-armeabi-v7a.apk
+    rm:
+      - test/fixture
+      - resources/packaging/macos
+    prebuild:
+      - $$SDK$$/tools/bin/sdkmanager 'build-tools;32.0.0' 'build-tools;30.0.3' "platforms;android-31"
+        > /dev/null
+      - cp $$SDK$$/build-tools/30.0.3/lib/dx.jar $$SDK$$/build-tools/32.0.0/lib/dx.jar
+      - cp $$SDK$$/build-tools/30.0.3/dx $$SDK$$/build-tools/32.0.0/dx
+    build:
+      - export ANDROID_SDK_ROOT=$$SDK$$
+      - mkdir libs/build build
+      - cd libs/build
+      - cmake .. -DCMAKE_TOOLCHAIN_FILE=../../cmake/android.toolchain.cmake -DCMAKE_BUILD_TYPE=release
+      - make
+      - cd ../../build
+      - cmake .. -DCMAKE_TOOLCHAIN_FILE=../cmake/android.toolchain.cmake -DCMAKE_BUILD_TYPE=MinSizeRel
+        -DCMAKE_PREFIX_PATH=$(realpath ../libs/build/dist) -DANDROID_VERSION_CODE=$$VERCODE$$
+        -DVENDOR=F-Droid -DVENDOR_DOMAIN=f-droid.org
+      - make
+      - make install
+      - make apk
+    ndk: r21e
+
 AutoUpdateMode: Version %v
 UpdateCheckMode: HTTP
 UpdateCheckData: https://appl.governikus-asp.de/ausweisapp2/apk/AusweisApp2-armeabi-v7a.apk.dump|versionCode='(\d+)'|.|versionName='([\d.]+)'
-CurrentVersion: 1.22.6
-CurrentVersionCode: 96
+CurrentVersion: 1.24.0
+CurrentVersionCode: 98
