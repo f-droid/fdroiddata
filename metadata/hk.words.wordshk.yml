@@ -1,0 +1,53 @@
+AntiFeatures:
+  - NonFreeAssets
+Categories:
+  - Science & Education
+License: MIT
+AuthorName: Xiang (Kevin) Li
+WebSite: https://words.hk
+SourceCode: https://github.com/AlienKevin/wordshk_app
+IssueTracker: https://github.com/AlienKevin/wordshk_app/issues
+Changelog: https://github.com/AlienKevin/wordshk_app/releases
+
+AutoName: words.hk
+
+RepoType: git
+Repo: https://github.com/AlienKevin/wordshk_app
+
+Builds:
+  - versionName: 2.1.1
+    versionCode: 4
+    commit: 9643dca3958ed187afac6edeed5722df71453ff9
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y openjdk-11-jdk-headless
+      - update-alternatives --auto java
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@3.0.5
+      - rustup@1.25.1
+    rm:
+      - ios
+      - test
+    scandelete:
+      - android/app/src/main/jniLibs
+    build:
+      - pushd rust
+      - $$rustup$$/rustup-init.sh -y
+      - source $HOME/.cargo/env
+      - rustup install 1.63.0
+      - cargo install cargo-ndk --version 2.11.0
+      - rustup target add aarch64-linux-android
+      - cargo ndk -o ../android/app/src/main/jniLibs --target aarch64-linux-android
+        build --release
+      - popd
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter packages pub get
+      - $$flutter$$/bin/flutter build apk --release --target-platform android-arm64
+    ndk: r25
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 2.1.1
+CurrentVersionCode: 4
