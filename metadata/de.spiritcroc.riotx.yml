@@ -1080,10 +1080,66 @@ Builds:
       - cp -r node_modules/jsc-android/dist/org/webkit/android-jsc "$HOME/.m2/repository/org/webkit"
     ndk: r21d
 
+  - versionName: 1.4.32.sc57
+    versionCode: 40100900
+    commit: 2a8ef64861fb863a91ccb9309be74fdf96fa5a82
+    subdir: vector
+    sudo:
+      - cd /opt/android-sdk/ndk
+      - rm -fr $(ls | sed 's/21.3.6528147//')
+      - curl -Lo node.tar.xz https://nodejs.org/dist/v16.14.2/node-v16.14.2-linux-x64.tar.xz
+      - echo "e40c6f81bfd078976d85296b5e657be19e06862497741ad82902d0704b34bb1b node.tar.xz"
+        | sha256sum -c -
+      - tar xJf node.tar.xz --strip-components=1 -C /usr/local/
+      - apt-get update || apt-get update
+      - apt-get install -y -t stretch-backports jq openjdk-11-jdk-headless openjdk-11-jre-headless
+        libopus0
+      - update-alternatives --auto java
+      - sysctl fs.inotify.max_user_watches=524288 || true
+    patch:
+      - build_gradle_remove_jitsi_repo_40104160.patch
+    gradle:
+      - fdroid
+    srclibs:
+      - jitsi-meet@android-sdk-5.0.2
+      - maplibre-gl-native@android-v9.5.2
+    prebuild:
+      - sed -i -e '/applicationIdSuffix/d' -e '/^repositories {/a mavenLocal()' build.gradle
+      - sed -i -e 's/org.maplibre.gl/org.fdroid/' build.gradle $$maplibre-gl-native$$/platform/android/gradle/artifact-settings.gradle
+      - pushd $$maplibre-gl-native$$/platform/android/MapboxGLAndroidSDK
+      - sed -i -e '/signing {/,/}/d' -e '/signing/d' ../gradle/gradle-publish.gradle
+      - sed -i -e '/gmsLocation/d' build.gradle
+      - cd src/main/java/com/mapbox/mapboxsdk/location/engine
+      - sed -i -e '/isOnClasspath(GOOGLE_API_AVAILABILITY)/,/}/d' -e '/import.*gms/d'
+        -e 's|return isGoogle|return //isGoogle|' LocationEngineProvider.java
+      - rm GoogleLocationEngineImpl.java
+      - sed -i -e '/private.*extractGooglePlayResult/,/^  }/d' -e '/extractGooglePlayResult/d'
+        -e '/import.*gms/d' LocationEngineResult.java
+      - popd
+      - sed -i -e '/com.google.gms.google-services/d' build.gradle ../build.gradle
+      - sed -i -e 's/enable true/enable false/g' build.gradle
+      - sed -i -e '/repositories {/a\        mavenLocal()' ../build.gradle
+      - sed -i -e '/gplayImplementation(.*) {/,/}/d; /gplayImplementation/d' build.gradle
+    build:
+      - pushd $$maplibre-gl-native$$/platform/android
+      - git submodule update --init --recursive
+      - BUILDTYPE=Release make apackage
+      - gradle -Pmapbox.abis=all -PVERSION_NAME=9.5.2 :MapboxGLAndroidSDK:publishToMavenLocal
+      - popd
+      - cd $$jitsi-meet$$
+      - export LIBRE_BUILD=true
+      - npm install --save false webpack-bundle-analyzer
+      - npm ci
+      - mkdir -p "$HOME/.m2"
+      - bash android/scripts/release-sdk.sh "$HOME/.m2/repository"
+      - mkdir -p "$HOME/.m2/repository/org/webkit"
+      - cp -r node_modules/jsc-android/dist/org/webkit/android-jsc "$HOME/.m2/repository/org/webkit"
+    ndk: r21d
+
 MaintainerNotes: AntiFeature NonFreeNet is added because each chat has a "Add Matrix
     apps" button which by default links to the proprietary scalar.vector.im service.
 
 AutoUpdateMode: Version sc_v%v
 UpdateCheckMode: Tags
-CurrentVersion: 1.4.31.sc56
-CurrentVersionCode: 40100890
+CurrentVersion: 1.4.32.sc57
+CurrentVersionCode: 40100900
