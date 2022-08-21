@@ -199,9 +199,9 @@ for the answer.
     ```
 - You can add a badge of your apps F-Droid version from [shields.io].
   
-    ![](https://img.shields.io/badge/f--droid-v1.0-blue.svg)
+    ![](https://img.shields.io/badge/f--droid-v1.0-blue.svg?logo=F-Droid)
     ```
-    https://img.shields.io/f-droid/v/APP.ID.svg
+    https://img.shields.io/f-droid/v/APP.ID.svg?logo=F-Droid
     ```
     You can also include a GitHub release badge to know if your version is
     up to date.
