@@ -53,6 +53,45 @@ Builds:
       - $$flutter$$/bin/flutter pub get
       - $$flutter$$/bin/flutter build apk --release
 
+  - versionName: 2.56.6
+    versionCode: 314
+    commit: 9416670d0b17c15bd50f4911f29c8cb4e6a9856d
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y openjdk-11-jdk-headless
+      - update-alternatives --auto java
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@2.10.5
+    rm:
+      - ios
+      - test
+      - android/app/libs
+      - android/app/proguard-rules.pro
+      - android/app/src/main/kotlin/com/chao/app/ddshare
+      - android/app/src/main/kotlin/com/chao/app/wxapi
+      - android/app/src/main/kotlin/com/chao/app/MyMessageReceiver.java
+      - android/app/src/main/kotlin/com/chao/app/Share.kt
+    prebuild:
+      - sed -i -E -e "/url/s|http[^'\"]*|https://jitpack.io|" -e '/ams/d' -e '/sinaweibosdk/d'
+        -e '/hms/d' -e '/umeng/d' -e '/tencent/d' -e '/libddshare/d' -e '/proguardFiles/d'
+        -e '/minifyEnabled/d' -e '/shrinkResources/d' -e '/signingConfig /d' android/build.gradle
+        android/app/build.gradle
+      - sed -i -e '/<queries>/,/<\/queries>/d' -e '/READ_PHONE_STATE/d' -e '/READ_PRIVILEGED_PHONE_STATE/d'
+        -e '/REQUEST_INSTALL_PACKAGES/d' android/app/src/main/AndroidManifest.xml
+      - sed -i -z -E -e 's/<meta-data[^>]+hms[^>]+\/>//g' -e 's/<meta-data[^>]+vivo.push[^>]+\/>//g'
+        -e 's/<activity[^>]+(ddshare|wxapi|tencent)[^>]+\/>//g' -e 's/<activity[^>]+com.tencent.tauth[^>]+\/>//g'
+        -e 's/<receiver[^>]+alibaba[^>]+\/>//g' -e 's/<(receiver|service)[^>]+taobao[^>]+\/>//g'
+        android/app/src/main/AndroidManifest.xml
+      - sed -i -e '/fun configureFlutterEngine/,/^    }/s/\s\{16\}.*//' -e '/fun onCreate/,/^    }/d'
+        -e '/fun onActivityResult/,/^    }/d' -e '/fun init/,/^    }/d' -e '/fun initCloudChannel/,/^    }/d'
+        -e '/alibaba/d' -e '/umeng/d' android/app/src/main/kotlin/com/chao/app/MainActivity.kt
+      - sed -i -e '/alibaba/d' -e '/umeng/d' android/app/src/main/kotlin/com/chao/app/ChaoFunApp.java
+    build:
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+      - $$flutter$$/bin/flutter build apk --release
+
 AutoUpdateMode: None
 UpdateCheckMode: HTTP
 UpdateCheckData: https://raw.githubusercontent.com/www-chao-fun/chaofun-app/master/pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
