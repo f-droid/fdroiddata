@@ -1596,6 +1596,33 @@ Builds:
         util/PrefsUtils.java
       - echo 'package com.newsblur.activity;class Premium:NbActivity() {}' > activity/Premium.kt
 
+  - versionName: '12.0'
+    versionCode: 204
+    commit: 8cb1af8acc3bb9bba1b9347f89eaa31aec7600a3
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y openjdk-11-jdk-headless
+      - update-alternatives --auto java
+    gradle:
+      - yes
+    rm:
+      - clients/android/NewsBlur/buildtools/*.jar
+      - clients/android/NewsBlur/src/com/newsblur/service/SubscriptionSyncService.kt
+      - clients/android/NewsBlur/src/com/newsblur/subscription
+    prebuild:
+      - mv clients/android/NewsBlur ..
+      - rm -r ./*
+      - mv ../NewsBlur/* .
+      - rm -r ../NewsBlur
+      - sed -i -e '/com.google.android.play/d' -e '/billingclient/d' build.gradle
+      - cd src/com/newsblur
+      - sed -i -e '/play.core/d' -e '/void checkInAppReview/,/^    }/d' -e '/checkInAppReview/d'
+        -e '/void onBackPressed/a super.onBackPressed();}' -e '/reviewInfo != null/,/^    }/d'
+        -e '/Review/d' activity/FeedItemsList.java
+      - sed -i -e '/SubscriptionSyncService/d' activity/InitActivity.kt activity/LoginProgress.kt
+        util/PrefsUtils.java
+      - echo 'package com.newsblur.activity;class Premium:NbActivity() {}' > activity/Premium.kt
+
 AutoUpdateMode: None
 UpdateCheckMode: RepoManifest
 CurrentVersion: '12.0'
