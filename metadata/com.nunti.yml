@@ -528,7 +528,6 @@ Builds:
 
   - versionName: v2.0.0
     versionCode: 11
-    disable: failed to build
     commit: 3fbc213a7e449617b14209a3c5491599050ca904
     subdir: Nunti/android/app
     sudo:
@@ -548,6 +547,8 @@ Builds:
     gradle:
       - yes
     output: build/outputs/apk/release/app-release-unsigned.apk
+    srclibs:
+      - transistor-background-fetch@1882065423f60d53dab80ef8e8ee2a5d5c7db9a1
     prebuild: echo -e "android { packagingOptions { pickFirst 'lib/**/*.so' } }" >>
         build.gradle
     scanignore:
@@ -568,6 +569,12 @@ Builds:
       - Nunti/node_modules/react-native-background-fetch/android/build.gradle
     scandelete:
       - Nunti/node_modules
+    build:
+      - pushd $$transistor-background-fetch$$/android/tsbackgroundfetch/
+      - gradle assembleRelease
+      - popd
+      - mv $$transistor-background-fetch$$/android/tsbackgroundfetch/build/intermediates/aar_main_jar/release/classes.jar
+        ../../node_modules/react-native-background-fetch/android/libs/com/transistorsoft/tsbackgroundfetch/0.5.5/tsbackgroundfetch-0.5.5.jar
     ndk: r23
 
 AutoUpdateMode: Version %v
