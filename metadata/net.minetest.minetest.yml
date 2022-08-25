@@ -10,6 +10,7 @@ Donate: https://www.minetest.net/development/#donate
 Liberapay: celeron55
 
 Name: Minetest
+AutoName: Minetest
 Description: |-
     Minetest is a near infinite world block sandbox game and a game engine, inspired
     by InfiniMiner, Minecraft and the like.
@@ -184,7 +185,37 @@ Builds:
       - make release
     ndk: r16b
 
+  - versionName: 5.6.0
+    versionCode: 40
+    commit: 5.6.0
+    subdir: android/app
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y gettext wget gcc-multilib openjdk-11-jdk-headless
+      - update-alternatives --auto java
+    patch:
+      - 5.6.0.patch
+    gradle:
+      - yes
+    srclibs:
+      - MinetestGame@5.6.0
+      - minetest_android_deps@de332f3c11a5ee7b731fd606b9a3c577b13093c7
+    prebuild:
+      - sed -i -e 's/enable true/enable false/' build.gradle ../native/build.gradle
+      - sed -i -e '/preBuild.dependsOn getDeps/d' ../native/build.gradle
+      - cp -R $$MinetestGame$$ ../../games/minetest_game
+    build:
+      - pushd $$minetest_android_deps$$
+      - ./build.sh --all armeabi-v7a
+      - ./build.sh --all arm64-v8a
+      - ./build.sh --all x86
+      - ./build.sh --all x86_64
+      - popd
+      - mv $$minetest_android_deps$$/deps ../native
+    ndk: r23c
+
 AutoUpdateMode: None
-UpdateCheckMode: None
-CurrentVersion: 5.2.0.26
-CurrentVersionCode: 26
+UpdateCheckMode: Tags
+UpdateCheckData: android/build.gradle|"versionCode", (\d+)||(.*)
+CurrentVersion: 5.6.0
+CurrentVersionCode: 40
