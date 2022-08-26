@@ -40,7 +40,31 @@ Builds:
       - mv $$ffmpeg-android-maker$$/output/lib src/main/cpp/ffmpeg/libs
     ndk: r23b
 
+  - versionName: 1.9.2
+    versionCode: 18
+    commit: 78d2ffdb00d997863afe43f952e86049ceae940e
+    subdir: app
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y openjdk-11-jdk-headless
+      - update-alternatives --auto java
+    gradle:
+      - yes
+    srclibs:
+      - ffmpeg-android-maker@v2.7
+    rm:
+      - app/src/main/cpp/ffmpeg/libs
+    prebuild:
+      - JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 $$SDK$$/tools/bin/sdkmanager 'cmake;3.10.2.4988404'
+        > /dev/null
+      - sed -i -e '/enable true/d'  build.gradle
+    build:
+      - ANDROID_SDK_HOME=$$SDK$$ $$ffmpeg-android-maker$$/ffmpeg-android-maker.sh
+        --source-tar=4.4.2
+      - mv $$ffmpeg-android-maker$$/output/lib src/main/cpp/ffmpeg/libs
+    ndk: r23b
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 1.9.1
-CurrentVersionCode: 17
+CurrentVersion: 1.9.2
+CurrentVersionCode: 18
