@@ -221,7 +221,7 @@ Builds:
     subdir: app
     sudo:
       - apt-get update || apt-get update
-      - apt-get install -y openjdk-11-jdk
+      - apt-get install -y openjdk-11-jdk-headless
       - update-alternatives --auto java
     gradle:
       - minimal
@@ -230,7 +230,10 @@ Builds:
     prebuild:
       - cp ../.github/mock-google-services.json google-services.json
       - sed -i -e '/-minimal/d' -e 's/System.getenv("VERSION")/"$$VERSION$$"/' -e
-        's/System.getenv("VERSION_CODE")/"$$VERCODE$$"/' build.gradle.kts
+        's/System.getenv("VERSION_CODE")/"$$VERCODE$$"/' -e '/firebaseAppDistribution
+        {/,/}/d' -e '/firebase/d' -e '/com.google.gms/d' -e '/<GoogleServicesPluginConfig>/,/}/d'
+        build.gradle.kts
+      - sed -i -e '/firebase/d' -e '/com.google.gms/d' ../build.gradle.kts
       - sed -i -e 's/, ":wear"//' ../settings.gradle.kts
 
 MaintainerNotes: |-

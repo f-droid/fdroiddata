@@ -8,7 +8,7 @@ IssueTracker: https://git.jami.net/savoirfairelinux/jami-client-android/issues
 Translation: https://www.transifex.com/savoirfairelinux/jami
 Changelog: https://git.jami.net/savoirfairelinux/jami-client-android/tree/master/ring-android/fastlane/metadata/android/en-US/changelogs
 
-AutoName: Ring
+AutoName: Jami
 Description: |-
     Jami (formerly Ring and SFLphone) is a free distributed multimedia communication
     software. It is developed by Savoir-faire Linux with the help of a global
@@ -1924,51 +1924,6 @@ Builds:
       - ./compile.sh --release --daemon
     ndk: r23c
 
-  - versionName: 20220707-01
-    versionCode: 336
-    disable: https://git.jami.net/savoirfairelinux/jami-client-android/-/issues/1110
-    commit: android/release_336
-    timeout: 10800
-    subdir: client-android/ring-android/app
-    submodules: true
-    sudo:
-      - apt-get update || apt-get update
-      - apt-get install -y openjdk-11-jdk-headless
-      - apt-get install -y -t stretch-backports-sloppy libarchive13
-      - apt-get install -y -t stretch-backports cmake g++
-      - update-alternatives --auto java
-      - pushd build/srclib/swig
-      - ./autogen.sh
-      - ./configure
-      - make -j`nproc`
-      - make install
-      - popd
-    gradle:
-      - noPush
-    srclibs:
-      - swig@v4.0.2
-    rm:
-      - client-ios
-      - client-macosx
-      - client-qt
-      - plugins
-      - docker
-      - docs
-      - guix
-      - packaging
-      - patches
-      - scripts
-    prebuild:
-      - JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 $$SDK$$/tools/bin/sdkmanager 'platforms;android-32'
-        'build-tools;32.0.0' > /dev/null
-      - sed -i -e '/ndkVersion/s/25.0.8528842/24.0.8215888/' build.gradle.kts
-    build:
-      - cd ../..
-      - export ANDROID_NDK_ROOT="$ANDROID_NDK"
-      - export ANDROID_ABI="armeabi-v7a arm64-v8a x86_64"
-      - ./compile.sh --release --daemon
-    ndk: r24
-
   - versionName: 20220825-01
     versionCode: 340
     commit: android/release_340
@@ -1981,12 +1936,6 @@ Builds:
       - apt-get install -y -t stretch-backports-sloppy libarchive13
       - apt-get install -y -t stretch-backports cmake g++
       - update-alternatives --auto java
-      - pushd build/srclib/swig
-      - ./autogen.sh
-      - ./configure
-      - make -j`nproc`
-      - make install
-      - popd
     gradle:
       - noPush
     srclibs:
@@ -2000,18 +1949,22 @@ Builds:
       - docs
       - guix
       - packaging
-      - patches
       - scripts
-    prebuild:
-      - JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 $$SDK$$/tools/bin/sdkmanager 'platforms;android-32'
-        'build-tools;32.0.0' > /dev/null
-      - sed -i -e '/ndkVersion/s/25.0.8528842/24.0.8215888/' build.gradle.kts
+    prebuild: JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 $$SDK$$/tools/bin/sdkmanager
+        'platforms;android-32' 'build-tools;32.0.0' > /dev/null
     build:
       - cd ../..
+      - pushd $$swig$$
+      - ./autogen.sh
+      - ./configure --prefix=$$swig$$
+      - make -j`nproc`
+      - make install
+      - popd
+      - export PATH=$$swig$$/bin:$PATH
       - export ANDROID_NDK_ROOT="$ANDROID_NDK"
       - export ANDROID_ABI="armeabi-v7a arm64-v8a x86_64"
       - ./compile.sh --release --daemon
-    ndk: r24
+    ndk: r25
 
 MaintainerNotes: |-
     Ring has a lot of native dependencies, the source tarballs of these are all downloaded and build for all enabled architectures.
@@ -2020,8 +1973,7 @@ MaintainerNotes: |-
     We DO build separately for arm64 because this is a fairly common architecture and improves performance over using the armv7 binaries.
     v103 introduces push notifications using gplay. Optional since 106 with noPush flavour.
 
-AutoUpdateMode: Version android/release_%c
-UpdateCheckMode: HTTP
-UpdateCheckData: https://git.jami.net/savoirfairelinux/jami-project/-/tags?format=atom|<title>android/release_(\d+)|https://git.jami.net/savoirfairelinux/jami-client-android/-/raw/master/ring-android/app/build.gradle.kts|versionName\s=\s"([\d-]+)"
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
 CurrentVersion: 20220825-01
 CurrentVersionCode: 340
