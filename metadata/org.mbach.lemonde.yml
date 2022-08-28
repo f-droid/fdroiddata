@@ -282,48 +282,40 @@ Builds:
 
   - versionName: 2.1.6
     versionCode: 29
-    disable: 'fails to build: Unexpected token vm.js:80:10'
     commit: 2.1.6
     subdir: android/app
     sudo:
-      - sysctl fs.inotify.max_user_watches=524288
-      - sysctl -p
-      - apt-get update || apt-get update
-      - apt-get install -y -t stretch-backports npm
-    init:
-      - sed -E -i 's/^.*(fabric|com\.(crashlytics|google\.(firebase|android.gms))).*$//g'
-        build.gradle
-      - sed -E -i 's/^.*fabric.*$//g' ../build.gradle
-      - sed -E -i 's/libreBuild =.*$/libreBuild = true/g' ../build.gradle
-      - sed -E -i 's/^.*fabric.*$//g' ../../package.json
-      - sed -E -i 's/vcode =.*$/vcode = $$VERCODE$$/g' build.gradle
-      - sed -i '/flow-bin/d' ../../package.json
-      - sed -E -i 's/^.*libflacjs.*$//g' ../../package.json
-      - export LIBRE_BUILD=true
-      - npm install
+      - sysctl fs.inotify.max_user_watches=524288 || true
+      - curl -Lo node.tar.xz https://nodejs.org/dist/v14.17.6/node-v14.17.6-linux-x64.tar.xz
+      - echo "3bbe4faf356738d88b45be222bf5e858330541ff16bd0d4cfad36540c331461b node.tar.xz"
+        | sha256sum -c -
+      - tar xJf node.tar.xz --strip-components=1 -C /usr/local/
+      - npm install -g yarn
     gradle:
       - yes
-    rm:
-      - node_modules/bplist-parser
-      - node_modules/jetifier/lib/*.jar
-      - node_modules/react-native/template
-      - node_modules/react-native/ReactAndroid/src/main/third-party/java/buck-android-support/buck-android-support.jar
+    prebuild:
+      - cd ../..
+      - yarn
+      - sed -i -e '/installreferrer/,+11d' node_modules/react-native-device-info/android/build.gradle
     scanignore:
       - android/build.gradle
       - node_modules/jsc-android
       - node_modules/hermes-engine
-      - node_modules/react-native-svg/android/build.gradle
       - node_modules/react-native/android
+      - node_modules/react-native-device-info/android/build.gradle
+      - node_modules/react-native-svg/android/build.gradle
       - node_modules/react-native-webview/android/build.gradle
-      - node_modules/@react-native-community/async-storage/android/build.gradle
       - node_modules/react-native-reanimated/android/build.gradle
-      - node_modules/@react-native-community/masked-view/android/build.gradle
       - node_modules/react-native-screens/android/build.gradle
       - node_modules/react-native-safe-area-context/android/build.gradle
       - node_modules/react-native-localize/android/build.gradle
       - node_modules/react-native-vector-icons/android/build.gradle
+      - node_modules/@react-native-async-storage/async-storage/android/build.gradle
+      - node_modules/@react-native-community/masked-view/android/build.gradle
+    scandelete:
+      - node_modules
 
-AutoUpdateMode: Version %v
+AutoUpdateMode: Version
 UpdateCheckMode: Tags
 CurrentVersion: 2.1.6
 CurrentVersionCode: 29
