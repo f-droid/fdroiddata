@@ -183,125 +183,46 @@ Builds:
       - cd platforms/android/app
       - gradle assembleRelease
 
-  - versionName: 1.5.4
-    versionCode: 177
-    disable: webpack fails
-    commit: 02406867803c6f1b73c0e3c11d65aec57bc18c44
-    sudo:
-      - sysctl fs.inotify.max_user_watches=524288
-      - curl -Lo node.tar.xz https://nodejs.org/dist/v14.17.6/node-v14.17.6-linux-x64.tar.xz
-      - echo "3bbe4faf356738d88b45be222bf5e858330541ff16bd0d4cfad36540c331461b node.tar.xz"
-        | sha256sum -c -
-      - tar xJf node.tar.xz --strip-components=1 -C /usr/local/
-      - npm install -g npm@latest
-      - npm install -g cordova yarn
-    output: platforms/android/app/build/outputs/apk/release/app-release-unsigned.apk
-    srclibs:
-      - ftp4j@86
-    rm:
-      - test
-    prebuild:
-      - mkdir -p platforms
-      - npm install
-      - node ./utils/config.js p paid
-      - ./node_modules/.bin/webpack --progress --mode production
-      - cordova platform add android
-      - node ./utils/loadStyles.js
-      - sed -i -e '/signingConfig signingConfigs.release/d' -e '/gms/d' -e '/core-google-shortcuts/d'
-        platforms/android/app/build.gradle
-    scandelete:
-      - src/plugins
-      - platforms/android
-      - plugins
-    build:
-      - pushd $$ftp4j$$/tags/1.7.2
-      - sed -i -e 's/else="rv\${revision}"/else="1.7.2"/' build.xml
-      - ant jar
-      - popd
-      - cp $$ftp4j$$/tags/1.7.2/ftp4j-1.7.2.jar platforms/android/app/libs/
-      - cd platforms/android/app
-      - gradle assembleRelease
-
-  - versionName: 1.5.4
-    versionCode: 180
-    disable: Task 'assembleRelease' not found in project ':app'.
-    commit: 714f092d67c1444bf863545bb0cc0ca6c16351e6
-    sudo:
-      - sysctl fs.inotify.max_user_watches=524288
-      - curl -Lo node.tar.xz https://nodejs.org/dist/v14.17.6/node-v14.17.6-linux-x64.tar.xz
-      - echo "3bbe4faf356738d88b45be222bf5e858330541ff16bd0d4cfad36540c331461b node.tar.xz"
-        | sha256sum -c -
-      - tar xJf node.tar.xz --strip-components=1 -C /usr/local/
-      - npm install -g npm@latest
-      - npm install -g cordova yarn
-    output: platforms/android/app/build/outputs/apk/release/app-release-unsigned.apk
-    srclibs:
-      - ftp4j@86
-    rm:
-      - test
-    prebuild:
-      - mkdir -p platforms
-      - npm install
-      - node ./utils/config.js p paid
-      - ./node_modules/.bin/webpack --progress --mode production
-      - cordova platform add android
-      - node ./utils/loadStyles.js
-      - sed -i -e '/signingConfig signingConfigs.release/d' -e '/gms/d' -e '/core-google-shortcuts/d'
-        platforms/android/app/build.gradle
-    scandelete:
-      - src/plugins
-      - platforms/android
-      - plugins
-    build:
-      - pushd $$ftp4j$$/tags/1.7.2
-      - sed -i -e 's/else="rv\${revision}"/else="1.7.2"/' build.xml
-      - ant jar
-      - popd
-      - cp $$ftp4j$$/tags/1.7.2/ftp4j-1.7.2.jar platforms/android/app/libs/
-      - cd platforms/android/app
-      - gradle assembleRelease
-
   - versionName: 1.6.0
-    versionCode: 186
-    disable: webpack fails
-    commit: 0b5dd6d3b723ac4f1d2a8f591af3541d603106b1
+    versionCode: 212
+    commit: 1b8950cac7b3e381cef2d1a0ffcb6dd47009db69
     sudo:
-      - sysctl fs.inotify.max_user_watches=524288
+      - sysctl fs.inotify.max_user_watches=524288 || true
       - curl -Lo node.tar.xz https://nodejs.org/dist/v14.17.6/node-v14.17.6-linux-x64.tar.xz
       - echo "3bbe4faf356738d88b45be222bf5e858330541ff16bd0d4cfad36540c331461b node.tar.xz"
         | sha256sum -c -
       - tar xJf node.tar.xz --strip-components=1 -C /usr/local/
       - npm install -g npm@latest
       - npm install -g cordova yarn
+      - apt-get update || apt-get update
+      - apt-get install -y openjdk-11-jdk-headless
+      - update-alternatives --auto java
     output: platforms/android/app/build/outputs/apk/release/app-release-unsigned.apk
-    srclibs:
-      - ftp4j@86
     rm:
       - test
+      - src/pages/donate
+      - src/plugins/iap
     prebuild:
-      - mkdir -p platforms
-      - npm install
-      - node ./utils/config.js p paid
-      - ./node_modules/.bin/webpack --progress --mode production
+      - sed -i -e 's/webserver/server/' package.json
+      - sed -i -e '/iap/d' package.json src/lib/main.js
+      - sed -i -e '/Donate/d' src/settings/mainSettings.js
+      - sed -i -e 's/acodefree/acode/' utils/config.js
+      - sed -i -e 's/build/prepare/' utils/scripts/build.sh
+      - sed -i -e '/core-google-shortcuts/d' src/plugins/system/plugin.xml
+      - rm -rf node_modules/cordova-android/framework/cordova-publish.gradle
+      - yarn setup
       - cordova platform add android
-      - node ./utils/loadStyles.js
-      - sed -i -e '/signingConfig signingConfigs.release/d' -e '/gms/d' -e '/core-google-shortcuts/d'
-        platforms/android/app/build.gradle
-    scandelete:
-      - src/plugins
-      - platforms/android
-      - plugins
-    build:
-      - pushd $$ftp4j$$/tags/1.7.2
-      - sed -i -e 's/else="rv\${revision}"/else="1.7.2"/' build.xml
-      - ant jar
-      - popd
-      - cp $$ftp4j$$/tags/1.7.2/ftp4j-1.7.2.jar platforms/android/app/libs/
-      - cd platforms/android/app
-      - gradle assembleRelease
+      - rm node_modules/cordova-android/framework/cordova-publish.gradle
+      - yarn build android free p
+      - JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 $$SDK$$/tools/bin/sdkmanager 'build-tools;31.0.0'
+        'build-tools;30.0.3' > /dev/null
+      - cp $$SDK$$/build-tools/30.0.3/lib/dx.jar $$SDK$$/build-tools/31.0.0/lib/dx.jar
+      - cp $$SDK$$/build-tools/30.0.3/dx $$SDK$$/build-tools/31.0.0/dx
+    build: JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64 cordova compile android --release
+        -- --packageType=apk
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: config.xml|android-versionCode="(\d+)"|.|version="([\d.]+)"
 CurrentVersion: 1.6.0
-CurrentVersionCode: 186
+CurrentVersionCode: 211
