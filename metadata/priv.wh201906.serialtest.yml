@@ -1,0 +1,63 @@
+Categories:
+  - Connectivity
+  - Development
+License: LGPL-3.0-only
+AuthorName: wh201906
+AuthorEmail: wh201906@yandex.com
+SourceCode: https://github.com/wh201906/SerialTest
+IssueTracker: https://github.com/wh201906/SerialTest/issues
+
+RepoType: git
+Repo: https://github.com/wh201906/SerialTest.git
+
+Builds:
+  - versionName: V0.2.1
+    versionCode: 21
+    commit: 5971a7ded018fa173250f3abdcc3e29013537fb0
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y build-essential wget
+    output: fdroid-build/android-build/build/outputs/apk/release/android-build-release-unsigned.apk
+    build:
+      - $ANDROID_HOME/tools/bin/sdkmanager "platforms;android-31"
+      - mkdir -pv build-qt
+      - cd build-qt
+      - wget -cq https://download.qt.io/official_releases/qt/5.15/5.15.5/single/qt-everywhere-opensource-src-5.15.5.tar.xz
+      - echo "5a97827bdf9fd515f43bc7651defaf64fecb7a55e051c79b8f80510d0e990f06 qt-everywhere-opensource-src-5.15.5.tar.xz"
+        | sha256sum -c -
+      - tar -xkf qt-everywhere-opensource-src-5.15.5.tar.xz
+      - mkdir qt5
+      - mkdir build
+      - cd build 
+      - ../qt-everywhere-src-5.15.5/configure -xplatform android-clang --disable-rpath
+        -no-warnings-are-errors -prefix $(pwd)/../qt5 -android-ndk $$NDK$$ -android-sdk
+        $$SDK$$ -opensource -confirm-license -release -nomake examples -nomake tests
+        -no-compile-examples -no-feature-testlib -skip qt3d -skip qtactiveqt -skip
+        qtcanvas3d -skip qtcharts -skip qtdatavis3d -skip qtdeclarative -skip qtdoc
+        -skip qtgamepad -skip qtgraphicaleffects -skip qtmacextras -skip qtmultimedia
+        -skip qtnetworkauth -skip qtpurchasing -skip qtquickcontrols -skip qtquickcontrols2
+        -skip qtremoteobjects -skip qtscxml -skip qtspeech -skip qtwayland -skip qtwebview
+        -skip qtwinextras -skip qtx11extras -skip qtwebengine -skip qtlocation -skip qtlottie 
+        -skip qtquick3d -skip qtquicktimeline -skip qtscript -skip qtsensors -skip qtserialbus 
+        -skip qttools -skip qtxmlpatterns -skip qtwebglplugin -skip qtwebchannel 
+        -skip qtvirtualkeyboard -skip qttranslations
+      - make -j$(nproc)
+      - make -j$(nproc) install
+      - cd ../../
+      - mkdir -pv fdroid-build
+      - cd fdroid-build
+      - wget -cq https://www.qcustomplot.com/release/2.1.0fixed/QCustomPlot-source.tar.gz
+      - echo "357b78be0f52b2d01c17ec3e2e1271255761810af7e8a9476cef51fccf1a0f44 QCustomPlot-source.tar.gz"
+        | sha256sum -c -
+      - tar -xvf QCustomPlot-source.tar.gz
+      - cp qcustomplot-source/qcustomplot.cpp ../src
+      - ../build-qt/qt5/bin/qmake ../src/
+      - make -j$(nproc) apk_install_target
+      - ../build-qt/qt5/bin/androiddeployqt --release --output android-build/ --input
+        android-SerialTest-deployment-settings.json
+    ndk: r21e
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: V0.2.1
+CurrentVersionCode: 21
