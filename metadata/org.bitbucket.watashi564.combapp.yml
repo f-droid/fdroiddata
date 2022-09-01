@@ -1,0 +1,58 @@
+Categories:
+  - Money
+License: Apache-2.0
+AuthorName: Watashi Kokoto
+SourceCode: https://bitbucket.org/watashi564/combapp
+IssueTracker: https://bitbucket.org/watashi564/combapp/jira
+Changelog: https://bitbucket.org/watashi564/combapp/src/HEAD/CHANGELOG.md
+
+AutoName: Haircomb
+
+RepoType: git
+Repo: https://bitbucket.org/watashi564/combapp
+
+Builds:
+  - versionName: 0.0.1
+    versionCode: 1
+    commit: v0.0.1
+    subdir: app
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y openjdk-11-jdk-headless
+      - update-alternatives --auto java
+      - curl -Lo go.tar.gz https://go.dev/dl/go1.18.linux-amd64.tar.gz
+      - echo 'e85278e98f57cdb150fe8409e6e5df5343ecb13cebf03a5d5ff12bd55a80264f go.tar.gz'
+        | sha256sum -c -
+      - tar xzf go.tar.gz --strip-components=1 -C /usr/local/
+    gradle:
+      - yes
+    srclibs:
+      - CombDownloader@0.0.10
+      - CombFullUI@5b9e42f51faf9f07a97e46a64459f7f4364bbd9a
+    build:
+      - pushd $$CombDownloader$$
+      - go mod init localhost/combdownloader
+      - go get -u bitbucket.org/watashi564/accelerator/libfile@v0.0.4
+      - go get -u golang.org/x/net/proxy@latest
+      - go get -u github.com/btcsuite/btcd/chaincfg/chainhash@latest
+      - go get -u github.com/btcsuite/btcd/wire@latest
+      - GOARM=7 GOOS=linux GOARCH=arm64 go build -o combdownloader.arm64.bin -trimpath
+        -ldflags=-buildid=
+      - popd
+      - mv $$CombDownloader$$/combdownloader.arm64.bin src/main/res/raw/libdl_0_0_10_arm64.so
+      - pushd $$CombFullUI$$
+      - go mod init localhost/combfullui
+      - go get -u github.com/gorilla/mux@latest
+      - go get -u github.com/sipa/bech32/ref/go/src/bech32@latest
+      - go get -u github.com/syndtr/goleveldb/leveldb@latest
+      - go get -u github.com/syndtr/goleveldb/leveldb/opt@latest
+      - go get -u github.com/syndtr/goleveldb/leveldb/util@latest
+      - GOARM=7 GOOS=linux GOARCH=arm64 go build -o combfullui.arm64.bin -trimpath
+        -ldflags=-buildid=
+      - popd
+      - mv $$CombFullUI$$/combfullui.arm64.bin src/main/res/raw/libcore_0_3_4_arm64.so
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^v[\d.]+$
+CurrentVersion: 0.0.1
+CurrentVersionCode: 1
