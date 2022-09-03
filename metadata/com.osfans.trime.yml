@@ -231,7 +231,36 @@ Builds:
       - make install
     ndk: r24
 
+  - versionName: 3.2.8
+    versionCode: 20220901
+    commit: 33c348734acd842197ffb4c1701e18376abb7948
+    subdir: app
+    submodules: true
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get -y install g++ openjdk-11-jdk
+      - update-alternatives --auto java
+    gradle:
+      - yes
+    prebuild:
+      - JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 $$SDK$$/tools/bin/sdkmanager 'cmake;3.10.2.4988404'
+        > /dev/null
+      - sed -i -e '/set.CMAKE_MODULE_PATH/a\set(CMAKE_PREFIX_PATH "${CMAKE_CURRENT_SOURCE_DIR}/capnproto/c++")'
+        src/main/jni/CMakeLists.txt
+      - sed -i -e '/Enables building multiple APKs per ABI/,/enable true/d' build.gradle
+    scanignore:
+      - app/src/main/jni/capnproto/c++/src/capnp/testdata
+    scandelete:
+      - app/src/main/jni
+    build:
+      - cd src/main/jni/capnproto/c++
+      - autoreconf -i
+      - ./configure --prefix="$PWD"
+      - make -j$(nproc)
+      - make install
+    ndk: r24
+
 AutoUpdateMode: Version %v
 UpdateCheckMode: Tags
-CurrentVersion: 3.2.7
-CurrentVersionCode: 20220701
+CurrentVersion: 3.2.8
+CurrentVersionCode: 20220901
