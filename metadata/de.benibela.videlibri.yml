@@ -84,6 +84,77 @@ Builds:
       - x86_64-linux-android-strip --strip-all android/libs/x86_64/liblclapp.so
     ndk: r21e
 
+  - versionName: '2.600'
+    versionCode: 2600
+    commit: VIDELIBRI_2.600
+    subdir: android/android
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y --no-install-recommends fpc openjdk-11-jdk-headless
+      - update-alternatives --auto java
+    gradle:
+      - yes
+    srclibs:
+      - fpc@fixes_3_2
+      - internettools@4c07aceda256b7d5cc35a2e2550489b4d7564daf
+      - pucu@ae5b4ddeb8f5e1831026b45f074dab05f9a71826
+      - flre@d70569ebba120dfec407cd469c0e8b7a6507598c
+      - rcmdline@618dbee077d2d1d3deb98d1a0612af968e55e77d
+    build:
+      - pushd $$fpc$$
+      - mkdir -p install
+      - pushd compiler
+      - make cycle
+      - make install INSTALL_PREFIX=$$fpc$$/install
+      - popd
+      - export PATH=$$NDK$$/toolchains/arm-linux-androideabi-4.9/prebuilt/linux-x86_64/bin:$PATH
+      - export PATH=$$NDK$$/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64/bin:$PATH
+      - export PATH=$$NDK$$/toolchains/x86-4.9/prebuilt/linux-x86_64/bin:$PATH
+      - export PATH=$$NDK$$/toolchains/x86_64-4.9/prebuilt/linux-x86_64/bin:$PATH
+      - echo $PATH > path.txt
+      - make crossinstall OS_TARGET=android CPU_TARGET=arm INSTALL_PREFIX=$(pwd)/install
+        PP=$$fpc$$/install/lib/fpc/3.0.0/ppcx64
+      - make crossinstall OS_TARGET=android CPU_TARGET=aarch64 INSTALL_PREFIX=$(pwd)/install
+        PP=$$fpc$$/install/lib/fpc/3.0.0/ppcx64
+      - make crossinstall OS_TARGET=android CPU_TARGET=i386 INSTALL_PREFIX=$(pwd)/install
+        PP=$$fpc$$/install/lib/fpc/3.0.0/ppcx64
+      - make crossinstall OS_TARGET=android CPU_TARGET=x86_64 INSTALL_PREFIX=$(pwd)/install
+        PP=$$fpc$$/install/lib/fpc/3.0.0/ppcx64
+      - popd
+      - sed -i -e '/PASDBL/d' $$internettools$$/internettoolsconfig.inc
+      - mkdir -p libs/armeabi/ libs/x86/ libs/arm64-v8a/ libs/x86_64/
+      - cd ..
+      - echo "'f-droid'" > ../videlibribuildid.inc
+      - $$fpc$$/install/lib/fpc/3.2.3/ppcrossarm -Parm -B -Tandroid -MObjFPC -Scghi
+        -O1 -Xs -XX -l -vewnhibq -dANDROID -Xd -gl -Fu.. -Fu$$fpc$$/install/lib/fpc/3.2.3/units/*
+        -Fu$$fpc$$/install/lib/fpc/3.2.3/units/arm-android/* -Fu$$internettools$$/data
+        -Fi$$internettools$$/data -Fu$$internettools$$/internet -Fu$$internettools$$/system
+        -Fu$$pucu$$/src -Fu$$flre$$/src -Fu$$rcmdline$$ -Fl$$NDK$$/platforms/android-28/arch-arm/usr/lib
+        -oandroid/libs/armeabi/liblclapp.so videlibriandroid.pas
+      - $$fpc$$/install/lib/fpc/3.2.3/ppcrossa64 -Paarch64 -B -Tandroid -MObjFPC -Scghi
+        -O1 -Xs -XX -l -vewnhibq -dANDROID -Xd -gl -Fu.. -Fu$$fpc$$/install/lib/fpc/3.2.3/units/*
+        -Fu$$fpc$$/install/lib/fpc/3.2.3/units/aarch64-android/* -Fu$$internettools$$/data
+        -Fi$$internettools$$/data -Fu$$internettools$$/internet -Fu$$internettools$$/system
+        -Fu$$pucu$$/src -Fu$$flre$$/src -Fu$$rcmdline$$ -Fl$$NDK$$/platforms/android-28/arch-arm64/usr/lib
+        -oandroid/libs/arm64-v8a/liblclapp.so videlibriandroid.pas
+      - $$fpc$$/install/lib/fpc/3.2.3/ppcross386 -Pi386 -B -Tandroid -MObjFPC -Scghi
+        -O1 -Xs -XX -l -vewnhibq -dANDROID -Xd -gl -Fu.. -Fu$$fpc$$/install/lib/fpc/3.2.3/units/*
+        -Fu$$fpc$$/install/lib/fpc/3.2.3/units/i386-android/* -Fu$$internettools$$/data
+        -Fi$$internettools$$/data -Fu$$internettools$$/internet -Fu$$internettools$$/system
+        -Fu$$pucu$$/src -Fu$$flre$$/src -Fu$$rcmdline$$ -Fl$$NDK$$/platforms/android-28/arch-x86/usr/lib
+        -oandroid/libs/x86/liblclapp.so videlibriandroid.pas
+      - $$fpc$$/install/lib/fpc/3.2.3/ppcrossx64 -Px86_64 -B -Tandroid -MObjFPC -Scghi
+        -O1 -Xs -XX -l -vewnhibq -dANDROID -Xd -gl -Fu.. -Fu$$fpc$$/install/lib/fpc/3.2.3/units/*
+        -Fu$$fpc$$/install/lib/fpc/3.2.3/units/x86_64-android/* -Fu$$internettools$$/data
+        -Fi$$internettools$$/data -Fu$$internettools$$/internet -Fu$$internettools$$/system
+        -Fu$$pucu$$/src -Fu$$flre$$/src -Fu$$rcmdline$$ -Fl$$NDK$$/platforms/android-28/arch-x86_64/usr/lib64
+        -oandroid/libs/x86_64/liblclapp.so videlibriandroid.pas
+      - arm-linux-androideabi-strip --strip-all android/libs/armeabi/liblclapp.so
+      - aarch64-linux-android-strip --strip-all android/libs/arm64-v8a/liblclapp.so
+      - i686-linux-android-strip --strip-all android/libs/x86/liblclapp.so
+      - x86_64-linux-android-strip --strip-all android/libs/x86_64/liblclapp.so
+    ndk: r19c
+
 MaintainerNotes: |-
     AutoUpdate is disabled, because srclibs need to be updated manually.
     To find out which commit to use, go to https://github.com/benibela/videlibri/actions
@@ -94,7 +165,9 @@ MaintainerNotes: |-
     ACRA is used but only via the Dialog option, so it is opt-in. See
     https://github.com/benibela/videlibri/issues/3#issuecomment-1198660908
 
+    Use NDK 19 to support Android 4 and 5.
+
 AutoUpdateMode: None
 UpdateCheckMode: Tags ^VIDELIBRI
-CurrentVersion: '2.592'
-CurrentVersionCode: 2592
+CurrentVersion: '2.600'
+CurrentVersionCode: 2600
