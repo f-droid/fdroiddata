@@ -79,7 +79,76 @@ Builds:
       - mv $$react-native-reanimated$$/build/outputs/aar/android-release.aar ../../node_modules/react-native-reanimated/android/react-native-reanimated-67-jsc.aar
     ndk: r23c
 
-AutoUpdateMode: None
+  - versionName: '27.191'
+    versionCode: 191
+    commit: e53c31e4c53f6500ae1758f48d981fbd6bec35b1
+    subdir: android/app
+    sudo:
+      - sysctl fs.inotify.max_user_watches=524288 || true
+      - curl -Lo node.tar.xz https://nodejs.org/dist/v16.16.0/node-v16.16.0-linux-x64.tar.xz
+      - echo "edcb6e9bb049ae365611aa209fc03c4bfc7e0295dbcc5b2f1e710ac70384a8ec node.tar.xz"
+        | sha256sum -c -
+      - tar xJf node.tar.xz --strip-components=1 -C /usr/local/
+      - npm -g install yarn
+      - apt-get update || apt-get update
+      - apt-get install -y openjdk-11-jdk-headless
+      - update-alternatives --auto java
+    gradle:
+      - yes
+    srclibs:
+      - react-native-reanimated@2.2.4
+    rm:
+      - android/app/src/main/java/com/zulipmobile/notifications/FcmListenerService.java
+      - ios
+    prebuild:
+      - sed -i -e 's/enable true/enable false/' -e '/firebase/d' -e "/android {/a
+        packagingOptions {pickFirst 'lib/*/*.so'}" build.gradle
+      - sed -i -e '/<service/,/service>/d' -e '/com.zulipmobile/a <uses-permission
+        android:name="com.google.android.finsky.permission.BIND_GET_INSTALL_REFERRER_SERVICE"
+        tools:node="remove" \/>' -e '/com.zulipmobile/a <uses-permission android:name="com.android.vending.CHECK_LICENSE"
+        tools:node="remove" \/>' src/main/AndroidManifest.xml
+      - sed -i -e '/firebase/d' -e '/FirebaseInstanceId/,/addOnFailureListener/d'
+        src/main/java/com/zulipmobile/notifications/NotificationsModule.java
+      - cd ../..
+      - yarn install
+      - sed -i -e '/installreferrer/,+11d' node_modules/react-native-device-info/android/build.gradle
+      - sed -i -e '/checkCompatibility/,/^    });/d' src/boot/CompatibilityChecker.js
+    scanignore:
+      - android/build.gradle
+      - node_modules/jsc-android
+      - node_modules/react-native/android
+      - node_modules/react-native/ReactAndroid/build.gradle
+      - node_modules/react-native-device-info/android/build.gradle
+      - node_modules/react-native-safe-area-context/android/build.gradle
+      - node_modules/react-native-screens/android/build.gradle
+      - node_modules/react-native-vector-icons/android/build.gradle
+      - node_modules/react-native-webview/android/build.gradle
+      - node_modules/expo/android/build.gradle
+      - node_modules/expo-application/android/build.gradle
+      - node_modules/expo-constants/android/build.gradle
+      - node_modules/expo-error-recovery/android/build.gradle
+      - node_modules/expo-file-system/android/build.gradle
+      - node_modules/expo-font/android/build.gradle
+      - node_modules/expo-keep-awake/android/build.gradle
+      - node_modules/expo-modules-core/android/build.gradle
+      - node_modules/expo-screen-orientation/android/build.gradle
+      - node_modules/expo-sqlite/android/build.gradle
+      - node_modules/expo-web-browser/android/build.gradle
+      - node_modules/@react-native-async-storage/async-storage/android/build.gradle
+      - node_modules/@react-native-community/masked-view/android/build.gradle
+      - node_modules/@react-native-community/netinfo/android/build.gradle
+      - node_modules/@react-native-community/push-notification-ios/android/build.gradle
+    scandelete:
+      - node_modules
+    build:
+      - pushd $$react-native-reanimated$$
+      - yarn add react-native@0.67.4
+      - gradle :assembleRelease
+      - popd
+      - mv $$react-native-reanimated$$/build/outputs/aar/android-release.aar ../../node_modules/react-native-reanimated/android/react-native-reanimated-67-jsc.aar
+    ndk: r23c
+
+AutoUpdateMode: Version
 UpdateCheckMode: Tags
 CurrentVersion: '27.191'
 CurrentVersionCode: 191
