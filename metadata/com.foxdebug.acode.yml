@@ -221,8 +221,46 @@ Builds:
     build: JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64 cordova compile android --release
         -- --packageType=apk
 
+  - versionName: 1.6.0
+    versionCode: 231
+    commit: 5525e1c4a32869cc1cfb8737558b346a8210a57f
+    sudo:
+      - sysctl fs.inotify.max_user_watches=524288 || true
+      - curl -Lo node.tar.xz https://nodejs.org/dist/v14.17.6/node-v14.17.6-linux-x64.tar.xz
+      - echo "3bbe4faf356738d88b45be222bf5e858330541ff16bd0d4cfad36540c331461b node.tar.xz"
+        | sha256sum -c -
+      - tar xJf node.tar.xz --strip-components=1 -C /usr/local/
+      - npm install -g npm@latest
+      - npm install -g cordova yarn
+      - apt-get update || apt-get update
+      - apt-get install -y openjdk-11-jdk-headless
+      - update-alternatives --auto java
+    output: platforms/android/app/build/outputs/apk/release/app-release-unsigned.apk
+    rm:
+      - test
+      - src/pages/donate
+      - src/plugins/iap
+    prebuild:
+      - sed -i -e 's/webserver/server/' package.json
+      - sed -i -e '/iap/d' package.json src/lib/main.js
+      - sed -i -e '/Donate/d' src/settings/mainSettings.js
+      - sed -i -e 's/acodefree/acode/' utils/config.js
+      - sed -i -e 's/build/prepare/' utils/scripts/build.sh
+      - sed -i -e '/core-google-shortcuts/d' src/plugins/system/plugin.xml
+      - rm -rf node_modules/cordova-android/framework/cordova-publish.gradle
+      - yarn setup
+      - cordova platform add android
+      - rm node_modules/cordova-android/framework/cordova-publish.gradle
+      - yarn build android free p
+      - JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 $$SDK$$/tools/bin/sdkmanager 'build-tools;31.0.0'
+        'build-tools;30.0.3' > /dev/null
+      - cp $$SDK$$/build-tools/30.0.3/lib/dx.jar $$SDK$$/build-tools/31.0.0/lib/dx.jar
+      - cp $$SDK$$/build-tools/30.0.3/dx $$SDK$$/build-tools/31.0.0/dx
+    build: JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64 cordova compile android --release
+        -- --packageType=apk
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: config.xml|android-versionCode="(\d+)"|.|version="([\d.]+)"
 CurrentVersion: 1.6.0
-CurrentVersionCode: 211
+CurrentVersionCode: 231
