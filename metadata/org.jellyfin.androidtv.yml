@@ -18,10 +18,9 @@ Repo: https://github.com/jellyfin/jellyfin-androidtv
 Binaries: https://repo.jellyfin.org/releases/client/androidtv/versions/v%v/jellyfin-androidtv-v%v-release.apk
 
 Builds:
-  - versionName: 0.14.0
-    versionCode: 140099
-    disable: https://github.com/jellyfin/jellyfin-androidtv/issues/1639
-    commit: v0.14.0
+  - versionName: 0.14.3
+    versionCode: 140399
+    commit: v0.14.3
     subdir: app
     sudo:
       - apt-get update || apt-get update
@@ -29,11 +28,12 @@ Builds:
       - update-alternatives --auto java
     gradle:
       - yes
-    output: build/outputs/apk/release/jellyfin-androidtv-*-release-unsigned.apk
-    prebuild: echo 'rootProject.name="jellyfin-androidtv"' >> ../settings.gradle.kts
-    build: echo 'jellyfin.version=$$VERSION$$' >> ../gradle.properties
+    prebuild:
+      - sed -i -e 's/s01.oss.sonatype.org.*"/maven.google.com"/' ../settings.gradle.kts
+      - echo 'rootProject.name="jellyfin-androidtv"' >> ../settings.gradle.kts
+      - echo 'jellyfin.version=$$VERSION$$' >> ../gradle.properties
 
-AutoUpdateMode: None
+AutoUpdateMode: Version v%v
 UpdateCheckMode: HTTP
 UpdateCheckIgnore: (beta|rc)
 UpdateCheckData: https://repo.jellyfin.org/releases/client/androidtv/version.txt|^v.*?=(\d+)|.|^v(.*?)=\d+
