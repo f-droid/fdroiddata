@@ -2877,11 +2877,42 @@ Builds:
       - popd
     ndk: r21e
 
+  - versionName: 8.9.2a
+    versionCode: 27579
+    commit: v8.9.2a
+    subdir: TMessagesProj_App
+    submodules: true
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y openjdk-11-jdk-headless ninja-build golang-go yasm
+      - apt-get install -y -t stretch-backports-sloppy libarchive13
+      - apt-get install -y -t stretch-backports cmake libuv1
+      - update-alternatives --auto java
+    gradle:
+      - afat
+    rm:
+      - TMessagesProj/jni/ffmpeg/tests/ref/fate/sub-microdvd-remux
+    prebuild: echo -e 'APP_ID = 12834\nAPP_HASH = c84d9229db1d6be95c067b02b126352c'
+        > API_KEYS
+    scandelete:
+      - TMessagesProj/jni
+    build:
+      - export NDK=$$NDK$$
+      - export NINJA_PATH=/usr/bin/ninja
+      - pushd ../TMessagesProj/jni
+      - ./build_libvpx_clang.sh
+      - ./build_ffmpeg_clang.sh
+      - ./patch_ffmpeg.sh
+      - ./patch_boringssl.sh
+      - ./build_boringssl.sh
+      - popd
+    ndk: r21e
+
 MaintainerNotes: Update check mode not working because of version code calculations
     for different flavours.
 
 ArchivePolicy: 6 versions
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: 8.9.2
-CurrentVersionCode: 27569
+CurrentVersion: 8.9.2a
+CurrentVersionCode: 27579
