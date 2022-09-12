@@ -1,0 +1,55 @@
+AntiFeatures:
+  - NonFreeAssets
+Categories:
+  - Games
+License: GPL-3.0-or-later
+AuthorName: Lichess
+WebSite: https://lichess.org
+SourceCode: https://github.com/lichess-org/lichobile/
+IssueTracker: https://github.com/lichess-org/lichobile/issues
+Translation: https://crowdin.com/project/lichess
+Changelog: https://github.com/lichess-org/lichobile/releases
+Donate: https://lichess.org/patron
+
+AutoName: lichess
+
+RepoType: git
+Repo: https://github.com/lichess-org/lichobile
+
+Builds:
+  - versionName: 7.16.0
+    versionCode: 7016000
+    commit: 242c95b9abc8392f3b71c269be40b0cfe556d62a
+    subdir: android/app
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y g++ openjdk-11-jdk-headless
+      - update-alternatives --auto java
+      - curl -Lo node.tar.xz https://nodejs.org/dist/v16.17.0/node-v16.17.0-linux-x64.tar.xz
+      - echo "f0867d7a17a4d0df7dbb7df9ac3f9126c2b58f75450647146749ef296b31b49b node.tar.xz"
+        | sha256sum -c -
+      - tar xJf node.tar.xz --strip-components=1 -C /usr/local/
+    init:
+      - pushd ../..
+      - npm install
+      - PATCH_NONFREE_FORCE=1 npm run patch-nonfree
+      - touch www/index.html
+      - npx cap update android
+      - npm run fetch-nnue
+      - sed 's/lichess\.dev/lichess.org/g' appconfig.dev.json > appconfig.prod.json
+    gradle:
+      - yes
+    rm:
+      - ios/
+      - node_modules/@capacitor/push-notifications/
+    scandelete:
+      - node_modules/
+    build:
+      - pushd ../..
+      - APP_MODE=release APP_CONFIG=prod npm run build
+
+AutoUpdateMode: Version v%v
+UpdateCheckMode: Tags
+UpdateCheckName: org.lichess.mobileapp
+CurrentVersion: 7.16.0
+CurrentVersionCode: 7016000
