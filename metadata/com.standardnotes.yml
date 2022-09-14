@@ -5941,10 +5941,75 @@ Builds:
       - popd
     ndk: r21e
 
+  - versionName: 3.33.2
+    versionCode: 3000457
+    commit: '@standardnotes/mobile@3.33.2'
+    subdir: packages/mobile/android/app
+    sudo:
+      - sysctl fs.inotify.max_user_watches=524288 || true
+      - curl -Lo /tmp/node.tar.xz https://nodejs.org/dist/v16.15.1/node-v16.15.1-linux-x64.tar.xz
+      - echo "b749f7a76e56dfd6dfb8a910b8a2a871159661557680aa95acf13c9514422c12 /tmp/node.tar.xz"
+        | sha256sum -c -
+      - tar xJf /tmp/node.tar.xz --strip-components=1 -C /usr/local/
+      - npm -g install yarn
+      - apt-get update
+      - apt-get install -y openjdk-11-jdk-headless --no-install-recommends
+      - update-alternatives --auto java
+      - apt-get install -y libsecret-1-dev build-essential --no-install-recommends
+      - pushd build/srclib/cpython
+      - ./configure
+      - make -j$(nproc)
+      - make install
+      - popd
+    init:
+      - pushd ../../../..
+      - npm_config_build_from_source=true yarn --immutable
+      - popd
+      - pushd ../..
+      - npm_config_build_from_source=true yarn --immutable
+      - yarn remove react-native-store-review
+      - popd
+    patch:
+      - disable-splits-abi.patch
+      - remove-gms.patch
+    gradle:
+      - prod
+    srclibs:
+      - cpython@v3.10.5
+    rm:
+      - packages/desktop
+    prebuild: sed -i -e '/detox/Id' -e 's/versionName appVersionName/versionName "$$VERSION$$"/'
+        -e 's/versionCode appVersionCode/versionCode $$VERCODE$$/' build.gradle
+    scanignore:
+      - packages/mobile/android/build.gradle
+      - packages/mobile/node_modules/hermes-engine
+      - packages/mobile/node_modules/jsc-android
+      - packages/mobile/node_modules/react-native
+      - packages/mobile/node_modules/detox/android/build.gradle
+      - packages/mobile/node_modules/detox/android/detox/publishing.gradle
+      - packages/mobile/node_modules/@react-native-community/async-storage/android/build.gradle
+      - packages/mobile/node_modules/@react-native-community/masked-view/android/build.gradle
+      - packages/mobile/node_modules/@standardnotes/react-native-utils/android/build.gradle
+      - packages/mobile/node_modules/@standardnotes/react-native-textview/android/build.gradle
+      - packages/mobile/node_modules/@standardnotes/react-native-aes/android/build.gradle
+    scandelete:
+      - node_modules/
+      - packages/mobile/node_modules
+      - packages/components/dist
+      - .yarn/
+    build:
+      - pushd ../../../..
+      - yarn run build:mobile
+      - popd
+      - pushd ../..
+      - yarn run android:bundle
+      - popd
+    ndk: r21e
+
 ArchivePolicy: 4 versions
 AutoUpdateMode: Version @standardnotes/mobile@%v
 UpdateCheckMode: HTTP
 VercodeOperation: 3000310 + %c
 UpdateCheckData: https://github.com/standardnotes/app/actions/workflows/mobile.release.prod.yml|(\d+)\sworkflow\sruns|https://github.com/standardnotes/app/releases|/releases/tag/%40standardnotes%2Fmobile%40([\d.]+)
-CurrentVersion: 3.32.5
-CurrentVersionCode: 3000454
+CurrentVersion: 3.33.2
+CurrentVersionCode: 3000457
