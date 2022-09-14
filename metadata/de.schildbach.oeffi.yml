@@ -572,7 +572,33 @@ Builds:
     gradle:
       - aosp
 
+  - versionName: 12.1.3-aosp
+    versionCode: 120103
+    commit: v12.1.3
+    subdir: oeffi
+    submodules: true
+    sudo:
+      - ln -fs /usr/share/zoneinfo/CET /etc/localtime
+      - dpkg-reconfigure -f noninteractive tzdata
+      - apt-get update || apt-get update
+      - apt-get install -y openjdk-11-jdk-headless
+      - echo "deb http://deb.debian.org/debian bullseye main" > /etc/apt/sources.list.d/bullseye.list
+      - apt-get update || apt-get update
+      - apt-get install -y gradle/bullseye
+      - update-alternatives --auto java
+    init:
+      - rm /home/vagrant/fdroidserver/gradlew-fdroid
+      - ln -s /usr/bin/gradle /home/vagrant/fdroidserver/gradlew-fdroid
+      - cd ../..
+      - mv de.schildbach.oeffi de.schildbach.oeffi_underlying
+      - mkdir de.schildbach.oeffi
+      - disorderfs --sort-dirents=yes --reverse-dirents=no de.schildbach.oeffi_underlying
+        de.schildbach.oeffi
+      - cd de.schildbach.oeffi/oeffi
+    gradle:
+      - aosp
+
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: 12.1-aosp
-CurrentVersionCode: 120100
+CurrentVersion: 12.1.3-aosp
+CurrentVersionCode: 120103
