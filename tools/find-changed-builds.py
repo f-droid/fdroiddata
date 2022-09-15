@@ -14,11 +14,10 @@ target_ref = os.getenv('TARGET_REF')
 source_ref = os.getenv('SOURCE_REF')
 
 for appid in sorted(changed):
-    metadata_file = 'metadata/' + appid +'.yml'
+    metadata_file = 'metadata/{appid}.yml'.format(**locals())
     diff = subprocess.check_output(
         (
-            'git diff --no-color --diff-filter=d ' + target_ref +
-            '...' + source_ref + ' -- ' + metadata_file
+            'git diff --no-color --diff-filter=d {target_ref}...{source_ref} -- {metadata_file}' .format(**locals())
         ).split(' ')
     )
 
@@ -83,8 +82,7 @@ for appid in sorted(changed):
     signatures_dir = 'metadata/%s/signatures/' % appid
     diff = subprocess.check_output(
         (
-            'git diff --no-color --diff-filter=d ' + target_ref +
-            '...' + source_ref + ' -- ' + signatures_dir
+            'git diff --name-only --no-color --diff-filter=d {target_ref}...{source_ref} -- {signatures_dir}'.format(**locals())
         ).split(' ')
     )
     for f in diff.split():
