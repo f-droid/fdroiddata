@@ -107,37 +107,6 @@ Builds:
       - ./link_to_mupdf_1.20.0.sh
     ndk: r23c
 
-  - versionName: 8.5.43-fdroid
-    versionCode: 4578
-    disable: https://gitlab.com/fdroid/fdroiddata/-/jobs/2826861210#L4837
-    commit: 17ee4a601ada554d3d9f4d0efa07609d07782925
-    subdir: app
-    sudo:
-      - apt-get update || apt-get update
-      - apt-get install -y g++ mesa-common-dev libxcursor-dev libxrandr-dev libxinerama-dev
-        libglu1-mesa-dev libxi-dev
-      - apt-get install -y openjdk-11-jdk-headless
-      - update-alternatives --auto java
-    gradle:
-      - fdroid
-    srclibs:
-      - MuPDF@1.20.2
-    rm:
-      - Builder/libs
-    prebuild:
-      - sed -i -e '/F-DROID REMOVE THIS LINE/,+1d' ../build.gradle
-      - sed -i -e '/^if.*Fdroid/,/^}/d' -e '/enable true/d' build.gradle
-      - sed -i -e '/^#!/a\set -e' -e 's|git clone .*|cp -r $$MuPDF$$ mupdf-$VERSION_TAG|'
-        -e '/mkdir mupdf/d' -e 's/ndk-build $1/& -j`nproc` || exit 1/' ../Builder/link_to_mupdf_1.20.2.sh
-      - mkdir src/main/jniLibs/
-    scanignore:
-      - Builder/fonts/fonts.zip
-      - app/src/fdroid/assets/fonts.zip
-    build:
-      - pushd ../Builder/
-      - ./link_to_mupdf_1.20.2.sh
-    ndk: r23c
-
   - versionName: 8.5.45-fdroid
     versionCode: 4586
     commit: fd31752806feb35f4c16f7c374333914b12f3557
