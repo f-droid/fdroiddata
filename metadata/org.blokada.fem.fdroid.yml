@@ -462,10 +462,9 @@ Builds:
       - ./build.blocka.sh
     ndk: r24
 
-  - versionName: 6.2.0
-    versionCode: 602000000
-    disable: https://github.com/blokadaorg/blokada/issues/943
-    commit: 0debf947ff4c8d8b50dfb588f9cbdababd7d60fe
+  - versionName: 22.3.8
+    versionCode: 666022308
+    commit: 41f9ef1bc79660820cb408f8f6149af357cb6bab
     subdir: android5/app
     submodules: true
     sudo:
@@ -473,17 +472,20 @@ Builds:
       - apt-get install -y openjdk-11-jdk-headless
       - update-alternatives --auto java
     gradle:
-      - droid
+      - five
     srclibs:
-      - rustup@1.24.3
+      - rustup@1.25.1
     rm:
+      - ios
       - android5/app/src/engine/jniLibs
       - android5/app/src/libre/jniLibs
     prebuild:
       - unzip -P default_blocklist src/libre/assets/default_blocklist.zip default_blocklist
         -d src/libre/assets
       - rm src/libre/assets/default_blocklist.zip
-      - sed -i -e 's/24.0.7856742/24.0.8215888/' build.gradle
+      - sed -i -e 's/origin.alarm/fem.fdroid/' -e '/billingclient/d' build.gradle
+      - sed -e '/interface IPaymentService/,/^}/d' -e 's/PaymentServiceMock/BillingService/'
+        -e '/BlokadaException/d' src/main/java/service/IPaymentService.kt > src/main/java/service/BillingService.kt
     build:
       - $$rustup$$/rustup-init.sh -y
       - source $HOME/.cargo/env
@@ -501,7 +503,8 @@ Builds:
       - ./build.blocka.sh
     ndk: r24
 
-AutoUpdateMode: None
+AutoUpdateMode: Version
 UpdateCheckMode: Tags ^android-v[0-9.]+$
-CurrentVersion: 6.2.0
-CurrentVersionCode: 602000000
+UpdateCheckName: org.blokada.origin.alarm
+CurrentVersion: 22.3.8
+CurrentVersionCode: 666022308
