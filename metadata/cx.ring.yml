@@ -1926,7 +1926,6 @@ Builds:
 
   - versionName: 20220906-01
     versionCode: 343
-    disable: https://git.jami.net/savoirfairelinux/jami-client-android/-/issues/1114
     commit: e8c199719d334692563cfeb22975bfec680a3a91
     timeout: 10800
     subdir: client-android/ring-android/app
@@ -1951,8 +1950,10 @@ Builds:
       - guix
       - packaging
       - scripts
-    prebuild: JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 $$SDK$$/tools/bin/sdkmanager
-        'platforms;android-32' 'build-tools;32.0.0' > /dev/null
+    prebuild:
+      - JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 $$SDK$$/tools/bin/sdkmanager 'platforms;android-33'
+        'build-tools;33.0.0' > /dev/null
+      - sed -i -e '/isEnable = true/d' build.gradle.kts
     build:
       - cd ../..
       - pushd $$swig$$
@@ -1965,7 +1966,7 @@ Builds:
       - export ANDROID_NDK_ROOT="$ANDROID_NDK"
       - export ANDROID_ABI="armeabi-v7a arm64-v8a x86_64"
       - ./compile.sh --release --daemon
-    ndk: r25
+    ndk: r25b
 
 MaintainerNotes: |-
     Ring has a lot of native dependencies, the source tarballs of these are all downloaded and build for all enabled architectures.
@@ -1974,7 +1975,7 @@ MaintainerNotes: |-
     We DO build separately for arm64 because this is a fairly common architecture and improves performance over using the armv7 binaries.
     v103 introduces push notifications using gplay. Optional since 106 with noPush flavour.
 
-AutoUpdateMode: None
+AutoUpdateMode: Version
 UpdateCheckMode: Tags
 CurrentVersion: 20220906-01
 CurrentVersionCode: 343
