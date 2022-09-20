@@ -214,6 +214,34 @@ Builds:
       - mv $$minetest_android_deps$$/deps ../native
     ndk: r23c
 
+  - versionName: 5.6.1
+    versionCode: 42
+    commit: 5.6.1
+    subdir: android/app
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y gettext wget gcc-multilib openjdk-11-jdk-headless
+      - update-alternatives --auto java
+    gradle:
+      - yes
+    srclibs:
+      - MinetestGame@5.6.1
+      - minetest_android_deps@c0b96d6e03801706b802de4f21f9ebd4f941961b
+    prebuild:
+      - sed -i -e 's/enable true/enable false/' build.gradle ../native/build.gradle
+      - sed -i -e '/preBuild.dependsOn getDeps/d' ../native/build.gradle
+      - cp -R $$MinetestGame$$ ../../games/minetest_game
+      - sed -i -e '/versionPatch/s/0/1/' ../build.gradle
+    build:
+      - pushd $$minetest_android_deps$$
+      - ./build.sh --all armeabi-v7a
+      - ./build.sh --all arm64-v8a
+      - ./build.sh --all x86
+      - ./build.sh --all x86_64
+      - popd
+      - mv $$minetest_android_deps$$/deps ../native
+    ndk: r23c
+
 AutoUpdateMode: None
 UpdateCheckMode: Tags
 UpdateCheckData: android/build.gradle|"versionCode", (\d+)||(.*)
