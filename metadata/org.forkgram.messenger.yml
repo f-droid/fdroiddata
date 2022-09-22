@@ -357,7 +357,32 @@ Builds:
       - TMessagesProj/jni
     ndk: r21e
 
+  - versionName: 9.0.2.0
+    versionCode: 280809
+    commit: 9.0.2.0
+    timeout: 18000
+    subdir: TMessagesProj_AppFork
+    submodules: true
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y openjdk-11-jdk ninja-build golang-go
+      - update-alternatives --auto java
+    gradle:
+      - afat
+    rm:
+      - TMessagesProj_AppHuawei
+    prebuild:
+      - sed -i '6 s/"$(ANDROID_SDK)"/$ANDROID_SDK/g' ../TMessagesProj/jni/build_boringssl.sh
+      - sed -i 's/${cmakePath}cmake/$cmakePath/g' ../TMessagesProj/jni/build_boringssl.sh
+      - sed -i '9 s/.$//' ../TMessagesProj/jni/build_boringssl.sh
+      - sed -i 's/<application/<application android:label="@string\/AppNameBeta"/g'
+        ../TMessagesProj/src/main/AndroidManifest.xml
+      - ./prebuild_fdroid.sh 0 14577864 54d3ae230fd8f985ce9adccf08fbd9d6
+    scandelete:
+      - TMessagesProj/jni
+    ndk: r21e
+
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: 9.0.0.0
-CurrentVersionCode: 279909
+CurrentVersion: 9.0.2.0
+CurrentVersionCode: 280809
