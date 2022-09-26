@@ -1,0 +1,142 @@
+diff --git a/app/src/main/AndroidManifest.xml b/app/src/main/AndroidManifest.xml
+index bbb984425..e1493d495 100644
+--- a/app/src/main/AndroidManifest.xml
++++ b/app/src/main/AndroidManifest.xml
+@@ -38,7 +38,6 @@
+         android:label="@string/app_name"
+         android:theme="@style/AppTheme"
+         android:supportsRtl="true">
+-        <meta-data android:name="com.google.ar.core" android:value="optional" />
+         <activity
+             android:windowSoftInputMode="adjustResize"
+             android:name="de.westnordost.streetcomplete.screens.MainActivity"
+@@ -65,11 +64,6 @@
+                 <category android:name="android.intent.category.DEFAULT" />
+             </intent-filter>
+         </activity>
+-        <activity
+-            android:name="de.westnordost.streetcomplete.screens.measure.MeasureActivity"
+-            android:configChanges="orientation|screenSize"
+-            android:screenOrientation="portrait"
+-            tools:ignore="LockedOrientationActivity" />
+         <activity android:name="de.westnordost.streetcomplete.screens.FragmentContainerActivity" />
+         <activity android:name="de.westnordost.streetcomplete.screens.about.AboutActivity" />
+         <activity
+diff --git a/app/src/main/java/de/westnordost/streetcomplete/quests/max_height/AddMaxPhysicalHeightForm.kt b/app/src/main/java/de/westnordost/streetcomplete/quests/max_height/AddMaxPhysicalHeightForm.kt
+index a95191829..15dacf1eb 100644
+--- a/app/src/main/java/de/westnordost/streetcomplete/quests/max_height/AddMaxPhysicalHeightForm.kt
++++ b/app/src/main/java/de/westnordost/streetcomplete/quests/max_height/AddMaxPhysicalHeightForm.kt
+@@ -8,7 +8,6 @@ import de.westnordost.streetcomplete.R
+ import de.westnordost.streetcomplete.databinding.QuestLengthBinding
+ import de.westnordost.streetcomplete.quests.AbstractOsmQuestForm
+ import de.westnordost.streetcomplete.screens.measure.ArSupportChecker
+-import de.westnordost.streetcomplete.screens.measure.TakeMeasurementLauncher
+ import de.westnordost.streetcomplete.view.controller.LengthInputViewController
+ import kotlinx.coroutines.launch
+ import org.koin.android.ext.android.inject
+@@ -17,7 +16,6 @@ class AddMaxPhysicalHeightForm : AbstractOsmQuestForm<MaxPhysicalHeightAnswer>()
+ 
+     override val contentLayoutResId = R.layout.quest_length
+     private val binding by contentViewBinding(QuestLengthBinding::bind)
+-    private val takeMeasurement = TakeMeasurementLauncher(this)
+     private val checkArSupport: ArSupportChecker by inject()
+     private var isARMeasurement: Boolean = false
+     private lateinit var lengthInput: LengthInputViewController
+@@ -43,14 +41,6 @@ class AddMaxPhysicalHeightForm : AbstractOsmQuestForm<MaxPhysicalHeightAnswer>()
+             checkIsFormComplete()
+         }
+         binding.measureButton.isGone = !checkArSupport()
+-        binding.measureButton.setOnClickListener { lifecycleScope.launch { takeMeasurement() } }
+-    }
+-
+-    private suspend fun takeMeasurement() {
+-        val lengthUnit = lengthInput.unit ?: return
+-        val length = takeMeasurement(requireContext(), lengthUnit, true) ?: return
+-        lengthInput.length = length
+-        isARMeasurement = true
+     }
+ 
+     override fun isFormComplete(): Boolean = lengthInput.length != null
+diff --git a/app/src/main/java/de/westnordost/streetcomplete/quests/width/AddWidthForm.kt b/app/src/main/java/de/westnordost/streetcomplete/quests/width/AddWidthForm.kt
+index f13b195f3..3f307cb70 100644
+--- a/app/src/main/java/de/westnordost/streetcomplete/quests/width/AddWidthForm.kt
++++ b/app/src/main/java/de/westnordost/streetcomplete/quests/width/AddWidthForm.kt
+@@ -9,7 +9,6 @@ import de.westnordost.streetcomplete.databinding.QuestLengthBinding
+ import de.westnordost.streetcomplete.osm.ALL_ROADS
+ import de.westnordost.streetcomplete.quests.AbstractOsmQuestForm
+ import de.westnordost.streetcomplete.screens.measure.ArSupportChecker
+-import de.westnordost.streetcomplete.screens.measure.TakeMeasurementLauncher
+ import de.westnordost.streetcomplete.view.controller.LengthInputViewController
+ import kotlinx.coroutines.launch
+ import org.koin.android.ext.android.inject
+@@ -18,7 +17,6 @@ class AddWidthForm : AbstractOsmQuestForm<WidthAnswer>() {
+ 
+     override val contentLayoutResId = R.layout.quest_length
+     private val binding by contentViewBinding(QuestLengthBinding::bind)
+-    private val takeMeasurement = TakeMeasurementLauncher(this)
+     private val checkArSupport: ArSupportChecker by inject()
+     private var isARMeasurement: Boolean = false
+     private lateinit var lengthInput: LengthInputViewController
+@@ -49,14 +47,6 @@ class AddWidthForm : AbstractOsmQuestForm<WidthAnswer>() {
+             checkIsFormComplete()
+         }
+         binding.measureButton.isGone = !checkArSupport()
+-        binding.measureButton.setOnClickListener { lifecycleScope.launch { takeMeasurement() } }
+-    }
+-
+-    private suspend fun takeMeasurement() {
+-        val lengthUnit = lengthInput.unit ?: return
+-        val length = takeMeasurement(requireContext(), lengthUnit, false) ?: return
+-        lengthInput.length = length
+-        isARMeasurement = true
+     }
+ 
+     override fun onClickOk() {
+diff --git a/app/src/main/java/de/westnordost/streetcomplete/screens/measure/ArSupportChecker.kt b/app/src/main/java/de/westnordost/streetcomplete/screens/measure/ArSupportChecker.kt
+index 270d06763..07f4b61bd 100644
+--- a/app/src/main/java/de/westnordost/streetcomplete/screens/measure/ArSupportChecker.kt
++++ b/app/src/main/java/de/westnordost/streetcomplete/screens/measure/ArSupportChecker.kt
+@@ -4,13 +4,7 @@ import android.app.ActivityManager
+ import android.content.Context
+ import android.os.Build
+ import androidx.core.content.getSystemService
+-import com.google.ar.core.ArCoreApk
+ 
+ class ArSupportChecker(private val context: Context) {
+-    operator fun invoke(): Boolean =
+-        // extra requirements for Sceneform: min Android SDK and OpenGL ES 3.1
+-        Build.VERSION.SDK_INT >= Build.VERSION_CODES.N
+-        && context.getSystemService<ActivityManager>()!!.deviceConfigurationInfo.glEsVersion.toDouble() >= 3.1
+-        // otherwise, ask ArCore
+-        && ArCoreApk.getInstance().checkAvailability(context).isSupported
++    operator fun invoke(): Boolean = false
+ }
+diff --git a/app/src/main/java/de/westnordost/streetcomplete/screens/settings/SettingsFragment.kt b/app/src/main/java/de/westnordost/streetcomplete/screens/settings/SettingsFragment.kt
+index 650563907..6bdfca46b 100644
+--- a/app/src/main/java/de/westnordost/streetcomplete/screens/settings/SettingsFragment.kt
++++ b/app/src/main/java/de/westnordost/streetcomplete/screens/settings/SettingsFragment.kt
+@@ -29,7 +29,6 @@ import de.westnordost.streetcomplete.data.visiblequests.QuestPresetsSource
+ import de.westnordost.streetcomplete.data.visiblequests.VisibleQuestTypeSource
+ import de.westnordost.streetcomplete.databinding.DialogDeleteCacheBinding
+ import de.westnordost.streetcomplete.screens.HasTitle
+-import de.westnordost.streetcomplete.screens.measure.MeasureActivity
+ import de.westnordost.streetcomplete.screens.settings.debug.ShowLinksActivity
+ import de.westnordost.streetcomplete.screens.settings.debug.ShowQuestFormsActivity
+ import de.westnordost.streetcomplete.util.getSelectedLocales
+@@ -116,16 +115,6 @@ class SettingsFragment :
+             true
+         }
+ 
+-        findPreference<Preference>("debug.ar_measure_horizontal")?.setOnPreferenceClickListener {
+-            startActivity(MeasureActivity.createIntent(requireContext(), false))
+-            true
+-        }
+-
+-        findPreference<Preference>("debug.ar_measure_vertical")?.setOnPreferenceClickListener {
+-            startActivity(MeasureActivity.createIntent(requireContext(), true))
+-            true
+-        }
+-
+         buildLanguageSelector()
+     }
+ 
