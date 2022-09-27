@@ -209,53 +209,8 @@ Builds:
       - plugin
     ndk: r23b
 
-  - versionName: 102.0.5005.61-1
-    versionCode: 80
-    disable: missing lib
-    commit: 3ea6119b30938086becb5f4f93f434531aef9b55
-    subdir: plugin/naive
-    submodules: true
-    sudo:
-      - apt-get update || apt-get update
-      - apt-get install -y openjdk-11-jdk-headless
-      - update-alternatives --auto java
-      - apt-get install -y tcl gettext libcurl4-openssl-dev ninja-build pkg-config
-      - apt-get remove -y libc6-i386 --autoremove
-    gradle:
-      - fdroid
-    prebuild:
-      - pushd ../..
-      - ./run fdroid prebuild_plugin_naive
-    scandelete:
-      - external
-      - plugin
-    ndk: r23b
-
-  - versionName: 103.0.5060.53-1
-    versionCode: 85
-    disable: missing lib
-    commit: 8b6f50ce8516b1dd96788c6eec402783a49b6ba8
-    subdir: plugin/naive
-    submodules: true
-    sudo:
-      - apt-get update || apt-get update
-      - apt-get install -y openjdk-11-jdk-headless
-      - update-alternatives --auto java
-      - apt-get install -y tcl gettext libcurl4-openssl-dev ninja-build pkg-config
-      - apt-get remove -y libc6-i386 --autoremove
-    gradle:
-      - fdroid
-    prebuild:
-      - pushd ../..
-      - ./run fdroid prebuild_plugin_naive
-    scandelete:
-      - external
-      - plugin
-    ndk: r23b
-
   - versionName: 105.0.5195.52-1
     versionCode: 95
-    disable: missing lib
     commit: f0b4416434fb0de228af2f1ae203140d6c3e66ec
     subdir: plugin/naive
     submodules: true
@@ -267,12 +222,21 @@ Builds:
       - apt-get remove -y libc6-i386 --autoremove
     gradle:
       - fdroid
+    srclibs:
+      - cpython@v3.10.7
     prebuild:
       - pushd ../..
       - ./run fdroid prebuild_plugin_naive
+      - echo -e '\nexport PATH="$$cpython$$/bin:$PATH"' >> ./bin/plugin/naive/build.sh
     scandelete:
       - external
       - plugin
+    build:
+      - pushd $$cpython$$
+      - ./configure --prefix=$$cpython$$
+      - make -j`nproc`
+      - make install
+      - popd
     ndk: r23b
 
 AutoUpdateMode: Version
