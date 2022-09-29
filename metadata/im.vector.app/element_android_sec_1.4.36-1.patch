@@ -1,0 +1,2240 @@
+From f926cfbae9f0d42120f4ce40d09245a075324e2d Mon Sep 17 00:00:00 2001
+Date: Wed, 28 Sep 2022 16:57:24 +0000
+Subject: [PATCH 1/1] element_android_sec_1.4.37.patch
+
+---
+ .../src/main/res/values/strings.xml           |   1 +
+ .../ui-styles/src/main/res/values/colors.xml  |   1 +
+ .../android/sdk/common/CommonTestHelper.kt    |  12 +-
+ .../android/sdk/common/CryptoTestHelper.kt    |   3 +-
+ .../sdk/internal/crypto/E2eeSanityTests.kt    |  73 +++---
+ .../crypto/E2eeShareKeysHistoryTest.kt        |  14 +-
+ .../sdk/internal/crypto/UnwedgingTest.kt      |   6 +-
+ .../crypto/gossiping/KeyShareTests.kt         |  82 ++++--
+ .../crypto/gossiping/WithHeldTests.kt         |  11 +-
+ .../android/sdk/api/crypto/MXCryptoConfig.kt  |   5 +-
+ .../crypto/model/MXEventDecryptionResult.kt   |   4 +-
+ .../crypto/model/OlmDecryptionResult.kt       |   7 +-
+ .../sdk/api/session/events/model/Event.kt     |  18 +-
+ .../internal/crypto/DefaultCryptoService.kt   |  30 ++-
+ .../crypto/InboundGroupSessionStore.kt        |  15 ++
+ .../sdk/internal/crypto/MXOlmDevice.kt        |  60 ++++-
+ .../sdk/internal/crypto/SecretShareManager.kt |  13 +-
+ .../crypto/algorithms/IMXDecrypting.kt        |   2 +-
+ .../algorithms/megolm/MXMegolmDecryption.kt   | 122 ++++++---
+ .../megolm/MXMegolmDecryptionFactory.kt       |  24 +-
+ .../algorithms/megolm/MXMegolmEncryption.kt   |   3 +-
+ .../megolm/UnRequestedForwardManager.kt       | 150 +++++++++++
+ .../keysbackup/DefaultKeysBackupService.kt    |   7 -
+ .../crypto/model/InboundGroupSessionData.kt   |   9 +-
+ .../model/MXInboundMegolmSessionWrapper.kt    |   1 +
+ .../store/db/RealmCryptoStoreMigration.kt     |   4 +-
+ .../store/db/migration/MigrateCryptoTo018.kt  |  52 ++++
+ .../internal/crypto/tasks/EncryptEventTask.kt |   3 +-
+ .../database/helper/ThreadSummaryHelper.kt    |   3 +-
+ .../internal/database/model/EventEntity.kt    |   3 +-
+ .../threads/FetchThreadTimelineTask.kt        |   3 +-
+ .../session/room/timeline/GetEventTask.kt     |   3 +-
+ .../session/sync/handler/CryptoSyncHandler.kt |  30 ++-
+ .../sync/handler/room/RoomSyncHandler.kt      |   6 +-
+ .../crypto/UnRequestedKeysManagerTest.kt      | 248 ++++++++++++++++++
+ .../app/core/ui/views/ShieldImageView.kt      |  34 +++
+ .../action/MessageActionsEpoxyController.kt   |   8 +
+ .../edithistory/ViewEditHistoryViewModel.kt   |   3 +-
+ .../helper/MessageInformationDataFactory.kt   |  66 +++--
+ .../timeline/item/AbsBaseMessageItem.kt       |  13 +-
+ .../timeline/item/MessageInformationData.kt   |   4 +-
+ .../notifications/NotifiableEventResolver.kt  |   3 +-
+ .../src/main/res/drawable/ic_shield_gray.xml  |  11 +
+ 43 files changed, 970 insertions(+), 200 deletions(-)
+ create mode 100644 matrix-sdk-android/src/main/java/org/matrix/android/sdk/internal/crypto/algorithms/megolm/UnRequestedForwardManager.kt
+ create mode 100644 matrix-sdk-android/src/main/java/org/matrix/android/sdk/internal/crypto/store/db/migration/MigrateCryptoTo018.kt
+ create mode 100644 matrix-sdk-android/src/test/java/org/matrix/android/sdk/internal/crypto/UnRequestedKeysManagerTest.kt
+ create mode 100644 vector/src/main/res/drawable/ic_shield_gray.xml
+
+diff --git a/library/ui-strings/src/main/res/values/strings.xml b/library/ui-strings/src/main/res/values/strings.xml
+index 6a87ce82f4..0b7d4b31cc 100644
+--- a/library/ui-strings/src/main/res/values/strings.xml
++++ b/library/ui-strings/src/main/res/values/strings.xml
+@@ -2613,6 +2613,7 @@
+ 
+     <string name="unencrypted">Unencrypted</string>
+     <string name="encrypted_unverified">Encrypted by an unverified device</string>
++    <string name="key_authenticity_not_guaranteed">The authenticity of this encrypted message can\'t be guaranteed on this device.</string>
+     <string name="review_logins">Review where you’re logged in</string>
+     <string name="verify_other_sessions">Verify all your sessions to ensure your account &amp; messages are safe</string>
+     <!-- Argument will be replaced by the other session name (e.g, Desktop, mobile) -->
+diff --git a/library/ui-styles/src/main/res/values/colors.xml b/library/ui-styles/src/main/res/values/colors.xml
+index 01af740d43..d64056ab9c 100644
+--- a/library/ui-styles/src/main/res/values/colors.xml
++++ b/library/ui-styles/src/main/res/values/colors.xml
+@@ -142,6 +142,7 @@
+     <!-- Shield colors -->
+     <color name="shield_color_trust">#0DBD8B</color>
+     <color name="shield_color_black">#17191C</color>
++    <color name="shield_color_gray">#91A1C0</color>
+     <color name="shield_color_warning">#FF4B55</color>
+     <color name="shield_color_warning_background">#0FFF4B55</color>
+ 
+diff --git a/matrix-sdk-android/src/androidTest/java/org/matrix/android/sdk/common/CommonTestHelper.kt b/matrix-sdk-android/src/androidTest/java/org/matrix/android/sdk/common/CommonTestHelper.kt
+index a78953caac..43f42a3ed4 100644
+--- a/matrix-sdk-android/src/androidTest/java/org/matrix/android/sdk/common/CommonTestHelper.kt
++++ b/matrix-sdk-android/src/androidTest/java/org/matrix/android/sdk/common/CommonTestHelper.kt
+@@ -38,6 +38,7 @@ import org.matrix.android.sdk.api.MatrixCallback
+ import org.matrix.android.sdk.api.MatrixConfiguration
+ import org.matrix.android.sdk.api.auth.data.HomeServerConnectionConfig
+ import org.matrix.android.sdk.api.auth.registration.RegistrationResult
++import org.matrix.android.sdk.api.crypto.MXCryptoConfig
+ import org.matrix.android.sdk.api.session.Session
+ import org.matrix.android.sdk.api.session.events.model.EventType
+ import org.matrix.android.sdk.api.session.events.model.toModel
+@@ -61,7 +62,7 @@ import java.util.concurrent.TimeUnit
+  * This class exposes methods to be used in common cases
+  * Registration, login, Sync, Sending messages...
+  */
+-class CommonTestHelper internal constructor(context: Context) {
++class CommonTestHelper internal constructor(context: Context, val cryptoConfig: MXCryptoConfig? = null) {
+ 
+     companion object {
+         internal fun runSessionTest(context: Context, autoSignoutOnClose: Boolean = true, block: (CommonTestHelper) -> Unit) {
+@@ -75,8 +76,10 @@ class CommonTestHelper internal constructor(context: Context) {
+             }
+         }
+ 
+-        internal fun runCryptoTest(context: Context, autoSignoutOnClose: Boolean = true, block: (CryptoTestHelper, CommonTestHelper) -> Unit) {
+-            val testHelper = CommonTestHelper(context)
++        internal fun runCryptoTest(context: Context, autoSignoutOnClose: Boolean = true,
++                                   cryptoConfig: MXCryptoConfig? = null,
++                                   block: (CryptoTestHelper, CommonTestHelper) -> Unit) {
++            val testHelper = CommonTestHelper(context, cryptoConfig)
+             val cryptoTestHelper = CryptoTestHelper(testHelper)
+             return try {
+                 block(cryptoTestHelper, testHelper)
+@@ -103,7 +106,8 @@ class CommonTestHelper internal constructor(context: Context) {
+                     context,
+                     MatrixConfiguration(
+                             applicationFlavor = "TestFlavor",
+-                            roomDisplayNameFallbackProvider = TestRoomDisplayNameFallbackProvider()
++                            roomDisplayNameFallbackProvider = TestRoomDisplayNameFallbackProvider(),
++                            cryptoConfig = cryptoConfig ?: MXCryptoConfig()
+                     )
+             )
+         }
+diff --git a/matrix-sdk-android/src/androidTest/java/org/matrix/android/sdk/common/CryptoTestHelper.kt b/matrix-sdk-android/src/androidTest/java/org/matrix/android/sdk/common/CryptoTestHelper.kt
+index f36bfb6210..210ce90692 100644
+--- a/matrix-sdk-android/src/androidTest/java/org/matrix/android/sdk/common/CryptoTestHelper.kt
++++ b/matrix-sdk-android/src/androidTest/java/org/matrix/android/sdk/common/CryptoTestHelper.kt
+@@ -529,7 +529,8 @@ class CryptoTestHelper(val testHelper: CommonTestHelper) {
+                                         payload = result.clearEvent,
+                                         senderKey = result.senderCurve25519Key,
+                                         keysClaimed = result.claimedEd25519Key?.let { mapOf("ed25519" to it) },
+-                                        forwardingCurve25519KeyChain = result.forwardingCurve25519KeyChain
++                                        forwardingCurve25519KeyChain = result.forwardingCurve25519KeyChain,
++                                        isSafe = result.isSafe
+                                 )
+                             }
+                         } catch (error: MXCryptoError) {
+diff --git a/matrix-sdk-android/src/androidTest/java/org/matrix/android/sdk/internal/crypto/E2eeSanityTests.kt b/matrix-sdk-android/src/androidTest/java/org/matrix/android/sdk/internal/crypto/E2eeSanityTests.kt
+index f883295495..410fb4f5d4 100644
+--- a/matrix-sdk-android/src/androidTest/java/org/matrix/android/sdk/internal/crypto/E2eeSanityTests.kt
++++ b/matrix-sdk-android/src/androidTest/java/org/matrix/android/sdk/internal/crypto/E2eeSanityTests.kt
+@@ -29,9 +29,9 @@ import org.junit.runner.RunWith
+ import org.junit.runners.JUnit4
+ import org.junit.runners.MethodSorters
+ import org.matrix.android.sdk.InstrumentedTest
++import org.matrix.android.sdk.api.crypto.MXCryptoConfig
+ import org.matrix.android.sdk.api.session.Session
+ import org.matrix.android.sdk.api.session.crypto.MXCryptoError
+-import org.matrix.android.sdk.api.session.crypto.RequestResult
+ import org.matrix.android.sdk.api.session.crypto.keysbackup.KeysVersion
+ import org.matrix.android.sdk.api.session.crypto.keysbackup.KeysVersionResult
+ import org.matrix.android.sdk.api.session.crypto.keysbackup.MegolmBackupCreationInfo
+@@ -45,7 +45,6 @@ import org.matrix.android.sdk.api.session.crypto.verification.VerificationServic
+ import org.matrix.android.sdk.api.session.crypto.verification.VerificationTransaction
+ import org.matrix.android.sdk.api.session.events.model.EventType
+ import org.matrix.android.sdk.api.session.events.model.content.EncryptedEventContent
+-import org.matrix.android.sdk.api.session.events.model.content.WithHeldCode
+ import org.matrix.android.sdk.api.session.events.model.toModel
+ import org.matrix.android.sdk.api.session.getRoom
+ import org.matrix.android.sdk.api.session.room.Room
+@@ -134,7 +133,8 @@ class E2eeSanityTests : InstrumentedTest {
+                     val timeLineEvent = otherSession.getRoom(e2eRoomID)?.getTimelineEvent(sentEventId!!)
+                     timeLineEvent != null &&
+                             timeLineEvent.isEncrypted() &&
+-                            timeLineEvent.root.getClearType() == EventType.MESSAGE
++                            timeLineEvent.root.getClearType() == EventType.MESSAGE &&
++                            timeLineEvent.root.mxDecryptionResult?.isSafe == true
+                 }
+             }
+         }
+@@ -331,6 +331,15 @@ class E2eeSanityTests : InstrumentedTest {
+ 
+         // ensure bob can now decrypt
+         cryptoTestHelper.ensureCanDecrypt(sentEventIds, newBobSession, e2eRoomID, messagesText)
++
++        // Check key trust
++        sentEventIds.forEach { sentEventId ->
++            val timelineEvent = newBobSession.getRoom(e2eRoomID)?.getTimelineEvent(sentEventId)!!
++            val result = testHelper.runBlockingTest {
++                newBobSession.cryptoService().decryptEvent(timelineEvent.root, "")
++            }
++            assertEquals("Keys from history should be deniable", false, result.isSafe)
++        }
+     }
+ 
+     /**
+@@ -379,10 +388,6 @@ class E2eeSanityTests : InstrumentedTest {
+         Log.v("#E2E TEST", "check that new bob can't currently decrypt")
+ 
+         cryptoTestHelper.ensureCannotDecrypt(sentEventIds, newBobSession, e2eRoomID, null)
+-//        newBobSession.cryptoService().getOutgoingRoomKeyRequests()
+-//                .firstOrNull {
+-//                    it.sessionId ==
+-//                }
+ 
+         // Try to request
+         sentEventIds.forEach { sentEventId ->
+@@ -390,33 +395,30 @@ class E2eeSanityTests : InstrumentedTest {
+             newBobSession.cryptoService().requestRoomKeyForEvent(event)
+         }
+ 
+-        // wait a bit
+-        // we need to wait a couple of syncs to let sharing occurs
+-//        testHelper.waitFewSyncs(newBobSession, 6)
+-
+         // Ensure that new bob still can't decrypt (keys must have been withheld)
+-        sentEventIds.forEach { sentEventId ->
+-            val megolmSessionId = newBobSession.getRoom(e2eRoomID)!!
+-                    .getTimelineEvent(sentEventId)!!
+-                    .root.content.toModel<EncryptedEventContent>()!!.sessionId
+-            testHelper.waitWithLatch { latch ->
+-                testHelper.retryPeriodicallyWithLatch(latch) {
+-                    val aliceReply = newBobSession.cryptoService().getOutgoingRoomKeyRequests()
+-                            .first {
+-                                it.sessionId == megolmSessionId &&
+-                                        it.roomId == e2eRoomID
+-                            }
+-                            .results.also {
+-                                Log.w("##TEST", "result list is $it")
+-                            }
+-                            .firstOrNull { it.userId == aliceSession.myUserId }
+-                            ?.result
+-                    aliceReply != null &&
+-                            aliceReply is RequestResult.Failure &&
+-                            WithHeldCode.UNAUTHORISED == aliceReply.code
+-                }
+-            }
+-        }
++        // as per new config we won't request to alice, so ignore following test
++//        sentEventIds.forEach { sentEventId ->
++//            val megolmSessionId = newBobSession.getRoom(e2eRoomID)!!
++//                    .getTimelineEvent(sentEventId)!!
++//                    .root.content.toModel<EncryptedEventContent>()!!.sessionId
++//            testHelper.waitWithLatch { latch ->
++//                testHelper.retryPeriodicallyWithLatch(latch) {
++//                    val aliceReply = newBobSession.cryptoService().getOutgoingRoomKeyRequests()
++//                            .first {
++//                                it.sessionId == megolmSessionId &&
++//                                        it.roomId == e2eRoomID
++//                            }
++//                            .results.also {
++//                                Log.w("##TEST", "result list is $it")
++//                            }
++//                            .firstOrNull { it.userId == aliceSession.myUserId }
++//                            ?.result
++//                    aliceReply != null &&
++//                            aliceReply is RequestResult.Failure &&
++//                            WithHeldCode.UNAUTHORISED == aliceReply.code
++//                }
++//            }
++//        }
+ 
+         cryptoTestHelper.ensureCannotDecrypt(sentEventIds, newBobSession, e2eRoomID, null)
+ 
+@@ -438,7 +440,10 @@ class E2eeSanityTests : InstrumentedTest {
+      * Test that if a better key is forwarded (lower index, it is then used)
+      */
+     @Test
+-    fun testForwardBetterKey() = runCryptoTest(context()) { cryptoTestHelper, testHelper ->
++    fun testForwardBetterKey() = runCryptoTest(
++            context(),
++            cryptoConfig = MXCryptoConfig(limitRoomKeyRequestsToMyDevices = false)
++    ) { cryptoTestHelper, testHelper ->
+ 
+         val cryptoTestData = cryptoTestHelper.doE2ETestWithAliceAndBobInARoom(true)
+         val aliceSession = cryptoTestData.firstSession
+diff --git a/matrix-sdk-android/src/androidTest/java/org/matrix/android/sdk/internal/crypto/E2eeShareKeysHistoryTest.kt b/matrix-sdk-android/src/androidTest/java/org/matrix/android/sdk/internal/crypto/E2eeShareKeysHistoryTest.kt
+index 32a95008b1..4b44aab18b 100644
+--- a/matrix-sdk-android/src/androidTest/java/org/matrix/android/sdk/internal/crypto/E2eeShareKeysHistoryTest.kt
++++ b/matrix-sdk-android/src/androidTest/java/org/matrix/android/sdk/internal/crypto/E2eeShareKeysHistoryTest.kt
+@@ -77,6 +77,7 @@ class E2eeShareKeysHistoryTest : InstrumentedTest {
+      */
+     private fun testShareHistoryWithRoomVisibility(roomHistoryVisibility: RoomHistoryVisibility? = null) =
+             runCryptoTest(context()) { cryptoTestHelper, testHelper ->
++                val aliceMessageText = "Hello Bob, I am Alice!"
+                 val cryptoTestData = cryptoTestHelper.doE2ETestWithAliceAndBobInARoom(true, roomHistoryVisibility)
+ 
+                 val e2eRoomID = cryptoTestData.roomId
+@@ -96,7 +97,7 @@ class E2eeShareKeysHistoryTest : InstrumentedTest {
+                 assertEquals(bobRoomPOV.roomSummary()?.joinedMembersCount, 2)
+                 Log.v("#E2E TEST", "Alice and Bob are in roomId: $e2eRoomID")
+ 
+-                val aliceMessageId: String? = sendMessageInRoom(aliceRoomPOV, "Hello Bob, I am Alice!", testHelper)
++                val aliceMessageId: String? = sendMessageInRoom(aliceRoomPOV, aliceMessageText, testHelper)
+                 Assert.assertTrue("Message should be sent", aliceMessageId != null)
+                 Log.v("#E2E TEST", "Alice sent message to roomId: $e2eRoomID")
+ 
+@@ -106,7 +107,8 @@ class E2eeShareKeysHistoryTest : InstrumentedTest {
+                         val timelineEvent = bobSession.roomService().getRoom(e2eRoomID)?.timelineService()?.getTimelineEvent(aliceMessageId!!)
+                         (timelineEvent != null &&
+                                 timelineEvent.isEncrypted() &&
+-                                timelineEvent.root.getClearType() == EventType.MESSAGE).also {
++                                timelineEvent.root.getClearType() == EventType.MESSAGE &&
++                                timelineEvent.root.mxDecryptionResult?.isSafe == true).also {
+                             if (it) {
+                                 Log.v("#E2E TEST", "Bob can decrypt the message: ${timelineEvent?.root?.getDecryptedTextSummary()}")
+                             }
+@@ -142,7 +144,8 @@ class E2eeShareKeysHistoryTest : InstrumentedTest {
+                                 val timelineEvent = arisSession.roomService().getRoom(e2eRoomID)?.timelineService()?.getTimelineEvent(aliceMessageId!!)
+                                 (timelineEvent != null &&
+                                         timelineEvent.isEncrypted() &&
+-                                        timelineEvent.root.getClearType() == EventType.MESSAGE
++                                        timelineEvent.root.getClearType() == EventType.MESSAGE &&
++                                        timelineEvent.root.mxDecryptionResult?.isSafe == false
+                                         ).also {
+                                             if (it) {
+                                                 Log.v("#E2E TEST", "Aris can decrypt the message: ${timelineEvent?.root?.getDecryptedTextSummary()}")
+@@ -377,7 +380,10 @@ class E2eeShareKeysHistoryTest : InstrumentedTest {
+     }
+ 
+     private fun sendMessageInRoom(aliceRoomPOV: Room, text: String, testHelper: CommonTestHelper): String? {
+-        return testHelper.sendTextMessage(aliceRoomPOV, text, 1).firstOrNull()?.eventId
++        return testHelper.sendTextMessage(aliceRoomPOV, text, 1).firstOrNull()?.let {
++            Log.v("#E2E TEST", "Message sent with session ${it.root.content?.get("session_id")}")
++            return it.eventId
++        }
+     }
+ 
+     private fun ensureMembersHaveJoined(aliceSession: Session, otherAccounts: List<Session>, e2eRoomID: String, testHelper: CommonTestHelper) {
+diff --git a/matrix-sdk-android/src/androidTest/java/org/matrix/android/sdk/internal/crypto/UnwedgingTest.kt b/matrix-sdk-android/src/androidTest/java/org/matrix/android/sdk/internal/crypto/UnwedgingTest.kt
+index 5fe7376184..130c8d13f9 100644
+--- a/matrix-sdk-android/src/androidTest/java/org/matrix/android/sdk/internal/crypto/UnwedgingTest.kt
++++ b/matrix-sdk-android/src/androidTest/java/org/matrix/android/sdk/internal/crypto/UnwedgingTest.kt
+@@ -29,6 +29,7 @@ import org.matrix.android.sdk.api.auth.UIABaseAuth
+ import org.matrix.android.sdk.api.auth.UserInteractiveAuthInterceptor
+ import org.matrix.android.sdk.api.auth.UserPasswordAuth
+ import org.matrix.android.sdk.api.auth.registration.RegistrationFlowResponse
++import org.matrix.android.sdk.api.crypto.MXCryptoConfig
+ import org.matrix.android.sdk.api.extensions.tryOrNull
+ import org.matrix.android.sdk.api.session.crypto.MXCryptoError
+ import org.matrix.android.sdk.api.session.events.model.EventType
+@@ -82,7 +83,10 @@ class UnwedgingTest : InstrumentedTest {
+      * -> This is automatically fixed after SDKs restarted the olm session
+      */
+     @Test
+-    fun testUnwedging() = runCryptoTest(context()) { cryptoTestHelper, testHelper ->
++    fun testUnwedging() = runCryptoTest(
++            context(),
++            cryptoConfig = MXCryptoConfig(limitRoomKeyRequestsToMyDevices = false)
++    ) { cryptoTestHelper, testHelper ->
+         val cryptoTestData = cryptoTestHelper.doE2ETestWithAliceAndBobInARoom()
+ 
+         val aliceSession = cryptoTestData.firstSession
+diff --git a/matrix-sdk-android/src/androidTest/java/org/matrix/android/sdk/internal/crypto/gossiping/KeyShareTests.kt b/matrix-sdk-android/src/androidTest/java/org/matrix/android/sdk/internal/crypto/gossiping/KeyShareTests.kt
+index 7bb53e139c..df0b10ea6d 100644
+--- a/matrix-sdk-android/src/androidTest/java/org/matrix/android/sdk/internal/crypto/gossiping/KeyShareTests.kt
++++ b/matrix-sdk-android/src/androidTest/java/org/matrix/android/sdk/internal/crypto/gossiping/KeyShareTests.kt
+@@ -22,15 +22,16 @@ import androidx.test.filters.LargeTest
+ import junit.framework.TestCase.assertNotNull
+ import junit.framework.TestCase.assertTrue
+ import org.amshove.kluent.internal.assertEquals
++import org.amshove.kluent.shouldBeEqualTo
+ import org.junit.Assert
+ import org.junit.Assert.assertNull
+ import org.junit.FixMethodOrder
+-import org.junit.Ignore
+-import org.junit.Rule
+ import org.junit.Test
+ import org.junit.runner.RunWith
+ import org.junit.runners.MethodSorters
+ import org.matrix.android.sdk.InstrumentedTest
++import org.matrix.android.sdk.api.crypto.MXCRYPTO_ALGORITHM_OLM
++import org.matrix.android.sdk.api.crypto.MXCryptoConfig
+ import org.matrix.android.sdk.api.session.crypto.OutgoingRoomKeyRequestState
+ import org.matrix.android.sdk.api.session.crypto.RequestResult
+ import org.matrix.android.sdk.api.session.crypto.crosssigning.DeviceTrustLevel
+@@ -43,7 +44,6 @@ import org.matrix.android.sdk.api.session.room.model.RoomDirectoryVisibility
+ import org.matrix.android.sdk.api.session.room.model.create.CreateRoomParams
+ import org.matrix.android.sdk.api.session.room.timeline.getLastMessageContent
+ import org.matrix.android.sdk.common.CommonTestHelper.Companion.runCryptoTest
+-import org.matrix.android.sdk.common.RetryTestRule
+ import org.matrix.android.sdk.common.SessionTestParams
+ import org.matrix.android.sdk.common.TestConstants
+ import org.matrix.android.sdk.mustFail
+@@ -51,16 +51,15 @@ import org.matrix.android.sdk.mustFail
+ @RunWith(AndroidJUnit4::class)
+ @FixMethodOrder(MethodSorters.JVM)
+ @LargeTest
+-@Ignore
+ class KeyShareTests : InstrumentedTest {
+ 
+-    @get:Rule val rule = RetryTestRule(3)
++    // @get:Rule val rule = RetryTestRule(3)
+ 
+     @Test
+     fun test_DoNotSelfShareIfNotTrusted() = runCryptoTest(context()) { cryptoTestHelper, commonTestHelper ->
+ 
+         val aliceSession = commonTestHelper.createAccount(TestConstants.USER_ALICE, SessionTestParams(true))
+-        Log.v("TEST", "=======> AliceSession 1 is ${aliceSession.sessionParams.deviceId}")
++        Log.v("#TEST", "=======> AliceSession 1 is ${aliceSession.sessionParams.deviceId}")
+ 
+         // Create an encrypted room and add a message
+         val roomId = commonTestHelper.runBlockingTest {
+@@ -86,7 +85,7 @@ class KeyShareTests : InstrumentedTest {
+         aliceSession2.cryptoService().enableKeyGossiping(false)
+         commonTestHelper.syncSession(aliceSession2)
+ 
+-        Log.v("TEST", "=======> AliceSession 2 is ${aliceSession2.sessionParams.deviceId}")
++        Log.v("#TEST", "=======> AliceSession 2 is ${aliceSession2.sessionParams.deviceId}")
+ 
+         val roomSecondSessionPOV = aliceSession2.getRoom(roomId)
+ 
+@@ -121,7 +120,7 @@ class KeyShareTests : InstrumentedTest {
+                         }
+             }
+         }
+-        Log.v("TEST", "=======> Outgoing requet Id is $outGoingRequestId")
++        Log.v("#TEST", "=======> Outgoing requet Id is $outGoingRequestId")
+ 
+         val outgoingRequestAfter = aliceSession2.cryptoService().getOutgoingRoomKeyRequests()
+ 
+@@ -134,14 +133,17 @@ class KeyShareTests : InstrumentedTest {
+         commonTestHelper.waitWithLatch { latch ->
+             commonTestHelper.retryPeriodicallyWithLatch(latch) {
+                 // DEBUG LOGS
+-//                aliceSession.cryptoService().getIncomingRoomKeyRequests().let {
+-//                    Log.v("TEST", "Incoming request Session 1 (looking for $outGoingRequestId)")
+-//                    Log.v("TEST", "=========================")
+-//                    it.forEach { keyRequest ->
+-//                        Log.v("TEST", "[ts${keyRequest.localCreationTimestamp}] requestId ${keyRequest.requestId}, for sessionId ${keyRequest.requestBody?.sessionId}")
+-//                    }
+-//                    Log.v("TEST", "=========================")
+-//                }
++                aliceSession.cryptoService().getIncomingRoomKeyRequests().let {
++                    Log.v("#TEST", "Incoming request Session 1 (looking for $outGoingRequestId)")
++                    Log.v("#TEST", "=========================")
++                    it.forEach { keyRequest ->
++                        Log.v(
++                                "#TEST",
++                                "[ts${keyRequest.localCreationTimestamp}] requestId ${keyRequest.requestId}, for sessionId ${keyRequest.requestBody?.sessionId}"
++                        )
++                    }
++                    Log.v("#TEST", "=========================")
++                }
+ 
+                 val incoming = aliceSession.cryptoService().getIncomingRoomKeyRequests().firstOrNull { it.requestId == outGoingRequestId }
+                 incoming != null
+@@ -152,10 +154,10 @@ class KeyShareTests : InstrumentedTest {
+             commonTestHelper.retryPeriodicallyWithLatch(latch) {
+                 // DEBUG LOGS
+                 aliceSession2.cryptoService().getOutgoingRoomKeyRequests().forEach { keyRequest ->
+-                    Log.v("TEST", "=========================")
+-                    Log.v("TEST", "requestId ${keyRequest.requestId}, for sessionId ${keyRequest.requestBody?.sessionId}")
+-                    Log.v("TEST", "replies -> ${keyRequest.results.joinToString { it.toString() }}")
+-                    Log.v("TEST", "=========================")
++                    Log.v("#TEST", "=========================")
++                    Log.v("#TEST", "requestId ${keyRequest.requestId}, for sessionId ${keyRequest.requestBody?.sessionId}")
++                    Log.v("#TEST", "replies -> ${keyRequest.results.joinToString { it.toString() }}")
++                    Log.v("#TEST", "=========================")
+                 }
+ 
+                 val outgoing = aliceSession2.cryptoService().getOutgoingRoomKeyRequests().firstOrNull { it.requestId == outGoingRequestId }
+@@ -172,11 +174,24 @@ class KeyShareTests : InstrumentedTest {
+         }
+ 
+         // Mark the device as trusted
++
++        Log.v("#TEST", "=======> Alice device 1 is ${aliceSession.sessionParams.deviceId}|${aliceSession.cryptoService().getMyDevice().identityKey()}")
++        val aliceSecondSession = aliceSession2.cryptoService().getMyDevice()
++        Log.v("#TEST", "=======> Alice device 2 is ${aliceSession2.sessionParams.deviceId}|${aliceSecondSession.identityKey()}")
++
+         aliceSession.cryptoService().setDeviceVerification(
+                 DeviceTrustLevel(crossSigningVerified = false, locallyVerified = true), aliceSession.myUserId,
+                 aliceSession2.sessionParams.deviceId ?: ""
+         )
+ 
++        // We only accept forwards from trusted session, so we need to trust on other side to
++        aliceSession2.cryptoService().setDeviceVerification(
++                DeviceTrustLevel(crossSigningVerified = false, locallyVerified = true), aliceSession.myUserId,
++                aliceSession.sessionParams.deviceId ?: ""
++        )
++
++        aliceSession.cryptoService().deviceWithIdentityKey(aliceSecondSession.identityKey()!!, MXCRYPTO_ALGORITHM_OLM)!!.isVerified shouldBeEqualTo true
++
+         // Re request
+         aliceSession2.cryptoService().reRequestRoomKeyForEvent(receivedEvent.root)
+ 
+@@ -193,7 +208,10 @@ class KeyShareTests : InstrumentedTest {
+      * if the key was originally shared with him
+      */
+     @Test
+-    fun test_reShareIfWasIntendedToBeShared() = runCryptoTest(context()) { cryptoTestHelper, commonTestHelper ->
++    fun test_reShareIfWasIntendedToBeShared() = runCryptoTest(
++            context(),
++            cryptoConfig = MXCryptoConfig(limitRoomKeyRequestsToMyDevices = false)
++    ) { cryptoTestHelper, commonTestHelper ->
+ 
+         val testData = cryptoTestHelper.doE2ETestWithAliceAndBobInARoom(true)
+         val aliceSession = testData.firstSession
+@@ -224,7 +242,10 @@ class KeyShareTests : InstrumentedTest {
+      * if the key was originally shared with him
+      */
+     @Test
+-    fun test_reShareToUnverifiedIfWasIntendedToBeShared() = runCryptoTest(context()) { cryptoTestHelper, commonTestHelper ->
++    fun test_reShareToUnverifiedIfWasIntendedToBeShared() = runCryptoTest(
++            context(),
++            cryptoConfig = MXCryptoConfig(limitRoomKeyRequestsToMyDevices = false)
++    ) { cryptoTestHelper, commonTestHelper ->
+ 
+         val testData = cryptoTestHelper.doE2ETestWithAliceInARoom(true)
+         val aliceSession = testData.firstSession
+@@ -242,7 +263,6 @@ class KeyShareTests : InstrumentedTest {
+         }
+         val sentEvent = commonTestHelper.sendTextMessage(roomFromAlice, "Hello", 1).first()
+         val sentEventMegolmSession = sentEvent.root.content.toModel<EncryptedEventContent>()!!.sessionId!!
+-
+         // Let's try to request any how.
+         // As it was share previously alice should accept to reshare
+         aliceNewSession.cryptoService().reRequestRoomKeyForEvent(sentEvent.root)
+@@ -261,7 +281,10 @@ class KeyShareTests : InstrumentedTest {
+      * Tests that keys reshared with own verified session are done from the earliest known index
+      */
+     @Test
+-    fun test_reShareFromTheEarliestKnownIndexWithOwnVerifiedSession() = runCryptoTest(context()) { cryptoTestHelper, commonTestHelper ->
++    fun test_reShareFromTheEarliestKnownIndexWithOwnVerifiedSession() = runCryptoTest(
++            context(),
++            cryptoConfig = MXCryptoConfig(limitRoomKeyRequestsToMyDevices = false)
++    ) { cryptoTestHelper, commonTestHelper ->
+ 
+         val testData = cryptoTestHelper.doE2ETestWithAliceAndBobInARoom(true)
+         val aliceSession = testData.firstSession
+@@ -333,6 +356,9 @@ class KeyShareTests : InstrumentedTest {
+         aliceSession.cryptoService()
+                 .verificationService()
+                 .markedLocallyAsManuallyVerified(aliceNewSession.myUserId, aliceNewSession.sessionParams.deviceId!!)
++        aliceNewSession.cryptoService()
++                .verificationService()
++                .markedLocallyAsManuallyVerified(aliceSession.myUserId, aliceSession.sessionParams.deviceId!!)
+ 
+         // Let's now try to request
+         aliceNewSession.cryptoService().reRequestRoomKeyForEvent(sentEvents.first().root)
+@@ -381,7 +407,10 @@ class KeyShareTests : InstrumentedTest {
+      * Tests that we don't cancel a request to early on first forward if the index is not good enough
+      */
+     @Test
+-    fun test_dontCancelToEarly() = runCryptoTest(context()) { cryptoTestHelper, commonTestHelper ->
++    fun test_dontCancelToEarly() = runCryptoTest(
++            context(),
++            cryptoConfig = MXCryptoConfig(limitRoomKeyRequestsToMyDevices = false)
++    ) { cryptoTestHelper, commonTestHelper ->
+         val testData = cryptoTestHelper.doE2ETestWithAliceAndBobInARoom(true)
+         val aliceSession = testData.firstSession
+         val bobSession = testData.secondSession!!
+@@ -421,6 +450,9 @@ class KeyShareTests : InstrumentedTest {
+         aliceSession.cryptoService()
+                 .verificationService()
+                 .markedLocallyAsManuallyVerified(aliceNewSession.myUserId, aliceNewSession.sessionParams.deviceId!!)
++        aliceNewSession.cryptoService()
++                .verificationService()
++                .markedLocallyAsManuallyVerified(aliceSession.myUserId, aliceSession.sessionParams.deviceId!!)
+ 
+         // /!\ Stop initial alice session syncing so that it can't reply
+         aliceSession.cryptoService().enableKeyGossiping(false)
+diff --git a/matrix-sdk-android/src/androidTest/java/org/matrix/android/sdk/internal/crypto/gossiping/WithHeldTests.kt b/matrix-sdk-android/src/androidTest/java/org/matrix/android/sdk/internal/crypto/gossiping/WithHeldTests.kt
+index 0aac4297e4..910a349b40 100644
+--- a/matrix-sdk-android/src/androidTest/java/org/matrix/android/sdk/internal/crypto/gossiping/WithHeldTests.kt
++++ b/matrix-sdk-android/src/androidTest/java/org/matrix/android/sdk/internal/crypto/gossiping/WithHeldTests.kt
+@@ -27,6 +27,7 @@ import org.junit.runner.RunWith
+ import org.junit.runners.MethodSorters
+ import org.matrix.android.sdk.InstrumentedTest
+ import org.matrix.android.sdk.api.NoOpMatrixCallback
++import org.matrix.android.sdk.api.crypto.MXCryptoConfig
+ import org.matrix.android.sdk.api.extensions.tryOrNull
+ import org.matrix.android.sdk.api.session.crypto.MXCryptoError
+ import org.matrix.android.sdk.api.session.crypto.RequestResult
+@@ -153,7 +154,10 @@ class WithHeldTests : InstrumentedTest {
+     }
+ 
+     @Test
+-    fun test_WithHeldNoOlm() = runCryptoTest(context()) { cryptoTestHelper, testHelper ->
++    fun test_WithHeldNoOlm() = runCryptoTest(
++            context(),
++            cryptoConfig = MXCryptoConfig(limitRoomKeyRequestsToMyDevices = false)
++    ) { cryptoTestHelper, testHelper ->
+ 
+         val testData = cryptoTestHelper.doE2ETestWithAliceAndBobInARoom()
+         val aliceSession = testData.firstSession
+@@ -233,7 +237,10 @@ class WithHeldTests : InstrumentedTest {
+     }
+ 
+     @Test
+-    fun test_WithHeldKeyRequest() = runCryptoTest(context()) { cryptoTestHelper, testHelper ->
++    fun test_WithHeldKeyRequest() = runCryptoTest(
++            context(),
++            cryptoConfig = MXCryptoConfig(limitRoomKeyRequestsToMyDevices = false)
++    ) { cryptoTestHelper, testHelper ->
+ 
+         val testData = cryptoTestHelper.doE2ETestWithAliceAndBobInARoom()
+         val aliceSession = testData.firstSession
+diff --git a/matrix-sdk-android/src/main/java/org/matrix/android/sdk/api/crypto/MXCryptoConfig.kt b/matrix-sdk-android/src/main/java/org/matrix/android/sdk/api/crypto/MXCryptoConfig.kt
+index 015cb6a1a2..38f522586f 100644
+--- a/matrix-sdk-android/src/main/java/org/matrix/android/sdk/api/crypto/MXCryptoConfig.kt
++++ b/matrix-sdk-android/src/main/java/org/matrix/android/sdk/api/crypto/MXCryptoConfig.kt
+@@ -35,8 +35,9 @@ data class MXCryptoConfig constructor(
+ 
+         /**
+          * Currently megolm keys are requested to the sender device and to all of our devices.
+-         * You can limit request only to your sessions by turning this setting to `true`
++         * You can limit request only to your sessions by turning this setting to `true`.
++         * Forwarded keys coming from other users will also be ignored if set to true.
+          */
+-        val limitRoomKeyRequestsToMyDevices: Boolean = false,
++        val limitRoomKeyRequestsToMyDevices: Boolean = true,
+ 
+         )
+diff --git a/matrix-sdk-android/src/main/java/org/matrix/android/sdk/api/session/crypto/model/MXEventDecryptionResult.kt b/matrix-sdk-android/src/main/java/org/matrix/android/sdk/api/session/crypto/model/MXEventDecryptionResult.kt
+index 0a0ccc2db3..66d7558fe2 100755
+--- a/matrix-sdk-android/src/main/java/org/matrix/android/sdk/api/session/crypto/model/MXEventDecryptionResult.kt
++++ b/matrix-sdk-android/src/main/java/org/matrix/android/sdk/api/session/crypto/model/MXEventDecryptionResult.kt
+@@ -43,5 +43,7 @@ data class MXEventDecryptionResult(
+          * List of curve25519 keys involved in telling us about the senderCurve25519Key and
+          * claimedEd25519Key. See MXEvent.forwardingCurve25519KeyChain.
+          */
+-        val forwardingCurve25519KeyChain: List<String> = emptyList()
++        val forwardingCurve25519KeyChain: List<String> = emptyList(),
++
++        val isSafe: Boolean = false
+ )
+diff --git a/matrix-sdk-android/src/main/java/org/matrix/android/sdk/api/session/crypto/model/OlmDecryptionResult.kt b/matrix-sdk-android/src/main/java/org/matrix/android/sdk/api/session/crypto/model/OlmDecryptionResult.kt
+index a26f6606ed..6d57318f87 100755
+--- a/matrix-sdk-android/src/main/java/org/matrix/android/sdk/api/session/crypto/model/OlmDecryptionResult.kt
++++ b/matrix-sdk-android/src/main/java/org/matrix/android/sdk/api/session/crypto/model/OlmDecryptionResult.kt
+@@ -44,5 +44,10 @@ data class OlmDecryptionResult(
+         /**
+          * Devices which forwarded this session to us (normally empty).
+          */
+-        @Json(name = "forwardingCurve25519KeyChain") val forwardingCurve25519KeyChain: List<String>? = null
++        @Json(name = "forwardingCurve25519KeyChain") val forwardingCurve25519KeyChain: List<String>? = null,
++
++        /**
++         * True if the key used to decrypt is considered safe (trusted).
++         */
++        @Json(name = "key_safety") val isSafe: Boolean? = null,
+ )
+diff --git a/matrix-sdk-android/src/main/java/org/matrix/android/sdk/api/session/events/model/Event.kt b/matrix-sdk-android/src/main/java/org/matrix/android/sdk/api/session/events/model/Event.kt
+index 59dc6c434d..f5d2c0d9a0 100644
+--- a/matrix-sdk-android/src/main/java/org/matrix/android/sdk/api/session/events/model/Event.kt
++++ b/matrix-sdk-android/src/main/java/org/matrix/android/sdk/api/session/events/model/Event.kt
+@@ -174,15 +174,29 @@ data class Event(
+      * @return the event type
+      */
+     fun getClearType(): String {
+-        return mxDecryptionResult?.payload?.get("type")?.toString() ?: type ?: EventType.MISSING_TYPE
++        return getDecryptedType() ?: type ?: EventType.MISSING_TYPE
++    }
++
++    /**
++     * @return The decrypted type, or null. Won't fallback to the wired type
++     */
++    fun getDecryptedType(): String? {
++        return mxDecryptionResult?.payload?.get("type")?.toString()
+     }
+ 
+     /**
+      * @return the event content
+      */
+     fun getClearContent(): Content? {
++        return getDecryptedContent() ?: content
++    }
++
++    /**
++     * @return the decrypted event content or null, Won't fallback to the wired content
++     */
++    fun getDecryptedContent(): Content? {
+         @Suppress("UNCHECKED_CAST")
+-        return mxDecryptionResult?.payload?.get("content") as? Content ?: content
++        return mxDecryptionResult?.payload?.get("content") as? Content
+     }
+ 
+     fun toContentStringWithIndent(): String {
+diff --git a/matrix-sdk-android/src/main/java/org/matrix/android/sdk/internal/crypto/DefaultCryptoService.kt b/matrix-sdk-android/src/main/java/org/matrix/android/sdk/internal/crypto/DefaultCryptoService.kt
+index 8dd7c309c6..322f297ac3 100755
+--- a/matrix-sdk-android/src/main/java/org/matrix/android/sdk/internal/crypto/DefaultCryptoService.kt
++++ b/matrix-sdk-android/src/main/java/org/matrix/android/sdk/internal/crypto/DefaultCryptoService.kt
+@@ -79,6 +79,7 @@ import org.matrix.android.sdk.internal.crypto.actions.SetDeviceVerificationActio
+ import org.matrix.android.sdk.internal.crypto.algorithms.IMXEncrypting
+ import org.matrix.android.sdk.internal.crypto.algorithms.IMXGroupEncryption
+ import org.matrix.android.sdk.internal.crypto.algorithms.megolm.MXMegolmEncryptionFactory
++import org.matrix.android.sdk.internal.crypto.algorithms.megolm.UnRequestedForwardManager
+ import org.matrix.android.sdk.internal.crypto.algorithms.olm.MXOlmEncryptionFactory
+ import org.matrix.android.sdk.internal.crypto.crosssigning.DefaultCrossSigningService
+ import org.matrix.android.sdk.internal.crypto.keysbackup.DefaultKeysBackupService
+@@ -183,7 +184,8 @@ internal class DefaultCryptoService @Inject constructor(
+         private val cryptoCoroutineScope: CoroutineScope,
+         private val eventDecryptor: EventDecryptor,
+         private val verificationMessageProcessor: VerificationMessageProcessor,
+-        private val liveEventManager: Lazy<StreamEventsManager>
++        private val liveEventManager: Lazy<StreamEventsManager>,
++        private val unrequestedForwardManager: UnRequestedForwardManager,
+ ) : CryptoService {
+ 
+     private val isStarting = AtomicBoolean(false)
+@@ -399,6 +401,7 @@ internal class DefaultCryptoService @Inject constructor(
+         cryptoCoroutineScope.coroutineContext.cancelChildren(CancellationException("Closing crypto module"))
+         incomingKeyRequestManager.close()
+         outgoingKeyRequestManager.close()
++        unrequestedForwardManager.close()
+         olmDevice.release()
+         cryptoStore.close()
+     }
+@@ -485,6 +488,14 @@ internal class DefaultCryptoService @Inject constructor(
+                     // just for safety but should not throw
+                     Timber.tag(loggerTag.value).w("failed to process incoming room key requests")
+                 }
++
++                unrequestedForwardManager.postSyncProcessParkedKeysIfNeeded(clock.epochMillis()) { events ->
++                    cryptoCoroutineScope.launch(coroutineDispatchers.crypto) {
++                        events.forEach {
++                            onRoomKeyEvent(it, true)
++                        }
++                    }
++                }
+             }
+         }
+     }
+@@ -845,9 +856,9 @@ internal class DefaultCryptoService @Inject constructor(
+      *
+      * @param event the key event.
+      */
+-    private fun onRoomKeyEvent(event: Event) {
+-        val roomKeyContent = event.getClearContent().toModel<RoomKeyContent>() ?: return
+-        Timber.tag(loggerTag.value).i("onRoomKeyEvent() from: ${event.senderId} type<${event.getClearType()}> , sessionId<${roomKeyContent.sessionId}>")
++    private fun onRoomKeyEvent(event: Event, acceptUnrequested: Boolean = false) {
++        val roomKeyContent = event.getDecryptedContent().toModel<RoomKeyContent>() ?: return
++        Timber.tag(loggerTag.value).i("onRoomKeyEvent(forceAccept:$acceptUnrequested) from: ${event.senderId} type<${event.getClearType()}> , sessionId<${roomKeyContent.sessionId}>")
+         if (roomKeyContent.roomId.isNullOrEmpty() || roomKeyContent.algorithm.isNullOrEmpty()) {
+             Timber.tag(loggerTag.value).e("onRoomKeyEvent() : missing fields")
+             return
+@@ -857,7 +868,7 @@ internal class DefaultCryptoService @Inject constructor(
+             Timber.tag(loggerTag.value).e("GOSSIP onRoomKeyEvent() : Unable to handle keys for ${roomKeyContent.algorithm}")
+             return
+         }
+-        alg.onRoomKeyEvent(event, keysBackupService)
++        alg.onRoomKeyEvent(event, keysBackupService, acceptUnrequested)
+     }
+ 
+     private fun onKeyWithHeldReceived(event: Event) {
+@@ -950,6 +961,15 @@ internal class DefaultCryptoService @Inject constructor(
+      * @param event the membership event causing the change
+      */
+     private fun onRoomMembershipEvent(roomId: String, event: Event) {
++        // because the encryption event can be after the join/invite in the same batch
++        event.stateKey?.let { _ ->
++            val roomMember: RoomMemberContent? = event.content.toModel()
++            val membership = roomMember?.membership
++            if (membership == Membership.INVITE) {
++                unrequestedForwardManager.onInviteReceived(roomId, event.senderId.orEmpty(), clock.epochMillis())
++            }
++        }
++
+         roomEncryptorsStore.get(roomId) ?: /* No encrypting in this room */ return
+ 
+         event.stateKey?.let { userId ->
+diff --git a/matrix-sdk-android/src/main/java/org/matrix/android/sdk/internal/crypto/InboundGroupSessionStore.kt b/matrix-sdk-android/src/main/java/org/matrix/android/sdk/internal/crypto/InboundGroupSessionStore.kt
+index 39dfb72149..6d197a09ed 100644
+--- a/matrix-sdk-android/src/main/java/org/matrix/android/sdk/internal/crypto/InboundGroupSessionStore.kt
++++ b/matrix-sdk-android/src/main/java/org/matrix/android/sdk/internal/crypto/InboundGroupSessionStore.kt
+@@ -91,6 +91,21 @@ internal class InboundGroupSessionStore @Inject constructor(
+         internalStoreGroupSession(new, sessionId, senderKey)
+     }
+ 
++    @Synchronized
++    fun updateToSafe(old: InboundGroupSessionHolder, sessionId: String, senderKey: String) {
++        Timber.tag(loggerTag.value).v("## updateToSafe for session ${old.wrapper.roomId}-${old.wrapper.senderKey}")
++
++        store.storeInboundGroupSessions(
++                listOf(
++                        old.wrapper.copy(
++                                sessionData = old.wrapper.sessionData.copy(trusted = true)
++                        )
++                )
++        )
++        // will release it :/
++        sessionCache.remove(CacheKey(sessionId, senderKey))
++    }
++
+     @Synchronized
+     fun storeInBoundGroupSession(holder: InboundGroupSessionHolder, sessionId: String, senderKey: String) {
+         internalStoreGroupSession(holder, sessionId, senderKey)
+diff --git a/matrix-sdk-android/src/main/java/org/matrix/android/sdk/internal/crypto/MXOlmDevice.kt b/matrix-sdk-android/src/main/java/org/matrix/android/sdk/internal/crypto/MXOlmDevice.kt
+index 96ccba51dc..b6a5136b8f 100755
+--- a/matrix-sdk-android/src/main/java/org/matrix/android/sdk/internal/crypto/MXOlmDevice.kt
++++ b/matrix-sdk-android/src/main/java/org/matrix/android/sdk/internal/crypto/MXOlmDevice.kt
+@@ -19,6 +19,7 @@ package org.matrix.android.sdk.internal.crypto
+ import androidx.annotation.VisibleForTesting
+ import kotlinx.coroutines.sync.Mutex
+ import kotlinx.coroutines.sync.withLock
++import org.matrix.android.sdk.api.extensions.orFalse
+ import org.matrix.android.sdk.api.extensions.tryOrNull
+ import org.matrix.android.sdk.api.logger.LoggerTag
+ import org.matrix.android.sdk.api.session.crypto.MXCryptoError
+@@ -612,7 +613,8 @@ internal class MXOlmDevice @Inject constructor(
+             forwardingCurve25519KeyChain: List<String>,
+             keysClaimed: Map<String, String>,
+             exportFormat: Boolean,
+-            sharedHistory: Boolean
++            sharedHistory: Boolean,
++            trusted: Boolean
+     ): AddSessionResult {
+         val candidateSession = tryOrNull("Failed to create inbound session in room $roomId") {
+             if (exportFormat) {
+@@ -620,6 +622,8 @@ internal class MXOlmDevice @Inject constructor(
+             } else {
+                 OlmInboundGroupSession(sessionKey)
+             }
++        } ?: return AddSessionResult.NotImported.also {
++            Timber.tag(loggerTag.value).d("## addInboundGroupSession() : failed to import key candidate $senderKey/$sessionId")
+         }
+ 
+         val existingSessionHolder = tryOrNull { getInboundGroupSession(sessionId, senderKey, roomId) }
+@@ -631,31 +635,49 @@ internal class MXOlmDevice @Inject constructor(
+                 val existingFirstKnown = tryOrNull { existingSession.session.firstKnownIndex } ?: return AddSessionResult.NotImported.also {
+                     // This is quite unexpected, could throw if native was released?
+                     Timber.tag(loggerTag.value).e("## addInboundGroupSession() null firstKnownIndex on existing session")
+-                    candidateSession?.releaseSession()
++                    candidateSession.releaseSession()
+                     // Probably should discard it?
+                 }
+-                val newKnownFirstIndex = tryOrNull("Failed to get candidate first known index") { candidateSession?.firstKnownIndex }
++                val newKnownFirstIndex = tryOrNull("Failed to get candidate first known index") { candidateSession.firstKnownIndex }
++                        ?: return AddSessionResult.NotImported.also {
++                            candidateSession.releaseSession()
++                            Timber.tag(loggerTag.value).d("## addInboundGroupSession() : Failed to get new session index")
++                        }
++
++                val keyConnects = existingSession.session.connects(candidateSession)
++                if (!keyConnects) {
++                    Timber.tag(loggerTag.value)
++                            .e("## addInboundGroupSession() Unconnected key")
++                    if (!trusted) {
++                        // Ignore the not connecting unsafe, keep existing
++                        Timber.tag(loggerTag.value)
++                                .e("## addInboundGroupSession() Received unsafe unconnected key")
++                        return AddSessionResult.NotImported
++                    }
++                    // else if the new one is safe and does not connect with existing, import the new one
++                } else {
+                 // If our existing session is better we keep it
+-                if (newKnownFirstIndex != null && existingFirstKnown <= newKnownFirstIndex) {
++                    if (existingFirstKnown <= newKnownFirstIndex) {
++                        val shouldUpdateTrust = trusted && (existingSession.sessionData.trusted != true)
++                        Timber.tag(loggerTag.value).d("## addInboundGroupSession() : updateTrust for $sessionId")
++                        if (shouldUpdateTrust) {
++                            // the existing as a better index but the new one is trusted so update trust
++                            inboundGroupSessionStore.updateToSafe(existingSessionHolder, sessionId, senderKey)
++                        }
+                     Timber.tag(loggerTag.value).d("## addInboundGroupSession() : ignore session our is better $senderKey/$sessionId")
+-                    candidateSession?.releaseSession()
++                        candidateSession.releaseSession()
+                     return AddSessionResult.NotImportedHigherIndex(newKnownFirstIndex.toInt())
+                 }
++                }
+             } catch (failure: Throwable) {
+                 Timber.tag(loggerTag.value).e("## addInboundGroupSession() Failed to add inbound: ${failure.localizedMessage}")
+-                candidateSession?.releaseSession()
++                candidateSession.releaseSession()
+                 return AddSessionResult.NotImported
+             }
+         }
+ 
+         Timber.tag(loggerTag.value).d("## addInboundGroupSession() : Candidate session should be added $senderKey/$sessionId")
+ 
+-        // sanity check on the new session
+-        if (null == candidateSession) {
+-            Timber.tag(loggerTag.value).e("## addInboundGroupSession : invalid session <null>")
+-            return AddSessionResult.NotImported
+-        }
+-
+         try {
+             if (candidateSession.sessionIdentifier() != sessionId) {
+                 Timber.tag(loggerTag.value).e("## addInboundGroupSession : ERROR: Mismatched group session ID from senderKey: $senderKey")
+@@ -674,6 +696,7 @@ internal class MXOlmDevice @Inject constructor(
+                 keysClaimed = keysClaimed,
+                 forwardingCurve25519KeyChain = forwardingCurve25519KeyChain,
+                 sharedHistory = sharedHistory,
++                trusted = trusted
+         )
+ 
+         val wrapper = MXInboundMegolmSessionWrapper(
+@@ -689,6 +712,16 @@ internal class MXOlmDevice @Inject constructor(
+         return AddSessionResult.Imported(candidateSession.firstKnownIndex.toInt())
+     }
+ 
++    fun OlmInboundGroupSession.connects(other: OlmInboundGroupSession): Boolean {
++        return try {
++            val lowestCommonIndex = this.firstKnownIndex.coerceAtLeast(other.firstKnownIndex)
++            this.export(lowestCommonIndex) == other.export(lowestCommonIndex)
++        } catch (failure: Throwable) {
++            // native error? key disposed?
++            false
++        }
++    }
++
+     /**
+      * Import an inbound group sessions to the session store.
+      *
+@@ -821,7 +854,8 @@ internal class MXOlmDevice @Inject constructor(
+                 payload,
+                 wrapper.sessionData.keysClaimed,
+                 senderKey,
+-                wrapper.sessionData.forwardingCurve25519KeyChain
++                wrapper.sessionData.forwardingCurve25519KeyChain,
++                isSafe = sessionHolder.wrapper.sessionData.trusted.orFalse()
+         )
+     }
+ 
+diff --git a/matrix-sdk-android/src/main/java/org/matrix/android/sdk/internal/crypto/SecretShareManager.kt b/matrix-sdk-android/src/main/java/org/matrix/android/sdk/internal/crypto/SecretShareManager.kt
+index a79e1a8901..5691f24d17 100644
+--- a/matrix-sdk-android/src/main/java/org/matrix/android/sdk/internal/crypto/SecretShareManager.kt
++++ b/matrix-sdk-android/src/main/java/org/matrix/android/sdk/internal/crypto/SecretShareManager.kt
+@@ -267,13 +267,24 @@ internal class SecretShareManager @Inject constructor(
+             Timber.tag(loggerTag.value).e("onSecretSend() :Received unencrypted secret send event")
+             return
+         }
++        // no need to download keys, after a verification we already forced download
++        val sendingDevice = toDevice.getSenderKey()?.let { cryptoStore.deviceWithIdentityKey(it) }
++        if (sendingDevice == null) {
++            Timber.tag(loggerTag.value).e("onSecretSend() : Ignore secret from unknown  device ${toDevice.getSenderKey()}")
++            return
++        }
+ 
+         // Was that sent by us?
+-        if (toDevice.senderId != credentials.userId) {
++        if (sendingDevice.userId != credentials.userId) {
+             Timber.tag(loggerTag.value).e("onSecretSend() : Ignore secret from other user ${toDevice.senderId}")
+             return
+         }
+ 
++        if (!sendingDevice.isVerified) {
++            Timber.tag(loggerTag.value).e("onSecretSend() : Ignore secret from untrusted device ${toDevice.getSenderKey()}")
++            return
++        }
++
+         val secretContent = toDevice.getClearContent().toModel<SecretSendEventContent>() ?: return
+ 
+         val existingRequest = verifMutex.withLock {
+diff --git a/matrix-sdk-android/src/main/java/org/matrix/android/sdk/internal/crypto/algorithms/IMXDecrypting.kt b/matrix-sdk-android/src/main/java/org/matrix/android/sdk/internal/crypto/algorithms/IMXDecrypting.kt
+index 6847a46369..e2ddd5d19f 100644
+--- a/matrix-sdk-android/src/main/java/org/matrix/android/sdk/internal/crypto/algorithms/IMXDecrypting.kt
++++ b/matrix-sdk-android/src/main/java/org/matrix/android/sdk/internal/crypto/algorithms/IMXDecrypting.kt
+@@ -42,5 +42,5 @@ internal interface IMXDecrypting {
+      * @param event the key event.
+      * @param defaultKeysBackupService the keys backup service
+      */
+-    fun onRoomKeyEvent(event: Event, defaultKeysBackupService: DefaultKeysBackupService) {}
++    fun onRoomKeyEvent(event: Event, defaultKeysBackupService: DefaultKeysBackupService, forceAccept: Boolean = false) {}
+ }
+diff --git a/matrix-sdk-android/src/main/java/org/matrix/android/sdk/internal/crypto/algorithms/megolm/MXMegolmDecryption.kt b/matrix-sdk-android/src/main/java/org/matrix/android/sdk/internal/crypto/algorithms/megolm/MXMegolmDecryption.kt
+index 410b74e19f..5354cbff3b 100644
+--- a/matrix-sdk-android/src/main/java/org/matrix/android/sdk/internal/crypto/algorithms/megolm/MXMegolmDecryption.kt
++++ b/matrix-sdk-android/src/main/java/org/matrix/android/sdk/internal/crypto/algorithms/megolm/MXMegolmDecryption.kt
+@@ -17,7 +17,8 @@
+ package org.matrix.android.sdk.internal.crypto.algorithms.megolm
+ 
+ import dagger.Lazy
+-import org.matrix.android.sdk.api.MatrixConfiguration
++import org.matrix.android.sdk.api.crypto.MXCryptoConfig
++import org.matrix.android.sdk.api.extensions.orFalse
+ import org.matrix.android.sdk.api.logger.LoggerTag
+ import org.matrix.android.sdk.api.session.crypto.MXCryptoError
+ import org.matrix.android.sdk.api.session.crypto.NewSessionListener
+@@ -34,16 +35,20 @@ import org.matrix.android.sdk.internal.crypto.algorithms.IMXDecrypting
+ import org.matrix.android.sdk.internal.crypto.keysbackup.DefaultKeysBackupService
+ import org.matrix.android.sdk.internal.crypto.store.IMXCryptoStore
+ import org.matrix.android.sdk.internal.session.StreamEventsManager
++import org.matrix.android.sdk.internal.util.time.Clock
+ import timber.log.Timber
+ 
+ private val loggerTag = LoggerTag("MXMegolmDecryption", LoggerTag.CRYPTO)
+ 
+ internal class MXMegolmDecryption(
+         private val olmDevice: MXOlmDevice,
++        private val myUserId: String,
+         private val outgoingKeyRequestManager: OutgoingKeyRequestManager,
+         private val cryptoStore: IMXCryptoStore,
+-        private val matrixConfiguration: MatrixConfiguration,
+-        private val liveEventManager: Lazy<StreamEventsManager>
++        private val liveEventManager: Lazy<StreamEventsManager>,
++        private val unrequestedForwardManager: UnRequestedForwardManager,
++        private val cryptoConfig: MXCryptoConfig,
++        private val clock: Clock,
+ ) : IMXDecrypting {
+ 
+     var newSessionListener: NewSessionListener? = null
+@@ -94,7 +99,8 @@ internal class MXMegolmDecryption(
+                                         senderCurve25519Key = olmDecryptionResult.senderKey,
+                                         claimedEd25519Key = olmDecryptionResult.keysClaimed?.get("ed25519"),
+                                         forwardingCurve25519KeyChain = olmDecryptionResult.forwardingCurve25519KeyChain
+-                                                .orEmpty()
++                                                .orEmpty(),
++                                        isSafe = olmDecryptionResult.isSafe.orFalse()
+                                 ).also {
+                                     liveEventManager.get().dispatchLiveEventDecrypted(event, it)
+                                 }
+@@ -182,12 +188,21 @@ internal class MXMegolmDecryption(
+      * @param event the key event.
+      * @param defaultKeysBackupService the keys backup service
+      */
+-    override fun onRoomKeyEvent(event: Event, defaultKeysBackupService: DefaultKeysBackupService) {
+-        Timber.tag(loggerTag.value).v("onRoomKeyEvent()")
++    override fun onRoomKeyEvent(event: Event, defaultKeysBackupService: DefaultKeysBackupService, forceAccept: Boolean) {
++        Timber.tag(loggerTag.value).v("onRoomKeyEvent(${event.getSenderKey()})")
+         var exportFormat = false
+-        val roomKeyContent = event.getClearContent().toModel<RoomKeyContent>() ?: return
++        val roomKeyContent = event.getDecryptedContent()?.toModel<RoomKeyContent>() ?: return
++
++        val eventSenderKey: String = event.getSenderKey() ?: return Unit.also {
++            Timber.tag(loggerTag.value).e("onRoom Key/Forward Event() : event is missing sender_key field")
++        }
++
++        // this device might not been downloaded now?
++        val fromDevice = cryptoStore.deviceWithIdentityKey(eventSenderKey)
++
++        lateinit var sessionInitiatorSenderKey: String
++        val trusted: Boolean
+ 
+-        var senderKey: String? = event.getSenderKey()
+         var keysClaimed: MutableMap<String, String> = HashMap()
+         val forwardingCurve25519KeyChain: MutableList<String> = ArrayList()
+ 
+@@ -195,32 +210,25 @@ internal class MXMegolmDecryption(
+             Timber.tag(loggerTag.value).e("onRoomKeyEvent() :  Key event is missing fields")
+             return
+         }
+-        if (event.getClearType() == EventType.FORWARDED_ROOM_KEY) {
++        if (event.getDecryptedType() == EventType.FORWARDED_ROOM_KEY) {
+             if (!cryptoStore.isKeyGossipingEnabled()) {
+                 Timber.tag(loggerTag.value)
+                         .i("onRoomKeyEvent(), ignore forward adding as per crypto config : ${roomKeyContent.roomId}|${roomKeyContent.sessionId}")
+                 return
+             }
+             Timber.tag(loggerTag.value).i("onRoomKeyEvent(), forward adding key : ${roomKeyContent.roomId}|${roomKeyContent.sessionId}")
+-            val forwardedRoomKeyContent = event.getClearContent().toModel<ForwardedRoomKeyContent>()
++            val forwardedRoomKeyContent = event.getDecryptedContent()?.toModel<ForwardedRoomKeyContent>()
+                     ?: return
+ 
+             forwardedRoomKeyContent.forwardingCurve25519KeyChain?.let {
+                 forwardingCurve25519KeyChain.addAll(it)
+             }
+ 
+-            if (senderKey == null) {
+-                Timber.tag(loggerTag.value).e("onRoomKeyEvent() : event is missing sender_key field")
+-                return
+-            }
+-
+-            forwardingCurve25519KeyChain.add(senderKey)
++            forwardingCurve25519KeyChain.add(eventSenderKey)
+ 
+             exportFormat = true
+-            senderKey = forwardedRoomKeyContent.senderKey
+-            if (null == senderKey) {
++            sessionInitiatorSenderKey = forwardedRoomKeyContent.senderKey ?: return Unit.also {
+                 Timber.tag(loggerTag.value).e("onRoomKeyEvent() : forwarded_room_key event is missing sender_key field")
+-                return
+             }
+ 
+             if (null == forwardedRoomKeyContent.senderClaimedEd25519Key) {
+@@ -229,13 +237,51 @@ internal class MXMegolmDecryption(
+             }
+ 
+             keysClaimed["ed25519"] = forwardedRoomKeyContent.senderClaimedEd25519Key
+-        } else {
+-            Timber.tag(loggerTag.value).i("onRoomKeyEvent(), Adding key : ${roomKeyContent.roomId}|${roomKeyContent.sessionId}")
+-            if (null == senderKey) {
+-                Timber.tag(loggerTag.value).e("## onRoomKeyEvent() : key event has no sender key (not encrypted?)")
++
++            // checking if was requested once.
++            // should we check if the request is sort of active?
++            val wasNotRequested = cryptoStore.getOutgoingRoomKeyRequest(
++                    roomId = forwardedRoomKeyContent.roomId.orEmpty(),
++                    sessionId = forwardedRoomKeyContent.sessionId.orEmpty(),
++                    algorithm = forwardedRoomKeyContent.algorithm.orEmpty(),
++                    senderKey = forwardedRoomKeyContent.senderKey.orEmpty(),
++            ).isEmpty()
++
++            trusted = false
++
++            if (!forceAccept && wasNotRequested) {
++//                val senderId = cryptoStore.deviceWithIdentityKey(event.getSenderKey().orEmpty())?.userId.orEmpty()
++                unrequestedForwardManager.onUnRequestedKeyForward(roomKeyContent.roomId, event, clock.epochMillis())
++                // Ignore unsolicited
++                Timber.tag(loggerTag.value).w("Ignoring forwarded_room_key_event for ${roomKeyContent.sessionId} that was not requested")
++                return
++            }
++
++            // Check who sent the request, as we requested we have the device keys (no need to download)
++            val sessionThatIsSharing = cryptoStore.deviceWithIdentityKey(eventSenderKey)
++            if (sessionThatIsSharing == null) {
++                Timber.tag(loggerTag.value).w("Ignoring forwarded_room_key from unknown device with identity $eventSenderKey")
+                 return
+             }
++            val isOwnDevice = myUserId == sessionThatIsSharing.userId
++            val isDeviceVerified = sessionThatIsSharing.isVerified
++            val isFromSessionInitiator = sessionThatIsSharing.identityKey() == sessionInitiatorSenderKey
++
++            val isLegitForward = (isOwnDevice && isDeviceVerified) ||
++                    (!cryptoConfig.limitRoomKeyRequestsToMyDevices && isFromSessionInitiator)
+ 
++            val shouldAcceptForward = forceAccept || isLegitForward
++
++            if (!shouldAcceptForward) {
++                Timber.tag(loggerTag.value)
++                        .w("Ignoring forwarded_room_key device:$eventSenderKey, ownVerified:{$isOwnDevice&&$isDeviceVerified}, fromInitiator:$isFromSessionInitiator")
++                return
++            }
++        } else {
++            // It's a m.room_key so safe
++            trusted = true
++            sessionInitiatorSenderKey = eventSenderKey
++            Timber.tag(loggerTag.value).i("onRoomKeyEvent(), Adding key : ${roomKeyContent.roomId}|${roomKeyContent.sessionId}")
+             // inherit the claimed ed25519 key from the setup message
+             keysClaimed = event.getKeysClaimed().toMutableMap()
+         }
+@@ -245,12 +291,15 @@ internal class MXMegolmDecryption(
+                 sessionId = roomKeyContent.sessionId,
+                 sessionKey = roomKeyContent.sessionKey,
+                 roomId = roomKeyContent.roomId,
+-                senderKey = senderKey,
++                senderKey = sessionInitiatorSenderKey,
+                 forwardingCurve25519KeyChain = forwardingCurve25519KeyChain,
+                 keysClaimed = keysClaimed,
+                 exportFormat = exportFormat,
+-                sharedHistory = roomKeyContent.getSharedKey()
+-        )
++                sharedHistory = roomKeyContent.getSharedKey(),
++                trusted = trusted
++        ).also {
++            Timber.tag(loggerTag.value).v(".. onRoomKeyEvent addInboundGroupSession ${roomKeyContent.sessionId} result: $it")
++        }
+ 
+         when (addSessionResult) {
+             is MXOlmDevice.AddSessionResult.Imported -> addSessionResult.ratchetIndex
+@@ -258,35 +307,28 @@ internal class MXMegolmDecryption(
+             else -> null
+         }?.let { index ->
+             if (event.getClearType() == EventType.FORWARDED_ROOM_KEY) {
+-                val fromDevice = (event.content?.get("sender_key") as? String)?.let { senderDeviceIdentityKey ->
+-                    cryptoStore.getUserDeviceList(event.senderId ?: "")
+-                            ?.firstOrNull {
+-                                it.identityKey() == senderDeviceIdentityKey
+-                            }
+-                }?.deviceId
+-
+                 outgoingKeyRequestManager.onRoomKeyForwarded(
+                         sessionId = roomKeyContent.sessionId,
+                         algorithm = roomKeyContent.algorithm ?: "",
+                         roomId = roomKeyContent.roomId,
+-                        senderKey = senderKey,
++                        senderKey = sessionInitiatorSenderKey,
+                         fromIndex = index,
+-                        fromDevice = fromDevice,
++                        fromDevice = fromDevice?.deviceId,
+                         event = event
+                 )
+ 
+                 cryptoStore.saveIncomingForwardKeyAuditTrail(
+                         roomId = roomKeyContent.roomId,
+                         sessionId = roomKeyContent.sessionId,
+-                        senderKey = senderKey,
++                        senderKey = sessionInitiatorSenderKey,
+                         algorithm = roomKeyContent.algorithm ?: "",
+-                        userId = event.senderId ?: "",
+-                        deviceId = fromDevice ?: "",
++                        userId = event.senderId.orEmpty(),
++                        deviceId = fromDevice?.deviceId.orEmpty(),
+                         chainIndex = index.toLong()
+                 )
+ 
+                 // The index is used to decide if we cancel sent request or if we wait for a better key
+-                outgoingKeyRequestManager.postCancelRequestForSessionIfNeeded(roomKeyContent.sessionId, roomKeyContent.roomId, senderKey, index)
++                outgoingKeyRequestManager.postCancelRequestForSessionIfNeeded(roomKeyContent.sessionId, roomKeyContent.roomId, sessionInitiatorSenderKey, index)
+             }
+         }
+ 
+@@ -295,7 +337,7 @@ internal class MXMegolmDecryption(
+                     .d("onRoomKeyEvent(${event.getClearType()}) : Added megolm session ${roomKeyContent.sessionId} in ${roomKeyContent.roomId}")
+             defaultKeysBackupService.maybeBackupKeys()
+ 
+-            onNewSession(roomKeyContent.roomId, senderKey, roomKeyContent.sessionId)
++            onNewSession(roomKeyContent.roomId, sessionInitiatorSenderKey, roomKeyContent.sessionId)
+         }
+     }
+ 
+diff --git a/matrix-sdk-android/src/main/java/org/matrix/android/sdk/internal/crypto/algorithms/megolm/MXMegolmDecryptionFactory.kt b/matrix-sdk-android/src/main/java/org/matrix/android/sdk/internal/crypto/algorithms/megolm/MXMegolmDecryptionFactory.kt
+index 38edbb7430..99f8bc69e0 100644
+--- a/matrix-sdk-android/src/main/java/org/matrix/android/sdk/internal/crypto/algorithms/megolm/MXMegolmDecryptionFactory.kt
++++ b/matrix-sdk-android/src/main/java/org/matrix/android/sdk/internal/crypto/algorithms/megolm/MXMegolmDecryptionFactory.kt
+@@ -17,28 +17,36 @@
+ package org.matrix.android.sdk.internal.crypto.algorithms.megolm
+ 
+ import dagger.Lazy
+-import org.matrix.android.sdk.api.MatrixConfiguration
++import org.matrix.android.sdk.api.crypto.MXCryptoConfig
+ import org.matrix.android.sdk.internal.crypto.MXOlmDevice
+ import org.matrix.android.sdk.internal.crypto.OutgoingKeyRequestManager
+ import org.matrix.android.sdk.internal.crypto.store.IMXCryptoStore
++import org.matrix.android.sdk.internal.di.UserId
+ import org.matrix.android.sdk.internal.session.StreamEventsManager
++import org.matrix.android.sdk.internal.util.time.Clock
+ import javax.inject.Inject
+ 
+ internal class MXMegolmDecryptionFactory @Inject constructor(
+         private val olmDevice: MXOlmDevice,
++        @UserId private val myUserId: String,
+         private val outgoingKeyRequestManager: OutgoingKeyRequestManager,
+         private val cryptoStore: IMXCryptoStore,
+-        private val matrixConfiguration: MatrixConfiguration,
+-        private val eventsManager: Lazy<StreamEventsManager>
++        private val eventsManager: Lazy<StreamEventsManager>,
++        private val unrequestedForwardManager: UnRequestedForwardManager,
++        private val mxCryptoConfig: MXCryptoConfig,
++        private val clock: Clock,
+ ) {
+ 
+     fun create(): MXMegolmDecryption {
+         return MXMegolmDecryption(
+-                olmDevice,
+-                outgoingKeyRequestManager,
+-                cryptoStore,
+-                matrixConfiguration,
+-                eventsManager
++                olmDevice = olmDevice,
++                myUserId = myUserId,
++                outgoingKeyRequestManager = outgoingKeyRequestManager,
++                cryptoStore = cryptoStore,
++                liveEventManager = eventsManager,
++                unrequestedForwardManager = unrequestedForwardManager,
++                cryptoConfig = mxCryptoConfig,
++                clock = clock,
+         )
+     }
+ }
+diff --git a/matrix-sdk-android/src/main/java/org/matrix/android/sdk/internal/crypto/algorithms/megolm/MXMegolmEncryption.kt b/matrix-sdk-android/src/main/java/org/matrix/android/sdk/internal/crypto/algorithms/megolm/MXMegolmEncryption.kt
+index 771b5f9a62..fca6fab66c 100644
+--- a/matrix-sdk-android/src/main/java/org/matrix/android/sdk/internal/crypto/algorithms/megolm/MXMegolmEncryption.kt
++++ b/matrix-sdk-android/src/main/java/org/matrix/android/sdk/internal/crypto/algorithms/megolm/MXMegolmEncryption.kt
+@@ -162,7 +162,8 @@ internal class MXMegolmEncryption(
+                 forwardingCurve25519KeyChain = emptyList(),
+                 keysClaimed = keysClaimedMap,
+                 exportFormat = false,
+-                sharedHistory = sharedHistory
++                sharedHistory = sharedHistory,
++                trusted = true
+         )
+ 
+         defaultKeysBackupService.maybeBackupKeys()
+diff --git a/matrix-sdk-android/src/main/java/org/matrix/android/sdk/internal/crypto/algorithms/megolm/UnRequestedForwardManager.kt b/matrix-sdk-android/src/main/java/org/matrix/android/sdk/internal/crypto/algorithms/megolm/UnRequestedForwardManager.kt
+new file mode 100644
+index 0000000000..42629b617e
+--- /dev/null
++++ b/matrix-sdk-android/src/main/java/org/matrix/android/sdk/internal/crypto/algorithms/megolm/UnRequestedForwardManager.kt
+@@ -0,0 +1,150 @@
++/*
++ * Copyright 2022 The Matrix.org Foundation C.I.C.
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *     http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++
++package org.matrix.android.sdk.internal.crypto.algorithms.megolm
++
++import kotlinx.coroutines.CoroutineScope
++import kotlinx.coroutines.SupervisorJob
++import kotlinx.coroutines.asCoroutineDispatcher
++import kotlinx.coroutines.cancel
++import kotlinx.coroutines.launch
++import org.matrix.android.sdk.api.extensions.tryOrNull
++import org.matrix.android.sdk.api.session.events.model.Event
++import org.matrix.android.sdk.internal.crypto.DeviceListManager
++import org.matrix.android.sdk.internal.session.SessionScope
++import org.matrix.android.sdk.internal.task.SemaphoreCoroutineSequencer
++import timber.log.Timber
++import java.util.concurrent.Executors
++import javax.inject.Inject
++import kotlin.math.abs
++
++private val INVITE_VALIDITY_TIME_WINDOW_MILLIS = 10 * 60_000
++
++@SessionScope
++internal class UnRequestedForwardManager @Inject constructor(
++        private val deviceListManager: DeviceListManager,
++) {
++
++    private val dispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
++    private val scope = CoroutineScope(SupervisorJob() + dispatcher)
++    private val sequencer = SemaphoreCoroutineSequencer()
++
++    // For now only in memory storage. Maybe we should persist? in case of gappy sync and long catchups?
++    private val forwardedKeysPerRoom = mutableMapOf<String, MutableMap<String, MutableList<ForwardInfo>>>()
++
++    data class InviteInfo(
++            val roomId: String,
++            val fromMxId: String,
++            val timestamp: Long
++    )
++
++    data class ForwardInfo(
++            val event: Event,
++            val timestamp: Long
++    )
++
++    // roomId, local timestamp of invite
++    private val recentInvites = mutableListOf<InviteInfo>()
++
++    fun close() {
++        try {
++            scope.cancel("User Terminate")
++        } catch (failure: Throwable) {
++            Timber.w(failure, "Failed to shutDown UnrequestedForwardManager")
++        }
++    }
++
++    fun onInviteReceived(roomId: String, fromUserId: String, localTimeStamp: Long) {
++        Timber.w("Invite received in room:$roomId from:$fromUserId at $localTimeStamp")
++        scope.launch {
++            sequencer.post {
++                if (!recentInvites.any { it.roomId == roomId && it.fromMxId == fromUserId }) {
++                    recentInvites.add(
++                            InviteInfo(
++                                    roomId,
++                                    fromUserId,
++                                    localTimeStamp
++                            )
++                    )
++                }
++            }
++        }
++    }
++
++    fun onUnRequestedKeyForward(roomId: String, event: Event, localTimeStamp: Long) {
++        Timber.w("Received unrequested forward in room:$roomId from:${event.senderId} at $localTimeStamp")
++        scope.launch {
++            sequencer.post {
++                val claimSenderId = event.senderId.orEmpty()
++                val senderKey = event.getSenderKey()
++                // we might want to download keys, as this user might not be known yet, cache is ok
++                val ownerMxId =
++                        tryOrNull {
++                            deviceListManager.downloadKeys(listOf(claimSenderId), false)
++                                    .map[claimSenderId]
++                                    ?.values
++                                    ?.firstOrNull { it.identityKey() == senderKey }
++                                    ?.userId
++                        }
++                // Not sure what to do if the device has been deleted? I can't proove the mxid
++                if (ownerMxId == null || claimSenderId != ownerMxId) {
++                    Timber.w("Mismatch senderId between event and olm owner")
++                    return@post
++                }
++
++                forwardedKeysPerRoom
++                        .getOrPut(roomId) { mutableMapOf() }
++                        .getOrPut(ownerMxId) { mutableListOf() }
++                        .add(ForwardInfo(event, localTimeStamp))
++            }
++        }
++    }
++
++    fun postSyncProcessParkedKeysIfNeeded(currentTimestamp: Long, handleForwards: suspend (List<Event>) -> Unit) {
++        scope.launch {
++            sequencer.post {
++                // Prune outdated invites
++                recentInvites.removeAll { currentTimestamp - it.timestamp > INVITE_VALIDITY_TIME_WINDOW_MILLIS }
++                val cleanUpEvents = mutableListOf<Pair<String, String>>()
++                forwardedKeysPerRoom.forEach { (roomId, senderIdToForwardMap) ->
++                    senderIdToForwardMap.forEach { (senderId, eventList) ->
++                        // is there a matching invite in a valid timewindow?
++                        val matchingInvite = recentInvites.firstOrNull { it.fromMxId == senderId && it.roomId == roomId }
++                        if (matchingInvite != null) {
++                            Timber.v("match  for room:$roomId from sender:$senderId -> count =${eventList.size}")
++
++                            eventList.filter {
++                                abs(matchingInvite.timestamp - it.timestamp) <= INVITE_VALIDITY_TIME_WINDOW_MILLIS
++                            }.map {
++                                it.event
++                            }.takeIf { it.isNotEmpty() }?.let {
++                                Timber.w("Re-processing forwarded_room_key_event that was not requested after invite")
++                                scope.launch {
++                                    handleForwards.invoke(it)
++                                }
++                            }
++                            cleanUpEvents.add(roomId to senderId)
++                        }
++                    }
++                }
++
++                cleanUpEvents.forEach { roomIdToSenderPair ->
++                    forwardedKeysPerRoom[roomIdToSenderPair.first]?.get(roomIdToSenderPair.second)?.clear()
++                }
++            }
++        }
++    }
++}
+diff --git a/matrix-sdk-android/src/main/java/org/matrix/android/sdk/internal/crypto/keysbackup/DefaultKeysBackupService.kt b/matrix-sdk-android/src/main/java/org/matrix/android/sdk/internal/crypto/keysbackup/DefaultKeysBackupService.kt
+index 8691c08779..e8700b7809 100644
+--- a/matrix-sdk-android/src/main/java/org/matrix/android/sdk/internal/crypto/keysbackup/DefaultKeysBackupService.kt
++++ b/matrix-sdk-android/src/main/java/org/matrix/android/sdk/internal/crypto/keysbackup/DefaultKeysBackupService.kt
+@@ -652,14 +652,7 @@ internal class DefaultKeysBackupService @Inject constructor(
+                         }
+                 val recoveryKey = computeRecoveryKey(secret.fromBase64())
+                 if (isValidRecoveryKeyForKeysBackupVersion(recoveryKey, keysBackupVersion)) {
+-                    awaitCallback<Unit> {
+-                        trustKeysBackupVersion(keysBackupVersion, true, it)
+-                    }
+                     // we don't want to start immediately downloading all as it can take very long
+-
+-//                    val importResult = awaitCallback<ImportRoomKeysResult> {
+-//                        restoreKeysWithRecoveryKey(keysBackupVersion, recoveryKey, null, null, null, it)
+-//                    }
+                     withContext(coroutineDispatchers.crypto) {
+                         cryptoStore.saveBackupRecoveryKey(recoveryKey, keysBackupVersion.version)
+                     }
+diff --git a/matrix-sdk-android/src/main/java/org/matrix/android/sdk/internal/crypto/model/InboundGroupSessionData.kt b/matrix-sdk-android/src/main/java/org/matrix/android/sdk/internal/crypto/model/InboundGroupSessionData.kt
+index 2ce36aa209..15e8ba835b 100644
+--- a/matrix-sdk-android/src/main/java/org/matrix/android/sdk/internal/crypto/model/InboundGroupSessionData.kt
++++ b/matrix-sdk-android/src/main/java/org/matrix/android/sdk/internal/crypto/model/InboundGroupSessionData.kt
+@@ -38,9 +38,6 @@ data class InboundGroupSessionData(
+         @Json(name = "forwarding_curve25519_key_chain")
+         var forwardingCurve25519KeyChain: List<String>? = emptyList(),
+ 
+-        /** Not yet used, will be in backup v2
+-        val untrusted?: Boolean = false */
+-
+         /**
+          * Flag that indicates whether or not the current inboundSession will be shared to
+          * invited users to decrypt past messages.
+@@ -48,4 +45,10 @@ data class InboundGroupSessionData(
+         @Json(name = "shared_history")
+         val sharedHistory: Boolean = false,
+ 
++        /**
++         * Flag indicating that this key is trusted.
++         */
++        @Json(name = "trusted")
++        val trusted: Boolean? = null,
++
+         )
+diff --git a/matrix-sdk-android/src/main/java/org/matrix/android/sdk/internal/crypto/model/MXInboundMegolmSessionWrapper.kt b/matrix-sdk-android/src/main/java/org/matrix/android/sdk/internal/crypto/model/MXInboundMegolmSessionWrapper.kt
+index 2772b34835..2c6a0a967a 100644
+--- a/matrix-sdk-android/src/main/java/org/matrix/android/sdk/internal/crypto/model/MXInboundMegolmSessionWrapper.kt
++++ b/matrix-sdk-android/src/main/java/org/matrix/android/sdk/internal/crypto/model/MXInboundMegolmSessionWrapper.kt
+@@ -86,6 +86,7 @@ data class MXInboundMegolmSessionWrapper(
+                     keysClaimed = megolmSessionData.senderClaimedKeys,
+                     forwardingCurve25519KeyChain = megolmSessionData.forwardingCurve25519KeyChain,
+                     sharedHistory = megolmSessionData.sharedHistory,
++                    trusted = false
+             )
+ 
+             return MXInboundMegolmSessionWrapper(
+diff --git a/matrix-sdk-android/src/main/java/org/matrix/android/sdk/internal/crypto/store/db/RealmCryptoStoreMigration.kt b/matrix-sdk-android/src/main/java/org/matrix/android/sdk/internal/crypto/store/db/RealmCryptoStoreMigration.kt
+index c36d572da6..426d50a54f 100644
+--- a/matrix-sdk-android/src/main/java/org/matrix/android/sdk/internal/crypto/store/db/RealmCryptoStoreMigration.kt
++++ b/matrix-sdk-android/src/main/java/org/matrix/android/sdk/internal/crypto/store/db/RealmCryptoStoreMigration.kt
+@@ -34,6 +34,7 @@ import org.matrix.android.sdk.internal.crypto.store.db.migration.MigrateCryptoTo
+ import org.matrix.android.sdk.internal.crypto.store.db.migration.MigrateCryptoTo015
+ import org.matrix.android.sdk.internal.crypto.store.db.migration.MigrateCryptoTo016
+ import org.matrix.android.sdk.internal.crypto.store.db.migration.MigrateCryptoTo017
++import org.matrix.android.sdk.internal.crypto.store.db.migration.MigrateCryptoTo018
+ import org.matrix.android.sdk.internal.util.database.MatrixRealmMigration
+ import org.matrix.android.sdk.internal.util.time.Clock
+ import javax.inject.Inject
+@@ -48,7 +49,7 @@ internal class RealmCryptoStoreMigration @Inject constructor(
+         private val clock: Clock,
+ ) : MatrixRealmMigration(
+         dbName = "Crypto",
+-        schemaVersion = 17L,
++        schemaVersion = 18L,
+ ) {
+     /**
+      * Forces all RealmCryptoStoreMigration instances to be equal.
+@@ -75,5 +76,6 @@ internal class RealmCryptoStoreMigration @Inject constructor(
+         if (oldVersion < 15) MigrateCryptoTo015(realm).perform()
+         if (oldVersion < 16) MigrateCryptoTo016(realm).perform()
+         if (oldVersion < 17) MigrateCryptoTo017(realm).perform()
++        if (oldVersion < 18) MigrateCryptoTo018(realm).perform()
+     }
+ }
+diff --git a/matrix-sdk-android/src/main/java/org/matrix/android/sdk/internal/crypto/store/db/migration/MigrateCryptoTo018.kt b/matrix-sdk-android/src/main/java/org/matrix/android/sdk/internal/crypto/store/db/migration/MigrateCryptoTo018.kt
+new file mode 100644
+index 0000000000..3bedf58ca2
+--- /dev/null
++++ b/matrix-sdk-android/src/main/java/org/matrix/android/sdk/internal/crypto/store/db/migration/MigrateCryptoTo018.kt
+@@ -0,0 +1,52 @@
++/*
++ * Copyright (c) 2022 The Matrix.org Foundation C.I.C.
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *     http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++
++package org.matrix.android.sdk.internal.crypto.store.db.migration
++
++import io.realm.DynamicRealm
++import org.matrix.android.sdk.internal.crypto.model.InboundGroupSessionData
++import org.matrix.android.sdk.internal.crypto.store.db.model.OlmInboundGroupSessionEntityFields
++import org.matrix.android.sdk.internal.di.MoshiProvider
++import org.matrix.android.sdk.internal.util.database.RealmMigrator
++import timber.log.Timber
++
++/**
++ * This migration is adding support for trusted flags on megolm sessions.
++ * We can't really assert the trust of existing keys, so for the sake of simplicity we are going to
++ * mark existing keys as safe.
++ * This migration can take long depending on the account
++ */
++internal class MigrateCryptoTo018(realm: DynamicRealm) : RealmMigrator(realm, 18) {
++
++    private val moshiAdapter = MoshiProvider.providesMoshi().adapter(InboundGroupSessionData::class.java)
++
++    override fun doMigrate(realm: DynamicRealm) {
++        realm.schema.get("OlmInboundGroupSessionEntity")
++                ?.transform { dynamicObject ->
++                    try {
++                        dynamicObject.getString(OlmInboundGroupSessionEntityFields.INBOUND_GROUP_SESSION_DATA_JSON)?.let { oldData ->
++                            moshiAdapter.fromJson(oldData)?.let { dataToMigrate ->
++                                dataToMigrate.copy(trusted = true).let {
++                                    dynamicObject.setString(OlmInboundGroupSessionEntityFields.INBOUND_GROUP_SESSION_DATA_JSON, moshiAdapter.toJson(it))
++                                }
++                            }
++                        }
++                    } catch (failure: Throwable) {
++                        Timber.e(failure, "Failed to migrate megolm session")
++                    }
++                }
++    }
++}
+diff --git a/matrix-sdk-android/src/main/java/org/matrix/android/sdk/internal/crypto/tasks/EncryptEventTask.kt b/matrix-sdk-android/src/main/java/org/matrix/android/sdk/internal/crypto/tasks/EncryptEventTask.kt
+index a4b4cd0761..f93da74507 100644
+--- a/matrix-sdk-android/src/main/java/org/matrix/android/sdk/internal/crypto/tasks/EncryptEventTask.kt
++++ b/matrix-sdk-android/src/main/java/org/matrix/android/sdk/internal/crypto/tasks/EncryptEventTask.kt
+@@ -82,7 +82,8 @@ internal class DefaultEncryptEventTask @Inject constructor(
+                         ).toContent(),
+                         forwardingCurve25519KeyChain = emptyList(),
+                         senderCurve25519Key = result.eventContent["sender_key"] as? String,
+-                        claimedEd25519Key = cryptoService.get().getMyDevice().fingerprint()
++                        claimedEd25519Key = cryptoService.get().getMyDevice().fingerprint(),
++                        isSafe = true
+                 )
+             } else {
+                 null
+diff --git a/matrix-sdk-android/src/main/java/org/matrix/android/sdk/internal/database/helper/ThreadSummaryHelper.kt b/matrix-sdk-android/src/main/java/org/matrix/android/sdk/internal/database/helper/ThreadSummaryHelper.kt
+index 0a6d4bf833..193710f962 100644
+--- a/matrix-sdk-android/src/main/java/org/matrix/android/sdk/internal/database/helper/ThreadSummaryHelper.kt
++++ b/matrix-sdk-android/src/main/java/org/matrix/android/sdk/internal/database/helper/ThreadSummaryHelper.kt
+@@ -228,7 +228,8 @@ private fun decryptIfNeeded(cryptoService: CryptoService?, eventEntity: EventEnt
+                     payload = result.clearEvent,
+                     senderKey = result.senderCurve25519Key,
+                     keysClaimed = result.claimedEd25519Key?.let { k -> mapOf("ed25519" to k) },
+-                    forwardingCurve25519KeyChain = result.forwardingCurve25519KeyChain
++                    forwardingCurve25519KeyChain = result.forwardingCurve25519KeyChain,
++                    isSafe = result.isSafe
+             )
+             // Save decryption result, to not decrypt every time we enter the thread list
+             eventEntity.setDecryptionResult(result)
+diff --git a/matrix-sdk-android/src/main/java/org/matrix/android/sdk/internal/database/model/EventEntity.kt b/matrix-sdk-android/src/main/java/org/matrix/android/sdk/internal/database/model/EventEntity.kt
+index 8b5a211fba..ee5c3d90c1 100644
+--- a/matrix-sdk-android/src/main/java/org/matrix/android/sdk/internal/database/model/EventEntity.kt
++++ b/matrix-sdk-android/src/main/java/org/matrix/android/sdk/internal/database/model/EventEntity.kt
+@@ -87,7 +87,8 @@ internal open class EventEntity(
+                 payload = result.clearEvent,
+                 senderKey = result.senderCurve25519Key,
+                 keysClaimed = result.claimedEd25519Key?.let { mapOf("ed25519" to it) },
+-                forwardingCurve25519KeyChain = result.forwardingCurve25519KeyChain
++                forwardingCurve25519KeyChain = result.forwardingCurve25519KeyChain,
++                isSafe = result.isSafe
+         )
+         val adapter = MoshiProvider.providesMoshi().adapter(OlmDecryptionResult::class.java)
+         decryptionResultJson = adapter.toJson(decryptionResult)
+diff --git a/matrix-sdk-android/src/main/java/org/matrix/android/sdk/internal/session/room/relation/threads/FetchThreadTimelineTask.kt b/matrix-sdk-android/src/main/java/org/matrix/android/sdk/internal/session/room/relation/threads/FetchThreadTimelineTask.kt
+index bac810f424..edd74c2ce0 100644
+--- a/matrix-sdk-android/src/main/java/org/matrix/android/sdk/internal/session/room/relation/threads/FetchThreadTimelineTask.kt
++++ b/matrix-sdk-android/src/main/java/org/matrix/android/sdk/internal/session/room/relation/threads/FetchThreadTimelineTask.kt
+@@ -225,7 +225,8 @@ internal class DefaultFetchThreadTimelineTask @Inject constructor(
+                     payload = result.clearEvent,
+                     senderKey = result.senderCurve25519Key,
+                     keysClaimed = result.claimedEd25519Key?.let { k -> mapOf("ed25519" to k) },
+-                    forwardingCurve25519KeyChain = result.forwardingCurve25519KeyChain
++                    forwardingCurve25519KeyChain = result.forwardingCurve25519KeyChain,
++                    isSafe = result.isSafe
+             )
+         } catch (e: MXCryptoError) {
+             if (e is MXCryptoError.Base) {
+diff --git a/matrix-sdk-android/src/main/java/org/matrix/android/sdk/internal/session/room/timeline/GetEventTask.kt b/matrix-sdk-android/src/main/java/org/matrix/android/sdk/internal/session/room/timeline/GetEventTask.kt
+index 7c662444e4..e0751865ad 100644
+--- a/matrix-sdk-android/src/main/java/org/matrix/android/sdk/internal/session/room/timeline/GetEventTask.kt
++++ b/matrix-sdk-android/src/main/java/org/matrix/android/sdk/internal/session/room/timeline/GetEventTask.kt
+@@ -56,7 +56,8 @@ internal class DefaultGetEventTask @Inject constructor(
+                                 payload = result.clearEvent,
+                                 senderKey = result.senderCurve25519Key,
+                                 keysClaimed = result.claimedEd25519Key?.let { mapOf("ed25519" to it) },
+-                                forwardingCurve25519KeyChain = result.forwardingCurve25519KeyChain
++                                forwardingCurve25519KeyChain = result.forwardingCurve25519KeyChain,
++                                isSafe = result.isSafe
+                         )
+                     }
+         }
+diff --git a/matrix-sdk-android/src/main/java/org/matrix/android/sdk/internal/session/sync/handler/CryptoSyncHandler.kt b/matrix-sdk-android/src/main/java/org/matrix/android/sdk/internal/session/sync/handler/CryptoSyncHandler.kt
+index b6142b3a7a..7bda5f0a2f 100644
+--- a/matrix-sdk-android/src/main/java/org/matrix/android/sdk/internal/session/sync/handler/CryptoSyncHandler.kt
++++ b/matrix-sdk-android/src/main/java/org/matrix/android/sdk/internal/session/sync/handler/CryptoSyncHandler.kt
+@@ -16,6 +16,7 @@
+ 
+ package org.matrix.android.sdk.internal.session.sync.handler
+ 
++import org.matrix.android.sdk.api.crypto.MXCRYPTO_ALGORITHM_OLM
+ import org.matrix.android.sdk.api.logger.LoggerTag
+ import org.matrix.android.sdk.api.session.crypto.MXCryptoError
+ import org.matrix.android.sdk.api.session.crypto.model.MXEventDecryptionResult
+@@ -42,7 +43,9 @@ internal class CryptoSyncHandler @Inject constructor(
+ 
+     suspend fun handleToDevice(toDevice: ToDeviceSyncResponse, progressReporter: ProgressReporter? = null) {
+         val total = toDevice.events?.size ?: 0
+-        toDevice.events?.forEachIndexed { index, event ->
++        toDevice.events
++                ?.filter { isSupportedToDevice(it) }
++                ?.forEachIndexed { index, event ->
+             progressReporter?.reportProgress(index * 100F / total)
+             // Decrypt event if necessary
+             Timber.tag(loggerTag.value).i("To device event from ${event.senderId} of type:${event.type}")
+@@ -57,6 +60,28 @@ internal class CryptoSyncHandler @Inject constructor(
+         }
+     }
+ 
++    private val unsupportedPlainToDeviceEventTypes = listOf(
++            EventType.ROOM_KEY,
++            EventType.FORWARDED_ROOM_KEY,
++            EventType.SEND_SECRET
++    )
++
++    private fun isSupportedToDevice(event: Event): Boolean {
++        val algorithm = event.content?.get("algorithm") as? String
++        val type = event.type.orEmpty()
++        return if (event.isEncrypted()) {
++            algorithm == MXCRYPTO_ALGORITHM_OLM
++        } else {
++            // some clear events are not allowed
++            type !in unsupportedPlainToDeviceEventTypes
++        }.also {
++            if (!it) {
++                Timber.tag(loggerTag.value)
++                        .w("Ignoring unsupported to device event ${event.type} alg:${algorithm}")
++            }
++        }
++    }
++
+     fun onSyncCompleted(syncResponse: SyncResponse) {
+         cryptoService.onSyncCompleted(syncResponse)
+     }
+@@ -91,7 +116,8 @@ internal class CryptoSyncHandler @Inject constructor(
+                         payload = result.clearEvent,
+                         senderKey = result.senderCurve25519Key,
+                         keysClaimed = result.claimedEd25519Key?.let { mapOf("ed25519" to it) },
+-                        forwardingCurve25519KeyChain = result.forwardingCurve25519KeyChain
++                        forwardingCurve25519KeyChain = result.forwardingCurve25519KeyChain,
++                        isSafe = result.isSafe
+                 )
+                 return true
+             } else {
+diff --git a/matrix-sdk-android/src/main/java/org/matrix/android/sdk/internal/session/sync/handler/room/RoomSyncHandler.kt b/matrix-sdk-android/src/main/java/org/matrix/android/sdk/internal/session/sync/handler/room/RoomSyncHandler.kt
+index bc91ca205d..a2f2251b70 100644
+--- a/matrix-sdk-android/src/main/java/org/matrix/android/sdk/internal/session/sync/handler/room/RoomSyncHandler.kt
++++ b/matrix-sdk-android/src/main/java/org/matrix/android/sdk/internal/session/sync/handler/room/RoomSyncHandler.kt
+@@ -40,6 +40,7 @@ import org.matrix.android.sdk.api.session.sync.model.RoomSync
+ import org.matrix.android.sdk.api.session.sync.model.RoomsSyncResponse
+ import org.matrix.android.sdk.api.settings.LightweightSettingsStorage
+ import org.matrix.android.sdk.internal.crypto.DefaultCryptoService
++import org.matrix.android.sdk.internal.crypto.algorithms.megolm.UnRequestedForwardManager
+ import org.matrix.android.sdk.internal.database.helper.addIfNecessary
+ import org.matrix.android.sdk.internal.database.helper.addTimelineEvent
+ import org.matrix.android.sdk.internal.database.helper.createOrUpdate
+@@ -99,6 +100,7 @@ internal class RoomSyncHandler @Inject constructor(
+         private val timelineInput: TimelineInput,
+         private val liveEventService: Lazy<StreamEventsManager>,
+         private val clock: Clock,
++        private val unRequestedForwardManager: UnRequestedForwardManager,
+ ) {
+ 
+     sealed class HandlingStrategy {
+@@ -322,6 +324,7 @@ internal class RoomSyncHandler @Inject constructor(
+         }
+         roomChangeMembershipStateDataSource.setMembershipFromSync(roomId, Membership.INVITE)
+         roomSummaryUpdater.update(realm, roomId, Membership.INVITE, updateMembers = true, inviterId = inviterEvent?.senderId, aggregator = aggregator)
++        unRequestedForwardManager.onInviteReceived(roomId, inviterEvent?.senderId.orEmpty(), clock.epochMillis())
+         return roomEntity
+     }
+ 
+@@ -551,7 +554,8 @@ internal class RoomSyncHandler @Inject constructor(
+                     payload = result.clearEvent,
+                     senderKey = result.senderCurve25519Key,
+                     keysClaimed = result.claimedEd25519Key?.let { k -> mapOf("ed25519" to k) },
+-                    forwardingCurve25519KeyChain = result.forwardingCurve25519KeyChain
++                    forwardingCurve25519KeyChain = result.forwardingCurve25519KeyChain,
++                    isSafe = result.isSafe
+             )
+         } catch (e: MXCryptoError) {
+             if (e is MXCryptoError.Base) {
+diff --git a/matrix-sdk-android/src/test/java/org/matrix/android/sdk/internal/crypto/UnRequestedKeysManagerTest.kt b/matrix-sdk-android/src/test/java/org/matrix/android/sdk/internal/crypto/UnRequestedKeysManagerTest.kt
+new file mode 100644
+index 0000000000..950093760a
+--- /dev/null
++++ b/matrix-sdk-android/src/test/java/org/matrix/android/sdk/internal/crypto/UnRequestedKeysManagerTest.kt
+@@ -0,0 +1,248 @@
++/*
++ * Copyright 2022 The Matrix.org Foundation C.I.C.
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *     http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++
++package org.matrix.android.sdk.internal.crypto
++
++import io.mockk.coEvery
++import io.mockk.mockk
++import kotlinx.coroutines.runBlocking
++import org.amshove.kluent.fail
++import org.amshove.kluent.shouldBe
++import org.junit.Test
++import org.matrix.android.sdk.api.crypto.MXCRYPTO_ALGORITHM_MEGOLM
++import org.matrix.android.sdk.api.session.crypto.crosssigning.DeviceTrustLevel
++import org.matrix.android.sdk.api.session.crypto.model.CryptoDeviceInfo
++import org.matrix.android.sdk.api.session.crypto.model.ForwardedRoomKeyContent
++import org.matrix.android.sdk.api.session.crypto.model.MXUsersDevicesMap
++import org.matrix.android.sdk.api.session.crypto.model.OlmDecryptionResult
++import org.matrix.android.sdk.api.session.crypto.model.UnsignedDeviceInfo
++import org.matrix.android.sdk.api.session.events.model.Event
++import org.matrix.android.sdk.api.session.events.model.EventType
++import org.matrix.android.sdk.api.session.events.model.content.OlmEventContent
++import org.matrix.android.sdk.api.session.events.model.toContent
++import org.matrix.android.sdk.internal.crypto.algorithms.megolm.UnRequestedForwardManager
++
++class UnRequestedKeysManagerTest {
++
++    private val aliceMxId = "alice@example.com"
++    private val bobMxId = "bob@example.com"
++    private val bobDeviceId = "MKRJDSLYGA"
++
++    private val device1Id = "MGDAADVDMG"
++
++    private val aliceFirstDevice = CryptoDeviceInfo(
++            deviceId = device1Id,
++            userId = aliceMxId,
++            algorithms = MXCryptoAlgorithms.supportedAlgorithms(),
++            keys = mapOf(
++                    "curve25519:$device1Id" to "yDa6cWOZ/WGBqm/JMUfTUCdEbAIzKHhuIcdDbnPEhDU",
++                    "ed25519:$device1Id" to "XTge+TDwfm+WW10IGnaqEyLTSukPPzg3R1J1YvO1SBI",
++            ),
++            signatures = mapOf(
++                    aliceMxId to mapOf(
++                            "ed25519:$device1Id" to "bPOAqM40+QSMgeEzUbYbPSZZccDDMUG00lCNdSXCoaS1gKKBGkSEaHO1OcibISIabjLYzmhp9mgtivz32fbABQ",
++                            "ed25519:Ru4ni66dbQ6FZgUoHyyBtmjKecOHMvMSsSBZ2SABtt0" to "owzUsQ4Pvn35uEIc5FdVnXVRPzsVYBV8uJRUSqr4y8r5tp0DvrMArtJukKETgYEAivcZMT1lwNihHIN9xh06DA"
++                    )
++            ),
++            unsigned = UnsignedDeviceInfo(deviceDisplayName = "Element Web"),
++            trustLevel = DeviceTrustLevel(crossSigningVerified = true, locallyVerified = true)
++    )
++
++    private val aBobDevice = CryptoDeviceInfo(
++            deviceId = bobDeviceId,
++            userId = bobMxId,
++            algorithms = MXCryptoAlgorithms.supportedAlgorithms(),
++            keys = mapOf(
++                    "curve25519:$bobDeviceId" to "tWwg63Yfn//61Ylhir6z4QGejvo193E6MVHmURtYVn0",
++                    "ed25519:$bobDeviceId" to "pS5NJ1LiVksQFX+p58NlphqMxE705laRVtUtZpYIAfs",
++            ),
++            signatures = mapOf(
++                    bobMxId to mapOf(
++                            "ed25519:$bobDeviceId" to "zAJqsmOSzkx8EWXcrynCsWtbgWZifN7A6DLyEBs+ZPPLnNuPN5Jwzc1Rg+oZWZaRPvOPcSL0cgcxRegSBU0NBA",
++                    )
++            ),
++            unsigned = UnsignedDeviceInfo(deviceDisplayName = "Element Ios")
++    )
++
++    @Test
++    fun `test process key request if invite received`() {
++        val fakeDeviceListManager = mockk<DeviceListManager> {
++            coEvery { downloadKeys(any(), any()) } returns MXUsersDevicesMap<CryptoDeviceInfo>().apply {
++                setObject(bobMxId, bobDeviceId, aBobDevice)
++            }
++        }
++        val unrequestedForwardManager = UnRequestedForwardManager(fakeDeviceListManager)
++
++        val roomId = "someRoomId"
++
++        unrequestedForwardManager.onUnRequestedKeyForward(
++                roomId,
++                createFakeSuccessfullyDecryptedForwardToDevice(
++                        aBobDevice,
++                        aliceFirstDevice,
++                        aBobDevice,
++                        megolmSessionId = "megolmId1"
++                ),
++                1_000
++        )
++
++        unrequestedForwardManager.onUnRequestedKeyForward(
++                roomId,
++                createFakeSuccessfullyDecryptedForwardToDevice(
++                        aBobDevice,
++                        aliceFirstDevice,
++                        aBobDevice,
++                        megolmSessionId = "megolmId2"
++                ),
++                1_000
++        )
++        // for now no reason to accept
++        runBlocking {
++            unrequestedForwardManager.postSyncProcessParkedKeysIfNeeded(1000) {
++                fail("There should be no key to process")
++            }
++        }
++
++        // ACT
++        // suppose an invite is received but from another user
++        val inviteTime = 1_000L
++        unrequestedForwardManager.onInviteReceived(roomId, "@jhon:example.com", inviteTime)
++
++        // we shouldn't process the requests!
++//        runBlocking {
++            unrequestedForwardManager.postSyncProcessParkedKeysIfNeeded(inviteTime) {
++                fail("There should be no key to process")
++            }
++//        }
++
++        // ACT
++        // suppose an invite is received from correct user
++
++        unrequestedForwardManager.onInviteReceived(roomId, aBobDevice.userId, inviteTime)
++        runBlocking {
++            unrequestedForwardManager.postSyncProcessParkedKeysIfNeeded(inviteTime) {
++                it.size shouldBe 2
++            }
++        }
++    }
++
++    @Test
++    fun `test invite before keys`() {
++        val fakeDeviceListManager = mockk<DeviceListManager> {
++            coEvery { downloadKeys(any(), any()) } returns MXUsersDevicesMap<CryptoDeviceInfo>().apply {
++                setObject(bobMxId, bobDeviceId, aBobDevice)
++            }
++        }
++        val unrequestedForwardManager = UnRequestedForwardManager(fakeDeviceListManager)
++
++        val roomId = "someRoomId"
++
++        unrequestedForwardManager.onInviteReceived(roomId, aBobDevice.userId, 1_000)
++
++        unrequestedForwardManager.onUnRequestedKeyForward(
++                roomId,
++                createFakeSuccessfullyDecryptedForwardToDevice(
++                        aBobDevice,
++                        aliceFirstDevice,
++                        aBobDevice,
++                        megolmSessionId = "megolmId1"
++                ),
++                1_000
++        )
++
++        runBlocking {
++            unrequestedForwardManager.postSyncProcessParkedKeysIfNeeded(1000) {
++                it.size shouldBe 1
++            }
++        }
++    }
++
++    @Test
++    fun `test validity window`() {
++        val fakeDeviceListManager = mockk<DeviceListManager> {
++            coEvery { downloadKeys(any(), any()) } returns MXUsersDevicesMap<CryptoDeviceInfo>().apply {
++                setObject(bobMxId, bobDeviceId, aBobDevice)
++            }
++        }
++        val unrequestedForwardManager = UnRequestedForwardManager(fakeDeviceListManager)
++
++        val roomId = "someRoomId"
++
++        val timeOfKeyReception = 1_000L
++
++        unrequestedForwardManager.onUnRequestedKeyForward(
++                roomId,
++                createFakeSuccessfullyDecryptedForwardToDevice(
++                        aBobDevice,
++                        aliceFirstDevice,
++                        aBobDevice,
++                        megolmSessionId = "megolmId1"
++                ),
++                timeOfKeyReception
++        )
++
++        val currentTimeWindow = 10 * 60_000
++
++        // simulate very late invite
++        val inviteTime = timeOfKeyReception + currentTimeWindow + 1_000
++        unrequestedForwardManager.onInviteReceived(roomId, aBobDevice.userId, inviteTime)
++
++        runBlocking {
++            unrequestedForwardManager.postSyncProcessParkedKeysIfNeeded(inviteTime) {
++                fail("There should be no key to process")
++            }
++        }
++    }
++
++    private fun createFakeSuccessfullyDecryptedForwardToDevice(
++            sentBy: CryptoDeviceInfo,
++            dest: CryptoDeviceInfo,
++            sessionInitiator: CryptoDeviceInfo,
++            algorithm: String = MXCRYPTO_ALGORITHM_MEGOLM,
++            roomId: String = "!zzgDlIhbWOevcdFBXr:example.com",
++            megolmSessionId: String = "Z/FSE8wDYheouGjGP9pezC4S1i39RtAXM3q9VXrBVZw"
++    ): Event {
++        return Event(
++                type = EventType.ENCRYPTED,
++                eventId = "!fake",
++                senderId = sentBy.userId,
++                content = OlmEventContent(
++                        ciphertext = mapOf(
++                                dest.identityKey()!! to mapOf(
++                                        "type" to 0,
++                                        "body" to "AwogcziNF/tv60X0elsBmnKPN3+LTXr4K3vXw+1ZJ6jpTxESIJCmMMDvOA+"
++                                )
++                        ),
++                        senderKey = sentBy.identityKey()
++                ).toContent(),
++
++                ).apply {
++            mxDecryptionResult = OlmDecryptionResult(
++                    payload = mapOf(
++                            "type" to EventType.FORWARDED_ROOM_KEY,
++                            "content" to ForwardedRoomKeyContent(
++                                    algorithm = algorithm,
++                                    roomId = roomId,
++                                    senderKey = sessionInitiator.identityKey(),
++                                    sessionId = megolmSessionId,
++                                    sessionKey = "AQAAAAAc4dK+lXxXyaFbckSxwjIEoIGDLKYovONJ7viWpwevhfvoBh+Q..."
++                            ).toContent()
++                    ),
++                    senderKey = sentBy.identityKey()
++            )
++        }
++    }
++}
+diff --git a/vector/src/main/java/im/vector/app/core/ui/views/ShieldImageView.kt b/vector/src/main/java/im/vector/app/core/ui/views/ShieldImageView.kt
+index 4d947f134b..4642fb8525 100644
+--- a/vector/src/main/java/im/vector/app/core/ui/views/ShieldImageView.kt
++++ b/vector/src/main/java/im/vector/app/core/ui/views/ShieldImageView.kt
+@@ -22,6 +22,7 @@ import androidx.annotation.DrawableRes
+ import androidx.appcompat.widget.AppCompatImageView
+ import androidx.core.view.isVisible
+ import im.vector.app.R
++import im.vector.app.features.home.room.detail.timeline.item.E2EDecoration
+ import org.matrix.android.sdk.api.session.crypto.model.RoomEncryptionTrustLevel
+ 
+ class ShieldImageView @JvmOverloads constructor(
+@@ -68,6 +69,39 @@ class ShieldImageView @JvmOverloads constructor(
+             null -> Unit
+         }
+     }
++
++    fun renderE2EDecoration(decoration: E2EDecoration?) {
++        isVisible = true
++        when (decoration) {
++            E2EDecoration.WARN_IN_CLEAR -> {
++                contentDescription = context.getString(R.string.unencrypted)
++                setImageResource(R.drawable.ic_shield_warning)
++            }
++            E2EDecoration.WARN_SENT_BY_UNVERIFIED -> {
++                contentDescription = context.getString(R.string.encrypted_unverified)
++                setImageResource(R.drawable.ic_shield_warning)
++            }
++            E2EDecoration.WARN_SENT_BY_UNKNOWN -> {
++                contentDescription = context.getString(R.string.encrypted_unverified)
++                setImageResource(R.drawable.ic_shield_warning)
++            }
++            E2EDecoration.WARN_SENT_BY_DELETED_SESSION -> {
++                contentDescription = context.getString(R.string.encrypted_unverified)
++                setImageResource(R.drawable.ic_shield_warning)
++            }
++            E2EDecoration.WARN_UNSAFE_KEY -> {
++                contentDescription = context.getString(R.string.key_authenticity_not_guaranteed)
++                setImageResource(
++                        R.drawable.ic_shield_gray
++                )
++            }
++            E2EDecoration.NONE,
++            null -> {
++                contentDescription = null
++                isVisible = false
++            }
++        }
++    }
+ }
+ 
+ @DrawableRes
+diff --git a/vector/src/main/java/im/vector/app/features/home/room/detail/timeline/action/MessageActionsEpoxyController.kt b/vector/src/main/java/im/vector/app/features/home/room/detail/timeline/action/MessageActionsEpoxyController.kt
+index d918703f95..5daf82fae6 100644
+--- a/vector/src/main/java/im/vector/app/features/home/room/detail/timeline/action/MessageActionsEpoxyController.kt
++++ b/vector/src/main/java/im/vector/app/features/home/room/detail/timeline/action/MessageActionsEpoxyController.kt
+@@ -143,6 +143,14 @@ class MessageActionsEpoxyController @Inject constructor(
+                     drawableStart(R.drawable.ic_shield_warning_small)
+                 }
+             }
++            E2EDecoration.WARN_UNSAFE_KEY -> {
++                bottomSheetSendStateItem {
++                    id("e2e_unsafe")
++                    showProgress(false)
++                    text(host.stringProvider.getString(R.string.key_authenticity_not_guaranteed))
++                    drawableStart(R.drawable.ic_shield_gray)
++                }
++            }
+             else -> {
+                 // nothing
+             }
+diff --git a/vector/src/main/java/im/vector/app/features/home/room/detail/timeline/edithistory/ViewEditHistoryViewModel.kt b/vector/src/main/java/im/vector/app/features/home/room/detail/timeline/edithistory/ViewEditHistoryViewModel.kt
+index c8a3bb8967..ca93c1389e 100644
+--- a/vector/src/main/java/im/vector/app/features/home/room/detail/timeline/edithistory/ViewEditHistoryViewModel.kt
++++ b/vector/src/main/java/im/vector/app/features/home/room/detail/timeline/edithistory/ViewEditHistoryViewModel.kt
+@@ -83,7 +83,8 @@ class ViewEditHistoryViewModel @AssistedInject constructor(
+                                 payload = result.clearEvent,
+                                 senderKey = result.senderCurve25519Key,
+                                 keysClaimed = result.claimedEd25519Key?.let { k -> mapOf("ed25519" to k) },
+-                                forwardingCurve25519KeyChain = result.forwardingCurve25519KeyChain
++                                forwardingCurve25519KeyChain = result.forwardingCurve25519KeyChain,
++                                isSafe = result.isSafe
+                         )
+                     } catch (e: MXCryptoError) {
+                         Timber.w("Failed to decrypt event in history")
+diff --git a/vector/src/main/java/im/vector/app/features/home/room/detail/timeline/helper/MessageInformationDataFactory.kt b/vector/src/main/java/im/vector/app/features/home/room/detail/timeline/helper/MessageInformationDataFactory.kt
+index b711bf37bd..85a4c9da8a 100644
+--- a/vector/src/main/java/im/vector/app/features/home/room/detail/timeline/helper/MessageInformationDataFactory.kt
++++ b/vector/src/main/java/im/vector/app/features/home/room/detail/timeline/helper/MessageInformationDataFactory.kt
+@@ -31,7 +31,6 @@ import org.matrix.android.sdk.api.extensions.orFalse
+ import org.matrix.android.sdk.api.session.Session
+ import org.matrix.android.sdk.api.session.crypto.verification.VerificationState
+ import org.matrix.android.sdk.api.session.events.model.EventType
+-import org.matrix.android.sdk.api.session.events.model.content.EncryptedEventContent
+ import org.matrix.android.sdk.api.session.events.model.getMsgType
+ import org.matrix.android.sdk.api.session.events.model.isAttachmentMessage
+ import org.matrix.android.sdk.api.session.events.model.isSticker
+@@ -146,29 +145,40 @@ class MessageInformationDataFactory @Inject constructor(
+     }
+ 
+     private fun getE2EDecoration(roomSummary: RoomSummary?, event: TimelineEvent): E2EDecoration {
+-        return if (
+-                event.root.sendState == SendState.SYNCED &&
+-                roomSummary?.isEncrypted.orFalse() &&
+-                // is user verified
+-                session.cryptoService().crossSigningService().getUserCrossSigningKeys(event.root.senderId ?: "")?.isTrusted() == true) {
+-            val ts = roomSummary?.encryptionEventTs ?: 0
+-            val eventTs = event.root.originServerTs ?: 0
+-            if (event.isEncrypted()) {
++        if (roomSummary?.isEncrypted != true) {
++            // No decoration for clear room
++            // Questionable? what if the event is E2E?
++            return E2EDecoration.NONE
++        }
++        if (event.root.sendState != SendState.SYNCED) {
++            // we don't display e2e decoration if event not synced back
++            return E2EDecoration.NONE
++        }
++        val userCrossSigningInfo = session.cryptoService()
++                .crossSigningService()
++                .getUserCrossSigningKeys(event.root.senderId.orEmpty())
++
++        if (userCrossSigningInfo?.isTrusted() == true) {
++            return if (event.isEncrypted()) {
+                 // Do not decorate failed to decrypt, or redaction (we lost sender device info)
+                 if (event.root.getClearType() == EventType.ENCRYPTED || event.root.isRedacted()) {
+                     E2EDecoration.NONE
+                 } else {
+-                    val sendingDevice = event.root.content
+-                            .toModel<EncryptedEventContent>()
+-                            ?.deviceId
+-                            ?.let { deviceId ->
+-                                session.cryptoService().getCryptoDeviceInfo(event.root.senderId ?: "", deviceId)
++                    val sendingDevice = event.root.getSenderKey()
++                            ?.let { it ->
++                                session.cryptoService().deviceWithIdentityKey(
++                                        it,
++                                        event.root.content?.get("algorithm") as? String ?: ""
++                                )
+                             }
++                    if (event.root.mxDecryptionResult?.isSafe == false) {
++                        E2EDecoration.WARN_UNSAFE_KEY
++                    } else {
+                     when {
+                         sendingDevice == null -> {
+                             // For now do not decorate this with warning
+                             // maybe it's a deleted session
+-                            E2EDecoration.NONE
++                                E2EDecoration.WARN_SENT_BY_DELETED_SESSION
+                         }
+                         sendingDevice.trustLevel == null -> {
+                             E2EDecoration.WARN_SENT_BY_UNKNOWN
+@@ -181,19 +191,35 @@ class MessageInformationDataFactory @Inject constructor(
+                         }
+                     }
+                 }
++                }
+             } else {
+-                if (event.root.isStateEvent()) {
+-                    // Do not warn for state event, they are always in clear
++                e2EDecorationForClearEventInE2ERoom(event, roomSummary)
++            }
++        } else {
++            return if (!event.isEncrypted()) {
++                e2EDecorationForClearEventInE2ERoom(event, roomSummary)
++            } else if (event.root.mxDecryptionResult != null) {
++                if (event.root.mxDecryptionResult?.isSafe == true) {
+                     E2EDecoration.NONE
+                 } else {
+-                    // If event is in clear after the room enabled encryption we should warn
+-                    if (eventTs > ts) E2EDecoration.WARN_IN_CLEAR else E2EDecoration.NONE
+-                }
++                    E2EDecoration.WARN_UNSAFE_KEY
+             }
+         } else {
+             E2EDecoration.NONE
+         }
+     }
++    }
++
++    private fun e2EDecorationForClearEventInE2ERoom(event: TimelineEvent, roomSummary: RoomSummary) =
++            if (event.root.isStateEvent()) {
++                // Do not warn for state event, they are always in clear
++                E2EDecoration.NONE
++            } else {
++                val ts = roomSummary.encryptionEventTs ?: 0
++                val eventTs = event.root.originServerTs ?: 0
++                // If event is in clear after the room enabled encryption we should warn
++                if (eventTs > ts) E2EDecoration.WARN_IN_CLEAR else E2EDecoration.NONE
++            }
+ 
+     /**
+      * Tiles type message never show the sender information (like verification request), so we should repeat it for next message
+diff --git a/vector/src/main/java/im/vector/app/features/home/room/detail/timeline/item/AbsBaseMessageItem.kt b/vector/src/main/java/im/vector/app/features/home/room/detail/timeline/item/AbsBaseMessageItem.kt
+index 5e23f4db16..ab383f04ff 100644
+--- a/vector/src/main/java/im/vector/app/features/home/room/detail/timeline/item/AbsBaseMessageItem.kt
++++ b/vector/src/main/java/im/vector/app/features/home/room/detail/timeline/item/AbsBaseMessageItem.kt
+@@ -40,7 +40,6 @@ import im.vector.app.features.home.room.detail.timeline.TimelineEventController
+ import im.vector.app.features.home.room.detail.timeline.view.TimelineMessageLayoutRenderer
+ import im.vector.app.features.reactions.widget.ReactionButton
+ import im.vector.app.features.themes.ThemeUtils
+-import org.matrix.android.sdk.api.session.crypto.model.RoomEncryptionTrustLevel
+ import org.matrix.android.sdk.api.session.room.send.SendState
+ 
+ private const val MAX_REACTIONS_TO_SHOW = 8
+@@ -80,17 +79,7 @@ abstract class AbsBaseMessageItem<H : AbsBaseMessageItem.Holder>(@LayoutRes layo
+     override fun bind(holder: H) {
+         super.bind(holder)
+         renderReactions(holder, baseAttributes.informationData.reactionsSummary)
+-        when (baseAttributes.informationData.e2eDecoration) {
+-            E2EDecoration.NONE -> {
+-                holder.e2EDecorationView.render(null)
+-            }
+-            E2EDecoration.WARN_IN_CLEAR,
+-            E2EDecoration.WARN_SENT_BY_UNVERIFIED,
+-            E2EDecoration.WARN_SENT_BY_UNKNOWN -> {
+-                holder.e2EDecorationView.render(RoomEncryptionTrustLevel.Warning)
+-            }
+-        }
+-
++        holder.e2EDecorationView.renderE2EDecoration(baseAttributes.informationData.e2eDecoration)
+         holder.view.onClick(baseAttributes.itemClickListener)
+         holder.view.setOnLongClickListener(baseAttributes.itemLongClickListener)
+         (holder.view as? TimelineMessageLayoutRenderer)?.renderMessageLayout(baseAttributes.informationData.messageLayout)
+diff --git a/vector/src/main/java/im/vector/app/features/home/room/detail/timeline/item/MessageInformationData.kt b/vector/src/main/java/im/vector/app/features/home/room/detail/timeline/item/MessageInformationData.kt
+index 9b24720c88..757246d4e4 100644
+--- a/vector/src/main/java/im/vector/app/features/home/room/detail/timeline/item/MessageInformationData.kt
++++ b/vector/src/main/java/im/vector/app/features/home/room/detail/timeline/item/MessageInformationData.kt
+@@ -106,7 +106,9 @@ enum class E2EDecoration {
+     NONE,
+     WARN_IN_CLEAR,
+     WARN_SENT_BY_UNVERIFIED,
+-    WARN_SENT_BY_UNKNOWN
++    WARN_SENT_BY_UNKNOWN,
++    WARN_SENT_BY_DELETED_SESSION,
++    WARN_UNSAFE_KEY
+ }
+ 
+ enum class SendStateDecoration {
+diff --git a/vector/src/main/java/im/vector/app/features/notifications/NotifiableEventResolver.kt b/vector/src/main/java/im/vector/app/features/notifications/NotifiableEventResolver.kt
+index ae5a8aec7d..90138fd495 100644
+--- a/vector/src/main/java/im/vector/app/features/notifications/NotifiableEventResolver.kt
++++ b/vector/src/main/java/im/vector/app/features/notifications/NotifiableEventResolver.kt
+@@ -213,7 +213,8 @@ class NotifiableEventResolver @Inject constructor(
+                         payload = result.clearEvent,
+                         senderKey = result.senderCurve25519Key,
+                         keysClaimed = result.claimedEd25519Key?.let { mapOf("ed25519" to it) },
+-                        forwardingCurve25519KeyChain = result.forwardingCurve25519KeyChain
++                        forwardingCurve25519KeyChain = result.forwardingCurve25519KeyChain,
++                        isSafe = result.isSafe
+                 )
+             } catch (ignore: MXCryptoError) {
+             }
+diff --git a/vector/src/main/res/drawable/ic_shield_gray.xml b/vector/src/main/res/drawable/ic_shield_gray.xml
+new file mode 100644
+index 0000000000..a4c52d74ba
+--- /dev/null
++++ b/vector/src/main/res/drawable/ic_shield_gray.xml
+@@ -0,0 +1,11 @@
++<vector xmlns:android="http://schemas.android.com/apk/res/android"
++    android:width="24dp"
++    android:height="24dp"
++    android:viewportWidth="24"
++    android:viewportHeight="24">
++  <path
++      android:strokeWidth="1"
++      android:pathData="M12.0077,23.4869C12.0051,23.4875 12.0025,23.4881 12,23.4886C11.9975,23.4881 11.9949,23.4875 11.9923,23.4869C11.9204,23.4706 11.8129,23.4452 11.6749,23.4092C11.3989,23.3373 11.0015,23.2235 10.5233,23.0575C9.5654,22.725 8.2921,22.186 7.0225,21.3608C4.4897,19.7145 2,16.954 2,12.405V3.4496L12,0.521L22,3.4496V12.405C22,16.954 19.5103,19.7145 16.9775,21.3608C15.7079,22.186 14.4346,22.725 13.4767,23.0575C12.9985,23.2235 12.6011,23.3373 12.3251,23.4092C12.1871,23.4452 12.0796,23.4706 12.0077,23.4869Z"
++      android:fillColor="@color/shield_color_gray"
++      android:strokeColor="#ffffff"/>
++</vector>
+-- 
+2.30.2
+
