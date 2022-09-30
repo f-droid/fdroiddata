@@ -1117,7 +1117,36 @@ Builds:
       - cp $$Material-Dialogs$$/bottomsheets/build/outputs/aar/bottomsheets-release.aar
         libs/
 
+  - versionName: 3.10.2
+    versionCode: 31002
+    commit: f4ebf6cf66060ab5b7c920d744e424374130091c
+    subdir: app
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y openjdk-11-jdk-headless
+      - update-alternatives --auto java
+    gradle:
+      - firebasefree
+    srclibs:
+      - Material-Dialogs@3.3.0
+    rm:
+      - app/libs/bottomsheets-release.aar
+    prebuild:
+      - sed -i -e 's|= uri("https://jitpack\.io")|"https://jitpack.io"|' ../build.gradle
+      - sed -i -e '/google.firebase/d; /gms/d' ../build.gradle build.gradle
+      - sed -i -e '/firebaseCrashlytics/d' -e '/^android\.applicationVariants\.all
+        {/,/^}$/d' build.gradle
+      - sed -i -e '/app-update-ktx/s/implementation/firebaseImplementation/' build.gradle
+      - pushd $$Material-Dialogs$$
+      - sed -i -e '241d' bottomsheets/src/main/java/com/afollestad/materialdialogs/bottomsheets/BottomSheet.kt
+    build:
+      - pushd $$Material-Dialogs$$
+      - gradle bottomsheets:assembleRelease
+      - popd
+      - cp $$Material-Dialogs$$/bottomsheets/build/outputs/aar/bottomsheets-release.aar
+        libs/
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 3.10.1
-CurrentVersionCode: 31001
+CurrentVersion: 3.10.2
+CurrentVersionCode: 31002
