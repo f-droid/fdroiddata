@@ -215,8 +215,33 @@ Builds:
       - $HOME/.pub-cache/bin/melos bootstrap
       - flutter build apk
 
+  - versionName: 3.2.1
+    versionCode: 37
+    commit: 2a937394058e6092519cd9efc02985927447b027
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y openjdk-11-jdk-headless
+      - update-alternatives --auto java
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@3.3.2
+    rm:
+      - .github
+      - linux
+      - snap
+      - web
+      - windows
+      - android/app/proguard-rules.pro
+    prebuild: sed -i -e '/minifyEnabled/d' -e '/signingConfig /d' android/app/build.gradle
+    build:
+      - export PATH=$$flutter$$/bin/:$PATH
+      - flutter config --no-analytics
+      - dart pub global activate melos
+      - $HOME/.pub-cache/bin/melos bootstrap
+      - flutter build apk
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v.*$
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 3.2.0
-CurrentVersionCode: 36
+CurrentVersion: 3.2.1
+CurrentVersionCode: 37
