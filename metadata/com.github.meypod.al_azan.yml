@@ -286,7 +286,62 @@ Builds:
       - node_modules/
     ndk: r21e
 
+  - versionName: 1.4.3
+    versionCode: 24
+    commit: be5b2b0d2130d0164c09af072011a23212ca964b
+    subdir: android/app
+    sudo:
+      - sysctl fs.inotify.max_user_watches=524288 || true
+      - curl -Lo node.tar.xz https://nodejs.org/dist/v16.16.0/node-v16.16.0-linux-x64.tar.xz
+      - echo "edcb6e9bb049ae365611aa209fc03c4bfc7e0295dbcc5b2f1e710ac70384a8ec node.tar.xz"
+        | sha256sum -c -
+      - tar xJf node.tar.xz --strip-components=1 -C /usr/local/
+      - npm -g install yarn
+      - apt-get update || apt-get update
+      - apt-get install -y openjdk-11-jdk-headless
+      - update-alternatives --auto java
+    init:
+      - cd ../..
+      - yarn install --frozen-lockfile
+    gradle:
+      - yes
+    srclibs:
+      - meypod-notifee@5.6.0-guava
+    prebuild:
+      - sed -i -e '\!READ_PHONE_STATE!a<uses-permission android:name="com.android.vending.CHECK_LICENSE"
+        tools:node="remove" />' -e 's!xmlns:android!xmlns:tools="http://schemas.android.com/tools"
+        xmlns:android!' src/main/AndroidManifest.xml
+      - pushd ../..
+      - mkdir -p ./node_modules/@notifee/core/
+      - cp -r $$meypod-notifee$$/android ./node_modules/@notifee/core/
+      - sed -E -i 's/^.*(fabric|com\.(crashlytics|google\.(firebase|android.gms))).*$//g'
+        ./node_modules/@notifee/react-native/android/build.gradle
+      - sed "s/<TRANSLATION_IO_APIKEY>//" lingui.config.js.example > lingui.config.js
+      - npx lingui compile
+      - popd
+    scanignore:
+      - android/build.gradle
+      - node_modules/jsc-android
+      - node_modules/react-native/android
+      - node_modules/react-native/ReactAndroid/build.gradle
+      - node_modules/react-native/ReactAndroid/hermes-engine/build.gradle
+      - node_modules/react-native-mmkv/android/build.gradle
+      - node_modules/react-native-safe-area-context/android/build.gradle
+      - node_modules/react-native-screens/android/build.gradle
+      - node_modules/react-native-svg/android/build.gradle
+      - node_modules/@react-native-masked-view/masked-view/android/build.gradle
+      - node_modules/@callstack/repack/android/build.gradle
+      - node_modules/@notifee/react-native/android/build.gradle
+      - node_modules/@notifee/core/android/build.gradle
+      - node_modules/react-native-get-location/android/build.gradle
+      - node_modules/react-native-alarm-module/android/build.gradle
+      - node_modules/react-native-blob-util/android/build.gradle
+      - node_modules/react-native-document-picker/android/build.gradle
+    scandelete:
+      - node_modules/
+    ndk: r21e
+
 AutoUpdateMode: Version v%v
 UpdateCheckMode: Tags
-CurrentVersion: 1.3.0
-CurrentVersionCode: 20
+CurrentVersion: 1.4.3
+CurrentVersionCode: 24
