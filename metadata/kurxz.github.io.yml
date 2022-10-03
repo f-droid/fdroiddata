@@ -26,8 +26,12 @@ Builds:
         | sha256sum -c -
       - tar xJf node.tar.xz --strip-components=1 -C /usr/local/
       - npm -g install @ionic/cli
-    init:
-      - pushd ../../../srclib/cpython
+    gradle:
+      - yes
+    srclibs:
+      - cpython@v3.10.5
+    prebuild:
+      - pushd $$cpython$$
       - export temp=$(mktemp -d)
       - mkdir -p $temp/cpython
       - ./configure --prefix=$temp/cpython --enable-optimizations
@@ -39,11 +43,9 @@ Builds:
       - npm install --build-from-source
       - ionic cap copy
       - ionic cap sync
+      - npx cap telemetry off
+      - npx cap update
       - popd
-    gradle:
-      - yes
-    srclibs:
-      - cpython@v3.10.5
     scanignore:
       - node_modules/@capacitor/cli/assets/capacitor-cordova-android-plugins.tar.gz
     scandelete:
