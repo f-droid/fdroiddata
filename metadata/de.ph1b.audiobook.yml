@@ -1065,8 +1065,27 @@ Builds:
     scandelete:
       - plugins/build
 
+  - versionName: 6.2.1
+    versionCode: 3602010
+    commit: 515c72ff1ff7eb35f0b66f4af091711e6c8cbd5a
+    subdir: app
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y openjdk-11-jdk-headless
+      - update-alternatives --auto java
+    gradle:
+      - yes
+    prebuild:
+      - sed -i -e '/crashlytics/d' -e '/googleServices/d' -e '/if (enableCrashlytics)
+        {/,/}/d' build.gradle.kts
+      - sed -i -e '/crashlytics/d' ../logging/crashlytics/build.gradle.kts
+      - echo -e "\norg.gradle.jvmargs=-XX:MaxHeapSize=2048m" >> ../gradle.properties
+      - echo -e "\norg.gradle.unsafe.configuration-cache=false" >> ../gradle.properties
+    scandelete:
+      - plugins/build
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^[0-9.]+$
 UpdateCheckData: gradle/libs.versions.toml|versionCode\s*=\s*"([0-9]+)"|.|versionName\s*=\s*"(.+)"
-CurrentVersion: 6.1.2
-CurrentVersionCode: 3060397
+CurrentVersion: 6.2.1
+CurrentVersionCode: 3602010
