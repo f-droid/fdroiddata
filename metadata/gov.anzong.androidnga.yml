@@ -65,8 +65,39 @@ Builds:
       - popd
       - mv $$android-floating-action-button$$/build/outputs/aar/*.aar libs/floatingactionmenu.aar
 
+  - versionName: 3.8.0
+    versionCode: 3080
+    commit: b806e55efb4b170cdaeb60bf924c771437cd390f
+    subdir: nga_phone_base_3.0
+    gradle:
+      - yes
+    srclibs:
+      - android-floating-action-button@2396953e0f8a1f329756320bd0663d250aadac83
+    rm:
+      - nga_phone_base_3.0/libs/*.aar
+      - lib_common/libs/*.jar
+      - lib_cloud
+    prebuild:
+      - sed -i -e '/bintray/d' -e '/aliyun/d' -e '/sonatype/d' ../build.gradle
+      - sed -i -e '/lib_cloud/d' -e '/arouter-api/s/com.alibaba/com.github.alibaba.ARouter/'
+        -e 's/com.alibaba:arouter-compiler:1.1.4/com.github.alibaba.ARouter:arouter-compiler:1.1.1/'
+        build.gradle
+      - sed -i -e 's/com.nshmura:recyclertablayout:1.5.0/com.github.nshmura:RecyclerTabLayout:1.4.0/'
+        -e 's/com.zhouyou:signseekbar:1.0.6/com.github.zhou-you:EasySignSeekBar:8c52404ab6/'
+        -e 's/net.steamcrafted:load-toast/com.github.code-mc:loadtoast/' -e 's/me.imid.swipebacklayout.lib:library:1.1.0/com.github.ikew0ng:SwipeBackLayout:e1d109e5fe/'
+        -e "s|files('libs/commons-io-2.4.jar')|'commons-io:commons-io:2.4'|" ../lib_common/build.gradle
+      - sed -i -e "s/':lib_cloud',//" ../settings.gradle
+      - find -type f -name "*.java" -exec sed -i -e '/CloudServerManager/d' {} +
+    scanignore:
+      - nga_phone_base_3.0/src/main/java/sp/phone/util/PluginUtils.java
+    build:
+      - pushd $$android-floating-action-button$$
+      - gradle assembleRelease
+      - popd
+      - mv $$android-floating-action-button$$/build/outputs/aar/*.aar libs/floatingactionmenu.aar
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: build.gradle|appVersionCode\s=\s(\d+)|.|appVersionName\s=\s'([\d.]+)'
-CurrentVersion: 3.7.6
-CurrentVersionCode: 3076
+CurrentVersion: 3.8.0
+CurrentVersionCode: 3080
