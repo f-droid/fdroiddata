@@ -1317,7 +1317,48 @@ Builds:
       - ANDROID_NDK_ROOT=$$NDK$$ ./ndk-make.sh
     ndk: r21b
 
+  - versionName: 1.34.1
+    versionCode: 638
+    commit: 35f16c80aced4c7f07565bfd0379b2cebb47ce10
+    timeout: 20000
+    submodules: true
+    sudo:
+      - cd /opt/android-sdk/ndk
+      - rm -fr $(ls | sed 's/21.1.6352462//')
+      - apt-get update || apt-get update
+      - apt-get install -y openjdk-11-jdk-headless
+      - update-alternatives --auto java
+    gradle:
+      - fat
+    srclibs:
+      - rustup@1.25.1
+      - maplibre-gl-native@android-v9.5.2
+    prebuild:
+      - sed -i -e '/applicationIdSuffix/d' -e '/^repositories {/a mavenLocal()' build.gradle
+      - sed -i -e 's/org.maplibre.gl/org.fdroid/' build.gradle $$maplibre-gl-native$$/platform/android/gradle/artifact-settings.gradle
+      - cd $$maplibre-gl-native$$/platform/android/MapboxGLAndroidSDK
+      - sed -i -e '/signing {/,/}/d' -e '/signing/d' ../gradle/gradle-publish.gradle
+      - sed -i -e '/gmsLocation/d' build.gradle
+      - cd src/main/java/com/mapbox/mapboxsdk/location/engine
+      - sed -i -e '/isOnClasspath(GOOGLE_API_AVAILABILITY)/,/}/d' -e '/import.*gms/d'
+        -e 's|return isGoogle|return //isGoogle|' LocationEngineProvider.java
+      - rm GoogleLocationEngineImpl.java
+      - sed -i -e '/private.*extractGooglePlayResult/,/^  }/d' -e '/extractGooglePlayResult/d'
+        -e '/import.*gms/d' LocationEngineResult.java
+    build:
+      - pushd $$maplibre-gl-native$$/platform/android
+      - git submodule update --init --recursive
+      - BUILDTYPE=Release make apackage
+      - gradle -Pmapbox.abis=all -PVERSION_NAME=9.5.2 :MapboxGLAndroidSDK:publishToMavenLocal
+      - popd
+      - $$rustup$$/rustup-init.sh -y
+      - source $HOME/.cargo/env
+      - scripts/install-toolchains.sh
+      - export PATH=$PATH:$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin/
+      - ANDROID_NDK_ROOT=$$NDK$$ ./ndk-make.sh
+    ndk: r21b
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v[0-9]+\.[0-9]+\.[0-9]+$
-CurrentVersion: 1.32.0
-CurrentVersionCode: 635
+CurrentVersion: 1.34.1
+CurrentVersionCode: 638
