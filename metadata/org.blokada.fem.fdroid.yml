@@ -503,8 +503,49 @@ Builds:
       - ./build.blocka.sh
     ndk: r24
 
+  - versionName: 22.4.1
+    versionCode: 666022401
+    commit: f1e6f68dbb901e0c3d49ae4218d0891c13066fed
+    subdir: android5/app
+    submodules: true
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y openjdk-11-jdk-headless
+      - update-alternatives --auto java
+    gradle:
+      - five
+    srclibs:
+      - rustup@1.25.1
+    rm:
+      - ios
+      - android5/app/src/engine/jniLibs
+      - android5/app/src/libre/jniLibs
+    prebuild:
+      - unzip -P default_blocklist src/libre/assets/default_blocklist.zip default_blocklist
+        -d src/libre/assets
+      - rm src/libre/assets/default_blocklist.zip
+      - sed -i -e 's/origin.alarm/fem.fdroid/' -e '/billingclient/d' build.gradle
+      - sed -e '/interface IPaymentService/,/^}/d' -e 's/PaymentServiceMock/BillingService/'
+        -e '/BlokadaException/d' src/main/java/service/IPaymentService.kt > src/main/java/service/BillingService.kt
+    build:
+      - $$rustup$$/rustup-init.sh -y
+      - source $HOME/.cargo/env
+      - rustup default 1.61.0
+      - rustup target add armv7-linux-androideabi
+      - rustup target add aarch64-linux-android
+      - cargo install cargo-ndk --version 1.0.0
+      - cd ../..
+      - curl -Lo ndk.zip https://dl.google.com/android/repository/android-ndk-r21e-linux-x86_64.zip
+      - echo "ad7ce5467e18d40050dc51b8e7affc3e635c85bd8c59be62de32352328ed467e ndk.zip"
+        | sha256sum -c -
+      - unzip -q ndk.zip
+      - export ANDROID_NDK=$(pwd)/android-ndk-r21e
+      - ./build.boringtun.sh
+      - ./build.blocka.sh
+    ndk: r24
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^android-v[0-9.]+$
 UpdateCheckName: org.blokada.origin.alarm
-CurrentVersion: 22.3.8
-CurrentVersionCode: 666022308
+CurrentVersion: 22.4.1
+CurrentVersionCode: 666022401
