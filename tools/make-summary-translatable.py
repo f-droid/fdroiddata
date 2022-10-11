@@ -8,6 +8,8 @@ import yaml
 
 os.chdir(os.path.dirname(__file__) + '/../')
 
+exitvalue = 0
+
 for f in glob.glob('metadata/*.yml'):
     with open(f) as fp:
         raw = fp.read()
@@ -24,6 +26,9 @@ for f in glob.glob('metadata/*.yml'):
             fp.write(data['Summary'].strip().rstrip() + '\n')
         with open(f, 'w') as out:
             out.write(re.sub(r'Summary:[^\n]+\n', r'', raw))
+        exitvalue += 1
+
+        # if you want to pull in translations from another source:
         packageName = f[9:-4]
         scraped_glob = os.path.join(
             '/path/to/scraper/metadata/', packageName, '[a-z]*', 'short_description.txt'
@@ -36,3 +41,5 @@ for f in glob.glob('metadata/*.yml'):
             os.makedirs(os.path.dirname(outfile), exist_ok=True)
             with open(outfile, 'w') as fp:
                 fp.write(text.strip().rstrip() + '\n')
+
+exit(exitvalue)
