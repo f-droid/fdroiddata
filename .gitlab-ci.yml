@@ -363,7 +363,7 @@ fdroid build:
 # to GitLab Pages.
 pages:
   stage: deploy
-  image: registry.gitlab.com/fdroid/fdroidserver:buildserver
+  image: registry.gitlab.com/fdroid/fdroidserver:buildserver-bullseye
   only:
     refs:
       - branches
@@ -383,8 +383,11 @@ pages:
     - apt-get update
     - apt-get dist-upgrade
     - apt-get install
-          python3-requests-cache
-          python3-venv
+         python3-github
+         python3-gitlab
+         python3-requests-cache
+         python3-venv
+         python3-wheel
 
     - test -n "$fdroidserver" || source /etc/profile.d/bsenv.sh
     - *install_fdroid_server
@@ -399,10 +402,8 @@ pages:
     - git ls-remote https://gitlab.com/fdroid/issuebot.git master
     - curl --silent https://gitlab.com/fdroid/issuebot/-/archive/master/issuebot-master.tar.gz
         | tar -xz --strip-components=1
-    - pyvenv --system-site-packages --clear issuebot-env
+    - python3 -m venv --system-site-packages --clear issuebot-env
     - . issuebot-env/bin/activate
-    - pip3 install wheel # get rid of the bdist_wheel error messages
-    - pip3 install python-gitlab pygithub
     - ./issuebot.py
 
     # git_stats used to run here, redirect to new location
