@@ -7506,21 +7506,13 @@ Builds:
     commit: '@standardnotes/mobile@3.41.5'
     subdir: packages/mobile/android/app
     sudo:
-      - sysctl fs.inotify.max_user_watches=524288 || true
-      - curl -Lo /tmp/node.tar.xz https://nodejs.org/dist/v16.15.1/node-v16.15.1-linux-x64.tar.xz
-      - echo "b749f7a76e56dfd6dfb8a910b8a2a871159661557680aa95acf13c9514422c12 /tmp/node.tar.xz"
-        | sha256sum -c -
-      - tar xJf /tmp/node.tar.xz --strip-components=1 -C /usr/local/
-      - npm -g install yarn
+      - echo "deb https://deb.debian.org/debian testing main" > /etc/apt/sources.list.d/testing.list
+      - echo -e "Package:*\nPin:release o=Debian,a=testing\nPin-Priority:-300\n" >
+        /etc/apt/preferences.d/debian-testing
       - apt-get update
-      - apt-get install -y openjdk-11-jdk-headless --no-install-recommends
-      - update-alternatives --auto java
-      - apt-get install -y libsecret-1-dev build-essential --no-install-recommends
-      - pushd build/srclib/cpython
-      - ./configure
-      - make -j$(nproc)
-      - make install
-      - popd
+      - apt-get install -y libsecret-1-dev build-essential
+      - apt-get install -t testing npm yarnpkg
+      - sysctl fs.inotify.max_user_watches=524288 || true
     init:
       - pushd ../../../..
       - npm_config_build_from_source=true yarn --immutable
@@ -7534,8 +7526,6 @@ Builds:
       - remove-gms.patch
     gradle:
       - prod
-    srclibs:
-      - cpython@v3.10.5
     rm:
       - packages/desktop
     prebuild: sed -i -e '/detox/Id' -e 's/versionName appVersionName/versionName "$$VERSION$$"/'

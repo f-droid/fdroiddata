@@ -1051,16 +1051,14 @@ Builds:
     commit: f6411d673fde8cb18509fc19322607a84a9b5b1f
     subdir: vector-app
     sudo:
+      - echo "deb https://deb.debian.org/debian testing main" > /etc/apt/sources.list.d/testing.list
+      - echo -e "Package:*\nPin:release o=Debian,a=testing\nPin-Priority:-300\n" >
+        /etc/apt/preferences.d/debian-testing
+      - apt-get update
+      - apt-get install -y jq libopus0 make g++ cmake
+      - apt-get install -y -t testing npm
       - cd /opt/android-sdk/ndk
       - rm -fr $(ls | sed 's/21.3.6528147//')
-      - curl -Lo node.tar.xz https://nodejs.org/dist/v16.14.2/node-v16.14.2-linux-x64.tar.xz
-      - echo "e40c6f81bfd078976d85296b5e657be19e06862497741ad82902d0704b34bb1b node.tar.xz"
-        | sha256sum -c -
-      - tar xJf node.tar.xz --strip-components=1 -C /usr/local/
-      - apt-get update
-      - apt-get install -y -t stretch-backports jq openjdk-11-jdk-headless openjdk-11-jre-headless
-        libopus0
-      - update-alternatives --auto java
       - sysctl fs.inotify.max_user_watches=524288 || true
     patch:
       - build_gradle_remove_jitsi_repo_40104160.patch
