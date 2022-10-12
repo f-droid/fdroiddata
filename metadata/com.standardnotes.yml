@@ -7556,10 +7556,65 @@ Builds:
       - popd
     ndk: r21e
 
+  - versionName: 3.42.1
+    versionCode: 3000549
+    commit: '@standardnotes/mobile@3.42.1'
+    subdir: packages/mobile/android/app
+    sudo:
+      - echo "deb https://deb.debian.org/debian testing main" > /etc/apt/sources.list.d/testing.list
+      - echo -e "Package:*\nPin:release o=Debian,a=testing\nPin-Priority:-300\n" >
+        /etc/apt/preferences.d/debian-testing
+      - apt-get update
+      - apt-get install -y libsecret-1-dev build-essential
+      - apt-get install -t testing npm yarnpkg
+      - sysctl fs.inotify.max_user_watches=524288 || true
+    init:
+      - pushd ../../../..
+      - npm_config_build_from_source=true yarn --immutable
+      - popd
+      - pushd ../..
+      - npm_config_build_from_source=true yarn --immutable
+      - yarn remove react-native-store-review
+      - popd
+    patch:
+      - disable-splits-abi.patch
+      - remove-gms.patch
+    gradle:
+      - prod
+    rm:
+      - packages/desktop
+    prebuild: sed -i -e '/detox/Id' -e 's/versionName appVersionName/versionName "$$VERSION$$"/'
+        -e 's/versionCode appVersionCode/versionCode $$VERCODE$$/' build.gradle
+    scanignore:
+      - packages/mobile/android/build.gradle
+      - packages/mobile/node_modules/hermes-engine
+      - packages/mobile/node_modules/jsc-android
+      - packages/mobile/node_modules/react-native
+      - packages/mobile/node_modules/detox/android/build.gradle
+      - packages/mobile/node_modules/detox/android/detox/publishing.gradle
+      - packages/mobile/node_modules/@react-native-community/async-storage/android/build.gradle
+      - packages/mobile/node_modules/@react-native-community/masked-view/android/build.gradle
+      - packages/mobile/node_modules/@standardnotes/react-native-utils/android/build.gradle
+      - packages/mobile/node_modules/@standardnotes/react-native-textview/android/build.gradle
+      - packages/mobile/node_modules/@standardnotes/react-native-aes/android/build.gradle
+    scandelete:
+      - node_modules/
+      - packages/mobile/node_modules
+      - packages/components/dist
+      - .yarn/
+    build:
+      - pushd ../../../..
+      - yarn run build:mobile
+      - popd
+      - pushd ../..
+      - yarn run android:bundle
+      - popd
+    ndk: r21e
+
 ArchivePolicy: 4 versions
 AutoUpdateMode: Version @standardnotes/mobile@%v
 UpdateCheckMode: HTTP
 VercodeOperation: 3000310 + %c
 UpdateCheckData: https://github.com/standardnotes/app/actions/workflows/mobile.release.prod.yml|(\d+)\sworkflow\sruns|https://github.com/standardnotes/app/releases|/releases/tag/%40standardnotes%2Fmobile%40([\d.]+)
-CurrentVersion: 3.41.5
-CurrentVersionCode: 3000542
+CurrentVersion: 3.42.1
+CurrentVersionCode: 3000549
