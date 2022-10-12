@@ -92,11 +92,10 @@ checkupdates:
 fdroid lint:
   stage: test
   needs: []
-  image: registry.gitlab.com/fdroid/ci-images-base
+  image: debian:bullseye-slim
   rules: *app_verification_rules
   before_script:
-    - apt-get update
-    - apt-get -qy dist-upgrade
+    - *install_fdroid_server_deb
     - export fdroidserver=$PWD/fdroidserver
     - *install_fdroid_server
   script:
@@ -116,11 +115,12 @@ fdroid lint:
 lint:
   stage: test
   needs: []
-  image: registry.gitlab.com/fdroid/ci-images-base
+  image: debian:bullseye-slim
   rules: *app_verification_rules
   script:
     - apt-get -qy update
-    - apt-get -qy install --no-install-recommends exiftool
+    - apt-get -qy dist-upgrade
+    - apt-get -qy install --no-install-recommends exiftool git python3 python3-yaml
     - export EXITVALUE=0
     - function set_error() { export EXITVALUE=1; printf "\x1b[31mERROR `history|tail -2|head -1|cut -b 6-500`\x1b[0m\n"; }
 
@@ -271,7 +271,7 @@ checkupdates_runner:
 fdroid build:
   stage: build
   needs: []
-  image: registry.gitlab.com/fdroid/fdroidserver:buildserver
+  image: registry.gitlab.com/fdroid/fdroidserver:buildserver-bullseye
   artifacts:
     name: "${CI_PROJECT_PATH}_${CI_JOB_STAGE}_${CI_COMMIT_REF_NAME}_${CI_COMMIT_SHA}"
     paths:
@@ -412,7 +412,7 @@ pages:
 
 
 check_git_repos:
-  image: debian:buster-slim
+  image: debian:bullseye-slim
   stage: test
   needs: []
   only:
