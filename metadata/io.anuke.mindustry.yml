@@ -178,30 +178,34 @@ Builds:
     scandelete:
       - android/libs
 
-  - versionName: 6-fdroid-107
-    versionCode: 107
-    disable: unstable
-    commit: v107
+  - versionName: 7-fdroid-139
+    versionCode: 1050
+    commit: 5e6d40d6cc4b844788171c27d847f044398400ba
     subdir: android
+    sudo:
+      - apt-get update
+      - apt-get install -y openjdk-17-jdk-headless sdkmanager
+      - update-alternatives --auto java
     gradle:
       - yes
     prebuild:
-      - echo "androidBuildCode=$$VERCODE$$" > ../core/assets/version.properties
-      - echo "build=$$VERCODE$$" >> ../core/assets/version.properties
-      - echo "modifier=beta" >> ../core/assets/version.properties
-      - echo "type=fdroid" >> ../core/assets/version.properties
-      - echo "buildversion=$$VERCODE$$" >> gradle.properties
-      - echo "versionType=fdroid" >> gradle.properties
-      - grep archash ../gradle.properties >> gradle.properties
+      - sdkmanager 'platforms;android-30'
+      - echo -e 'androidBuildCode=$$VERCODE$$\nbuild=$$VERCODE$$\nmodifier=beta\ntype=fdroid'
+        > ../core/assets/version.properties
+      - echo 'buildversion=$$VERSION$$' | sed 's/=.*fdroid-/=/' >> ../gradle.properties
+      - sed -i -e '/publishing{/,/^    }/d' ../build.gradle
     scanignore:
       - android/src/mindustry/android/AndroidLauncher.java
       - android/src/mindustry/android/AndroidRhinoContext.java
     scandelete:
       - android/libs
+    build:
+      - cd ..
+      - gradle pack
+    gradleprops:
+      - versionType=fdroid
 
 MaintainerNotes: |-
-    v108 and later require Java 14 which is a bit too new for Debian 9.
-
     libgdx.so and libgdx-freetype.so binaries are extracted from
     com.badlogicgames.gdx:gdx-platform JARs that come from Maven Central.
 
