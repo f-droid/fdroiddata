@@ -2599,21 +2599,12 @@ Builds:
     subdir: green
     sudo:
       - apt-get update
-      - apt-get install -y build-essential clang jq libffi-dev virtualenv openjdk-11-jdk
-      - update-alternatives --auto java
-      - pushd build/srclib/cpython
-      - ./configure
-      - make -j`nproc`
-      - make altinstall
-      - popd
+      - apt-get install -y build-essential clang jq libffi-dev virtualenv
     gradle:
       - production
     srclibs:
-      - cpython@v3.9.6
       - rustup@1.24.3
-    prebuild:
-      - sed -i -e 's/-p python3/-p python3.9/' ../crypto/prepare_gdk_clang.sh
-      - sed -i -e '/signingConfigs/,/^            }/d' build.gradle
+    prebuild: sed -i -e '/signingConfigs/,/^            }/d' build.gradle
     build:
       - $$rustup$$/rustup-init.sh -y
       - source $HOME/.cargo/env
@@ -2623,7 +2614,7 @@ Builds:
       - cd ../crypto
       - JAVA_HOME=$(readlink -f /usr/bin/javac | sed "s:/bin/javac::") PATH=$HOME/.local/bin:$PATH
         ./prepare_gdk_clang.sh
-    ndk: r23b
+    ndk: r25b
 
 MaintainerNotes: |-
     Watch prepare_gdk_clang.sh for changes on new builds.
@@ -2634,7 +2625,7 @@ MaintainerNotes: |-
     for each chain runnin on localhost. They are used to speed up SPV verification when possible and they
     can be verified independently by checking each hash against the blockchain.
 
-AutoUpdateMode: Version release_%v
+AutoUpdateMode: Version
 UpdateCheckMode: Tags
 VercodeOperation: 22000000 + %c
 CurrentVersion: 3.8.9
