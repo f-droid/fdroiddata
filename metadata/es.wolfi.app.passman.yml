@@ -109,16 +109,16 @@ Builds:
     submodules: true
     sudo:
       - apt-get update
-      - apt-get install -y gcc cmake openjdk-11-jdk
-      - update-alternatives --auto java
-    init:
-      - cd ..
-      - ./build-openssl.sh > /dev/null
+      - apt-get install -y gcc cmake make
     gradle:
       - yes
-    output: build/outputs/apk/release/app-universal-release-unsigned.apk
-    scanignore:
-      - app/src/main/cpplibs/openssl
+    rm:
+      - app/src/main/cpplibs/openssl/boringssl/fuzz
+      - app/src/main/cpplibs/openssl/fuzz
+    prebuild: sed -i -e '/enable true/d' build.gradle
+    build:
+      - cd ..
+      - ./build-openssl.sh
     ndk: r21e
     gradleprops:
       - android.useAndroidX=true
