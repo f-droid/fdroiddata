@@ -1550,8 +1550,11 @@ Builds:
   - versionName: 2.0.6
     versionCode: 3048
     commit: 6010c7077a45d83be6b35b8bbce65d1b4add3192
-    subdir: src/ui/flutter_app
-    output: build/app/outputs/flutter-apk/app-fdroid-release.apk
+    sudo:
+      - apt-get update
+      - apt-get install -y openjdk-11-jdk
+      - update-alternatives --auto java
+    output: src/ui/flutter_app/build/app/outputs/flutter-apk/app-fdroid-release.apk
     srclibs:
       - flutter@3.3.3
     rm:
@@ -1564,12 +1567,14 @@ Builds:
       - src/ui/qt
       - resources
       - tests
-    prebuild: mv build.gradle_fdroid build.gradle
+    prebuild:
+      - cd src/ui/flutter_app/android/app
+      - rm build.gradle
+      - mv build.gradle_fdroid build.gradle
     build:
       - export PATH=$$flutter$$/bin:$PATH
-      - pushd ../../..
       - ./flutter-init.sh
-      - popd
+      - cd src/ui/flutter_app
       - flutter config --no-analytics
       - flutter build apk -v --flavor fdroid
     ndk: r21e

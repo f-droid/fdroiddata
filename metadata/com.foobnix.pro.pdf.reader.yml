@@ -260,32 +260,36 @@ Builds:
   - versionName: 8.8.1-fdroid
     versionCode: 4842
     commit: 99af91393db21b271370188dc68fd93f15d4b2a2
+    disable: https://github.com/foobnix/LibreraReader/issues/960
     subdir: app
     sudo:
       - apt-get update
       - apt-get install -y g++ mesa-common-dev libxcursor-dev libxrandr-dev libxinerama-dev
         libglu1-mesa-dev libxi-dev
-      - apt-get install -y openjdk-11-jdk-headless
-      - update-alternatives --auto java
     gradle:
       - fdroid
     srclibs:
-      - MuPDF@1.20.2
+      - MuPDF@b674dde6af4db9307575374eb4e634aa66fe046d
     rm:
       - Builder/libs
     prebuild:
       - sed -i -e '/F-DROID REMOVE THIS LINE/,+1d' ../build.gradle
       - sed -i -e '/^if.*Fdroid/,/^}/d' -e '/enable true/d' build.gradle
-      - sed -i -e '/^#!/a\set -e' -e 's|git clone .*|cp -r $$MuPDF$$ mupdf-$VERSION_TAG|'
-        -e '/mkdir mupdf/d' -e 's/ndk-build $1/& -j`nproc` || exit 1/' ../Builder/link_to_mupdf_1.20.2.sh
-      - mkdir src/main/jniLibs/
+      - mkdir src/main/jniLibs
+      - cd ../Builder
+      - sed -i -e '/^#!/a\set -e' -e '/git clone/d' -e '/mkdir mupdf/d' -e 's|.*ndk-build|$$NDK$$/ndk-build
+        -j`nproc`|' ../Builder/link_to_mupdf_master.sh ../Builder/link_to_mupdf_1.11.sh
+      - cp -r $$MuPDF$$ mupdf-master
+      - cp -r $$MuPDF$$ mupdf-1.11
+      - cd mupdf-1.11
+      - git checkout 1.11
     scanignore:
       - Builder/fonts/fonts.zip
       - app/src/fdroid/assets/fonts.zip
     build:
       - pushd ../Builder/
-      - ./link_to_mupdf_1.20.2.sh
-    ndk: r23c
+      - ./link_merge.sh
+    ndk: r25b
 
 MaintainerNotes: |-
     * Upstream builds separate APKs for each architecture but we build an universal APK.

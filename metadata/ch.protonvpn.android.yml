@@ -1197,46 +1197,32 @@ Builds:
       - openvpn/src/main/cpp/openvpn3/test/unittests
       - openvpn/src/main/cpp/mbedtls/programs/fuzz/corpuses/*
     prebuild:
-      - sdkmanager 'cmake;3.18.1'
+      - sdkmanager 'cmake;3.18.1' 'ndk;21.4.7075529'
       - sed -i -e '/triple/d' -e '/play\ {/,+4d' build.gradle
       - git submodule update --init --recursive ../strongswan
       - cd ../strongswan
       - ln -s -T $$android-ndk-boringssl$$ src/frontends/android/app/src/main/jni/openssl
       - cd ..
-      - echo ndk.dir="$(pwd)"/ndk/android-ndk-r21e > strongswan/src/frontends/android/local.properties
+      - echo ndk.dir="$ANDROID_SDK/ndk/21.4.7075529" > strongswan/src/frontends/android/local.properties
+    scanignore:
+      - build/gradle-build-cache
     scandelete:
       - strongswan/testing
       - openvpn/src/main/cpp/lz4/tmp
-      - build/gradle-build-cache
     build:
-      - pushd ..
-      - mkdir -p ndk
-      - pushd ndk
-      - curl -Lo ndk.zip https://dl.google.com/android/repository/android-ndk-r21e-linux-x86_64.zip
-      - echo "ad7ce5467e18d40050dc51b8e7affc3e635c85bd8c59be62de32352328ed467e ndk.zip"
-        | sha256sum -c -
-      - unzip -q ndk.zip
-      - popd
-      - popd
       - pushd ../strongswan
       - ./autogen.sh
       - ./configure || cat config.log
       - make dist
-      - pushd src/frontends/android/app
+      - cd src/frontends/android/app
       - sed -i -e '/android\ {/alintOptions\ {abortOnError\ false}' build.gradle
       - gradle assembleRelease
       - popd
-      - popd
-      - cp -r ../strongswan/src/frontends/android/app/src/main/libs/* src/main/jniLibs/
-      - rm -fr ../strongswan/src/frontends/android/app/src/main/libs/*
+      - mv ../strongswan/src/frontends/android/app/src/main/libs/* src/main/jniLibs/
       - rm -fr ../strongswan/src/frontends/android/app/build
-      - pushd ..
-      - gradle openvpn:assembleRelease
-      - rm -fr openvpn/build/intermediates
-      - rm -fr openvpn/build/kotlin
-      - rm -fr openvpn/build/tmp
-      - rm -fr openvpn/.cxx
-      - popd
+      - cd ../openvpn
+      - gradle assembleRelease
+      - rm -fr build/intermediates build/kotlin build/tmp .cxx
     ndk: r23b
     gradleprops:
       - buildUniversalApk
