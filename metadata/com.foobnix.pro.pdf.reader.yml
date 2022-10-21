@@ -291,6 +291,39 @@ Builds:
       - ./link_merge.sh
     ndk: r25b
 
+  - versionName: 8.8.4-fdroid
+    versionCode: 4852
+    commit: 2f19d467c57df986a5c59fc69cec07842ab2325c
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y g++ mesa-common-dev libxcursor-dev libxrandr-dev libxinerama-dev
+        libglu1-mesa-dev libxi-dev
+    gradle:
+      - fdroid
+    srclibs:
+      - MuPDF@b674dde6af4db9307575374eb4e634aa66fe046d
+    rm:
+      - Builder/libs
+    prebuild:
+      - sed -i -e '/F-DROID REMOVE THIS LINE/,+1d' ../build.gradle
+      - sed -i -e '/^if.*Fdroid/,/^}/d' -e '/enable true/d' build.gradle
+      - mkdir src/main/jniLibs
+      - cd ../Builder
+      - sed -i -e '/^#!/a\set -e' -e '/git clone/d' -e '/mkdir mupdf/d' -e 's|.*ndk-build|$$NDK$$/ndk-build
+        -j`nproc`|' ../Builder/link_to_mupdf_master.sh ../Builder/link_to_mupdf_1.11.sh
+      - cp -r $$MuPDF$$ mupdf-master
+      - cp -r $$MuPDF$$ mupdf-1.11
+      - cd mupdf-1.11
+      - git checkout 1.11
+    scanignore:
+      - Builder/fonts/fonts.zip
+      - app/src/fdroid/assets/fonts.zip
+    build:
+      - pushd ../Builder/
+      - ./link_merge.sh
+    ndk: r25b
+
 MaintainerNotes: |-
     * Upstream builds separate APKs for each architecture but we build an universal APK.
     * scanner will detect GMS (/com/google/android/gms) in these APKs; those are only stubs here, see https://gitlab.com/fdroid/fdroiddata/-/issues/2272#note_493741256
@@ -299,5 +332,5 @@ AutoUpdateMode: Version +-fdroid %v
 UpdateCheckMode: Tags
 UpdateCheckData: app/build.gradle|\s+FDroidCodeNumber = (\d+)|.|\s+FDroidVersionNumber
     = "([^\"]+)"
-CurrentVersion: 8.8.1
-CurrentVersionCode: 4842
+CurrentVersion: 8.8.4
+CurrentVersionCode: 4852
