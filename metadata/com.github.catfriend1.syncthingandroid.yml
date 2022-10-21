@@ -1828,23 +1828,19 @@ Builds:
 
   - versionName: 1.21.0.3
     versionCode: 1210003
-    disable: https://github.com/Catfriend1/syncthing-android/issues/919
-    commit: 03d8be22236e1cb464a63adc907c75a7338f608e
+    commit: cd36410b83fda620ffe56b02711e5120489b88ff
+    subdir: app
     submodules: true
-    sudo:
-      - apt-get update
-      - apt-get install -y openjdk-11-jdk-headless
-      - update-alternatives --auto java
     gradle:
       - yes
-    output: app/build/outputs/apk/release/app-release-unsigned.apk
     rm:
       - syncthing/src/github.com/syncthing/syncthing/lib/model/testdata
     prebuild:
-      - sed -i -e '/signingConfig/d' app/build.gradle
-      - echo 'org.gradle.jvmargs=-Xmx4096m' >> gradle.properties
+      - sed -i -e '/signingConfig/d' build.gradle
+      - sed -i -e '/executable/s/python/python3/' {../syncthing,.}/build.gradle
+      - echo 'org.gradle.jvmargs=-Xmx4096m' >> ../gradle.properties
     preassemble:
-      - buildNative
+      - :syncthing:buildNative
 
 MaintainerNotes: |-
     The submodule in syncthing/src/github.com/syncthing/syncthing must be
@@ -1854,7 +1850,7 @@ MaintainerNotes: |-
     contains pre-generated data for testing and is thus not involved in the build
     process.
 
-AutoUpdateMode: Version v%v
+AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v[a-z0-9.]*$
 CurrentVersion: 1.21.0.3
 CurrentVersionCode: 1210003
