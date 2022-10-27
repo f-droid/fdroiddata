@@ -1561,6 +1561,30 @@ Builds:
         util/PrefsUtils.java
       - echo 'package com.newsblur.activity;class Premium:NbActivity() {}' > activity/Premium.kt
 
+  - versionName: 12.1.1
+    versionCode: 207
+    commit: 214dde838e06753747827c299bb44b0e7b75aba1
+    gradle:
+      - yes
+    rm:
+      - clients/android/NewsBlur/buildtools/*.jar
+      - clients/android/NewsBlur/src/com/newsblur/service/SubscriptionSyncService.kt
+      - clients/android/NewsBlur/src/com/newsblur/subscription
+    prebuild:
+      - mv clients/android/NewsBlur ..
+      - rm -r ./*
+      - mv ../NewsBlur/* .
+      - rm -r ../NewsBlur
+      - sed -i -e '/com.google.android.play/d' -e '/billingclient/d' build.gradle
+      - sed -i -z -E -e 's/<service[^>]+SubscriptionSyncService[^>]+\/>//' AndroidManifest.xml
+      - cd src/com/newsblur
+      - sed -i -e '/play.core/d' -e '/void checkInAppReview/,/^    }/d' -e '/checkInAppReview/d'
+        -e '/reviewInfo != null/,/^        }$/c super.onBackPressed();' -e '/Review/d'
+        activity/FeedItemsList.java
+      - sed -i -e '/SubscriptionSyncService/d' activity/InitActivity.kt activity/LoginProgress.kt
+        util/PrefsUtils.java
+      - echo 'package com.newsblur.activity;class Premium:NbActivity() {}' > activity/Premium.kt
+
 AutoUpdateMode: None
 UpdateCheckMode: RepoManifest
 CurrentVersion: 12.1.1
