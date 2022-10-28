@@ -44,7 +44,7 @@ variables:
         export SOURCE_REF="${CI_COMMIT_SHA}"
     fi;
 
-.get_changed_apps: &get_changed_apps
+.get_changed_builds: &get_changed_builds
   - *get_target_source_refs
   - echo $TARGET_REF
   - |
@@ -53,6 +53,16 @@ variables:
         echo "$diff"
         test $(echo "$diff" | perl -wnle '/^[+-](( +-)|( *\w))/ and print' | grep -v -c '^+ *disable:') = 0 && continue
         echo "$diff" | grep -E '^\+ *(NoSourceSince|Disabled):' && continue
+        appid=$(echo "$f" | sed -E -n 's,^metadata/([^/][^/]*)(\.yml|/signatures/.*),\1,p')
+        export CHANGED="$CHANGED $appid"
+    done
+
+.get_changed_apps: &get_changed_apps
+  - *get_target_source_refs
+  - echo $TARGET_REF
+  - |
+    for f in $(git diff --name-only --diff-filter=d "${TARGET_REF}...${SOURCE_REF}" -- metadata/*.yml) $(git diff --name-only --diff-filter=d "${TARGET_REF}...${SOURCE_REF}" -- metadata/*/signatures); do
+        diff=$(git diff "${TARGET_REF}...${SOURCE_REF}" -- "$f")
         appid=$(echo "$f" | sed -E -n 's,^metadata/([^/][^/]*)(\.yml|/signatures/.*),\1,p')
         export CHANGED="$CHANGED $appid"
     done
@@ -80,7 +90,7 @@ checkupdates:
     - |
       set -xe
       if [ "$CI_PROJECT_NAMESPACE" = "fdroid" ]; then echo "not testing in fdroid"; exit 0; fi
-    - *get_changed_apps
+    - *get_changed_builds
     - |
       if [ -n "$CHANGED" ]; then
         fdroid checkupdates --auto -v $CHANGED
@@ -100,14 +110,17 @@ fdroid lint:
     - *get_changed_apps
     - export EXITVALUE=0
     - function set_error() { export EXITVALUE=1; printf "\x1b[31mERROR `history|tail -2|head -1|cut -b 6-500`\x1b[0m\n"; }
-    - fdroid lint -f $CHANGED || {
-          set_error;
-          printf "\nThese files have lint issues:\n";
-          fdroid rewritemeta -l $CHANGED;
-          printf "\nThese are the formatting issues:\n";
-          fdroid rewritemeta $CHANGED;
-          git --no-pager diff --color=always;
-      }
+    - |
+      if [ -n "$CHANGED" ]; then
+        fdroid lint -f $CHANGED || {
+            set_error;
+            printf "\nThese files have lint issues:\n";
+            fdroid rewritemeta -l $CHANGED;
+            printf "\nThese are the formatting issues:\n";
+            fdroid rewritemeta $CHANGED;
+            git --no-pager diff --color=always;
+        }
+      fi
     - exit $EXITVALUE
 
 lint:
@@ -289,7 +302,7 @@ fdroid build:
     ANDROID_SDK_ROOT: ${ANDROID_HOME}
   script:
     - test -d build || mkdir build
-    - *get_changed_apps
+    - *get_changed_builds
     - test -n "$(printf "$CHANGED" | tr -d '[:space:]')"
           || { echo "no packages need processing, exiting"; exit 0; }
 
