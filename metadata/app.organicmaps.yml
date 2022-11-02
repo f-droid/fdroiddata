@@ -1004,15 +1004,15 @@ Builds:
       - ./b2 headers
     ndk: r24
 
-  - versionName: 2022.11.02-2-FDroid
+  - versionName: 2022.11.02-2
     versionCode: 22110202
     commit: 7b766b25076fa59b79873ddd2f84dc00b8f3f090
     subdir: android
     submodules: true
     sudo:
       - apt-get update
-      - apt-get install -y g++ openjdk-11-jdk-headless
-      - update-alternatives --auto java
+      - apt-get install -y g++ ninja-build
+      - apt-get install -t bullseye-backports cmake 
     gradle:
       - fdroid
     rm:
@@ -1021,8 +1021,6 @@ Builds:
       - tools/shaders_compiler
       - xcode
     prebuild:
-      - JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 $$SDK$$/tools/bin/sdkmanager 'cmake;3.18.1'
-        > /dev/null
       - sed -i -e '/com.google.firebase/d; /com.google.gms/d; /com.google.android.gms/d'
         -e "/('Version/d" -e '/-FDroid/d' -e 's/ver.first/$$VERCODE$$/g' -e 's/ver.second/"$$VERSION$$"/g'
         build.gradle
@@ -1038,7 +1036,7 @@ Builds:
       - cd ../3party/boost
       - ./bootstrap.sh
       - ./b2 headers
-    ndk: r24
+    ndk: r25b
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags .*android$
