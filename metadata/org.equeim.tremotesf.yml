@@ -684,13 +684,42 @@ Builds:
         -DCMAKE_CXX_FLAGS=-stdlib=libc++
       - org.equeim.tremotesf.print-3rdparty-build-log-on-error=true
 
+  - versionName: 2.7.1
+    versionCode: 4050
+    commit: 2.7.1
+    subdir: app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y gcc g++ ninja-build make patch perl
+    gradle:
+      - fdroid
+    srclibs:
+      - FirefoxAndroid@v107.0.6
+    prebuild:
+      - sdkmanager 'cmake;3.22.1'
+      - sed -i -e 's|maven.*mozilla.*|mavenLocal\(\)|' ../settings.gradle.kts
+      - cd '$$FirefoxAndroid$$/android-components'
+      - tasks=":lib-publicsuffixlist:publishToMavenLocal $(gradlew-fdroid :lib-publicsuffixlist:dependencies
+        --configuration releaseRuntimeClasspath | perl -lne 'print "$1:publishToMavenLocal"
+        if /^.*--- project ([^\s]+)$/')"
+      - gradlew-fdroid $tasks
+    scanignore:
+      - gradle-plugin/build
+    scandelete:
+      - 3rdparty
+    ndk: r25b
+    gradleprops:
+      - org.equeim.tremotesf.print-3rdparty-build-log-on-error=true
+
 MaintainerNotes: |
-    We need host C++ compiler with proper C++17 support, and the only ones available in Debian Stretch are clang-7 and clang-11.
-    clang-7 has a bug that causes compilation errors, so use clang-11.
-    Tremotesf also uses Gradle plugin in its build process, which is compiled from source on first Gradle invocation.
+    Tremotesf uses Gradle plugin in its build process, which is compiled from source on first Gradle invocation.
     Since it happens before scanning for binaries, we need to scanignore plugin's build directory.
 
 AutoUpdateMode: Version %v
 UpdateCheckMode: Tags
-CurrentVersion: 2.6.1
-CurrentVersionCode: 4048
+UpdateCheckName: Ignore
+UpdateCheckData: app/build.gradle.kts|versionCode = (\d+)|app/build.gradle.kts|versionName
+    = "([\d.]+)"
+CurrentVersion: 2.7.1
+CurrentVersionCode: 4050
