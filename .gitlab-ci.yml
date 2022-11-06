@@ -79,11 +79,14 @@ variables:
   rules: &app_verification_rules
     - if: $CI_PIPELINE_SOURCE == "pipeline" || $CI_PIPELINE_SOURCE == "schedule" || $CI_PIPELINE_SOURCE == "trigger"
       when: never
-    # only works for merge request pipelines: https://docs.gitlab.com/ee/ci/jobs/job_control.html#jobs-or-pipelines-run-unexpectedly-when-using-changes
-    # - changes:
-    #     - metadata/**/*
-    #     - srclibs/**/*
-    - when: on_success
+    - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
+      when: never
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      # only works for merge request pipelines: https://docs.gitlab.com/ee/ci/jobs/job_control.html#jobs-or-pipelines-run-unexpectedly-when-using-changes
+      changes:
+        - metadata/**/*
+        - srclibs/**/*
+    - if: $CI_COMMIT_BRANCH
 
 checkupdates:
   stage: test
@@ -97,7 +100,6 @@ checkupdates:
   script:
     - |
       set -xe
-      if [ "$CI_PROJECT_NAMESPACE" = "fdroid" ]; then echo "not testing in fdroid"; exit 0; fi
     - *get_changed_builds
     - |
       if [ -n "$CHANGED" ]; then
