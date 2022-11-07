@@ -86,12 +86,12 @@ variables:
       when: never
     - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS && $CI_ENABLE_MERGE_REQUEST_PIPELINES != "false"
       when: never
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event" || $CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
       # only works for merge request pipelines: https://docs.gitlab.com/ee/ci/jobs/job_control.html#jobs-or-pipelines-run-unexpectedly-when-using-changes
       changes:
         - metadata/**/*
         - srclibs/**/*
-    - if: $CI_COMMIT_BRANCH
+    - if: $CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH
 
 checkupdates:
   stage: test
