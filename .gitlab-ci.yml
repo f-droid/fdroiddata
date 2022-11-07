@@ -1,12 +1,12 @@
 include:
   - template: Security/SAST.gitlab-ci.yml
-  
+
 workflow:
   rules:
     # required to enable merge request pipelines: https://docs.gitlab.com/ee/ci/pipelines/merge_request_pipelines.html#prerequisites
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_ENABLE_MERGE_REQUEST_PIPELINES != "false"
     # to prevent duplicate pipelines in MRs: https://docs.gitlab.com/ee/ci/yaml/workflow.html#switch-between-branch-pipelines-and-merge-request-pipelines
-    - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
+    - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS && $CI_PIPELINE_SOURCE == "push" && $CI_ENABLE_MERGE_REQUEST_PIPELINES != "false"
       when: never
     - if: $CI_COMMIT_TAG
     - if: $CI_COMMIT_BRANCH
@@ -21,8 +21,13 @@ stages:
 variables:
   pip: pip3 --timeout 100 --retries 10
 
-  # needs lots of git history since it has to compare the merge request to current master
-  GIT_DEPTH: "5000"
+  GIT_DEPTH:
+    description: needs lots of git history since it has to compare the merge request to current master
+    value: "5000"
+
+  CI_ENABLE_MERGE_REQUEST_PIPELINES:
+    description: push with `git push -o ci.variable="CI_ENABLE_MERGE_REQUEST_PIPELINES=false"` to disable merge request pipelines (e.g., to use self-hosted runners)
+    value: "true"
 
 .install_fdroid_server: &install_fdroid_server
   - rm -rf $fdroidserver
@@ -79,7 +84,7 @@ variables:
   rules: &app_verification_rules
     - if: $CI_PIPELINE_SOURCE == "pipeline" || $CI_PIPELINE_SOURCE == "schedule" || $CI_PIPELINE_SOURCE == "trigger"
       when: never
-    - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
+    - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS && $CI_ENABLE_MERGE_REQUEST_PIPELINES != "false"
       when: never
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       # only works for merge request pipelines: https://docs.gitlab.com/ee/ci/jobs/job_control.html#jobs-or-pipelines-run-unexpectedly-when-using-changes
