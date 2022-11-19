@@ -2088,6 +2088,38 @@ Builds:
       - ./compile.sh --release --daemon
     ndk: r25b
 
+  - versionName: 20221107-01
+    versionCode: 347
+    commit: 2c4fd7449a0fdbb881a3caa86d0e21c5dc10948f
+    timeout: 10800
+    subdir: client-android/ring-android/app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y cmake g++ swig autoconf automake m4 libtool pkg-config
+        yasm tar gettext autopoint xz-utils bzip2 make python-is-python3
+    gradle:
+      - noPush
+    rm:
+      - client-ios
+      - client-macosx
+      - client-qt
+      - plugins
+      - docker
+      - docs
+      - guix
+      - packaging
+      - scripts
+    prebuild:
+      - sdkmanager 'platforms;android-33' 'build-tools;33.0.0'
+      - sed -i -e '/isEnable = true/d' build.gradle.kts
+    build:
+      - cd ../..
+      - export ANDROID_NDK_ROOT="$ANDROID_NDK"
+      - export ANDROID_ABI="armeabi-v7a arm64-v8a x86_64"
+      - ./compile.sh --release --daemon
+    ndk: r25b
+
 MaintainerNotes: |-
     Ring has a lot of native dependencies, the source tarballs of these are all downloaded and build for all enabled architectures.
     Build failed with swig 2.0.12 from jessie but works with 3.0.10 from jessie-backports.
@@ -2097,5 +2129,5 @@ MaintainerNotes: |-
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 20221007-01
-CurrentVersionCode: 346
+CurrentVersion: 20221107-01
+CurrentVersionCode: 347
