@@ -1,0 +1,157 @@
+diff --git a/lib/audio/tracksPage.dart b/lib/audio/tracksPage.dart
+index 70b251b..08c2f79 100644
+--- a/lib/audio/tracksPage.dart
++++ b/lib/audio/tracksPage.dart
+@@ -12,7 +12,6 @@ import 'package:path/path.dart';
+ import '../platform/simpleSharedPrefs.dart';
+ import 'audioEditor.dart';
+ import 'models/jamTrack.dart';
+-import 'online_sources/YoutubeSource.dart';
+ import 'online_sources/onlineTrack.dart';
+ import 'trackdata/trackData.dart';
+ import 'widgets/online_source/online_source.dart';
+@@ -344,25 +343,6 @@ class _TracksPageState extends State<TracksPage>
+     });
+   }
+ 
+-  void addFromYoutubeSource(BuildContext context) {
+-    Navigator.of(context)
+-        .push(MaterialPageRoute(
+-            builder: (context) => OnlineSearchScreen(source: YoutubeSource())))
+-        .then((value) {
+-      if (value is List<OnlineTrack>) {
+-        for (int i = 0; i < value.length; i++) {
+-          var name = "${value[i].artist} - ${value[i].title}";
+-          TrackData().addTrack(value[i].url, name, false);
+-        }
+-        TrackData().saveTracks();
+-        //clear filter and scroll to bottom
+-        searchCtrl.text = "";
+-        setState(() {});
+-        _scollToNewSongs();
+-      }
+-    });
+-  }
+-
+   void _scollToNewSongs() async {
+     await Future.delayed(const Duration(milliseconds: 300));
+     scrollController.animateTo(scrollController.position.maxScrollExtent,
+@@ -467,17 +447,6 @@ class _TracksPageState extends State<TracksPage>
+   List<Bubble> _bubbles(BuildContext context) {
+     return [
+       // Floating action menu item
+-      if (_showHiddenSources)
+-        Bubble(
+-            title: "Youtube",
+-            iconColor: Colors.white,
+-            bubbleColor: Colors.red,
+-            icon: Icons.ondemand_video_outlined,
+-            titleStyle: const TextStyle(fontSize: 16, color: Colors.white),
+-            onPress: () {
+-              _animationController.reverse();
+-              addFromYoutubeSource(context);
+-            }),
+       if (_showHiddenSources)
+         Bubble(
+           title: "Online Source",
+diff --git a/lib/bluetooth/NuxDeviceControl.dart b/lib/bluetooth/NuxDeviceControl.dart
+index 4fa08a2..bb14123 100644
+--- a/lib/bluetooth/NuxDeviceControl.dart
++++ b/lib/bluetooth/NuxDeviceControl.dart
+@@ -8,7 +8,6 @@ import 'package:flutter/material.dart';
+ import 'package:flutter_blue_plus/flutter_blue_plus.dart';
+ import 'package:mighty_plug_manager/bluetooth/devices/NuxMighty8BT.dart';
+ import 'package:mighty_plug_manager/platform/simpleSharedPrefs.dart';
+-import 'package:sentry_flutter/sentry_flutter.dart';
+ import 'package:undo/undo.dart';
+ 
+ import 'bleMidiHandler.dart';
+@@ -484,12 +483,6 @@ class NuxDeviceControl extends ChangeNotifier {
+ 
+     diagData.device = "${_device.productName} ${_device.productVersion}";
+     if (connected != null) diagData.connected = connected;
+-
+-    Sentry.configureScope((scope) {
+-      scope.setTag(
+-          "nuxDevice", "${_device.productName} ${_device.productVersion}");
+-      scope.setContexts('NUX', diagData.toMap(includeJsonPreset));
+-    });
+   }
+ 
+   NuxDevice get device => _device;
+diff --git a/lib/main.dart b/lib/main.dart
+index 4688361..37e7962 100644
+--- a/lib/main.dart
++++ b/lib/main.dart
+@@ -12,7 +12,6 @@ import 'package:mighty_plug_manager/UI/widgets/app_drawer.dart';
+ import 'package:mighty_plug_manager/bluetooth/devices/presets/presetsStorage.dart';
+ import 'package:mighty_plug_manager/midi/MidiControllerManager.dart';
+ import 'package:mighty_plug_manager/platform/simpleSharedPrefs.dart';
+-import 'package:sentry_flutter/sentry_flutter.dart';
+ 
+ import 'UI/pages/drumEditor.dart';
+ import 'UI/pages/jamTracks.dart';
+@@ -32,7 +31,6 @@ import 'bluetooth/bleMidiHandler.dart';
+ 
+ //recreate this file with your own api keys
+ import 'bluetooth/devices/value_formatters/ValueFormatter.dart';
+-import 'configKeys.dart';
+ 
+ //able to create snackbars/messages everywhere
+ final navigatorKey = GlobalKey<NavigatorState>();
+@@ -43,55 +41,9 @@ void main() {
+   WidgetsFlutterBinding.ensureInitialized();
+   SharedPrefs prefs = SharedPrefs();
+ 
+-  //capture flutter errors
+-  if (!kDebugMode) {
+-    FlutterError.onError = (FlutterErrorDetails details) {
+-      DebugConsole.print("Flutter error: ${details.toString()}");
+-
+-      //update diagnostics with json preset
+-      NuxDeviceControl.instance()
+-          .updateDiagnosticsData(includeJsonPreset: true);
+-
+-      // Send report
+-      Sentry.captureException(
+-        details,
+-        stackTrace: details.stack,
+-      );
+-    };
+-  }
+-
+-  if (!kDebugMode) {
+-    runZonedGuarded(() {
+-      prefs.waitLoading().then((value) async {
+-        if (!kDebugMode) {
+-          await SentryFlutter.init((options) {
+-            options.dsn = sentryDsn;
+-          });
+-        }
+-        mainRunApp();
+-      });
+-    }, (Object error, StackTrace stackTrace) async {
+-      // Whenever an error occurs, call the `_reportError` function. This sends
+-      // Dart errors to the dev console or Sentry depending on the environment.
+-      //_reportError(error, stackTrace);
+-
+-      DebugConsole.print("Dart error: ${error.toString()}");
+-      DebugConsole.print(stackTrace);
+-
+-      //update diagnostics with json preset
+-      NuxDeviceControl.instance()
+-          .updateDiagnosticsData(includeJsonPreset: true);
+-
+-      await Sentry.captureException(
+-        error,
+-        stackTrace: stackTrace,
+-      );
+-    });
+-  } else {
+     prefs.waitLoading().then((value) {
+       mainRunApp();
+     });
+-  }
+ }
+ 
+ mainRunApp() {
