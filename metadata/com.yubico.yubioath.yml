@@ -1,24 +1,21 @@
 Categories:
-  - Connectivity
-License: BSD-2-Clause
-SourceCode: https://github.com/Yubico/yubioath-android
-IssueTracker: https://github.com/Yubico/yubioath-android/issues
+  - Security
+License: Apache-2.0
+AuthorName: Yubico
+AuthorWebSite: https://developers.yubico.com
+WebSite: https://developers.yubico.com/yubioath-flutter
+SourceCode: https://github.com/Yubico/yubioath-flutter
+IssueTracker: https://github.com/Yubico/yubioath-flutter/issues
 
 AutoName: Yubico Authenticator
 Description: |-
-    Generate One-Time Passwords (OTPs) using a YubiKey NEO hardware, connected using
-    NFC. It generates codes that are compatible with Google two-step verification,
-    and can be used with any other site that supports OATH HOTP/TOTP.
-
-    There are two apps for YubiKey NEO and OATH: YubiTOTP and YubiOATH. They work
-    differently, and both are supported, but to get the most features and best user
-    experience we recommend use of YubiOATH. The YubiTOTP app works with all YubiKey
-    NEOs, however it is more limited than the YubiOATH app. The YubiOATH app
-    requires that the (free software) ykneo-oath applet has been loaded on to the
-    YubiKey NEO. The YubiTOTP app is still maintained for backwards compatibility.
+    Store your unique credential on a hardware-backed security key and take it wherever
+    you go from mobile to desktop. No more storing sensitive secrets on your mobile
+    phone, leaving your account vulnerable to takeovers. With the Yubico Authenticator
+    you can raise the bar for security.
 
 RepoType: git
-Repo: https://github.com/Yubico/yubioath-android.git
+Repo: https://github.com/Yubico/yubioath-flutter.git
 
 Builds:
   - versionName: 0.0.4
@@ -138,7 +135,60 @@ Builds:
       - strict
     prebuild: sed -i -e '/com.google.android.gms/d' build.gradle
 
-AutoUpdateMode: Version %v
-UpdateCheckMode: Tags ^[0-9.]+$
-CurrentVersion: 2.2.0
-CurrentVersionCode: 20199
+  - versionName: 6.0.1
+    versionCode: 600041
+    commit: 19d72f08539035a142d2118413f7819d87b1b19c
+    output: build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
+    srclibs:
+      - flutter@3.3.7
+    rm:
+      - linux
+      - macos
+      - test
+      - windows
+    prebuild: sed -i -e '/gms/d' android/{app/build.gradle,build.gradle}
+    build:
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform="android-arm"
+
+  - versionName: 6.0.1
+    versionCode: 600042
+    commit: 19d72f08539035a142d2118413f7819d87b1b19c
+    output: build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+    srclibs:
+      - flutter@3.3.7
+    rm:
+      - linux
+      - macos
+      - test
+      - windows
+    prebuild: sed -i -e '/gms/d' android/{app/build.gradle,build.gradle}
+    build:
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform="android-arm64"
+
+  - versionName: 6.0.1
+    versionCode: 600044
+    commit: 19d72f08539035a142d2118413f7819d87b1b19c
+    output: build/app/outputs/flutter-apk/app-x86_64-release.apk
+    srclibs:
+      - flutter@3.3.7
+    rm:
+      - linux
+      - macos
+      - test
+      - windows
+    prebuild: sed -i -e '/gms/d' android/{app/build.gradle,build.gradle}
+    build:
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform="android-x64"
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+VercodeOperation:
+  - '%c * 10 + 1'
+  - '%c * 10 + 2'
+  - '%c * 10 + 4'
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 6.0.1
+CurrentVersionCode: 600044
