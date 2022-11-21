@@ -5,16 +5,16 @@ Categories:
 License: GPL-3.0-or-later
 AuthorName: Marco Bresciani
 AuthorEmail: marco.530@outlook.it
-AuthorWebSite: https://github.com/marcoXbresciani/
-SourceCode: https://github.com/marcoXbresciani/TKCompanionApp
-IssueTracker: https://github.com/marcoXbresciani/TKCompanionApp/issues
-Changelog: https://github.com/marcoXbresciani/TKCompanionApp/blob/HEAD/CHANGELOG.md
+AuthorWebSite: https://codeberg.org/marco.bresciani
+SourceCode: https://codeberg.org/marco.bresciani/TKCompanionApp
+IssueTracker: https://codeberg.org/marco.bresciani/TKCompanionApp/issues
+Changelog: https://codeberg.org/marco.bresciani/TKCompanionApp/src/branch/master/CHANGELOG.md
 Liberapay: marcoXbresciani
 
 AutoName: TKCompanionApp
 
 RepoType: git
-Repo: https://github.com/marcoXbresciani/TKCompanionApp
+Repo: https://codeberg.org/marco.bresciani/TKCompanionApp
 
 Builds:
   - versionName: 0.2.9
@@ -1002,10 +1002,43 @@ Builds:
       - node_modules/
     ndk: r21e
 
+  - versionName: 6.0.0
+    versionCode: 600
+    commit: 75a0c41a1b3bca99eb45b8cb977f56bae616c4ff
+    subdir: android/app
+    sudo:
+      - curl -Lo node.tar.gz https://nodejs.org/dist/v18.12.1/node-v18.12.1-linux-x64.tar.gz
+      - echo "a8fcacb8033504e6d704bdee821f7005ee3774db25c799bcf2a13b5bda7de172 node.tar.gz"
+        | sha256sum -c -
+      - tar xzf node.tar.gz --strip-components=1 -C /usr/local/
+      - sysctl fs.inotify.max_user_watches=524288 || true
+      - npm install -g npm@8.19.2
+    init: npm install --force
+    gradle:
+      - yes
+    prebuild:
+      - sed -i -e '/installReferrerVersion/,+11d' ../../node_modules/react-native-device-info/android/build.gradle
+      - sed -i -e "/swiperefreshlayout/a implementation(project(':react-native-device-info'))
+        { exclude group\x3a 'com.google.firebase'\\ exclude group\x3a 'com.google.android.gms'\\
+        exclude group\x3a 'com.android.installreferrer'\\ }" build.gradle
+    scanignore:
+      - android/build.gradle
+      - node_modules/jsc-android
+      - node_modules/react-native/sdks/hermesc/linux64-bin/hermesc
+      - node_modules/react-native/ReactAndroid/build.gradle
+      - node_modules/react-native/android/com/facebook/react/react-native
+      - node_modules/react-native/android/com/facebook/react/hermes-engine
+      - node_modules/react-native-device-info/android/build.gradle
+      - node_modules/react-native-vector-icons/android/build.gradle
+      - node_modules/@react-native-async-storage/async-storage/android/build.gradle
+    scandelete:
+      - node_modules/
+    ndk: r21e
+
 MaintainerNotes: scanignore is used to allow the "node_modules/react-native/android"
     local Maven repository.
 
 AutoUpdateMode: Version %v
 UpdateCheckMode: Tags
-CurrentVersion: 5.0.0
-CurrentVersionCode: 500
+CurrentVersion: 6.0.0
+CurrentVersionCode: 600
