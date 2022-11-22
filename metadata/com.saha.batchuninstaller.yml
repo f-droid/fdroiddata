@@ -57,8 +57,35 @@ Builds:
     versionCode: 13
     commit: bfa133698a36b895eb66b175ccd92600ecc94059
     subdir: app
+    sudo:
+      - echo "deb http://deb.debian.org/debian stretch main" > /etc/apt/sources.list.d/stretch.list
+      - apt-get update
+      - apt-get install -y -t stretch openjdk-8-jdk-headless
+      - /usr/sbin/update-java-alternatives --set java-1.11.0-openjdk-amd64
+      - sdkmanager 'extras;android;m2repository;47'
     gradle:
       - yes
+    srclibs:
+      - RootShell@89c3b49401b2a2e8d8331c4e4b8d78d8319e1a80
+      - RootTools@10fd55fb6d078a3d83f88d50c9d7878a25929d51
+    prebuild:
+      - rm $$RootTools$$/RootShell/RootShell.aar
+      - sed -i -e 's/4.0-rc-1/4.0/' $$RootShell$$/gradle/wrapper/gradle-wrapper.properties
+    scandelete:
+      - Root*/
+    build:
+      - export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+      - pushd $$RootShell$$
+      - gradle assembleRelease
+      - popd
+      - cp $$RootShell$$/build/outputs/aar/RootShell-release.aar $$RootTools$$/RootShell/RootShell.aar
+      - cp $$RootShell$$/build/outputs/aar/RootShell-release.aar ../RootShell/RootShell.aar
+      - pushd $$RootTools$$
+      - gradle assembleRelease
+      - popd
+      - cp $$RootTools$$/build/outputs/aar/RootTools-release.aar ../RootTools/RootTools.aar
+      - export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+    ndk: r25b
 
 AutoUpdateMode: Version %v
 UpdateCheckMode: Tags
