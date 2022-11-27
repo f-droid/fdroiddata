@@ -163,30 +163,29 @@ Builds:
     commit: d6ac6fcca64865b203a281382a9e93670d756d24
     subdir: app
     submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -t bullseye-backports -y golang-go
+      - apt-get install -y make
     gradle:
       - yes
     prebuild:
-      - JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 $$SDK$$/tools/bin/sdkmanager 'platforms;android-31'
-        'build-tools;31.0.0' > /dev/null
+      - sdkmanager 'platforms;android-31' 'build-tools;31.0.0'
       - mv ../acra.properties.sample ../acra.properties
-      - sed -i -e '/signingConfig\ signing/d' -e '/ndkVersion/d' build.gradle
+      - sed -i -e '/signingConfig signing/d' build.gradle
     build:
       - export ANDROID_SDK_ROOT=$$SDK$$
       - export ANDROID_NDK_ROOT=$$NDK$$
-      - curl -Lso go.tar.gz https://go.dev/dl/go1.18.1.linux-amd64.tar.gz
-      - echo "b3b815f47ababac13810fc6021eb73d65478e0b2db4b09d348eefad9581a2334 go.tar.gz"
-        | sha256sum -c -
-      - tar xzf go.tar.gz
       - export GOPATH="$PWD/golang"
-      - export PATH="$GOPATH/bin:$PWD/go/bin:$PATH"
+      - export PATH="$GOPATH/bin:$PATH"
       - cd ../yggdrasil/yggdrasil-go
       - go install golang.org/x/mobile/cmd/gomobile
       - gomobile init
       - cd ..
       - make
-    ndk: r21e
+    ndk: r21c
 
-AutoUpdateMode: Version v%v
+AutoUpdateMode: Version
 UpdateCheckMode: Tags
 CurrentVersion: 2.1.4
 CurrentVersionCode: 40
