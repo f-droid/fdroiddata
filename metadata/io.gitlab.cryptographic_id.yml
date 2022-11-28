@@ -1,0 +1,45 @@
+Categories:
+  - Security
+License: MIT
+SourceCode: https://gitlab.com/cryptographic_id/cryptographic-id-flutter
+IssueTracker: https://gitlab.com/cryptographic_id/cryptographic-id-flutter/-/issues
+
+AutoName: Crypto ID
+
+RepoType: git
+Repo: https://gitlab.com/cryptographic_id/cryptographic-id-flutter.git
+
+Builds:
+  - versionName: 0.2.1
+    versionCode: 5
+    commit: 87d4385bcf8bc38856a8e178be30da24d9b45a52
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y protobuf-compiler
+    output: build/app/outputs/flutter-apk/app-release.apk
+    prebuild:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export PATH=$PATH:$(pwd)/flutter/bin
+      - mkdir -p .dart_tool/flutter_gen/protobuf/
+      - flutter config --no-analytics
+      - flutter pub global activate protoc_plugin
+      - flutter pub get
+    scanignore:
+      - flutter/bin/cache
+      - flutter/packages/flutter_tools/gradle/flutter.gradle
+    scandelete:
+      - flutter
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export PATH=$PATH:$(pwd)/flutter/bin:${PUB_CACHE}/bin
+      - protoc --proto_path=lib/cryptographic-id-protocol --dart_out=.dart_tool/flutter_gen/protobuf
+        lib/cryptographic-id-protocol/cryptographic_id.proto
+      - flutter build apk --release
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 0.2.1
+CurrentVersionCode: 5
