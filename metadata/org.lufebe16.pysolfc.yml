@@ -15,7 +15,6 @@ Description: |-
     The project provides more than 1000 solitaire games such as patiences, mahjongg,
     shishensho, memory and others. The original project runs on linux, windows and
     macos and was published at sourceforge. See <a href="https://pysolfc.sourceforge.io/">https://pysolfc.sourceforge.io/</a>.
-
     A new user interface has been developed using the kivy framework to meet
     requirements of touch screens devices.
 
@@ -196,7 +195,44 @@ Builds:
       - deactivate
     ndk: r17c
 
+  - versionName: 2.18.0
+    versionCode: 102121800
+    commit: 96e45765723cb8878852ec786e871cbcbfdfb8c2
+    sudo:
+      - apt-get update
+      - apt-get install -y ant autoconf build-essential ccache gettext imagemagick
+        libffi-dev libltdl-dev libssl-dev libtool python3-tk virtualenv wget zlib1g-dev
+      - rm /opt/android-sdk/tools/bin/sdkmanager
+      - ln -s $(which sdkmanager) /opt/android-sdk/tools/bin/sdkmanager
+    output: buildozer/bin/pysolfc-$$VERSION$$-armeabi-v7a-release-unsigned.apk
+    prebuild:
+      - sdkmanager 'build-tools;32.0.0' 'platform-tools;32.0.0' 'platforms;android-32'
+      - pushd buildozer
+      - virtualenv --python=python3 ${HOME}/PYSOLENV
+      - . ${HOME}/PYSOLENV/bin/activate
+      - python3 -m pip install -r pipreq.txt
+      - ./fdroid.init
+      - git clone -b master --single-branch https://github.com/kivy/python-for-android.git
+        ${HOME}/PYSOLENV/python-for-android
+      - sed -r "s:#? ?android\.sdk_path =.*:android.sdk_path = $$SDK$$:" -i buildozer.spec
+      - sed -r "s:#? ?android\.ndk_path =.*:android.ndk_path = $$NDK$$:" -i buildozer.spec
+      - sed -r "s:#? ?android\.ant_path =.*:android.ant_path = $(which ant):" -i buildozer.spec
+      - sed -r "s:#? ?android\.accept_sdk_license =.*:android.accept_sdk_license =
+        False:" -i buildozer.spec
+      - sed -r "s:#? ?p4a\.source_dir =.*:p4a.source_dir = ${HOME}/PYSOLENV/python-for-android:"
+        -i buildozer.spec
+      - sed -r "s:#? ?log_level =.*:log_level = 2:" -i buildozer.spec
+      - deactivate
+      - popd
+    build:
+      - pushd buildozer
+      - . ${HOME}/PYSOLENV/bin/activate
+      - buildozer android release
+      - deactivate
+      - popd
+    ndk: r23b
+
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: 2.8.0
-CurrentVersionCode: 72120800
+CurrentVersion: 2.18.0
+CurrentVersionCode: 102121800
