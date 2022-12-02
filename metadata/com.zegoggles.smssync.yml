@@ -26,25 +26,6 @@ RepoType: git
 Repo: https://github.com/jberkel/sms-backup-plus.git
 
 Builds:
-  - versionName: 1.4.3
-    versionCode: 1404
-    disable: non-free paypal jar at 1.4.3
-    commit: 1.4.3
-
-  - versionName: 1.4.4
-    versionCode: 1405
-    disable: non-free paypal jar at 1.4.4
-    commit: 1.4.4
-    prebuild: mv lib libs
-    target: android-10
-
-  - versionName: 1.4.6
-    versionCode: 1407
-    disable: paypal jar
-    commit: unknown - see disabled
-    prebuild: mv lib libs
-    target: android-10
-
   - versionName: 1.4.8
     versionCode: 1409
     commit: 1.4.8
@@ -54,30 +35,6 @@ Builds:
       - mv $$K9Mail-XOAUTH$$/compile-only-libs $$K9Mail-XOAUTH$$/libs
       - ant clean jar -f $$K9Mail-XOAUTH$$/build.xml
       - mv $$K9Mail-XOAUTH$$/bin/k9-imapstore.jar libs/
-
-  - versionName: 1.5.5
-    versionCode: 1531
-    disable: does not build
-    commit: 1.5.5
-    gradle:
-      - yes
-    srclibs:
-      - whassup@0.0.4
-      - PayMe@0.0.2
-      - K9Mail-XOAUTH@70c41c71cd
-    prebuild:
-      - pushd $$whassup$$
-      - mvn install
-      - popd
-      - pushd $$PayMe$$
-      - mvn install
-      - popd
-      - sed -i -e '14,17d' build.gradle
-      - sed -i -e '/mavenCentral/amavenLocal()\njCenter()' build.gradle
-      - mv $$K9Mail-XOAUTH$$/compile-only-libs $$K9Mail-XOAUTH$$/libs
-      - ant clean jar -f $$K9Mail-XOAUTH$$/build.xml
-      - mvn install:install-file -Dfile=$$K9Mail-XOAUTH$$/bin/k9-imapstore.jar -DgroupId=com.zegoggles
-        -DartifactId=k9-imapstore -Dversion=0.1 -Dpackaging=jar
 
   - versionName: 1.5.6-beta
     versionCode: 1539
@@ -154,60 +111,9 @@ Builds:
       - mvn install:install-file -DgroupId=android -DartifactId=android -Dversion=4.4_r1
         -Dpackaging=jar -Dfile=$$SDK$$/platforms/android-19/android.jar
 
-  - versionName: 1.5.6
-    versionCode: 1546
-    disable: todo; k9lib failed
-    commit: 1.5.6
-    maven: 'yes'
-    srclibs:
-      - whassup@0.0.6
-      - PayMe@0.0.3
-      - k9lib@fe8e779b32eaa80321cc0c2a4b58a9a77aaf885d
-    forceversion: true
-    prebuild:
-      - sed -i -e 's@<version>3.8.2</version>@<version>3.7.0</version>@g' -e '/<repositories>/,/<\/repositories>/d'
-        pom.xml $$whassup$$/pom.xml $$PayMe$$/pom.xml
-      - pushd $$whassup$$
-      - mvn -Dmaven.test.skip=true install
-      - popd
-      - pushd $$PayMe$$
-      - mvn -Dmaven.test.skip=true install
-      - popd
-      - pushd $$k9lib$$
-      - gradle install
-      - popd
-      - mvn install:install-file -DgroupId=android -DartifactId=android -Dversion=4.4_r1
-        -Dpackaging=jar -Dfile=$$SDK$$/platforms/android-19/android.jar
-
   - versionName: 1.5.8
     versionCode: 1550
     commit: 1.5.8
-    maven: 'yes'
-    srclibs:
-      - whassup@0.0.7
-      - PayMe@0.0.4
-      - k9lib@f7b2f260265e230ba74be11469f4cf3db4c5745e
-    prebuild:
-      - mvn install:install-file -DgroupId=android -DartifactId=android -Dversion=4.4_r1
-        -Dpackaging=jar -Dfile=$$SDK$$/platforms/android-19/android.jar
-      - pushd $$k9lib$$/k9mail-library
-      - sed -i -e '/mavenDeployer/a/*' -e '/pom.project/i*/' build.gradle
-      - sed -i -e '/mavenDeployer/adef sha = "git rev-parse --short HEAD".execute().text'
-        build.gradle
-      - "sed -i -e '/mavenDeployer/arepository(url: mavenLocal().url) {' build.gradle"
-      - gradle uploadArchives
-      - popd
-      - pushd $$whassup$$
-      - mvn -Dmaven.test.skip=true install
-      - popd
-      - pushd $$PayMe$$
-      - mvn -Dmaven.test.skip=true install
-      - popd
-
-  - versionName: 1.5.9
-    versionCode: 1551
-    disable: unreleased
-    commit: 1.5.9
     maven: 'yes'
     srclibs:
       - whassup@0.0.7
@@ -271,35 +177,6 @@ Builds:
       - pushd $$PayMe$$
       - mvn -Dmaven.test.skip=true install
       - popd
-
-  - versionName: 1.5.11-beta4
-    versionCode: 1557
-    disable: https://gitlab.com/fdroid/fdroiddata/-/issues/2294
-    commit: 171aed735b5858e09ad957c556d6069f7b5ad9ab
-    subdir: app
-    gradle:
-      - yes
-    prebuild:
-      - sed -i -e 's/"https:\/\/dl.bintray.com\/jberkel\/maven"/"https:\/\/jitpack.io"/'
-        ../build.gradle
-      - sed -i -e 's/com.fsck.k9.mail:lib:0.0.1.75bb293/com.github.jberkel:k-9:75bb293984/'
-        build.gradle
-
-  - versionName: 1.5.11-beta7
-    versionCode: 1560
-    disable: https://gitlab.com/fdroid/fdroiddata/-/issues/2294
-    commit: 4b4287055a9ee6cdea26db38425ce914727d6511
-    subdir: app
-    gradle:
-      - yes
-
-  - versionName: 1.5.11-beta13
-    versionCode: 1566
-    disable: https://gitlab.com/fdroid/fdroiddata/-/issues/2294
-    commit: 66f4d77cb20e8533d4090c1312ce0a18b2f35724
-    subdir: app
-    gradle:
-      - yes
 
   - versionName: 1.5.11
     versionCode: 1576
