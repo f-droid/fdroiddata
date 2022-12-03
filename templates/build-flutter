@@ -7,13 +7,9 @@ Builds:
   - versionName: '1.0'
     versionCode: 1
     commit: v1.0
+    # Flutter should be added as a git submodule at e.g. .flutter
+    submodules: true
     output: build/app/outputs/flutter-apk/app-release.apk
-    # Choose one of the Tags of the Flutter source:
-    # https://github.com/flutter/flutter/tags.
-    # Sometimes the Flutter version is already specified by
-    # upstream in pubspec.yaml, environment.flutter.
-    srclibs:
-      - flutter@2.8.0
     # Deletes unrelated directories,
     # remove those not needed from the list.
     rm:
@@ -22,12 +18,33 @@ Builds:
       - macos
       - web
       - windows
+    prebuild:
+      # Change pub cache location so that the dart packages are scanned by the scanner
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - .flutter/bin/flutter config --no-analytics
+      - .flutter/bin/flutter pub get
+    scanignore:
+      # Ignore a maven repo for Flutter engine
+      - .flutter/packages/flutter_tools/gradle/flutter.gradle
+      # Ignore the downloaded dart tools
+      - .flutter/bin/cache
+    # Other binaries should be deleted
+    scandelete:
+      - .flutter
+      - .pub-cache
     build:
-      - $$flutter$$/bin/flutter config --no-analytics
-      - $$flutter$$/bin/flutter build apk --release --verbose
+      # Make Flutter use the scanned cache
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      # Split per abi to reduce the apk size
+      - .flutter/bin/flutter build apk --release --split-per-abi --target-platform="android-arm64"
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
+# This should be set according to the version code scheme
+VercodeOperation:
+  - '%c * 10 + 1'
+  - '%c * 10 + 2'
+  - '%c * 10 + 3'
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
 CurrentVersion: '1.0'
 CurrentVersionCode: 1
