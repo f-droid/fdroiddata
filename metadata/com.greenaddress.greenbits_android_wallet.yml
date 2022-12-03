@@ -2254,6 +2254,31 @@ Builds:
         ./prepare_gdk_clang.sh
     ndk: r25b
 
+  - versionName: 3.9.0
+    versionCode: 22000390
+    commit: c404a9820badb978778e49f29894a57d2adec513
+    timeout: 25200
+    subdir: green
+    sudo:
+      - apt-get update
+      - apt-get install -y make clang jq libffi-dev virtualenv swig autoconf automake
+        libtool
+    gradle:
+      - production
+    srclibs:
+      - rustup@1.25.1
+    prebuild: sed -i -e '/signingConfigs/,/^            }/d' build.gradle
+    build:
+      - $$rustup$$/rustup-init.sh -y
+      - source $HOME/.cargo/env
+      - rustup install 1.56.0
+      - rustup target add aarch64-linux-android armv7-linux-androideabi x86_64-linux-android
+        i686-linux-android
+      - cd ../crypto
+      - JAVA_HOME=$(readlink -f /usr/bin/javac | sed "s:/bin/javac::") PATH=$HOME/.local/bin:$PATH
+        ./prepare_gdk_clang.sh
+    ndk: r25b
+
 MaintainerNotes: |-
     Watch prepare_gdk_clang.sh for changes on new builds.
 
@@ -2267,5 +2292,5 @@ AutoUpdateMode: Version
 UpdateCheckMode: Tags
 VercodeOperation:
   - 22000000 + %c
-CurrentVersion: 3.8.9
-CurrentVersionCode: 22000389
+CurrentVersion: 3.9.0
+CurrentVersionCode: 22000390
