@@ -78,8 +78,38 @@ Builds:
       - pushd ../..
       - APP_MODE=release APP_CONFIG=prod npm run build
 
+  - versionName: 8.0.0
+    versionCode: 8000000
+    commit: fc52409b31207e068a8a5858fabca9138dc604ae
+    subdir: android/app
+    sudo:
+      - apt-get update
+      - apt-get install -y g++ make
+      - curl -Lo node.tar.gz https://nodejs.org/dist/v16.18.0/node-v16.18.0-linux-x64.tar.gz
+      - echo "faca6476cb5b41aa995370fd856d16fcfbbef5c18718a6fa44cc1bae4140849d node.tar.gz"
+        | sha256sum -c -
+      - tar xzf node.tar.gz --strip-components=1 -C /usr/local/
+    init:
+      - pushd ../..
+      - npm install
+      - PATCH_NONFREE_FORCE=1 npm run patch-nonfree
+      - touch www/index.html
+      - npx cap update android
+      - npm run fetch-nnue
+      - sed 's/lichess\.dev/lichess.org/g' appconfig.dev.json > appconfig.prod.json
+    gradle:
+      - yes
+    rm:
+      - ios/
+      - node_modules/@capacitor/push-notifications/
+    scandelete:
+      - node_modules/
+    build:
+      - pushd ../..
+      - APP_MODE=release APP_CONFIG=prod npm run build
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckName: org.lichess.mobileapp
-CurrentVersion: 7.16.1
-CurrentVersionCode: 7016010
+CurrentVersion: 8.0.0
+CurrentVersionCode: 8000000
