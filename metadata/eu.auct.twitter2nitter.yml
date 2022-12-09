@@ -1,0 +1,37 @@
+Categories:
+  - Internet
+License: GPL-3.0-only
+AuthorName: AucT
+AuthorEmail: auct.eu@gmail.com
+AuthorWebSite: https://auct.eu/
+SourceCode: https://github.com/AucT/twitter2nitter
+IssueTracker: https://github.com/AucT/twitter2nitter/issues
+Changelog: https://github.com/AucT/twitter2nitter/releases
+
+AutoName: twitter2nitter
+
+RepoType: git
+Repo: https://github.com/AucT/twitter2nitter.git
+Binaries: https://github.com/AucT/twitter2nitter/releases/download/v%v/twitter2nitter.v%v.apk
+
+Builds:
+  - versionName: '1.5'
+    versionCode: 6
+    commit: df9b3caa359b860d6222a0b538a7dffca49543f2
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get -y install zipalign
+    output: out.apk
+    srclibs:
+      - reproducible-apk-tools@v0.1.1
+    build:
+      - gradle assembleRelease
+      - $$reproducible-apk-tools$$/fix-newlines.py build/outputs/apk/release/*.apk
+        fixed.apk 'META-INF/services/*'
+      - zipalign 4 fixed.apk out.apk
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: '1.5'
+CurrentVersionCode: 6
