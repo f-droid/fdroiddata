@@ -10,23 +10,26 @@ RepoType: git
 Repo: https://github.com/simplex-chat/simplex-chat.git
 
 Builds:
-  - versionName: '3.2'
-    versionCode: 49
-    disable: https://gitlab.com/fdroid/fdroiddata/-/merge_requests/11545
-    commit: 9f94c6f98a160a836151853d31d54c0034f08c22
+  - versionName: 4.3.1
+    versionCode: 77
+    commit: 3a5bf004691bf0ab1f4fc640ef58cad36e3d21e7
+    timeout: 30000
     sudo:
       - apt-get update
-      - apt-get install -y openjdk-11-jdk-headless
-      - update-alternatives --auto java
+      - apt-get install -y xz-utils zipalign
       - mkdir -m 0755 /nix
       - chown vagrant /nix
       - chown -R vagrant /tmp
     output: ./simplex-chat.apk
+    prebuild:
+      - sed -i -e 's/extra-substituters/#extra-substituters/' -e 's/trusted-public-keys/#trusted-public-keys/'
+        ./scripts/android/build-android.sh
+      - mv apps/android/gradle .
     build:
       - export USER=vagrant
-      - ./scripts/android/build-android.sh $$COMMIT$$
+      - ./scripts/android/build-android.sh -s $$COMMIT$$
 
 AutoUpdateMode: None
 UpdateCheckMode: Tags
 CurrentVersion: 4.3.1
-CurrentVersionCode: 76
+CurrentVersionCode: 77
