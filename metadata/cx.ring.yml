@@ -1936,7 +1936,9 @@ Builds:
       - packaging
       - scripts
     prebuild:
-      - sdkmanager 'platforms;android-33' 'build-tools;33.0.0'
+      - platforms=$(grep compileSdk build.gradle.kts | sed -E 's/.* ([0-9]+)/\1/')
+      - build_tools=$(grep buildToolsVersion build.gradle.kts | sed -E 's/.*"([0-9.]+)"/\1/')
+      - sdkmanager "platforms;android-$platforms" "build-tools;$build_tools"
       - sed -i -e '/isEnable = true/d' build.gradle.kts
     build:
       - cd ../..
