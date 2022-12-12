@@ -1,0 +1,34 @@
+Categories:
+  - Money
+License: MIT
+SourceCode: https://github.com/vbresan/eurokonverter_android
+IssueTracker: https://github.com/vbresan/eurokonverter_android/issues
+
+AutoName: Euro konverter
+
+RepoType: git
+Repo: https://github.com/vbresan/eurokonverter_android
+Binaries: https://github.com/vbresan/eurokonverter_android/releases/download/%c/com.eurokonverter-%v-release.apk
+
+Builds:
+  - versionName: '1.1'
+    versionCode: 2
+    commit: '2'
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y zipalign
+    output: out.apk
+    srclibs:
+      - reproducible-apk-tools@v0.1.1
+    prebuild: gradle clean
+    build:
+      - gradle assembleRelease
+      - $$reproducible-apk-tools$$/fix-newlines.py build/outputs/apk/release/*.apk
+        fixed.apk 'META-INF/services/*'
+      - zipalign 4 fixed.apk out.apk
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: '1.1'
+CurrentVersionCode: 2
