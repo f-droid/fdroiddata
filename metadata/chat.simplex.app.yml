@@ -29,6 +29,25 @@ Builds:
       - export USER=vagrant
       - ./scripts/android/build-android.sh -s $$COMMIT$$
 
+  - versionName: 4.3.2
+    versionCode: 78
+    commit: bb4582109d119d4daf8081561b69504debdc573d
+    timeout: 30000
+    sudo:
+      - apt-get update
+      - apt-get install -y xz-utils zipalign
+      - mkdir -m 0755 /nix
+      - chown vagrant /nix
+      - chown -R vagrant /tmp
+    output: ./simplex-chat.apk
+    prebuild:
+      - sed -i -e 's/extra-substituters/#extra-substituters/' -e 's/trusted-public-keys/#trusted-public-keys/'
+        ./scripts/android/build-android.sh
+      - mv apps/android/gradle .
+    build:
+      - export USER=vagrant
+      - ./scripts/android/build-android.sh -s $$COMMIT$$
+
 AutoUpdateMode: None
 UpdateCheckMode: Tags
 CurrentVersion: 4.3.2
