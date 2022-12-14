@@ -163,10 +163,6 @@ Builds:
     versionCode: 103
     commit: 6f1bc94f7352c035945f826bb6b2e62b46213000
     subdir: app
-    sudo:
-      - echo "deb http://deb.debian.org/debian stretch main" > /etc/apt/sources.list.d/stretch.list
-      - apt-get update
-      - apt-get install -y -t stretch openjdk-8-jdk-headless
     gradle:
       - gplay
     srclibs:
@@ -175,19 +171,10 @@ Builds:
     rm:
       - app/libs/*.aar
       - secret-env-cipher
-    build:
-      - export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
-      - pushd $$RootShell$$
-      - sed -i -e 's/4.0-rc-1/4.0/' gradle/wrapper/gradle-wrapper.properties
-      - gradle assembleRelease
-      - popd
-      - rm $$RootTools$$/RootShell/RootShell.aar
-      - cp $$RootShell$$/build/outputs/aar/RootShell-release.aar $$RootTools$$/RootShell/RootShell.aar
-      - cp $$RootShell$$/build/outputs/aar/RootShell-release.aar libs/RootShell-1.6.aar
-      - pushd $$RootTools$$
-      - gradle assembleRelease
-      - popd
-      - cp $$RootTools$$/build/outputs/aar/RootTools-release.aar libs/RootTools-5.0.aar
+    prebuild:
+      - mv $$RootShell$$/src/main/java/com/stericson src/main/java/com
+      - mv $$RootTools$$/src/main/java/com/stericson/RootTools src/main/java/com/stericson
+      - sed -i -e '/implementation files/d' build.gradle
 
 AutoUpdateMode: None
 UpdateCheckMode: HTTP
