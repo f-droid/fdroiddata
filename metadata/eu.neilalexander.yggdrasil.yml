@@ -1,0 +1,47 @@
+Categories:
+  - Internet
+License: MIT
+AuthorName: Yggdrasil Developers
+AuthorWebSite: https://yggdrasil-network.github.io/
+WebSite: https://yggdrasil-network.github.io
+SourceCode: https://github.com/yggdrasil-network/yggdrasil-android
+IssueTracker: https://github.com/yggdrasil-network/yggdrasil-android/issues
+Changelog: https://github.com/yggdrasil-network/yggdrasil-android/releases
+
+AutoName: Yggdrasil
+
+RepoType: git
+Repo: https://github.com/yggdrasil-network/yggdrasil-android.git
+
+Builds:
+  - versionName: 0.1-011
+    versionCode: 11
+    commit: 055aab328d999586df94a461f27b2c28a1c08d78
+    subdir: app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -t bullseye-backports -y golang-go
+    gradle:
+      - yes
+    prebuild:
+      - sdkmanager 'platforms;android-21'
+      - sed -i -e 's/-target android/-target android -androidapi 21/g' ../libs/yggdrasil-go/contrib/mobile/build
+    build:
+      - mkdir libs
+      - pushd ..
+      - export GOPATH="$PWD/golang"
+      - export PATH="$GOPATH/bin:$PATH"
+      - go install golang.org/x/mobile/cmd/gomobile@latest
+      - pushd libs/yggdrasil-go
+      - gomobile init
+      - ./contrib/mobile/build -a
+      - cp yggdrasil.aar ../../app/libs
+      - popd
+      - popd
+    ndk: r21e
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: 0.1-011
+CurrentVersionCode: 11
