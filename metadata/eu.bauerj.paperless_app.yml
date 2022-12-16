@@ -113,18 +113,21 @@ Builds:
     commit: bf6c7ff36f8725fc270ff5e5962afc906b95268f
     output: build/app/outputs/flutter-apk/app-release.apk
     srclibs:
-      - flutter@2.10.2
-    build:
+      - flutter@3.3.9
+    rm:
+      - ios
+    prebuild:
+      - export PUB_CACHE=$(pwd)/.pub-cache
       - $$flutter$$/bin/flutter config --no-analytics
       - $$flutter$$/bin/flutter pub get
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
       - $$flutter$$/bin/flutter pub run build_runner build
       - $$flutter$$/bin/flutter pub run download_translations.dart
       - $$flutter$$/bin/flutter build apk
     ndk: r21
-
-MaintainerNotes: |-
-    Builds will fail when the srclib ref of flutter and the version with which
-    upstream has been built with differ to mouch.
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
