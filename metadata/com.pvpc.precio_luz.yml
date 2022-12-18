@@ -33,27 +33,30 @@ Builds:
       - $$flutter$$/bin/flutter build apk
     ndk: r20
 
-  - versionName: 2.4.2
-    versionCode: 25
-    disable: https://github.com/Webierta/precio-luz/issues/8
-    commit: 2ea45bd8b2f3fdc07fb1637c43ef995b5f53c53a
-    sudo:
-      - apt-get update
-      - rm -fr /opt/android-sdk/ndk/*
+  - versionName: 2.4.3
+    versionCode: 26
+    commit: 8d78e88467fefe7825462c120cfc220ece2ba4b8
+    sudo: rm -fr /opt/android-sdk/ndk/*
     output: build/app/outputs/flutter-apk/app-release.apk
     srclibs:
-      - flutter@2.5.3
+      - flutter@3.3.10
     rm:
       - ios
       - android/app/proguard-rules.pro
-    prebuild: sed -i -e '/signingConfig /,/proguardFiles/d' android/app/build.gradle
-    build:
+    prebuild:
+      - sed -i -e '/signingConfig /,/proguardFiles/d' android/app/build.gradle
+      - export PUB_CACHE=$(pwd)/.pub-cache
       - $$flutter$$/bin/flutter config --no-analytics
-      - $$flutter$$/bin/flutter build apk
-    ndk: r20
+      - $$flutter$$/bin/flutter pub get
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release
+    ndk: r23b
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v.*$
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 2.4.2
-CurrentVersionCode: 25
+CurrentVersion: 2.4.3
+CurrentVersionCode: 26
