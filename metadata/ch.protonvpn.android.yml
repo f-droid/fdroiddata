@@ -1332,7 +1332,6 @@ Builds:
 
   - versionName: 4.4.73.0
     versionCode: 104047300
-    disable: fails to build
     commit: 0dfed59817a87e1d63cb72230cec6d18f3c944b5
     timeout: 7200
     subdir: app
@@ -1340,11 +1339,9 @@ Builds:
       - apt-get update
       - apt-get install -y --no-install-recommends make libgmp-dev autoconf automake
         libtool pkg-config autogen gettext libssl-dev libsqlite3-dev libpam0g-dev
-        libldap2-dev gperf bison bzip2 flex swig
+        libldap2-dev gperf bison bzip2 flex swig cmake
     gradle:
       - prod
-    srclibs:
-      - android-ndk-boringssl@ndk-static
     rm:
       - app/src/main/jniLibs/x86/*
       - app/src/main/jniLibs/x86_64/*
@@ -1354,31 +1351,15 @@ Builds:
       - openvpn/src/main/cpp/openvpn3/test/unittests
       - openvpn/src/main/cpp/mbedtls/programs/fuzz/corpuses/*
     prebuild:
-      - sdkmanager 'cmake;3.18.1' 'ndk;21.4.7075529'
       - sed -i -e '/triple/d' -e '/play\ {/,+4d' build.gradle
-      - git submodule update --init --recursive ../strongswan
-      - cd ../strongswan
-      - ln -s -T $$android-ndk-boringssl$$ src/frontends/android/app/src/main/jni/openssl
-      - cd ..
-      - echo ndk.dir="$ANDROID_SDK/ndk/21.4.7075529" > strongswan/src/frontends/android/local.properties
-      - sed -i -e '/gradle-build-cache/d' settings.gradle
+      - sed -i -e '/gradle-build-cache/d' ../settings.gradle.kts
     scandelete:
-      - strongswan/testing
       - openvpn/src/main/cpp/lz4/tmp
     build:
-      - pushd ../strongswan
-      - ./autogen.sh
-      - ./configure || cat config.log
-      - make dist
-      - cd src/frontends/android/app
-      - sed -i -e '/android\ {/alintOptions\ {abortOnError\ false}' build.gradle
-      - gradle assembleRelease
-      - popd
-      - mv ../strongswan/src/frontends/android/app/src/main/libs/* src/main/jniLibs/
-      - rm -fr ../strongswan/src/frontends/android/app/build
-      - cd ../openvpn
+      - pushd ../openvpn
       - gradle assembleRelease
       - rm -fr build/intermediates build/kotlin build/tmp .cxx
+      - popd
     ndk: r23b
     gradleprops:
       - buildUniversalApk
