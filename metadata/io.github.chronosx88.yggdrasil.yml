@@ -185,7 +185,34 @@ Builds:
       - make
     ndk: r21c
 
+  - versionName: 2.1.6
+    versionCode: 42
+    commit: 91ddb4f9916fba77489d5b0eb27e4fed7db0fe56
+    subdir: app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -t bullseye-backports -y golang-go
+      - apt-get install -y make
+    gradle:
+      - yes
+    prebuild:
+      - sdkmanager 'platforms;android-31' 'build-tools;31.0.0'
+      - mv ../acra.properties.sample ../acra.properties
+      - sed -i -e '/signingConfig signing/d' build.gradle
+    build:
+      - export ANDROID_SDK_ROOT=$$SDK$$
+      - export ANDROID_NDK_ROOT=$$NDK$$
+      - export GOPATH="$PWD/golang"
+      - export PATH="$GOPATH/bin:$PATH"
+      - cd ../yggdrasil/yggdrasil-go
+      - go install golang.org/x/mobile/cmd/gomobile
+      - gomobile init
+      - cd ..
+      - make
+    ndk: r21c
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 2.1.4
-CurrentVersionCode: 40
+CurrentVersion: 2.1.6
+CurrentVersionCode: 42
