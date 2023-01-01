@@ -3,7 +3,7 @@ Categories:
 License: Apache-2.0
 AuthorName: Watashi Kokoto
 SourceCode: https://bitbucket.org/watashi564/combapp
-IssueTracker: https://bitbucket.org/watashi564/combapp/jira
+IssueTracker: https://bitbucket.org/watashi564/combapp/issues
 Changelog: https://bitbucket.org/watashi564/combapp/src/HEAD/CHANGELOG.md
 
 AutoName: Haircomb
@@ -87,7 +87,43 @@ Builds:
       - popd
       - mv $$CombFullUI$$/combfullui.arm64.bin src/main/res/raw/libcore_0_3_5_1_arm64.so
 
+  - versionName: 0.0.3
+    versionCode: 3
+    commit: v0.0.3
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y -t bullseye-backports golang-go
+    gradle:
+      - yes
+    srclibs:
+      - CombDownloader@0.0.12
+      - CombFullUI@0.3.6
+    build:
+      - pushd $$CombDownloader$$
+      - go mod init localhost/combdownloader
+      - go get -u bitbucket.org/watashi564/accelerator/libfile@v0.0.11
+      - go get -u golang.org/x/net/proxy@latest
+      - go get -u github.com/btcsuite/btcd/chaincfg/chainhash@latest
+      - go get -u github.com/btcsuite/btcd/wire@latest
+      - GOARM=7 GOOS=linux GOARCH=arm64 go build -o combdownloader.arm64.bin -trimpath
+        -ldflags=-buildid=
+      - popd
+      - mv $$CombDownloader$$/combdownloader.arm64.bin src/main/res/raw/libdl_0_0_12_arm64.so
+      - pushd $$CombFullUI$$
+      - go mod init localhost/combfullui
+      - go get -u github.com/gorilla/mux@latest
+      - go get -u bitbucket.org/watashi564/accelerator/libfile@v0.0.11
+      - go get -u github.com/sipa/bech32/ref/go/src/bech32@latest
+      - go get -u github.com/syndtr/goleveldb/leveldb@latest
+      - go get -u github.com/syndtr/goleveldb/leveldb/opt@latest
+      - go get -u github.com/syndtr/goleveldb/leveldb/util@latest
+      - GOARM=7 GOOS=linux GOARCH=arm64 go build -o combfullui.arm64.bin -trimpath
+        -ldflags=-buildid=
+      - popd
+      - mv $$CombFullUI$$/combfullui.arm64.bin src/main/res/raw/libcore_0_3_6_arm64.so
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v[\d.]+$
-CurrentVersion: 0.0.2
-CurrentVersionCode: 2
+CurrentVersion: 0.0.3
+CurrentVersionCode: 3
