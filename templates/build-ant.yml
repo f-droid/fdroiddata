@@ -1,0 +1,17 @@
+Builds:
+  - versionName: '1.0'
+    versionCode: 1
+    commit: v1.0
+    sudo:
+      - apt-get update
+      # Ant is not installed by default
+      - apt-get install -y ant
+      # New build-tools are installed by default which doesn't work with ant
+      - rm -fr /opt/android-sdk/build-tools/*
+    prebuild:
+      # The default target is generally too old
+      - echo -e 'java.target=1.8\njava.source=1.8' > ant.properties
+      # Ant can't install build-tools automatically
+      - sdkmanager 'build-tools;30.0.3'
+    # Use `target: android-X` if no target is defined in project.properties.
+    target: android-21

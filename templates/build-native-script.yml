@@ -1,0 +1,51 @@
+Builds:
+  - versionName: 2.0.2
+    versionCode: 3
+    commit: v2.0.2
+    sudo:
+      # Install dependencies and NativeScript-CLI
+      - apt-get update || apt-get update
+      - apt-get install -y lib32z1 nodejs
+      - npm -g install nativescript
+    init:
+      # Please adjust the versions as needed
+      - $$SDK$$/tools/bin/sdkmanager "platforms;android-30" "build-tools;30.0.3" "emulator"
+        > /dev/null
+      - npm install --unsafe-perm
+    output: platforms/android/app/build/outputs/apk/release/app-release-unsigned.apk
+    srclibs:
+      # Please use the latest releases available
+      - NativeScript_android-runtime@v8.2.2
+      - NativeScript_NativeScript@8.2.1-core
+    scandelete:
+      - node_modules
+    build:
+      # Build NativeScript UI blob
+      - pushd $$NativeScript_NativeScript$$/packages/ui-mobile-base/android/widgets
+      - gradle assembleRelease
+      - popd
+      - mkdir -p node_modules/@nativescript/core/platforms/android
+      - cp $$NativeScript_NativeScript$$/packages/ui-mobile-base/android/widgets/build/outputs/aar/widgets-release.aar
+        node_modules/@nativescript/core/platforms/android/widgets-release.aar
+      - rm -rf $$NativeScript_NativeScript$$
+      # Build NativeScript Android Runtime blobs
+      - pushd $$NativeScript_android-runtime$$
+      - export JAVA_HOME=$(readlink -f /usr/bin/javac | sed "s:/bin/javac::")
+      - cp $$SDK$$/build-tools/30.0.3/lib/dx.jar test-app/build-tools/android-metadata-generator/src/libs/dx.jar
+      # Please adjust the NDK version as needed, sync these [1]
+      - gradle -PndkVersion=20.1.5948944
+      - popd
+      - mkdir -p node_modules/@nativescript/android
+      - rm -rf node_modules/@nativescript/android/framework
+      - cp -r $$NativeScript_android-runtime$$/dist/framework node_modules/@nativescript/android
+      - rm -rf $$NativeScript_android-runtime$$
+      # Build the app itself
+      - ns prepare android
+      # Configure the app not to produce a signed APK when building
+      - sed -i 's/\(signingConfig[[:space:]]\)signingConfigs\.release/\1null/' platforms/android/app/build.gradle
+      - ns build android --gradlePath /opt/gradle/bin/gradle --release --env.uglify --key-store-path /dev/null --key-store-alias
+        NULL --key-store-password NULL --key-store-alias-password NULL || (cd platforms/android/app/build/outputs/apk/release
+      - echo "The following files were found:"
+      - find -maxdepth 1 -type f -name "*.apk")
+    # Please adjust the NDK version as needed, sync these [1]
+    ndk: r20b

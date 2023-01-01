@@ -52,7 +52,7 @@ Please read the [General Recommendations](#general-recommendations) before you s
 1. Add a new file by clicking on the plus sign and choosing _"New file"_.
 1. Set the file name in the following schema: `<application_id>.yml`. So an example would be _"com.app.example.yml"_.
 1. Write down the metadata. The [Build Metadata Reference](https://f-droid.org/en/docs/Build_Metadata_Reference)
-   as well as the [templates from the wiki](https://gitlab.com/fdroid/wiki/-/wikis/Metadata/YAML-Metadata)
+   as well as the [templates](./templates/README.md)
    will help you.
 1. Choose a smart commit message and commit your changes.
 1. Continue with the [Common steps for both methods](#common-steps-for-both-methods)
@@ -65,7 +65,7 @@ Please read the [General Recommendations](#general-recommendations) before you s
 1. Create a new file in the the `metadata` directory named after the following schema: `<application_id>.yml`.
    So an example would be _"com.app.example.yml"_.
 1. Write down the metadata in that file. The [Build Metadata Reference](https://f-droid.org/en/docs/Build_Metadata_Reference)
-   as well as the [templates from the wiki](https://gitlab.com/fdroid/wiki/-/wikis/Metadata/YAML-Metadata)
+   as well as the [templates](./templates/README.md)
    will help you.
 1. Commit and push to your upstream fork.
 1. Continue with the [Common steps for both methods](#common-steps-for-both-methods)
