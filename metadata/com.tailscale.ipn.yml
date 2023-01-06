@@ -1222,7 +1222,37 @@ Builds:
       - ANDROID_NDK_ROOT=$$NDK$$ make -C .. release_aar
     ndk: r23b
 
+  - versionName: 1.34.2-tc5ef9103d-g4727c9c4b63
+    versionCode: 147
+    commit: b0533d01d8489f58299cd7825d52946d246f6b75
+    subdir: android
+    sudo:
+      - apt-get update
+      - apt-get install -y -t bullseye-backports golang-go
+      - apt-get install -y build-essential
+    gradle:
+      - fdroid
+    srclibs:
+      - tailscale-go@e6ce5b50036022c91783161890eabecfddc5ae79
+    prebuild:
+      - sdkmanager 'platforms;android-31' 'build-tools;31.0.0'
+      - sed -i -e '/rm -rf/,+2d' ../Makefile
+    build:
+      - export TOOLCHAINREV=$(go run tailscale.com/cmd/printdep --go)
+      - export TOOLCHAINDIR=${HOME}/.cache/tailscale-android-go-$TOOLCHAINREV
+      - pushd $$tailscale-go$$
+      - git checkout $TOOLCHAINREV
+      - pushd src
+      - ./make.bash
+      - popd
+      - popd
+      - mkdir -p $TOOLCHAINDIR
+      - ln -s $$tailscale-go$$ $TOOLCHAINDIR/go
+      - export PATH=$TOOLCHAINDIR/go/bin:$PATH
+      - ANDROID_NDK_ROOT=$$NDK$$ make -C .. release_aar
+    ndk: r23b
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 1.35.108-t692eac23a-g30e46fb8545
-CurrentVersionCode: 145
+CurrentVersion: 1.34.2-tc5ef9103d-g4727c9c4b63
+CurrentVersionCode: 147
