@@ -1,0 +1,48 @@
+Categories:
+  - Security
+  - System
+License: GPL-3.0-only
+AuthorName: Paranoia Works
+AuthorEmail: paranoiaworks.mobile@gmail.com
+AuthorWebSite: https://www.paranoiaworks.mobi/
+SourceCode: https://gitlab.com/paranoia-works/secret-space-encryptor-for-android
+IssueTracker: https://gitlab.com/paranoia-works/secret-space-encryptor-for-android/issues
+Changelog: https://paranoiaworks.mobi/sse/ssechangelog.htm
+
+AutoName: S.S.E.
+
+RepoType: git
+Repo: https://gitlab.com/paranoia-works/secret-space-encryptor-for-android.git
+Binaries: https://paranoiaworks.mobi/sse/misc/SecretSpaceEncryptorF_%v.apk
+
+Builds:
+  - versionName: 3.0.3.3
+    versionCode: 112
+    commit: bb0b36fe74f0d053be07cafeed040a41ebff5e4c
+    subdir: MainApp
+    sudo:
+      - export CPUS_MAX=1
+      - export CPUS=$(getconf _NPROCESSORS_ONLN)
+      - for (( c=$CPUS_MAX; c<$CPUS; c++ )) ; do echo 0 > /sys/devices/system/cpu/cpu$c/online
+        ; done
+      - apt-get update
+      - apt-get install -y gcc libc-dev
+    output: build/outputs/apk/release/MainApp-release-unsigned.apk
+    srclibs:
+      - rustup@1.25.1
+    build:
+      - $$rustup$$/rustup-init.sh -y
+      - source $HOME/.cargo/env
+      - rustup default 1.65.0
+      - rustup target add armv7-linux-androideabi
+      - rustup target add aarch64-linux-android
+      - rustup target add x86_64-linux-android
+      - export PATH=$HOME/.cargo/bin:$PATH
+      - cargo install --version 2.12.2 cargo-ndk
+      - gradle assembleRelease
+    ndk: r25b
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: 3.0.3.3
+CurrentVersionCode: 112
