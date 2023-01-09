@@ -17,13 +17,18 @@ Builds:
     versionCode: 3002
     commit: v00.30.02f
     subdir: app
-    submodules: true
     sudo:
       - apt-get update
       - apt-get install -y nodejs npm node-uglify make wget ruby-mustache
     gradle:
       - yes
-    prebuild: sed -i -e '/versionNameSuffix/d' build.gradle
+    prebuild:
+      - git config --add receive.fsckObjects false
+      - git config --add fetch.fsckObjects false
+      - git config --add transfer.fsckObjects false
+      - git config --list
+      - sed -i -e '/versionNameSuffix/d' build.gradle
+      - git submodule update --init --recursive
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags v[\d.]+f
