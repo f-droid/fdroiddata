@@ -1,0 +1,66 @@
+Categories:
+  - Games
+License: GPL-3.0-or-later
+AuthorName: Clint Bellanger
+WebSite: http://flarerpg.org
+SourceCode: https://github.com/flareteam/flare-engine
+IssueTracker: https://github.com/flareteam/flare-engine/issues
+Donate: https://flarerpg.org/faq/#donations
+
+AutoName: FLARE
+Summary: An action RPG with gameplay alike to the games in the Diablo series
+Description: |-
+    Flare (Free Libre Action Roleplaying Engine) is a simple game engine built to
+    handle a very specific kind of game: single-player 2D action RPGs.
+    Flare is not a reimplementation of an existing game or engine. It is a tribute
+    to and exploration of the action RPG genre.
+
+    Android version of Flare requires manual installation of engine data files.
+    Instructions on how to install default game called 'The Empyrean Campaign'
+    can be found here: https://github.com/flareteam/flare-engine/wiki/Android-Port
+
+RepoType: git
+Repo: https://github.com/flareteam/flare-engine.git
+
+Builds:
+  - versionName: '1.12'
+    versionCode: 112
+    commit: v1.14
+    timeout: 15000
+    subdir: flare-android-project/app
+    sudo:
+      - apt-get update
+      - apt-get install -y build-essential file
+    gradle:
+      - yes
+    prebuild:
+      - cd src/main/jni
+      - git clone https://github.com/libsdl-org/SDL SDL2
+      - git clone https://github.com/libsdl-org/SDL_image SDL2_image
+      - git clone https://github.com/libsdl-org/SDL_mixer SDL2_mixer
+      - git clone https://github.com/libsdl-org/SDL_ttf SDL2_ttf
+      - cd SDL2
+      - git reset --hard 674989261d1f3c7efd36a1cfdfc0efbc1cca6949
+      - cd ../SDL2_image
+      - git reset --hard aa804aace7fa2cf93b9e88244f70a11f549f42d3
+      - cd ../SDL2_mixer
+      - git reset --hard fe903003892c00ed4a6641a5c8c2cc09057e065d
+      - cd ../SDL2_ttf
+      - git reset --hard  ff952bc8ddc072ebea64cda6c8f27d49097d8eae
+      - cd ..
+      - for i in SDL2 SDL2_image SDL2_mixer SDL2_ttf; do cd "$i"; git submodule init;
+        git submodule update; cd -; done
+    scandelete:
+      - flare-android-project/app/src/main/jni
+    ndk: r22b
+
+MaintainerNotes: |-
+    SDL repo commits were provided by the author and reflect the upstream build environment.
+    Scanner complains about binary test data in SDL repos that's safe to scandelete.
+    The engine requires data files that can be installed using the following instruction:
+    https://github.com/flareteam/flare-engine/wiki/Android-Port
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: '1.12'
+CurrentVersionCode: 112
