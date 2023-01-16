@@ -1,0 +1,36 @@
+Categories:
+  - Connectivity
+  - Internet
+License: AGPL-3.0-only
+SourceCode: https://github.com/akanshSirohi/ShareX
+IssueTracker: https://github.com/akanshSirohi/ShareX/issues
+
+AutoName: ShareX Pro
+
+RepoType: git
+Repo: https://github.com/akanshSirohi/ShareX
+Binaries: https://github.com/akanshSirohi/ShareX/releases/download/v%v/ShareX.apk
+
+Builds:
+  - versionName: 2.3.1
+    versionCode: 26
+    commit: 6b1ae8e357c0ac081faa79d8744df1af0f943d66
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y zipalign
+    output: out.apk
+    srclibs:
+      - reproducible-apk-tools@v0.2.0
+    prebuild: gradle clean
+    build:
+      - gradle assembleRelease
+      - $$reproducible-apk-tools$$/fix-newlines.py build/outputs/apk/release/*.apk
+        fixed.apk 'META-INF/services/*' 'assets/sharex_web_*/*.html' 'assets/sharex_web_*/*.js'
+        'assets/sharex_web_*/*.css'
+      - zipalign 4 fixed.apk out.apk
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: 2.3.1
+CurrentVersionCode: 26
