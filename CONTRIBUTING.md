@@ -126,19 +126,19 @@ fdroid import --url https://github.com/foo/bar --subdir app
 
 Alternatively, start the metadata file from scratch, see [the templates](https://gitlab.com/fdroid/fdroiddata/tree/master/templates):
 ```shell
-cp templates/app-full metadata/app.id.yml
+cp templates/general.yml metadata/app.id.yml
 ```
 
 Or by download:
 ```shell
-wget -O metadata/app.id.yml https://gitlab.com/fdroid/fdroiddata/raw/master/templates/app-full
+wget -O metadata/app.id.yml https://gitlab.com/fdroid/fdroiddata/raw/master/templates/general.yml
 ```
 
 Now that the file is created, you need to fill up all the app information and
 add a working build recipe.
 
 You can use the [metadata section](https://f-droid.org/docs/Build_Metadata_Reference)
-in the documentation for reference, or the full template at `templates/app-full` for
+in the documentation for reference, or the full template at `templates/general.yml` for
 some suggestions.
 
 Once you're done, see if `fdroid readmeta` runs without any errors. If it
