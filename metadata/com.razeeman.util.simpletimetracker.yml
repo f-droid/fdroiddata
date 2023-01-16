@@ -1,0 +1,38 @@
+Categories:
+  - Time
+License: GPL-3.0-or-later
+AuthorName: Anton Razinkov
+SourceCode: https://github.com/Razeeman/Android-SimpleTimeTracker
+IssueTracker: https://github.com/Razeeman/Android-SimpleTimeTracker/issues
+
+AutoName: Simple Time Tracker
+
+RepoType: git
+Repo: https://github.com/Razeeman/Android-SimpleTimeTracker.git
+Binaries: https://github.com/Razeeman/Android-SimpleTimeTracker/releases/download/v%v/%v-stt-release.apk
+
+Builds:
+  - versionName: '1.21'
+    versionCode: 22
+    commit: be4a79c3d30d9785525cda9e7a20b083431f2ffc
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y zipalign
+    output: out.apk
+    srclibs:
+      - reproducible-apk-tools@v0.2.0
+    prebuild: sed -e 's/\s\+"/implementation "/g' ../buildSrc/src/main/kotlin/com/example/util/simpletimetracker/Deps.kt
+        > deps.gradle
+    build:
+      - gradle assembleRelease
+      - $$reproducible-apk-tools$$/fix-newlines.py build/outputs/apk/release/*.apk
+        fixed.apk 'META-INF/services/*'
+      - zipalign 4 fixed.apk out.apk
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: buildSrc/src/main/kotlin/com/example/util/simpletimetracker/Base.kt|versionCode
+    = (\d+)|.|versionName = "(.*)"
+CurrentVersion: '1.21'
+CurrentVersionCode: 22
