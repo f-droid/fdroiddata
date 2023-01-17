@@ -55,11 +55,19 @@ Builds:
   - versionName: 3.9-fdroid
     versionCode: 1003901
     commit: 08e52d489a1db5e0b1fe9a76d66c679fe9743639
+    disable: reproducible build failed
     subdir: app
-    gradle:
-      - fdroid
-    gradleprops:
-      - ABI_FILTERS=armeabi-v7a
+    sudo:
+      - apt-get update
+      - apt-get install -y zipalign
+    output: out.apk
+    srclibs:
+      - reproducible-apk-tools@v0.2.0
+    build:
+      - gradle assembleFdroidRelease -PABI_FILTERS=armeabi-v7a
+      - $$reproducible-apk-tools$$/sort-baseline.py --apk build/outputs/apk/fdroid/release/*.apk
+        fixed.apk
+      - zipalign 4 fixed.apk out.apk
 
   - versionName: 3.9-fdroid
     versionCode: 1003902
