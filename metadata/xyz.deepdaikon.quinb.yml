@@ -7,7 +7,7 @@ WebSite: https://gitlab.com/deepdaikon/Quinb
 SourceCode: https://gitlab.com/deepdaikon/Quinb/tree/HEAD
 IssueTracker: https://gitlab.com/deepdaikon/Quinb/issues
 Translation: https://translate.deepdaikon.xyz/engage/quinb/
-Changelog: https://gitlab.com/deepdaikon/Quinb/tree/HEAD/CHANGELOG
+Changelog: https://gitlab.com/deepdaikon/Quinb/-/blob/master/CHANGELOG
 Donate: https://deepdaikon.xyz/donate
 Liberapay: deepdaikon
 
@@ -112,15 +112,20 @@ Builds:
     commit: abffb05a8f2269d468362f33744d07e18961a8d2
     output: build/app/outputs/flutter-apk/app-release.apk
     srclibs:
-      - flutter@2.10.3
+      - flutter@3.0.5
     rm:
       - ios
       - linux
       - web
-    build:
+    prebuild:
+      - export PUB_CACHE=$(pwd)/.pub-cache
       - $$flutter$$/bin/flutter config --no-analytics
       - $$flutter$$/bin/flutter pub get
-      - $$flutter$$/bin/flutter build apk
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
