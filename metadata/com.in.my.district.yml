@@ -148,8 +148,30 @@ Builds:
       - node_modules
     build: cordova build android --release -- --packageType=apk
 
+  - versionName: 1.2.28
+    versionCode: 10228
+    commit: 21bc2349af53cbd01289c73516cbfd74fa53019c
+    subdir: app
+    sudo:
+      - sysctl fs.inotify.max_user_watches=524288
+      - apt-get update
+      - apt-get install xz-utils -y
+      - curl -Lo node.tar.xz https://nodejs.org/dist/v14.17.4/node-v14.17.4-linux-x64.tar.xz
+      - echo "db18c54ebe01974d46198b08729249acbb0dcdc9aea82b53eec913f8c56035c6 node.tar.xz"
+        | sha256sum -c -
+      - tar xJf node.tar.xz --strip-components=1 -C /usr/local/
+      - npm install -g cordova
+    output: platforms/android/app/build/outputs/apk/release/app-release-unsigned.apk
+    prebuild:
+      - sdkmanager 'build-tools;30.0.3'
+      - npm install
+      - cordova platform add android
+    scandelete:
+      - app/node_modules
+    build: cordova build android --release -- --packageType=apk
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-UpdateCheckData: package.json|"android-version-code":\s(\d+),|.|"version":\s"([\d.]+)",
-CurrentVersion: 1.2.16
-CurrentVersionCode: 10216
+UpdateCheckData: app/package.json|"android-version-code":\s(\d+),|.|"version":\s"([\d.]+)",
+CurrentVersion: 1.2.28
+CurrentVersionCode: 10228
