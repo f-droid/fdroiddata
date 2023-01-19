@@ -1,0 +1,483 @@
+diff --git a/app/app/build.gradle.kts b/app/app/build.gradle.kts
+index a6ccbdfd..35a613f0 100644
+--- a/app/app/build.gradle.kts
++++ b/app/app/build.gradle.kts
+@@ -116,7 +116,6 @@ dependencies {
+     implementation(project(":data:customattrs"))
+     implementation(project(":data:favorites"))
+     implementation(project(":data:files"))
+-    implementation(project(":libs:g-services"))
+     implementation(project(":core:i18n"))
+     implementation(project(":services:icons"))
+     implementation(project(":core:ktx"))
+diff --git a/app/ui/build.gradle.kts b/app/ui/build.gradle.kts
+index 61a9f34b..f4dae074 100644
+--- a/app/ui/build.gradle.kts
++++ b/app/ui/build.gradle.kts
+@@ -137,7 +137,6 @@ dependencies {
+     implementation(project(":data:websites"))
+     implementation(project(":data:unitconverter"))
+     implementation(project(":libs:nextcloud"))
+-    implementation(project(":libs:g-services"))
+     implementation(project(":libs:owncloud"))
+     implementation(project(":services:accounts"))
+     implementation(project(":services:backup"))
+diff --git a/app/ui/src/main/java/de/mm20/launcher2/ui/settings/accounts/AccountsSettingsScreen.kt b/app/ui/src/main/java/de/mm20/launcher2/ui/settings/accounts/AccountsSettingsScreen.kt
+index f7971d23..adfc61e5 100644
+--- a/app/ui/src/main/java/de/mm20/launcher2/ui/settings/accounts/AccountsSettingsScreen.kt
++++ b/app/ui/src/main/java/de/mm20/launcher2/ui/settings/accounts/AccountsSettingsScreen.kt
+@@ -99,74 +99,5 @@ fun AccountsSettingsScreen() {
+                 )
+             }
+         }
+-        if (viewModel.isGoogleAvailable) {
+-            item {
+-                PreferenceCategory(title = stringResource(R.string.preference_category_services_google)) {
+-                    val account by viewModel.googleUser.observeAsState()
+-                    if (account == null) {
+-                        Box(modifier = Modifier
+-                            .padding(start = 56.dp)
+-                            .padding(16.dp)) {
+-                            GoogleSigninButton(
+-                                onClick = {
+-                                    viewModel.signIn(
+-                                        context as AppCompatActivity,
+-                                        AccountType.Google
+-                                    )
+-                                }
+-                            )
+-                        }
+-                    } else {
+-                        Preference(
+-                            title = stringResource(R.string.preference_signin_logout),
+-                            summary = account?.userName?.let {
+-                                stringResource(R.string.preference_signin_user, it)
+-                            },
+-                            onClick = {
+-                                viewModel.signOut(AccountType.Google)
+-                            }
+-                        )
+-                    }
+-                }
+-            }
+-        }
+-    }
+-}
+-
+-@Composable
+-fun GoogleSigninButton(
+-    onClick: () -> Unit,
+-) {
+-    Surface(
+-        modifier = Modifier.height(40.dp),
+-        shadowElevation = 1.dp,
+-        color = Color.White,
+-        shape = RoundedCornerShape(2.dp),
+-        onClick = onClick
+-    ) {
+-        Row(
+-            verticalAlignment = Alignment.CenterVertically
+-        ) {
+-            Box(
+-                modifier = Modifier
+-                    .size(40.dp)
+-                    .background(Color.White),
+-                contentAlignment = Alignment.Center
+-            ) {
+-                Image(
+-                    modifier = Modifier.size(18.dp),
+-                    painter = painterResource(id = R.drawable.ic_google_g),
+-                    contentDescription = null
+-                )
+-            }
+-            Text(
+-                modifier = Modifier.padding(start = 13.dp, end = 8.dp),
+-                text = stringResource(id = R.string.preference_google_signin),
+-                fontFamily = FontFamily.SansSerif,
+-                color = Color(0f, 0f, 0f, 0.54f),
+-                fontSize = 14.sp,
+-                fontWeight = FontWeight.Medium
+-            )
+-        }
+     }
+ }
+diff --git a/app/ui/src/main/java/de/mm20/launcher2/ui/settings/accounts/AccountsSettingsScreenVM.kt b/app/ui/src/main/java/de/mm20/launcher2/ui/settings/accounts/AccountsSettingsScreenVM.kt
+index 4ed1373a..25a306d6 100644
+--- a/app/ui/src/main/java/de/mm20/launcher2/ui/settings/accounts/AccountsSettingsScreenVM.kt
++++ b/app/ui/src/main/java/de/mm20/launcher2/ui/settings/accounts/AccountsSettingsScreenVM.kt
+@@ -14,9 +14,7 @@ import org.koin.core.component.inject
+ class AccountsSettingsScreenVM : ViewModel(), KoinComponent {
+     private val accountsRepository: AccountsRepository by inject()
+ 
+-    val isGoogleAvailable = accountsRepository.isSupported(AccountType.Google)
+ 
+-    val googleUser = MutableLiveData<Account?>(null)
+     val nextcloudUser = MutableLiveData<Account?>(null)
+     val owncloudUser = MutableLiveData<Account?>(null)
+ 
+@@ -25,7 +23,6 @@ class AccountsSettingsScreenVM : ViewModel(), KoinComponent {
+     fun onResume() {
+         viewModelScope.launch {
+             loading.value = true
+-            googleUser.value = accountsRepository.getCurrentlySignedInAccount(AccountType.Google)
+             nextcloudUser.value = accountsRepository.getCurrentlySignedInAccount(AccountType.Nextcloud)
+             owncloudUser.value = accountsRepository.getCurrentlySignedInAccount(AccountType.Owncloud)
+             loading.value = false
+@@ -39,7 +36,6 @@ class AccountsSettingsScreenVM : ViewModel(), KoinComponent {
+     fun signOut(accountType: AccountType) {
+         accountsRepository.signout(accountType)
+         when(accountType){
+-            AccountType.Google -> googleUser.value = null
+             AccountType.Nextcloud -> nextcloudUser.value = null
+             AccountType.Owncloud -> owncloudUser.value = null
+         }
+diff --git a/app/ui/src/main/java/de/mm20/launcher2/ui/settings/buildinfo/BuildInfoSettingsScreenVM.kt b/app/ui/src/main/java/de/mm20/launcher2/ui/settings/buildinfo/BuildInfoSettingsScreenVM.kt
+index a5f2936b..cda05229 100644
+--- a/app/ui/src/main/java/de/mm20/launcher2/ui/settings/buildinfo/BuildInfoSettingsScreenVM.kt
++++ b/app/ui/src/main/java/de/mm20/launcher2/ui/settings/buildinfo/BuildInfoSettingsScreenVM.kt
+@@ -15,7 +15,7 @@ class BuildInfoSettingsScreenVM : ViewModel(), KoinComponent {
+     private val availableWeatherProviders = weatherRepository.getAvailableProviders()
+ 
+     val buildFeatures = mapOf(
+-        "Accounts: Google" to accountsRepository.isSupported(AccountType.Google),
++        "Accounts: Google" to false,
+         "Accounts: Microsoft" to false,
+         "Weather providers: HERE" to availableWeatherProviders.contains(WeatherProvider.Here),
+         "Weather providers: Met No" to availableWeatherProviders.contains(WeatherProvider.MetNo),
+diff --git a/app/ui/src/main/java/de/mm20/launcher2/ui/settings/filesearch/FileSearchSettingsScreen.kt b/app/ui/src/main/java/de/mm20/launcher2/ui/settings/filesearch/FileSearchSettingsScreen.kt
+index 1a9fcbc1..a5348a45 100644
+--- a/app/ui/src/main/java/de/mm20/launcher2/ui/settings/filesearch/FileSearchSettingsScreen.kt
++++ b/app/ui/src/main/java/de/mm20/launcher2/ui/settings/filesearch/FileSearchSettingsScreen.kt
+@@ -139,39 +139,6 @@ fun FileSearchSettingsScreen() {
+                     },
+                     enabled = owncloudAccount != null
+                 )
+-
+-                val gdrive by viewModel.gdrive.observeAsState()
+-                val googleAccount by viewModel.googleAccount.observeAsState()
+-                AnimatedVisibility(googleAccount == null) {
+-                    Banner(
+-                        text = stringResource(R.string.no_account_google),
+-                        icon = Icons.Rounded.AccountBox,
+-                        primaryAction = {
+-                            TextButton(onClick = {
+-                                viewModel.login(
+-                                    context as AppCompatActivity,
+-                                    AccountType.Google
+-                                )
+-                            }) {
+-                                Text(
+-                                    stringResource(R.string.connect_account),
+-                                )
+-                            }
+-                        },
+-                        modifier = Modifier.padding(16.dp)
+-                    )
+-                }
+-                SwitchPreference(
+-                    title = stringResource(R.string.preference_search_gdrive),
+-                    summary = googleAccount?.let {
+-                        stringResource(R.string.preference_search_gdrive_summary, it.userName)
+-                    } ?: stringResource(R.string.preference_summary_not_logged_in),
+-                    value = gdrive == true && googleAccount != null,
+-                    onValueChanged = {
+-                        viewModel.setGdrive(it)
+-                    },
+-                    enabled = googleAccount != null
+-                )
+             }
+         }
+     }
+diff --git a/app/ui/src/main/java/de/mm20/launcher2/ui/settings/filesearch/FileSearchSettingsScreenVM.kt b/app/ui/src/main/java/de/mm20/launcher2/ui/settings/filesearch/FileSearchSettingsScreenVM.kt
+index cc8e096a..c5bb0e4f 100644
+--- a/app/ui/src/main/java/de/mm20/launcher2/ui/settings/filesearch/FileSearchSettingsScreenVM.kt
++++ b/app/ui/src/main/java/de/mm20/launcher2/ui/settings/filesearch/FileSearchSettingsScreenVM.kt
+@@ -27,7 +27,6 @@ class FileSearchSettingsScreenVM : ViewModel(), KoinComponent {
+     val loading = MutableLiveData(true)
+     val nextcloudAccount = MutableLiveData<Account?>(null)
+     val owncloudAccount = MutableLiveData<Account?>(null)
+-    val googleAccount = MutableLiveData<Account?>(null)
+ 
+     fun onResume() {
+         viewModelScope.launch {
+@@ -35,7 +34,6 @@ class FileSearchSettingsScreenVM : ViewModel(), KoinComponent {
+                 accountsRepository.getCurrentlySignedInAccount(AccountType.Nextcloud)
+             owncloudAccount.value =
+                 accountsRepository.getCurrentlySignedInAccount(AccountType.Owncloud)
+-            googleAccount.value = accountsRepository.getCurrentlySignedInAccount(AccountType.Google)
+             loading.value = false
+         }
+     }
+@@ -70,21 +68,6 @@ class FileSearchSettingsScreenVM : ViewModel(), KoinComponent {
+         }
+     }
+ 
+-    val gdrive = dataStore.data.map { it.fileSearch.gdrive }.asLiveData()
+-    fun setGdrive(gdrive: Boolean) {
+-        viewModelScope.launch {
+-            dataStore.updateData {
+-                it.toBuilder()
+-                    .setFileSearch(
+-                        it.fileSearch
+-                            .toBuilder()
+-                            .setGdrive(gdrive)
+-                    )
+-                    .build()
+-            }
+-        }
+-    }
+-
+     val owncloud = dataStore.data.map { it.fileSearch.owncloud }.asLiveData()
+     fun setOwncloud(owncloud: Boolean) {
+         viewModelScope.launch {
+diff --git a/data/files/build.gradle.kts b/data/files/build.gradle.kts
+index cf99cc0b..bd3a4da1 100644
+--- a/data/files/build.gradle.kts
++++ b/data/files/build.gradle.kts
+@@ -46,7 +46,6 @@ dependencies {
+ 
+     implementation(project(":core:base"))
+     implementation(project(":core:ktx"))
+-    implementation(project(":libs:g-services"))
+     implementation(project(":libs:nextcloud"))
+     implementation(project(":libs:owncloud"))
+     implementation(project(":core:i18n"))
+diff --git a/data/files/src/main/java/de/mm20/launcher2/files/FilesRepository.kt b/data/files/src/main/java/de/mm20/launcher2/files/FilesRepository.kt
+index 42ae2a56..ff930e6d 100644
+--- a/data/files/src/main/java/de/mm20/launcher2/files/FilesRepository.kt
++++ b/data/files/src/main/java/de/mm20/launcher2/files/FilesRepository.kt
+@@ -2,7 +2,6 @@ package de.mm20.launcher2.files
+ 
+ import android.content.Context
+ import de.mm20.launcher2.files.providers.FileProvider
+-import de.mm20.launcher2.files.providers.GDriveFileProvider
+ import de.mm20.launcher2.files.providers.LocalFileProvider
+ import de.mm20.launcher2.files.providers.NextcloudFileProvider
+ import de.mm20.launcher2.files.providers.OwncloudFileProvider
+@@ -24,7 +23,6 @@ interface FileRepository {
+     fun search(
+         query: String,
+         local: Boolean = true,
+-        gdrive: Boolean = true,
+         nextcloud: Boolean = true,
+         owncloud: Boolean = true,
+     ): Flow<ImmutableList<File>>
+@@ -49,7 +47,6 @@ internal class FileRepositoryImpl(
+     override fun search(
+         query: String,
+         local: Boolean,
+-        gdrive: Boolean,
+         nextcloud: Boolean,
+         owncloud: Boolean
+     ) = channelFlow {
+@@ -61,7 +58,6 @@ internal class FileRepositoryImpl(
+         val providers = mutableListOf<FileProvider>()
+ 
+         if (local) providers.add(LocalFileProvider(context, permissionsManager))
+-        if (gdrive) providers.add(GDriveFileProvider(context))
+         if (nextcloud) providers.add(NextcloudFileProvider(nextcloudClient))
+         if (owncloud) providers.add(OwncloudFileProvider(owncloudClient))
+ 
+diff --git a/data/files/src/main/java/de/mm20/launcher2/files/providers/GDriveFileProvider.kt b/data/files/src/main/java/de/mm20/launcher2/files/providers/GDriveFileProvider.kt
+deleted file mode 100644
+index f6287616..00000000
+--- a/data/files/src/main/java/de/mm20/launcher2/files/providers/GDriveFileProvider.kt
++++ /dev/null
+@@ -1,40 +0,0 @@
+-package de.mm20.launcher2.files.providers
+-
+-import android.content.Context
+-import de.mm20.launcher2.files.R
+-import de.mm20.launcher2.gservices.DriveFileMeta
+-import de.mm20.launcher2.gservices.GoogleApiHelper
+-import de.mm20.launcher2.search.data.File
+-import de.mm20.launcher2.search.data.GDriveFile
+-
+-internal class GDriveFileProvider(
+-    private val context: Context
+-) : FileProvider {
+-    override suspend fun search(query: String): List<File> {
+-        if (query.length < 4) return emptyList()
+-        val driveFiles = GoogleApiHelper.getInstance(context).queryGDriveFiles(query)
+-        return driveFiles.map {
+-            GDriveFile(
+-                fileId = it.fileId,
+-                label = it.label,
+-                size = it.size,
+-                mimeType = it.mimeType,
+-                isDirectory = it.isDirectory,
+-                path = "",
+-                directoryColor = it.directoryColor,
+-                viewUri = it.viewUri,
+-                metaData = getMetadata(it.metadata)
+-            )
+-        }
+-    }
+-
+-    private fun getMetadata(file: DriveFileMeta): List<Pair<Int, String>> {
+-        val metaData = mutableListOf<Pair<Int, String>>()
+-        val owners = file.owners
+-        metaData.add(R.string.file_meta_owner to owners.joinToString(separator = ", "))
+-        val width = file.width ?: file.width
+-        val height = file.height ?: file.height
+-        if (width != null && height != null) metaData.add(R.string.file_meta_dimensions to "${width}x$height")
+-        return metaData
+-    }
+-}
+\ No newline at end of file
+diff --git a/services/accounts/build.gradle.kts b/services/accounts/build.gradle.kts
+index f4158d42..0f24031c 100644
+--- a/services/accounts/build.gradle.kts
++++ b/services/accounts/build.gradle.kts
+@@ -40,7 +40,6 @@ dependencies {
+ 
+     implementation(libs.koin.android)
+ 
+-    implementation(project(":libs:g-services"))
+     implementation(project(":libs:owncloud"))
+     implementation(project(":libs:nextcloud"))
+ 
+diff --git a/services/accounts/src/main/java/de/mm20/launcher2/accounts/AccountType.kt b/services/accounts/src/main/java/de/mm20/launcher2/accounts/AccountType.kt
+index 89554215..615a3c7b 100644
+--- a/services/accounts/src/main/java/de/mm20/launcher2/accounts/AccountType.kt
++++ b/services/accounts/src/main/java/de/mm20/launcher2/accounts/AccountType.kt
+@@ -1,7 +1,6 @@
+ package de.mm20.launcher2.accounts
+ 
+ enum class AccountType {
+-    Google,
+     Nextcloud,
+     Owncloud,
+ }
+diff --git a/services/accounts/src/main/java/de/mm20/launcher2/accounts/AccountsRepository.kt b/services/accounts/src/main/java/de/mm20/launcher2/accounts/AccountsRepository.kt
+index 94542793..8420d957 100644
+--- a/services/accounts/src/main/java/de/mm20/launcher2/accounts/AccountsRepository.kt
++++ b/services/accounts/src/main/java/de/mm20/launcher2/accounts/AccountsRepository.kt
+@@ -2,7 +2,6 @@ package de.mm20.launcher2.accounts
+ 
+ import android.app.Activity
+ import android.content.Context
+-import de.mm20.launcher2.gservices.GoogleApiHelper
+ import de.mm20.launcher2.nextcloud.NextcloudApiHelper
+ import de.mm20.launcher2.owncloud.OwncloudClient
+ import kotlinx.coroutines.CoroutineScope
+@@ -27,17 +26,11 @@ internal class AccountsRepositoryImpl(
+ ) : AccountsRepository {
+     private val scope = CoroutineScope(Job() + Dispatchers.Default)
+ 
+-    private val googleApiHelper = GoogleApiHelper.getInstance(context)
+     private val nextcloudApiHelper = NextcloudApiHelper(context)
+     private val owncloudApiHelper = OwncloudClient(context)
+ 
+     override fun signin(context: Activity, accountType: AccountType) {
+         when (accountType) {
+-            AccountType.Google -> {
+-                scope.launch {
+-                    googleApiHelper.login(context)
+-                }
+-            }
+             AccountType.Nextcloud ->
+                 scope.launch {
+                     nextcloudApiHelper.login(context)
+@@ -51,9 +44,6 @@ internal class AccountsRepositoryImpl(
+ 
+     override fun signout(accountType: AccountType) {
+         when (accountType) {
+-            AccountType.Google -> {
+-                googleApiHelper.logout()
+-            }
+             AccountType.Nextcloud -> {
+                 scope.launch {
+                     nextcloudApiHelper.logout()
+@@ -67,7 +57,6 @@ internal class AccountsRepositoryImpl(
+ 
+     override fun isSupported(accountType: AccountType): Boolean {
+         return when (accountType) {
+-            AccountType.Google -> googleApiHelper.isAvailable()
+             AccountType.Nextcloud -> true
+             AccountType.Owncloud -> true
+         }
+@@ -75,9 +64,6 @@ internal class AccountsRepositoryImpl(
+ 
+     override suspend fun getCurrentlySignedInAccount(accountType: AccountType): Account? {
+         return when (accountType) {
+-            AccountType.Google -> {
+-                getGoogleAccount()
+-            }
+             AccountType.Nextcloud -> {
+                 getNextcloudAccount()
+             }
+@@ -87,12 +73,6 @@ internal class AccountsRepositoryImpl(
+         }
+     }
+ 
+-    private suspend fun getGoogleAccount(): Account? {
+-        return googleApiHelper.getAccount()?.let {
+-            Account(it.name, AccountType.Google)
+-        }
+-    }
+-
+     private suspend fun getNextcloudAccount(): Account? {
+         return nextcloudApiHelper.getLoggedInUser()?.let {
+             Account(it.displayName, AccountType.Nextcloud)
+diff --git a/services/search/src/main/java/de/mm20/launcher2/search/SearchService.kt b/services/search/src/main/java/de/mm20/launcher2/search/SearchService.kt
+index 8d05a8ef..ed48112a 100644
+--- a/services/search/src/main/java/de/mm20/launcher2/search/SearchService.kt
++++ b/services/search/src/main/java/de/mm20/launcher2/search/SearchService.kt
+@@ -21,7 +21,6 @@ import de.mm20.launcher2.search.data.Calculator
+ import de.mm20.launcher2.search.data.CalendarEvent
+ import de.mm20.launcher2.search.data.Contact
+ import de.mm20.launcher2.search.data.File
+-import de.mm20.launcher2.search.data.GDriveFile
+ import de.mm20.launcher2.search.data.LauncherApp
+ import de.mm20.launcher2.search.data.LocalFile
+ import de.mm20.launcher2.search.data.NextcloudFile
+@@ -174,14 +173,13 @@ internal class SearchServiceImpl(
+                         }
+                 }
+             }
+-            if (files.localFiles || files.owncloud || files.gdrive || files.nextcloud) {
++            if (files.localFiles || files.owncloud || files.nextcloud) {
+                 launch {
+                     fileRepository.search(
+                         query,
+                         local = files.localFiles,
+                         nextcloud = files.nextcloud,
+                         owncloud = files.owncloud,
+-                        gdrive = files.gdrive,
+                     )
+                         .withCustomLabels(customAttributesRepository)
+                         .collectLatest { r ->
+@@ -204,7 +202,6 @@ internal class SearchServiceImpl(
+                                                 files.localFiles && it is LocalFile ||
+                                                 files.nextcloud && it is NextcloudFile ||
+                                                 files.owncloud && it is OwncloudFile ||
+-                                                files.gdrive && it is GDriveFile ||
+                                                 wikipedia.enabled && it is Wikipedia ||
+                                                 websites.enabled && it is Website ||
+                                                 calendars.enabled && it is CalendarEvent ||
+diff --git a/settings.gradle.kts b/settings.gradle.kts
+index cf378170..055585d8 100644
+--- a/settings.gradle.kts
++++ b/settings.gradle.kts
+@@ -206,15 +206,6 @@ dependencyResolutionManagement {
+             library("mathparser", "org.mariuszgromada.math", "MathParser.org-mXparser")
+                 .version("4.4.2")
+ 
+-            library("google.auth", "com.google.auth", "google-auth-library-oauth2-http")
+-                .version("1.11.0")
+-            library("google.apiclient", "com.google.api-client", "google-api-client-android")
+-                .version("2.0.0")
+-            library("google.drive", "com.google.apis", "google-api-services-drive")
+-                .version("v3-rev197-1.25.0")
+-            library("google.oauth2", "com.google.apis", "google-api-services-oauth2")
+-                .version("v2-rev157-1.25.0")
+-
+             library("gson", "com.google.code.gson", "gson")
+                 .version("2.9.1")
+ 
+@@ -287,4 +278,3 @@ include(":libs:material-color-utilities")
+ include(":libs:nextcloud")
+ include(":libs:owncloud")
+ include(":libs:webdav")
+-include(":libs:g-services")

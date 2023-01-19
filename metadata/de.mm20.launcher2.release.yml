@@ -1,0 +1,89 @@
+AntiFeatures:
+  - UpstreamNonFree
+  - NonFreeNet
+Categories:
+  - System
+  - Theming
+License: GPL-3.0-or-later
+AuthorName: U. N. Owen
+WebSite: https://kvaesitso.mm20.de
+SourceCode: https://github.com/MM2-0/Kvaesitso
+IssueTracker: https://github.com/MM2-0/Kvaesitso/issues
+Donate: https://github.com/sponsors/MM2-0
+
+Summary: Search focused launcher
+Description: |-
+    Kvæsitso is a launcher application for Android
+    which replaces the device's default home screen.
+    It has been built from scratch, meaning it is not
+    based on the AOSP launcher (like many other third
+    party launchers) nor does it try to recreate this
+    launcher. Instead, Kvæsitso follows its own concepts.
+
+    The main feature is a global search which does not
+    only let you search on device for apps, contacts, and
+    calendar events, but also on web services like
+    Wikipedia or your Nextcloud Instance. Additionally it
+    includes some useful tools, for example a calculator
+    and a unit converter. You are looking for a document
+    or an information? Just search for it and Kvæsitso shows
+    you the fastest way to it.
+
+    F-Droid build has the following changes:
+    * Disabled OneDrive, GDrive and weather integration;
+    * F-Droid version uses a different versionCode.
+
+    Antifeatures:
+    * NonFreeNet: app uses a third party service for currency
+    exchange rates;
+    * UpstreamNonFree: google drive integration depends on
+    libraries with non-free dependencies.
+
+RepoType: git
+Repo: https://github.com/MM2-0/Kvaesitso
+
+Builds:
+  - versionName: 1.20.0
+    versionCode: 12000
+    commit: v1.20.0
+    subdir: app/app
+    patch:
+      - remove_ms-services.patch
+      - remove_gservices.patch
+    gradle:
+      - yes
+    prebuild:
+      - sed -i 's/^org\.gradle\.java\.home.*$//' ../../gradle.properties
+      - sed -i 's/exclude(group\ =\ "com\.google\.guava".*$//' build.gradle.kts
+      - sed -i 's/versionCode\ =\ versionCodeDate()/versionCode = 12000/' build.gradle.kts
+      - sed -i 's/versionNameSuffix.*$//' build.gradle.kts
+
+MaintainerNotes: |-
+    Kvaesitso uses several external APIs for search providers.
+    Several of them require signing up to obtain a developer API
+    key: gdrive and onedrive search, openweathermap, HERE
+    and Meteorologisk institutt. It's not possible for users
+    to provide these keys as explained here:
+    https://github.com/MM2-0/Kvaesitso/issues/227#issuecomment-1366826219
+    Therefore, these features are disabled in F-Droid build.
+
+    Kvaesitso uses a non-whitelisted microsoft maven repo for
+    OneDrive integration. The libraries used are open source, 
+    but we still remove the respective code from the source,
+    since onedrive integration is disabled anyway.
+
+    Patches:
+    remove_ms-services.patch removes microsoft azure sdk maven
+    repo and its usage (onedrive integration) across the project.
+
+    remove_gservices.patch removes gdrive integration, as one
+    of dependencies it relies on contains known non-free classes,
+    according to f-droid scanner.
+
+    Kvaesitso appends build date to both versionName and versionCode,
+    so we replace it in the build with static ones.
+
+AutoUpdateMode: None
+UpdateCheckMode: None
+CurrentVersion: 1.20.0
+CurrentVersionCode: 12000
