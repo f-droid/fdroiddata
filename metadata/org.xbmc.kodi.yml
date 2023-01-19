@@ -521,6 +521,44 @@ Builds:
       - make -C build apk
     ndk: r21e
 
+  - versionName: '20.0'
+    versionCode: 2000000
+    commit: 389e701cb96e5543c303c4004811b51684d67dd4
+    timeout: 28000
+    sudo:
+      - rm -fr /opt/android-sdk/build-tools/*
+      - apt-get update
+      - apt-get install -y automake build-essential cmake file gawk gperf groovy lib32stdc++6
+        lib32z1-dev libcommons-lang-java libcurl4-openssl-dev python-dev
+    patch:
+      - 20.0-groovy.patch
+    output: build/tools/android/packaging/xbmc/build/outputs/apk/release/xbmc-release-unsigned.apk
+    rm:
+      - tools/codegenerator/groovy/
+    prebuild:
+      - sed -i -e '/gradlew/d' -e '/gradle-wrapper.jar/d' cmake/scripts/android/Install.cmake
+      - sed -i -e 's#./gradlew#gradle#' -e '\!@cp xbmc/build!d' tools/android/packaging/Makefile.in
+      - sed -i -e '/signingConfigs {/,+11d' -e '/signingConfig/d' tools/android/packaging/xbmc/build.gradle.in
+    scanignore:
+      - addons/webinterface.default/lib/soundmanager/swf/soundmanager2_flash_xdomain.zip
+    scandelete:
+      - lib/
+      - project/
+      - tools/
+      - xbmc/filesystem/test
+    build:
+      - pushd tools/depends/
+      - ./bootstrap
+      - ./configure --host=aarch64-linux-android --with-sdk-path=$$SDK$$ --with-ndk-path=$$NDK$$
+        --prefix=$PWD/output --disable-debug
+      - make -j $(nproc)
+      - popd
+      - make -C tools/depends/target/binary-addons -j $(nproc)
+      - make -C tools/depends/target/cmakebuildsys
+      - make -C build -j $(nproc)
+      - make -C build apk
+    ndk: r21e
+
 MaintainerNotes: |-
     18.0-groovy.patch was <a href="https://github.com/xbmc/xbmc/issues/6860#issuecomment-461122155">provided by upstream</a>; it makes the build use the Debian groovy package instead of a prebuilt JAR.
 
@@ -530,5 +568,5 @@ MaintainerNotes: |-
 
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: '19.4'
-CurrentVersionCode: 1904001
+CurrentVersion: '20.0'
+CurrentVersionCode: 2000000
