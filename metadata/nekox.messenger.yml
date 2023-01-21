@@ -1127,9 +1127,33 @@ Builds:
       - git gc --prune=now
     ndk: r21e
 
-ArchivePolicy: 6 versions
+  - versionName: 9.1.6
+    versionCode: 680
+    commit: e3d8ed9a3b8dac22cd982eb19b9a03a315ef1e84
+    timeout: 10800
+    subdir: TMessagesProj
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y ninja-build yasm cmake libuv1 make
+    gradle:
+      - miniFdroid
+    output: build/outputs/apk/mini/*/*.apk
+    rm:
+      - TMessagesProj_*
+    prebuild:
+      - sed -i -e '/firebase/d' -e '/gms/d' {..,.}/build.gradle
+      - echo -e "\norg.gradle.jvmargs=-Xms1024m -Xmx4096m -XX:MaxPermSize=4096m" >>
+        ../gradle.properties
+      - cd ..
+      - ./run fdroid prebuild
+    build:
+      - cd ..
+      - ./run fdroid build
+    ndk: r21e
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v[0-9.]+$
 UpdateCheckData: TMessagesProj/build.gradle|verCode\s=\s(\d+)|.|verName\s=\s"(.+)"
-CurrentVersion: 8.7.4
-CurrentVersionCode: 635
+CurrentVersion: 9.1.6
+CurrentVersionCode: 680
