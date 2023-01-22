@@ -17,6 +17,16 @@ Description: |-
     Development is focussed on Twitter and that service is the only one officially
     supported.
 
+    <b>Features</b>
+
+    <ul>
+    <li>Modern Material Design</li>
+    <li>Dark mode</li>
+    <li>Tweet with photos</li>
+    <li>Multiple accounts support</li>
+    <li>Free, open source, NO ads, forever!</li>
+    </ul>
+
     You can donate via PayPal and Bitcoin here.
 
 RepoType: git
@@ -134,11 +144,28 @@ Builds:
       - sed -i -e '/const val jvmTarget = /s/17/11/' -e '/val java = JavaVersion/s/17/11/'
         ../buildSrc/src/main/kotlin/Versions.kt
 
-MaintainerNotes: |
-    Force it to build against Java 11 because our build environment is still Debian Stretch
+  - versionName: 1.7.0-beta01
+    versionCode: 60
+    commit: 5ebe4d325dbb2a331d344df7208e84702d89dd2d
+    subdir: android
+    sudo:
+      - apt-get update
+      - apt-get install -y openjdk-17-jdk-headless
+      - update-alternatives --auto java
+    gradle:
+      - fdroid
+    prebuild:
+      - sed -i -e '/START Non-FOSS component/,/END Non-FOSS component/d' build.gradle.kts
+      - sed -i -e '/jetbrains.space/d' ../settings.gradle.kts
+      - sed -i -e 's/compose-jb = "1.3.0-rc01"/compose_jb = "1.2.2"/' ../gradle/libs.versions.toml
+    scanignore:
+      - build-logic/build
+
+MaintainerNotes: Force using a stable JetBrains Compose version to avoid using JetBrains'
+    private repo. See https://github.com/TwidereProject/TwidereX-Android/issues/565.
 
 AutoUpdateMode: Version
-UpdateCheckMode: Tags ^[\d.]+$
-UpdateCheckData: buildSrc/src/main/kotlin/Package.kt|const val build = (\d+)||
-CurrentVersion: 1.6.0
-CurrentVersionCode: 59
+UpdateCheckMode: Tags ^[\d.]+
+UpdateCheckData: build-logic/src/main/kotlin/Package.kt|const val build = (\d+)||
+CurrentVersion: 1.7.0-beta01
+CurrentVersionCode: 60
