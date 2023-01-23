@@ -30,9 +30,27 @@ Builds:
         fixed.apk 'META-INF/services/*'
       - zipalign 4 fixed.apk out.apk
 
+  - versionName: '1.22'
+    versionCode: 23
+    commit: 04d790b041fbf15726a11ace131dd37d39ed903b
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y zipalign
+    output: out.apk
+    srclibs:
+      - reproducible-apk-tools@v0.2.0
+    prebuild: sed -e 's/\s\+"/implementation "/g' ../buildSrc/src/main/kotlin/com/example/util/simpletimetracker/Deps.kt
+        > deps.gradle
+    build:
+      - gradle assembleRelease
+      - $$reproducible-apk-tools$$/fix-newlines.py build/outputs/apk/release/*.apk
+        fixed.apk 'META-INF/services/*'
+      - zipalign 4 fixed.apk out.apk
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: buildSrc/src/main/kotlin/com/example/util/simpletimetracker/Base.kt|versionCode
     = (\d+)|.|versionName = "(.*)"
-CurrentVersion: '1.21'
-CurrentVersionCode: 22
+CurrentVersion: '1.22'
+CurrentVersionCode: 23
