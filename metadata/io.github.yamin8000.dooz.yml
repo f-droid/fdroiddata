@@ -1,0 +1,37 @@
+Categories:
+  - Games
+License: GPL-3.0-only
+AuthorName: Yamin Siahmargooei
+AuthorEmail: yamin8000@yahoo.com
+AuthorWebSite: https://yamins.ir/
+SourceCode: https://github.com/yamin8000/Dooz
+IssueTracker: https://github.com/yamin8000/Dooz/issues
+Changelog: https://github.com/yamin8000/Dooz/releases
+
+AutoName: Dooz
+
+RepoType: git
+Repo: https://github.com/yamin8000/Dooz
+Binaries: https://github.com/yamin8000/Dooz/releases/download/%v/app-release.apk
+
+Builds:
+  - versionName: 1.0.3
+    versionCode: 4
+    commit: 1.0.3
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y zipalign
+    output: out.apk
+    srclibs:
+      - reproducible-apk-tools@v0.1.1
+    build:
+      - gradle assembleRelease
+      - $$reproducible-apk-tools$$/fix-newlines.py build/outputs/apk/release/*.apk
+        fixed.apk 'META-INF/services/*'
+      - zipalign 4 fixed.apk out.apk
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: 1.0.3
+CurrentVersionCode: 4
