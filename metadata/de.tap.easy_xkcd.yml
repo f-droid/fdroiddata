@@ -1265,7 +1265,30 @@ Builds:
       - popd
       - mv $$ShiftColorPicker$$/build/outputs/aar/shiftcolorpicker-release.aar libs
 
+  - versionName: 8.2.1
+    versionCode: 190
+    commit: 8109b2978ef9c2b05732ff1ea6aca3cfb0951fd2
+    subdir: app
+    gradle:
+      - fdroid
+    srclibs:
+      - ShiftColorPicker@v0.5
+    rm:
+      - app/libs/*.aar
+    prebuild:
+      - sed -i -e 's|dl.bintray.com.*"|jitpack.io"|' build.gradle
+      - JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 $$SDK$$/tools/bin/sdkmanager 'platforms;android-25'
+        'build-tools;25.0.3' > /dev/null
+    build:
+      - pushd $$ShiftColorPicker$$
+      - echo "include ':shiftcolorpicker'" > ../settings.gradle
+      - sed -i -e '/buildToolsVersion/s/22.0.1/25.0.3/' -e '/SdkVersion/s/22/25/'
+        build.gradle
+      - JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 gradle assembleRelease
+      - popd
+      - mv $$ShiftColorPicker$$/build/outputs/aar/shiftcolorpicker-release.aar libs
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^release
-CurrentVersion: 8.1.1
-CurrentVersionCode: 187
+CurrentVersion: 8.2.1
+CurrentVersionCode: 190
