@@ -170,8 +170,30 @@ Builds:
       - app/node_modules/cordova-android/framework/cordova-publish.gradle
     build: CI=1 cordova build android --release -- --packageType=apk
 
+  - versionName: 1.2.31
+    versionCode: 10231
+    commit: e3d06c10aaeea144c3028e8d59a4db7c8c75a4c6
+    subdir: app
+    sudo:
+      - sysctl fs.inotify.max_user_watches=524288
+      - apt-get update
+      - apt-get install xz-utils -y
+      - curl -Lo node.tar.xz https://nodejs.org/dist/v14.17.4/node-v14.17.4-linux-x64.tar.xz
+      - echo "db18c54ebe01974d46198b08729249acbb0dcdc9aea82b53eec913f8c56035c6 node.tar.xz"
+        | sha256sum -c -
+      - tar xJf node.tar.xz --strip-components=1 -C /usr/local/
+      - npm install -g cordova
+    output: platforms/android/app/build/outputs/apk/release/app-release-unsigned.apk
+    prebuild:
+      - sdkmanager 'build-tools;30.0.3'
+      - npm install
+      - cordova platform add android
+    scanignore:
+      - app/node_modules/cordova-android/framework/cordova-publish.gradle
+    build: CI=1 cordova build android --release -- --packageType=apk
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: app/package.json|"android-version-code":\s(\d+),|.|"version":\s"([\d.]+)",
-CurrentVersion: 1.2.30
-CurrentVersionCode: 10230
+CurrentVersion: 1.2.31
+CurrentVersionCode: 10231
