@@ -1269,6 +1269,10 @@ Builds:
     versionCode: 190
     commit: 8109b2978ef9c2b05732ff1ea6aca3cfb0951fd2
     subdir: app
+    sudo:
+      - echo "deb http://deb.debian.org/debian stretch main" > /etc/apt/sources.list.d/stretch.list
+      - apt-get update
+      - apt-get install -y -t stretch openjdk-8-jdk-headless
     gradle:
       - fdroid
     srclibs:
@@ -1277,11 +1281,11 @@ Builds:
       - app/libs/*.aar
     prebuild:
       - sed -i -e 's|dl.bintray.com.*"|jitpack.io"|' build.gradle
-      - JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 $$SDK$$/tools/bin/sdkmanager 'platforms;android-25'
-        'build-tools;25.0.3' > /dev/null
+      - sdkmanager 'platforms;android-25' 'build-tools;25.0.3'
     build:
       - pushd $$ShiftColorPicker$$
       - echo "include ':shiftcolorpicker'" > ../settings.gradle
+      - sed -i "/repositories/amaven {url 'https://maven.google.com'}" ../build.gradle
       - sed -i -e '/buildToolsVersion/s/22.0.1/25.0.3/' -e '/SdkVersion/s/22/25/'
         build.gradle
       - JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 gradle assembleRelease
