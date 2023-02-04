@@ -740,6 +740,34 @@ Builds:
     gradleprops:
       - org.equeim.tremotesf.print-3rdparty-build-log-on-error=true
 
+  - versionName: 2.8.0
+    versionCode: 4052
+    commit: 4177f7f67b5d23a78f9f11877a12760a4775d35e
+    subdir: app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y g++ ninja-build make patch perl
+    gradle:
+      - fdroid
+    srclibs:
+      - FirefoxAndroid@v108.0.8
+    prebuild:
+      - sdkmanager 'cmake;3.22.1'
+      - sed -i -e 's|maven.*mozilla.*|mavenLocal\(\)|' ../settings.gradle.kts
+      - cd '$$FirefoxAndroid$$/android-components'
+      - tasks=":lib-publicsuffixlist:publishToMavenLocal $(gradle :lib-publicsuffixlist:dependencies
+        --configuration releaseRuntimeClasspath | perl -lne 'print "$1:publishToMavenLocal"
+        if /^.*--- project ([^\s]+)$/')"
+      - gradle $tasks
+    scanignore:
+      - gradle-plugin/build
+    scandelete:
+      - 3rdparty
+    ndk: r25b
+    gradleprops:
+      - org.equeim.tremotesf.print-3rdparty-build-log-on-error=true
+
 MaintainerNotes: |
     Tremotesf uses Gradle plugin in its build process, which is compiled from source on first Gradle invocation.
     Since it happens before scanning for binaries, we need to scanignore plugin's build directory.
@@ -749,5 +777,5 @@ UpdateCheckMode: Tags
 UpdateCheckName: Ignore
 UpdateCheckData: app/build.gradle.kts|versionCode = (\d+)|app/build.gradle.kts|versionName
     = "([\d.]+)"
-CurrentVersion: 2.7.2
-CurrentVersionCode: 4051
+CurrentVersion: 2.8.0
+CurrentVersionCode: 4052
