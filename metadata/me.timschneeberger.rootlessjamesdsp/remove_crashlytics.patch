@@ -1,0 +1,1056 @@
+diff --git a/app/build.gradle.kts b/app/build.gradle.kts
+index 88ead47..26ead58 100644
+--- a/app/build.gradle.kts
++++ b/app/build.gradle.kts
+@@ -1,11 +1,7 @@
+-import com.google.firebase.crashlytics.buildtools.gradle.CrashlyticsExtension
+-
+ plugins {
+     id("com.android.application")
+     id("org.jetbrains.kotlin.android")
+     id("kotlin-kapt")
+-    id("com.google.gms.google-services")
+-    id("com.google.firebase.crashlytics")
+     id("com.google.devtools.ksp") version AndroidConfig.kspVersion
+     id("dev.rikka.tools.refine") version AndroidConfig.rikkaRefineVersion
+ }
+@@ -42,15 +38,8 @@ android {
+         getByName("debug") {
+             applicationIdSuffix = ".debug"
+             versionNameSuffix = "-${getCommitCount()}"
+-            manifestPlaceholders["crashlyticsCollectionEnabled"] = "false"
+         }
+         getByName("release") {
+-            manifestPlaceholders["crashlyticsCollectionEnabled"] = "true"
+-            configure<CrashlyticsExtension> {
+-                nativeSymbolUploadEnabled = true
+-                mappingFileUploadEnabled = false
+-            }
+-
+             //proguardFiles("proguard-android-optimize.txt", "proguard-rules.pro")
+             isMinifyEnabled = false
+             isShrinkResources = false
+@@ -133,17 +122,6 @@ android {
+     }
+ }
+ 
+-// Hooks to upload native symbols to crashlytics automatically
+-afterEvaluate {
+-    getTasksByName("bundleRootlessRelease", false).firstOrNull()?.finalizedBy("uploadCrashlyticsSymbolFileRootlessRelease")
+-    getTasksByName("bundleRootRelease", false).firstOrNull()?.finalizedBy("uploadCrashlyticsSymbolFileRootRelease")
+-    getTasksByName("assembleRootlessRelease", false).firstOrNull()?.finalizedBy("uploadCrashlyticsSymbolFileRootlessRelease")
+-    getTasksByName("assembleRootRelease", false).firstOrNull()?.finalizedBy("uploadCrashlyticsSymbolFileRootRelease")
+-
+-    getTasksByName("assembleRootlessPreview", false).first().finalizedBy("uploadCrashlyticsSymbolFileRootlessRelease")
+-    getTasksByName("assembleRootPreview", false).first().finalizedBy("uploadCrashlyticsSymbolFileRootRelease")
+-}
+-
+ dependencies {
+     // Kotlin extensions
+     implementation("org.jetbrains.kotlin:kotlin-reflect:1.7.10")
+@@ -167,12 +145,6 @@ dependencies {
+     // Dependency injection
+     implementation("io.insert-koin:koin-android:3.2.0")
+ 
+-    // Firebase
+-    implementation(platform("com.google.firebase:firebase-bom:30.4.1"))
+-    implementation("com.google.firebase:firebase-analytics-ktx")
+-    implementation("com.google.firebase:firebase-crashlytics-ktx")
+-    implementation("com.google.firebase:firebase-crashlytics-ndk")
+-
+     // Web API client
+     implementation("com.google.code.gson:gson:2.10")
+     implementation("com.squareup.retrofit2:retrofit:2.9.0")
+@@ -213,4 +185,4 @@ dependencies {
+     testImplementation("junit:junit:4.13.2")
+     androidTestImplementation("androidx.test.ext:junit:1.1.4")
+     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.0")
+-}
+\ No newline at end of file
++}
+diff --git a/app/google-services.json b/app/google-services.json
+deleted file mode 100644
+index 24db9f2..0000000
+--- a/app/google-services.json
++++ /dev/null
+@@ -1,126 +0,0 @@
+-{
+-  "project_info": {
+-    "project_number": "1418102932",
+-    "project_id": "rootlessjamesdsp",
+-    "storage_bucket": "rootlessjamesdsp.appspot.com"
+-  },
+-  "client": [
+-    {
+-      "client_info": {
+-        "mobilesdk_app_id": "1:1418102932:android:709f97bf213439039c4c81",
+-        "android_client_info": {
+-          "package_name": "james.dsp"
+-        }
+-      },
+-      "oauth_client": [
+-        {
+-          "client_id": "1418102932-44cspu1cfn147b8gr84ov1f023lk8msc.apps.googleusercontent.com",
+-          "client_type": 3
+-        }
+-      ],
+-      "api_key": [
+-        {
+-          "current_key": "AIzaSyAmOKROX4dY-SuRJk5vd046_6zW6kV_UL8"
+-        }
+-      ],
+-      "services": {
+-        "appinvite_service": {
+-          "other_platform_oauth_client": [
+-            {
+-              "client_id": "1418102932-44cspu1cfn147b8gr84ov1f023lk8msc.apps.googleusercontent.com",
+-              "client_type": 3
+-            }
+-          ]
+-        }
+-      }
+-    },
+-    {
+-      "client_info": {
+-        "mobilesdk_app_id": "1:1418102932:android:00044677a03ce0099c4c81",
+-        "android_client_info": {
+-          "package_name": "james.dsp.debug"
+-        }
+-      },
+-      "oauth_client": [
+-        {
+-          "client_id": "1418102932-44cspu1cfn147b8gr84ov1f023lk8msc.apps.googleusercontent.com",
+-          "client_type": 3
+-        }
+-      ],
+-      "api_key": [
+-        {
+-          "current_key": "AIzaSyAmOKROX4dY-SuRJk5vd046_6zW6kV_UL8"
+-        }
+-      ],
+-      "services": {
+-        "appinvite_service": {
+-          "other_platform_oauth_client": [
+-            {
+-              "client_id": "1418102932-44cspu1cfn147b8gr84ov1f023lk8msc.apps.googleusercontent.com",
+-              "client_type": 3
+-            }
+-          ]
+-        }
+-      }
+-    },
+-    {
+-      "client_info": {
+-        "mobilesdk_app_id": "1:1418102932:android:e5a20ec31bf9c2b19c4c81",
+-        "android_client_info": {
+-          "package_name": "me.timschneeberger.rootlessjamesdsp"
+-        }
+-      },
+-      "oauth_client": [
+-        {
+-          "client_id": "1418102932-44cspu1cfn147b8gr84ov1f023lk8msc.apps.googleusercontent.com",
+-          "client_type": 3
+-        }
+-      ],
+-      "api_key": [
+-        {
+-          "current_key": "AIzaSyAmOKROX4dY-SuRJk5vd046_6zW6kV_UL8"
+-        }
+-      ],
+-      "services": {
+-        "appinvite_service": {
+-          "other_platform_oauth_client": [
+-            {
+-              "client_id": "1418102932-44cspu1cfn147b8gr84ov1f023lk8msc.apps.googleusercontent.com",
+-              "client_type": 3
+-            }
+-          ]
+-        }
+-      }
+-    },
+-    {
+-      "client_info": {
+-        "mobilesdk_app_id": "1:1418102932:android:e37e4526a91d86ba9c4c81",
+-        "android_client_info": {
+-          "package_name": "me.timschneeberger.rootlessjamesdsp.debug"
+-        }
+-      },
+-      "oauth_client": [
+-        {
+-          "client_id": "1418102932-44cspu1cfn147b8gr84ov1f023lk8msc.apps.googleusercontent.com",
+-          "client_type": 3
+-        }
+-      ],
+-      "api_key": [
+-        {
+-          "current_key": "AIzaSyAmOKROX4dY-SuRJk5vd046_6zW6kV_UL8"
+-        }
+-      ],
+-      "services": {
+-        "appinvite_service": {
+-          "other_platform_oauth_client": [
+-            {
+-              "client_id": "1418102932-44cspu1cfn147b8gr84ov1f023lk8msc.apps.googleusercontent.com",
+-              "client_type": 3
+-            }
+-          ]
+-        }
+-      }
+-    }
+-  ],
+-  "configuration_version": "1"
+-}
+\ No newline at end of file
+diff --git a/app/src/main/AndroidManifest.xml b/app/src/main/AndroidManifest.xml
+index afb6963..33bf7aa 100644
+--- a/app/src/main/AndroidManifest.xml
++++ b/app/src/main/AndroidManifest.xml
+@@ -30,10 +30,6 @@
+ 
+         <profileable android:shell="true"/>
+ 
+-        <meta-data
+-            android:name="firebase_crashlytics_collection_enabled"
+-            android:value="${crashlyticsCollectionEnabled}" />
+-
+         <!-- Activities -->
+         <activity
+             android:name=".activity.MainActivity"
+@@ -263,4 +259,4 @@
+         </provider>
+ 
+     </application>
+-</manifest>
+\ No newline at end of file
++</manifest>
+diff --git a/app/src/main/cpp/CMakeLists.txt b/app/src/main/cpp/CMakeLists.txt
+index d0db75e..d98bd32 100644
+--- a/app/src/main/cpp/CMakeLists.txt
++++ b/app/src/main/cpp/CMakeLists.txt
+@@ -12,7 +12,6 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ffunction-sections -fdata-sections -Ofa
+ project(jamesdsp LANGUAGES C)
+ project(jamesdsp-wrapper LANGUAGES CXX)
+ 
+-include(libcrashlytics-connector/CMakeLists.txt)
+ include(libjdspimptoolbox/CMakeLists.txt)
+ include(libjamesdsp-wrapper/CMakeLists.txt)
+ 
+diff --git a/app/src/main/cpp/libcrashlytics-connector/CMakeLists.txt b/app/src/main/cpp/libcrashlytics-connector/CMakeLists.txt
+deleted file mode 100644
+index 7ac9dd8..0000000
+--- a/app/src/main/cpp/libcrashlytics-connector/CMakeLists.txt
++++ /dev/null
+@@ -1,28 +0,0 @@
+-project(crashlytics-connector LANGUAGES CXX)
+-
+-add_library( # Sets the name of the library.
+-        crashlytics-connector
+-
+-        # Sets the library as a shared library.
+-        SHARED
+-
+-        # Provides a relative path to your source file(s).
+-        ${CMAKE_CURRENT_LIST_DIR}/crashlytics.h
+-        ${CMAKE_CURRENT_LIST_DIR}/Log.h
+-        ${CMAKE_CURRENT_LIST_DIR}/Log.cpp
+-        )
+-
+-
+-find_library( # Sets the name of the path variable.
+-        log-lib
+-
+-        # Specifies the name of the NDK library that
+-        # you want CMake to locate.
+-        log)
+-
+-target_link_libraries( # Specifies the target library.
+-        crashlytics-connector
+-
+-        # Links the target library to the log library
+-        # included in the NDK.
+-        ${log-lib})
+diff --git a/app/src/main/cpp/libcrashlytics-connector/Log.cpp b/app/src/main/cpp/libcrashlytics-connector/Log.cpp
+deleted file mode 100644
+index 56f9a50..0000000
+--- a/app/src/main/cpp/libcrashlytics-connector/Log.cpp
++++ /dev/null
+@@ -1,17 +0,0 @@
+-//
+-// Created by tim on 08.07.22.
+-//
+-
+-#include "Log.h"
+-
+-// TODO clean up this abomination
+-void log::toCrashlytics(const char *level, const char* tag, const char *fmt, ...) {
+-    va_list arguments;
+-    va_start(arguments, fmt);
+-    ssize_t bufsz = vsnprintf(nullptr, 0, fmt, arguments);
+-    char* buf = static_cast<char *>(malloc(bufsz + 1));
+-    vsnprintf(buf, bufsz + 1, fmt, arguments);
+-    firebase::crashlytics::Log(("["+std::string(level)+"] "+tag+": " + std::string(buf)).c_str());
+-    free(buf);
+-    va_end(arguments);
+-}
+diff --git a/app/src/main/cpp/libcrashlytics-connector/Log.h b/app/src/main/cpp/libcrashlytics-connector/Log.h
+deleted file mode 100644
+index 812f2d2..0000000
+--- a/app/src/main/cpp/libcrashlytics-connector/Log.h
++++ /dev/null
+@@ -1,41 +0,0 @@
+-//
+-// Created by tim on 08.07.22.
+-// Do NOT include this file in a header
+-//
+-#ifndef ROOTLESSJAMESDSP_LOG_H
+-#define ROOTLESSJAMESDSP_LOG_H
+-
+-#ifndef TAG
+-#define TAG "Global_JNI"
+-#endif
+-
+-#include "crashlytics.h"
+-#include <android/log.h>
+-#include <memory>
+-#include <string>
+-#include <stdexcept>
+-
+-namespace log {
+-    void toCrashlytics(const char* level, const char* tag, const char* fmt, ...);
+-}
+-
+-#define LOGE(...) \
+-    __android_log_print(ANDROID_LOG_ERROR, TAG, __VA_ARGS__); \
+-    log::toCrashlytics("E", TAG, __VA_ARGS__);
+-#define LOGD(...) \
+-    __android_log_print(ANDROID_LOG_DEBUG, TAG, __VA_ARGS__); \
+-    log::toCrashlytics("D", TAG, __VA_ARGS__);
+-#define LOGI(...) \
+-    __android_log_print(ANDROID_LOG_INFO, TAG, __VA_ARGS__); \
+-    log::toCrashlytics("I", TAG, __VA_ARGS__);
+-#define LOGW(...) \
+-    __android_log_print(ANDROID_LOG_WARN, TAG, __VA_ARGS__); \
+-    log::toCrashlytics("W", TAG, __VA_ARGS__);
+-#define LOGF(...) \
+-    __android_log_print(ANDROID_LOG_FATAL, TAG, __VA_ARGS__); \
+-    log::toCrashlytics("F", TAG, __VA_ARGS__);
+-#define LOGV(...) \
+-    __android_log_print(ANDROID_LOG_VERBOSE, TAG, __VA_ARGS__); \
+-    log::toCrashlytics("V", TAG, __VA_ARGS__);
+-
+-#endif //ROOTLESSJAMESDSP_LOG_H
+diff --git a/app/src/main/cpp/libcrashlytics-connector/crashlytics.h b/app/src/main/cpp/libcrashlytics-connector/crashlytics.h
+deleted file mode 100644
+index 20aa278..0000000
+--- a/app/src/main/cpp/libcrashlytics-connector/crashlytics.h
++++ /dev/null
+@@ -1,227 +0,0 @@
+-// Copyright 2020 Google LLC
+-//
+-// Licensed under the Apache License, Version 2.0 (the "License");
+-// you may not use this file except in compliance with the License.
+-// You may obtain a copy of the License at
+-//
+-//      http://www.apache.org/licenses/LICENSE-2.0
+-//
+-// Unless required by applicable law or agreed to in writing, software
+-// distributed under the License is distributed on an "AS IS" BASIS,
+-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+-// See the License for the specific language governing permissions and
+-// limitations under the License.
+-#ifndef __CRASHLYTICS_H__
+-#define __CRASHLYTICS_H__
+-
+-#include <cstddef>
+-#include <string>
+-#include <memory>
+-#include <functional>
+-#include <dlfcn.h>
+-
+-/// @brief Firebase Crashlytics NDK API, for Android apps which use native code.
+-///
+-/// This API is optional: It enables adding custom metadata to your native Crashlytics crash
+-/// reports. See <a href="https://firebase.google.com/docs/crashlytics">the developer guides</a>
+-/// for information on using Firebase Crashlytics in your NDK-enabled Android apps.
+-namespace firebase { namespace crashlytics {
+-
+-/** PUBLIC API **/
+-
+-/// @brief Initialize the Crashlytics NDK API, for Android apps using native code.
+-///
+-/// This allows finer grained control of when the native API is initialized. Calling this
+-/// function is not not strictly necessary as the API will be initialized on the first call
+-/// to any of the functions within the firebase::crashlytics namespace.
+-///
+-/// This call is only required for adding custom metadata to crash reports. Use of
+-/// this header file is NOT required for Android NDK crash reporting.
+-        inline bool Initialize();
+-
+-/// Deprecated; now a no-op and does not need to be called.
+-        inline void Terminate();
+-
+-/// @brief Logs a message to be included in the next fatal or non-fatal report.
+-        inline void Log(const char* msg);
+-
+-/// @brief Records a custom key and value to be associated with subsequent fatal and non-fatal
+-/// reports.
+-        inline void SetCustomKey(const char* key, bool value);
+-
+-/// @brief Records a custom key and value to be associated with subsequent fatal and non-fatal
+-/// reports.
+-        inline void SetCustomKey(const char* key, const char *value);
+-
+-/// @brief Records a custom key and value to be associated with subsequent fatal and non-fatal
+-/// reports.
+-        inline void SetCustomKey(const char* key, double value);
+-
+-/// @brief Records a custom key and value to be associated with subsequent fatal and non-fatal
+-/// reports.
+-        inline void SetCustomKey(const char* key, float value);
+-
+-/// @brief Records a custom key and value to be associated with subsequent fatal and non-fatal
+-/// reports.
+-        inline void SetCustomKey(const char* key, int value);
+-
+-/// @brief Records a custom key and value to be associated with subsequent fatal and non-fatal
+-/// reports.
+-        inline void SetCustomKey(const char* key, long value);
+-
+-/// @brief Records a user ID (identifier) that's associated with subsequent fatal and non-fatal
+-/// reports.
+-        inline void SetUserId(const char* id);
+-
+-/** END PUBLIC API **/
+-
+-        namespace detail {
+-
+-            struct         __crashlytics_context;
+-            struct         __crashlytics_unspecified;
+-            typedef struct __crashlytics_context                    __crashlytics_context_t;
+-            typedef struct __crashlytics_unspecified                __crashlytics_unspecified_t;
+-
+-            typedef __crashlytics_unspecified_t*    (*__crashlytics_initialize_t)           ();
+-            typedef void                            (*__crashlytics_set_internal_t)         (__crashlytics_unspecified_t *, const char *, const char *);
+-            typedef void                            (*__crashlytics_log_internal_t)         (__crashlytics_unspecified_t *, const char *);
+-            typedef void                            (*__crashlytics_set_user_id_internal_t) (__crashlytics_unspecified_t *, const char *);
+-            typedef void                            (*__crashlytics_dispose_t)              (__crashlytics_unspecified_t *);
+-
+-            struct __crashlytics_context {
+-                __crashlytics_set_internal_t __set;
+-                __crashlytics_log_internal_t __log;
+-                __crashlytics_set_user_id_internal_t __set_user_id;
+-
+-                __crashlytics_unspecified_t* __ctx;
+-                __crashlytics_dispose_t __dispose;
+-            };
+-
+-#define __CRASHLYTICS_NULL_CONTEXT                             (struct __crashlytics_context *) 0
+-#define __CRASHLYTICS_INITIALIZE_FAILURE                       (struct __crashlytics_unspecified *) 0
+-#define __CRASHLYTICS_DECORATED                                __attribute__ ((always_inline))
+-
+-            inline const __crashlytics_context_t* __crashlytics_context()                           __CRASHLYTICS_DECORATED;
+-            inline __crashlytics_context_t*       __crashlytics_init()                              __CRASHLYTICS_DECORATED;
+-
+-            inline void invoke(const std::function<void (const __crashlytics_context_t *)>& func)   __CRASHLYTICS_DECORATED;
+-
+-        } // end namespace detail
+-
+-        inline bool Initialize() {
+-            return detail::__crashlytics_context() != nullptr;
+-        }
+-
+-        inline void Terminate() {
+-            // no-op
+-        }
+-
+-        inline void Log(const char* msg) {
+-            detail::invoke([&](const detail::__crashlytics_context_t* context) {
+-                context->__log(context->__ctx, msg);
+-            });
+-        }
+-
+-        inline void SetCustomKey(const char* key, const char* value) {
+-            detail::invoke([&](const detail::__crashlytics_context_t* context) {
+-                context->__set(context->__ctx, key, value);
+-            });
+-        }
+-
+-        inline void SetCustomKey(const char* key, bool value) {
+-            SetCustomKey(key, value ? "true" : "false");
+-        }
+-
+-        inline void SetCustomKey(const char* key, double value) {
+-            SetCustomKey(key, std::to_string(value).c_str());
+-        }
+-
+-        inline void SetCustomKey(const char* key, float value) {
+-            SetCustomKey(key, std::to_string(value).c_str());
+-        }
+-
+-        inline void SetCustomKey(const char* key, int value) {
+-            SetCustomKey(key, std::to_string(value).c_str());
+-        }
+-
+-        inline void SetCustomKey(const char* key, long value) {
+-            SetCustomKey(key, std::to_string(value).c_str());
+-        }
+-
+-        inline void SetUserId(const char* id) {
+-            detail::invoke([&](const detail::__crashlytics_context_t* context) {
+-                context->__set_user_id(context->__ctx, id);
+-            });
+-        }
+-
+-        namespace detail {
+-
+-#define __CRASHLYTICS_NULL_ON_NULL(expression)                          \
+-    do {                                                                \
+-        if (((expression)) == NULL) {                                   \
+-            return NULL;                                                \
+-        }                                                               \
+-    } while (0)
+-
+-            inline __crashlytics_context_t* __crashlytics_construct(
+-                    __crashlytics_unspecified_t* ctx, void* sym_set, void* sym_log, void* sym_dispose, void* sym_set_user_id)  __CRASHLYTICS_DECORATED;
+-            inline __crashlytics_context_t* __crashlytics_construct(
+-                    __crashlytics_unspecified_t* ctx, void* sym_set, void* sym_log, void* sym_dispose, void* sym_set_user_id) {
+-                __crashlytics_context_t* context;
+-
+-                __CRASHLYTICS_NULL_ON_NULL(context = new __crashlytics_context_t);
+-
+-                context->__set = (__crashlytics_set_internal_t) sym_set;
+-                context->__log = (__crashlytics_log_internal_t) sym_log;
+-                context->__set_user_id = (__crashlytics_set_user_id_internal_t) sym_set_user_id;
+-                context->__ctx = ctx;
+-                context->__dispose = (__crashlytics_dispose_t) sym_dispose;
+-
+-                return context;
+-            }
+-
+-            inline const __crashlytics_context_t* __crashlytics_context() {
+-                static std::unique_ptr<__crashlytics_context_t> context { __crashlytics_init() };
+-                return context.get();
+-            }
+-
+-            inline __crashlytics_context_t* __crashlytics_init() {
+-                void* lib;
+-                void* sym_ini;
+-                void* sym_log;
+-                void* sym_set;
+-                void* sym_dispose;
+-                void* sym_set_user_id;
+-
+-                __CRASHLYTICS_NULL_ON_NULL(lib = dlopen("libcrashlytics.so", RTLD_LAZY | RTLD_LOCAL));
+-                __CRASHLYTICS_NULL_ON_NULL(sym_ini = dlsym(lib, "external_api_initialize"));
+-                __CRASHLYTICS_NULL_ON_NULL(sym_set = dlsym(lib, "external_api_set"));
+-                __CRASHLYTICS_NULL_ON_NULL(sym_log = dlsym(lib, "external_api_log"));
+-                __CRASHLYTICS_NULL_ON_NULL(sym_dispose = dlsym(lib, "external_api_dispose"));
+-                __CRASHLYTICS_NULL_ON_NULL(sym_set_user_id = dlsym(lib, "external_api_set_user_id"));
+-
+-                __crashlytics_unspecified_t* ctx = ((__crashlytics_initialize_t) sym_ini)();
+-
+-                return ctx == __CRASHLYTICS_INITIALIZE_FAILURE
+-                       ? __CRASHLYTICS_NULL_CONTEXT
+-                       : __crashlytics_construct(
+-                                ctx,
+-                                sym_set,
+-                                sym_log,
+-                                sym_dispose,
+-                                sym_set_user_id
+-                        );
+-            }
+-
+-            inline void invoke(const std::function<void (const __crashlytics_context_t *)>& func) {
+-                const __crashlytics_context_t* context = __crashlytics_context();
+-                if (context != nullptr) {
+-                    func(context);
+-                }
+-            }
+-
+-        } // end namespace detail
+-
+-    }}  // end namespace firebase::crashlytics
+-
+-#endif /* __CRASHLYTICS_H__ */
+\ No newline at end of file
+diff --git a/app/src/main/cpp/libjamesdsp-wrapper/CMakeLists.txt b/app/src/main/cpp/libjamesdsp-wrapper/CMakeLists.txt
+index 2631149..4f6dc04 100644
+--- a/app/src/main/cpp/libjamesdsp-wrapper/CMakeLists.txt
++++ b/app/src/main/cpp/libjamesdsp-wrapper/CMakeLists.txt
+@@ -22,13 +22,11 @@ find_library( # Sets the name of the path variable.
+ 
+ target_include_directories(jamesdsp-wrapper PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/libjamesdsp-subtree/Main/libjamesdsp/jni/jamesdsp/jdsp/)
+ target_include_directories(jamesdsp-wrapper PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/libjdspimptoolbox/main)
+-target_include_directories(jamesdsp-wrapper PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/libcrashlytics-connector)
+ 
+ # Link libjamesdsp with the wrapper library
+ target_link_libraries( # Specifies the target library.
+         jamesdsp-wrapper
+         jdspimprestoolbox
+-        crashlytics-connector
+         jamesdsp
+ 
+         # Links the target library to the log library
+diff --git a/app/src/main/cpp/libjamesdsp-wrapper/EelVmVariable.cpp b/app/src/main/cpp/libjamesdsp-wrapper/EelVmVariable.cpp
+index cea4f9a..94a6561 100644
+--- a/app/src/main/cpp/libjamesdsp-wrapper/EelVmVariable.cpp
++++ b/app/src/main/cpp/libjamesdsp-wrapper/EelVmVariable.cpp
+@@ -5,14 +5,12 @@
+ #include "EelVmVariable.h"
+ 
+ #define TAG "EelVmVariable_JNI"
+-#include <Log.h>
+ 
+ EelVmVariable::EelVmVariable(JNIEnv *env, const char *name, const char *value, bool isString) : IJavaObject(env) {
+ 
+     auto arrayClass = _env->FindClass("me/timschneeberger/rootlessjamesdsp/interop/structure/EelVmVariable");
+     if (arrayClass == nullptr)
+     {
+-        LOGE("JArrayList::ctor: EelVmVariable class not found");
+         return;
+     }
+ 
+@@ -20,7 +18,6 @@ EelVmVariable::EelVmVariable(JNIEnv *env, const char *name, const char *value, b
+                                              "(Ljava/lang/String;Ljava/lang/String;Z)V");
+     if (methodInit == nullptr)
+     {
+-        LOGE("JArrayList::ctor: EelVmVariable<init>(Ljava/lang/String;Ljava/lang/String;Z)V method not found");
+         return;
+     }
+ 
+@@ -30,7 +27,6 @@ EelVmVariable::EelVmVariable(JNIEnv *env, const char *name, const char *value, b
+ 
+     if (innerObject == nullptr)
+     {
+-        LOGE("JArrayList::ctor: Failed to allocate EelVmVariable object");
+         return;
+     }
+ 
+diff --git a/app/src/main/cpp/libjamesdsp-wrapper/JArrayList.cpp b/app/src/main/cpp/libjamesdsp-wrapper/JArrayList.cpp
+index f10e659..91ad590 100644
+--- a/app/src/main/cpp/libjamesdsp-wrapper/JArrayList.cpp
++++ b/app/src/main/cpp/libjamesdsp-wrapper/JArrayList.cpp
+@@ -5,35 +5,30 @@
+ #include "JArrayList.h"
+ 
+ #define TAG "JArrayList_JNI"
+-#include <Log.h>
+ 
+ JArrayList::JArrayList(JNIEnv* env) : IJavaObject(env)
+ {
+     arrayClass = _env->FindClass("java/util/ArrayList");
+     if (arrayClass == nullptr)
+     {
+-        LOGE("JArrayList::ctor: java/util/ArrayList class not found");
+         return;
+     }
+ 
+     jmethodID methodInit = _env->GetMethodID(arrayClass, "<init>", "()V");
+     if (methodInit == nullptr)
+     {
+-        LOGE("JArrayList::ctor: java/util/ArrayList<init>()V method not found");
+         return;
+     }
+ 
+     innerArrayList = _env->NewObject(arrayClass, methodInit);
+     if (innerArrayList == nullptr)
+     {
+-        LOGE("JArrayList::ctor: Failed to allocate ArrayList object");
+         return;
+     }
+ 
+     methodAdd = _env->GetMethodID(arrayClass, "add", "(Ljava/lang/Object;)Z");
+     if (methodAdd == nullptr)
+     {
+-        LOGE("JArrayList::ctor: java/util/ArrayList.add(Ljava/lang/Object;)Z method not found");
+         return;
+     }
+ 
+diff --git a/app/src/main/cpp/libjamesdsp-wrapper/JamesDspWrapper.cpp b/app/src/main/cpp/libjamesdsp-wrapper/JamesDspWrapper.cpp
+index d3d4dcf..70ce090 100755
+--- a/app/src/main/cpp/libjamesdsp-wrapper/JamesDspWrapper.cpp
++++ b/app/src/main/cpp/libjamesdsp-wrapper/JamesDspWrapper.cpp
+@@ -1,7 +1,6 @@
+ #include <android/log.h>
+ 
+ #define TAG "JamesDspWrapper_JNI"
+-#include <Log.h>
+ 
+ #include <string>
+ #include <jni.h>
+@@ -17,18 +16,10 @@ extern "C" {
+ 
+ // C interop
+ inline JamesDSPLib* cast(void* raw){
+-    if(raw == nullptr)
+-    {
+-        LOGE("JamesDspWrapper::cast: JamesDSPLib pointer is NULL")
+-    }
+     return static_cast<JamesDSPLib*>(raw);
+ }
+ 
+ inline JamesDspWrapper* castWrapper(jlong raw){
+-    if(raw == 0)
+-    {
+-        LOGE("JamesDspWrapper::castWrapper: JamesDspWrapper pointer is NULL")
+-    }
+     return reinterpret_cast<JamesDspWrapper*>(raw);
+ }
+ 
+@@ -91,7 +82,6 @@ Java_me_timschneeberger_rootlessjamesdsp_interop_JamesDspWrapper_alloc(JNIEnv *e
+     jclass callbackClass = env->GetObjectClass(callback);
+     if (callbackClass == nullptr)
+     {
+-        LOGE("JamesDspWrapper::ctor: Cannot find callback class");
+         delete self;
+         return 0;
+     }
+@@ -108,7 +98,6 @@ Java_me_timschneeberger_rootlessjamesdsp_interop_JamesDspWrapper_alloc(JNIEnv *e
+         if (self->callbackOnLiveprogOutput == nullptr || self->callbackOnLiveprogExec == nullptr ||
+             self->callbackOnLiveprogResult == nullptr || self->callbackOnVdcParseError == nullptr)
+         {
+-            LOGE("JamesDspWrapper::ctor: Cannot find callback method");
+             delete self;
+             return 0;
+         }
+@@ -120,7 +109,6 @@ Java_me_timschneeberger_rootlessjamesdsp_interop_JamesDspWrapper_alloc(JNIEnv *e
+ 
+     if(!_dsp)
+     {
+-        LOGE("JamesDspWrapper::ctor: Failed to allocate memory for libjamesdsp class object");
+         delete self;
+         return 1;
+     }
+@@ -130,8 +118,6 @@ Java_me_timschneeberger_rootlessjamesdsp_interop_JamesDspWrapper_alloc(JNIEnv *e
+ 
+     if(!JamesDSPGetMutexStatus(_dsp))
+     {
+-        LOGE("JamesDspWrapper::ctor: JamesDSPGetMutexStatus returned false. "
+-                    "Cannot run safely in multi-threaded environment.");
+         JamesDSPFree(_dsp);
+         JamesDSPGlobalMemoryDeallocation();
+         delete self;
+@@ -140,7 +126,6 @@ Java_me_timschneeberger_rootlessjamesdsp_interop_JamesDspWrapper_alloc(JNIEnv *e
+ 
+     self->dsp = _dsp;
+ 
+-    LOGD("JamesDspWrapper::ctor: memory allocated at %ld", (long)self);
+     return (long)self;
+ }
+ 
+@@ -159,8 +144,6 @@ Java_me_timschneeberger_rootlessjamesdsp_interop_JamesDspWrapper_free(JNIEnv *en
+ 
+     env->DeleteGlobalRef(wrapper->callbackInterface);
+     delete wrapper;
+-
+-    LOGD("JamesDspWrapper::dtor: memory freed");
+ }
+ 
+ extern "C"
+@@ -264,14 +247,11 @@ Java_me_timschneeberger_rootlessjamesdsp_interop_JamesDspWrapper_setFirEqualizer
+ 
+     if(env->GetArrayLength(bands) != 30)
+     {
+-        LOGE("JamesDspWrapper::setFirEqualizer: Invalid EQ data. 30 semicolon-separated fields expected, "
+-                      "found %d fields instead.", env->GetArrayLength(bands));
+         return false;
+     }
+ 
+     if(bands == nullptr)
+     {
+-        LOGW("JamesDspWrapper::setFirEqualizer: EQ band pointer is NULL. Disabling EQ");
+         FIREqualizerDisable(dsp);
+         return true;
+     }
+@@ -304,8 +284,6 @@ Java_me_timschneeberger_rootlessjamesdsp_interop_JamesDspWrapper_setVdc(JNIEnv *
+         int ret = DDCEnable(dsp);
+         if (ret <= 0)
+         {
+-            LOGE("JamesDspWrapper::setVdc: Call to DDCEnable(wrapper->dsp) failed. Invalid DDC parameter?");
+-            LOGE("JamesDspWrapper::setVdc: Disabling DDC engine");
+             env->CallVoidMethod(wrapper->callbackInterface, wrapper->callbackOnVdcParseError);
+ 
+             DDCDisable(dsp);
+@@ -363,19 +341,11 @@ Java_me_timschneeberger_rootlessjamesdsp_interop_JamesDspWrapper_setConvolver(JN
+     int success = 1;
+     if(env->GetArrayLength(impulseResponse) <= 0)
+     {
+-        LOGW("JamesDspWrapper::setConvolver: Impulse response array is empty. Disabling convolver");
+         enable = false;
+     }
+ 
+     if(enable)
+     {
+-        if(irFrames <= 0)
+-        {
+-            LOGW("JamesDspWrapper::setConvolver: Impulse response has zero frames");
+-        }
+-
+-        LOGD("JamesDspWrapper::setConvolver: Impulse response loaded: channels=%d, frames=%d", irChannels, irFrames);
+-
+         Convolver1DDisable(dsp);
+ 
+         auto* nativeImpulse = (env->GetFloatArrayElements(impulseResponse, nullptr));
+@@ -390,7 +360,6 @@ Java_me_timschneeberger_rootlessjamesdsp_interop_JamesDspWrapper_setConvolver(JN
+ 
+     if(success <= 0)
+     {
+-        LOGD("JamesDspWrapper::setConvolver: Failed to update convolver. Convolver1DLoadImpulseResponse returned an error.");
+         return false;
+     }
+ 
+@@ -404,7 +373,6 @@ Java_me_timschneeberger_rootlessjamesdsp_interop_JamesDspWrapper_setGraphicEq(JN
+     DECLARE_DSP_B
+     if(graphicEq == nullptr || env->GetStringUTFLength(graphicEq) <= 0)
+     {
+-        LOGE("JamesDspWrapper::setGraphicEq: graphicEq is empty or NULL. Disabling graphic eq.");
+         enable = false;
+     }
+ 
+@@ -507,7 +475,6 @@ Java_me_timschneeberger_rootlessjamesdsp_interop_JamesDspWrapper_setLiveprog(JNI
+ 
+     const char *nativeString = env->GetStringUTFChars(liveprogContent, nullptr);
+     if(strlen(nativeString) < 1) {
+-        LOGD("JamesDspWrapper::setLiveprog: empty file")
+         env->ReleaseStringUTFChars(liveprogContent, nativeString);
+         return true;
+     }
+@@ -521,14 +488,6 @@ Java_me_timschneeberger_rootlessjamesdsp_interop_JamesDspWrapper_setLiveprog(JNI
+     jdsp_unlock(dsp);
+ 
+     const char* errorString = NSEEL_code_getcodeerror(dsp->eel.vm);
+-    if(errorString != nullptr)
+-    {
+-        LOGW("JamesDspWrapper::setLiveprog: NSEEL_code_getcodeerror: Syntax error in script file, cannot load. Reason: %s", errorString);
+-    }
+-    if(ret <= 0)
+-    {
+-        LOGW("JamesDspWrapper::setLiveprog: %s", checkErrorCode(ret));
+-    }
+ 
+     jstring errorStringJni = env->NewStringUTF(errorString);
+     env->CallVoidMethod(wrapper->callbackInterface, wrapper->callbackOnLiveprogResult, ret, id, errorStringJni);
+@@ -598,7 +557,6 @@ Java_me_timschneeberger_rootlessjamesdsp_interop_JamesDspWrapper_manipulateEelVa
+             char *validString = (char*)GetStringForIndex(ctx->m_string_context, ctx->varTable_Values[i][j], 0);
+             if(validString)
+             {
+-                LOGE("JamesDspWrapper::manipulateEelVariable: variable '%s' is a string; currently only numerical variables can be manipulated", nativeName);
+                 env->ReleaseStringUTFChars(name, nativeName);
+                 return false;
+             }
+@@ -611,7 +569,6 @@ Java_me_timschneeberger_rootlessjamesdsp_interop_JamesDspWrapper_manipulateEelVa
+     }
+ 
+     const char *nativeName = env->GetStringUTFChars(name, nullptr);
+-    LOGE("JamesDspWrapper::manipulateEelVariable: variable '%s' not found", nativeName);
+     env->ReleaseStringUTFChars(name, nativeName);
+     return false;
+ }
+@@ -622,7 +579,6 @@ Java_me_timschneeberger_rootlessjamesdsp_interop_JamesDspWrapper_freezeLiveprogE
+ {
+     DECLARE_DSP_V
+     dsp->eel.active = !freeze;
+-    LOGD("JamesDspWrapper::freezeLiveprogExecution: Liveprog execution has been %s", (freeze ? "frozen" : "resumed"));
+ }
+ 
+ extern "C" JNIEXPORT jstring JNICALL
+@@ -638,8 +594,6 @@ void receiveLiveprogStdOut(const char *buffer, void* userData)
+     auto* self = static_cast<JamesDspWrapper*>(userData);
+     if(self == nullptr)
+     {
+-        LOGE("JamesDspWrapper::receiveLiveprogStdOut: Self reference is NULL");
+-        LOGE("JamesDspWrapper::receiveLiveprogStdOut: Unhandled output: %s", buffer);
+         return;
+     }
+ 
+@@ -648,7 +602,5 @@ void receiveLiveprogStdOut(const char *buffer, void* userData)
+ 
+ extern "C" JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *, void *)
+ {
+-    firebase::crashlytics::Initialize();
+-    LOGD("JNI_OnLoad called")
+     return JNI_VERSION_1_6;
+ }
+diff --git a/app/src/main/java/me/timschneeberger/rootlessjamesdsp/MainApplication.kt b/app/src/main/java/me/timschneeberger/rootlessjamesdsp/MainApplication.kt
+index 023618f..732a6c2 100644
+--- a/app/src/main/java/me/timschneeberger/rootlessjamesdsp/MainApplication.kt
++++ b/app/src/main/java/me/timschneeberger/rootlessjamesdsp/MainApplication.kt
+@@ -7,9 +7,6 @@ import android.os.Build
+ import android.util.Log
+ import androidx.appcompat.app.AppCompatDelegate
+ import androidx.preference.PreferenceManager
+-import com.google.firebase.crashlytics.FirebaseCrashlytics
+-import com.google.firebase.crashlytics.ktx.crashlytics
+-import com.google.firebase.ktx.Firebase
+ import fr.bipi.tressence.file.FileLoggerTree
+ import kotlinx.coroutines.CoroutineScope
+ import kotlinx.coroutines.SupervisorJob
+@@ -84,22 +81,6 @@ class MainApplication : Application(), SharedPreferences.OnSharedPreferenceChang
+             dumpFile.delete()
+         }
+ 
+-        // Soft-disable crashlytics in debug mode by default on each launch
+-        if(BuildConfig.DEBUG) {
+-            prefs
+-                .edit()
+-                .putBoolean(getString(R.string.key_share_crash_reports), false)
+-                .apply()
+-        }
+-
+-        val crashlytics = prefs.getBoolean(getString(R.string.key_share_crash_reports), true) && (!BuildConfig.DEBUG || BuildConfig.PREVIEW)
+-        Timber.d("Crashlytics enabled? $crashlytics")
+-        FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(crashlytics)
+-
+-        FirebaseCrashlytics.getInstance().setCustomKey("buildType", BuildConfig.BUILD_TYPE)
+-        FirebaseCrashlytics.getInstance().setCustomKey("buildCommit", BuildConfig.COMMIT_SHA)
+-        FirebaseCrashlytics.getInstance().setCustomKey("flavor", BuildConfig.FLAVOR)
+-
+         val initialPrefList = arrayOf(
+             R.string.key_appearance_theme_mode
+         )
+@@ -133,15 +114,12 @@ class MainApplication : Application(), SharedPreferences.OnSharedPreferenceChang
+ 
+     override fun onLowMemory() {
+         Timber.w("onLowMemory: Running low on memory")
+-        FirebaseCrashlytics.getInstance().setCustomKey("last_low_memory_event", SimpleDateFormat("yyyyMMdd HHmmss z", Locale.US).format(Date()))
+         super.onLowMemory()
+     }
+ 
+     override fun onTrimMemory(level: Int) {
+         if (level >= 60)
+             Timber.w("onTrimMemory: Memory trim at level $level requested")
+-        FirebaseCrashlytics.getInstance().setCustomKey("last_memory_trim_event", SimpleDateFormat("yyyyMMdd HHmmss z", Locale.US).format(Date()))
+-        FirebaseCrashlytics.getInstance().setCustomKey("last_memory_trim_level", level)
+         super.onTrimMemory(level)
+     }
+ 
+@@ -172,14 +150,5 @@ class MainApplication : Application(), SharedPreferences.OnSharedPreferenceChang
+                 else -> "?"
+             }
+         }
+-
+-        override fun log(priority: Int, tag: String?, message: String, t: Throwable?) {
+-            val safeTag = tag ?: "Unknown"
+-            Firebase.crashlytics.log("[${priorityAsString(priority)}] $safeTag: $message")
+-
+-            if (t != null && (priority == Log.ERROR || priority == Log.WARN || priority == Log.ASSERT)) {
+-                Firebase.crashlytics.recordException(t)
+-            }
+-        }
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/app/src/main/java/me/timschneeberger/rootlessjamesdsp/activity/MainActivity.kt b/app/src/main/java/me/timschneeberger/rootlessjamesdsp/activity/MainActivity.kt
+index 9f68307..9120882 100644
+--- a/app/src/main/java/me/timschneeberger/rootlessjamesdsp/activity/MainActivity.kt
++++ b/app/src/main/java/me/timschneeberger/rootlessjamesdsp/activity/MainActivity.kt
+@@ -21,7 +21,6 @@ import androidx.preference.Preference
+ import com.google.android.material.dialog.MaterialAlertDialogBuilder
+ import com.google.android.material.shape.MaterialShapeDrawable
+ import com.google.android.material.snackbar.Snackbar
+-import com.google.firebase.crashlytics.FirebaseCrashlytics
+ import kotlinx.coroutines.CoroutineScope
+ import kotlinx.coroutines.Dispatchers
+ import kotlinx.coroutines.delay
+@@ -581,7 +580,6 @@ class MainActivity : BaseActivity() {
+     }
+ 
+     private fun quitGracefully() {
+-        FirebaseCrashlytics.getInstance().sendUnsentReports()
+         Timer().schedule(2000){
+             this@MainActivity.finishAndRemoveTask()
+         }
+@@ -612,4 +610,4 @@ class MainActivity : BaseActivity() {
+ 
+         private const val STATE_LOAD_FAILED = "LoadFailed"
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/app/src/main/java/me/timschneeberger/rootlessjamesdsp/fragment/SettingsMiscFragment.kt b/app/src/main/java/me/timschneeberger/rootlessjamesdsp/fragment/SettingsMiscFragment.kt
+index 4d29bbe..c7aebc8 100644
+--- a/app/src/main/java/me/timschneeberger/rootlessjamesdsp/fragment/SettingsMiscFragment.kt
++++ b/app/src/main/java/me/timschneeberger/rootlessjamesdsp/fragment/SettingsMiscFragment.kt
+@@ -8,7 +8,6 @@ import android.view.View
+ import android.view.ViewGroup
+ import androidx.core.content.res.ResourcesCompat
+ import androidx.preference.*
+-import com.google.firebase.crashlytics.FirebaseCrashlytics
+ import me.timschneeberger.rootlessjamesdsp.BuildConfig
+ import me.timschneeberger.rootlessjamesdsp.R
+ import me.timschneeberger.rootlessjamesdsp.utils.AssetManagerExtensions.installPrivateAssets
+@@ -19,18 +18,12 @@ class SettingsMiscFragment : PreferenceFragmentCompat() {
+ 
+     private val autoStartNotify by lazy { findPreference<Preference>(getString(R.string.key_autostart_prompt_at_boot)) }
+     private val repairAssets by lazy { findPreference<Preference>(getString(R.string.key_troubleshooting_repair_assets)) }
+-    private val crashReports by lazy { findPreference<Preference>(getString(R.string.key_share_crash_reports)) }
+     private val debugDatabase by lazy { findPreference<Preference>(getString(R.string.key_debug_database)) }
+ 
+     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
+         preferenceManager.sharedPreferencesName = Constants.PREF_APP
+         setPreferencesFromResource(R.xml.app_misc_preferences, rootKey)
+ 
+-        crashReports?.setOnPreferenceChangeListener { _, newValue ->
+-            FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(newValue as Boolean)
+-            true
+-        }
+-
+         repairAssets?.setOnPreferenceClickListener {
+             requireContext().assets.installPrivateAssets(requireContext(), force = true)
+             requireContext().showAlert(R.string.success, R.string.troubleshooting_repair_assets_success)
+@@ -62,4 +55,4 @@ class SettingsMiscFragment : PreferenceFragmentCompat() {
+             return SettingsMiscFragment()
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/app/src/main/java/me/timschneeberger/rootlessjamesdsp/interop/PreferenceCache.kt b/app/src/main/java/me/timschneeberger/rootlessjamesdsp/interop/PreferenceCache.kt
+index 0dab863..fd6a6de 100644
+--- a/app/src/main/java/me/timschneeberger/rootlessjamesdsp/interop/PreferenceCache.kt
++++ b/app/src/main/java/me/timschneeberger/rootlessjamesdsp/interop/PreferenceCache.kt
+@@ -2,8 +2,6 @@ package me.timschneeberger.rootlessjamesdsp.interop
+ 
+ import android.content.Context
+ import androidx.annotation.StringRes
+-import com.google.firebase.crashlytics.ktx.crashlytics
+-import com.google.firebase.ktx.Firebase
+ 
+ class PreferenceCache(val context: Context) {
+     val changedNamespaces = ArrayList<String>()
+@@ -43,7 +41,6 @@ class PreferenceCache(val context: Context) {
+             }
+         }
+ 
+-        Firebase.crashlytics.setCustomKey("pref_$name", current.toString())
+         cache[name] = current as Any
+         return current
+     }
+@@ -51,4 +48,4 @@ class PreferenceCache(val context: Context) {
+     fun markChangesAsCommitted() {
+         changedNamespaces.clear()
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/build.gradle.kts b/build.gradle.kts
+index 77c46fd..ffe1bf1 100644
+--- a/build.gradle.kts
++++ b/build.gradle.kts
+@@ -8,8 +8,6 @@ buildscript {
+     }
+     dependencies {
+         classpath("com.android.tools.build:gradle:7.3.0")
+-        classpath("com.google.gms:google-services:4.3.14")
+-        classpath("com.google.firebase:firebase-crashlytics-gradle:2.9.2")
+         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:${AndroidConfig.kotlinVersion}")
+     }
+ }
+@@ -22,4 +20,4 @@ plugins {
+ 
+ tasks.register<Delete>("clean") {
+     delete(rootProject.buildDir)
+-}
+\ No newline at end of file
++}
