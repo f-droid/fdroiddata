@@ -1,0 +1,35 @@
+Categories:
+  - Multimedia
+License: GPL-3.0-only
+SourceCode: https://gitlab.com/listentogether/app/
+
+AutoName: ListenTogether
+
+RepoType: git
+Repo: https://gitlab.com/listentogether/app/
+
+Builds:
+  - versionName: 1.1.2
+    versionCode: 6
+    commit: v1.1.2
+    subdir: android/app
+    sudo:
+      - curl -Lo node.tar.gz https://nodejs.org/dist/v18.12.1/node-v18.12.1-linux-x64.tar.gz
+      - echo "a8fcacb8033504e6d704bdee821f7005ee3774db25c799bcf2a13b5bda7de172 node.tar.gz"
+        | sha256sum -c -
+      - tar xzf node.tar.gz --strip-components=1 -C /usr/local/
+      - sysctl fs.inotify.max_user_watches=524288 || true
+    init:
+      - npm install --no-audit
+      - cd ../..
+      - npm run build
+    gradle:
+      - yes
+    scandelete:
+      - node_modules/
+      - .parcel-cache/
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags v[0-9\.]+
+CurrentVersion: 1.1.2
+CurrentVersionCode: 6
