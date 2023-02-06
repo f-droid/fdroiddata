@@ -1,5 +1,6 @@
 AntiFeatures:
-  - UpstreamNonFree
+  - NonFreeNet
+  - Tracking
 Categories:
   - Multimedia
   - System
@@ -38,22 +39,31 @@ Description: |-
     can search and import frequency responses that aim to correct your headphone to a neutral sound.
     Go to 'Arbitrary response equalizer > Magnitude response > AutoEQ profiles' to get started.
 
+    Antifeatures:
+    * NonFreeNet: app downloads AutoEQ profiles from github
+    * Tracking: app has crash reporting enabled by default
+
 RepoType: git
 Repo: https://github.com/ThePBone/RootlessJamesDSP
 
 Builds:
   - versionName: 1.1.1
     versionCode: 17
-    commit: v1.1.1
+    commit: 3b11513f1648f105d50b2822820b48c2224143bf
     subdir: app
     submodules: true
-    patch:
-      - remove_crashlytics.patch
     gradle:
-      - yes
-    output: build/outputs/apk/rootless/release/JamesDSP-v$$VERSION$$-rootless-universal-release-unsigned.apk
-    prebuild: sed -i 's/maven\ {\ url\ =\ java\.net\.URI("https\:\/\/jitpack\.io")\
-        }/maven("https:\/\/jitpack.io")/' ../build.gradle.kts
+      - RootlessFdroid
+    output: build/outputs/apk/rootlessFdroid/release/JamesDSP-v$$VERSION$$-rootless-fdroid-universal-release-unsigned.apk
+    prebuild:
+      - sdkmanager --install "cmake;3.18.1"
+      - sed -i 's/^.*classpath("com\.google\.gms:google-services.*$//' ../build.gradle.kts
+      - sed -i 's/^.*classpath("com\.google\.firebase:firebase-crashlytics-gradle.*$//'
+        ../build.gradle.kts
+      - sed -i 's/^.*id("com\.google\.gms\.google-services").*$//' build.gradle.kts
+      - sed -i 's/^.*id("com.google.firebase.crashlytics").*$//' build.gradle.kts
+      - sed -i 's/^.*import\ com\.google\.firebase.*$//' build.gradle.kts
+      - sed -i '/configure<CrashlyticsExtension>/,+3d' build.gradle.kts
     scandelete:
       - app/src/main/cpp/libjamesdsp
     ndk: r23c
@@ -63,15 +73,13 @@ MaintainerNotes: |-
     however it's needed to build DSPManager for libjamesdsp, not libjamesdsp itself, so it's safe to
     remove it, RootlessJamesDSP doesn't need DSPManager from libjamesdsp.
 
-    Scanner complains about unrecognized maven repo (regex matches the wrong thing), however this repo is
-    allowed in f-droid:
-    https://gitlab.com/fdroid/fdroidserver/-/blob/master/fdroidserver/scanner.py#L439,
-    Adapted the repo line to proper kotlin DSL syntax.
+    Upstream provides an fdroid flavor, crashlytics are removed at compile-time,
+    libcrashlytics-connector is still included, however crashlytics-related code
+    is also removed at compile-time.
 
-    AUM is disabled since the massive patch is very likely to fail in newer versions and needs to be adapted
-    manually.
+    Cmake needs to be installed manually by sdkmanager, otherwise gradle clean fails
 
-AutoUpdateMode: None
+AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: buildSrc/src/main/kotlin/AndroidConfig.kt|versionCode\s=\s(\d+)|.|versionName\s=\s"(.*)"
 CurrentVersion: 1.1.1
