@@ -1,0 +1,53 @@
+Categories:
+  - Games
+License: GPL-3.0-only
+AuthorName: ligi
+AuthorEmail: ligi@ligi.de
+AuthorWebSite: https://ligi.de/
+SourceCode: https://github.com/ligi/gobandroid-ai-gnugo
+IssueTracker: https://github.com/ligi/gobandroid-ai-gnugo/issues
+
+AutoName: gobandroid ai gnugo
+Description: |-
+    Note: This is not a standalone app. In Gobandroid ( https://f-droid.org/packages/org.ligi.gobandroid_hd/ ) press Setup -> GNU Go to activate it.
+
+    This is a plugin that enables the GNU Go 3.8 engine to play as an AI player inside Gobandroid.
+
+    After install please restart Gobandroid so it is detected.
+
+    The app does not have a launcher icon so it can be uninstalled either from F-Droid Client or from Android Settings Apps.
+
+RepoType: git
+Repo: https://github.com/ligi/gobandroid-ai-gnugo.git
+
+Builds:
+  - versionName: 2.1.2
+    versionCode: 212
+    commit: 5661f04fddbe5ac3efe3d3a5250230fbefe4430e
+    sudo:
+      - apt-get update
+      - apt-get install -y build-essential
+    gradle:
+      - yes
+    srclibs:
+      - gnugo@fc538acde40b2d4f5b8f9b717c7f732063d12dcf
+    prebuild:
+      - sed -i -e '/splits/,+7d' build.gradle
+      - sed -i -e 's/int meaningless/extern int meaningless/g' src/main/jni/project/gnugo-3.8/engine/liberty.h
+        $$gnugo$$/engine/liberty.h
+      - sed -i -e '/liberty.h/aint meaningless_black_moves[BOARDMAX];\nint meaningless_white_moves[BOARDMAX];'
+        src/main/jni/project/gnugo-3.8/engine/unconditional.c $$gnugo$$/engine/unconditional.c
+    build:
+      - pushd $$gnugo$$/
+      - ./configure
+      - make -j$(nproc)
+      - make clean
+      - popd
+      - cp -nr $$gnugo$$/* src/main/jni/project/gnugo-3.8/
+      - ndk-build -j$(nproc) -C src/main
+    ndk: r25
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: 2.1.2
+CurrentVersionCode: 212
