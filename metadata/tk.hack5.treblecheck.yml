@@ -1,0 +1,43 @@
+Categories:
+  - System
+  - Development
+License: GPL-3.0-or-later
+AuthorName: Hackintosh Five
+AuthorEmail: treble@hack5.dev
+AuthorWebSite: https://hack5.dev
+WebSite: https://hack5.dev/about/projects/TrebleInfo
+SourceCode: https://gitlab.com/TrebleInfo/TrebleInfo
+IssueTracker: https://gitlab.com/TrebleInfo/TrebleInfo/-/issues
+Translation: https://gitlab.com/TrebleInfo/TrebleInfo/#translating
+
+AutoName: Treble Info
+
+RepoType: git
+Repo: https://gitlab.com/TrebleInfo/TrebleInfo.git
+Binaries: https://gitlab.com/api/v4/projects/30453147/packages/generic/apk/%v/TrebleInfo-free.apk
+
+Builds:
+  - versionName: 5.0.7
+    versionCode: 5000007
+    commit: af6430cb90bc14320b63fc4cb4dd42ce3fba4569
+    submodules: true
+    gradle:
+      - free
+    output: out.apk
+    srclibs:
+      - apksigcopier@db0812505cc3bd492a4c9a9a7f7c7e02ea508683
+    prebuild:
+      - sed -i -e '/publishing {/,/^}/d' {poeditor-android,materialdesignicons-android}/build.gradle.kts
+      - "echo 'PYTHONPATH=$PYTHONPATH:$$apksigcopier$$ python3 -c '\"'\"'from apksigcopier\
+        \ import copy_apk; copy_apk(\"app/build/outputs/apk/free/release/app-free-release-unsigned.apk\"\
+        , \"out.apk\", exclude=lambda _: False, zfe_size=132)'\"'\" > add_zfe.sh"
+      - chmod +x add_zfe.sh
+      - echo >> settings.gradle.kts
+      - echo 'gradle.projectsEvaluated { gradle.rootProject.tasks.getByPath(":app:packageFreeRelease").doLast
+        { exec { commandLine(rootProject.file("add_zfe.sh")) } } }' >> settings.gradle.kts
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^[0-9.]+$
+UpdateCheckData: app/version.properties|versionCode=(\d+)|.|versionName=(.+)
+CurrentVersion: 5.0.7
+CurrentVersionCode: 5000007
