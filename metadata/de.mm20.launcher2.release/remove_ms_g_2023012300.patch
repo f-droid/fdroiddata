@@ -1,0 +1,627 @@
+diff --git a/app/ui/src/main/java/de/mm20/launcher2/ui/settings/accounts/AccountsSettingsScreen.kt b/app/ui/src/main/java/de/mm20/launcher2/ui/settings/accounts/AccountsSettingsScreen.kt
+index e4e4e9cd..adfc61e5 100644
+--- a/app/ui/src/main/java/de/mm20/launcher2/ui/settings/accounts/AccountsSettingsScreen.kt
++++ b/app/ui/src/main/java/de/mm20/launcher2/ui/settings/accounts/AccountsSettingsScreen.kt
+@@ -99,101 +99,5 @@ fun AccountsSettingsScreen() {
+                 )
+             }
+         }
+-        if (viewModel.isMicrosoftAvailable) {
+-            item {
+-                PreferenceCategory(title = stringResource(R.string.preference_category_services_microsoft)) {
+-                    val account by viewModel.msUser.observeAsState()
+-                    Preference(
+-                        title = if (account != null) {
+-                            stringResource(R.string.preference_signin_logout)
+-                        } else {
+-                            stringResource(R.string.preference_ms_signin)
+-                        },
+-                        summary = account?.let {
+-                            stringResource(R.string.preference_signin_user, it.userName)
+-                        } ?: stringResource(R.string.preference_ms_signin_summary),
+-                        onClick = {
+-                            if (account != null) {
+-                                viewModel.signOut(AccountType.Microsoft)
+-                            } else {
+-                                viewModel.signIn(
+-                                    context as AppCompatActivity,
+-                                    AccountType.Microsoft
+-                                )
+-                            }
+-                        }
+-                    )
+-                }
+-            }
+-        }
+-        if (viewModel.isGoogleAvailable) {
+-            item {
+-                PreferenceCategory(title = stringResource(R.string.preference_category_services_google)) {
+-                    val account by viewModel.googleUser.observeAsState()
+-                    if (account == null) {
+-                        Box(modifier = Modifier
+-                            .padding(start = 56.dp)
+-                            .padding(16.dp)) {
+-                            GoogleSigninButton(
+-                                onClick = {
+-                                    viewModel.signIn(
+-                                        context as AppCompatActivity,
+-                                        AccountType.Google
+-                                    )
+-                                }
+-                            )
+-                        }
+-                    } else {
+-                        Preference(
+-                            title = stringResource(R.string.preference_signin_logout),
+-                            summary = account?.userName?.let {
+-                                stringResource(R.string.preference_signin_user, it)
+-                            },
+-                            onClick = {
+-                                viewModel.signOut(AccountType.Google)
+-                            }
+-                        )
+-                    }
+-                }
+-            }
+-        }
+     }
+ }
+-
+-@Composable
+-fun GoogleSigninButton(
+-    onClick: () -> Unit,
+-) {
+-    Surface(
+-        modifier = Modifier.height(40.dp),
+-        shadowElevation = 1.dp,
+-        color = Color.White,
+-        shape = RoundedCornerShape(2.dp),
+-        onClick = onClick
+-    ) {
+-        Row(
+-            verticalAlignment = Alignment.CenterVertically
+-        ) {
+-            Box(
+-                modifier = Modifier
+-                    .size(40.dp)
+-                    .background(Color.White),
+-                contentAlignment = Alignment.Center
+-            ) {
+-                Image(
+-                    modifier = Modifier.size(18.dp),
+-                    painter = painterResource(id = R.drawable.ic_google_g),
+-                    contentDescription = null
+-                )
+-            }
+-            Text(
+-                modifier = Modifier.padding(start = 13.dp, end = 8.dp),
+-                text = stringResource(id = R.string.preference_google_signin),
+-                fontFamily = FontFamily.SansSerif,
+-                color = Color(0f, 0f, 0f, 0.54f),
+-                fontSize = 14.sp,
+-                fontWeight = FontWeight.Medium
+-            )
+-        }
+-    }
+-}
+\ No newline at end of file
+diff --git a/app/ui/src/main/java/de/mm20/launcher2/ui/settings/accounts/AccountsSettingsScreenVM.kt b/app/ui/src/main/java/de/mm20/launcher2/ui/settings/accounts/AccountsSettingsScreenVM.kt
+index 0b49d1ef..25a306d6 100644
+--- a/app/ui/src/main/java/de/mm20/launcher2/ui/settings/accounts/AccountsSettingsScreenVM.kt
++++ b/app/ui/src/main/java/de/mm20/launcher2/ui/settings/accounts/AccountsSettingsScreenVM.kt
+@@ -14,11 +14,7 @@ import org.koin.core.component.inject
+ class AccountsSettingsScreenVM : ViewModel(), KoinComponent {
+     private val accountsRepository: AccountsRepository by inject()
+ 
+-    val isGoogleAvailable = accountsRepository.isSupported(AccountType.Google)
+-    val isMicrosoftAvailable = accountsRepository.isSupported(AccountType.Microsoft)
+ 
+-    val googleUser = MutableLiveData<Account?>(null)
+-    val msUser= MutableLiveData<Account?>(null)
+     val nextcloudUser = MutableLiveData<Account?>(null)
+     val owncloudUser = MutableLiveData<Account?>(null)
+ 
+@@ -27,9 +23,7 @@ class AccountsSettingsScreenVM : ViewModel(), KoinComponent {
+     fun onResume() {
+         viewModelScope.launch {
+             loading.value = true
+-            googleUser.value = accountsRepository.getCurrentlySignedInAccount(AccountType.Google)
+             nextcloudUser.value = accountsRepository.getCurrentlySignedInAccount(AccountType.Nextcloud)
+-            msUser.value = accountsRepository.getCurrentlySignedInAccount(AccountType.Microsoft)
+             owncloudUser.value = accountsRepository.getCurrentlySignedInAccount(AccountType.Owncloud)
+             loading.value = false
+         }
+@@ -42,10 +36,8 @@ class AccountsSettingsScreenVM : ViewModel(), KoinComponent {
+     fun signOut(accountType: AccountType) {
+         accountsRepository.signout(accountType)
+         when(accountType){
+-            AccountType.Google -> googleUser.value = null
+-            AccountType.Microsoft -> msUser.value = null
+             AccountType.Nextcloud -> nextcloudUser.value = null
+             AccountType.Owncloud -> owncloudUser.value = null
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/app/ui/src/main/java/de/mm20/launcher2/ui/settings/buildinfo/BuildInfoSettingsScreenVM.kt b/app/ui/src/main/java/de/mm20/launcher2/ui/settings/buildinfo/BuildInfoSettingsScreenVM.kt
+index b562b629..cda05229 100644
+--- a/app/ui/src/main/java/de/mm20/launcher2/ui/settings/buildinfo/BuildInfoSettingsScreenVM.kt
++++ b/app/ui/src/main/java/de/mm20/launcher2/ui/settings/buildinfo/BuildInfoSettingsScreenVM.kt
+@@ -15,10 +15,10 @@ class BuildInfoSettingsScreenVM : ViewModel(), KoinComponent {
+     private val availableWeatherProviders = weatherRepository.getAvailableProviders()
+ 
+     val buildFeatures = mapOf(
+-        "Accounts: Google" to accountsRepository.isSupported(AccountType.Google),
+-        "Accounts: Microsoft" to accountsRepository.isSupported(AccountType.Microsoft),
++        "Accounts: Google" to false,
++        "Accounts: Microsoft" to false,
+         "Weather providers: HERE" to availableWeatherProviders.contains(WeatherProvider.Here),
+         "Weather providers: Met No" to availableWeatherProviders.contains(WeatherProvider.MetNo),
+         "Weather providers: OpenWeatherMap" to availableWeatherProviders.contains(WeatherProvider.OpenWeatherMap),
+     )
+-}
+\ No newline at end of file
++}
+diff --git a/app/ui/src/main/java/de/mm20/launcher2/ui/settings/filesearch/FileSearchSettingsScreen.kt b/app/ui/src/main/java/de/mm20/launcher2/ui/settings/filesearch/FileSearchSettingsScreen.kt
+index 7fc96986..a5348a45 100644
+--- a/app/ui/src/main/java/de/mm20/launcher2/ui/settings/filesearch/FileSearchSettingsScreen.kt
++++ b/app/ui/src/main/java/de/mm20/launcher2/ui/settings/filesearch/FileSearchSettingsScreen.kt
+@@ -139,73 +139,7 @@ fun FileSearchSettingsScreen() {
+                     },
+                     enabled = owncloudAccount != null
+                 )
+-
+-                val onedrive by viewModel.onedrive.observeAsState()
+-                val microsoftAccount by viewModel.microsoftAccount.observeAsState()
+-                AnimatedVisibility(microsoftAccount == null) {
+-                    Banner(
+-                        text = stringResource(R.string.no_account_microsoft),
+-                        icon = Icons.Rounded.AccountBox,
+-                        primaryAction = {
+-                            TextButton(onClick = {
+-                                viewModel.login(
+-                                    context as AppCompatActivity,
+-                                    AccountType.Microsoft
+-                                )
+-                            }) {
+-                                Text(
+-                                    stringResource(R.string.connect_account),
+-                                )
+-                            }
+-                        },
+-                        modifier = Modifier.padding(16.dp)
+-                    )
+-                }
+-                SwitchPreference(
+-                    title = stringResource(R.string.preference_search_onedrive),
+-                    summary = microsoftAccount?.let {
+-                        stringResource(R.string.preference_search_onedrive_summary, it.userName)
+-                    } ?: stringResource(R.string.preference_summary_not_logged_in),
+-                    value = onedrive == true && microsoftAccount != null,
+-                    onValueChanged = {
+-                        viewModel.setOneDrive(it)
+-                    },
+-                    enabled = microsoftAccount != null
+-                )
+-
+-                val gdrive by viewModel.gdrive.observeAsState()
+-                val googleAccount by viewModel.googleAccount.observeAsState()
+-                AnimatedVisibility(googleAccount == null) {
+-                    Banner(
+-                        text = stringResource(R.string.no_account_google),
+-                        icon = Icons.Rounded.AccountBox,
+-                        primaryAction = {
+-                            TextButton(onClick = {
+-                                viewModel.login(
+-                                    context as AppCompatActivity,
+-                                    AccountType.Google
+-                                )
+-                            }) {
+-                                Text(
+-                                    stringResource(R.string.connect_account),
+-                                )
+-                            }
+-                        },
+-                        modifier = Modifier.padding(16.dp)
+-                    )
+-                }
+-                SwitchPreference(
+-                    title = stringResource(R.string.preference_search_gdrive),
+-                    summary = googleAccount?.let {
+-                        stringResource(R.string.preference_search_gdrive_summary, it.userName)
+-                    } ?: stringResource(R.string.preference_summary_not_logged_in),
+-                    value = gdrive == true && googleAccount != null,
+-                    onValueChanged = {
+-                        viewModel.setGdrive(it)
+-                    },
+-                    enabled = googleAccount != null
+-                )
+             }
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/app/ui/src/main/java/de/mm20/launcher2/ui/settings/filesearch/FileSearchSettingsScreenVM.kt b/app/ui/src/main/java/de/mm20/launcher2/ui/settings/filesearch/FileSearchSettingsScreenVM.kt
+index a05b2592..c5bb0e4f 100644
+--- a/app/ui/src/main/java/de/mm20/launcher2/ui/settings/filesearch/FileSearchSettingsScreenVM.kt
++++ b/app/ui/src/main/java/de/mm20/launcher2/ui/settings/filesearch/FileSearchSettingsScreenVM.kt
+@@ -27,8 +27,6 @@ class FileSearchSettingsScreenVM : ViewModel(), KoinComponent {
+     val loading = MutableLiveData(true)
+     val nextcloudAccount = MutableLiveData<Account?>(null)
+     val owncloudAccount = MutableLiveData<Account?>(null)
+-    val microsoftAccount = MutableLiveData<Account?>(null)
+-    val googleAccount = MutableLiveData<Account?>(null)
+ 
+     fun onResume() {
+         viewModelScope.launch {
+@@ -36,9 +34,6 @@ class FileSearchSettingsScreenVM : ViewModel(), KoinComponent {
+                 accountsRepository.getCurrentlySignedInAccount(AccountType.Nextcloud)
+             owncloudAccount.value =
+                 accountsRepository.getCurrentlySignedInAccount(AccountType.Owncloud)
+-            microsoftAccount.value =
+-                accountsRepository.getCurrentlySignedInAccount(AccountType.Microsoft)
+-            googleAccount.value = accountsRepository.getCurrentlySignedInAccount(AccountType.Google)
+             loading.value = false
+         }
+     }
+@@ -73,36 +68,6 @@ class FileSearchSettingsScreenVM : ViewModel(), KoinComponent {
+         }
+     }
+ 
+-    val gdrive = dataStore.data.map { it.fileSearch.gdrive }.asLiveData()
+-    fun setGdrive(gdrive: Boolean) {
+-        viewModelScope.launch {
+-            dataStore.updateData {
+-                it.toBuilder()
+-                    .setFileSearch(
+-                        it.fileSearch
+-                            .toBuilder()
+-                            .setGdrive(gdrive)
+-                    )
+-                    .build()
+-            }
+-        }
+-    }
+-
+-    val onedrive = dataStore.data.map { it.fileSearch.onedrive }.asLiveData()
+-    fun setOneDrive(onedrive: Boolean) {
+-        viewModelScope.launch {
+-            dataStore.updateData {
+-                it.toBuilder()
+-                    .setFileSearch(
+-                        it.fileSearch
+-                            .toBuilder()
+-                            .setOnedrive(onedrive)
+-                    )
+-                    .build()
+-            }
+-        }
+-    }
+-
+     val owncloud = dataStore.data.map { it.fileSearch.owncloud }.asLiveData()
+     fun setOwncloud(owncloud: Boolean) {
+         viewModelScope.launch {
+@@ -125,4 +90,4 @@ class FileSearchSettingsScreenVM : ViewModel(), KoinComponent {
+     fun login(context: AppCompatActivity, accountType: AccountType) {
+         accountsRepository.signin(context, accountType)
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/data/files/src/main/java/de/mm20/launcher2/files/FilesRepository.kt b/data/files/src/main/java/de/mm20/launcher2/files/FilesRepository.kt
+index a1ba695f..ff930e6d 100644
+--- a/data/files/src/main/java/de/mm20/launcher2/files/FilesRepository.kt
++++ b/data/files/src/main/java/de/mm20/launcher2/files/FilesRepository.kt
+@@ -2,10 +2,8 @@ package de.mm20.launcher2.files
+ 
+ import android.content.Context
+ import de.mm20.launcher2.files.providers.FileProvider
+-import de.mm20.launcher2.files.providers.GDriveFileProvider
+ import de.mm20.launcher2.files.providers.LocalFileProvider
+ import de.mm20.launcher2.files.providers.NextcloudFileProvider
+-import de.mm20.launcher2.files.providers.OneDriveFileProvider
+ import de.mm20.launcher2.files.providers.OwncloudFileProvider
+ import de.mm20.launcher2.nextcloud.NextcloudApiHelper
+ import de.mm20.launcher2.owncloud.OwncloudClient
+@@ -25,8 +23,6 @@ interface FileRepository {
+     fun search(
+         query: String,
+         local: Boolean = true,
+-        gdrive: Boolean = true,
+-        onedrive: Boolean = true,
+         nextcloud: Boolean = true,
+         owncloud: Boolean = true,
+     ): Flow<ImmutableList<File>>
+@@ -51,8 +47,6 @@ internal class FileRepositoryImpl(
+     override fun search(
+         query: String,
+         local: Boolean,
+-        gdrive: Boolean,
+-        onedrive: Boolean,
+         nextcloud: Boolean,
+         owncloud: Boolean
+     ) = channelFlow {
+@@ -64,8 +58,6 @@ internal class FileRepositoryImpl(
+         val providers = mutableListOf<FileProvider>()
+ 
+         if (local) providers.add(LocalFileProvider(context, permissionsManager))
+-        if (gdrive) providers.add(GDriveFileProvider(context))
+-        if (onedrive) providers.add(OneDriveFileProvider(context))
+         if (nextcloud) providers.add(NextcloudFileProvider(nextcloudClient))
+         if (owncloud) providers.add(OwncloudFileProvider(owncloudClient))
+ 
+@@ -87,4 +79,4 @@ internal class FileRepositoryImpl(
+             }
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/data/files/src/main/java/de/mm20/launcher2/files/providers/GDriveFileProvider.kt b/data/files/src/main/java/de/mm20/launcher2/files/providers/GDriveFileProvider.kt
+deleted file mode 100644
+index f6287616..00000000
+--- a/data/files/src/main/java/de/mm20/launcher2/files/providers/GDriveFileProvider.kt
++++ /dev/null
+@@ -1,40 +0,0 @@
+-package de.mm20.launcher2.files.providers
+-
+-import android.content.Context
+-import de.mm20.launcher2.files.R
+-import de.mm20.launcher2.gservices.DriveFileMeta
+-import de.mm20.launcher2.gservices.GoogleApiHelper
+-import de.mm20.launcher2.search.data.File
+-import de.mm20.launcher2.search.data.GDriveFile
+-
+-internal class GDriveFileProvider(
+-    private val context: Context
+-) : FileProvider {
+-    override suspend fun search(query: String): List<File> {
+-        if (query.length < 4) return emptyList()
+-        val driveFiles = GoogleApiHelper.getInstance(context).queryGDriveFiles(query)
+-        return driveFiles.map {
+-            GDriveFile(
+-                fileId = it.fileId,
+-                label = it.label,
+-                size = it.size,
+-                mimeType = it.mimeType,
+-                isDirectory = it.isDirectory,
+-                path = "",
+-                directoryColor = it.directoryColor,
+-                viewUri = it.viewUri,
+-                metaData = getMetadata(it.metadata)
+-            )
+-        }
+-    }
+-
+-    private fun getMetadata(file: DriveFileMeta): List<Pair<Int, String>> {
+-        val metaData = mutableListOf<Pair<Int, String>>()
+-        val owners = file.owners
+-        metaData.add(R.string.file_meta_owner to owners.joinToString(separator = ", "))
+-        val width = file.width ?: file.width
+-        val height = file.height ?: file.height
+-        if (width != null && height != null) metaData.add(R.string.file_meta_dimensions to "${width}x$height")
+-        return metaData
+-    }
+-}
+\ No newline at end of file
+diff --git a/data/files/src/main/java/de/mm20/launcher2/files/providers/OneDriveFileProvider.kt b/data/files/src/main/java/de/mm20/launcher2/files/providers/OneDriveFileProvider.kt
+deleted file mode 100644
+index 57a34b9d..00000000
+--- a/data/files/src/main/java/de/mm20/launcher2/files/providers/OneDriveFileProvider.kt
++++ /dev/null
+@@ -1,48 +0,0 @@
+-package de.mm20.launcher2.files.providers
+-
+-import android.content.Context
+-import de.mm20.launcher2.files.R
+-import de.mm20.launcher2.msservices.DriveItem
+-import de.mm20.launcher2.msservices.MicrosoftGraphApiHelper
+-import de.mm20.launcher2.search.data.File
+-import de.mm20.launcher2.search.data.OneDriveFile
+-
+-internal class OneDriveFileProvider(
+-    private val context: Context
+-) : FileProvider {
+-    override suspend fun search(query: String): List<File> {
+-        if (query.length < 4) return emptyList()
+-        val driveItems = MicrosoftGraphApiHelper.getInstance(context).queryOneDriveFiles(query)
+-            ?: return emptyList()
+-        val files = mutableListOf<OneDriveFile>()
+-        for (driveItem in driveItems) {
+-            files += OneDriveFile(
+-                fileId = driveItem.id,
+-                label = driveItem.label,
+-                path = "",
+-                mimeType = driveItem.mimeType,
+-                size = driveItem.size,
+-                isDirectory = driveItem.isDirectory,
+-                metaData = getMetaData(driveItem),
+-                webUrl = driveItem.webUrl
+-            )
+-        }
+-        return files
+-    }
+-
+-    private fun getMetaData(driveItem: DriveItem): List<Pair<Int, String>> {
+-        val metaData = mutableListOf<Pair<Int, String>>()
+-        driveItem.meta.owner?.let {
+-            metaData.add(R.string.file_meta_owner to it)
+-        } ?: driveItem.meta.createdBy?.let {
+-            metaData.add(R.string.file_meta_owner to it)
+-        }
+-        val width = driveItem.meta.width
+-        val height = driveItem.meta.height
+-
+-        if (width != null && height != null) {
+-            metaData.add(R.string.file_meta_dimensions to "${width}x${height}")
+-        }
+-        return metaData
+-    }
+-}
+\ No newline at end of file
+diff --git a/services/accounts/src/main/java/de/mm20/launcher2/accounts/AccountType.kt b/services/accounts/src/main/java/de/mm20/launcher2/accounts/AccountType.kt
+index 982c6b88..615a3c7b 100644
+--- a/services/accounts/src/main/java/de/mm20/launcher2/accounts/AccountType.kt
++++ b/services/accounts/src/main/java/de/mm20/launcher2/accounts/AccountType.kt
+@@ -1,8 +1,6 @@
+ package de.mm20.launcher2.accounts
+ 
+ enum class AccountType {
+-    Google,
+-    Microsoft,
+     Nextcloud,
+     Owncloud,
+-}
+\ No newline at end of file
++}
+diff --git a/services/accounts/src/main/java/de/mm20/launcher2/accounts/AccountsRepository.kt b/services/accounts/src/main/java/de/mm20/launcher2/accounts/AccountsRepository.kt
+index e5801eef..8420d957 100644
+--- a/services/accounts/src/main/java/de/mm20/launcher2/accounts/AccountsRepository.kt
++++ b/services/accounts/src/main/java/de/mm20/launcher2/accounts/AccountsRepository.kt
+@@ -2,8 +2,6 @@ package de.mm20.launcher2.accounts
+ 
+ import android.app.Activity
+ import android.content.Context
+-import de.mm20.launcher2.gservices.GoogleApiHelper
+-import de.mm20.launcher2.msservices.MicrosoftGraphApiHelper
+ import de.mm20.launcher2.nextcloud.NextcloudApiHelper
+ import de.mm20.launcher2.owncloud.OwncloudClient
+ import kotlinx.coroutines.CoroutineScope
+@@ -28,23 +26,11 @@ internal class AccountsRepositoryImpl(
+ ) : AccountsRepository {
+     private val scope = CoroutineScope(Job() + Dispatchers.Default)
+ 
+-    private val googleApiHelper = GoogleApiHelper.getInstance(context)
+-    private val msGraphApiHelper = MicrosoftGraphApiHelper.getInstance(context)
+     private val nextcloudApiHelper = NextcloudApiHelper(context)
+     private val owncloudApiHelper = OwncloudClient(context)
+ 
+     override fun signin(context: Activity, accountType: AccountType) {
+         when (accountType) {
+-            AccountType.Google -> {
+-                scope.launch {
+-                    googleApiHelper.login(context)
+-                }
+-            }
+-            AccountType.Microsoft -> {
+-                scope.launch {
+-                    msGraphApiHelper.login(context)
+-                }
+-            }
+             AccountType.Nextcloud ->
+                 scope.launch {
+                     nextcloudApiHelper.login(context)
+@@ -58,14 +44,6 @@ internal class AccountsRepositoryImpl(
+ 
+     override fun signout(accountType: AccountType) {
+         when (accountType) {
+-            AccountType.Google -> {
+-                googleApiHelper.logout()
+-            }
+-            AccountType.Microsoft -> {
+-                scope.launch {
+-                    msGraphApiHelper.logout()
+-                }
+-            }
+             AccountType.Nextcloud -> {
+                 scope.launch {
+                     nextcloudApiHelper.logout()
+@@ -79,8 +57,6 @@ internal class AccountsRepositoryImpl(
+ 
+     override fun isSupported(accountType: AccountType): Boolean {
+         return when (accountType) {
+-            AccountType.Google -> googleApiHelper.isAvailable()
+-            AccountType.Microsoft -> msGraphApiHelper.isAvailable()
+             AccountType.Nextcloud -> true
+             AccountType.Owncloud -> true
+         }
+@@ -88,12 +64,6 @@ internal class AccountsRepositoryImpl(
+ 
+     override suspend fun getCurrentlySignedInAccount(accountType: AccountType): Account? {
+         return when (accountType) {
+-            AccountType.Google -> {
+-                getGoogleAccount()
+-            }
+-            AccountType.Microsoft -> {
+-                getMicrosoftAccount()
+-            }
+             AccountType.Nextcloud -> {
+                 getNextcloudAccount()
+             }
+@@ -103,18 +73,6 @@ internal class AccountsRepositoryImpl(
+         }
+     }
+ 
+-    private suspend fun getGoogleAccount(): Account? {
+-        return googleApiHelper.getAccount()?.let {
+-            Account(it.name, AccountType.Google)
+-        }
+-    }
+-
+-    private suspend fun getMicrosoftAccount(): Account? {
+-        return msGraphApiHelper.getUser()?.let {
+-            Account(it.name, AccountType.Microsoft)
+-        }
+-    }
+-
+     private suspend fun getNextcloudAccount(): Account? {
+         return nextcloudApiHelper.getLoggedInUser()?.let {
+             Account(it.displayName, AccountType.Nextcloud)
+@@ -127,4 +85,4 @@ internal class AccountsRepositoryImpl(
+         }
+     }
+ 
+-}
+\ No newline at end of file
++}
+diff --git a/services/search/src/main/java/de/mm20/launcher2/search/SearchService.kt b/services/search/src/main/java/de/mm20/launcher2/search/SearchService.kt
+index 221575a8..ed48112a 100644
+--- a/services/search/src/main/java/de/mm20/launcher2/search/SearchService.kt
++++ b/services/search/src/main/java/de/mm20/launcher2/search/SearchService.kt
+@@ -21,11 +21,9 @@ import de.mm20.launcher2.search.data.Calculator
+ import de.mm20.launcher2.search.data.CalendarEvent
+ import de.mm20.launcher2.search.data.Contact
+ import de.mm20.launcher2.search.data.File
+-import de.mm20.launcher2.search.data.GDriveFile
+ import de.mm20.launcher2.search.data.LauncherApp
+ import de.mm20.launcher2.search.data.LocalFile
+ import de.mm20.launcher2.search.data.NextcloudFile
+-import de.mm20.launcher2.search.data.OneDriveFile
+ import de.mm20.launcher2.search.data.OwncloudFile
+ import de.mm20.launcher2.search.data.UnitConverter
+ import de.mm20.launcher2.search.data.Website
+@@ -175,15 +173,13 @@ internal class SearchServiceImpl(
+                         }
+                 }
+             }
+-            if (files.localFiles || files.owncloud || files.onedrive || files.gdrive || files.nextcloud) {
++            if (files.localFiles || files.owncloud || files.nextcloud) {
+                 launch {
+                     fileRepository.search(
+                         query,
+                         local = files.localFiles,
+                         nextcloud = files.nextcloud,
+                         owncloud = files.owncloud,
+-                        onedrive = files.onedrive,
+-                        gdrive = files.gdrive,
+                     )
+                         .withCustomLabels(customAttributesRepository)
+                         .collectLatest { r ->
+@@ -206,8 +202,6 @@ internal class SearchServiceImpl(
+                                                 files.localFiles && it is LocalFile ||
+                                                 files.nextcloud && it is NextcloudFile ||
+                                                 files.owncloud && it is OwncloudFile ||
+-                                                files.onedrive && it is OneDriveFile ||
+-                                                files.gdrive && it is GDriveFile ||
+                                                 wikipedia.enabled && it is Wikipedia ||
+                                                 websites.enabled && it is Website ||
+                                                 calendars.enabled && it is CalendarEvent ||
+@@ -253,4 +247,4 @@ internal data class SearchResults(
+     fun toList(): List<Searchable> {
+         return searchActions + (apps + shortcuts + contacts + calendars  + files + websites + wikipedia + other).distinctBy { it.key } + calculators + unitConverters
+     }
+-}
+\ No newline at end of file
++}

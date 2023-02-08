@@ -47,8 +47,8 @@ Builds:
     commit: v1.20.0
     subdir: app/app
     patch:
-      - remove_ms-services.patch
-      - remove_gservices.patch
+      - remove_ms-services_12000.patch
+      - remove_gservices_12000.patch
     gradle:
       - yes
     prebuild:
@@ -56,6 +56,23 @@ Builds:
       - sed -i 's/exclude(group\ =\ "com\.google\.guava".*$//' build.gradle.kts
       - sed -i 's/versionCode\ =\ versionCodeDate()/versionCode = 12000/' build.gradle.kts
       - sed -i 's/versionNameSuffix.*$//' build.gradle.kts
+
+  - versionName: 1.21.1-fdroid
+    versionCode: 2023012300
+    commit: v1.21.2
+    subdir: app/app
+    patch:
+      - remove_ms_g_2023012300.patch
+    gradle:
+      - fdroid
+    prebuild:
+      - cd ../..
+      - sed -i 's/^org\.gradle\.java\.home.*$//' gradle.properties
+      - sed -i 's/^.*pkgs\.dev\.azure\.com.*$//' build.gradle.kts
+      - sed -i 's/exclude(group\ =\ "com\.google\.guava".*$//' app/app/build.gradle.kts
+      - for i in build.gradle.kts settings.gradle.kts app/app/build.gradle.kts app/ui/build.gradle.kts
+        data/files/build.gradle.kts services/accounts/build.gradle.kts; do sed -i
+        's/^.*:ms-services.*$//' "$i"; sed -i 's/^.*:g-services.*$//' "$i"; done
 
 MaintainerNotes: |-
     Kvaesitso uses several external APIs for search providers.
@@ -71,18 +88,24 @@ MaintainerNotes: |-
     but we still remove the respective code from the source,
     since onedrive integration is disabled anyway.
 
-    Patches:
-    remove_ms-services.patch removes microsoft azure sdk maven
+    Older patches:
+    * remove_ms-services.patch removes microsoft azure sdk maven
     repo and its usage (onedrive integration) across the project.
 
-    remove_gservices.patch removes gdrive integration, as one
+    * remove_gservices.patch removes gdrive integration, as one
     of dependencies it relies on contains known non-free classes,
     according to f-droid scanner.
 
-    Kvaesitso appends build date to both versionName and versionCode,
-    so we replace it in the build with static ones.
+    Patches:
+    * remove_ms_g_2023012300.patch removes microsoft and google
+    services from the source code, while patching of respective
+    modules build.gradle.kts files is done with sed edits, since
+    these files are changed often.
+
+    Upstream provides an fdroid flavor, however there's no difference
+    and it still needs to be patched.
 
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: 1.20.0
-CurrentVersionCode: 12000
+CurrentVersion: 1.21.1-fdroid
+CurrentVersionCode: 2023012300
