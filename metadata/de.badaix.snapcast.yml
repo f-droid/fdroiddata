@@ -67,7 +67,35 @@ Builds:
       - gradle assembleRelease
     ndk: r22
 
+  - versionName: 0.27.0.0
+    versionCode: 2690
+    commit: v0.27.0
+    subdir: Snapcast
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y automake bzip2 cmake gettext libtool-bin libvorbisidec-dev
+        make pkg-config
+    gradle:
+      - yes
+    srclibs:
+      - snapcast-deps@v0.27.0
+    rm:
+      - Snapcast/Ressources
+      - Snapcast/src/main/cpp/snapcast/doc/Audiowide.zip
+    prebuild: sed -i -e '/maven {/,/^    }/d' build.gradle
+    build:
+      - pushd $$snapcast-deps$$
+      - curl -LOs https://boostorg.jfrog.io/artifactory/main/release/1.81.0/source/boost_1_81_0.tar.bz2
+      - echo '71feeed900fbccca04a3b4f2f84a7c217186f28a940ed8b7ed4725986baf99fa  boost_1_81_0.tar.bz2'
+        | shasum -c
+      - tar xjf boost_1_81_0.tar.bz2
+      - NDK_DIR=$$NDK$$ ./build_android.sh
+      - popd
+      - mv $$snapcast-deps$$/build/aar/*.aar libs
+    ndk: r25b
+
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: 0.24.0.0
-CurrentVersionCode: 2400
+CurrentVersion: 0.27.0.0
+CurrentVersionCode: 2690
