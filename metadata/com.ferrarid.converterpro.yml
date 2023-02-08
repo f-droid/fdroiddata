@@ -93,7 +93,7 @@ Builds:
     commit: bebd73d3dbdde4218e9d3d9239cb969481cfb52c
     output: build/app/outputs/flutter-apk/app-release.apk
     srclibs:
-      - flutter@3.3.2
+      - flutter@3.7.1
     rm:
       - .github
       - linux
@@ -101,12 +101,19 @@ Builds:
       - web
       - windows
       - android/app/proguard-rules.pro
-    prebuild: sed -i -e '/minifyEnabled/d' -e '/signingConfig /d' android/app/build.gradle
-    build:
-      - export PATH=$$flutter$$/bin/:$PATH
+    prebuild:
+      - sed -i -e '/minifyEnabled/d' -e '/signingConfig /d' android/app/build.gradle
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export PATH=$PUB_CACHE/bin/:$$flutter$$/bin/:$PATH
       - flutter config --no-analytics
       - dart pub global activate melos
-      - $HOME/.pub-cache/bin/melos bootstrap
+      - dart pub global activate vector_graphics_compiler
+      - melos bootstrap
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export PATH=$PUB_CACHE/bin/:$$flutter$$/bin/:$PATH
       - flutter build apk
 
 AutoUpdateMode: Version
