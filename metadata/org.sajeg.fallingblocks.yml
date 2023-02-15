@@ -1,0 +1,56 @@
+Categories:
+  - Games
+License: MIT
+AuthorWebSite: https://sajeg.itch.io/
+WebSite: https://sajeg.itch.io/falling-blocks
+SourceCode: https://github.com/Sajeg/falling-blocks
+IssueTracker: https://github.com/Sajeg/falling-blocks/issues
+
+RepoType: git
+Repo: https://github.com/Sajeg/falling-blocks.git
+
+Builds:
+  - versionName: '1.4'
+    versionCode: 1
+    commit: 10fd380dce71cb71e498cfec9093874c6e082820
+    subdir: android/build
+    sudo:
+      - apt-get update
+      - apt-get install -y clang gettext pkg-config scons
+    gradle:
+      - yes
+    output: build/outputs/apk/release/android_release.apk
+    srclibs:
+      - Godot@6fed1ffa313c6760fa88b368ae580378daaef0f0
+    rm:
+      - android/build/libs/*/*.aar
+    prebuild: sed -i -e '/Load keystore/,+3d' -e '/storeFile/,+3d' build.gradle
+    scanignore:
+      - android/build/assets/_cl_
+      - android/build/build.gradle
+    build:
+      - pushd $$Godot$$
+      - export ANDROID_NDK_ROOT=$$NDK$$
+      - scons -j `nproc` platform=server target=release_debug use_llvm=yes unix_global_settings_path=".."
+        tools=yes android_arch=armv7
+      - scons -j `nproc` use_llvm=yes p=android target=release android_arch=armv7
+      - scons -j `nproc` platform=server target=release_debug use_llvm=yes unix_global_settings_path=".."
+        tools=yes android_arch=arm64v8
+      - scons -j `nproc` use_llvm=yes p=android target=release android_arch=arm64v8
+      - scons -j `nproc` platform=server target=release_debug use_llvm=yes unix_global_settings_path=".."
+        tools=yes android_arch=x86
+      - scons -j `nproc` use_llvm=yes p=android target=release android_arch=x86
+      - scons -j `nproc` platform=server target=release_debug use_llvm=yes unix_global_settings_path=".."
+        tools=yes android_arch=x86_64
+      - scons -j `nproc` use_llvm=yes p=android target=release android_arch=x86_64
+      - cd platform/android/java/
+      - gradle assembleRelease
+      - popd
+      - cp $$Godot$$/platform/android/java/lib/build/outputs/aar/godot-lib.release.aar
+        libs/release/
+    ndk: r23c
+
+AutoUpdateMode: None
+UpdateCheckMode: Tags
+CurrentVersion: '1.4'
+CurrentVersionCode: 1
