@@ -1,0 +1,53 @@
+Categories:
+  - Security
+License: AGPL-3.0-or-later
+AuthorName: Berker Sen
+AuthorEmail: practice_suite@fastmail.com
+AuthorWebSite: https://berker.codeberg.page
+SourceCode: https://codeberg.org/Berker/practice_suite
+IssueTracker: https://codeberg.org/Berker/practice_suite/issues
+Liberapay: Berker
+
+AutoName: Practice Suite
+
+RepoType: git
+Repo: https://codeberg.org/Berker/practice_suite
+
+Builds:
+  - versionName: 1.0.7
+    versionCode: 107
+    commit: 1.0.7
+    submodules: true
+    output: build/app/outputs/flutter-apk/app-release.apk
+    rm:
+      - ios
+      - test
+    prebuild:
+      - cd ..
+      - mv com.berkersen.practicesuite /tmp/build
+      - pushd /tmp/build/
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - flutter/bin/flutter config --no-analytics
+      - flutter/bin/flutter pub get
+      - popd
+      - mv /tmp/build com.berkersen.practicesuite
+    scanignore:
+      - flutter/packages/flutter_tools/gradle/flutter.gradle
+      - flutter/bin/cache
+    scandelete:
+      - flutter
+      - .pub-cache
+    build:
+      - cd ..
+      - mv com.berkersen.practicesuite /tmp/build
+      - pushd /tmp/build/
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - flutter/bin/flutter build apk
+      - popd
+      - mv /tmp/build com.berkersen.practicesuite
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 1.0.7
+CurrentVersionCode: 107
