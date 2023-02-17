@@ -922,7 +922,7 @@ Builds:
     subdir: mobile
     output: build/app/outputs/flutter-apk/app-release.apk
     srclibs:
-      - flutter@3.3.0
+      - flutter@3.7.3
     rm:
       - design
       - docker
@@ -930,9 +930,14 @@ Builds:
       - mobile/ios
       - server
       - web
-    build:
+    prebuild:
+      - export PUB_CACHE=$(pwd)/.pub-cache
       - $$flutter$$/bin/flutter config --no-analytics
-      - $$flutter$$/bin/flutter packages pub get
+      - $$flutter$$/bin/flutter pub get
+    scandelete:
+      - mobile/.pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
       - $$flutter$$/bin/flutter build apk --release
 
 AutoUpdateMode: Version
