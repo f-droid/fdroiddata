@@ -269,36 +269,62 @@ Builds:
     ndk: r20b
 
   - versionName: 6.0.0
-    versionCode: 2181
-    disable: fails to build
+    versionCode: 18102
     commit: e9ae3cdae45257b108fe0144a4bb41581d98cdab
     subdir: tordnscrypt
     submodules: true
     sudo:
       - apt-get update
-      - apt-get install -y autogen g++
-      - curl -Lso go.tar.gz https://golang.org/dl/go1.17.3.linux-amd64.tar.gz
-      - echo "550f9845451c0c94be679faf116291e7807a8d78b43149f9506c1b15eb89008c go.tar.gz"
-        | sha256sum -c -
-      - tar xzf go.tar.gz --strip-components=1 -C /usr/local/
+      - apt-get install -y bzip2 g++ make autogen autopoint libtool automake gettext
+        rename
+      - apt-get install -y -t bullseye-backports golang-go
     init:
-      - sed -i -e "s/ndkVersion .*/ndkVersion '20.1.5948944'/" build.gradle
+      - sed -i -e "s/ndkVersion .*/ndkVersion '23.0.7599858'/" build.gradle
       - libs/prebuild
     gradle:
-      - fdroidArmv7a
+      - fdroid
+      - armv7a
     rm:
       - TorBuildScript/external/openssl/fuzz
       - PurpleI2PBuildScript/external/libs/openssl/fuzz
+    prebuild: sdkmanager 'ndk;21.4.7075529'
     scandelete:
       - tordnscrypt/libs
       - TorBuildScript/external
-    build: libs/build
-    ndk: r20b
+    build: NDK="$$SDK$$/ndk/21.4.7075529" libs/build
+    ndk: r23
+
+  - versionName: 6.0.0
+    versionCode: 18103
+    commit: e9ae3cdae45257b108fe0144a4bb41581d98cdab
+    subdir: tordnscrypt
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y bzip2 g++ make autogen autopoint libtool automake gettext
+        rename
+      - apt-get install -y -t bullseye-backports golang-go
+    init:
+      - sed -i -e "s/ndkVersion .*/ndkVersion '23.0.7599858'/" build.gradle
+      - libs/prebuild
+    gradle:
+      - fdroid
+      - arm64
+    rm:
+      - TorBuildScript/external/openssl/fuzz
+      - PurpleI2PBuildScript/external/libs/openssl/fuzz
+    prebuild: sdkmanager 'ndk;21.4.7075529'
+    scandelete:
+      - tordnscrypt/libs
+      - TorBuildScript/external
+    build: NDK="$$SDK$$/ndk/21.4.7075529" libs/build arm64
+    ndk: r23
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v.*-stable$
 VercodeOperation:
-  - 2000 + %c
+  - 100 * %c + 2
+  - 100 * %c + 3
 UpdateCheckData: tordnscrypt/build.gradle|versionCode\s(\d+)|.|versionName\s"([\d.]+)"
 CurrentVersion: 6.0.0
-CurrentVersionCode: 2181
+CurrentVersionCode: 18103
