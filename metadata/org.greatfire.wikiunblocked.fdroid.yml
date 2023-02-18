@@ -56,12 +56,15 @@ Builds:
     versionCode: 1003901
     commit: 08e52d489a1db5e0b1fe9a76d66c679fe9743639
     subdir: app
-    output: build/outputs/apk/fdroid/release/*.apk
+    gradle:
+      - fdroid
     srclibs:
       - reproducible-apk-tools@v0.2.3
-    build:
-      - gradle assembleFdroidRelease -PABI_FILTERS=armeabi-v7a
-      - $$reproducible-apk-tools$$/inplace-fix.py --zipalign fix-compresslevel build/outputs/apk/fdroid/release/*.apk
+    gradleprops:
+      - ABI_FILTERS=armeabi-v7a
+    postbuild:
+      - $$reproducible-apk-tools$$/inplace-fix.py sort-baseline --apk $$OUT$$
+      - $$reproducible-apk-tools$$/inplace-fix.py --zipalign fix-compresslevel $$OUT$$
         6 '*.xml'
 
   - versionName: 3.9-fdroid
