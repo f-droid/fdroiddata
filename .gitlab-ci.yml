@@ -165,22 +165,16 @@ lint:
 schema validation:
   stage: test
   needs: []
-  image: node:alpine
+  image: python
   rules: *app_verification_rules
-  allow_failure:
-    exit_codes: 128
   before_script:
-    - apk add git
-    - npm -g install ajv-cli
+    - pip install check-jsonschema
   script:
-    - ajv compile -s schemas/*.json || exit 1
+    - check-jsonschema --check-metaschema schemas/metadata.json || exit 1
     - set -xe
     - *get_changed_apps
-    - |
-      for app_id in $CHANGED
-      do
-        ajv validate -s schemas/metadata.json -d "metadata/${app_id}.yml";
-      done
+    - if [ -z "$CHANGED" ]; then exit; fi
+    - echo $CHANGED | sed -En 's|([^ ]*)|metadata/\1.yml|gp' | xargs check-jsonschema --schemafile schemas/metadata.json
 
 trigger-issuebot:
   stage: prepare
