@@ -42,7 +42,33 @@ Builds:
       - gradle assembleRelease
     ndk: r25b
 
+  - versionName: '3.1'
+    versionCode: 118
+    commit: c9668bfda050941bad1ff22d21fb70f232f56ea1
+    subdir: MainApp
+    sudo:
+      - export CPUS_MAX=1
+      - export CPUS=$(getconf _NPROCESSORS_ONLN)
+      - for (( c=$CPUS_MAX; c<$CPUS; c++ )) ; do echo 0 > /sys/devices/system/cpu/cpu$c/online
+        ; done
+      - apt-get update
+      - apt-get install -y gcc libc-dev
+    output: build/outputs/apk/release/MainApp-release-unsigned.apk
+    srclibs:
+      - rustup@1.25.1
+    build:
+      - $$rustup$$/rustup-init.sh -y
+      - source $HOME/.cargo/env
+      - rustup default 1.65.0
+      - rustup target add armv7-linux-androideabi
+      - rustup target add aarch64-linux-android
+      - rustup target add x86_64-linux-android
+      - export PATH=$HOME/.cargo/bin:$PATH
+      - cargo install --version 2.12.2 cargo-ndk
+      - gradle assembleRelease
+    ndk: r25b
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 3.0.3.3
-CurrentVersionCode: 112
+CurrentVersion: '3.1'
+CurrentVersionCode: 118
