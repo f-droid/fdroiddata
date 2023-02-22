@@ -42,22 +42,38 @@ Builds:
       - gradle assembleRelease
     ndk: r25b
 
-  - versionName: 3.1.0.1
+  - versionName: 3.1.0.2
     versionCode: 118
-    commit: 66044e27c7b540e63b92bba5434af63b522efe20
+    commit: b65a345df4abdebe3afdfdb55366495a414abab4
     subdir: MainApp
     sudo:
       - export CPUS_MAX=1
       - export CPUS=$(getconf _NPROCESSORS_ONLN)
       - for (( c=$CPUS_MAX; c<$CPUS; c++ )) ; do echo 0 > /sys/devices/system/cpu/cpu$c/online
         ; done
+      - apt-get update
+      - apt-get install -y gcc libc-dev
     output: build/outputs/apk/release/MainApp-release-unsigned.apk
+    srclibs:
+      - rustup@1.25.2
     build:
       - export BUILD_FLAVOR=FDROID
+      - $$rustup$$/rustup-init.sh -y
+      - source $HOME/.cargo/env
+      - export ANDROID_NDK_ROOT=$$NDK$$
+      - rustup target add armv7-linux-androideabi
+      - rustup target add aarch64-linux-android
+      - rustup target add x86_64-linux-android
+      - pushd ../CryptoLibs/jni-Blake3mt/blake3jni
+      - chmod +x release.sh
+      - ./release.sh arm64-v8a
+      - ./release.sh armeabi-v7a
+      - ./release.sh x86_64
+      - popd
       - gradle assembleRelease
     ndk: r25b
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 3.1.0.1
+CurrentVersion: 3.1.0.2
 CurrentVersionCode: 118
