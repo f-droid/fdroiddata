@@ -1,0 +1,35 @@
+Categories:
+  - Graphics
+License: Apache-2.0
+AuthorName: Malik Mukhametzyanov
+AuthorEmail: open.t8rin@internet.ru
+SourceCode: https://github.com/T8RIN/ImageResizer
+IssueTracker: https://github.com/T8RIN/ImageResizer/issues
+
+AutoName: Image Resizer
+
+RepoType: git
+Repo: https://github.com/T8RIN/ImageResizer.git
+Binaries: https://github.com/T8RIN/ImageResizer/releases/download/%v/app-release.apk
+
+Builds:
+  - versionName: 1.5.1
+    versionCode: 13
+    commit: f01a8013a22380f81f6c79404a19bbaa7f95d15f
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y zipalign
+    output: out.apk
+    srclibs:
+      - reproducible-apk-tools@v0.2.3
+    build:
+      - gradle assembleRelease
+      - $$reproducible-apk-tools$$/fix-newlines.py build/outputs/apk/release/*.apk
+        fixed.apk 'META-INF/services/*'
+      - zipalign 4 fixed.apk out.apk
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: 1.5.1
+CurrentVersionCode: 13
