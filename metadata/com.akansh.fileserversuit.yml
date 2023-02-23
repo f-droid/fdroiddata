@@ -9,7 +9,7 @@ AutoName: ShareX
 
 RepoType: git
 Repo: https://github.com/akanshSirohi/ShareX
-Binaries: https://github.com/akanshSirohi/ShareX/releases/download/v%v/ShareX.apk
+Binaries: https://github.com/akanshSirohi/ShareX/releases/download/v%v/Sharex-v%v.apk
 
 Builds:
   - versionName: 2.3.1
@@ -20,6 +20,7 @@ Builds:
       - apt-get update
       - apt-get install -y zipalign
     output: out.apk
+    binary: https://github.com/akanshSirohi/ShareX/releases/download/v%v/ShareX.apk
     srclibs:
       - reproducible-apk-tools@v0.2.0
     prebuild: gradle clean
@@ -38,6 +39,7 @@ Builds:
       - apt-get update
       - apt-get install -y zipalign
     output: out.apk
+    binary: https://github.com/akanshSirohi/ShareX/releases/download/v%v/ShareX.apk
     srclibs:
       - reproducible-apk-tools@v0.2.3
     prebuild: gradle clean
@@ -48,25 +50,18 @@ Builds:
         'assets/sharex_web_*/*.css'
       - zipalign 4 fixed.apk out.apk
 
-  - versionName: 2.3.5
-    versionCode: 28
-    commit: 2217d1267b4c1de0d513f64327a1432a81364013
+  - versionName: 2.3.6
+    versionCode: 29
+    commit: d85ac29129ce73b98aae60eaafa370551722c138
     subdir: app
-    sudo:
-      - apt-get update
-      - apt-get install -y zipalign
-    output: out.apk
+    gradle:
+      - yes
     srclibs:
       - reproducible-apk-tools@v0.2.3
-    prebuild: gradle clean
-    build:
-      - gradle assembleRelease
-      - $$reproducible-apk-tools$$/fix-newlines.py build/outputs/apk/release/*.apk
-        fixed.apk 'META-INF/services/*' 'assets/sharex_web_*/*.html' 'assets/sharex_web_*/*.js'
-        'assets/sharex_web_*/*.css'
-      - zipalign 4 fixed.apk out.apk
+    postbuild: $$reproducible-apk-tools$$/inplace-fix.py --zipalign fix-newlines $$OUT$$
+        'META-INF/services/*'
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 2.3.5
-CurrentVersionCode: 28
+CurrentVersion: 2.3.6
+CurrentVersionCode: 29
