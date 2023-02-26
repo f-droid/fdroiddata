@@ -31,19 +31,15 @@ Builds:
 
   - versionName: 1.5.3
     versionCode: 15
+    disable: https://github.com/T8RIN/ImageResizer/issues/15
     commit: 43b7ef5454f00e4b48aecf35d60f4074979c77f3
     subdir: app
-    sudo:
-      - apt-get update
-      - apt-get install -y zipalign
-    output: out.apk
+    gradle:
+      - yes
     srclibs:
       - reproducible-apk-tools@v0.2.3
-    build:
-      - gradle assembleRelease
-      - $$reproducible-apk-tools$$/fix-newlines.py build/outputs/apk/release/*.apk
-        fixed.apk 'META-INF/services/*'
-      - zipalign 4 fixed.apk out.apk
+    postbuild: $$reproducible-apk-tools$$/inplace-fix.py --zipalign fix-newlines $$OUT$$
+        'META-INF/services/*'
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
