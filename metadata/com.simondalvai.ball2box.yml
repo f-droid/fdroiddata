@@ -10,7 +10,7 @@ IssueTracker: https://github.com/dulvui/ball2box/issues
 Donate: https://ko-fi.com/simondalvai
 
 Name: Ball2Box
-AutoName: godot-project-name
+AutoName: Ball2Box
 
 RepoType: git
 Repo: https://github.com/dulvui/ball2box.git
@@ -51,7 +51,42 @@ Builds:
         libs/release/
     ndk: r23c
 
+  - versionName: 2.2.3
+    versionCode: 41
+    commit: cbc017d94f2838c74c6045570dd5e47a9af5b92b
+    subdir: game/android/build
+    sudo:
+      - apt-get update
+      - apt-get install -y clang gettext pkg-config scons
+    gradle:
+      - yes
+    output: build/outputs/apk/release/android_release.apk
+    srclibs:
+      - Godot@6fed1ffa313c6760fa88b368ae580378daaef0f0
+    prebuild: sed -i -e '/Load keystore/,+3d' -e '/storeFile/,+3d' build.gradle
+    scanignore:
+      - game/android/build/assets/_cl_
+      - game/android/build/build.gradle
+    build:
+      - pushd $$Godot$$
+      - export ANDROID_NDK_ROOT=$$NDK$$
+      - scons -j `nproc` platform=server target=release_debug use_llvm=yes unix_global_settings_path=".."
+        tools=yes android_arch=armv7 profile=../ball2box/fdroid/godot-build-options.py
+      - scons -j `nproc` use_llvm=yes p=android target=release android_arch=armv7
+        profile=../ball2box/fdroid/godot-build-options.py
+      - scons -j `nproc` platform=server target=release_debug use_llvm=yes unix_global_settings_path=".."
+        tools=yes android_arch=arm64v8 profile=../ball2box/fdroid/godot-build-options.py
+      - scons -j `nproc` use_llvm=yes p=android target=release android_arch=arm64v8
+        profile=../ball2box/fdroid/godot-build-options.py
+      - cd platform/android/java/
+      - gradle assembleRelease
+      - popd
+      - mkdir -p libs/release
+      - cp $$Godot$$/platform/android/java/lib/build/outputs/aar/godot-lib.release.aar
+        libs/release/
+    ndk: r23c
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 2.2.2
-CurrentVersionCode: 37
+CurrentVersion: 2.2.3
+CurrentVersionCode: 41
