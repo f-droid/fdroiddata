@@ -336,7 +336,59 @@ Builds:
       - ./buildall.sh
     ndk: r25
 
+  - versionName: 2023-02-27-release
+    versionCode: 30
+    commit: 927fd7c45667bd48e67489cc5a69b0e39f7e8ce5
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y make automake pkg-config libtool nasm
+      - apt-get install -y -t bullseye-backports meson
+    gradle:
+      - default
+    srclibs:
+      - mbedtls@v2.28.2
+      - dav1d@1.1.0
+      - FFmpeg@ac6eec1fc258efce219e4fccb84312a1b13a7a23
+      - freetype2@VER-2-13-0
+      - fribidi@v1.0.12
+      - harfbuzz@7.0.1
+      - libass@04a208d5d200360d2ac75f8f6cfc43dd58dd9225
+      - mpv@a194ddaa4304852043f4367fba1e02526ab28f0a
+    prebuild:
+      - sed -i -e '/enable true/d' build.gradle
+      - cd ../buildscripts/
+      - mkdir -p sdk
+      - ln -s $$NDK$$ sdk/android-ndk-r25c
+      - mkdir -p deps
+      - pushd deps/
+      - cp -r $$mbedtls$$ mbedtls
+      - cp -r $$dav1d$$ dav1d
+      - cp -r $$FFmpeg$$ ffmpeg
+      - cp -r $$freetype2$$ freetype2
+      - cp -r $$fribidi$$ fribidi
+      - cp -r $$harfbuzz$$ harfbuzz
+      - cp -r $$libass$$ libass
+      - cp -r $$mpv$$ mpv
+      - mkdir lua
+      - curl -Lo lua.tar.gz https://www.lua.org/ftp/lua-5.2.4.tar.gz
+      - echo "b9e2e4aad6789b3b63a056d442f7b39f0ecfca3ae0f1fc0ae4e9614401b69f4b lua.tar.gz"
+        | sha256sum -c -
+      - tar -xz --strip-components=1 -C lua -f lua.tar.gz
+      - popd
+      - sed -i -e '/gradlew/d' scripts/mpv-android.sh
+      - sed -i -e '/"$target" == "mpv-android"/,/ls -lh/d' buildall.sh
+    scandelete:
+      - buildscripts/deps/mbedtls/
+      - buildscripts/deps/lua.tar.gz
+    build:
+      - cd ../buildscripts/
+      - ./buildall.sh --arch arm64 mpv
+      - ./buildall.sh --arch x86_64 mpv
+      - ./buildall.sh
+    ndk: r25c
+
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: 2022-07-30-release
-CurrentVersionCode: 29
+CurrentVersion: 2023-02-27-release
+CurrentVersionCode: 30
