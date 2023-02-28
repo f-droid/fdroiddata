@@ -52,7 +52,47 @@ Builds:
         libs/release/
     ndk: r23c
 
+  - versionName: '1.5'
+    versionCode: 2
+    commit: 2b0a8843a7493529a0062b136dd2c182682b5518
+    subdir: android/build
+    sudo:
+      - apt-get update
+      - apt-get install -y clang gettext pkg-config scons
+    gradle:
+      - yes
+    output: build/outputs/apk/release/android_release.apk
+    srclibs:
+      - Godot@6fed1ffa313c6760fa88b368ae580378daaef0f0
+    rm:
+      - android/build/libs/*/*.aar
+    prebuild: sed -i -e '/Load keystore/,+3d' -e '/storeFile/,+3d' build.gradle
+    scanignore:
+      - android/build/assets/_cl_
+      - android/build/build.gradle
+    build:
+      - pushd $$Godot$$
+      - export ANDROID_NDK_ROOT=$$NDK$$
+      - scons -j `nproc` platform=server target=release_debug use_llvm=yes unix_global_settings_path=".."
+        tools=yes android_arch=armv7
+      - scons -j `nproc` use_llvm=yes p=android target=release android_arch=armv7
+      - scons -j `nproc` platform=server target=release_debug use_llvm=yes unix_global_settings_path=".."
+        tools=yes android_arch=arm64v8
+      - scons -j `nproc` use_llvm=yes p=android target=release android_arch=arm64v8
+      - scons -j `nproc` platform=server target=release_debug use_llvm=yes unix_global_settings_path=".."
+        tools=yes android_arch=x86
+      - scons -j `nproc` use_llvm=yes p=android target=release android_arch=x86
+      - scons -j `nproc` platform=server target=release_debug use_llvm=yes unix_global_settings_path=".."
+        tools=yes android_arch=x86_64
+      - scons -j `nproc` use_llvm=yes p=android target=release android_arch=x86_64
+      - cd platform/android/java/
+      - gradle assembleRelease
+      - popd
+      - cp $$Godot$$/platform/android/java/lib/build/outputs/aar/godot-lib.release.aar
+        libs/release/
+    ndk: r23c
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: '1.4'
-CurrentVersionCode: 1
+CurrentVersion: '1.5'
+CurrentVersionCode: 2
