@@ -35,7 +35,7 @@ Description: |-
     You can also install Jami on Windows, macOS, iOS and GNU/Linux.
 
 RepoType: git
-Repo: https://review.jami.net/jami-project
+Repo: https://git.jami.net/savoirfairelinux/jami-client-android
 
 Builds:
   - versionName: 2.0.003
@@ -2153,14 +2153,27 @@ Builds:
       - ./compile.sh --release --daemon
     ndk: r25b
 
-MaintainerNotes: |-
-    Ring has a lot of native dependencies, the source tarballs of these are all downloaded and build for all enabled architectures.
-    Build failed with swig 2.0.12 from jessie but works with 3.0.10 from jessie-backports.
-    We don't build for x86_64 to reduce apk size a bit, x86 should work as well for those devices(?).
-    We DO build separately for arm64 because this is a fairly common architecture and improves performance over using the armv7 binaries.
-    v103 introduces push notifications using gplay. Optional since 106 with noPush flavour.
+  - versionName: 20230227-01
+    versionCode: 361
+    commit: f45d27e209b78e9cf40fd6cc1137ddd6e52d981f
+    timeout: 10800
+    subdir: jami-android/app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y g++ automake autopoint bzip2 gettext libtool make pkg-config
+        python-is-python3 swig tar yasm
+      - apt-get install -y -t bullseye-backports cmake
+    gradle:
+      - withUnifiedPush
+    build:
+      - cd ../../daemon/bin/jni
+      - PACKAGEDIR=../../../jami-android/libjamiclient/src/main/java ./make-swig.sh
+    ndk: r25c
+    gradleprops:
+      - android.builder.sdkDownload=true
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 20230119-01
-CurrentVersionCode: 358
+CurrentVersion: 20230227-01
+CurrentVersionCode: 361
