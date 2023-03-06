@@ -299,24 +299,26 @@ Builds:
     versionCode: 658
     commit: v0.10.0
     sudo:
-      - rm -fr /opt/android-sdk/ndk/*
       - apt-get update
+      - apt-get install -y make
     output: build/app/outputs/flutter-apk/app-release.apk
     srclibs:
-      - flutter@3.0.5
+      - flutter@3.3.10
     rm:
       - ios
       - test
-    prebuild: sed -i -e '/bool skipIOS/s/false/true/' scripts/buildLocalizedStrings
-    build:
-      - JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 $$SDK$$/tools/bin/sdkmanager 'build-tools;31.0.0'
-        'build-tools;30.0.3' > /dev/null
-      - cp $$SDK$$/build-tools/30.0.3/lib/dx.jar $$SDK$$/build-tools/31.0.0/lib/dx.jar
-      - cp $$SDK$$/build-tools/30.0.3/dx $$SDK$$/build-tools/31.0.0/dx
+    prebuild:
+      - sed -i -e '/bool skipIOS/s/false/true/' scripts/buildLocalizedStrings
+      - sdkmanager 'build-tools;31.0.0' 'build-tools;30.0.3'
+      - export PUB_CACHE=$(pwd)/.pub-cache
       - $$flutter$$/bin/flutter config --no-analytics
       - $$flutter$$/bin/flutter pub get
-      - PATH=$$flutter$$/bin:$$flutter$$/bin/cache/dart-sdk/bin/:$PATH make fdroid
-        BUILD_NO=$$VERCODE$$
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export PATH=$$flutter$$/bin:$$flutter$$/bin/cache/dart-sdk/bin/:$PATH
+      - make fdroid BUILD_NO=$$VERCODE$$
     ndk: r20
 
 AutoUpdateMode: Version v%v
