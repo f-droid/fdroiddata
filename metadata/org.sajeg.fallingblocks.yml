@@ -1,6 +1,7 @@
 Categories:
   - Games
 License: MIT
+AuthorName: Sajeg
 AuthorWebSite: https://sajeg.itch.io/
 WebSite: https://sajeg.itch.io/falling-blocks
 SourceCode: https://github.com/Sajeg/falling-blocks
@@ -54,43 +55,46 @@ Builds:
 
   - versionName: '1.5'
     versionCode: 2
-    disable: Fails To Start
-    commit: 2b0a8843a7493529a0062b136dd2c182682b5518
-    subdir: android/build
+    commit: f9a06475c976c7b251dcc094bf95a5c45a1694c3
     sudo:
       - apt-get update
       - apt-get install -y clang gettext pkg-config scons
-    gradle:
-      - yes
-    output: build/outputs/apk/release/android_release.apk
+    output: fallingblocks.apk
     srclibs:
       - Godot@6fed1ffa313c6760fa88b368ae580378daaef0f0
-    rm:
-      - android/build/libs/*/*.aar
-    prebuild: sed -i -e '/Load keystore/,+3d' -e '/storeFile/,+3d' build.gradle
-    scanignore:
-      - android/build/assets/_cl_
-      - android/build/build.gradle
+    prebuild: mv fdroid/export.cfg export_presets.cfg
     build:
-      - pushd $$Godot$$
+      - export HOME=$PWD
+      - cp -R $$Godot$$ godot
+      - keytool -genkey -v -keystore debug.keystore -storepass android -alias androiddebugkey
+        -keypass android -dname "CN=Android Debug,O=Android,C=US"
+      - mkdir -p ./.config/godot/
+      - export SDK_PATH="export/android/android_sdk_path = \"$$SDK$$\""
+      - export DEBUG_KEYSTORE_PATH="export/android/debug_keystore = \"$PWD/debug.keystore\""
+      - echo '[gd_resource type="EditorSettings" format=2]' >> ./.config/godot/editor_settings-3.tres
+      - echo "[resource]"  >> ./.config/godot/editor_settings-3.tres
+      - echo $SDK_PATH >> ./.config/godot/editor_settings-3.tres
+      - echo $DEBUG_KEYSTORE_PATH >> ./.config/godot/editor_settings-3.tres
+      - echo 'export/android/debug_keystore_user = "androiddebugkey"' >> ./.config/godot/editor_settings-3.tres
+      - echo 'export/android/debug_keystore_pass = "android"' >> ./.config/godot/editor_settings-3.tres
+      - cd godot
+      - scons -j `nproc` platform=server use_llvm=yes unix_global_settings_path=".."
+        profile=fdroid/godot-build-options.py
       - export ANDROID_NDK_ROOT=$$NDK$$
-      - scons -j `nproc` platform=server target=release_debug use_llvm=yes unix_global_settings_path=".."
-        tools=yes android_arch=armv7
-      - scons -j `nproc` use_llvm=yes p=android target=release android_arch=armv7
-      - scons -j `nproc` platform=server target=release_debug use_llvm=yes unix_global_settings_path=".."
-        tools=yes android_arch=arm64v8
-      - scons -j `nproc` use_llvm=yes p=android target=release android_arch=arm64v8
-      - scons -j `nproc` platform=server target=release_debug use_llvm=yes unix_global_settings_path=".."
-        tools=yes android_arch=x86
-      - scons -j `nproc` use_llvm=yes p=android target=release android_arch=x86
-      - scons -j `nproc` platform=server target=release_debug use_llvm=yes unix_global_settings_path=".."
-        tools=yes android_arch=x86_64
-      - scons -j `nproc` use_llvm=yes p=android target=release android_arch=x86_64
-      - cd platform/android/java/
-      - gradle assembleRelease
+      - scons -j `nproc` use_llvm=yes p=android target=release  unix_global_settings_path=".."
+        android_arch=armv7 profile=fdroid/godot-build-options.py
+      - scons -j `nproc` use_llvm=yes p=android target=release  unix_global_settings_path=".."
+        android_arch=arm64v8 profile=fdroid/godot-build-options.py
+      - pushd platform/android/java/
+      - gradle generateGodotTemplates
       - popd
-      - cp $$Godot$$/platform/android/java/lib/build/outputs/aar/godot-lib.release.aar
-        libs/release/
+      - cd ..
+      - mkdir -p ./.local/share/godot/templates/3.5.1.stable/
+      - echo "3.5.1.stable" >> ./.local/share/godot/templates/3.5.1.stable/version.txt
+      - cp godot/bin/android_release.apk ./.local/share/godot/templates/3.5.1.stable/
+      - ./godot/bin/godot_server.* -v --path game --export Android fallingblocks.apk
+      - find . -iname "*.apk"
+      - echo "build end"
     ndk: r23c
 
 AutoUpdateMode: Version
