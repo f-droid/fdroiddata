@@ -14,9 +14,13 @@ Binaries: https://github.com/ochadenas/cpudefense/releases/download/v%v/app-rele
 Builds:
   - versionName: '1.14'
     versionCode: 14
-    disable: fails rb
     commit: v1.14
     subdir: app
+    sudo:
+      - export CPUS_MAX=1
+      - export CPUS=$(getconf _NPROCESSORS_ONLN)
+      - for (( c=$CPUS_MAX; c<$CPUS; c++ )) ; do echo 0 > /sys/devices/system/cpu/cpu$c/online
+        ; done
     gradle:
       - yes
 
