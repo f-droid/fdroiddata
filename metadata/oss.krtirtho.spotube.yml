@@ -167,7 +167,6 @@ Builds:
 
   - versionName: 2.7.0
     versionCode: 17
-    disable: fails to build
     commit: 4182234be653d8762863ec4949bd45ac56ad8ca1
     sudo:
       - apt-get update
@@ -187,12 +186,14 @@ Builds:
       - choco-struct
       - aur-struct
     prebuild:
+      - sed -i -e 's/this.checkUpdate .*/this.checkUpdate = false,/' lib/provider/user_preferences_provider.dart
       - export PUB_CACHE=$(pwd)/.pub-cache
       - $$flutter$$/bin/flutter config --no-analytics
       - $$flutter$$/bin/flutter pub get
     scandelete:
       - .pub-cache
     build:
+      - echo "POCKETBASE_URL=https://spotube.pockethost.io/" >> .env
       - export PUB_CACHE=$(pwd)/.pub-cache
       - pushd $$metadata_god_rust$$
       - export ANDROID_NDK_ROOT=$$NDK$$
