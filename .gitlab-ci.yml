@@ -112,6 +112,23 @@ checkupdates:
         git --no-pager diff --color=always --exit-code
       fi
 
+git redirect:
+  stage: test
+  needs: []
+  image: debian:bullseye-slim
+  rules: *app_verification_rules
+  script:
+    - apt-get -qy update
+    - apt-get -qy dist-upgrade
+    - apt-get -qy install --no-install-recommends ca-certificates git python3 python3-yaml
+    - *get_changed_apps
+    - test -n "$CHANGED" || exit 0
+    - tools/rewrite-git-redirects.py $CHANGED
+    - git --no-pager diff --color=always --exit-code || {
+          printf "\x1b[31mERROR git URLs should be direct, not redirects!\x1b[0m\n";
+          exit 1;
+      }
+
 fdroid lint:
   stage: test
   needs: []
