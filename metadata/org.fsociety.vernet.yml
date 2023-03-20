@@ -166,10 +166,11 @@ Builds:
 
   - versionName: 1.0.1
     versionCode: 14
+    disable: https://github.com/osociety/vernet/issues/75
     commit: 224b758f34957cb234142f12ed992f3b98f0f441
     output: build/app/outputs/flutter-apk/app-fdroid-release.apk
     srclibs:
-      - flutter@3.0.5
+      - flutter@3.7.7
     rm:
       - .vscode
       - ios
@@ -177,9 +178,14 @@ Builds:
       - macos
       - test
       - web
-    build:
+    prebuild:
+      - export PUB_CACHE=$(pwd)/.pub-cache
       - $$flutter$$/bin/flutter config --no-analytics
       - $$flutter$$/bin/flutter packages pub get
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
       - $$flutter$$/bin/flutter packages pub run build_runner build --delete-conflicting-outputs
       - $$flutter$$/bin/flutter build apk --flavor fdroid
 
