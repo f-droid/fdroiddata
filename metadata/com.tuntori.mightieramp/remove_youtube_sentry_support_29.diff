@@ -1,0 +1,197 @@
+diff --git a/lib/audio/tracksPage.dart b/lib/audio/tracksPage.dart
+index b0ddf2a..5ff8869 100644
+--- a/lib/audio/tracksPage.dart
++++ b/lib/audio/tracksPage.dart
+@@ -14,7 +14,6 @@ import '../platform/platformUtils.dart';
+ import '../platform/simpleSharedPrefs.dart';
+ import 'audioEditor.dart';
+ import 'models/jamTrack.dart';
+-import 'online_sources/YoutubeSource.dart';
+ import 'online_sources/onlineTrack.dart';
+ import 'trackdata/trackData.dart';
+ import 'widgets/online_source/online_source.dart';
+@@ -358,26 +357,6 @@ class _TracksPageState extends State<TracksPage>
+     });
+   }
+ 
+-  void addFromYoutubeSource(BuildContext context) {
+-    stopPlayer();
+-    Navigator.of(context)
+-        .push(MaterialPageRoute(
+-            builder: (context) => OnlineSearchScreen(source: YoutubeSource())))
+-        .then((value) {
+-      if (value is List<OnlineTrack>) {
+-        for (int i = 0; i < value.length; i++) {
+-          var name = "${value[i].artist} - ${value[i].title}";
+-          TrackData().addTrack(value[i].url, name, false);
+-        }
+-        TrackData().saveTracks();
+-        //clear filter and scroll to bottom
+-        searchCtrl.text = "";
+-        setState(() {});
+-        _scollToNewSongs();
+-      }
+-    });
+-  }
+-
+   void _scollToNewSongs() async {
+     await Future.delayed(const Duration(milliseconds: 300));
+     scrollController.animateTo(scrollController.position.maxScrollExtent,
+@@ -483,17 +462,6 @@ class _TracksPageState extends State<TracksPage>
+   List<Bubble> _bubbles(BuildContext context) {
+     return [
+       // Floating action menu item
+-      if (_showHiddenSources)
+-        Bubble(
+-            title: "Youtube",
+-            iconColor: Colors.white,
+-            bubbleColor: Colors.red,
+-            icon: Icons.ondemand_video_outlined,
+-            titleStyle: const TextStyle(fontSize: 16, color: Colors.white),
+-            onPress: () {
+-              _animationController.reverse();
+-              addFromYoutubeSource(context);
+-            }),
+       if (_showHiddenSources)
+         Bubble(
+           title: "Online Source",
+diff --git a/lib/bluetooth/NuxDeviceControl.dart b/lib/bluetooth/NuxDeviceControl.dart
+index eb61860..5674efb 100644
+--- a/lib/bluetooth/NuxDeviceControl.dart
++++ b/lib/bluetooth/NuxDeviceControl.dart
+@@ -7,7 +7,6 @@ import 'package:flutter/foundation.dart';
+ import 'package:flutter/material.dart';
+ import 'package:mighty_plug_manager/bluetooth/devices/NuxMighty8BT.dart';
+ import 'package:mighty_plug_manager/platform/simpleSharedPrefs.dart';
+-import 'package:sentry_flutter/sentry_flutter.dart';
+ import 'package:undo/undo.dart';
+ 
+ import 'bleMidiHandler.dart';
+@@ -529,12 +528,6 @@ class NuxDeviceControl extends ChangeNotifier {
+ 
+     diagData.device = "${_device.productName} ${_device.productVersion}";
+     if (connected != null) diagData.connected = connected;
+-
+-    Sentry.configureScope((scope) {
+-      scope.setTag(
+-          "nuxDevice", "${_device.productName} ${_device.productVersion}");
+-      scope.setContexts('NUX', diagData.toMap(includeJsonPreset));
+-    });
+   }
+ 
+   NuxDevice get device => _device;
+diff --git a/lib/main.dart b/lib/main.dart
+index b773e3a..411cee7 100644
+--- a/lib/main.dart
++++ b/lib/main.dart
+@@ -9,7 +9,6 @@ import 'package:flutter/material.dart';
+ import 'package:mighty_plug_manager/UI/pages/DebugConsolePage.dart';
+ import 'package:mighty_plug_manager/bluetooth/devices/presets/presetsStorage.dart';
+ import 'package:mighty_plug_manager/platform/simpleSharedPrefs.dart';
+-import 'package:sentry_flutter/sentry_flutter.dart';
+ 
+ //pages
+ import 'UI/mainTabs.dart';
+@@ -18,7 +17,6 @@ import 'audio/trackdata/trackData.dart';
+ import 'bluetooth/NuxDeviceControl.dart';
+ 
+ //recreate this file with your own api keys
+-import 'configKeys.dart';
+ import 'modules/cloud/cloudManager.dart';
+ 
+ //able to create snackbars/messages everywhere
+@@ -30,56 +28,9 @@ void main() {
+   WidgetsFlutterBinding.ensureInitialized();
+   SharedPrefs prefs = SharedPrefs();
+ 
+-  //capture flutter errors
+-  if (!kDebugMode) {
+-    FlutterError.onError = (FlutterErrorDetails details) {
+-      DebugConsole.print("Flutter error: ${details.toString()}");
+-
+-      //update diagnostics with json preset
+-      NuxDeviceControl.instance()
+-          .updateDiagnosticsData(includeJsonPreset: true);
+-
+-      // Send report
+-      Sentry.captureException(
+-        details,
+-        stackTrace: details.stack,
+-      );
+-    };
+-  }
+-
+-  if (!kDebugMode) {
+-    runZonedGuarded(() {
+-      prefs.waitLoading().then((value) async {
+-        if (!kDebugMode) {
+-          await SentryFlutter.init((options) {
+-            options.dsn = sentryDsn;
+-            options.sampleRate = 0.33;
+-          });
+-        }
+-        mainRunApp();
+-      });
+-    }, (Object error, StackTrace stackTrace) async {
+-      // Whenever an error occurs, call the `_reportError` function. This sends
+-      // Dart errors to the dev console or Sentry depending on the environment.
+-      //_reportError(error, stackTrace);
+-
+-      DebugConsole.print("Dart error: ${error.toString()}");
+-      DebugConsole.print(stackTrace);
+-
+-      //update diagnostics with json preset
+-      NuxDeviceControl.instance()
+-          .updateDiagnosticsData(includeJsonPreset: true);
+-
+-      await Sentry.captureException(
+-        error,
+-        stackTrace: stackTrace,
+-      );
+-    });
+-  } else {
+     prefs.waitLoading().then((value) {
+       mainRunApp();
+     });
+-  }
+ }
+ 
+ mainRunApp() {
+diff --git a/lib/platform/fileSaver.dart b/lib/platform/fileSaver.dart
+index 1e16f14..0e0f26b 100644
+--- a/lib/platform/fileSaver.dart
++++ b/lib/platform/fileSaver.dart
+@@ -1,5 +1,4 @@
+ import 'package:flutter/services.dart';
+-import 'package:sentry_flutter/sentry_flutter.dart';
+ 
+ Future<String> saveFileString(String mime, String name, String data) async {
+   const platform =
+@@ -14,13 +13,6 @@ Future<String> saveFileString(String mime, String name, String data) async {
+ 
+     return result;
+   } on PlatformException catch (e) {
+-    //handle error and report to Sentry
+-    final event = SentryEvent(
+-      throwable: e,
+-      level: SentryLevel.error,
+-    );
+-    await Sentry.captureEvent(event);
+-
+     return Future.error("Error saving file");
+   }
+ }
+@@ -38,13 +30,6 @@ Future<String> saveFile(String mime, String name, List<int> data) async {
+ 
+     return result;
+   } on PlatformException catch (e) {
+-    //handle error and report to Sentry
+-    final event = SentryEvent(
+-      throwable: e,
+-      level: SentryLevel.error,
+-    );
+-    await Sentry.captureEvent(event);
+-
+     return Future.error("Error saving file");
+   }
+ }
