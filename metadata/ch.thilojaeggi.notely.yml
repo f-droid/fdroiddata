@@ -10,7 +10,7 @@ IssueTracker: https://github.com/thilojaeggi/notely/issues
 AutoName: Notely
 
 RepoType: git
-Repo: https://github.com/thilojaeggi/notely
+Repo: https://github.com/thilojaeggi/notely.git
 
 Builds:
   - versionName: 1.0.7
@@ -64,16 +64,22 @@ Builds:
 
   - versionName: 1.1.0
     versionCode: 10
+    disable: https://github.com/thilojaeggi/Notely/issues/13
     commit: 5fdebff8b18f4fff08b4f7642a6d55ebeb94a7fc
     output: build/app/outputs/flutter-apk/app-release.apk
     srclibs:
-      - flutter@3.3.3
+      - flutter@3.7.7
     rm:
       - ios
-    prebuild: echo "flutter.sdk=$$flutter$$" >> ./android/local.properties
-    build:
+    prebuild:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - echo "flutter.sdk=$$flutter$$" >> ./android/local.properties
       - $$flutter$$/bin/flutter config --no-analytics
       - $$flutter$$/bin/flutter packages pub get
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
       - $$flutter$$/bin/flutter build apk
 
 AutoUpdateMode: Version
