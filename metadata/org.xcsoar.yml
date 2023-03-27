@@ -375,15 +375,17 @@ Builds:
 
   - versionName: '7.28'
     versionCode: 149
-    disable: can't install
     commit: 49c37d870f1e00b3600aa8f77fbfc9c2150b5672
     submodules: true
     sudo:
       - apt-get update
       - apt-get install -y ninja-build g++ vorbis-tools librsvg2-bin imagemagick make
         gettext quilt sox m4 xsltproc cmake xz-utils pkg-config
-    output: output/ANDROID/opt/build/unsigned.apk
-    prebuild: sdkmanager 'platforms;android-30' 'build-tools;29.0.3'
+    output: output/ANDROID/opt/build/aligned.apk
+    prebuild:
+      - platforms=$(grep ANDROID_SDK_PLATFORM build/targets.mk | sed -E 's/.*android-([0-9]+)/\1/')
+      - build_tools=$(grep build-tools build/android.mk | sed -E 's/.*\/([0-9.]+)$/\1/')
+      - sdkmanager "platforms;android-$platforms" "build-tools;$build_tools"
     scandelete:
       - android/ioio
       - android/UsbSerial/usbserial/eclipse_lib
