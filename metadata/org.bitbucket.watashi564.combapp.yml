@@ -125,40 +125,93 @@ Builds:
 
   - versionName: 0.0.4
     versionCode: 4
-    disable: fails to build
-    commit: 520b51a0f6d954a3fcff3c2c7d6f5a6fb7bf2a8e
+    commit: v0.0.4
     subdir: app
     sudo:
-      - apt-get update
-      - apt-get install -y -t bullseye-backports golang-go
+      - curl -Lo go.tar.gz https://go.dev/dl/go1.19.7.linux-amd64.tar.gz
+      - echo '7a75720c9b066ae1750f6bcc7052aba70fa3813f4223199ee2a2315fd3eb533d go.tar.gz'
+        | sha256sum -c -
+      - tar xzf go.tar.gz --strip-components=1 -C /usr/local/
     gradle:
       - yes
     srclibs:
-      - CombDownloader@0.0.12
-      - CombFullUI@0.3.6
+      - CombDownloader@0.0.13
+      - CombFullUI@0.3.7
+    prebuild:
+      - pushd $$CombDownloader$$
+      - git clone --depth 1 https://bitbucket.org/watashi564/accelerator --branch
+        v0.0.14 ./nonvendor/bitbucket.org/watashi564/accelerator
+      - git clone --depth 1 https://github.com/btcsuite/btcd --branch v0.23.4 ./nonvendor/github.com/btcsuite/btcd
+      - git clone --depth 1 https://go.googlesource.com/net --branch v0.8.0 ./nonvendor/golang.org/x/net
+      - git clone --depth 1 https://go.googlesource.com/crypto --branch v0.7.0 ./nonvendor/golang.org/x/crypto
+      - git clone --depth 1 https://go.googlesource.com/sys --branch v0.6.0 ./nonvendor/golang.org/x/sys
+      - git clone --depth 1 https://github.com/twmb/murmur3 --branch v1.1.6 ./nonvendor/github.com/twmb/murmur3
+      - git clone --depth 1 https://github.com/pbnjay/memory --branch master ./nonvendor/github.com/pbnjay/memory
+      - git clone --depth 1 https://github.com/davecgh/go-spew --branch v1.1.1 ./nonvendor/github.com/davecgh/go-spew
+      - find . -name go.mod -type f -delete
+      - echo "module localhost/combdownloader" > go.mod
+      - echo "replace bitbucket.org => ./nonvendor/bitbucket.org" >> go.mod
+      - echo "replace github.com => ./nonvendor/github.com" >> go.mod
+      - echo "replace golang.org => ./nonvendor/golang.org" >> go.mod
+      - echo "module github.com" > ./nonvendor/github.com/go.mod
+      - echo "module golang.org" > ./nonvendor/golang.org/go.mod
+      - echo "module bitbucket.org" > ./nonvendor/bitbucket.org/go.mod
+      - popd
+      - pushd $$CombFullUI$$
+      - git clone --depth 1 https://bitbucket.org/watashi564/accelerator --branch
+        v0.0.14 ./nonvendor/bitbucket.org/watashi564/accelerator
+      - git clone --depth 1 https://github.com/gorilla/mux --branch v1.8.0 ./nonvendor/github.com/gorilla/mux
+      - git clone --depth 1 https://github.com/sipa/bech32 --branch master ./nonvendor/github.com/sipa/bech32
+      - git clone --depth 1 https://github.com/syndtr/goleveldb --branch v1.0.0 ./nonvendor/github.com/syndtr/goleveldb
+      - git clone --depth 1 https://github.com/siongui/godom --branch master ./nonvendor/github.com/siongui/godom
+      - git clone --depth 1 https://github.com/skip2/go-qrcode --branch master ./nonvendor/github.com/skip2/go-qrcode
+      - git clone --depth 1 https://github.com/twmb/murmur3 --branch v1.1.6 ./nonvendor/github.com/twmb/murmur3
+      - git clone --depth 1 https://github.com/pbnjay/memory --branch master ./nonvendor/github.com/pbnjay/memory
+      - git clone --depth 1 https://github.com/onsi/ginkgo --branch v1.16.5 ./nonvendor/github.com/onsi/ginkgo
+      - git clone --depth 1 https://github.com/onsi/gomega --branch v1.27.6 ./nonvendor/github.com/onsi/gomega
+      - git clone --depth 1 https://github.com/golang/snappy --branch v0.0.4 ./nonvendor/github.com/golang/snappy
+      - git clone --depth 1 https://github.com/klauspost/cpuid --branch v2.2.4 ./nonvendor/github.com/klauspost/cpuid/v2
+      - git clone --depth 1 https://go.googlesource.com/net --branch v0.8.0 ./nonvendor/golang.org/x/net
+      - git clone --depth 1 https://go.googlesource.com/text --branch v0.8.0 ./nonvendor/golang.org/x/text
+      - git clone --depth 1 https://go.googlesource.com/term --branch v0.6.0 ./nonvendor/golang.org/x/term
+      - git clone --depth 1 https://go.googlesource.com/sys --branch v0.6.0 ./nonvendor/golang.org/x/sys
+      - git clone --depth 1 https://go.googlesource.com/mod --branch v0.9.0 ./nonvendor/golang.org/x/mod
+      - git clone --depth 1 https://go.googlesource.com/sync --branch v0.1.0 ./nonvendor/golang.org/x/sync
+      - git clone --depth 1 https://go.googlesource.com/tools --branch v0.7.0 ./nonvendor/golang.org/x/tools
+      - git clone --depth 1 https://github.com/nxadm/tail --branch v1.4.8 ./nonvendor/github.com/nxadm/tail
+      - git clone --depth 1 https://github.com/google/go-cmp --branch v0.5.9 ./nonvendor/github.com/google/go-cmp
+      - git clone --depth 1 https://github.com/fsnotify/fsnotify --branch v1.6.0 ./nonvendor/github.com/fsnotify/fsnotify
+      - git clone --depth 1 https://github.com/go-yaml/yaml --branch v3.0.1 ./nonvendor/gopkg.in/yaml.v3
+      - git clone --depth 1 https://github.com/go-tomb/tomb --branch master ./nonvendor/gopkg.in/tomb.v1
+      - find . -name go.mod -type f -delete
+      - echo "module localhost/combfullui" > go.mod
+      - echo "replace bitbucket.org => ./nonvendor/bitbucket.org" >> go.mod
+      - echo "replace github.com => ./nonvendor/github.com" >> go.mod
+      - echo "replace gopkg.in => ./nonvendor/gopkg.in" >> go.mod
+      - echo "replace golang.org => ./nonvendor/golang.org" >> go.mod
+      - echo "module github.com" > ./nonvendor/github.com/go.mod
+      - echo "module bitbucket.org" > ./nonvendor/bitbucket.org/go.mod
+      - echo "module gopkg.in" > ./nonvendor/gopkg.in/go.mod
+      - echo "module golang.org" > ./nonvendor/golang.org/go.mod
+      - popd
     build:
       - pushd $$CombDownloader$$
-      - go mod init localhost/combdownloader
-      - go get -u bitbucket.org/watashi564/accelerator/libfile@v0.0.11
-      - go get -u golang.org/x/net/proxy@latest
-      - go get -u github.com/btcsuite/btcd/chaincfg/chainhash@latest
-      - go get -u github.com/btcsuite/btcd/wire@latest
+      - go version
+      - go mod tidy
       - GOARM=7 GOOS=linux GOARCH=arm64 go build -o combdownloader.arm64.bin -trimpath
         -ldflags=-buildid=
       - popd
-      - mv $$CombDownloader$$/combdownloader.arm64.bin src/main/res/raw/libdl_0_0_12_arm64.so
+      - mv $$CombDownloader$$/combdownloader.arm64.bin src/main/res/raw/libdl_0_0_13_arm64.so
       - pushd $$CombFullUI$$
-      - go mod init localhost/combfullui
-      - go get -u github.com/gorilla/mux@latest
-      - go get -u bitbucket.org/watashi564/accelerator/libfile@v0.0.11
-      - go get -u github.com/sipa/bech32/ref/go/src/bech32@latest
-      - go get -u github.com/syndtr/goleveldb/leveldb@latest
-      - go get -u github.com/syndtr/goleveldb/leveldb/opt@latest
-      - go get -u github.com/syndtr/goleveldb/leveldb/util@latest
+      - go version
+      - go mod tidy
+      - pushd ui
+      - GOOS=js GOARCH=wasm go build -o combfullui.wasm -trimpath -ldflags=-buildid=
+      - popd
       - GOARM=7 GOOS=linux GOARCH=arm64 go build -o combfullui.arm64.bin -trimpath
         -ldflags=-buildid=
       - popd
-      - mv $$CombFullUI$$/combfullui.arm64.bin src/main/res/raw/libcore_0_3_6_arm64.so
+      - mv $$CombFullUI$$/combfullui.arm64.bin src/main/res/raw/libcore_0_3_7_arm64.so
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v[\d.]+$
