@@ -211,24 +211,45 @@ Builds:
       - ./scripts/android/build-android.sh -s $$COMMIT$$
 
   - versionName: '4.6'
-    versionCode: 107
+    versionCode: 1107
     commit: 05c4a6c68297418226e3a1fa186925444e25482a
-    timeout: 30000
+    timeout: 40000
     sudo:
       - apt-get update
       - apt-get install -y xz-utils zipalign
       - mkdir -m 0755 /nix
       - chown vagrant /nix
       - chown -R vagrant /tmp
-    output: ./simplex-chat.apk
+    output: ./simplex-chat-armv7.apk
     prebuild:
       - mv apps/android/gradle .
-      - sed -i -e '/android {/a lint {abortOnError false}' apps/android/app/build.gradle
+      - sed -i -e 's/versionCode .*/versionCode $$VERCODE$$/' apps/android/app/build.gradle
+    build:
+      - export USER=vagrant
+      - ./scripts/android/build-android.sh -s $$COMMIT$$
+
+  - versionName: '4.6'
+    versionCode: 2107
+    commit: 05c4a6c68297418226e3a1fa186925444e25482a
+    timeout: 40000
+    sudo:
+      - apt-get update
+      - apt-get install -y xz-utils zipalign
+      - mkdir -m 0755 /nix
+      - chown vagrant /nix
+      - chown -R vagrant /tmp
+    output: ./simplex-chat-aarch64.apk
+    prebuild:
+      - mv apps/android/gradle .
+      - sed -i -e 's/versionCode .*/versionCode $$VERCODE$$/' apps/android/app/build.gradle
     build:
       - export USER=vagrant
       - ./scripts/android/build-android.sh -s $$COMMIT$$
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v[\d.]+$
+VercodeOperation:
+  - '%c+1000'
+  - '%c+2000'
 CurrentVersion: '4.6'
-CurrentVersionCode: 107
+CurrentVersionCode: 2107
