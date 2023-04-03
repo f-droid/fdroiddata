@@ -31,7 +31,7 @@ Description: |-
     * many more, Changelog and Feature-List can be found on the project-page...
 
 RepoType: git
-Repo: https://github.com/nilsbraden/ttrss-reader-fork
+Repo: https://github.com/nilsbraden/ttrss-reader-fork.git
 
 Builds:
   - versionName: '1.0'
@@ -653,7 +653,16 @@ Builds:
     subdir: ttrssreader
     gradle:
       - fdroid
-    prebuild: sed -i -e '/playCompile/d' build.gradle
+    srclibs:
+      - twofortyfouram-monorepo@4023d30d5b44b2fd15206c3435829e999e7bbd02
+    prebuild:
+      - sed -i -e '/play-services/d' build.gradle
+      - sed -i -e '/maven {/,+8d' -e '/repositories {/amavenLocal()' ../settings.gradle
+    build:
+      - pushd $$twofortyfouram-monorepo$$
+      - gradle assembleRelease
+      - gradle publishToMavenLocal
+      - popd
 
 MaintainerNotes: |-
     Upstream mistags often and retags, so never use tags directly.
