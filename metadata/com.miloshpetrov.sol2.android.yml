@@ -67,6 +67,52 @@ Builds:
       - sed -i "s/.*com\.android\.tools\.build:gradle:.*/$(grep 'com\.android\.tools\.build:gradle:3.*'
         android.gradle)/g" engine_workspace/libs/gestalt/build.gradle
 
+  - versionName: 2.1.0
+    versionCode: 14
+    commit: v2.1.0
+    gradle:
+      - yes
+    output: build/outputs/apk/release/android-release-unsigned.apk
+    srclibs:
+      - MovingBlocks-DestinationSol-engine@v2.1.0
+      - MovingBlocks-gestalt@7259b21
+      - MovingBlocks-nui@5ed1a66
+      - MovingBlocks-joml-ext@v0.1.0
+      - MovingBlocks-org-reflections-fork@4fe6bd5
+      - antilaby-jsemver-fork@0.10.0
+    prebuild:
+      - sdkmanager 'build-tools;33.0.2' > /dev/null
+      - "printf 'rootProject.projectDir = file(\"engine_workspace\")\\n include \"\
+        :android\"\\n project(\":android\\\").projectDir = file(\".\")\\n project(\"\
+        :android\").buildFileName = \"android.gradle\"\\n apply from: \"engine_workspace/settings.gradle\"\
+        \\n' >> settings.gradle"
+      - mv build.gradle android.gradle
+      - ln -s $$MovingBlocks-DestinationSol-engine$$ engine_workspace
+      - ln -s engine_workspace/gradle gradle
+      - ln -s engine_workspace/build-logic build-logic
+      - pushd engine_workspace
+      - ln -s $$MovingBlocks-gestalt$$ libs/gestalt
+      - ln -s $$MovingBlocks-nui$$ libs/TeraNUI
+      - ln -s $$MovingBlocks-joml-ext$$ libs/joml-ext
+      - ln -s $$MovingBlocks-org-reflections-fork$$ libs/reflections
+      - ln -s $$antilaby-jsemver-fork$$ libs/jsemver
+      - pushd $$MovingBlocks-org-reflections-fork$$
+      - touch settings.gradle
+      - gradle wrapper --gradle-version=7.6
+      - rm settings.gradle
+      - ./gradlew init --type pom
+      - popd
+      - echo 'sdk.dir=$$SDK$$' > local.properties
+      - echo 'sdk.dir=$$SDK$$' > libs/gestalt/local.properties
+      - popd
+      - sed -i '/maven {/{:a;N;/}/!ba;N;N};/artifactory.terasology.org/d' engine_workspace/build-logic/src/main/groovy/destination-sol-repositories.gradle
+        engine_workspace/build-logic/src/main/groovy/gestalt-repositories.gradle engine_workspace/engine/build.gradle
+        android.gradle
+      - sed -i '/heisluft.de/d' engine_workspace/engine/build.gradle android.gradle
+      - sed -i '/com.github.zafarkhaja:java-semver/d' android.gradle
+      - sed -i "s/.*com\.android\.tools\.build:gradle:.*/$(grep 'com\.android\.tools\.build:gradle:.*'
+        android.gradle)/g" engine_workspace/libs/gestalt/build.gradle
+
 MaintainerNotes: |
     The main engine code is at https://github.com/MovingBlocks/DestinationSol but the actual android application
     can be found at https://github.com/MovingBlocks/DestSolAndroid.
@@ -86,12 +132,11 @@ MaintainerNotes: |
     Destination Sol depends on a couple of MovingBlocks libraries that are not published elsewhere.
     Normally they can be found in the Terasology Artifactory (http://artifactory.terasology.org/artifactory), however,
     that repository has been patched-out for the F-Droid builds.
-    It may be possible to use jitpack.io to replace these custom builds?
 
     The MovingBlocks libraries needed are as follows:
       * org.terasology.gestalt - https://github.com/MovingBlocks/gestalt
-      * org.terasology.nui - https://github.com/MovingBlocks/TeraNui (app >= v2.1.0-SNAPSHOT)
-      * org.terasology.joml-ext - https://github.com/MovingBlocks/joml-ext (app >= v2.1.0-SNAPSHOT)
+      * org.terasology.nui - https://github.com/MovingBlocks/TeraNui (app >= v2.1.0)
+      * org.terasology.joml-ext - https://github.com/MovingBlocks/joml-ext (app >= v2.1.0)
     [app >= v2.1.0] Gestalt also depends on a fork of jsemver containing fixes and improvments to the original code.
     The forked jsemver can be found at https://github.com/AntiLaby/jsemver. Version 0.10.0 is used.
 
