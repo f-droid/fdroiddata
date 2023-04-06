@@ -51,7 +51,7 @@ Description: |-
     We're always happy to talk, whether it be a question, thought, or issue. Please feel free to email us any time at help@standardnotes.com. When you take the time to send us a message, we'll be sure to do the same.
 
 RepoType: git
-Repo: https://github.com/standardnotes/app
+Repo: https://github.com/standardnotes/app.git
 
 Builds:
   - versionName: 3.0.5
@@ -9698,55 +9698,6 @@ Builds:
   - versionName: 3.150.37
     versionCode: 3000876
     commit: '@standardnotes/mobile@3.150.37'
-    subdir: packages/mobile/android/app
-    sudo:
-      - apt-get update
-      - apt-get install -y libsecret-1-dev build-essential
-      - curl -Lo node.tar.gz https://nodejs.org/download/release/v16.19.0/node-v16.19.0-linux-x64.tar.gz
-      - echo "23770ba26a52cb8fedd1096613bbc419b8a033d774a457d9024bb5a0159f3585 node.tar.gz"
-        | sha256sum -c -
-      - tar xzf node.tar.gz --strip-components=1 -C /usr/local/
-      - npm install -g yarn
-      - sysctl fs.inotify.max_user_watches=524288 || true
-    init:
-      - cd ../../../..
-      - yarn config set -H enableImmutableInstalls false
-      - sed -i -e '/react-native-iap/d' packages/mobile/package.json
-      - npm_config_build_from_source=true yarn
-      - cd packages/mobile
-      - npm_config_build_from_source=true yarn
-    patch:
-      - remove-IAP.3.146.2.patch
-    gradle:
-      - prod
-    rm:
-      - packages/desktop
-      - packages/mobile/ios
-    prebuild:
-      - sed -i -e '/detox/Id' -e 's/versionName appVersionName/versionName "$$VERSION$$"/'
-        -e 's/versionCode appVersionCode/versionCode $$VERCODE$$/' -e '/universalApk/s/false/true/'
-        build.gradle
-      - pushd ../../../..
-      - yarn run build:mobile
-      - popd
-      - pushd ../..
-      - yarn run android:bundle
-      - popd
-    scanignore:
-      - packages/mobile/node_modules/jsc-android
-      - packages/mobile/node_modules/react-native
-      - packages/mobile/node_modules/detox/android/build.gradle
-      - packages/mobile/node_modules/@standardnotes/react-native-utils/android/build.gradle
-      - packages/mobile/node_modules/@react-native-async-storage/async-storage/android/build.gradle
-    scandelete:
-      - node_modules/
-      - packages/mobile/node_modules
-      - .yarn/
-    ndk: r23b
-
-  - versionName: 3.150.38
-    versionCode: 3000877
-    commit: '@standardnotes/mobile@3.150.38'
     subdir: packages/mobile/android/app
     sudo:
       - apt-get update
