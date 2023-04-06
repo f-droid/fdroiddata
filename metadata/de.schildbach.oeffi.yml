@@ -10,6 +10,8 @@ Changelog: https://gitlab.com/oeffi/oeffi/raw/HEAD/oeffi/CHANGES
 Donate: https://oeffi.schildbach.de/donate.html
 Bitcoin: bc1qxm9r8n3pe47r30e04gs2xsalxef55zrfvelvln
 
+AutoName: Öffi
+
 RepoType: git
 Repo: https://gitlab.com/oeffi/oeffi.git
 Binaries: https://oeffi.schildbach.de/downloads/oeffi-%v.apk
@@ -664,7 +666,29 @@ Builds:
     gradle:
       - aosp
 
-AutoUpdateMode: None
-UpdateCheckMode: None
-CurrentVersion: 12.1.8-aosp
-CurrentVersionCode: 120108
+  - versionName: 12.1.10-aosp
+    versionCode: 120110
+    commit: v12.1.10
+    subdir: oeffi
+    submodules: true
+    sudo:
+      - ln -fs /usr/share/zoneinfo/CET /etc/localtime
+      - dpkg-reconfigure -f noninteractive tzdata
+      - apt-get update
+      - apt-get install -y gradle disorderfs
+    init:
+      - rm /home/vagrant/fdroidserver/gradlew-fdroid
+      - ln -s /usr/bin/gradle /home/vagrant/fdroidserver/gradlew-fdroid
+      - cd ../..
+      - mv de.schildbach.oeffi de.schildbach.oeffi_underlying
+      - mkdir de.schildbach.oeffi
+      - disorderfs --sort-dirents=yes --reverse-dirents=no de.schildbach.oeffi_underlying
+        de.schildbach.oeffi
+      - cd de.schildbach.oeffi/oeffi
+    gradle:
+      - aosp
+
+AutoUpdateMode: Version +-aosp %v
+UpdateCheckMode: Tags ^v[0-9]+(\.[0-9]+)*$
+CurrentVersion: 12.1.10-aosp
+CurrentVersionCode: 120110
