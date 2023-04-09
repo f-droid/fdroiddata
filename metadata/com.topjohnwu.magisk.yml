@@ -43,27 +43,6 @@ Builds:
       - app/shared/src/main/java/com/topjohnwu/magisk/utils/DynamicClassLoader.java
 
   - versionName: '1.0'
-    versionCode: 2
-    disable: Not used
-    commit: bb64ba0ef6a9bdbfcb1a2ceb4e4900f94b0deb95
-    subdir: stub
-    sudo:
-      - apt-get update
-      - apt-get install -y openjdk-11-jdk-headless
-      - update-alternatives --auto java
-    gradle:
-      - yes
-    rm:
-      - native
-      - tools
-    prebuild:
-      - echo -e 'version=25.1' > ../config.prop
-      - sed -i -e 's|"https://.*"|"https://f-droid.org/repo/com.topjohnwu.magisk_${Config.versionCode}.apk"|'
-        -e '/versionCode/s/1/$$VERCODE$$/' build.gradle.kts
-    scanignore:
-      - app/shared/src/main/java/com/topjohnwu/magisk/utils/DynamicClassLoader.java
-
-  - versionName: '1.0'
     versionCode: 3
     commit: b6d50bea2cf8149fe1fffb3589bd9d7e4fbc9e28
     subdir: stub
@@ -74,6 +53,26 @@ Builds:
       - tools
     prebuild:
       - echo -e 'version=25.2-canary-25206' > ../config.prop
+      - sed -i -e 's|"https://.*"|"https://f-droid.org/repo/com.topjohnwu.magisk_${Config.versionCode}.apk"|'
+        -e '/versionCode/s/1/$$VERCODE$$/' build.gradle.kts
+    scanignore:
+      - app/shared/src/main/java/com/topjohnwu/magisk/utils/DynamicClassLoader.java
+
+  - versionName: '1.0'
+    versionCode: 4
+    commit: 7cb0909c70126225f817de27d5f43c7e115db29c
+    subdir: stub
+    sudo:
+      - apt-get update
+      - apt-get install -y openjdk-17-jdk-headless
+      - update-alternatives --auto java
+    gradle:
+      - yes
+    rm:
+      - native
+      - tools
+    prebuild:
+      - echo -e 'version=26.0' > ../config.prop
       - sed -i -e 's|"https://.*"|"https://f-droid.org/repo/com.topjohnwu.magisk_${Config.versionCode}.apk"|'
         -e '/versionCode/s/1/$$VERCODE$$/' build.gradle.kts
     scanignore:
@@ -392,6 +391,52 @@ Builds:
       - python3 ./build.py -rv ndk
       - python3 ./build.py -rv binary
       - python3 ./build.py -rv app
+
+  - versionName: '26.0'
+    versionCode: 26000
+    disable: build stub first
+    commit: 7cb0909c70126225f817de27d5f43c7e115db29c
+    timeout: 20000
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y g++ make pkg-config libssl-dev ninja-build clang-13 cmake
+        lld-13 openjdk-17-jdk-headless
+      - update-alternatives --auto java
+    output: out/app-release.apk
+    srclibs:
+      - ondk@r25.2
+      - vboot@release-R91-13904.B
+    extlibs:
+      - stub/stub.jar
+    prebuild:
+      - echo -e 'version=$$VERSION$$' > ./config.prop
+      - sed -i -e 's|https://.*download/{ndk_ver}|$$ondk$$/dist|' -e 's/urllib.request.urlopen(url)/open(url,"rb")/'
+        build.py
+      - sed -i -e 's/-12/-13/' -e 's/"src",.*/"src"]/' $$ondk$$/config-linux.toml
+      - sed -i -e '/Key.CHECK_UPDATES/s/true/false/' ./app/src/main/java/com/topjohnwu/magisk/core/Config.kt
+    scanignore:
+      - app/shared/src/main/java/com/topjohnwu/magisk/utils/DynamicClassLoader.java
+    scandelete:
+      - native/src/external
+      - tools
+    build:
+      - pushd $$ondk$$
+      - ./build.sh x86_64
+      - popd
+      - cp $$NDK$$/platforms/android-19/arch-arm/usr/lib/*.[ao] tools/ndk-bins/21/arm
+      - cp $$NDK$$/platforms/android-19/arch-x86/usr/lib/*.[ao] tools/ndk-bins/21/i686
+      - pushd $$vboot$$
+      - make ARCH=arm futil
+      - popd
+      - cp $$vboot$$/build/futility/futility tools
+      - ln -s $(which gradle) ./gradlew
+      - mkdir out
+      - curl -Lo out/stub-release.apk https://f-droid.org/archive/com.topjohnwu.magisk_4.apk
+      - python3 ./build.py -rv ndk
+      - python3 ./build.py -rv binary
+      - python3 ./build.py -rv app
+    ndk: r10e
 
 MaintainerNotes: |-
     22.1: https://github.com/topjohnwu/ndk-busybox/commit/31b2b5780bf9fe982e1f3d9df0bd4b1b44d6e394
