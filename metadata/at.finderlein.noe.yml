@@ -167,7 +167,7 @@ Builds:
     commit: 8ee6214517abc6ab7de78d91bb79879d4ef7bc70
     output: build/app/outputs/flutter-apk/app-release.apk
     srclibs:
-      - flutter@3.0.1
+      - flutter@3.7.10
     rm:
       - .github
       - .vscode
@@ -179,12 +179,17 @@ Builds:
       - test
       - web
       - windows
-    prebuild: sed -i -e 's|git@github.com:|https://github.com/|' pubspec.lock pubspec.yaml
-    build:
-      - echo 'var mapAccessToken = "pk.eyJ1IjoiZGVycXVycHMiLCJhIjoiY2wzY3dqeGhkMDJxeTNja2p1cHZmNWJhYSJ9.dnnM2GDwtxAVog4xvJzTJw";'>
-        lib/auth/secrets.dart
+    prebuild:
+      - sed -i -e 's|git@github.com:|https://github.com/|' pubspec.lock pubspec.yaml
+      - export PUB_CACHE=$(pwd)/.pub-cache
       - $$flutter$$/bin/flutter config --no-analytics
       - $$flutter$$/bin/flutter pub get
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - echo 'var mapAccessToken = "pk.eyJ1IjoiZGVycXVycHMiLCJhIjoiY2wzY3dqeGhkMDJxeTNja2p1cHZmNWJhYSJ9.dnnM2GDwtxAVog4xvJzTJw";'>
+        lib/auth/secrets.dart
       - $$flutter$$/bin/flutter pub run build_runner build
       - $$flutter$$/bin/flutter build apk --release --dart-define=ANDROID_FLOSS=true
 
