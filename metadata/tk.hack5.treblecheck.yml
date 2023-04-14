@@ -55,8 +55,26 @@ Builds:
       - echo 'gradle.projectsEvaluated { gradle.rootProject.tasks.getByPath(":app:packageFreeRelease").doLast
         { exec { commandLine(rootProject.file("add_zfe.sh")) } } }' >> settings.gradle.kts
 
-AutoUpdateMode: None
-UpdateCheckMode: None
+  - versionName: 5.0.9
+    versionCode: 5000009
+    commit: f5f1cfd85aff4b1b45331700eba9b629694f3ad8
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y openjdk-17-jdk-headless
+      - update-java-alternatives -a
+    gradle:
+      - free
+    output: app/build/outputs/apk/free/release/app-free-release-unsigned.apk
+    srclibs:
+      - apksigcopier@bc08f220f8c4b5e429b99f3263a56c68f1cda4e9
+    prebuild: sed -i -e '/publishing {/,/^}/d' {poeditor-android,materialdesignicons-android}/build.gradle.kts
+    postbuild: "PYTHONPATH=$$PYTHONPATH$$:$$apksigcopier$$ python3 -c 'import os;\
+        \ os.rename(\"$$OUT$$\", \"$$OUT$$.in\"); from apksigcopier import copy_apk;\
+        \ copy_apk(\"$$OUT$$.in\", \"$$OUT$$\", exclude=lambda _: False, zfe_size=132)'"
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^[0-9.]+$
 UpdateCheckData: app/version.properties|versionCode=(\d+)|.|versionName=(.+)
-CurrentVersion: 5.0.8
-CurrentVersionCode: 5000008
+CurrentVersion: 5.0.9
+CurrentVersionCode: 5000009
