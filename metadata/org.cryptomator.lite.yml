@@ -1,0 +1,48 @@
+Categories:
+  - Internet
+  - Security
+License: GPL-3.0-only
+AuthorName: Skymatic GmbH
+WebSite: https://cryptomator.org/
+SourceCode: https://github.com/cryptomator/android
+IssueTracker: https://github.com/cryptomator/android/issues
+Translation: https://translate.cryptomator.org/
+Changelog: https://github.com/cryptomator/android/releases
+Donate: https://cryptomator.org/donate/
+
+RepoType: git
+Repo: https://github.com/cryptomator/android.git
+Binaries: https://github.com/cryptomator/android/releases/download/%v/Cryptomator-%v_lite_signed.apk
+
+Builds:
+  - versionName: 1.9.0
+    versionCode: 2797
+    commit: 227f5058c26a6f6b896b26b862d0774e6aaa0cd8
+    subdir: presentation
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y disorderfs
+    init:
+      - cd ../..
+      - mv org.cryptomator.lite org.cryptomator.lite_underlying
+      - mkdir org.cryptomator.lite
+      - disorderfs --sort-dirents=yes --reverse-dirents=no org.cryptomator.lite_underlying
+        org.cryptomator.lite
+      - cd org.cryptomator.lite
+    gradle:
+      - lite
+    prebuild:
+      - sed -i -e '/dependencies.googlePlayServicesAuth/,+41d' -e '/msgraphAuth/,+5d'
+        ../data/build.gradle
+      - sed -i -e '/exclusiveContent/,+11d' ../buildsystem/dependencies.gradle
+      - sed -i -e '/prebuild.gradle/d' -e '/msgraphAuth/,+5d' build.gradle
+    scandelete:
+      - lib
+    ndk: r23b
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: build.gradle|androidVersionCode\s=\s(\d+)|.|androidVersionName\s=\s'(.+)'
+CurrentVersion: 1.9.0
+CurrentVersionCode: 2797
