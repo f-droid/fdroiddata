@@ -222,7 +222,8 @@
     },
     "AuthorEmail": {
       "description": "The e-mail address of the author(s).",
-      "type": "string"
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
     },
     "AuthorWebSite": {
       "description": "The website url of the author(s).",
@@ -254,14 +255,11 @@
     },
     "FlattrID": {
       "description": "The project's Flattr (https://flattr.com) ID.",
-      "type": "string"
+      "type": "string",
+      "pattern": "^[0-9a-z]+$"
     },
     "Liberapay": {
       "description": "The project's Liberapay (https://liberapay.com) user or group name.",
-      "type": "string"
-    },
-    "LiberapayID": {
-      "description": "The project's Liberapay (https://liberapay.com) user or group ID.",
       "type": "string"
     },
     "OpenCollective": {
@@ -270,11 +268,13 @@
     },
     "Bitcoin": {
       "description": "A Bitcoin address for donating to the project.",
-      "type": "string"
+      "type": "string",
+      "pattern": "^(bc1|[13])[a-zA-HJ-NP-Z0-9]{25,39}$"
     },
     "Litecoin": {
       "description": "A Litecoin address for donating to the project.",
-      "type": "string"
+      "type": "string",
+      "pattern": "^([LM3][a-km-zA-HJ-NP-Z1-9]{26,33}|ltc1[a-km-z]{39})$"
     },
     "Name": {
       "description": "The title of the application, with optional descriptive phrase.",
@@ -299,15 +299,13 @@
       "anyOf": [
         {
           "type": "string",
-          "minLength": 64,
-          "maxLength": 64
+          "pattern": "^[0-9a-f]{64}$"
         },
         {
           "type": "array",
           "items": {
             "type": "string",
-            "minLength": 64,
-            "maxLength": 64
+            "pattern": "^[0-9a-f]{64}$"
           }
         }
       ]
@@ -365,10 +363,7 @@
           },
           "submodules": {
             "description": "Use if the project (git only) has submodules - causes git submodule update --init --recursive to be executed after the source is cloned.",
-            "type": "boolean",
-            "enum": [
-              true
-            ]
+            "const": true
           },
           "sudo": {
             "description": "Specifies a script to be run using sudo bash -x -c \"xxxx\" in the Buildserver VM guest. This script is run with full root privileges, but the state will be reset after each build.",
@@ -384,10 +379,7 @@
           },
           "oldsdkloc": {
             "description": "The sdk location in the repo is in an old format, or the build.xml is expecting such. The 'new' format is sdk.dir while the VERY OLD format is sdk-location.",
-            "type": "boolean",
-            "enum": [
-              true
-            ]
+            "const": true
           },
           "target": {
             "description": "Specifies a particular SDK target for compilation, overriding the value defined in the code by upstream. This has different effects depending on what build system used — this flag currently affects Ant, Maven and Gradle projects only.",
@@ -397,10 +389,7 @@
             "description": "By default, 'android update' is used in Ant builds to generate or update the project and all its referenced projects. Specifying update=no bypasses that. Note that this is useless in builds that don't use Ant.",
             "anyOf": [
               {
-                "type": "string",
-                "enum": [
-                  "auto"
-                ]
+                "const": "auto"
               },
               {
                 "type": "array",
@@ -416,17 +405,11 @@
           },
           "forceversion": {
             "description": "If specified, the package version in AndroidManifest.xml is replaced with the version name for the build as specified in the metadata.",
-            "type": "boolean",
-            "enum": [
-              true
-            ]
+            "const": true
           },
           "forcevercode": {
             "description": "If specified, the package version code in the AndroidManifest.xml is replaced with the version code for the build. See also forceversion.",
-            "type": "boolean",
-            "enum": [
-              true
-            ]
+            "const": true
           },
           "rm": {
             "description": "Specifies the relative paths of files or directories to delete before the build is done.",
@@ -492,10 +475,7 @@
               {
                 "type": "array",
                 "items": {
-                  "type": "string",
-                  "enum": [
-                    "yes"
-                  ]
+                  "const": "yes"
                 },
                 "maxItems": 1
               },
@@ -544,10 +524,7 @@
           },
           "novcheck": {
             "description": "Don't check that the version name and code in the resulting APK are correct by looking at the build output - assume the metadata is correct.",
-            "type": "boolean",
-            "enum": [
-              true
-            ]
+            "const": true
           },
           "antifeatures": {
             "description": "List of Anti-Features for this specific build. They are described in AntiFeatures.",
@@ -582,16 +559,16 @@
     },
     "AutoUpdateMode": {
       "description": "This determines the method used for auto-generating new builds when new releases are available - in other words, adding a new Build Version line to the metadata.",
+      "type": "string",
       "anyOf": [
         {
-          "type": "string"
-        },
-        {
-          "type": "string",
           "enum": [
             "None",
             "Version"
           ]
+        },
+        {
+          "pattern": "^Version( \\+.+)? [^+].+"
         }
       ]
     },
@@ -600,17 +577,17 @@
       "type": "string",
       "anyOf": [
         {
-          "type": "string"
-        },
-        {
           "enum": [
             "None",
             "Static",
-            "RepoManifest",
-            "RepoTrunk",
-            "Tags",
             "HTTP"
           ]
+        },
+        {
+          "pattern": "^RepoManifest(/.+)?$"
+        },
+        {
+          "pattern": "^Tags( .*)?$"
         }
       ]
     },
@@ -663,49 +640,102 @@
     "License",
     "Builds"
   ],
-  "anyOf": [
+  "allOf": [
     {
-      "required": [
-        "Repo",
-        "RepoType",
-        "SourceCode"
+      "anyOf": [
+        {
+          "required": [
+            "Repo",
+            "RepoType",
+            "SourceCode"
+          ]
+        },
+        {
+          "required": [
+            "NoSourceSince"
+          ]
+        }
       ]
     },
     {
-      "required": [
-        "NoSourceSince"
-      ]
+      "if": {
+        "anyOf": [
+          {
+            "properties": {
+              "ArchivePolicy": {
+                "const": "0 versions"
+              }
+            },
+            "required": [
+              "ArchivePolicy"
+            ]
+          },
+          {
+            "required": [
+              "NoSourceSince"
+            ]
+          }
+        ]
+      },
+      "then": {
+        "properties": {
+          "AutoUpdateMode": {
+            "const": "None"
+          },
+          "UpdateCheckMode": {
+            "const": "None"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "anyOf": [
+          {
+            "required": [
+              "Binaries"
+            ]
+          },
+          {
+            "properties": {
+              "Builds": {
+                "contains": {
+                  "required": [
+                    "binary"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "Builds"
+            ]
+          }
+        ]
+      },
+      "then": {
+        "required": [
+          "AllowedAPKSigningKeys"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "UpdateCheckMode": {
+            "pattern": "^Tags"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "AutoUpdateMode": {
+            "type": "string",
+            "pattern": "^(None|Version( \\+.+)?)$"
+          }
+        }
+      }
     }
   ],
-  "if": {
-    "anyOf": [
-      {
-        "properties": {
-          "ArchivePolicy": {
-            "const": "0 versions"
-          }
-        },
-        "required": [
-          "ArchivePolicy"
-        ]
-      },
-      {
-        "required": [
-          "NoSourceSince"
-        ]
-      }
-    ]
-  },
-  "then": {
-    "properties": {
-      "AutoUpdateMode": {
-        "const": "None"
-      },
-      "UpdateCheckMode": {
-        "const": "None"
-      }
-    }
-  },
   "additionalProperties": false,
   "definitions": {
     "anti_features": {
