@@ -31,37 +31,21 @@ Builds:
         fixed.apk 'META-INF/services/*'
       - zipalign 4 fixed.apk out.apk
 
-  - versionName: 1.0.4
-    versionCode: 5
-    commit: cb370a3b334b8080684293e04b4689ca851215ac
-    subdir: app
-    sudo:
-      - apt-get update
-      - apt-get install -y zipalign
-    output: out.apk
-    srclibs:
-      - reproducible-apk-tools@v0.1.1
-    build:
-      - gradle assembleRelease
-      - $$reproducible-apk-tools$$/fix-newlines.py build/outputs/apk/release/*.apk
-        fixed.apk 'META-INF/services/*'
-      - zipalign 4 fixed.apk out.apk
-
   - versionName: 1.0.5
     versionCode: 6
+    disable: fails to build
     commit: 2bf07df78e0a4d642af9ebe62881a8b8726af928
     subdir: app
     sudo:
       - apt-get update
-      - apt-get install -y zipalign
-    output: out.apk
+      - apt-get install -y openjdk-17-jdk-headless
+      - update-java-alternatives -a
+    gradle:
+      - yes
     srclibs:
-      - reproducible-apk-tools@v0.1.1
-    build:
-      - gradle assembleRelease
-      - $$reproducible-apk-tools$$/fix-newlines.py build/outputs/apk/release/*.apk
-        fixed.apk 'META-INF/services/*'
-      - zipalign 4 fixed.apk out.apk
+      - reproducible-apk-tools@v0.2.3
+    postbuild: $$reproducible-apk-tools$$/inplace-fix.py --zipalign fix-newlines $$OUT$$
+        'META-INF/services/*'
 
 AllowedAPKSigningKeys: c5fc36a2d18057155a471f456216f0b1f07755f33147f938c92ea6275dced4d2
 
