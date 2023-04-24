@@ -1259,7 +1259,27 @@ Builds:
         build.gradle
     build: mvn install -f $$android-vcard$$/pom.xml -Dmaven.test.skip=true
 
+  - versionName: 2.3.2
+    versionCode: 129
+    commit: 2779c829585b49012074500a3c6248894471ee4e
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y maven
+    gradle:
+      - yes
+    srclibs:
+      - android-vcard@android-vcard-1.4
+    prebuild:
+      - echo -e "\norg.gradle.jvmargs=-Xms4g -Xmx16g -XX:MaxPermSize=16g -XX:-UseGCOverheadLimit"
+        >> ../gradle.properties
+      - find $$android-vcard$$ -name '*.jar' -delete
+      - sed -i -e '/repositories/a\        mavenLocal()' ../build.gradle
+      - sed -i -e 's/implementation fileTree.*/implementation "com.googlecode.android-vcard:android-vcard:1.4"/'
+        build.gradle
+    build: mvn install -f $$android-vcard$$/pom.xml -Dmaven.test.skip=true
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 2.3.1
-CurrentVersionCode: 128
+CurrentVersion: 2.3.2
+CurrentVersionCode: 129
