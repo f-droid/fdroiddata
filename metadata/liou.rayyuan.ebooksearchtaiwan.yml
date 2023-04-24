@@ -62,8 +62,33 @@ Builds:
         ReviewInfo()}' -e '/class/a fun showReviewDialog(activity:Activity,reviewInfo:ReviewInfo){}'
         booksearch/review/PlayStoreReviewHelper.kt
 
+  - versionName: 2.1.1
+    versionCode: 1922210102
+    commit: 141ee92615c924695553ad731187cdb16bfe02d8
+    subdir: app
+    gradle:
+      - api
+    prebuild:
+      - sed -i -e '/firebase/d' -e '/gms/d' ../build.gradle.kts build.gradle.kts
+      - sed -i -e '/Firebase/,/IN_APP_REVIEW/d' -e '/CrashlyticsExtension/,+2d' -e
+        '/ADMOB/d' -e '/localProperties.getProperty/d' build.gradle.kts
+      - sed -i -e '/Firebase/,/^    }/d' -e '/GooglePlayService/,/^    }/d' ../buildSrc/src/main/java/AppDependencies.kt
+      - sed -i -z -E -e 's|<[^>]+gms[^>]+/>||' src/main/AndroidManifest.xml src/main/res/layout/admob_view_header.xml
+      - mkdir -p src/main/java/com/google/android/play/core/review
+      - echo -e "package com.google.android.play.core.review\nclass ReviewInfo" >
+        src/main/java/com/google/android/play/core/review/ReviewInfo.kt
+      - cd src/main/java/liou/rayyuan/ebooksearchtaiwan
+      - sed -i -e '/FirebaseAnalytics/d' EBookSearchApplication.kt
+      - sed -i -e '/firebase/d' model/EventTracker.kt
+      - sed -i -e '/fun loadAds/,/^    }/d' -e '/loadAds/d' -e '/gms/d' booksearch/BookResultListFragment.kt
+      - sed -i -e '/class AdViewHolder/,/^    }/d' -e '/header -> {/,/^\s\{12\}}/d'
+        -e '/AdViewHolder/d' -e '/gms/d' booksearch/FullBookStoreResultAdapter.kt
+      - sed -i -e '/ReviewManagerFactory/d' -e 's/^ .*//' -e '/class/a fun prepareReviewInfo():ReviewInfo{return
+        ReviewInfo()}' -e '/class/a fun showReviewDialog(activity:Activity,reviewInfo:ReviewInfo){}'
+        booksearch/review/PlayStoreReviewHelper.kt
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: buildSrc/src/main/java/AppSettings.kt|VERSION_CODE\s=\s(\d+)|.|VERSION_NAME\s=\s"(.+)"
-CurrentVersion: 2.1.0
-CurrentVersionCode: 1922210101
+CurrentVersion: 2.1.1
+CurrentVersionCode: 1922210102
