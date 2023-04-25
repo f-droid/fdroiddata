@@ -1,0 +1,53 @@
+AntiFeatures:
+  - NonFreeNet
+Categories:
+  - Games
+License: GPL-3.0-only
+AuthorEmail: libretro@gmail.com
+WebSite: http://www.libretro.com
+SourceCode: https://github.com/libretro/RetroArch
+IssueTracker: https://github.com/libretro/RetroArch/issues
+Translation: https://docs.libretro.com/development/retroarch/new-translations-crowdi
+Changelog: https://github.com/libretro/RetroArch/blob/HEAD/CHANGES.md
+Donate: https://www.patreon.com/libretro
+
+RepoType: git
+Repo: https://github.com/libretro/RetroArch.git
+
+Builds:
+  - versionName: 1.15.0
+    versionCode: 1597175256
+    commit: 6616b807edea5b56683e9fbca8b003b436c22b13
+    subdir: pkg/android/phoenix
+    sudo:
+      - apt-get update
+      - apt-get install -y file
+    gradle:
+      - normal
+    rm:
+      - deps/bearssl-0.6/T0Comp.exe
+      - gfx/drivers_font_renderer/bitmap.bin
+      - pkg/apple
+      - pkg/ctr
+      - pkg/msvc-uwp
+      - vita
+      - wii
+      - wiiu
+    prebuild:
+      - curl -Lo assets.zip http://buildbot.libretro.com/assets/frontend/glui_minimal_assets.zip
+      - echo "5bb677c6e340a042562ddd019c5916c369c07da7143b912b201d1158e541dd12  assets.zip"
+        | sha256sum -c -
+      - unzip assets.zip -d 'assets'
+      - rm assets.zip
+      - sed -i -e '/versionCode System/d' -e '/versionName "${/d' build.gradle
+      - cd ../../../
+      - ./fetch-submodules.sh
+    scanignore:
+      - media/assets/rgui/font/*.bin
+      - media/libretrodb/metadat/mame/MAME 2015 XML.zip
+    ndk: r22
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: 1.15.0
+CurrentVersionCode: 1597175256
