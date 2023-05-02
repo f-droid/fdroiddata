@@ -143,7 +143,6 @@ Builds:
 
   - versionName: 1.6.1
     versionCode: 5
-    disable: fails to build
     commit: 2a42aedc24f74d262d9520bc678522c469271f10
     sudo:
       - apt-get update
@@ -151,7 +150,9 @@ Builds:
     output: fallingblocks.apk
     srclibs:
       - Godot@6fed1ffa313c6760fa88b368ae580378daaef0f0
-    prebuild: mv fdroid/export.cfg export_presets.cfg
+    prebuild:
+      - sed -i -e 's/x86=.*/x86=false/' -e 's/x86_64=.*/x86_64=false/' fdroid/export.cfg
+      - mv fdroid/export.cfg export_presets.cfg
     build:
       - export HOME=$PWD
       - cp -R $$Godot$$ godot
@@ -182,9 +183,7 @@ Builds:
       - echo "3.5.1.stable" >> ./.local/share/godot/templates/3.5.1.stable/version.txt
       - cp godot/bin/android_release.apk ./.local/share/godot/templates/3.5.1.stable/
       - ./godot/bin/godot_server.* -v --path game --export Android fallingblocks.apk
-      - find . -iname "*.apk"
-      - echo "build end"
-    ndk: r23c
+    ndk: 23.2.8568313
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
