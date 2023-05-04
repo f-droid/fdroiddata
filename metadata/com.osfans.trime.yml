@@ -323,17 +323,20 @@ Builds:
 
   - versionName: 3.2.12
     versionCode: 20230501
+    disable: https://github.com/osfans/trime/issues/1006
     commit: 31fa50fdfc5d71af84fb99f6ddcf1b5fb5fae919
     subdir: app
     submodules: true
     sudo:
       - apt-get update
-      - apt-get -y install automake g++ libtool make
+      - apt-get -y install automake g++ libtool make openjdk-17-jdk-headless
+      - update-java-alternatives -a
     gradle:
       - yes
     prebuild:
       - sdkmanager 'cmake;3.22.1'
-      - sed -i -e '/Enables building multiple APKs per ABI/,/enable true/d' build.gradle
+      - sed -i -e '/isEnable = true/d' -e 's/exec("git config user.name")/"F-Droid"/'
+        -e 's/exec("git symbolic-ref --short HEAD")/""/' build.gradle.kts
     scandelete:
       - app/src/main/jni
     ndk: r24
