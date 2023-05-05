@@ -368,8 +368,27 @@ Builds:
       - node_modules/cordova-android/framework/cordova-publish.gradle
     build: cordova build android --release -- --packageType=apk
 
+  - versionName: 8.1.6
+    versionCode: 80106
+    commit: 907dcb946f6547e034695b3f39e7d3d77d6ad63a
+    sudo:
+      - sysctl fs.inotify.max_user_watches=524288 || true
+      - curl -Lo node.tar.gz https://nodejs.org/dist/v14.17.6/node-v14.17.6-linux-x64.tar.gz
+      - echo "19e376214450e93e58687198070b4ab46e42357032ec65f23a7e35b0e86ad6e2  node.tar.gz"
+        | sha256sum -c -
+      - tar xzf node.tar.gz --strip-components=1 -C /usr/local/
+      - npm install -g npm@latest
+      - npm install -g cordova
+    output: platforms/android/app/build/outputs/apk/release/app-release-unsigned.apk
+    prebuild:
+      - sdkmanager 'platforms;android-32' 'build-tools;32.0.0'
+      - cordova platform add android
+    scandelete:
+      - node_modules/cordova-android/framework/cordova-publish.gradle
+    build: cordova build android --release -- --packageType=apk
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: fdroid_version.txt|.+,(\d+)|.|(.+),\d+
-CurrentVersion: 8.1.3
-CurrentVersionCode: 80103
+CurrentVersion: 8.1.6
+CurrentVersionCode: 80106
