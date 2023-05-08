@@ -1,0 +1,64 @@
+AntiFeatures:
+  - NonFreeNet
+Categories:
+  - Multimedia
+License: GPL-3.0-or-later
+AuthorName: Valeri Gokadze
+WebSite: https://gokadzev.github.io/Musify
+SourceCode: https://github.com/gokadzev/Musify
+IssueTracker: https://github.com/gokadzev/Musify/issues
+Changelog: https://github.com/gokadzev/Musify/releases
+
+AutoName: Musify
+
+RepoType: git
+Repo: https://github.com/gokadzev/Musify
+Binaries: https://github.com/gokadzev/Musify/releases/download/%v/Musify-fdroid.apk
+
+Builds:
+  - versionName: 5.2.0
+    versionCode: 53
+    commit: f706643df26fb55ed2d6aa9a583499d614c871bf
+    sudo:
+      - apt-get update
+      - apt-get install -y jq python3-pip
+      - pip3 install yq
+      - mkdir -p /home/runner/
+      - chown vagrant /home/runner/
+    output: build/app/outputs/flutter-apk/app-fdroid-release.apk
+    srclibs:
+      - flutter@stable
+    prebuild:
+      - mkdir -p /home/runner/work/Musify/
+      - cd ..
+      - mv com.gokadzev.musify.fdroid /home/runner/work/Musify/Musify
+      - export HOME=/home/runner
+      - pushd $HOME/work/Musify/Musify/
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export version="$(yq -r .environment.flutter pubspec.yaml | sed 's/\^//g')"
+      - pushd $$flutter$$
+      - git checkout $version
+      - popd
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+      - popd
+      - mv $HOME/work/Musify/Musify com.gokadzev.musify.fdroid
+    scandelete:
+      - .pub-cache
+    build:
+      - cd ..
+      - mv com.gokadzev.musify.fdroid /home/runner/work/Musify/Musify
+      - export HOME=/home/runner
+      - pushd $HOME/work/Musify/Musify/
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --flavor fdroid -t lib/main_fdroid.dart
+      - popd
+      - mv $HOME/work/Musify/Musify com.gokadzev.musify.fdroid
+
+AllowedAPKSigningKeys: a3fdd79dae938381b8582553b1382f96f1bc78a3b7028ffd07ec061c1842823a
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 5.2.0
+CurrentVersionCode: 53
