@@ -1235,8 +1235,41 @@ Builds:
       - ./b2 headers
     ndk: r25c
 
+  - versionName: 2023.05.08-7-FDroid
+    versionCode: 23050807
+    commit: fd0133d9f21fe08a81b43177c5aa322acee58252
+    subdir: android
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y g++ ninja-build
+      - apt-get install -t bullseye-backports cmake
+    gradle:
+      - fdroid
+    rm:
+      - iphone
+      - qt
+      - tools/shaders_compiler
+      - xcode
+    prebuild:
+      - sed -i -e '/com.google.firebase/d; /com.google.gms/d; /com.google.android.gms/d'
+        build.gradle
+      - touch secure.properties
+      - echo '<?xml version="1.0" encoding="utf-8"?><network-security-config/>' >
+        res/xml/network_security_config.xml
+      - cp ../private_default.h ../private.h
+    scanignore:
+      - data/*.bin
+    scandelete:
+      - 3party
+    build:
+      - cd ../3party/boost
+      - ./bootstrap.sh
+      - ./b2 headers
+    ndk: r25c
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags .*android$
 UpdateCheckData: android/src/fdroid/play/version.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 2023.04.02-7-FDroid
-CurrentVersionCode: 23040207
+CurrentVersion: 2023.05.08-7-FDroid
+CurrentVersionCode: 23050807
