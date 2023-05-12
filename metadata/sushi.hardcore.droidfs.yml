@@ -392,7 +392,35 @@ Builds:
     gradleprops:
       - nosplits
 
+  - versionName: 2.0.2
+    versionCode: 32
+    commit: 1b7e5904bef9586d5eae6ba29028c0ba0bf78c1e
+    subdir: app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y golang-go/bullseye-backports golang-src/bullseye-backports
+        build-essential pkg-config libssl-dev wget
+    gradle:
+      - yes
+    srclibs:
+      - OpenSSL@OpenSSL_1_1_1t
+      - FFmpeg@n6.0
+    prebuild: sed -i ':a;N;$!ba;s/maven {\n *url = uri("https:\/\/dl.google.com\/dl\/android\/maven2")\n
+        *}/google()/g' ../libpdfviewer/build.gradle.kts
+    scandelete:
+      - app/libcryfs/vendor/cryptopp/vendor_cryptopp/TestData
+      - app/libcryfs/vendor/cryptopp/vendor_cryptopp/*.zip
+    build:
+      - cd libgocryptfs
+      - OPENSSL_PATH="$$OpenSSL$$" ./build.sh
+      - cd ../ffmpeg
+      - ./build.sh $$FFmpeg$$
+    ndk: r25b
+    gradleprops:
+      - nosplits
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v[\d.]+$
-CurrentVersion: 2.0.1
-CurrentVersionCode: 31
+CurrentVersion: 2.0.2
+CurrentVersionCode: 32
