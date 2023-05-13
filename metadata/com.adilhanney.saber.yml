@@ -1303,8 +1303,52 @@ Builds:
       - submodules/flutter/bin/flutter build apk -t lib/main_fdroid.dart
     ndk: 25.2.9519653
 
+  - versionName: 0.12.4
+    versionCode: 12040
+    commit: 8d31c442c0f302af810ef257cab3b36958347dcf
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y gcc libc-dev
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - rustup@1.25.2
+    rm:
+      - .github
+      - assets_raw
+      - flatpak
+      - installers
+      - ios
+      - linux
+      - macos
+      - packages/onyxsdk_pen
+      - snap
+      - windows
+    prebuild:
+      - ./patches/remove_proprietary_dependencies.sh
+      - ./patches/remove_request_install_packages_permission.sh
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - submodules/flutter/bin/flutter config --no-analytics
+      - submodules/flutter/bin/flutter pub get
+    scanignore:
+      - submodules/flutter/packages/flutter_tools/gradle/flutter.gradle
+      - submodules/flutter/bin/cache
+    scandelete:
+      - submodules/flutter
+      - .pub-cache
+    build:
+      - $$rustup$$/rustup-init.sh -y
+      - source $HOME/.cargo/env
+      - export ANDROID_NDK_ROOT=$$NDK$$
+      - rustup target add armv7-linux-androideabi
+      - rustup target add aarch64-linux-android
+      - rustup target add x86_64-linux-android
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - submodules/flutter/bin/flutter build apk -t lib/main_fdroid.dart
+    ndk: 25.2.9519653
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 0.12.3
-CurrentVersionCode: 12031
+CurrentVersion: 0.12.4
+CurrentVersionCode: 12040
