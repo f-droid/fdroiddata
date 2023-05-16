@@ -150,8 +150,36 @@ Builds:
         lib/cryptographic-id-protocol/cryptographic_id.proto
       - flutter build apk --release
 
+  - versionName: 0.4.1
+    versionCode: 11
+    commit: 0b2f12141d568785b7aabc7f8352473a92a09eea
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y protobuf-compiler
+    output: build/app/outputs/flutter-apk/app-release.apk
+    prebuild:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export PATH=$PATH:$(pwd)/flutter/bin
+      - mkdir -p .dart_tool/flutter_gen/protobuf/
+      - flutter config --no-analytics
+      - flutter pub global activate protoc_plugin
+      - flutter pub get
+    scanignore:
+      - flutter/bin/cache
+      - flutter/packages/flutter_tools/gradle/flutter.gradle
+    scandelete:
+      - flutter
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export PATH=$PATH:$(pwd)/flutter/bin:${PUB_CACHE}/bin
+      - protoc --proto_path=lib/cryptographic-id-protocol --dart_out=.dart_tool/flutter_gen/protobuf
+        lib/cryptographic-id-protocol/cryptographic_id.proto
+      - flutter build apk --release
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 0.4.0
-CurrentVersionCode: 10
+CurrentVersion: 0.4.1
+CurrentVersionCode: 11
