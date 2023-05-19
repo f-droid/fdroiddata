@@ -14,7 +14,7 @@
 ## Suggested
 <!--These suggestions may be difficult to apply on your app. Please have a try.-->
 * [ ] External repos are added as git submodules instead of srclibs <!--You can update git submodules without opening an MR in this repo and the submodule is covered by our scanner.-->
-* [ ] Enable [Reproducible Builds](https://f-droid.org/docs/Reproducible_Builds) <!--We'll use your signature so that the users can switch between different channels.-->
+* [ ] Enable [Reproducible Builds](https://f-droid.org/docs/Reproducible_Builds) <!--We'll use your signature for improved security/reliability, also allowing users to switch between different channels.-->
 * [ ] Multiple apks for native code <!--If your app has native code and the size is large, please consider building multiple apks instead of one universal apk.-->
 
 ---------------------
