@@ -67,18 +67,6 @@ Builds:
       - sed -i 's@\(android.library.reference.2=\).*@\1$$PullToRefresh$$@' project.properties
       - cp libs/android-support-v4.jar $$ActionBarSherlock$$/libs/
 
-  - versionName: 0.4.10
-    versionCode: 33
-    disable: missing libs 0.4.10
-    commit: unknown - see disabled
-    srclibs:
-      - ActionBarSherlock@4.4.0
-      - PullToRefresh@319024754481f23e
-    prebuild:
-      - echo "android.library.reference.1=$$ActionBarSherlock$$" >> project.properties
-      - echo "android.library.reference.2=$$PullToRefresh$$" >> project.properties
-      - cp libs/android-support-v4.jar $$ActionBarSherlock$$/libs/
-
   - versionName: 0.5.2
     versionCode: 37
     commit: 0.5.2
@@ -122,11 +110,6 @@ Builds:
       - $$SDK$$/tools/android update project -p .)
       - cp libs/android-support-v4.jar $$ActionBarSherlock$$/libs/
 
-  - versionName: 0.5.5
-    versionCode: 40
-    disable: beta
-    commit: v0.5.5
-
   - versionName: 0.5.8
     versionCode: 43
     commit: v0.5.8
@@ -153,34 +136,6 @@ Builds:
       - yes
     rm:
       - News-Android-App/src/main/libs/gson-*-*.jar
-
-  - versionName: 0.6.9.5
-    versionCode: 59
-    disable: beta
-
-  - versionName: 0.7.1
-    versionCode: 65
-    disable: broken on bs
-    commit: 926a5dc5d42eb97b2dbe857750c57070662fd3ab
-    subdir: News-Android-App
-    submodules: true
-    gradle:
-      - yes
-    rm:
-      - News-Android-App/src/main/libs/*jar
-    prebuild:
-      - sed -i -e '/src\/main\/libs/d' -e '$d' build.gradle
-      - echo -e "    compile 'org.jsoup:jsoup:1.7.2'\n    compile 'com.google.code.gson:gson:2.2.4'\n}"
-        >> build.gradle
-      - sed -i -e '/MIN_SDK/d' ../gradle.properties
-      - echo -e "\nANDROID_BUILD_MIN_SDK_VERSION=11\nMIN_SDK=11" >> ../gradle.properties
-      - cat ../gradle.properties
-    build:
-      - pushd ../ShowcaseView/library
-      - gradle assembleRelease
-      - mv build/outputs/aar/library-50101.aar build/outputs/aar/library.aar
-      - popd
-      - gradle build
 
   - versionName: 0.7.4
     versionCode: 68
@@ -396,25 +351,6 @@ Builds:
       - sed -i -e '/MIN_SDK/d' ../gradle.properties
       - echo -e "\nANDROID_BUILD_MIN_SDK_VERSION=11\nMIN_SDK=11" >> ../gradle.properties
 
-  - versionName: 0.9.4
-    versionCode: 87
-    disable: crashes (fixed in 0.9.5)
-    commit: b9c885eb20732331f7c5081004f39a26f9fd6db5
-    subdir: News-Android-App
-    submodules: true
-    init:
-      - sed -i -e '/ANDROID_BUILD_TOOLS_VERSION/d' -e '/ANDROID_BUILD_SDK_VERSION/abuildToolsVersion
-        "21"' build.gradle ../ownCloud-Account-Importer/build.gradle ../Changeloglib/ChangeLogLibrary/build.gradle
-      - sed -i 's;BUILD_TOOLS_VERSION;"21";' ../ShowcaseView/library/build.gradle
-      - sed -i 's/runProguard false/minifyEnabled false/g' ../ownCloud-Account-Importer/build.gradle
-    gradle:
-      - yes
-    prebuild:
-      - sed -i -e "/freemarker/acompile 'org.jsoup:jsoup:1.7.2'\ncompile 'com.google.code.gson:gson:2.2.4'"
-        build.gradle
-      - sed -i -e '/MIN_SDK/d' ../gradle.properties
-      - echo -e "\nANDROID_BUILD_MIN_SDK_VERSION=11\nMIN_SDK=11" >> ../gradle.properties
-
   - versionName: 0.9.5.2
     versionCode: 90
     commit: v.0.9.5.2
@@ -464,15 +400,6 @@ Builds:
   - versionName: 0.9.7.3
     versionCode: 100
     commit: v.0.9.7.3
-    subdir: News-Android-App
-    submodules: true
-    gradle:
-      - yes
-
-  - versionName: 0.9.7.5
-    versionCode: 102
-    disable: untrusted maven repo
-    commit: v.0.9.7.5
     subdir: News-Android-App
     submodules: true
     gradle:
@@ -786,35 +713,6 @@ Builds:
       - mkdir libs
       - mv $$JavaOptionClass$$/target/option-1.3-SNAPSHOT.jar libs/option-1.3.jar
 
-  - versionName: 0.9.9.4
-    versionCode: 116
-    disable: youtube jar, see https://github.com/owncloud/News-Android-App/issues/551
-    commit: v.0.9.9.4
-    subdir: News-Android-App
-    submodules: true
-    init:
-      - sed -i -e '/com.nbsp:library/d' build.gradle
-      - sed -i -e '/com.gu:option/d' build.gradle
-      - sed -i -e '/maven { url/d' build.gradle
-      - sed -i "/repositories {/a flatDir { dirs 'libs' }" build.gradle
-      - sed -i "/dependencies {/a compile project(':MaterialFilePicker:library')"
-        build.gradle
-      - sed -i "$ ainclude ':MaterialFilePicker:library'" ../settings.gradle
-    gradle:
-      - yes
-    srclibs:
-      - MaterialFilePicker@6817d91
-      - JavaOptionClass@e933c3a
-    prebuild:
-      - rm -rf $$MaterialFilePicker$$/app
-      - cp -r $$MaterialFilePicker$$ ../
-      - sed -i -e '/apply from/d' ../MaterialFilePicker/library/build.gradle
-      - pushd $$JavaOptionClass$$
-      - mvn package -Dmaven.compiler.source=1.6 -Dmaven.compiler.target=1.6
-      - popd
-      - mkdir libs
-      - mv $$JavaOptionClass$$/target/option-1.3-SNAPSHOT.jar libs/option-1.3.jar
-
   - versionName: 0.9.9.8
     versionCode: 120
     commit: v.0.9.9.8
@@ -989,70 +887,9 @@ Builds:
       - mkdir libs
       - mv $$JavaOptionClass$$/target/option-1.3-SNAPSHOT.jar libs/option-1.3.jar
 
-  - versionName: 0.9.9.15
-    versionCode: 129
-    disable: 'error: YoutubePlaybackService is not abstract and does not override
-        abstract method playbackSpeedChanged(float) in PlaybackService'
-    commit: v.0.9.9.15
-    subdir: News-Android-App
-    submodules: true
-    init:
-      - sed -i -e '/com.nbsp:library/d' build.gradle
-      - sed -i -e '/com.gu:option/d' build.gradle
-      - sed -i -e '/maven { url/d' build.gradle
-      - sed -i -e '/signingConfigs {/,+3d' build.gradle
-      - sed -i "/repositories {/a flatDir { dirs 'libs' }" build.gradle
-      - sed -i "/dependencies {/a compile project(':MaterialFilePicker:library')"
-        build.gradle
-      - sed -i "$ ainclude ':MaterialFilePicker:library'" ../settings.gradle
-    gradle:
-      - oss
-    srclibs:
-      - MaterialFilePicker@13920fc
-      - JavaOptionClass@e933c3a
-    prebuild:
-      - rm -rf $$MaterialFilePicker$$/app
-      - cp -r $$MaterialFilePicker$$ ../
-      - sed -i -e '/apply from/d' ../MaterialFilePicker/library/build.gradle
-      - pushd $$JavaOptionClass$$
-      - mvn package -Dmaven.compiler.source=1.6 -Dmaven.compiler.target=1.6
-      - popd
-      - mkdir libs
-      - mv $$JavaOptionClass$$/target/option-1.3-SNAPSHOT.jar libs/option-1.3.jar
-
   - versionName: 0.9.9.16
     versionCode: 130
     commit: v.0.9.9.16.1
-    subdir: News-Android-App
-    submodules: true
-    init:
-      - sed -i -e '/com.nbsp:library/d' build.gradle
-      - sed -i -e '/com.gu:option/d' build.gradle
-      - sed -i -e '/maven { url/d' build.gradle
-      - sed -i -e '/signingConfigs {/,+3d' build.gradle
-      - sed -i "/repositories {/a flatDir { dirs 'libs' }" build.gradle
-      - sed -i "/dependencies {/a compile project(':MaterialFilePicker:library')"
-        build.gradle
-      - sed -i "$ ainclude ':MaterialFilePicker:library'" ../settings.gradle
-    gradle:
-      - oss
-    srclibs:
-      - MaterialFilePicker@13920fc
-      - JavaOptionClass@e933c3a
-    prebuild:
-      - rm -rf $$MaterialFilePicker$$/app
-      - cp -r $$MaterialFilePicker$$ ../
-      - sed -i -e '/apply from/d' ../MaterialFilePicker/library/build.gradle
-      - pushd $$JavaOptionClass$$
-      - mvn package -Dmaven.compiler.source=1.6 -Dmaven.compiler.target=1.6
-      - popd
-      - mkdir libs
-      - mv $$JavaOptionClass$$/target/option-1.3-SNAPSHOT.jar libs/option-1.3.jar
-
-  - versionName: 0.9.9.18
-    versionCode: 133
-    disable: No url found for submodule path 'ownCloud-Account-Importer' in .gitmodules
-    commit: v.0.9.9.18
     subdir: News-Android-App
     submodules: true
     init:
@@ -1224,64 +1061,6 @@ Builds:
   - versionName: 0.9.9.25
     versionCode: 141
     commit: v.0.9.9.25
-    subdir: News-Android-App
-    init:
-      - sed -i -e '/com.nbsp:library/d' build.gradle
-      - sed -i -e '/com.gu:option/d' build.gradle
-      - sed -i -e '/guardian.github.com/d; /dl.bintray.com/d' build.gradle
-      - sed -i -e '/signingConfigs {/,+3d' build.gradle
-      - sed -i "/repositories {/a\    flatDir { dirs 'libs' }" build.gradle
-      - sed -i "/dependencies {/a\    compile project(':MaterialFilePicker:library')"
-        build.gradle
-      - sed -i "$ ainclude ':MaterialFilePicker:library'" ../settings.gradle
-    gradle:
-      - oss
-    srclibs:
-      - MaterialFilePicker@13920fc
-      - JavaOptionClass@e933c3a
-    prebuild:
-      - rm -rf $$MaterialFilePicker$$/app
-      - cp -r $$MaterialFilePicker$$ ../
-      - sed -i -e '/apply from/d' ../MaterialFilePicker/library/build.gradle
-      - pushd $$JavaOptionClass$$
-      - mvn package -Dmaven.compiler.source=1.6 -Dmaven.compiler.target=1.6 -DskipTests
-      - popd
-      - mkdir libs
-      - mv $$JavaOptionClass$$/target/option-1.3-SNAPSHOT.jar libs/option-1.3.jar
-
-  - versionName: 0.9.9.26
-    versionCode: 142
-    disable: Could not find com.github.nextcloud:Android-SingleSignOn:fix-account-not-found-SNAPSHOT
-    commit: v.0.9.9.26
-    subdir: News-Android-App
-    init:
-      - sed -i -e '/com.nbsp:library/d' build.gradle
-      - sed -i -e '/com.gu:option/d' build.gradle
-      - sed -i -e '/guardian.github.com/d; /dl.bintray.com/d' build.gradle
-      - sed -i -e '/signingConfigs {/,+3d' build.gradle
-      - sed -i "/repositories {/a\    flatDir { dirs 'libs' }" build.gradle
-      - sed -i "/dependencies {/a\    compile project(':MaterialFilePicker:library')"
-        build.gradle
-      - sed -i "$ ainclude ':MaterialFilePicker:library'" ../settings.gradle
-    gradle:
-      - oss
-    srclibs:
-      - MaterialFilePicker@13920fc
-      - JavaOptionClass@e933c3a
-    prebuild:
-      - rm -rf $$MaterialFilePicker$$/app
-      - cp -r $$MaterialFilePicker$$ ../
-      - sed -i -e '/apply from/d' ../MaterialFilePicker/library/build.gradle
-      - pushd $$JavaOptionClass$$
-      - mvn package -Dmaven.compiler.source=1.6 -Dmaven.compiler.target=1.6 -DskipTests
-      - popd
-      - mkdir libs
-      - mv $$JavaOptionClass$$/target/option-1.3-SNAPSHOT.jar libs/option-1.3.jar
-
-  - versionName: 0.9.9.31
-    versionCode: 150
-    disable: fails to build
-    commit: v.0.9.9.31
     subdir: News-Android-App
     init:
       - sed -i -e '/com.nbsp:library/d' build.gradle
@@ -1829,31 +1608,6 @@ Builds:
     scanignore:
       - News-Android-App/libs/option-1.3.jar
 
-  - versionName: 0.9.9.75
-    versionCode: 178
-    disable: https://github.com/nextcloud/news-android/issues/1109
-    commit: 262c98e5d4835df59349806b938e96f6ecc6f307
-    subdir: News-Android-App
-    sudo:
-      - apt-get update
-      - apt-get install -y openjdk-11-jdk-headless
-      - update-alternatives --auto java
-    init: sed -i -e '/signingConfigs {/d' build.gradle
-    gradle:
-      - oss
-    srclibs:
-      - JavaOptionClass@e933c3a
-    prebuild:
-      - sed -i -e "/repositories {/a flatDir { dirs 'libs' }" -e '/guardian.github.io/d'
-        build.gradle
-      - pushd $$JavaOptionClass$$
-      - mvn package -Dmaven.compiler.source=1.6 -Dmaven.compiler.target=1.6 -DskipTests
-      - popd
-      - mkdir libs
-      - mv $$JavaOptionClass$$/target/option-1.3-SNAPSHOT.jar libs/option-1.3.jar
-    scanignore:
-      - News-Android-App/libs/option-1.3.jar
-
   - versionName: 0.9.9.76
     versionCode: 179
     commit: f4897312a2bf87d7136f2d33ba8d5ca454153eca
@@ -1924,6 +1678,10 @@ Builds:
     versionCode: 184
     commit: 90245b0a419d75f544963a71cdd2b76ea4914eff
     subdir: News-Android-App
+    sudo:
+      - apt-get update
+      - apt-get install -y openjdk-17-jdk-headless
+      - update-java-alternatives -a
     init: sed -i -e '/signingConfigs {/d' build.gradle
     gradle:
       - oss
