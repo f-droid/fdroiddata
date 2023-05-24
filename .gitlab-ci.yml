@@ -188,6 +188,9 @@ schema validation:
     - pip install check-jsonschema
   script:
     - check-jsonschema --check-metaschema schemas/metadata.json || exit 1
+    - *get_target_source_refs
+    - git diff --exit-code --name-only "${TARGET_REF}...${SOURCE_REF}" schemas/metadata.json
+          || { check-jsonschema --schemafile schemas/metadata.json metadata/*.yml || exit 1; exit; }
     - set -xe
     - *get_changed_apps
     - if [ -z "$CHANGED" ]; then exit; fi
