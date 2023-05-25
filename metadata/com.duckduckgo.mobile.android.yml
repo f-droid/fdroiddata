@@ -1966,11 +1966,43 @@ Builds:
       - cp $$libsodium$$/libsodium-android-i686/lib/libsodium.so sync/sync-lib/src/main/cpp/third-party/android.x86/libsodium.so
     ndk: r21e
 
+  - versionName: 5.158.2
+    versionCode: 51582000
+    commit: 5.158.2
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y automake libtool make
+    gradle:
+      - fdroid
+    output: app/build/outputs/apk/fdroid/release/duckduckgo-$$VERSION$$-fdroid-release-unsigned.apk
+    srclibs:
+      - libsodium@ee009287afd480b60a9a4d75b19afdc0f705e9d9
+    rm:
+      - app/src/play/res/raw/https_mobile_v2_bloom.bin
+    prebuild: sed -i -e '/installreferrer/d' statistics/build.gradle
+    scandelete:
+      - app/src/androidTest
+      - sync/sync-lib/src/main/cpp/third-party
+    build:
+      - pushd $$libsodium$$
+      - ./autogen.sh -s
+      - ./dist-build/android-armv7-a.sh
+      - ./dist-build/android-armv8-a.sh
+      - ./dist-build/android-x86.sh
+      - ./dist-build/android-x86_64.sh
+      - popd
+      - cp $$libsodium$$/libsodium-android-armv7-a/lib/libsodium.so sync/sync-lib/src/main/cpp/third-party/android.armeabi-v7a/libsodium.so
+      - cp $$libsodium$$/libsodium-android-westmere/lib/libsodium.so sync/sync-lib/src/main/cpp/third-party/android.x86_64/libsodium.so
+      - cp $$libsodium$$/libsodium-android-armv8-a+crypto/lib/libsodium.so sync/sync-lib/src/main/cpp/third-party/android.arm64-v8a/libsodium.so
+      - cp $$libsodium$$/libsodium-android-i686/lib/libsodium.so sync/sync-lib/src/main/cpp/third-party/android.x86/libsodium.so
+    ndk: r21e
+
 MaintainerNotes: |-
     Cannot use AUM/UCM because version code and version name are dynamic.
     Using a custom fladle build, see https://gitlab.com/fdroid/fdroiddata/-/merge_requests/10831#note_897065716
 
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: 5.157.0
-CurrentVersionCode: 51570000
+CurrentVersion: 5.158.2
+CurrentVersionCode: 51582000
