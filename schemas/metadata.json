@@ -736,25 +736,38 @@
   "definitions": {
     "anti_features": {
       "$id": "#antifeatures",
-      "type": "array",
-      "items": {
-        "type": "string",
-        "enum": [
-          "Ads",
-          "Tracking",
-          "NonFreeNet",
-          "NonFreeAdd",
-          "NonFreeDep",
-          "UpstreamNonFree",
-          "NonFreeAssets",
-          "NSFW",
-          "KnownVuln",
-          "ApplicationDebuggable",
-          "NoSourceSince"
-        ]
-      },
-      "uniqueItems": true,
-      "minItems": 1
+      "oneOf": [
+        {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "Ads",
+              "ApplicationDebuggable",
+              "KnownVuln",
+              "NonFreeAdd",
+              "NonFreeAssets",
+              "NonFreeDep",
+              "NonFreeNet",
+              "NoSourceSince",
+              "NSFW",
+              "UpstreamNonFree",
+              "Tracking"
+            ]
+          },
+          "uniqueItems": true,
+          "minItems": 1
+        },
+        {
+          "type": "object",
+          "patternProperties": {
+            "^(Ads|Tracking|ApplicationDebuggable|KnownVuln|NonFreeAdd|NonFreeAssets|NonFreeDep|NonFreeNet|NoSourceSince|NSFW|UpstreamNonFree|Tracking)$": {
+              "$ref": "#/definitions/localized_string"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
     },
     "string_list": {
       "anyOf": [
@@ -768,6 +781,15 @@
           }
         }
       ]
+    },
+    "localized_string": {
+      "type": "object",
+      "patternProperties": {
+        "^[a-z]{2,3}(-([A-Z][a-zA-Z]+|\\d+|[a-z]+))*$": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
     },
     "url": {
       "type": "string",
