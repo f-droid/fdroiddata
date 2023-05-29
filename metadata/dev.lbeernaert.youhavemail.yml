@@ -1,0 +1,47 @@
+AntiFeatures:
+  - NonFreeNet
+Categories:
+  - Internet
+License: AGPL-3.0-only
+AuthorName: Leander Beernaert
+SourceCode: https://github.com/LeanderBB/you-have-mail
+IssueTracker: https://github.com/LeanderBB/you-have-mail/issues
+
+Name: You Have Mail
+AutoName: You Have Mail
+
+RepoType: git
+Repo: https://github.com/LeanderBB/you-have-mail.git
+Binaries: https://github.com/LeanderBB/you-have-mail/releases/download/v%v/you-have-mail-v%v.apk
+
+Builds:
+  - versionName: 0.7.2
+    versionCode: 20
+    commit: a5e28962ed91ced8d74b8624b319dca9630bdbed
+    subdir: you-have-mail-android
+    sudo:
+      - apt-get update
+      - apt-get install -y automake clang-11 gcc-multilib libclang-11-dev libtool
+        make pkg-config python-is-python3
+      - curl -Lso go.tar.gz https://go.dev/dl/go1.20.4.linux-amd64.tar.gz
+      - echo "698ef3243972a51ddb4028e4a1ac63dc6d60821bf18e59a807e051fee0a385bd go.tar.gz"
+        | sha256sum -c -
+      - tar xzf go.tar.gz --strip-components=1 -C /usr/local/
+    output: app/build/outputs/apk/release/app-release-unsigned.apk
+    srclibs:
+      - rustup@1.26.0
+    build:
+      - $$rustup$$/rustup-init.sh -y
+      - source $HOME/.cargo/env
+      - rustup install 1.69.0
+      - rustup target add x86_64-linux-android
+      - rustup target add aarch64-linux-android
+      - gradle assembleRelease
+    ndk: 25.2.9519653
+
+AllowedAPKSigningKeys: 1bb4b343aa705f49b73b3ef489c987dd2e2f684cc1b6eb49f625bcbf6c8f01ee
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: 0.7.2
+CurrentVersionCode: 20
