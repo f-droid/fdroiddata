@@ -14,11 +14,11 @@ for f in glob.glob('metadata/*.yml'):
     with open(f) as fp:
         raw = fp.read()
         data = yaml.safe_load(raw)
-    archive_policy = data.get('ArchivePolicy')
+    archive_policy = data.get('ArchivePolicy', 3)
     if (
         'Disabled' not in data
         and 'Summary' in data
-        and (archive_policy is None or not archive_policy.startswith('0 '))
+        and archive_policy > 0
     ):
         en_US_dir = f[:-4] + '/en-US/'
         os.makedirs(en_US_dir, exist_ok=True)
