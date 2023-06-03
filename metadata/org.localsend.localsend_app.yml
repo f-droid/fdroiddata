@@ -268,10 +268,46 @@ Builds:
       - popd
       - mv /tmp/build org.localsend.localsend_app
 
+  - versionName: 1.10.0
+    versionCode: 32
+    commit: c1cb574ae2323be12bf621b3a87d9302596ecefa
+    submodules: true
+    output: build/app/outputs/flutter-apk/app-release.apk
+    rm:
+      - ios
+      - macos
+      - linux
+      - windows
+      - web
+    prebuild:
+      - cd ..
+      - mv org.localsend.localsend_app /tmp/build
+      - pushd /tmp/build/
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - submodules/flutter/bin/flutter config --no-analytics
+      - submodules/flutter/bin/flutter pub get
+      - popd
+      - mv /tmp/build org.localsend.localsend_app
+    scanignore:
+      - submodules/flutter/packages/flutter_tools/gradle/flutter.gradle
+      - submodules/flutter/bin/cache
+    scandelete:
+      - submodules/flutter
+      - .pub-cache
+    build:
+      - cd ..
+      - mv org.localsend.localsend_app /tmp/build
+      - pushd /tmp/build/
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - submodules/flutter/bin/flutter pub run build_runner build -d
+      - submodules/flutter/bin/flutter build apk
+      - popd
+      - mv /tmp/build org.localsend.localsend_app
+
 AllowedAPKSigningKeys: 3220c353a73cfbd0c2f3052471c445324cf452bcba26de1c473a52fe5c44e1d6
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 1.9.1
-CurrentVersionCode: 31
+CurrentVersion: 1.10.0
+CurrentVersionCode: 32
