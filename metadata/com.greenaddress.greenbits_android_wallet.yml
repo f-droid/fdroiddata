@@ -18,7 +18,7 @@ Description: |-
     With Blockstream Green, you get all three.
 
 RepoType: git
-Repo: https://github.com/blockstream/green_android
+Repo: https://github.com/blockstream/green_android.git
 
 Builds:
   - versionName: '1.33'
@@ -2280,18 +2280,24 @@ Builds:
 
   - versionName: 4.0.7
     versionCode: 22000407
+    disable: https://github.com/Blockstream/green_android/issues/173
     commit: 6cac335369df2905c6a15e1370ac67f22ba4f3ff
     timeout: 25200
     subdir: green
     sudo:
       - apt-get update
-      - apt-get install -y make clang jq libffi-dev virtualenv swig autoconf automake
-        libtool cmake pkg-config
+      - apt-get install -y automake clang cmake jq libffi-dev libtool make pkg-config
+        swig virtualenv
+      - apt-get install -y openjdk-17-jdk-headless
+      - update-java-alternatives -a
     gradle:
       - production
     srclibs:
       - rustup@1.25.2
-    prebuild: sed -i -e '/signingConfigs/,/^            }/d' build.gradle
+    prebuild:
+      - sed -i -e '/mvn.breez/d' ../build.gradle.kts
+      - sed -i -e '/signingConfigs {/,+8d' -e '/signingConfigs.getByName/,+3d' -e
+        '/versionNameSuffix/d' build.gradle.kts
     build:
       - $$rustup$$/rustup-init.sh -y
       - source $HOME/.cargo/env
