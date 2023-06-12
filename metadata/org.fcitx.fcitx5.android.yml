@@ -286,43 +286,175 @@ Builds:
     gradleprops:
       - buildABI=x86
 
-  - versionName: 0.0.5-0-g679ab7db
-    versionCode: 34
-    disable: not reproducible
-    commit: 679ab7dbcf3ea21af1ba4785acbb591dedb5b9de
+  - versionName: 0.0.6-0-g024241cf
+    versionCode: 41
+    commit: 024241cff19ca4bd79a3a6df511053c4c3aada29
     subdir: app
     submodules: true
     sudo:
       - apt-get update
       - apt-get install -y g++ make cmake xz-utils bzip2 extra-cmake-modules gettext
-        ghc libghc-shake-dev opencc libghc-js-flot-data haskell-js-dgtable-utils
+        ghc libghc-shake-dev opencc libghc-js-flot-data haskell-js-dgtable-utils automake
+        libtool openjdk-17-jdk-headless
+      - update-java-alternatives -a
       - apt-get install -y -t bullseye-backports libime-bin fcitx5-modules
     gradle:
       - yes
-    binary: https://github.com/fcitx5-android/fcitx5-android/releases/download/0.0.5/org.fcitx.fcitx5.android-%v-x86_64-release.apk
+    binary: https://github.com/fcitx5-android/fcitx5-android/releases/download/0.0.6/org.fcitx.fcitx5.android-%v-armeabi-v7a-release.apk
     srclibs:
-      - fcitx5-android-prebuilder@e919646e5561aaaad34f87664819dfb1f9a0bc52
+      - fcitx5-android-prebuilder@915bcacb0f21b842e1f888ade729038666987cdc
     rm:
-      - app/src/main/cpp/prebuilt
+      - lib/fcitx5/src/main/cpp/prebuilt
     prebuild:
-      - sdkmanager 'cmake;3.22.1'
-      - buildTimestamp=$(curl -L https://github.com/fcitx5-android/fcitx5-android/releases/download/$(echo
-        $$VERSION$$ | sed 's/-.*//')/build-metadata.json | sed -n -E 's/.*timestamp.*"(.*)"$/\1/p')
+      - sdkmanager 'cmake;3.22.1' 'ndk;25.0.8775105'
+      - buildTimestamp=$(curl -L https://github.com/fcitx5-android/fcitx5-android/releases/download/0.0.6/build-metadata.json
+        | sed -n -E 's/.*timestamp.*"(.*)"$/\1/p')
       - echo -e "\nbuildTimestamp=$buildTimestamp" >> ../gradle.properties
       - sed -i -e '/ImportQualifiedPost/d' -e 's/import \(.*\) qualified as/import
         qualified \1 as/g' $$fcitx5-android-prebuilder$$/Main.hs
     scanignore:
-      - app/src/main/cpp/fcitx5/src/modules/unicode/charselectdata
+      - lib/fcitx5/src/main/cpp/fcitx5/src/modules/unicode/charselectdata
+    scandelete:
+      - build-logic/convention/build
     build:
       - pushd $$fcitx5-android-prebuilder$$
       - mkdir build
       - cd build
-      - ABI=x86_64 ANDROID_NDK_ROOT=$$NDK$$ CMAKE_VERSION=3.22.1 ANDROID_PLATFORM=23
+      - ABI=armeabi-v7a ANDROID_NDK_ROOT=$$NDK$$/../25.0.8775105 CMAKE_VERSION=3.22.1
+        ANDROID_PLATFORM=23 COMP_SPELL_DICT=/usr/lib/x86_64-linux-gnu/fcitx5/libexec/comp-spell-dict
+        runghc ../Main.hs -j everything
+      - popd
+      - mv $$fcitx5-android-prebuilder$$/build ../lib/fcitx5/src/main/cpp/prebuilt
+    ndk: 25.2.9519653
+    gradleprops:
+      - buildABI=armeabi-v7a
+
+  - versionName: 0.0.6-0-g024241cf
+    versionCode: 42
+    commit: 024241cff19ca4bd79a3a6df511053c4c3aada29
+    subdir: app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y g++ make cmake xz-utils bzip2 extra-cmake-modules gettext
+        ghc libghc-shake-dev opencc libghc-js-flot-data haskell-js-dgtable-utils automake
+        libtool openjdk-17-jdk-headless
+      - update-java-alternatives -a
+      - apt-get install -y -t bullseye-backports libime-bin fcitx5-modules
+    gradle:
+      - yes
+    binary: https://github.com/fcitx5-android/fcitx5-android/releases/download/0.0.6/org.fcitx.fcitx5.android-%v-arm64-v8a-release.apk
+    srclibs:
+      - fcitx5-android-prebuilder@915bcacb0f21b842e1f888ade729038666987cdc
+    rm:
+      - lib/fcitx5/src/main/cpp/prebuilt
+    prebuild:
+      - sdkmanager 'cmake;3.22.1' 'ndk;25.0.8775105'
+      - buildTimestamp=$(curl -L https://github.com/fcitx5-android/fcitx5-android/releases/download/0.0.6/build-metadata.json
+        | sed -n -E 's/.*timestamp.*"(.*)"$/\1/p')
+      - echo -e "\nbuildTimestamp=$buildTimestamp" >> ../gradle.properties
+      - sed -i -e '/ImportQualifiedPost/d' -e 's/import \(.*\) qualified as/import
+        qualified \1 as/g' $$fcitx5-android-prebuilder$$/Main.hs
+    scanignore:
+      - lib/fcitx5/src/main/cpp/fcitx5/src/modules/unicode/charselectdata
+    scandelete:
+      - build-logic/convention/build
+    build:
+      - pushd $$fcitx5-android-prebuilder$$
+      - mkdir build
+      - cd build
+      - ABI=arm64-v8a ANDROID_NDK_ROOT=$$NDK$$/../25.0.8775105 CMAKE_VERSION=3.22.1
+        ANDROID_PLATFORM=23 COMP_SPELL_DICT=/usr/lib/x86_64-linux-gnu/fcitx5/libexec/comp-spell-dict
+        runghc ../Main.hs -j everything
+      - popd
+      - mv $$fcitx5-android-prebuilder$$/build ../lib/fcitx5/src/main/cpp/prebuilt
+    ndk: 25.2.9519653
+    gradleprops:
+      - buildABI=arm64-v8a
+
+  - versionName: 0.0.6-0-g024241cf
+    versionCode: 43
+    commit: 024241cff19ca4bd79a3a6df511053c4c3aada29
+    subdir: app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y g++ make cmake xz-utils bzip2 extra-cmake-modules gettext
+        ghc libghc-shake-dev opencc libghc-js-flot-data haskell-js-dgtable-utils automake
+        libtool openjdk-17-jdk-headless
+      - update-java-alternatives -a
+      - apt-get install -y -t bullseye-backports libime-bin fcitx5-modules
+    gradle:
+      - yes
+    binary: https://github.com/fcitx5-android/fcitx5-android/releases/download/0.0.6/org.fcitx.fcitx5.android-%v-x86-release.apk
+    srclibs:
+      - fcitx5-android-prebuilder@915bcacb0f21b842e1f888ade729038666987cdc
+    rm:
+      - lib/fcitx5/src/main/cpp/prebuilt
+    prebuild:
+      - sdkmanager 'cmake;3.22.1' 'ndk;25.0.8775105'
+      - buildTimestamp=$(curl -L https://github.com/fcitx5-android/fcitx5-android/releases/download/0.0.6/build-metadata.json
+        | sed -n -E 's/.*timestamp.*"(.*)"$/\1/p')
+      - echo -e "\nbuildTimestamp=$buildTimestamp" >> ../gradle.properties
+      - sed -i -e '/ImportQualifiedPost/d' -e 's/import \(.*\) qualified as/import
+        qualified \1 as/g' $$fcitx5-android-prebuilder$$/Main.hs
+    scanignore:
+      - lib/fcitx5/src/main/cpp/fcitx5/src/modules/unicode/charselectdata
+    scandelete:
+      - build-logic/convention/build
+    build:
+      - pushd $$fcitx5-android-prebuilder$$
+      - mkdir build
+      - cd build
+      - ABI=x86 ANDROID_NDK_ROOT=$$NDK$$/../25.0.8775105 CMAKE_VERSION=3.22.1 ANDROID_PLATFORM=23
         COMP_SPELL_DICT=/usr/lib/x86_64-linux-gnu/fcitx5/libexec/comp-spell-dict runghc
         ../Main.hs -j everything
       - popd
-      - mv $$fcitx5-android-prebuilder$$/build src/main/cpp/prebuilt
-    ndk: r25
+      - mv $$fcitx5-android-prebuilder$$/build ../lib/fcitx5/src/main/cpp/prebuilt
+    ndk: 25.2.9519653
+    gradleprops:
+      - buildABI=x86
+
+  - versionName: 0.0.6-0-g024241cf
+    versionCode: 44
+    commit: 024241cff19ca4bd79a3a6df511053c4c3aada29
+    subdir: app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y g++ make cmake xz-utils bzip2 extra-cmake-modules gettext
+        ghc libghc-shake-dev opencc libghc-js-flot-data haskell-js-dgtable-utils automake
+        libtool openjdk-17-jdk-headless
+      - update-java-alternatives -a
+      - apt-get install -y -t bullseye-backports libime-bin fcitx5-modules
+    gradle:
+      - yes
+    binary: https://github.com/fcitx5-android/fcitx5-android/releases/download/0.0.6/org.fcitx.fcitx5.android-%v-x86_64-release.apk
+    srclibs:
+      - fcitx5-android-prebuilder@915bcacb0f21b842e1f888ade729038666987cdc
+    rm:
+      - lib/fcitx5/src/main/cpp/prebuilt
+    prebuild:
+      - sdkmanager 'cmake;3.22.1' 'ndk;25.0.8775105'
+      - buildTimestamp=$(curl -L https://github.com/fcitx5-android/fcitx5-android/releases/download/0.0.6/build-metadata.json
+        | sed -n -E 's/.*timestamp.*"(.*)"$/\1/p')
+      - echo -e "\nbuildTimestamp=$buildTimestamp" >> ../gradle.properties
+      - sed -i -e '/ImportQualifiedPost/d' -e 's/import \(.*\) qualified as/import
+        qualified \1 as/g' $$fcitx5-android-prebuilder$$/Main.hs
+    scanignore:
+      - lib/fcitx5/src/main/cpp/fcitx5/src/modules/unicode/charselectdata
+    scandelete:
+      - build-logic/convention/build
+    build:
+      - pushd $$fcitx5-android-prebuilder$$
+      - mkdir build
+      - cd build
+      - ABI=x86_64 ANDROID_NDK_ROOT=$$NDK$$/../25.0.8775105 CMAKE_VERSION=3.22.1 ANDROID_PLATFORM=23
+        COMP_SPELL_DICT=/usr/lib/x86_64-linux-gnu/fcitx5/libexec/comp-spell-dict runghc
+        ../Main.hs -j everything
+      - popd
+      - mv $$fcitx5-android-prebuilder$$/build ../lib/fcitx5/src/main/cpp/prebuilt
+    ndk: 25.2.9519653
     gradleprops:
       - buildABI=x86_64
 
@@ -335,7 +467,7 @@ VercodeOperation:
   - 10 * %c + 2
   - 10 * %c + 3
   - 10 * %c + 4
-UpdateCheckData: https://raw.githubusercontent.com/fcitx5-android/fcitx5-android/master/app/build.gradle.kts|baseVersionCode
+UpdateCheckData: https://raw.githubusercontent.com/fcitx5-android/fcitx5-android/master/build-logic/convention/src/main/kotlin/Versions.kt|baseVersionCode
     = (\d+)|https://github.com/fcitx5-android/fcitx5-android/releases/latest/download/build-metadata.json|"versionName":\s"(.*)"
-CurrentVersion: 0.0.5-0-g679ab7db
-CurrentVersionCode: 34
+CurrentVersion: 0.0.6-0-g024241cf
+CurrentVersionCode: 44
