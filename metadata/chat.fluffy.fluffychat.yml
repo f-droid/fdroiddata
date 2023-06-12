@@ -317,7 +317,7 @@ Builds:
       - apt-get install -y ninja-build
     output: build/app/outputs/flutter-apk/app-release.apk
     srclibs:
-      - flutter@3.7.11
+      - flutter@stable
     rm:
       - ios
       - linux
@@ -327,6 +327,10 @@ Builds:
       - windows
       - winuwp
     prebuild:
+      - export version=$(grep "^\ \ FLUTTER_VERSION" .gitlab-ci.yml | cut -d " " -f4)
+      - pushd $$flutter$$
+      - git checkout -f $version
+      - popd
       - sdkmanager 'cmake;3.18.1'
       - export PUB_CACHE=$(pwd)/.pub-cache
       - $$flutter$$/bin/flutter config --no-analytics
