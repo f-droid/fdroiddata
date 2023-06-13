@@ -1096,8 +1096,27 @@ Builds:
     scandelete:
       - plugins/build
 
+  - versionName: 8.0.0
+    versionCode: 3603026
+    commit: 62e156d5132f53cc409572ae203561b9973d3468
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y openjdk-17-jdk-headless
+      - update-java-alternatives -a
+    gradle:
+      - yes
+    prebuild:
+      - sed -i -e '/crashlytics/d' -e '/googleServices/d' -e '/if (enableCrashlytics)
+        {/,/}/d' build.gradle.kts
+      - sed -i -e '/crashlytics/d' ../logging/crashlytics/build.gradle.kts
+      - echo -e "\norg.gradle.jvmargs=-XX:MaxHeapSize=2048m" >> ../gradle.properties
+      - echo -e "\norg.gradle.unsafe.configuration-cache=false" >> ../gradle.properties
+    scandelete:
+      - plugins/build
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^[0-9.]+$
 UpdateCheckData: gradle/libs.versions.toml|versionCode\s*=\s*"([0-9]+)"|.|versionName\s*=\s*"(.+)"
-CurrentVersion: 7.2.0
-CurrentVersionCode: 3603025
+CurrentVersion: 8.0.0
+CurrentVersionCode: 3603026
