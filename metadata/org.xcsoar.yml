@@ -506,7 +506,26 @@ Builds:
     build: make TARGET=ANDROIDFAT DEBUG=n TESTING=n -j`nproc`
     ndk: r25b
 
+  - versionName: '7.35'
+    versionCode: 156
+    commit: c5c49879417dda654534795db92e14526e373794
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y ninja-build g++ vorbis-tools librsvg2-bin imagemagick make
+        gettext quilt sox automake xsltproc cmake xz-utils pkg-config libtool
+    output: output/ANDROID/opt/build/aligned.apk
+    prebuild:
+      - platforms=$(grep ANDROID_SDK_PLATFORM build/targets.mk | sed -E 's/.*android-([0-9]+)/\1/')
+      - build_tools=$(grep build-tools build/android.mk | sed -E 's/.*\/([0-9.]+)$/\1/')
+      - sdkmanager "platforms;android-$platforms" "build-tools;$build_tools"
+    scandelete:
+      - android/ioio
+      - android/UsbSerial/usbserial/eclipse_lib
+    build: make TARGET=ANDROIDFAT DEBUG=n TESTING=n -j`nproc`
+    ndk: r25b
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: '7.34'
-CurrentVersionCode: 155
+CurrentVersion: '7.35'
+CurrentVersionCode: 156
