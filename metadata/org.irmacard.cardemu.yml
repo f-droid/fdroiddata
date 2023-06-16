@@ -1,9 +1,9 @@
 AntiFeatures:
   - NonFreeAssets
 Categories:
-  - System
-  - Security
   - Internet
+  - Security
+  - System
 License: GPL-3.0-only
 AuthorName: Privacy by Design foundation
 WebSite: https://yivi.app
@@ -500,10 +500,48 @@ Builds:
       - $$flutter$$/bin/flutter build apk --flavor beta
     ndk: r21e
 
+  - versionName: 7.4.1
+    versionCode: 4194461
+    commit: 71d036b1c9fee6bb126d9c9c5f1eb6a864f16b15
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y -t bullseye-backports golang-go
+    output: build/app/outputs/flutter-apk/app-beta-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+      - test
+      - .idea
+      - .reuse
+      - .vscode
+    prebuild:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export version=$(grep "^FLUTTER_VERSION" ci_scripts/install_flutter.sh | cut
+        -d "\"" -f2)
+      - pushd $$flutter$$
+      - git checkout -f $version
+      - popd
+      - sdkmanager 'platforms;android-32' 'build-tools;32.0.0'
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+    scandelete:
+      - .pub-cache
+    build:
+      - export GOPATH="$PWD/golang"
+      - export PATH="$GOPATH/bin:$PATH"
+      - go install golang.org/x/mobile/cmd/gomobile@latest
+      - gomobile init
+      - gomobile bind -target android -o android/irmagobridge/irmagobridge.aar github.com/privacybydesign/irmamobile/irmagobridge
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --flavor beta
+    ndk: r21e
+
 MaintainerNotes: uses Sentry.io configured as opt-in
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v.*$
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 7.4.0
-CurrentVersionCode: 4194460
+CurrentVersion: 7.4.1
+CurrentVersionCode: 4194461
