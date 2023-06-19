@@ -742,7 +742,23 @@ Builds:
         | grep -F unsigned | cut -c-64 | tr -cd '0-9a-f' )"
       - sha256sum -c <<< "$sha256sum  build/outputs/apk/release/app-release-unsigned.apk"
 
+  - versionName: 2.24.2
+    versionCode: 126
+    commit: 224ab7f2e71a860ad52786d15dda4cc4108e84de
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y openjdk-17-jdk-headless
+      - update-java-alternatives -a
+    output: build/outputs/apk/release/app-release-unsigned.apk
+    prebuild: gradle clean
+    build:
+      - gradle assembleRelease
+      - sha256sum="$( curl -L https://github.com/CatimaLoyalty/Android/releases/download/v$$VERSION$$/SHA256SUMS
+        | grep -F unsigned | cut -c-64 | tr -cd '0-9a-f' )"
+      - sha256sum -c <<< "$sha256sum  build/outputs/apk/release/app-release-unsigned.apk"
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 2.24.1
-CurrentVersionCode: 125
+CurrentVersion: 2.24.2
+CurrentVersionCode: 126
