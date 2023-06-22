@@ -364,9 +364,32 @@ Builds:
       - export SENTRY_ENVIRONMENT=fdroid
       - gradle assembleFreeTazProductionUnminifiedRelease
 
+  - versionName: 1.7.2
+    versionCode: 10702900
+    commit: 1.7.2
+    subdir: app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y make file
+    output: build/outputs/apk/freeTazProduction/unminifiedRelease/app-free-taz-production-unminifiedRelease-unsigned.apk
+    prebuild:
+      - cd ../thirdparty/mupdf-jni
+      - git apply ../../scripts/mupdf-mavenlocal.patch
+      - touch "settings.gradle"
+      - sed -i -e "s/'-j4'/'-j`nproc`'/" build.gradle
+    scandelete:
+      - thirdparty/mupdf-jni/libmupdf/thirdparty
+    build:
+      - make -C ../thirdparty/mupdf-jni/libmupdf generate
+      - gradle -p ../thirdparty/mupdf-jni assembleRelease publishReleasePublicationToMavenLocal
+      - export VERSION_IGNORES_DIRTY_TREE=true
+      - export SENTRY_ENVIRONMENT=fdroid
+      - gradle assembleFreeTazProductionUnminifiedRelease
+
 MaintainerNotes: Dynamic versionName and version code, so no autoupdates possible.
 
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: 1.7.1
-CurrentVersionCode: 10701900
+CurrentVersion: 1.7.2
+CurrentVersionCode: 10702900
