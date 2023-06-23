@@ -2548,6 +2548,170 @@ Builds:
       - ANDROID_NDK_ROOT=$$SDK$$/ndk/r23c/ scripts/ndk-make.sh x86_64
     ndk: r21b
 
+  - versionName: 1.38.2
+    versionCode: 6581
+    commit: f4f8a107769db3f2bb98b8d79ff8977567e33cda
+    timeout: 20000
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y make g++ cmake
+    gradle:
+      - fat
+    srclibs:
+      - rustup@1.25.1
+      - maplibre-gl-native@android-v9.5.2
+    prebuild:
+      - sdkmanager 'ndk;20.0.5594570'
+      - sed -i -e '/versionCode/s/$/1/' -e 's/abiFilters .*/abiFilters "armeabi-v7a"/'
+        -e '/^repositories {/a mavenLocal()' build.gradle
+      - sed -i -e 's/org.maplibre.gl/org.fdroid/' build.gradle $$maplibre-gl-native$$/platform/android/gradle/artifact-settings.gradle
+      - cd $$maplibre-gl-native$$/platform/android/MapboxGLAndroidSDK
+      - sed -i -e '/signing {/,/}/d' -e '/signing/d' ../gradle/gradle-publish.gradle
+      - sed -i -e '/gmsLocation/d' build.gradle
+      - cd src/main/java/com/mapbox/mapboxsdk/location/engine
+      - sed -i -e '/isOnClasspath(GOOGLE_API_AVAILABILITY)/,/}/d' -e '/import.*gms/d'
+        -e 's|return isGoogle|return //isGoogle|' LocationEngineProvider.java
+      - rm GoogleLocationEngineImpl.java
+      - sed -i -e '/private.*extractGooglePlayResult/,/^  }/d' -e '/extractGooglePlayResult/d'
+        -e '/import.*gms/d' LocationEngineResult.java
+    build:
+      - pushd $$maplibre-gl-native$$/platform/android
+      - git submodule update --init --recursive
+      - BUILDTYPE=Release make android-lib-arm-v7
+      - gradle -Pmapbox.abis=armeabi-v7a -PVERSION_NAME=9.5.2 :MapboxGLAndroidSDK:assembleRelease
+        :MapboxGLAndroidSDK:publishToMavenLocal
+      - popd
+      - $$rustup$$/rustup-init.sh -y
+      - source $HOME/.cargo/env
+      - scripts/install-toolchains.sh
+      - export PATH=$PATH:$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin/
+      - ANDROID_NDK_ROOT=$$NDK$$ scripts/ndk-make.sh armeabi-v7a
+    ndk: r21b
+
+  - versionName: 1.38.2
+    versionCode: 6582
+    commit: f4f8a107769db3f2bb98b8d79ff8977567e33cda
+    timeout: 20000
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y make g++ cmake
+    gradle:
+      - fat
+    srclibs:
+      - rustup@1.25.1
+      - maplibre-gl-native@android-v9.5.2
+    prebuild:
+      - sed -i -e '/versionCode/s/$/2/' -e 's/abiFilters .*/abiFilters "arm64-v8a"/'
+        -e '/^repositories {/a mavenLocal()' build.gradle
+      - sed -i -e 's/org.maplibre.gl/org.fdroid/' build.gradle $$maplibre-gl-native$$/platform/android/gradle/artifact-settings.gradle
+      - cd $$maplibre-gl-native$$/platform/android/MapboxGLAndroidSDK
+      - sed -i -e '/signing {/,/}/d' -e '/signing/d' ../gradle/gradle-publish.gradle
+      - sed -i -e '/gmsLocation/d' build.gradle
+      - cd src/main/java/com/mapbox/mapboxsdk/location/engine
+      - sed -i -e '/isOnClasspath(GOOGLE_API_AVAILABILITY)/,/}/d' -e '/import.*gms/d'
+        -e 's|return isGoogle|return //isGoogle|' LocationEngineProvider.java
+      - rm GoogleLocationEngineImpl.java
+      - sed -i -e '/private.*extractGooglePlayResult/,/^  }/d' -e '/extractGooglePlayResult/d'
+        -e '/import.*gms/d' LocationEngineResult.java
+    build:
+      - pushd $$maplibre-gl-native$$/platform/android
+      - git submodule update --init --recursive
+      - BUILDTYPE=Release make android-lib-arm-v8
+      - gradle -Pmapbox.abis=arm64-v8a -PVERSION_NAME=9.5.2 :MapboxGLAndroidSDK:assembleRelease
+        :MapboxGLAndroidSDK:publishToMavenLocal
+      - popd
+      - $$rustup$$/rustup-init.sh -y
+      - source $HOME/.cargo/env
+      - scripts/install-toolchains.sh
+      - sdkmanager 'ndk;r23c'
+      - export PATH=$PATH:$$SDK$$/ndk/r23c/toolchains/llvm/prebuilt/linux-x86_64/bin/
+      - ANDROID_NDK_ROOT=$$SDK$$/ndk/r23c/ scripts/ndk-make.sh arm64-v8a
+    ndk: r21b
+
+  - versionName: 1.38.2
+    versionCode: 6583
+    commit: f4f8a107769db3f2bb98b8d79ff8977567e33cda
+    timeout: 20000
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y make g++ cmake
+    gradle:
+      - fat
+    srclibs:
+      - rustup@1.25.1
+      - maplibre-gl-native@android-v9.5.2
+    prebuild:
+      - sed -i -e '/versionCode/s/$/3/' -e 's/abiFilters .*/abiFilters "x86"/' -e
+        '/^repositories {/a mavenLocal()' build.gradle
+      - sed -i -e 's/org.maplibre.gl/org.fdroid/' build.gradle $$maplibre-gl-native$$/platform/android/gradle/artifact-settings.gradle
+      - cd $$maplibre-gl-native$$/platform/android/MapboxGLAndroidSDK
+      - sed -i -e '/signing {/,/}/d' -e '/signing/d' ../gradle/gradle-publish.gradle
+      - sed -i -e '/gmsLocation/d' build.gradle
+      - cd src/main/java/com/mapbox/mapboxsdk/location/engine
+      - sed -i -e '/isOnClasspath(GOOGLE_API_AVAILABILITY)/,/}/d' -e '/import.*gms/d'
+        -e 's|return isGoogle|return //isGoogle|' LocationEngineProvider.java
+      - rm GoogleLocationEngineImpl.java
+      - sed -i -e '/private.*extractGooglePlayResult/,/^  }/d' -e '/extractGooglePlayResult/d'
+        -e '/import.*gms/d' LocationEngineResult.java
+    build:
+      - pushd $$maplibre-gl-native$$/platform/android
+      - git submodule update --init --recursive
+      - BUILDTYPE=Release make android-lib-x86
+      - gradle -Pmapbox.abis=x86 -PVERSION_NAME=9.5.2 :MapboxGLAndroidSDK:assembleRelease
+        :MapboxGLAndroidSDK:publishToMavenLocal
+      - popd
+      - $$rustup$$/rustup-init.sh -y
+      - source $HOME/.cargo/env
+      - scripts/install-toolchains.sh
+      - sdkmanager 'ndk;r23c'
+      - export PATH=$PATH:$$SDK$$/ndk/r23c/toolchains/llvm/prebuilt/linux-x86_64/bin/
+      - ANDROID_NDK_ROOT=$$SDK$$/ndk/r23c/ scripts/ndk-make.sh x86
+    ndk: r21b
+
+  - versionName: 1.38.2
+    versionCode: 6584
+    commit: f4f8a107769db3f2bb98b8d79ff8977567e33cda
+    timeout: 20000
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y make g++ cmake
+    gradle:
+      - fat
+    srclibs:
+      - rustup@1.25.1
+      - maplibre-gl-native@android-v9.5.2
+    prebuild:
+      - sed -i -e '/versionCode/s/$/4/' -e 's/abiFilters .*/abiFilters "x86_64"/'
+        -e '/^repositories {/a mavenLocal()' build.gradle
+      - sed -i -e 's/org.maplibre.gl/org.fdroid/' build.gradle $$maplibre-gl-native$$/platform/android/gradle/artifact-settings.gradle
+      - cd $$maplibre-gl-native$$/platform/android/MapboxGLAndroidSDK
+      - sed -i -e '/signing {/,/}/d' -e '/signing/d' ../gradle/gradle-publish.gradle
+      - sed -i -e '/gmsLocation/d' build.gradle
+      - cd src/main/java/com/mapbox/mapboxsdk/location/engine
+      - sed -i -e '/isOnClasspath(GOOGLE_API_AVAILABILITY)/,/}/d' -e '/import.*gms/d'
+        -e 's|return isGoogle|return //isGoogle|' LocationEngineProvider.java
+      - rm GoogleLocationEngineImpl.java
+      - sed -i -e '/private.*extractGooglePlayResult/,/^  }/d' -e '/extractGooglePlayResult/d'
+        -e '/import.*gms/d' LocationEngineResult.java
+    build:
+      - pushd $$maplibre-gl-native$$/platform/android
+      - git submodule update --init --recursive
+      - BUILDTYPE=Release make android-lib-x86-64
+      - gradle -Pmapbox.abis=x86_64 -PVERSION_NAME=9.5.2 :MapboxGLAndroidSDK:assembleRelease
+        :MapboxGLAndroidSDK:publishToMavenLocal
+      - popd
+      - $$rustup$$/rustup-init.sh -y
+      - source $HOME/.cargo/env
+      - scripts/install-toolchains.sh
+      - sdkmanager 'ndk;r23c'
+      - export PATH=$PATH:$$SDK$$/ndk/r23c/toolchains/llvm/prebuilt/linux-x86_64/bin/
+      - ANDROID_NDK_ROOT=$$SDK$$/ndk/r23c/ scripts/ndk-make.sh x86_64
+    ndk: r21b
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v[\d.]+$
 VercodeOperation:
@@ -2555,5 +2719,5 @@ VercodeOperation:
   - 10 * %c + 2
   - 10 * %c + 3
   - 10 * %c + 4
-CurrentVersion: 1.36.5
-CurrentVersionCode: 6544
+CurrentVersion: 1.38.2
+CurrentVersionCode: 6584
