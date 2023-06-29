@@ -4,13 +4,13 @@ License: Apache-2.0
 AuthorName: Open Food Facts
 AuthorEmail: contact@openfoodfacts.org
 AuthorWebSite: https://world.openfoodfacts.org/
-SourceCode: https://github.com/openfoodfacts/openfoodfacts-androidapp
-IssueTracker: https://github.com/openfoodfacts/openfoodfacts-androidapp/issues
+SourceCode: https://github.com/openfoodfacts/smooth-app
+IssueTracker: https://github.com/openfoodfacts/smooth-app/issues
 Translation: https://translate.openfoodfacts.org/
-Changelog: https://github.com/openfoodfacts/openfoodfacts-androidapp/blob/HEAD/CHANGELOG.md
+Changelog: https://github.com/openfoodfacts/smooth-app/blob/develop/CHANGELOG.md
 Donate: https://donate.openfoodfacts.org
 
-AutoName: Open Food
+AutoName: Open Food Facts
 Description: |-
     Scan food products or their barcode to obtain data on ingredients, additives,
     allergens, nutrition facts…
@@ -30,21 +30,9 @@ Description: |-
     please visit <a href="https://world.openfoodfacts.org/discover">openfoodfacts.org</a> where you can discover how to contribute.
 
 RepoType: git
-Repo: https://github.com/openfoodfacts/openfoodfacts-androidapp
+Repo: https://github.com/openfoodfacts/smooth-app.git
 
 Builds:
-  - versionName: 0.1.5
-    versionCode: 5
-    disable: https://github.com/openfoodfacts/OpenFoodFacts-androidApp/issues/25
-    commit: 0.1.5
-    subdir: app
-    gradle:
-      - yes
-    prebuild:
-      - sed -i -e "/support-v4/s/21.1.1/21.0.3/g" -e "/support-v4/acompile('com.github.afollestad.material-dialogs:commons:0.8.5.7@aar')
-        {\ntransitive = true\n}\n" -e '/com.afollestad:material-dialogs/d' build.gradle
-      - sed -i -e '/jcenter/amaven { url "https://jitpack.io" }' ../build.gradle
-
   - versionName: 0.1.5-dev
     versionCode: 6
     commit: 4c5c210fbcfa42f84daf26a1ad5e500c302be85c
@@ -291,15 +279,6 @@ Builds:
     gradle:
       - 'off'
 
-  - versionName: 2.7.9
-    versionCode: 279
-    disable: Could not find com.mikepenz:materialdrawer:6.0.2
-    commit: 2.7.9
-    subdir: app
-    init: sed -i '/javaMaxHeapSize/d' build.gradle
-    gradle:
-      - 'off'
-
   - versionName: 2.8.2
     versionCode: 282
     commit: 2.8.2
@@ -437,8 +416,38 @@ Builds:
       - offFdroid
     prebuild: sed -i -e '/play:core/d' -e '/libs.barcode.scanning/d' build.gradle.kts
 
-AutoUpdateMode: Version
-UpdateCheckMode: Tags
-UpdateCheckData: app/build.gradle.kts|versionCode = (\d+)|.|versionName = "(.*)"
-CurrentVersion: 3.9.0
-CurrentVersionCode: 582
+  - versionName: 4.8.0
+    versionCode: 1148
+    commit: v4.8.0
+    subdir: packages/smooth_app
+    output: build/app/outputs/apk/release/app-release-unsigned.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - packages/smooth_app/ios
+      - packages/scanner/ml_kit
+    prebuild:
+      - version=$(cat ../../flutter-version.txt)
+      - pushd $$flutter$$
+      - git checkout -f $version
+      - popd
+      - sed -i -e '/ml_kit/d' -e '/apple_/d' -e '/google_play/d' -e 's/version:.*/version:\ $$VERSION$$+$$VERCODE$$/'
+        pubspec.yaml
+      - pushd android
+      - grep -rli 'org.openfoodfacts.scanner' * | xargs -i@ sed -i 's/org.openfoodfacts.scanner/openfoodfacts.github.scrachx.openfood/g'
+        @
+      - popd
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub upgrade
+    scandelete:
+      - packages/smooth_app/.pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk
+
+AutoUpdateMode: Version v%v
+UpdateCheckMode: HTTP
+UpdateCheckData: https://github.com/openfoodfacts/smooth-app/releases/latest/download/version-code.txt|(\d+)|https://github.com/openfoodfacts/smooth-app/releases/latest|releases/tag/v([\d.]+)
+CurrentVersion: 4.8.0
+CurrentVersionCode: 1148
