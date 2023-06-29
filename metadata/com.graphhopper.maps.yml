@@ -158,14 +158,14 @@ Builds:
     submodules: true
     sudo:
       - sysctl fs.inotify.max_user_watches=524288
-      - curl -fsSL https://deb.nodesource.com/setup_16.x | bash -
-      - apt-get install -y nodejs
-    init:
-      - cd ../..
-      - cp config.js graphhopper-maps/
-      - cd graphhopper-maps
+      - curl -Lo node.tar.gz https://nodejs.org/dist/v16.20.1/node-v16.20.1-linux-x64.tar.gz
+      - echo "c76d2aabd2d02542505fd24e18876fb8515e23638531249277272def42ab54e3 node.tar.gz"
+        | sha256sum -c -
+      - tar xzf node.tar.gz --strip-components=1 -C /usr/local/
+    prebuild:
+      - cd ../../graphhopper-maps
+      - cp ../config.js ./
       - npm install
-      - sed -i -e 's/gitSHA\ =/gitSHA\ ="1"\/\//g' webpack.common.js
       - npm run build
       - mv dist/bundle.*.js dist/bundle.js
       - cd ..
