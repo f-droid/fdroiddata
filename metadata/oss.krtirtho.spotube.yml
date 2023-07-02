@@ -273,8 +273,64 @@ Builds:
       - find . | sed -e "s/[^-][^\/]*\// |/g" -e "s/|\([^ ]\)/|-\1/"
     ndk: r25b
 
+  - versionName: 3.0.0
+    versionCode: 19
+    commit: 6a196672bb08a69e972c82efdb6ce8636c98a22a
+    sudo:
+      - apt-get update
+      - apt-get install -y gcc libc-dev
+    output: build/app/outputs/apk/release/*.apk
+    srclibs:
+      - flutter@stable
+      - metadata_god_rust@v0.4.1
+      - rustup@1.25.2
+    rm:
+      - ios
+      - linux
+      - web
+      - windows
+      - macos
+      - scripts
+      - choco-struct
+      - aur-struct
+    prebuild:
+      - export version=$(grep flutterSdkVersion .fvm/fvm_config.json | cut -d ":"
+        -f2|cut -d "\"" -f2)
+      - pushd $$flutter$$
+      - git checkout -f $version
+      - popd
+      - sed -i -e 's/this.checkUpdate .*/this.checkUpdate = false,/' lib/provider/user_preferences_provider.dart
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export PATH=$PUB_CACHE/bin/:$$flutter$$/bin/:$PATH
+      - flutter config --no-analytics
+      - flutter pub get
+      - flutter pub global activate melos
+    scandelete:
+      - .pub-cache
+    build:
+      - echo "POCKETBASE_URL=https://spotube.pockethost.io/" >> .env
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export PATH=$PUB_CACHE/bin/:$$flutter$$/bin/:$PATH
+      - export ANDROID_NDK_ROOT=$$NDK$$
+      - $$rustup$$/rustup-init.sh -y
+      - source $HOME/.cargo/env
+      - rustup target add aarch64-linux-android armv7-linux-androideabi x86_64-linux-android
+        i686-linux-android
+      - cargo install cargo-ndk
+      - pushd $$metadata_god_rust$$
+      - melos bs
+      - melos build:android
+      - melos copylib:android
+      - popd
+      - export HASH1='WyJUSnI4QlFITWRVVUlMQjZoYTRIZFUzMklMaFdzV1NMaEZWQWwxUGNzMU9uZmpGdVRxVWtQZEk0ODhnTmJIb2tRIiwiQURLZkJ5WUU4d1NYdHFZczV1Wm0wVEJRMlJGUkc2a29pZVFiNWJVRE9jRzUya29WVkxTS0lQUlNMbUdBaHgycCIsImZJcHB2bDBIeDZEMDQ5YzlWYnlwV2RLZllnbWdRMGc1YmV6ZmJmQXQzaHNjcGVDbFFXOTZGajNhc3JsTG00QjciLCAiNHd4MWlmejVNUW9VYnhyc1kxRENTMDJMTVNOdFZKUmY0SXJjWTB6OW9IVVlZU05WUndrZUtHUW0xSjlJSE9GWiIsInlkOWQ2REl4VzY4dEhMbWxBVTZZUGxaVTV2LWRlQ2pzcHBhdWxwT19xUmhsV1NDVyFuCKutHeifAnDWHaTURdOIngSuKsamYyX0Fkd1Z6bndjMkhiTHhzTlJldEdsTlFLdDl1ZHozbGZqdTkwOEw5ZWViIiwiRVJnNjJpajFzVnJzdkRTS1hrbVlIemRzRlN3c29VR21GcEVRRVR6Sm5ROHc4eVc1b3plM1hmUDZabFJZVU8xWCIsIjdybGczUExtQzFMUHA3MHZmbEtuWHV1a29BQmpoMTE3b2t4SG5TamFLeENSd1VXVGdSVVo3WGU5dVR0WDVvUS0iLCJiMmUyR2NzUTlEay0zeXVpTW01azNTTERkLXpFXzZTQUdjMENNMUtpbGs4Y21ySjEzem5mT05yRXh3YTJJWnlpIiwiMnZYWmJObWt2SUJ5MnFVSElxc2Q4VHNCRmFLaFgtSW5ZVjU4Wk4wUm5nVHBLNmdSRDlfcWFrMWVJdGFMS2NicyJd'
+      - export HASH2='W3siY2xpZW50SWQiOiJlNGQyMGIwMTMwMjI0MzMyOGQzNTg1MjQxYTFiMmIyNSIsImNsaWVudFNlY3JldCI6IjNkZDIxNjM1MjRjNjQ2NWM5MTZjYzRkNmU2ZmRhOTc3In0seyJjbGllbnRJZCI6ImUzODRkYmFkNmM3ZjQ2OTJiNjI3ZDRhMDZkOTE4M2NmIiwiY2xpZW50U2VjcmV0IjoiZGNkNzY2OGI2ZjAzNDM2Yzk5OTIzNDMyOWVlYTYxNmYifSx7ImNsaWVudElkIjoiZWVmZDBiYWU2NjRkNGY1ODhmMDg3NDFkOWU2ZjNlYmUiLCJjbGllbnRTZWNyZXQiOiI4YTE4ZDgyMGQ1YmQ0NTU3YjMwZmU3YTQ1OWY4ZjNhYiJ9LHsiY2xpZW50SWQiOiI4MWQxZGRhYzljNWU0Njk2YTlmNDdhZGZmODhkZmE5NSIsImNsaWVudFNlY3JldCI6ImY1NTg5ZTNiN2MwZjRiZTFhY2ZkODc3OWUyN2YzMWFhIn0seyJjbGllbnRJZCI6ImFhYzZlYmQ3Mjg5MDFuCKutHeifANdfDrOidsUckSwMDgxIiwiY2xpZW50U2VjcmV0IjoiNTk4ODk2OWFiMWUwNGUxNDhmNWRkZDI4ZWE4OThlMzMifSx7ImNsaWVudElkIjoiMDAwYWUwNzVjOGFhNDcxMTk0NTc5YmM3ZDhlYTY5MjciLCJjbGllbnRTZWNyZXQiOiJkNzBhZWM4ZjhjN2Q0ZTY0YTlhMDkwYTY0N2UxZDBmYiJ9LHsiY2xpZW50SWQiOiJhZjQ4OGI0MDhkNWM0NDAyYWQxNGY3MGNjZjMwMTdmOCIsImNsaWVudFNlY3JldCI6IjEzZTkwMzk5YTEyMjQzMjE4Y2U1MDE2YmZlZWIyNTA0In0seyJjbGllbnRJZCI6IjYyYmI1NWU2Y2Y2MDQwOTZhZDQ2ODBiYjI1NGY4ZjU1IiwiY2xpZW50U2VjcmV0IjoiZGM1NGIxMzhjODJkNGQ2OWJjZGQ0MDFlOWRjNmUwZTAifSx7ImNsaWVudElkIjoiZGFlM2QzNjQ4ODhiNDhjN2JhOTQwYmU3OWYxNDBjMDUiLCJjbGllbnRTZWNyZXQiOiJhMzU2ZjEyNDE4YjI0ODBkYWJmODRkOThhOTUxYTliYSJ9LHsiY2xpZW50SWQiOiIzZmM0OWZjNjkwYzA0NWVhYTBmMGEyNDI2ZGQ0YTkxZSIsImNsaWVudFNlY3JldCI6IjJiYjdkYTY1YzUwNjQ4YWVhOGI3YmMwOWQ0ZWY0MGZlIn1d'
+      - dart bin/create-secrets.dart --fdroid $HASH1 $HASH2
+      - flutter build apk --release --verbose --obfuscate --split-debug-info=.
+      - find . | sed -e "s/[^-][^\/]*\// |/g" -e "s/|\([^ ]\)/|-\1/"
+    ndk: r25b
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 2.7.1
-CurrentVersionCode: 18
+CurrentVersion: 3.0.0
+CurrentVersionCode: 19
