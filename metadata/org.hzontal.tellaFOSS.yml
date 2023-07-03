@@ -1,0 +1,41 @@
+Categories:
+  - Multimedia
+  - Writing
+License: Apache-2.0
+AuthorEmail: contact@tella-app.org
+AuthorWebSite: https://wearehorizontal.org
+WebSite: https://tella-app.org
+SourceCode: https://github.com/Horizontal-org/Tella-Android-FOSS
+IssueTracker: https://github.com/Horizontal-org/Tella-Android-FOSS/issues
+Translation: https://app.lokalise.com/public/9394139661a3d89da6fa91.77098206/
+Donate: https://wearehorizontal.org/donate.html
+
+AutoName: Tella
+
+RepoType: git
+Repo: https://github.com/Horizontal-org/Tella-Android-FOSS.git
+Binaries: https://github.com/Horizontal-org/Tella-Android-FOSS/releases/download/v%v(%c)/mobile-release-FOSS-%c.apk
+
+Builds:
+  - versionName: 2.0.15
+    versionCode: 149
+    commit: d3e629da651380dcc290b019ba590b79da7075c6
+    subdir: mobile
+    sudo:
+      - export CPUS_MAX=1
+      - export CPUS=$(getconf _NPROCESSORS_ONLN)
+      - for (( c=$CPUS_MAX; c<$CPUS; c++ )) ; do echo 0 > /sys/devices/system/cpu/cpu$c/online
+        ; done
+    gradle:
+      - yes
+    srclibs:
+      - reproducible-apk-tools@v0.2.3
+    postbuild: $$reproducible-apk-tools$$/inplace-fix.py --zipalign fix-newlines $$OUT$$
+        'META-INF/services/*' 'assets/cleaninsights.json'
+
+AllowedAPKSigningKeys: 0f98d162b443e71de141a93aec27c6d5acaa725dba4c3fca97457258c193a729
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: 2.0.15
+CurrentVersionCode: 149
