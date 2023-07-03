@@ -58,21 +58,32 @@ Builds:
       - $$flutter$$/bin/flutter packages pub get
       - $$flutter$$/bin/flutter build apk
 
-  - versionName: 1.5.0
-    versionCode: 27
-    disable: https://github.com/wger-project/flutter/issues/152
-    commit: 280143362552fa3af2a612edf326ebac1697285b
+  - versionName: 1.5.6
+    versionCode: 33
+    commit: 928ef7e7f76aca37dc4782c6e4711c7a1cf2b498
     output: build/app/outputs/flutter-apk/app-release.apk
     srclibs:
-      - flutter@3.3.4
-    prebuild: sdkmanager "build-tools;30.0.3" "build-tools;31.0.0" "platforms;android-31"
-    build:
+      - flutter@3.7.12
+    rm:
+      - flatpak
+      - ios
+      - linux
+      - macos
+      - web
+    prebuild:
+      - sed -i -e '/flutter_barcode_scanner/d' pubspec.yaml
+      - sed -i -e '/flutter_barcode_scanner/,/version:/d' pubspec.lock
+      - export PUB_CACHE=$(pwd)/.pub-cache
       - $$flutter$$/bin/flutter config --no-analytics
-      - $$flutter$$/bin/flutter packages pub get
+      - $$flutter$$/bin/flutter pub get
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
       - $$flutter$$/bin/flutter build apk
 
-AutoUpdateMode: None
+AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 1.5.5
-CurrentVersionCode: 32
+CurrentVersion: 1.5.6
+CurrentVersionCode: 33
