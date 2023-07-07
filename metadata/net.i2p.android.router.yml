@@ -562,25 +562,6 @@ Builds:
     scandelete:
       - lib/client/src/main/jniLibs
 
-  - versionName: 0.9.46
-    versionCode: 4745256
-    disable: fails to start
-    commit: 83bb7096a7717b58d5ef096f23c82fd475dc27e6
-    subdir: app
-    gradle:
-      - legacy
-    srclibs:
-      - I2P@i2p-0.9.46
-    rm:
-      - gradle/wrapper
-    prebuild:
-      - echo -e "i2psrc=../$$I2P$$" >> ../lib/client/local.properties
-      - echo -e "sdk.dir=$$SDK$$\nndk.dir=$$NDK$$\ni2psrc=$$I2P$$" >> ../routerjars/local.properties
-      - sed -i -e '/^props\ =/,+22d' -e 's!../i2p.i2p!$$I2P$$!g' build.gradle
-      - curl https://gmplib.org/download/gmp/gmp-6.1.2.tar.xz | tar xJv -C $$I2P$$/core/c/jbigi/
-    scandelete:
-      - lib/client/src/main/jniLibs
-
   - versionName: 0.9.47
     versionCode: 4745257
     commit: aec25ab3741018d3aedc6c0ac302ed1d4f222df
@@ -767,6 +748,31 @@ Builds:
     ndk: r19c
     gradleprops:
       - I2P_VERSION=2.2.1
+
+  - versionName: 2.3.0
+    versionCode: 4745279
+    commit: 41ca3fe527cc0d28a2d1902b78d796f4001c423c
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y ant gettext
+    gradle:
+      - legacy
+    srclibs:
+      - I2P@i2p-2.3.0
+    rm:
+      - gradle/wrapper
+    prebuild:
+      - echo -e "i2psrc=$$I2P$$" >> ../lib/client/local.properties
+      - echo -e "sdk.dir=$$SDK$$\nndk.dir=$$NDK$$\ni2psrc=$$I2P$$" >> ../routerjars/local.properties
+      - cp -R $$I2P$$ ../i2p.i2p
+      - sed -i -e '/abortOnError/acheckReleaseBuilds false' build.gradle
+    scandelete:
+      - lib/client/src/main/jniLibs
+      - i2p.i2p
+    ndk: r19c
+    gradleprops:
+      - I2P_VERSION=2.3.0
 
 AutoUpdateMode: None
 UpdateCheckMode: Tags
