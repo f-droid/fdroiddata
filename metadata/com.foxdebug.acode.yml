@@ -29,7 +29,7 @@ Description: |-
     * And it is open source.
 
 RepoType: git
-Repo: https://github.com/deadlyjack/Acode
+Repo: https://github.com/deadlyjack/Acode.git
 
 Builds:
   - versionName: 1.2.143
@@ -339,6 +339,42 @@ Builds:
       - chmod -R 777 /opt/android-sdk
       - curl -Lo node.tar.gz https://nodejs.org/dist/v18.15.0/node-v18.15.0-linux-x64.tar.gz
       - echo "b298a73a9fc07badfa9e4a2e86ed48824fc9201327cdc43e3f3f58b273c535e7 node.tar.gz"
+        | sha256sum -c -
+      - tar xzf node.tar.gz --strip-components=1 -C /usr/local/
+      - npm install -g npm@latest
+      - npm install -g cordova yarn
+    output: platforms/android/app/build/outputs/apk/release/app-release-unsigned.apk
+    rm:
+      - test
+      - src/pages/donate
+      - src/plugins/iap
+    prebuild:
+      - sed -i -e '/iap/d' package.json
+      - sed -i -e '/iap.startConnection/,/Purchase error/c} catch (e) {' src/lib/main.js
+      - sed -i -e '/Donate/d' src/settings/mainSettings.js
+      - sed -i -e 's/acodefree/acode/' utils/config.js
+      - sed -i -e 's/build/prepare/' utils/scripts/build.sh
+      - sed -i -e '/core-google-shortcuts/d' src/plugins/system/plugin.xml
+      - yarn setup
+      - cordova plugin add cordova-plugin-file
+      - cordova platform add android
+      - rm node_modules/cordova-android/framework/cordova-publish.gradle
+      - yarn build android free p
+      - sdkmanager 'build-tools;31.0.0' 'build-tools;30.0.3'
+      - cp $$SDK$$/build-tools/30.0.3/lib/dx.jar $$SDK$$/build-tools/31.0.0/lib/dx.jar
+      - cp $$SDK$$/build-tools/30.0.3/dx $$SDK$$/build-tools/31.0.0/dx
+    scandelete:
+      - node_modules/jszip/.jekyll-metadata
+    build: cordova compile android --release -- --packageType=apk
+
+  - versionName: 1.8.5
+    versionCode: 293
+    commit: e2869a5ccf2e60e294f4603a80825588bd8ef000
+    sudo:
+      - sysctl fs.inotify.max_user_watches=524288 || true
+      - chmod -R 777 /opt/android-sdk
+      - curl -Lo node.tar.gz https://nodejs.org/dist/v18.16.1/node-v18.16.1-linux-x64.tar.gz
+      - echo "582f51570d0857de6333620323bdeee5ae36107318f86ce5eca24747cabf5  node.tar.gz"
         | sha256sum -c -
       - tar xzf node.tar.gz --strip-components=1 -C /usr/local/
       - npm install -g npm@latest
