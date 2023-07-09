@@ -1,0 +1,58 @@
+Categories:
+  - Connectivity
+  - Multimedia
+License: GPL-3.0-only
+AuthorName: Kounex
+SourceCode: https://github.com/Kounex/obs_blade
+IssueTracker: https://github.com/Kounex/obs_blade/issues
+
+AutoName: OBS Blade
+
+RepoType: git
+Repo: https://github.com/Kounex/obs_blade.git
+Binaries: https://github.com/Kounex/obs_blade/releases/download/foss-%v/obs-blade-foss-%v.apk
+
+Builds:
+  - versionName: 3.2.0
+    versionCode: 2023012003
+    commit: foss-3.2.0
+    submodules: true
+    output: build/app/outputs/flutter-apk/app-release.apk
+    rm:
+      - ios
+      - linux
+      - macos
+      - web
+      - windows
+    prebuild:
+      - cd ..
+      - mv com.kounex.obsBlade /tmp/build
+      - pushd /tmp/build/
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - .flutter/bin/flutter config --no-analytics
+      - .flutter/bin/flutter pub get
+      - popd
+      - mv /tmp/build com.kounex.obsBlade
+    scanignore:
+      - .flutter/packages/flutter_tools/gradle/flutter.gradle
+      - .flutter/bin/cache
+    scandelete:
+      - .flutter
+      - .pub-cache
+    build:
+      - cd ..
+      - mv com.kounex.obsBlade /tmp/build
+      - pushd /tmp/build/
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - .flutter/bin/flutter pub run build_runner build -d
+      - .flutter/bin/flutter build apk
+      - popd
+      - mv /tmp/build com.kounex.obsBlade
+
+AllowedAPKSigningKeys: 9183c56b5518a3215d18c0fe9e244d64a1a94917dd4df86019c46ad7a7f03ac1
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^foss-
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 3.2.0
+CurrentVersionCode: 2023012003
