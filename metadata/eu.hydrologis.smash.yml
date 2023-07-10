@@ -1,0 +1,77 @@
+Categories:
+  - Science & Education
+License: GPL-3.0-only
+AuthorName: HydroloGIS S.r.l.
+AuthorEmail: info@hydrologis.com
+AuthorWebSite: https://www.hydrologis.com
+WebSite: https://www.geopaparazzi.org/smash/index.html
+SourceCode: https://github.com/geopaparazzi/smash
+IssueTracker: https://github.com/geopaparazzi/smash/issues
+Translation: https://hosted.weblate.org/engage/smash/
+Donate: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=84U4N2DVQ74S6&lc=IT&item_name=JGrass%20BeeGIS%20Geopaparazzi%20Donations&item_number=jgrassdonations&currency_code=EUR&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted
+
+AutoName: SMASH
+
+RepoType: git
+Repo: https://github.com/geopaparazzi/smash.git
+Binaries: https://github.com/geopaparazzi/smash/releases/download/version_%v%2B%c_fdroid/smash_%v+%c_fdroid.apk
+
+Builds:
+  - versionName: 1.7.6
+    versionCode: 68
+    commit: 84d508ab0c47d56ccd2c13d4e0537ccbd2b42835
+    submodules: true
+    sudo:
+      - mkdir -p /home/hydrologis/
+      - chown vagrant /home/hydrologis/
+    output: build/app/outputs/flutter-apk/app-release.apk
+    rm:
+      - ios
+      - macos
+      - linux
+      - .vscode
+      - .gradle
+    prebuild:
+      - export repo=/home/hydrologis/development/SMASH/smash
+      - mkdir -p /home/hydrologis/development/SMASH/
+      - cd ..
+      - mv eu.hydrologis.smash $repo
+      - pushd $repo
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - .flutter/bin/flutter config --no-analytics
+      - .flutter/bin/flutter pub get
+      - sed -i -e '/shrinkResources/d' -e '/minifyEnabled/d' android/app/build.gradle
+      - cd .pub-cache/git/background_locator*/android
+      - sed -i -e '/gms/d' build.gradle
+      - cd src/main/kotlin/yukams/app/background_locator_2
+      - sed -i -e '/gms/d' -e '/fun getAccuracy/,/^}/d' -e 's/getAccuracy//' IsolateHolderExtension.kt
+      - sed -i -e 's/GoogleLocationProviderClient/AndroidLocationProviderClient/'
+        IsolateHolderService.kt
+      - sed -i -e '/getLocationMapFromLocation.*LocationResult/,/^        }/d' -e
+        '/gms/d' provider/LocationParserUtil.kt
+      - rm provider/GoogleLocationProviderClient.kt
+      - popd
+      - mv $repo eu.hydrologis.smash
+    scanignore:
+      - .flutter/packages/flutter_tools/gradle/flutter.gradle
+      - .flutter/bin/cache
+    scandelete:
+      - .flutter
+      - .pub-cache
+    build:
+      - export repo=/home/hydrologis/development/SMASH/smash
+      - cd ..
+      - mv eu.hydrologis.smash $repo
+      - pushd $repo
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - .flutter/bin/flutter build apk --no-tree-shake-icons
+      - popd
+      - mv $repo eu.hydrologis.smash
+
+AllowedAPKSigningKeys: 9f8e62c370915566cf88eefa4384afb67124087b7aee81ff1b461bde895c7ca2
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags version_[\d.]+\+\d+_fdroid
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 1.7.6
+CurrentVersionCode: 68
