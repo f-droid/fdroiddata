@@ -1158,63 +1158,6 @@ Builds:
       - cp -r node_modules/jsc-android/dist/org/webkit/android-jsc "$HOME/.m2/repository/org/webkit"
     ndk: r21d
 
-  - versionName: 1.5.6
-    versionCode: 40105060
-    disable: Requested by Element team due to regression https://github.com/vector-im/element-android/issues/7516
-    commit: 3b2718951b4942b14a2144b5170dc96cc7d7affa
-    subdir: vector-app
-    sudo:
-      - apt-get update
-      - apt-get install -y jq libopus0 make g++ cmake maven
-      - curl -Lo node.tar.gz https://nodejs.org/dist/v16.17.1/node-v16.17.1-linux-x64.tar.gz
-      - echo "da5658693243b3ecf6a4cba6751a71df1eb9e9703ca93b42a9404aed85f58ad0 node.tar.gz"
-        | sha256sum -c -
-      - tar xzf node.tar.gz --strip-components=1 -C /usr/local/
-      - sysctl fs.inotify.max_user_watches=524288 || true
-      - cd /opt/android-sdk/ndk
-      - rm -fr $(ls | sed 's/21.3.6528147//')
-    patch:
-      - build_gradle_remove_jitsi_repo_40105060.patch
-    gradle:
-      - fdroid
-    srclibs:
-      - jitsi-meet@android-sdk-6.2.2
-      - maplibre-gl-native@android-v9.5.2
-    prebuild:
-      - sed -i -e 's/def isCiBuild =.*/def isCiBuild = true/' ../tools/gradle/doctor.gradle
-      - sed -i -e '/applicationIdSuffix/d' -e '/^repositories {/a mavenLocal()' build.gradle
-      - sed -i -e 's/org.maplibre.gl/org.fdroid/' build.gradle $$maplibre-gl-native$$/platform/android/gradle/artifact-settings.gradle
-      - pushd $$maplibre-gl-native$$/platform/android/MapboxGLAndroidSDK
-      - sed -i -e '/signing {/,/}/d' -e '/signing/d' ../gradle/gradle-publish.gradle
-      - sed -i -e '/gmsLocation/d' build.gradle
-      - cd src/main/java/com/mapbox/mapboxsdk/location/engine
-      - sed -i -e '/isOnClasspath(GOOGLE_API_AVAILABILITY)/,/}/d' -e '/import.*gms/d'
-        -e 's|return isGoogle|return //isGoogle|' LocationEngineProvider.java
-      - rm GoogleLocationEngineImpl.java
-      - sed -i -e '/private.*extractGooglePlayResult/,/^  }/d' -e '/extractGooglePlayResult/d'
-        -e '/import.*gms/d' LocationEngineResult.java
-      - popd
-      - sed -i -e '/com.google.gms.google-services/d' build.gradle ../build.gradle
-      - sed -i -e 's/enable true/enable false/g' -e '/firebase.appdistribution/d'
-        -e '/AppDistribution {/,/}/d' build.gradle
-      - sed -i -e '/repositories {/a\        mavenLocal()' -e '/firebase/d' ../build.gradle
-      - sed -i -e '/gplayImplementation(.*) {/,/}/d; /gplayImplementation/d' build.gradle
-    build:
-      - pushd $$maplibre-gl-native$$/platform/android
-      - git submodule update --init --recursive
-      - BUILDTYPE=Release make apackage
-      - gradle -Pmapbox.abis=all -PVERSION_NAME=9.5.2 :MapboxGLAndroidSDK:publishToMavenLocal
-      - popd
-      - cd $$jitsi-meet$$
-      - export LIBRE_BUILD=true
-      - npm install --save false webpack-bundle-analyzer
-      - npm ci
-      - mkdir -p "$HOME/.m2"
-      - bash android/scripts/release-sdk.sh "$HOME/.m2/repository"
-      - mkdir -p "$HOME/.m2/repository/org/webkit"
-      - cp -r node_modules/jsc-android/dist/org/webkit/android-jsc "$HOME/.m2/repository/org/webkit"
-    ndk: r21d
-
   - versionName: 1.5.7
     versionCode: 40105070
     commit: 4b7f030dfc1adc9524fe39b14c29cc6e533bc713
@@ -1853,6 +1796,146 @@ Builds:
       - cp -r node_modules/jsc-android/dist/org/webkit/android-jsc "$HOME/.m2/repository/org/webkit"
     ndk: r21d
 
+  - versionName: 1.6.3
+    versionCode: 40106031
+    commit: f5f4d4a32636eb420834065fb6a41f04dd731a48
+    subdir: vector-app
+    sudo:
+      - apt-get update
+      - apt-get install -y jq maven
+      - sysctl fs.inotify.max_user_watches=524288
+      - curl -Lo node.tar.gz https://nodejs.org/dist/v16.20.0/node-v16.20.0-linux-x64.tar.gz
+      - echo "7abc0e558fa3b3c4cc0fd3c7fa5dbe61500ba7213f5e87ed560c65a733c6a5c4  node.tar.gz"
+        | sha256sum -c -
+      - tar xzf node.tar.gz --strip-components=1 -C /usr/local/
+    gradle:
+      - fdroid
+      - rustCrypto
+    srclibs:
+      - jitsi-meet@android-sdk-8.1.1
+    prebuild:
+      - sed -i -e 's/def isCiBuild =.*/def isCiBuild = true/' ../tools/gradle/doctor.gradle
+      - sed -i -e '/universalApk/d' -e '/abiFilters/d' -e '/include/s/"armeabi-v7a".*/"armeabi-v7a"/'
+        -e '/AppDistribution {/,/^            }/d' build.gradle
+      - sed -i -e '/repositories {/a mavenLocal()' -e 's|https.*android-sdk-8.1.1|https://jitpack.io|'
+        ../build.gradle
+      - sed -i -e '/com.google.firebase/d' -e '/gms/d' {.,..}/build.gradle
+    build:
+      - cd $$jitsi-meet$$
+      - export LIBRE_BUILD=true
+      - npm install --save false webpack-bundle-analyzer
+      - npm ci
+      - mkdir -p "$HOME/.m2"
+      - bash android/scripts/release-sdk.sh "$HOME/.m2/repository"
+      - mkdir -p "$HOME/.m2/repository/org/webkit"
+      - cp -r node_modules/jsc-android/dist/org/webkit/android-jsc "$HOME/.m2/repository/org/webkit"
+    ndk: r21d
+
+  - versionName: 1.6.3
+    versionCode: 40106032
+    commit: f5f4d4a32636eb420834065fb6a41f04dd731a48
+    subdir: vector-app
+    sudo:
+      - apt-get update
+      - apt-get install -y jq maven
+      - sysctl fs.inotify.max_user_watches=524288
+      - curl -Lo node.tar.gz https://nodejs.org/dist/v16.20.0/node-v16.20.0-linux-x64.tar.gz
+      - echo "7abc0e558fa3b3c4cc0fd3c7fa5dbe61500ba7213f5e87ed560c65a733c6a5c4  node.tar.gz"
+        | sha256sum -c -
+      - tar xzf node.tar.gz --strip-components=1 -C /usr/local/
+    gradle:
+      - fdroid
+      - rustCrypto
+    srclibs:
+      - jitsi-meet@android-sdk-8.1.1
+    prebuild:
+      - sed -i -e 's/def isCiBuild =.*/def isCiBuild = true/' ../tools/gradle/doctor.gradle
+      - sed -i -e '/universalApk/d' -e '/abiFilters/d' -e '/include/s/"armeabi-v7a".*/"arm64-v8a"/'
+        -e '/AppDistribution {/,/^            }/d' build.gradle
+      - sed -i -e '/repositories {/a mavenLocal()' -e 's|https.*android-sdk-8.1.1|https://jitpack.io|'
+        ../build.gradle
+      - sed -i -e '/com.google.firebase/d' -e '/gms/d' {.,..}/build.gradle
+    build:
+      - cd $$jitsi-meet$$
+      - export LIBRE_BUILD=true
+      - npm install --save false webpack-bundle-analyzer
+      - npm ci
+      - mkdir -p "$HOME/.m2"
+      - bash android/scripts/release-sdk.sh "$HOME/.m2/repository"
+      - mkdir -p "$HOME/.m2/repository/org/webkit"
+      - cp -r node_modules/jsc-android/dist/org/webkit/android-jsc "$HOME/.m2/repository/org/webkit"
+    ndk: r21d
+
+  - versionName: 1.6.3
+    versionCode: 40106033
+    commit: f5f4d4a32636eb420834065fb6a41f04dd731a48
+    subdir: vector-app
+    sudo:
+      - apt-get update
+      - apt-get install -y jq maven
+      - sysctl fs.inotify.max_user_watches=524288
+      - curl -Lo node.tar.gz https://nodejs.org/dist/v16.20.0/node-v16.20.0-linux-x64.tar.gz
+      - echo "7abc0e558fa3b3c4cc0fd3c7fa5dbe61500ba7213f5e87ed560c65a733c6a5c4  node.tar.gz"
+        | sha256sum -c -
+      - tar xzf node.tar.gz --strip-components=1 -C /usr/local/
+    gradle:
+      - fdroid
+      - rustCrypto
+    srclibs:
+      - jitsi-meet@android-sdk-8.1.1
+    prebuild:
+      - sed -i -e 's/def isCiBuild =.*/def isCiBuild = true/' ../tools/gradle/doctor.gradle
+      - sed -i -e '/universalApk/d' -e '/abiFilters/d' -e '/include/s/"armeabi-v7a".*/"x86"/'
+        -e '/AppDistribution {/,/^            }/d' build.gradle
+      - sed -i -e '/repositories {/a mavenLocal()' -e 's|https.*android-sdk-8.1.1|https://jitpack.io|'
+        ../build.gradle
+      - sed -i -e '/com.google.firebase/d' -e '/gms/d' {.,..}/build.gradle
+    build:
+      - cd $$jitsi-meet$$
+      - export LIBRE_BUILD=true
+      - npm install --save false webpack-bundle-analyzer
+      - npm ci
+      - mkdir -p "$HOME/.m2"
+      - bash android/scripts/release-sdk.sh "$HOME/.m2/repository"
+      - mkdir -p "$HOME/.m2/repository/org/webkit"
+      - cp -r node_modules/jsc-android/dist/org/webkit/android-jsc "$HOME/.m2/repository/org/webkit"
+    ndk: r21d
+
+  - versionName: 1.6.3
+    versionCode: 40106034
+    commit: f5f4d4a32636eb420834065fb6a41f04dd731a48
+    subdir: vector-app
+    sudo:
+      - apt-get update
+      - apt-get install -y jq maven
+      - sysctl fs.inotify.max_user_watches=524288
+      - curl -Lo node.tar.gz https://nodejs.org/dist/v16.20.0/node-v16.20.0-linux-x64.tar.gz
+      - echo "7abc0e558fa3b3c4cc0fd3c7fa5dbe61500ba7213f5e87ed560c65a733c6a5c4  node.tar.gz"
+        | sha256sum -c -
+      - tar xzf node.tar.gz --strip-components=1 -C /usr/local/
+    gradle:
+      - fdroid
+      - rustCrypto
+    srclibs:
+      - jitsi-meet@android-sdk-8.1.1
+    prebuild:
+      - sed -i -e 's/def isCiBuild =.*/def isCiBuild = true/' ../tools/gradle/doctor.gradle
+      - sed -i -e '/universalApk/d' -e '/abiFilters/d' -e '/include/s/"armeabi-v7a".*/"x86_64"/'
+        -e '/AppDistribution {/,/^            }/d' build.gradle
+      - sed -i -e '/repositories {/a mavenLocal()' -e 's|https.*android-sdk-8.1.1|https://jitpack.io|'
+        ../build.gradle
+      - sed -i -e '/com.google.firebase/d' -e '/gms/d' {.,..}/build.gradle
+    build:
+      - cd $$jitsi-meet$$
+      - export LIBRE_BUILD=true
+      - npm install --save false webpack-bundle-analyzer
+      - npm ci
+      - mkdir -p "$HOME/.m2"
+      - bash android/scripts/release-sdk.sh "$HOME/.m2/repository"
+      - mkdir -p "$HOME/.m2/repository/org/webkit"
+      - cp -r node_modules/jsc-android/dist/org/webkit/android-jsc "$HOME/.m2/repository/org/webkit"
+    ndk: r21d
+
 MaintainerNotes: Do not update unless requested by the Element team! The Element team
     will ping us whenever they feel a new release is ready. See https://github.com/vector-im/element-android/issues/3728
     as an example of their release process. AntiFeature NonFreeNet is added because
@@ -1863,5 +1946,5 @@ MaintainerNotes: Do not update unless requested by the Element team! The Element
 
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: 1.5.32
-CurrentVersionCode: 40105320
+CurrentVersion: 1.6.3
+CurrentVersionCode: 40106034
