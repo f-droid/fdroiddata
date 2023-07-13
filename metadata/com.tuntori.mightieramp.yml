@@ -142,8 +142,35 @@ Builds:
       - $$flutter$$/bin/flutter build apk --release
     ndk: r21
 
+  - versionName: 1.0.5
+    versionCode: 48
+    commit: a8b06b050adaabd68f63f6f0b3f7df0f00601a9f
+    patch:
+      - remove_youtube_sentry_support_29.diff
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@3.7.7
+    rm:
+      - ios
+      - linux
+      - web
+      - windows
+    prebuild:
+      - sed -i -e '/INTERNET/d' -e '/ACCESS_NETWORK_STATE/d' android/app/src/main/AndroidManifest.xml
+      - sed -i -e '/^  sentry:/,/^    version:/d' -e '/^  sentry_flutter:/,/^    version:/d'
+        pubspec.lock
+      - sed -i -e '/sentry_flutter/d' pubspec.yaml
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release
+    ndk: r21
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 0.9.11
-CurrentVersionCode: 30
+CurrentVersion: 1.0.5
+CurrentVersionCode: 48
