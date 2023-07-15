@@ -614,10 +614,58 @@ Builds:
         libs/
     ndk: r21e
 
-MaintainerNotes: 'Extensions build instructions: https://github.com/androidx/media/blob/1.0.0-beta03/libraries/decoder_ffmpeg/README.md
-    https://github.com/androidx/media/blob/1.0.0-beta03/libraries/decoder_av1/README.md'
+  - versionName: '0.149'
+    versionCode: 149
+    commit: v0.149
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y make ninja-build
+      - apt-get install -y -t bullseye-backports cmake
+      - apt-get install -y openjdk-17-jdk-headless
+      - update-alternatives --auto java
+    gradle:
+      - latestUniversalFull
+    srclibs:
+      - media-moneytoo@1.1.0
+      - FFmpeg@release/4.2
+      - cpu_features@v0.7.0
+      - abseil-cpp@20220623.0
+      - libgav1@v0.18.0
+    prebuild: sed -i -e 's/android {/&\n    ndkVersion "21.4.7075529"/' $$media-moneytoo$$/common_library_config.gradle
+    scandelete:
+      - app/libs/
+    build:
+      - export FFMPEG_EXT_PATH="$$media-moneytoo$$/libraries/decoder_ffmpeg/src/main"
+      - export HOST_PLATFORM="$(uname -s | tr '[:upper:]' '[:lower:]')-x86_64"
+      - export ENABLED_DECODERS=(vorbis opus flac alac pcm_mulaw pcm_alaw mp3 amrnb
+        amrwb aac ac3 eac3 dca mlp truehd)
+      - pushd "${FFMPEG_EXT_PATH}/jni"
+      - ln -s "$$FFmpeg$$" ffmpeg
+      - cd "${FFMPEG_EXT_PATH}/jni"
+      - ./build_ffmpeg.sh "${FFMPEG_EXT_PATH}" "$$NDK$$" "${HOST_PLATFORM}" "${ENABLED_DECODERS[@]}"
+      - export AV1_EXT_PATH="$$media-moneytoo$$/libraries/decoder_av1/src/main"
+      - cd "${AV1_EXT_PATH}/jni"
+      - ln -s "$$cpu_features$$" cpu_features
+      - ln -s "$$libgav1$$" libgav1
+      - cd "${AV1_EXT_PATH}/jni/libgav1"
+      - mkdir "${AV1_EXT_PATH}/jni/libgav1/third_party"
+      - cd "${AV1_EXT_PATH}/jni/libgav1/third_party"
+      - ln -s "$$abseil-cpp$$" abseil-cpp
+      - cd "$$media-moneytoo$$"
+      - ./gradlew :lib-decoder-{ffmpeg,av1}:bundleReleaseAar
+      - ./gradlew :lib-{exoplayer,extractor,ui}:bundleReleaseAar
+      - popd
+      - cp $$media-moneytoo$$/libraries/decoder_{ffmpeg,av1}/buildout/outputs/aar/*.aar
+        libs/
+      - cp $$media-moneytoo$$/libraries/{exoplayer,extractor,ui}/buildout/outputs/aar/*.aar
+        libs/
+    ndk: 21.4.7075529
+
+MaintainerNotes: 'Extensions build instructions: https://github.com/androidx/media/blob/1.1.0/libraries/decoder_ffmpeg/README.md
+    https://github.com/androidx/media/blob/1.1.0/libraries/decoder_av1/README.md'
 
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: '0.137'
-CurrentVersionCode: 137
+CurrentVersion: '0.149'
+CurrentVersionCode: 149
