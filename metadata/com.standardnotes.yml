@@ -12136,10 +12136,58 @@ Builds:
       - .yarn/
     ndk: r23b
 
+  - versionName: 3.166.17
+    versionCode: 3001035
+    commit: '@standardnotes/mobile@3.166.17'
+    subdir: packages/mobile/android/app
+    sudo:
+      - apt-get update
+      - apt-get install -y libsecret-1-dev build-essential
+      - curl -Lo node.tar.gz https://nodejs.org/download/release/v16.20.0/node-v16.20.0-linux-x64.tar.gz
+      - echo "7abc0e558fa3b3c4cc0fd3c7fa5dbe61500ba7213f5e87ed560c65a733c6a5c4 node.tar.gz"
+        | sha256sum -c -
+      - tar xzf node.tar.gz --strip-components=1 -C /usr/local/
+      - npm install -g yarn
+      - sysctl fs.inotify.max_user_watches=524288 || true
+    init:
+      - cd ../../../..
+      - yarn config set -H enableImmutableInstalls false
+      - sed -i -e '/react-native-iap/d' packages/mobile/package.json
+      - npm_config_build_from_source=true yarn
+    patch:
+      - remove-IAP.3.146.2.patch
+      - disable-gms-u2f-support-3.160.17.patch
+    gradle:
+      - prod
+    rm:
+      - packages/mobile/ios
+    prebuild:
+      - sed -i -e '/detox/Id' -e 's/versionName appVersionName/versionName "$$VERSION$$"/'
+        -e 's/versionCode appVersionCode/versionCode $$VERCODE$$/' -e '/universalApk/s/false/true/'
+        build.gradle
+      - pushd ../../../..
+      - yarn run build:mobile
+      - popd
+      - pushd ../..
+      - yarn run android:bundle
+      - popd
+    scanignore:
+      - packages/mobile/node_modules/jsc-android
+      - packages/mobile/node_modules/react-native
+      - packages/mobile/node_modules/detox/android/build.gradle
+      - packages/mobile/node_modules/@standardnotes/react-native-utils/android/build.gradle
+      - packages/mobile/node_modules/@react-native-async-storage/async-storage/android/build.gradle
+    scandelete:
+      - node_modules/
+      - packages/mobile/node_modules
+      - packages/desktop
+      - .yarn/
+    ndk: r23b
+
 AutoUpdateMode: Version @standardnotes/mobile@%v
 UpdateCheckMode: HTTP
 VercodeOperation:
   - 3000310 + %c
 UpdateCheckData: https://github.com/standardnotes/app/actions/workflows/mobile.release.prod.yml|(\d+)\sworkflow\sruns|https://github.com/standardnotes/app/releases|/releases/tag/%40standardnotes%2Fmobile%40([\d.]+)
-CurrentVersion: 3.166.15
-CurrentVersionCode: 3001033
+CurrentVersion: 3.166.17
+CurrentVersionCode: 3001035
