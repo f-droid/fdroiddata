@@ -142,42 +142,13 @@ Builds:
       - $$flutter$$/bin/flutter build apk --release
     ndk: r21
 
-  - versionName: 1.0.5
-    versionCode: 48
-    disable: patch fails
-    commit: a8b06b050adaabd68f63f6f0b3f7df0f00601a9f
-    patch:
-      - remove_youtube_sentry_support_29.diff
-    output: build/app/outputs/flutter-apk/app-release.apk
-    srclibs:
-      - flutter@3.7.7
-    rm:
-      - ios
-      - linux
-      - web
-      - windows
-    prebuild:
-      - sed -i -e '/INTERNET/d' -e '/ACCESS_NETWORK_STATE/d' android/app/src/main/AndroidManifest.xml
-      - sed -i -e '/^  sentry:/,/^    version:/d' -e '/^  sentry_flutter:/,/^    version:/d'
-        pubspec.lock
-      - sed -i -e '/sentry_flutter/d' pubspec.yaml
-      - export PUB_CACHE=$(pwd)/.pub-cache
-      - $$flutter$$/bin/flutter config --no-analytics
-    scandelete:
-      - .pub-cache
-    build:
-      - export PUB_CACHE=$(pwd)/.pub-cache
-      - $$flutter$$/bin/flutter build apk --release
-    ndk: r21
-
   - versionName: 1.0.6
     versionCode: 49
+    disable: https://github.com/tuntorius/mightier_amp/issues/67
     commit: f7d282553063f4ae30213c301b030bd51aa26103
-    patch:
-      - remove_youtube_sentry_support_29.diff
     output: build/app/outputs/flutter-apk/app-release.apk
     srclibs:
-      - flutter@3.7.7
+      - flutter@3.10.6
     rm:
       - ios
       - linux
@@ -186,8 +157,12 @@ Builds:
     prebuild:
       - sed -i -e '/INTERNET/d' -e '/ACCESS_NETWORK_STATE/d' android/app/src/main/AndroidManifest.xml
       - sed -i -e '/^  sentry:/,/^    version:/d' -e '/^  sentry_flutter:/,/^    version:/d'
-        pubspec.lock
-      - sed -i -e '/sentry_flutter/d' pubspec.yaml
+        -e '/^  youtube_explode_dart:/,/^    version:/d' pubspec.lock
+      - sed -i -e '/sentry_flutter/d' -e '/youtube_explode_dart/d' pubspec.yaml
+      - sed -i -e '/startsWith("yt:")/,/^    }/s/^      .*//g' -e '/YoutubeSource/d'
+        lib/audio/online_sources/sourceResolver.dart
+      - sed -i -e '/void addFromYoutubeSource/,/^  }/d' -e '/addFromYoutubeSource/d'
+        -e '/YoutubeSource/d' lib/audio/tracksPage.dart
       - export PUB_CACHE=$(pwd)/.pub-cache
       - $$flutter$$/bin/flutter config --no-analytics
     scandelete:
