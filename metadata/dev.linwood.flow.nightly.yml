@@ -1,0 +1,47 @@
+Categories:
+  - Time
+License: GPL-3.0-only
+AuthorName: Linwood
+AuthorEmail: admin@linwood.dev
+SourceCode: https://github.com/LinwoodDev/Flow
+IssueTracker: https://github.com/LinwoodDev/Flow/issues
+Translation: https://linwood.crowdin.com/flow
+Changelog: https://github.com/LinwoodDev/Flow/blob/develop/CHANGELOG.md
+
+AutoName: Flow
+
+RepoType: git
+Repo: https://github.com/LinwoodDev/Flow.git
+
+Builds:
+  - versionName: 0.2.0
+    versionCode: 5
+    commit: 80f5e606411c8ffefac062fad6b7873eca2053ca
+    subdir: app
+    output: build/app/outputs/flutter-apk/app-nightly-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - app/ios
+      - app/linux
+      - app/macos
+      - app/web
+      - app/windows
+    prebuild:
+      - export version=$(cat ../FLUTTER_VERSION)
+      - pushd $$flutter$$
+      - git checkout -f $version
+      - popd
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+    scandelete:
+      - app/.pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --flavor nightly
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^v.+$
+UpdateCheckData: app/pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 0.2.0
+CurrentVersionCode: 5
