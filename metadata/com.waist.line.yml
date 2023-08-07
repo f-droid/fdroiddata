@@ -673,10 +673,15 @@ Builds:
     output: platforms/android/app/build/outputs/apk/release/app-release-unsigned.apk
     srclibs:
       - BarcodeScanner@0fc1fd2ff00683d2a2803ba6da63320bcb29fd2c
-    prebuild: sdkmanager 'platforms;android-30' 'build-tools;30.0.3'
-    build:
+    prebuild:
+      - sdkmanager 'platforms;android-33' 'build-tools;33.0.2'
       - npm install
       - cordova platform add android
+    scandelete:
+      - node_modules
+      - platforms
+      - plugins
+    build:
       - pushd $$BarcodeScanner$$
       - rm -r local.properties gradle
       - sed -i -e 's/3.0.1/3.6.4/' build.gradle
@@ -684,6 +689,10 @@ Builds:
       - popd
       - cp $$BarcodeScanner$$/barcodescanner/build/outputs/aar/barcodescanner-release.aar
         platforms/android/app/libs/barcodescanner-release-2.1.5.aar
+      - cp $$BarcodeScanner$$/barcodescanner/build/outputs/aar/barcodescanner-release.aar
+        plugins/phonegap-plugin-barcodescanner/src/android/barcodescanner-release-2.1.5.aar
+      - cp $$BarcodeScanner$$/barcodescanner/build/outputs/aar/barcodescanner-release.aar
+        node_modules/phonegap-plugin-barcodescanner/src/android/barcodescanner-release-2.1.5.aar
       - cordova build android --release -- --packageType=apk
 
 AutoUpdateMode: Version
