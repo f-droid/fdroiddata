@@ -59,27 +59,6 @@ Builds:
       - app/shared/src/main/java/com/topjohnwu/magisk/utils/DynamicClassLoader.java
 
   - versionName: '1.0'
-    versionCode: 4
-    disable: not used
-    commit: 7cb0909c70126225f817de27d5f43c7e115db29c
-    subdir: stub
-    sudo:
-      - apt-get update
-      - apt-get install -y openjdk-17-jdk-headless
-      - update-alternatives --auto java
-    gradle:
-      - yes
-    rm:
-      - native
-      - tools
-    prebuild:
-      - echo -e 'version=26.0' > ../config.prop
-      - sed -i -e 's|"https://.*"|"https://f-droid.org/repo/com.topjohnwu.magisk_${Config.versionCode}.apk"|'
-        -e '/versionCode/s/1/$$VERCODE$$/' build.gradle.kts
-    scanignore:
-      - app/shared/src/main/java/com/topjohnwu/magisk/utils/DynamicClassLoader.java
-
-  - versionName: '1.0'
     versionCode: 5
     commit: d0c9384233412c91d3538336e26fb419dd40c850
     subdir: stub
@@ -415,7 +394,6 @@ Builds:
 
   - versionName: '26.1'
     versionCode: 26100
-    disable: doesn't work
     commit: d0c9384233412c91d3538336e26fb419dd40c850
     timeout: 30000
     submodules: true
@@ -434,6 +412,8 @@ Builds:
         build.py
       - sed -i -e 's/-12/-13/' -e 's/"src",.*/"src"]/' $$ondk$$/config-linux.toml
       - sed -i -e '/Key.CHECK_UPDATES/s/true/false/' ./app/src/main/java/com/topjohnwu/magisk/core/Config.kt
+      - sed -i -e '/dependsOn(stubTask)/d' -e 's|from(stubApk)|from(rootProject.file("out/stub-release.apk"))|'
+        buildSrc/src/main/java/Setup.kt
     scanignore:
       - app/shared/src/main/java/com/topjohnwu/magisk/utils/DynamicClassLoader.java
     scandelete:
