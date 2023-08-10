@@ -1,0 +1,51 @@
+Categories:
+  - Time
+License: GPL-3.0-only
+AuthorName: Naval Alcalá
+AuthorWebSite: https://www.naval.cat/
+SourceCode: https://github.com/aeri/Florae
+IssueTracker: https://github.com/aeri/Florae/issues
+
+AutoName: Florae
+
+RepoType: git
+Repo: https://github.com/aeri/Florae
+
+Builds:
+  - versionName: 2.0.1
+    versionCode: 4
+    commit: v2.0.1
+    submodules: true
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - transistor-background-fetch@fb883de16ff3fbaaaa5ce84d829911c8a5894d2
+    rm:
+      - test
+      - docs
+    prebuild:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - .flutter/bin/flutter config --no-analytics
+      - .flutter/bin/flutter pub get
+    scanignore:
+      - .flutter/packages/flutter_tools/gradle/flutter.gradle
+      - .flutter/bin/cache
+      - android/build.gradle
+      - .pub-cache/hosted/pub.dev/background_fetch-*/android/build.gradle
+    scandelete:
+      - .flutter
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - pushd $$transistor-background-fetch$$/android/tsbackgroundfetch/
+      - gradle assembleRelease
+      - gradle publishToMavenLocal
+      - popd
+      - mv $$transistor-background-fetch$$/android/tsbackgroundfetch/build/outputs/aar/tsbackgroundfetch-release.aar
+        $PUB_CACHE/hosted/pub.dev/background_fetch-1.1.6/android/libs/com/transistorsoft/tsbackgroundfetch/0.5.7/tsbackgroundfetch-0.5.7.aar
+      - .flutter/bin/flutter build apk
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 2.0.1
+CurrentVersionCode: 4
