@@ -592,11 +592,57 @@ Builds:
       - export USER=vagrant
       - ARCHES="aarch64" ./scripts/android/build-android.sh -s $$COMMIT$$
 
+  - versionName: 5.2.3
+    versionCode: 144
+    commit: 8f9134b494ee859fe171696028eeb0df9dbc6cde
+    timeout: 30000
+    sudo:
+      - apt-get update
+      - apt-get install -y xz-utils zipalign
+      - mkdir -m 0755 /nix
+      - chown vagrant /nix
+      - chown -R vagrant /tmp
+    output: ./simplex-chat-armeabi-v7a.apk
+    rm:
+      - ./docs/themes/simplex-chat.sample.zip
+    prebuild:
+      - cp -r ./apps/multiplatform/gradle .
+      - sed -i -e '/maven.pkg.jetbrains.space/d' ./apps/multiplatform/{build,settings}.gradle.kts
+      - sed -i -e '/gradleConfig/d' ./apps/multiplatform/android/build.gradle.kts
+      - sed -i -e 's/android.version_code=.*/android.version_code=$$VERCODE$$/' ./apps/multiplatform/gradle.properties
+    build:
+      - gradle -v
+      - export USER=vagrant
+      - ARCHES="armv7a" ./scripts/android/build-android.sh -s $$COMMIT$$
+
+  - versionName: 5.2.3
+    versionCode: 145
+    commit: 8f9134b494ee859fe171696028eeb0df9dbc6cde
+    timeout: 30000
+    sudo:
+      - apt-get update
+      - apt-get install -y xz-utils zipalign
+      - mkdir -m 0755 /nix
+      - chown vagrant /nix
+      - chown -R vagrant /tmp
+    output: ./simplex-chat-arm64-v8a.apk
+    rm:
+      - ./docs/themes/simplex-chat.sample.zip
+    prebuild:
+      - cp -r ./apps/multiplatform/gradle .
+      - sed -i -e '/maven.pkg.jetbrains.space/d' ./apps/multiplatform/{build,settings}.gradle.kts
+      - sed -i -e '/gradleConfig/d' ./apps/multiplatform/android/build.gradle.kts
+      - sed -i -e 's/android.version_code=.*/android.version_code=$$VERCODE$$/' ./apps/multiplatform/gradle.properties
+    build:
+      - gradle -v
+      - export USER=vagrant
+      - ARCHES="aarch64" ./scripts/android/build-android.sh -s $$COMMIT$$
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v[\d.]+$
 VercodeOperation:
   - '%c'
   - '%c+1'
 UpdateCheckData: apps/multiplatform/gradle.properties|android\.version_code\s*=\s*(\d+)|apps/multiplatform/gradle.properties|android\.version_name\s*=\s*([\d.]+)
-CurrentVersion: 5.2.2
-CurrentVersionCode: 143
+CurrentVersion: 5.2.3
+CurrentVersionCode: 145
