@@ -476,8 +476,38 @@ Builds:
       - export PUB_CACHE=$(pwd)/.pub-cache
       - $$flutter$$/bin/flutter build apk -t lib/entrypoints/android/main_fdroid.dart
 
+  - versionName: 4.10.0
+    versionCode: 1230
+    commit: v4.10.0
+    subdir: packages/smooth_app
+    output: build/app/outputs/apk/release/app-release-unsigned.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - packages/smooth_app/ios
+      - packages/scanner/ml_kit
+    prebuild:
+      - version=$(cat ../../flutter-version.txt)
+      - pushd $$flutter$$
+      - git checkout -f $version
+      - popd
+      - sed -i -e '/ml_kit/d' -e '/apple_/d' -e '/google_play/d' -e 's/version:.*/version:\
+        $$VERSION$$+$$VERCODE$$/' pubspec.yaml
+      - pushd android
+      - grep -rli 'org.openfoodfacts.scanner' * | xargs -i@ sed -i 's/org.openfoodfacts.scanner/openfoodfacts.github.scrachx.openfood/g'
+        @
+      - popd
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub upgrade
+    scandelete:
+      - packages/smooth_app/.pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk -t lib/entrypoints/android/main_fdroid.dart
+
 AutoUpdateMode: Version v%v
 UpdateCheckMode: HTTP
 UpdateCheckData: https://github.com/openfoodfacts/smooth-app/releases/latest/download/version-code.txt|(\d+)|https://github.com/openfoodfacts/smooth-app/releases/latest|releases/tag/v([\d.]+)
-CurrentVersion: 4.9.0
-CurrentVersionCode: 1228
+CurrentVersion: 4.10.0
+CurrentVersionCode: 1230
