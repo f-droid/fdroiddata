@@ -36,10 +36,31 @@ Builds:
       - cordova/node_modules/cordova-android/framework/cordova-publish.gradle
     build: cordova build android --release -- --packageType=apk
 
+  - versionName: 1.5.9-0
+    versionCode: 1050900
+    commit: 9b992f66ac61ab546c67a5bdd0c675b335c07afc
+    subdir: cordova
+    sudo:
+      - sysctl fs.inotify.max_user_watches=524288 || true
+      - curl -Lo node.tar.gz https://nodejs.org/dist/v14.17.6/node-v14.17.6-linux-x64.tar.gz
+      - echo "19e376214450e93e58687198070b4ab46e42357032ec65f23a7e35b0e86ad6e2  node.tar.gz"
+        | sha256sum -c -
+      - tar xzf node.tar.gz --strip-components=1 -C /usr/local/
+      - rm node.tar.gz
+      - npm install -g npm@latest
+      - npm install -g cordova
+    output: platforms/android/app/build/outputs/apk/release/app-release-unsigned.apk
+    prebuild:
+      - sdkmanager 'platforms;android-33' 'build-tools;33.0.2'
+      - cordova platform add android
+    scandelete:
+      - cordova/node_modules/cordova-android/framework/cordova-publish.gradle
+    build: cordova build android --release -- --packageType=apk
+
 AllowedAPKSigningKeys: f79e14acebf2bf19f843f12522a0d363f39942e8a7f8951d576aae1662766c81
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: cordova/config.xml|android-versionCode="(\d+)"|.|version="([-\d.]+)"
-CurrentVersion: 1.5.8-0
-CurrentVersionCode: 1050800
+CurrentVersion: 1.5.9-0
+CurrentVersionCode: 1050900
