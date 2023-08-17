@@ -428,6 +428,28 @@ Builds:
       - sed -i -e '/firebase/d' -e '/com.google.gms/d' ../build.gradle.kts
       - sed -i -e 's/, ":wear", ":automotive"//' ../settings.gradle.kts
 
+  - versionName: 2023.8.2-minimal
+    versionCode: 10992
+    commit: 2023.8.2
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y openjdk-17-jdk-headless
+      - update-java-alternatives -a
+    gradle:
+      - minimal
+    rm:
+      - automotive
+      - wear
+    prebuild:
+      - cp ../.github/mock-google-services.json google-services.json
+      - sed -i -e '/-minimal/d' -e 's/project.version.toString()/"$$VERSION$$"/' -e
+        's/System.getenv("VERSION_CODE")/"$$VERCODE$$"/' -e '/firebaseAppDistribution
+        {/,/}/d' -e '/firebase/d' -e '/com.google.gms/d' -e '/<GoogleServicesPluginConfig>/,/}/d'
+        build.gradle.kts
+      - sed -i -e '/firebase/d' -e '/com.google.gms/d' ../build.gradle.kts
+      - sed -i -e 's/, ":wear", ":automotive"//' ../settings.gradle.kts
+
 MaintainerNotes: |-
     6 versions, due to the rapid release there may be a trailing error
     (which bothers only some users) and it takes time to fix.
@@ -436,5 +458,5 @@ ArchivePolicy: 6
 AutoUpdateMode: Version +-minimal %v
 UpdateCheckMode: HTTP
 UpdateCheckData: https://github.com/home-assistant/android/releases/latest/download/version_code.txt|(\d+)|https://github.com/home-assistant/android/releases/latest|tree/([\d.]+)"
-CurrentVersion: 2023.7.5
-CurrentVersionCode: 10506
+CurrentVersion: 2023.8.2
+CurrentVersionCode: 10992
