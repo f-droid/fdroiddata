@@ -604,21 +604,34 @@ Builds:
     prebuild: sed -i -e "/android {/alintOptions { disable 'MissingTranslation' }"
         build.gradle
 
-  - versionName: 1.1.202-beta.f
-    versionCode: 202
-    disable: https://github.com/openvk/mobile-android-legacy/issues/58#issuecomment-1674847585
-    commit: 5c3eb5acbaf4faf52b0a774040b9e34bfafb1269
+  - versionName: 1.1.203-beta.f
+    versionCode: 203
+    commit: b1a84e5b9c4345746f0e44ce9c52ac679c466db5
     subdir: app
     sudo:
+      - apt-get update
+      - apt-get install -y bzip2 file make
+      - apt-get remove openjdk-11-jdk-headless openjdk-11-jre-headless
       - echo "deb http://deb.debian.org/debian sid main" > /etc/apt/sources.list.d/stretch.list
       - apt-get update
-      - apt-get remove openjdk-11-jdk-headless openjdk-11-jre-headless
       - apt-get install -y -t sid openjdk-8-jdk-headless
+      - curl -Lso r8e.tar.bz2 https://dl.google.com/android/ndk/android-ndk-r8e-linux-x86_64.tar.bz2
+      - echo "07371eaa242490096be1bf494ecea1e5a6b7839cbead329fb868c0f54b716f24 r8e.tar.bz2"
+        | sha256sum -c -
+      - tar xjf r8e.tar.bz2 -C /opt/android-sdk/ndk
       - chmod -R 777 /opt/android-sdk
     gradle:
       - fdroidConfig
     prebuild: sed -i -e "/android {/alintOptions { disable 'MissingTranslation' }"
+        -e 's/ndk-build.sh/ndk-build/' -e 's!projDir/ndk-modules!projDir/../ndk-modules!g'
         build.gradle
+    build:
+      - pushd ..
+      - chmod +x ./build-ffmpeg.sh
+      - ANDROID_NDK_HOME=/opt/android-sdk/ndk/android-ndk-r8e ./build-ffmpeg.sh 0.8.12
+      - ANDROID_NDK_HOME=$$NDK$$ ./build-ffmpeg.sh 3.1.4
+      - popd
+    ndk: r11c
 
 AutoUpdateMode: None
 UpdateCheckMode: Tags
