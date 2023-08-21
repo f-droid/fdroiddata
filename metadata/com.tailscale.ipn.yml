@@ -973,6 +973,7 @@ Builds:
 
   - versionName: 1.48.0-t77c732357-g388b71affe8
     versionCode: 176
+    disable: https://github.com/tailscale/tailscale/issues/8987
     commit: fcab2211ef57398f0042b422178ab796e258177c
     subdir: android
     sudo:
@@ -986,8 +987,8 @@ Builds:
     srclibs:
       - tailscale-go@e6ce5b50036022c91783161890eabecfddc5ae79
     prebuild:
-      - sdkmanager 'platforms;android-31' 'build-tools;31.0.0'
-      - sed -i -e '/rm -rf/,+2d' ../Makefile
+      - sdkmanager 'platforms;android-31' 'platform-tools' 'build-tools;33.0.2'
+      - sed -i -e '/rm -rf/,+2d' -e 's!$(ANDROID_HOME)/cmdline-tools/latest/bin/sdkmanager!sdkmanager!g' -e 's/list_installed/list/' ../Makefile
     build:
       - export TOOLCHAINREV=$(go run tailscale.com/cmd/printdep --go)
       - export TOOLCHAINDIR=${HOME}/.cache/tailscale-android-go-$TOOLCHAINREV
@@ -1000,7 +1001,7 @@ Builds:
       - mkdir -p $TOOLCHAINDIR
       - ln -s $$tailscale-go$$ $TOOLCHAINDIR/go
       - export PATH=$TOOLCHAINDIR/go/bin:$PATH
-      - ANDROID_NDK_ROOT=$$NDK$$ make -C .. release_aar
+      - ANDROID_NDK_ROOT=$$NDK$$ make -C .. tailscale-fdroid.apk
     ndk: r23b
 
 MaintainerNotes: Tracking reported at https://gitlab.com/fdroid/fdroiddata/-/issues/2601
