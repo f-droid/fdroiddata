@@ -1,0 +1,61 @@
+Categories:
+  - System
+License: Apache-2.0
+AuthorName: benjamin wan
+SourceCode: https://github.com/benjaminwan/ChineseTtsTflite
+IssueTracker: https://github.com/benjaminwan/ChineseTtsTflite/issues
+Changelog: https://github.com/benjaminwan/ChineseTtsTflite/releases
+
+RepoType: git
+Repo: https://github.com/benjaminwan/ChineseTtsTflite.git
+
+Builds:
+  - versionName: 0.5.0
+    versionCode: 5
+    commit: 36f27f8d1afe6f0739e61c396c0cbc916014daa5
+    timeout: 30000
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y ninja-build p7zip g++ python-is-python3 libpython3-dev
+        python3-distutils
+      - sdkmanager "build-tools;31.0.0" "platforms;android-32" "build-tools;30.0.3"
+      - cp /opt/android-sdk/build-tools/30.0.3/lib/dx.jar /opt/android-sdk/build-tools/31.0.0/lib/dx.jar
+      - cp /opt/android-sdk/build-tools/30.0.3/dx /opt/android-sdk/build-tools/31.0.0/dx
+      - curl -Lo /usr/local/bin/bazel https://github.com/bazelbuild/bazel/releases/download/4.2.3/bazel_nojdk-4.2.3-linux-x86_64
+      - echo "278adaebbd2d1b30cfd9e9c1444194b1cf297db8590b953abf27342a88a78b89 /usr/local/bin/bazel"
+        | sha256sum -c -
+      - chmod +x /usr/local/bin/bazel
+    gradle:
+      - yes
+    srclibs:
+      - tensorflow@v2.8.4
+    prebuild:
+      - curl -Lo models.7z https://github.com/benjaminwan/ChineseTtsTflite/releases/download/init/models-tflite.7z
+      - echo "a7ed28743173ac2e6fc07422dd3fcb742df26fe80d35556f4637d05df7e57168 models.7z"
+        | sha256sum -c -
+      - p7zip -d models.7z
+      - mv models-tflite src/main/assets
+    build:
+      - assets=$(pwd)/src/main/assets
+      - pushd $$tensorflow$$
+      - yes "" | ./configure || true
+      - echo -e '\nbuild --action_env ANDROID_NDK_HOME="$$NDK$$"' >> .tf_configure.bazelrc
+      - echo -e '\nbuild --action_env ANDROID_NDK_API_LEVEL="21"' >> .tf_configure.bazelrc
+      - echo -e '\nbuild --action_env ANDROID_BUILD_TOOLS_VERSION="31.0.0"' >> .tf_configure.bazelrc
+      - echo -e '\nbuild --action_env ANDROID_SDK_API_LEVEL="32"' >> .tf_configure.bazelrc
+      - echo -e '\nbuild --action_env ANDROID_SDK_HOME="$$SDK$$"' >> .tf_configure.bazelrc
+      - popd
+      - build="$$tensorflow$$/tensorflow/lite/tools/build_aar.sh --target_archs=arm64-v8a
+        --input_models=$assets/fastspeech2_quan.tflite,$assets/mb_melgan.tflite,$assets/tacotron2_quan.tflite"
+      - $build || true
+      - echo -e '\nbuild --jobs=8' >> $$tensorflow$$/.tf_configure.bazelrc
+      - $build
+      - mkdir libs
+      - mv $$tensorflow$$/bazel-bin/tmp/tensorflow-lite*.aar libs
+    ndk: r19c
+
+AutoUpdateMode: None
+UpdateCheckMode: None
+CurrentVersion: 0.5.0
+CurrentVersionCode: 5
