@@ -1,0 +1,47 @@
+Categories:
+  - Graphics
+  - Science & Education
+License: GPL-3.0-only
+SourceCode: https://github.com/lufebe16/lbalance
+IssueTracker: https://github.com/lufebe16/lbalance/issues
+
+RepoType: git
+Repo: https://github.com/lufebe16/lbalance
+
+Builds:
+  - versionName: '1.0'
+    versionCode: 1021100
+    commit: b1f904b3617411114fa9b2b6f045a0882b437905
+    sudo:
+      - apt-get update
+      - apt-get install -y ant autoconf build-essential ccache gettext imagemagick
+        libffi-dev libltdl-dev libssl-dev libtool python3-tk virtualenv wget zlib1g-dev
+      - rm /opt/android-sdk/tools/bin/sdkmanager
+      - ln -s $(which sdkmanager) /opt/android-sdk/tools/bin/sdkmanager
+    output: bin/lbalance-$$VERSION$$-armeabi-v7a-release-unsigned.apk
+    prebuild:
+      - sdkmanager 'build-tools;32.0.0' 'platforms;android-32'
+      - mkdir -p ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin
+      - ./helpers/setapiforp4a >${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/avdmanager
+      - chmod 0755 ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/avdmanager
+      - virtualenv --python=python3 ${HOME}/WWENV
+      - . ${HOME}/WWENV/bin/activate
+      - python3 -m pip install -r req.txt
+      - sed -r "s:#? ?android\.skip_update =.*:android.skip_update = True:" -i buildozer.spec
+      - sed -r "s:#? ?android\.accept_sdk_license =.*:android.accept_sdk_license =
+        False:" -i buildozer.spec
+      - sed -r "s:#? ?android\.sdk_path =.*:android.sdk_path = $$SDK$$:" -i buildozer.spec
+      - sed -r "s:#? ?android\.ndk_path =.*:android.ndk_path = $$NDK$$:" -i buildozer.spec
+      - sed -r "s:#? ?android\.ant_path =.*:android.ant_path = $(which ant):" -i buildozer.spec
+      - deactivate
+    build:
+      - . ${HOME}/WWENV/bin/activate
+      - buildozer android release
+      - deactivate
+    ndk: r25b
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^v.*$
+UpdateCheckData: pubspec/output-metadata.json|versionCode[:"\s]+(\d+)|.|versionName[:"\s]+([0-9.]+)
+CurrentVersion: '1.0'
+CurrentVersionCode: 1021100
