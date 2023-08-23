@@ -1,0 +1,70 @@
+AntiFeatures:
+    NonFreeNet:
+        en-US: Currently this app can only work with e926.net and e621.net.
+    NSFW:
+        en-US: There are NSFW images.
+Categories:
+  - Multimedia
+License: GPL-3.0-or-later
+AuthorName: clragon
+AuthorEmail: kenta3ds.habbo@gmail.com
+WebSite: https://e1547.clynamic.net/
+SourceCode: https://github.com/clragon/e1547
+IssueTracker: https://github.com/clragon/e1547/issues
+
+AutoName: e1547
+
+RepoType: git
+Repo: https://github.com/clragon/e1547.git
+Binaries: https://github.com/clragon/e1547/releases/download/%v%2B%c/e1547.apk
+
+Builds:
+  - versionName: 16.2.8
+    versionCode: 88
+    commit: 16.2.8+88
+    sudo:
+      - mkdir -p /home/runner/
+      - chown vagrant /home/runner/
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+      - windows
+    prebuild:
+      - export FLUTTER_VERSION=$(grep "^  flutter:" pubspec.yaml | cut -d "'" -f2
+        | cut -d ' ' -f1 | cut -d '=' -f2)
+      - pushd $$flutter$$
+      - git checkout -f $FLUTTER_VERSION
+      - popd
+      - export repo=/home/runner/work/e1547
+      - mkdir -p $repo
+      - cd ..
+      - mv net.e1547 $repo/e1547
+      - pushd $repo/e1547
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+      - popd
+      - mv $repo/e1547 net.e1547
+      - cd net.e1547
+      - sed -i -e '/googleapis/d' .pub-cache/hosted/pub.dev/webview_cookie_manager-*/android/build.gradle
+    scandelete:
+      - .pub-cache
+    build:
+      - export repo=/home/runner/work/e1547
+      - cd ..
+      - mv net.e1547 $repo/e1547
+      - pushd $repo/e1547
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk
+      - popd
+      - mv $repo/e1547 net.e1547
+
+AllowedAPKSigningKeys: 8d324e434b975aa338a7a9c7f3077e1fc0dbf1303ec5d9b9634fe83e9ddb6380
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 16.2.8
+CurrentVersionCode: 88
