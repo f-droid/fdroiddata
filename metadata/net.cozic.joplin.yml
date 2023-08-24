@@ -1355,25 +1355,33 @@ Builds:
       - packages/app-mobile/components/CameraView.tsx
     prebuild:
       - pushd ../../../..
-      - yarn --version
+      - sed -i -e '/camera/d' -e '/geolocation/d' packages/app-mobile/package.json
       - YARN_ENABLE_IMMUTABLE_INSTALLS=false BUILD_SEQUENCIAL=1 yarn install
-      - sed -i '/android.permission.CAMERA/d' packages/app-mobile/android/app/src/main/AndroidManifest.xml
-      - popd
-      - sed -i -e '\!ACCESS_NETWORK_STATE!a<uses-permission android:name="com.android.vending.CHECK_LICENSE"
-        tools:node="remove" />' -e 's!xmlns:android!xmlns:tools="http://schemas.android.com/tools"
-        xmlns:android!' src/main/AndroidManifest.xml
-      - sed -i '/:react-native-camera/{N;N;d}' build.gradle
-      - pushd ../../../../packages/app-mobile/node_modules/react-native-rsa-native/android
+      - sed -i -e '/installreferrer/,+11d' packages/app-mobile/node_modules/react-native-device-info/android/build.gradle
+      - pushd packages/app-mobile/node_modules/react-native-rsa-native/android
       - sed -i -e 's|maven.fabric.io/public|jitpack.io|' build.gradle bin/build.gradle
       - popd
+      - sed -i -e '/react-native-community\/geolocation/d' -e '/return new Promise/,/});/c
+        return this.currentPosition_testResponse();' packages/app-mobile/utils/geolocation-react.js
+      - popd
+      - sed -i -e 's|maven.aliyun.com/repository/jcenter|maven.google.com|' -e 's|maven.apache.org|repo1.maven.org/maven2|'
+        ../build.gradle
+      - sed -i '/:react-native-camera/,+2d' build.gradle
+      - sed -i -e '/android.permission.CAMERA/d' -e '/ACCESS_NETWORK_STATE/a <uses-permission
+        android:name="com.android.vending.CHECK_LICENSE" tools:node="remove" />' -e
+        's|xmlns:android|xmlns:tools="http://schemas.android.com/tools" xmlns:android|'
+        src/main/AndroidManifest.xml
     scanignore:
-      - packages/app-mobile/android/build.gradle
       - packages/app-mobile/node_modules/jsc-android
+      - packages/app-mobile/node_modules/react-native/build.gradle.kts
+      - packages/app-mobile/node_modules/@bam.tech/react-native-image-resizer/android/build.gradle
       - packages/app-mobile/node_modules/@react-native-community/netinfo/android/build.gradle
       - packages/app-mobile/node_modules/@react-native-community/push-notification-ios/android/build.gradle
+      - packages/app-mobile/node_modules/react-native-device-info/android/build.gradle
       - packages/app-mobile/node_modules/react-native-get-random-values/android/build.gradle
       - packages/app-mobile/node_modules/react-native-image-picker/android/build.gradle
       - packages/app-mobile/node_modules/react-native-localize/android/build.gradle
+      - packages/app-mobile/node_modules/react-native-reanimated/android/build.gradle
       - packages/app-mobile/node_modules/react-native-rsa-native/android/bin/build.gradle
       - packages/app-mobile/node_modules/react-native-rsa-native/android/build.gradle
       - packages/app-mobile/node_modules/react-native-safe-area-context/android/build.gradle
