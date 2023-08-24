@@ -11,7 +11,7 @@ Changelog: https://github.com/jenspfahl/BDT/releases
 AutoName: Break.Down.Timer
 
 RepoType: git
-Repo: https://github.com/jenspfahl/BDT
+Repo: https://github.com/jenspfahl/BDT.git
 
 Builds:
   - versionName: 1.0.0
@@ -65,14 +65,18 @@ Builds:
     submodules: true
     output: build/app/outputs/flutter-apk/app-release.apk
     srclibs:
-      - flutter@3.0.4
-    prebuild: sdkmanager 'cmake;3.10.2.4988404'
+      - flutter@3.13.0
+    prebuild:
+      - sdkmanager 'cmake;3.10.2.4988404'
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter packages pub get
+    scandelete:
+      - .pub-cache
     build:
-      - export PATH=$$flutter$$/bin:$PATH
-      - flutter packages pub get
-      - flutter packages pub run build_runner build --delete-conflicting-outputs
-      - flutter config --no-analytics
-      - flutter build apk
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter packages pub run build_runner build --delete-conflicting-outputs
+      - $$flutter$$/bin/flutter build apk
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
