@@ -442,7 +442,61 @@ Builds:
       - ./buildall.sh
     ndk: r25c
 
+  - versionName: 2023-08-27-release
+    versionCode: 32
+    commit: 79182d8f23e41fcdcb088ff1bd19099548696545
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y make automake pkg-config libtool nasm
+      - apt-get install -y -t bullseye-backports meson
+      - apt-get install -y openjdk-17-jdk-headless
+      - update-java-alternatives -a
+    gradle:
+      - default
+    srclibs:
+      - mbedtls@v2.28.4
+      - dav1d@97becd73726c3d4c4bb8793d2215f846da8795af
+      - FFmpeg@c48ec95ba310fa7debb317b8790b387b6256d2c5
+      - freetype2@VER-2-13-1
+      - fribidi@v1.0.13
+      - harfbuzz@8.1.1
+      - libass@5c15c883a4783641f7e71a6a1f440209965eb64f
+      - mpv@a19aefac372c7fbfed08209eef55862c2e715b5c
+    prebuild:
+      - sed -i -e '/enable true/d' -e '/universalBase/s/8000/0/' build.gradle
+      - cd ../buildscripts/
+      - mkdir -p sdk
+      - ln -s $$NDK$$ sdk/android-ndk-r25c
+      - mkdir -p deps
+      - pushd deps/
+      - cp -r $$mbedtls$$ mbedtls
+      - cp -r $$dav1d$$ dav1d
+      - cp -r $$FFmpeg$$ ffmpeg
+      - cp -r $$freetype2$$ freetype2
+      - cp -r $$fribidi$$ fribidi
+      - cp -r $$harfbuzz$$ harfbuzz
+      - cp -r $$libass$$ libass
+      - cp -r $$mpv$$ mpv
+      - mkdir lua
+      - curl -Lo lua.tar.gz https://www.lua.org/ftp/lua-5.2.4.tar.gz
+      - echo "b9e2e4aad6789b3b63a056d442f7b39f0ecfca3ae0f1fc0ae4e9614401b69f4b lua.tar.gz"
+        | sha256sum -c -
+      - tar -xz --strip-components=1 -C lua -f lua.tar.gz
+      - popd
+      - sed -i -e '/gradlew/d' scripts/mpv-android.sh
+      - sed -i -e '/"$target" == "mpv-android"/,/ls -lh/d' buildall.sh
+    scandelete:
+      - buildscripts/deps/mbedtls/
+      - buildscripts/deps/lua.tar.gz
+    build:
+      - cd ../buildscripts/
+      - ./buildall.sh --arch arm64 mpv
+      - ./buildall.sh --arch x86_64 mpv
+      - ./buildall.sh
+    ndk: r25c
+
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: 2023-06-04-release
-CurrentVersionCode: 31
+CurrentVersion: 2023-08-27-release
+CurrentVersionCode: 32
