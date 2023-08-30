@@ -1,0 +1,62 @@
+Categories:
+  - Multimedia
+License: GPL-3.0-only
+SourceCode: https://github.com/guysoft/midistrum
+IssueTracker: https://github.com/guysoft/midistrum/issues
+
+Name: midistrum
+Description: |-
+    An app to use android's native midi system to create an omnichord/auto harp-like strum instrument.
+    It contains a port native midi to kivy.
+    Midistrum does not generate sound on its own, it needs a synth to send midi t. For example fluidsynth. Or your PC over USB.
+
+RepoType: git
+Repo: https://github.com/guysoft/midistrum.git
+
+Builds:
+  - versionName: 0.2.7
+    versionCode: 1021207
+    commit: v0.2.7
+    sudo:
+      - apt-get update
+      - apt-get install -y build-essential wget python3-distutils python3-pip python3-dev
+        openjdk-17-jdk automake libltdl-dev libtool pkg-config zlib1g-dev libncurses5-dev
+        libncursesw5-dev libtinfo5 cmake libffi-dev libssl-dev
+      - rm /opt/android-sdk/tools/bin/sdkmanager
+      - ln -s $(which sdkmanager) /opt/android-sdk/tools/bin/sdkmanager
+    output: src/bin/*.apk
+    prebuild:
+      - cd src
+      - wget --no-verbose -O /tmp/cmdline-tools.zip -t 5 "https://dl.google.com/android/repository/commandlinetools-linux-7583922_latest.zip"
+      - echo "124f2d5115eee365df6cf3228ffbca6fc3911d16f8025bebd5b1c6e2fcfa7faf /tmp/cmdline-tools.zip"  |
+        sha256sum -c -
+      - unzip -qq -o /tmp/cmdline-tools.zip -d /tmp/cmdline-tools
+      - rm /tmp/cmdline-tools.zip
+      - mkdir -p ${ANDROID_SDK_ROOT}/cmdline-tools/latest
+      - mv /tmp/cmdline-tools/cmdline-tools/* ${ANDROID_SDK_ROOT}/cmdline-tools/latest
+        || true
+      - export PATH=${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin:${PATH}
+      - echo y | sdkmanager --licenses
+      - sdkmanager 'platforms;android-33' 'build-tools;33.0.0'
+      - sed -r "s:log_level =.*:log_level = 0:" -i buildozer.spec
+      - sed -r "s:#? ?android\.sdk_path =.*:android.sdk_path = $$SDK$$:" -i buildozer.spec
+      - sed -r "s:#? ?android\.ndk_path =.*:android.ndk_path = $$NDK$$:" -i buildozer.spec
+      - sed -r "s:#? ?android\.ant_path =.*:android.ant_path = $(which ant):" -i buildozer.spec
+      - sed -r "s:#? ?android\.skip_update =.*:android.skip_update = True:" -i buildozer.spec
+    build:
+      - pip3 install --upgrade Cython==0.29.33
+      - pip3 install --upgrade buildozer
+      - cd src
+      - export PATH="$PATH:/home/vagrant/.local/bin"
+      - echo y | buildozer android release
+    ndk: r25b
+
+MaintainerNotes: |-
+    The auto accept license is disabled since fdroid sdkmanager doesn't support
+    the --licenses argument.
+    UpdateCheckMode stays as HTTP as the app has an older tag with a higher version number.
+
+AutoUpdateMode: Version %v
+UpdateCheckMode: None
+CurrentVersion: 0.2.7
+CurrentVersionCode: 1021207
