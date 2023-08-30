@@ -1,11 +1,8 @@
 Categories:
   - Internet
 License: EUPL-1.2
-AuthorName: Governikus GmbH & Co. KG
-AuthorEmail: ausweisapp2@governikus.de
 WebSite: https://www.ausweisapp.bund.de/
 SourceCode: https://github.com/Governikus/AusweisApp2
-IssueTracker: https://github.com/Governikus/AusweisApp2/issues
 Changelog: https://github.com/Governikus/AusweisApp2/releases
 
 Description: |-
@@ -13,7 +10,7 @@ Description: |-
     Aufenthaltstitels können Sie sich im Internet ausweisen.
 
 RepoType: git
-Repo: https://github.com/Governikus/AusweisApp2
+Repo: https://github.com/Governikus/AusweisApp2.git
 
 Builds:
   - versionName: 1.16.1
@@ -291,8 +288,76 @@ Builds:
       - make apk
     ndk: r21e
 
-AutoUpdateMode: None
+  - versionName: 1.26.7
+    versionCode: 122
+    commit: 1.26.7
+    timeout: 40000
+    sudo:
+      - apt-get update
+      - apt-get install -y cmake -t bullseye-backports
+      - apt-get install -y build-essential ccache g++ make maven ninja-build
+    patch:
+      - 1.26.7-smart.patch
+    output: build/dist/AusweisApp2-$$VERSION$$-armeabi-v7a.apk
+    rm:
+      - test/fixture
+      - resources/packaging/macos
+    prebuild: sdkmanager "cmdline-tools;9.0" "build-tools;33.0.2" "platforms;android-33"
+    scandelete:
+      - resources/packaging/android/build.gradle.append.aar
+    build:
+      - export ANDROID_SDK_ROOT=$$SDK$$
+      - mkdir libs/build build
+      - cd libs/build
+      - cmake .. -DCMAKE_TOOLCHAIN_FILE=../../cmake/android.toolchain.cmake -DCMAKE_BUILD_TYPE=release
+      - make -j$(nproc)
+      - cd ../../build
+      - cmake .. -DCMAKE_TOOLCHAIN_FILE=../cmake/android.toolchain.cmake -DCMAKE_BUILD_TYPE=MinSizeRel
+        -DCMAKE_PREFIX_PATH=$(realpath ../libs/build/dist) -DANDROID_VERSION_CODE=$$VERCODE$$
+        -DVENDOR=F-Droid -DVENDOR_DOMAIN=f-droid.org
+      - make -j$(nproc)
+      - make install
+      - make apk
+    ndk: r25c
+
+  - versionName: 1.26.7
+    versionCode: 123
+    commit: 1.26.7
+    timeout: 40000
+    sudo:
+      - apt-get update
+      - apt-get install -y cmake -t bullseye-backports
+      - apt-get install -y build-essential ccache g++ make maven ninja-build
+    patch:
+      - 1.26.7-smart.patch
+    output: build/dist/AusweisApp2-$$VERSION$$-arm64-v8a.apk
+    rm:
+      - test/fixture
+      - resources/packaging/macos
+    prebuild: sdkmanager "cmdline-tools;9.0" "build-tools;33.0.2" "platforms;android-33"
+    scandelete:
+      - resources/packaging/android/build.gradle.append.aar
+    build:
+      - export ANDROID_SDK_ROOT=$$SDK$$
+      - mkdir libs/build build
+      - cd libs/build
+      - cmake .. -DCMAKE_TOOLCHAIN_FILE=../../cmake/android.toolchain.cmake -DCMAKE_BUILD_TYPE=release
+        -DCMAKE_ANDROID_ARCH_ABI=arm64-v8a
+      - make -j$(nproc)
+      - cd ../../build
+      - cmake .. -DCMAKE_TOOLCHAIN_FILE=../cmake/android.toolchain.cmake -DCMAKE_BUILD_TYPE=MinSizeRel
+        -DCMAKE_PREFIX_PATH=$(realpath ../libs/build/dist) -DANDROID_VERSION_CODE=$$VERCODE$$
+        -DVENDOR=F-Droid -DVENDOR_DOMAIN=f-droid.org -DCMAKE_ANDROID_ARCH_ABI=arm64-v8a
+      - make -j$(nproc)
+      - make install
+      - make apk
+    ndk: r25c
+
+AutoUpdateMode: Version
 UpdateCheckMode: HTTP
+VercodeOperation:
+  - 0 + %c
+  - 1 + %c
 UpdateCheckData: https://appl.governikus-asp.de/ausweisapp2/apk/AusweisApp2-armeabi-v7a.apk.dump|versionCode='(\d+)'|.|versionName='([\d.]+)'
 CurrentVersion: 1.26.7
-CurrentVersionCode: 122
+CurrentVersionCode: 123
