@@ -475,6 +475,33 @@ Builds:
     gradleprops:
       - versionType=fdroid
 
+  - versionName: 7-fdroid-146
+    versionCode: 1070
+    commit: 26b66f9bdbd3a77b32f10f3cb350a9a737d5f012
+    subdir: android
+    sudo:
+      - apt-get update
+      - apt-get install -y openjdk-17-jdk-headless
+      - update-alternatives --auto java
+    gradle:
+      - yes
+    prebuild:
+      - sdkmanager 'platforms;android-30'
+      - echo -e 'androidBuildCode=$$VERCODE$$\nbuild=$$VERCODE$$\nmodifier=beta\ntype=fdroid'
+        > ../core/assets/version.properties
+      - echo 'buildversion=$$VERSION$$' | sed 's/=.*fdroid-/=/' >> ../gradle.properties
+      - sed -i -e '/publishing{/,/^    }/d' ../build.gradle
+    scanignore:
+      - android/src/mindustry/android/AndroidLauncher.java
+      - android/src/mindustry/android/AndroidRhinoContext.java
+    scandelete:
+      - android/libs
+    build:
+      - cd ..
+      - gradle pack
+    gradleprops:
+      - versionType=fdroid
+
 MaintainerNotes: |-
     libgdx.so and libgdx-freetype.so binaries are extracted from
     com.badlogicgames.gdx:gdx-platform JARs that come from Maven Central.
