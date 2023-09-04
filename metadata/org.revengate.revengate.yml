@@ -1,0 +1,55 @@
+Categories:
+  - Games
+License: GPL-3.0-or-later
+AuthorName: Yannick Gingras
+AuthorWebSite: http://ygingras.net
+WebSite: http://revengate.org
+SourceCode: https://gitlab.com/ygingras/revengate
+IssueTracker: https://gitlab.com/ygingras/revengate/-/issues
+
+RepoType: git
+Repo: https://gitlab.com/ygingras/revengate.git
+
+Builds:
+  - versionName: 0.9.4
+    versionCode: 1027131
+    commit: v0.9.4
+    timeout: 10800
+    sudo:
+      - apt-get update
+      - apt-get install -y pkgconf clang scons python3-invoke
+    output: bin/revengate.apk
+    srclibs:
+      - Godot@4.1.1-stable
+    prebuild:
+      - mkdir -p bin
+      - mkdir -p android
+      - pushd $$Godot$$
+      - scons --clean platform=linuxbsd target=editor use_llvm=yes tools=yes
+      - scons --clean platform=android arch=arm64v8 production=yes target=template_release
+      - cd platform/android/java
+      - ./gradlew cleanGodotTemplates
+      - popd
+    build:
+      - export ANDROID_SDK_ROOT=$$SDK$$
+      - export ANDROID_NDK_ROOT=$$NDK$$
+      - pushd $$Godot$$
+      - scons -j `nproc` platform=linuxbsd target=editor use_llvm=yes tools=yes
+      - scons -j `nproc` platform=android arch=arm64v8 production=yes target=template_release
+      - cd platform/android/java
+      - ./gradlew generateGodotTemplates
+      - popd
+      - invoke make-fdroid-presets $$Godot$$
+      - $$Godot$$/bin/godot.linuxbsd.editor.x86_64.llvm --headless --check-only --quit
+        project.godot
+      - invoke configure-android-sdk $$SDK$$
+      - $$Godot$$/bin/godot.linuxbsd.editor.x86_64.llvm --headless --export-release
+      - $$Godot$$/bin/godot.linuxbsd.editor.x86_64.llvm --headless --export-release
+        'Android APK' bin/revengate.apk
+    ndk: 25.1.8937393
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: src/constants.gd|const VERSION_CODE := (\d+)|.|const VERSION := "([\d.]+)"
+CurrentVersion: 0.9.4
+CurrentVersionCode: 1027131
