@@ -83,10 +83,20 @@ Builds:
     commit: 7e42f9d29d46faa4a031627683fa8f5bfd09e15a
     output: build/app/outputs/flutter-apk/app-release.apk
     srclibs:
-      - flutter@3.0.5
-    build:
+      - flutter@stable
+    prebuild:
+      - version=$(sed -n -E "s/.*flutter-version:\ '(.*)'/\1/p" .github/workflows/release.yml)
+      - pushd $$flutter$$
+      - git checkout -f $version
+      - popd
+      - export PUB_CACHE=$(pwd)/.pub-cache
       - $$flutter$$/bin/flutter config --no-analytics
-      - $$flutter$$/bin/flutter build apk --release --verbose
+      - $$flutter$$/bin/flutter packages pub get
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
