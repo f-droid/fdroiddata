@@ -1414,7 +1414,7 @@ Builds:
     ndk: r21e
 
   - versionName: 23.3.1
-    versionCode: 233010
+    versionCode: 23301001
     commit: cf35a65bc51fab45eef89087342b651fd8d11884
     subdir: android/app
     sudo:
@@ -1434,7 +1434,8 @@ Builds:
       - sed -i -e '/installReferrerVersion/,+11d' ../../node_modules/react-native-device-info/android/build.gradle
       - sed -i -e "/leakcanary/a implementation(project(':react-native-device-info'))
         { exclude group\x3a 'com.google.firebase'\\ exclude group\x3a 'com.google.android.gms'\\
-        exclude group\x3a 'com.android.installreferrer'\\ }" build.gradle
+        exclude group\x3a 'com.android.installreferrer'\\ }" -e "s/'armeabi-v7a',
+        'arm64-v8a', 'x86', 'x86_64'/'armeabi-v7a'/" build.gradle
       - sed -E -i 's/^.*google.*play.*services.*$//g' ../../node_modules/@react-native-google-signin/google-signin/android/build.gradle
       - sed -i -e '/maven/agoogle()' -e '/maven/d' ../../node_modules/react-native-video/android/build.gradle
     gradle:
@@ -1463,16 +1464,171 @@ Builds:
       - node_modules/
     ndk: r21e
 
-MaintainerNotes: |-
+  - versionName: 23.3.1
+    versionCode: 23301002
+    commit: cf35a65bc51fab45eef89087342b651fd8d11884
+    subdir: android/app
+    sudo:
+      - sysctl fs.inotify.max_user_watches=524288
+      - curl -Lo node.tar.gz https://nodejs.org/dist/v16.20.2/node-v16.20.2-linux-x64.tar.gz
+      - echo "c9193e6c414891694759febe846f4f023bf48410a6924a8b1520c46565859665 node.tar.gz"
+        | sha256sum -c -
+      - tar xzf node.tar.gz --strip-components=1 -C /usr/local/
+    init:
+      - sed -E -i 's/^.*(fabric|com\.(crashlytics|google\.(firebase|android.gms))).*$//g'
+        build.gradle
+      - sed -E -i 's/libreBuild =.*$/libreBuild = true/g' ../build.gradle
+      - sed -E -i 's/vcode =.*$/vcode = $$VERCODE$$/g' build.gradle
+      - export LIBRE_BUILD=true
+      - npm install
+      - sed -i -e '/play-services/d' ../../node_modules/react-native-device-info/android/build.gradle
+      - sed -i -e '/installReferrerVersion/,+11d' ../../node_modules/react-native-device-info/android/build.gradle
+      - sed -i -e "/leakcanary/a implementation(project(':react-native-device-info'))
+        { exclude group\x3a 'com.google.firebase'\\ exclude group\x3a 'com.google.android.gms'\\
+        exclude group\x3a 'com.android.installreferrer'\\ }" -e "s/'armeabi-v7a',
+        'arm64-v8a', 'x86', 'x86_64'/'arm64-v8a'/" build.gradle
+      - sed -E -i 's/^.*google.*play.*services.*$//g' ../../node_modules/@react-native-google-signin/google-signin/android/build.gradle
+      - sed -i -e '/maven/agoogle()' -e '/maven/d' ../../node_modules/react-native-video/android/build.gradle
+    gradle:
+      - yes
+    scanignore:
+      - android/build.gradle
+      - android/sdk/build.gradle
+      - node_modules/@amplitude/react-native/android/build.gradle
+      - node_modules/@giphy/react-native-sdk/android/build.gradle
+      - node_modules/jsc-android
+      - node_modules/react-native/android
+      - node_modules/@react-native-async-storage/async-storage/android/build.gradle
+      - node_modules/@react-native-community/netinfo/android/build.gradle
+      - node_modules/react-native-device-info/android/build.gradle
+      - node_modules/react-native-get-random-values/android/build.gradle
+      - node_modules/@react-native-google-signin/google-signin/android/build.gradle
+      - node_modules/react-native-pager-view/android/build.gradle
+      - node_modules/react-native-performance/android/build.gradle
+      - node_modules/react-native/ReactAndroid/build.gradle
+      - node_modules/react-native-safe-area-context/android/build.gradle
+      - node_modules/react-native-screens/android/build.gradle
+      - node_modules/react-native-svg/android/build.gradle
+      - node_modules/react-native-webview/android/build.gradle
+      - react-native-sdk/android/build.gradle
+    scandelete:
+      - node_modules/
+    ndk: r21e
+
+      - versionName: 23.3.1
+    versionCode: 23301003
+    commit: cf35a65bc51fab45eef89087342b651fd8d11884
+    subdir: android/app
+    sudo:
+      - sysctl fs.inotify.max_user_watches=524288
+      - curl -Lo node.tar.gz https://nodejs.org/dist/v16.20.2/node-v16.20.2-linux-x64.tar.gz
+      - echo "c9193e6c414891694759febe846f4f023bf48410a6924a8b1520c46565859665 node.tar.gz"
+        | sha256sum -c -
+      - tar xzf node.tar.gz --strip-components=1 -C /usr/local/
+    init:
+      - sed -E -i 's/^.*(fabric|com\.(crashlytics|google\.(firebase|android.gms))).*$//g'
+        build.gradle
+      - sed -E -i 's/libreBuild =.*$/libreBuild = true/g' ../build.gradle
+      - sed -E -i 's/vcode =.*$/vcode = $$VERCODE$$/g' build.gradle
+      - export LIBRE_BUILD=true
+      - npm install
+      - sed -i -e '/play-services/d' ../../node_modules/react-native-device-info/android/build.gradle
+      - sed -i -e '/installReferrerVersion/,+11d' ../../node_modules/react-native-device-info/android/build.gradle
+      - sed -i -e "/leakcanary/a implementation(project(':react-native-device-info'))
+        { exclude group\x3a 'com.google.firebase'\\ exclude group\x3a 'com.google.android.gms'\\
+        exclude group\x3a 'com.android.installreferrer'\\ }" -e "s/'armeabi-v7a',
+        'arm64-v8a', 'x86', 'x86_64'/'x86'/" build.gradle
+      - sed -E -i 's/^.*google.*play.*services.*$//g' ../../node_modules/@react-native-google-signin/google-signin/android/build.gradle
+      - sed -i -e '/maven/agoogle()' -e '/maven/d' ../../node_modules/react-native-video/android/build.gradle
+    gradle:
+      - yes
+    scanignore:
+      - android/build.gradle
+      - android/sdk/build.gradle
+      - node_modules/@amplitude/react-native/android/build.gradle
+      - node_modules/@giphy/react-native-sdk/android/build.gradle
+      - node_modules/jsc-android
+      - node_modules/react-native/android
+      - node_modules/@react-native-async-storage/async-storage/android/build.gradle
+      - node_modules/@react-native-community/netinfo/android/build.gradle
+      - node_modules/react-native-device-info/android/build.gradle
+      - node_modules/react-native-get-random-values/android/build.gradle
+      - node_modules/@react-native-google-signin/google-signin/android/build.gradle
+      - node_modules/react-native-pager-view/android/build.gradle
+      - node_modules/react-native-performance/android/build.gradle
+      - node_modules/react-native/ReactAndroid/build.gradle
+      - node_modules/react-native-safe-area-context/android/build.gradle
+      - node_modules/react-native-screens/android/build.gradle
+      - node_modules/react-native-svg/android/build.gradle
+      - node_modules/react-native-webview/android/build.gradle
+      - react-native-sdk/android/build.gradle
+    scandelete:
+      - node_modules/
+    ndk: r21e
+
+     - versionName: 23.3.1
+    versionCode: 23301004
+    commit: cf35a65bc51fab45eef89087342b651fd8d11884
+    subdir: android/app
+    sudo:
+      - sysctl fs.inotify.max_user_watches=524288
+      - curl -Lo node.tar.gz https://nodejs.org/dist/v16.20.2/node-v16.20.2-linux-x64.tar.gz
+      - echo "c9193e6c414891694759febe846f4f023bf48410a6924a8b1520c46565859665 node.tar.gz"
+        | sha256sum -c -
+      - tar xzf node.tar.gz --strip-components=1 -C /usr/local/
+    init:
+      - sed -E -i 's/^.*(fabric|com\.(crashlytics|google\.(firebase|android.gms))).*$//g'
+        build.gradle
+      - sed -E -i 's/libreBuild =.*$/libreBuild = true/g' ../build.gradle
+      - sed -E -i 's/vcode =.*$/vcode = $$VERCODE$$/g' build.gradle
+      - export LIBRE_BUILD=true
+      - npm install
+      - sed -i -e '/play-services/d' ../../node_modules/react-native-device-info/android/build.gradle
+      - sed -i -e '/installReferrerVersion/,+11d' ../../node_modules/react-native-device-info/android/build.gradle
+      - sed -i -e "/leakcanary/a implementation(project(':react-native-device-info'))
+        { exclude group\x3a 'com.google.firebase'\\ exclude group\x3a 'com.google.android.gms'\\
+        exclude group\x3a 'com.android.installreferrer'\\ }" -e "s/'armeabi-v7a',
+        'arm64-v8a', 'x86', 'x86_64'/'x86_64'/" build.gradle
+      - sed -E -i 's/^.*google.*play.*services.*$//g' ../../node_modules/@react-native-google-signin/google-signin/android/build.gradle
+      - sed -i -e '/maven/agoogle()' -e '/maven/d' ../../node_modules/react-native-video/android/build.gradle
+    gradle:
+      - yes
+    scanignore:
+      - android/build.gradle
+      - android/sdk/build.gradle
+      - node_modules/@amplitude/react-native/android/build.gradle
+      - node_modules/@giphy/react-native-sdk/android/build.gradle
+      - node_modules/jsc-android
+      - node_modules/react-native/android
+      - node_modules/@react-native-async-storage/async-storage/android/build.gradle
+      - node_modules/@react-native-community/netinfo/android/build.gradle
+      - node_modules/react-native-device-info/android/build.gradle
+      - node_modules/react-native-get-random-values/android/build.gradle
+      - node_modules/@react-native-google-signin/google-signin/android/build.gradle
+      - node_modules/react-native-pager-view/android/build.gradle
+      - node_modules/react-native-performance/android/build.gradle
+      - node_modules/react-native/ReactAndroid/build.gradle
+      - node_modules/react-native-safe-area-context/android/build.gradle
+      - node_modules/react-native-screens/android/build.gradle
+      - node_modules/react-native-svg/android/build.gradle
+      - node_modules/react-native-webview/android/build.gradle
+      - react-native-sdk/android/build.gradle
+    scandelete:
+      - node_modules/
+    ndk: r21e
+
+    MaintainerNotes: |-
     3 directories are currently (scan)ignored as they contain binaries which are currently deemed acceptable for inclusion
       - React Native
       - WebRTC
       - JavaScript Core (JS engine, required by React Native)
 
     We can't enable autoupdate as versionCode is dynamic, depending on build date.
+
     Jitsi Meet is fully funded by 8x8 and does not take donations.
 
+ArchivePolicy: 6
 AutoUpdateMode: None
 UpdateCheckMode: None
 CurrentVersion: 23.3.1
-CurrentVersionCode: 233010
+CurrentVersionCode: 23301004
