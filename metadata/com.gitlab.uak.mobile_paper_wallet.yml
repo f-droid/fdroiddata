@@ -56,7 +56,37 @@ Builds:
       - PATH="$HOME/.local/bin:$PATH" buildozer android release
     ndk: r23b
 
+  - versionName: 1.4.1
+    versionCode: 102110401
+    commit: 719e255b1773b34383fb425d8be0f8e6fdd05e5e
+    subdir: src
+    sudo:
+      - apt-get update
+      - apt-get install -y ant build-essential libffi-dev libssl-dev libtool libltdl-dev
+        pkg-config python3-pip wget zlib1g-dev
+      - rm /opt/android-sdk/tools/bin/sdkmanager
+      - ln -s $(which sdkmanager) /opt/android-sdk/tools/bin/sdkmanager
+    output: bin/mobile_paper_wallet-*-arm64-v8a_armeabi-v7a-release-unsigned.apk
+    srclibs:
+      - buildozer@1.5.0
+    prebuild:
+      - sdkmanager 'platforms;android-33' 'build-tools;33.0.0'
+      - sed -r "s:#?android.sdk_path =.*:android.sdk_path = $$SDK$$:" -i buildozer.spec
+      - sed -r "s:#?android.ndk_path =.*:android.ndk_path = $$NDK$$:" -i buildozer.spec
+      - sed -r "s:#? ?android\.ant_path =.*:android.ant_path = $(which ant):" -i buildozer.spec
+      - sed -r "s:#?android.api =.*:android.api = 33:" -i buildozer.spec
+      - sed -r "s:#?android.accept_sdk_license =.*:android.accept_sdk_license = False:"
+        -i buildozer.spec
+      - sed -i -e 's/# android.release_artifact = aab/android.release_artifact = apk/'
+        buildozer.spec
+      - sed -r "s:#?android.skip_update =.*:android.skip_update = True:" -i buildozer.spec
+    build:
+      - export PATH="$HOME/.local/bin:$PATH"
+      - pip3 install --user --upgrade $$buildozer$$ "Cython==0.29.36" python-for-android
+      - buildozer android release
+    ndk: 25.2.9519653
+
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: 1.3.9
-CurrentVersionCode: 102110309
+CurrentVersion: 1.4.1
+CurrentVersionCode: 102110401
