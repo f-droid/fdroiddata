@@ -78,6 +78,27 @@ Builds:
     scanignore:
       - app/shared/src/main/java/com/topjohnwu/magisk/utils/DynamicClassLoader.java
 
+  - versionName: '1.0'
+    versionCode: 6
+    commit: 5a16418543032c06d03cb483859cec6c2590e9c8
+    subdir: stub
+    sudo:
+      - apt-get update
+      - apt-get install -y openjdk-17-jdk-headless
+      - update-alternatives --auto java
+    gradle:
+      - yes
+    rm:
+      - native
+      - tools
+    prebuild:
+      - echo -e 'version=26.1' > ../config.prop
+      - sed -i -e 's|"https://.*"|"https://f-droid.org/repo/com.topjohnwu.magisk_${Config.versionCode}.apk"|'
+        -e '/versionCode/s/1/$$VERCODE$$/' build.gradle.kts
+      - sed -i -e 's/8.3-rc-2/8.3/' ../gradle/wrapper/gradle-wrapper.properties
+    scanignore:
+      - app/shared/src/main/java/com/topjohnwu/magisk/utils/DynamicClassLoader.java
+
   - versionName: '22.0'
     versionCode: 22000
     commit: v22.0
@@ -437,6 +458,53 @@ Builds:
       - python3 ./build.py -rv binary
       - python3 ./build.py -rv app
 
+  - versionName: '26.3'
+    versionCode: 26300
+    disable: build the stub first
+    commit: 5a16418543032c06d03cb483859cec6c2590e9c8
+    timeout: 30000
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y g++ make pkg-config libssl-dev ninja-build clang-13 cmake
+        lld-13 xz-utils openjdk-17-jdk-headless
+      - update-alternatives --auto java
+    output: out/app-release.apk
+    srclibs:
+      - ondk@r26.0
+      - vboot@release-R91-13904.B
+    prebuild:
+      - echo -e 'version=$$VERSION$$' > ./config.prop
+      - sed -i -e 's|https://.*download/{ndk_ver}|$$ondk$$/dist|' -e 's/urllib.request.urlopen(url)/open(url,"rb")/'
+        build.py
+      - sed -i -e 's/-14/-13/' -e 's/"src",.*/"src"]/' $$ondk$$/config-linux.toml
+      - sed -i -e '/Key.CHECK_UPDATES/s/true/false/' ./app/src/main/java/com/topjohnwu/magisk/core/Config.kt
+      - sed -i -e '/dependsOn(stubTask)/d' -e 's|from(stubApk)|from(rootProject.file("out/stub-release.apk"))|'
+        buildSrc/src/main/java/Setup.kt
+      - sed -i -e 's/8.3-rc-2/8.3/' gradle/wrapper/gradle-wrapper.properties
+    scanignore:
+      - app/shared/src/main/java/com/topjohnwu/magisk/utils/DynamicClassLoader.java
+    scandelete:
+      - native/src/external
+      - tools
+    build:
+      - mkdir out
+      - curl -Lo out/stub-release.apk https://f-droid.org/archive/com.topjohnwu.magisk_6.apk
+      - sdkmanager 'ndk;r10e'
+      - cp $$SDK$$/ndk/r10e/platforms/android-19/arch-arm/usr/lib/*.[ao] tools/ndk-bins/arm
+      - cp $$SDK$$/ndk/r10e/platforms/android-19/arch-x86/usr/lib/*.[ao] tools/ndk-bins/i686
+      - ln -s $(which gradle) ./gradlew
+      - pushd $$vboot$$
+      - make ARCH=arm futil
+      - popd
+      - cp $$vboot$$/build/futility/futility tools
+      - pushd $$ondk$$
+      - PATH=/usr/lib/llvm-13/bin/:$PATH ./build.sh x86_64
+      - popd
+      - python3 ./build.py -rv ndk
+      - python3 ./build.py -rv binary
+      - python3 ./build.py -rv app
+
 MaintainerNotes: |-
   22.1: https://github.com/topjohnwu/ndk-busybox/commit/31b2b5780bf9fe982e1f3d9df0bd4b1b44d6e394
   in submodule is removed for some unkonwn reasons. Re-add it to fix the multiple definition error.
@@ -446,7 +514,7 @@ MaintainerNotes: |-
   first and the main apk should be built in the next build cycle.
 
 AutoUpdateMode: None
-UpdateCheckMode: None
+UpdateCheckMode: HTTP
 UpdateCheckData: https://topjohnwu.github.io/magisk-files/stable.json|"versionCode":\s"(\d+)"|.|"version":\s"([\d.]+)"
 CurrentVersion: '26.1'
 CurrentVersionCode: 26100
