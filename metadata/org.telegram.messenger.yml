@@ -3076,11 +3076,39 @@ Builds:
       - popd
     ndk: r21e
 
+  - versionName: 10.0.9
+    versionCode: 38729
+    commit: v10.0.9
+    subdir: TMessagesProj_App
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y ninja-build golang-go yasm cmake libuv1 make
+    gradle:
+      - afat
+    rm:
+      - TMessagesProj/jni/ffmpeg/tests/ref/fate/sub-microdvd-remux
+    prebuild: echo -e 'APP_ID = 105810\nAPP_HASH = 3e7a52498eec003c5896a330e5d29397'
+      > API_KEYS
+    scandelete:
+      - TMessagesProj/jni
+    build:
+      - export NDK=$$NDK$$
+      - export NINJA_PATH=/usr/bin/ninja
+      - pushd ../TMessagesProj/jni
+      - ./build_libvpx_clang.sh
+      - ./build_ffmpeg_clang.sh
+      - ./patch_ffmpeg.sh
+      - ./patch_boringssl.sh
+      - ./build_boringssl.sh
+      - popd
+    ndk: r21e
+
 MaintainerNotes: Update check mode not working because of version code calculations
   for different flavours.
 
 ArchivePolicy: 3
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: 9.7.6
-CurrentVersionCode: 37219
+CurrentVersion: 10.0.9
+CurrentVersionCode: 38729
