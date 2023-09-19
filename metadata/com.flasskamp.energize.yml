@@ -184,19 +184,26 @@ Builds:
   - versionName: 0.6.1
     versionCode: 18
     commit: eec9038a5cb7f4d051f7054ca246b516f917e809
+    submodules: true
     output: build/app/outputs/flutter-apk/app-release.apk
-    srclibs:
-      - flutter@3.13.4
     rm:
       - ios
       - test
       - web
+    prebuild:
+      - sed -i -e '/ndk {/,/^        }/d' android/app/build.gradle
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - submodules/flutter/bin/flutter config --no-analytics
+      - submodules/flutter/bin/flutter packages pub get
+    scanignore:
+      - submodules/flutter/bin/cache
+    scandelete:
+      - submodules/flutter
+      - .pub-cache
     build:
-      - export PATH=$$flutter$$/bin:$PATH
-      - flutter config --no-analytics
-      - flutter packages pub get
-      - flutter pub run build_runner build --delete-conflicting-outputs
-      - flutter build apk
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - submodules/flutter/bin/flutter pub run build_runner build --delete-conflicting-outputs
+      - submodules/flutter/bin/flutter build apk
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
