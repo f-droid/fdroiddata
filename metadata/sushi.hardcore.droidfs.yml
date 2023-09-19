@@ -486,7 +486,40 @@ Builds:
     gradleprops:
       - nosplits
 
+  - versionName: 2.1.2
+    versionCode: 35
+    commit: 3ba774fda32be171b1e28c28521462f5f0888105
+    subdir: app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y golang-go/bullseye-backports golang-src/bullseye-backports
+        openjdk-17-jdk-headless build-essential pkg-config libssl-dev wget
+      - update-alternatives --auto java
+    gradle:
+      - yes
+    srclibs:
+      - OpenSSL@OpenSSL_1_1_1v
+      - FFmpeg@n6.0
+    prebuild:
+      - cd ../libpdfviewer && mkdir app/pdfjs-dist pdfjs && cd pdfjs
+      - wget https://registry.npmjs.org/pdfjs-dist/-/pdfjs-dist-3.8.162.tgz
+      - tar xf pdfjs-dist-3.8.162.tgz package/build/pdf.min.js package/build/pdf.worker.min.js
+      - mv package/build ../app/pdfjs-dist
+      - cd .. && rm -rf pdfjs
+    scandelete:
+      - app/libcryfs/vendor/cryptopp/vendor_cryptopp/TestData
+      - app/libcryfs/vendor/cryptopp/vendor_cryptopp/*.zip
+    build:
+      - cd libgocryptfs
+      - OPENSSL_PATH="$$OpenSSL$$" ./build.sh
+      - cd ../ffmpeg
+      - ./build.sh $$FFmpeg$$
+    ndk: r25c
+    gradleprops:
+      - nosplits
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v[\d.]+$
-CurrentVersion: 2.1.1
-CurrentVersionCode: 34
+CurrentVersion: 2.1.2
+CurrentVersionCode: 35
