@@ -437,63 +437,74 @@ Builds:
 
   - versionName: 6.3.0
     versionCode: 19902
-    disable: fails to build
     commit: 1973733a08c451fd36d4ffa3c8382e5f8b511a44
     subdir: tordnscrypt
     submodules: true
     sudo:
       - apt-get update
-      - apt-get install -y bzip2 g++ make autogen autopoint libtool automake gettext
-        rename
-      - apt-get install -y -t bullseye-backports golang-go
+      - apt-get install -y autogen automake autopoint build-essential gettext libtool
+        pkg-config rename shtool
       - apt-get install -y openjdk-17-jdk-headless
       - update-java-alternatives -a
+      - curl -Lso go.tar.gz https://go.dev/dl/go1.20.4.linux-amd64.tar.gz
+      - echo "698ef3243972a51ddb4028e4a1ac63dc6d60821bf18e59a807e051fee0a385bd go.tar.gz"
+        | sha256sum -c -
+      - tar xzf go.tar.gz --strip-components=1 -C /usr/local/
     init:
       - sed -i -e "s/ndkVersion .*/ndkVersion '23.0.7599858'/" build.gradle
       - libs/prebuild
     gradle:
       - fdroid
       - armv7a
-    rm:
-      - TorBuildScript/external/openssl/fuzz
-      - PurpleI2PBuildScript/external/libs/openssl/fuzz
-    prebuild: sdkmanager 'ndk;21.4.7075529'
+    prebuild: sdkmanager 'ndk;21.4.7075529' 'cmake;3.18.1'
     scandelete:
       - tordnscrypt/libs
-      - TorBuildScript/external
-    build: NDK="$$SDK$$/ndk/21.4.7075529" libs/build
-    ndk: r23
+      - PurpleI2PBuildScript/external/libs/openssl/fuzz/corpora
+      - TorBuildScript/external/openssl/fuzz/corpora
+    build:
+      - NDK="$$SDK$$/ndk/21.4.7075529" libs/build arm64
+      - pushd libs
+      - mv Nflog-android conjure dnscrypt-proxy libzmq lyrebird snowflake webtunnel
+        ~
+      - popd
+    ndk: 23.0.7599858
 
   - versionName: 6.3.0
     versionCode: 19903
-    disable: fails to build
     commit: 1973733a08c451fd36d4ffa3c8382e5f8b511a44
     subdir: tordnscrypt
     submodules: true
     sudo:
       - apt-get update
-      - apt-get install -y bzip2 g++ make autogen autopoint libtool automake gettext
-        rename
-      - apt-get install -y -t bullseye-backports golang-go
+      - apt-get install -y autogen automake autopoint build-essential gettext libtool
+        pkg-config rename shtool
       - apt-get install -y openjdk-17-jdk-headless
       - update-java-alternatives -a
+      - curl -Lso go.tar.gz https://go.dev/dl/go1.20.4.linux-amd64.tar.gz
+      - echo "698ef3243972a51ddb4028e4a1ac63dc6d60821bf18e59a807e051fee0a385bd go.tar.gz"
+        | sha256sum -c -
+      - tar xzf go.tar.gz --strip-components=1 -C /usr/local/
     init:
       - sed -i -e "s/ndkVersion .*/ndkVersion '23.0.7599858'/" build.gradle
       - libs/prebuild
     gradle:
       - fdroid
       - arm64
-    rm:
-      - TorBuildScript/external/openssl/fuzz
-      - PurpleI2PBuildScript/external/libs/openssl/fuzz
-    prebuild:
-      - sdkmanager 'ndk;21.4.7075529'  'cmake;3.18.1'
-      - sed -i -e '/cmake {/aversion "3.18.1"' build.gradle
+    prebuild: sdkmanager 'ndk;21.4.7075529' 'cmake;3.18.1'
     scandelete:
       - tordnscrypt/libs
-      - TorBuildScript/external
-    build: NDK="$$SDK$$/ndk/21.4.7075529" libs/build arm64
-    ndk: r23
+      - PurpleI2PBuildScript/external/libs/openssl/fuzz/corpora
+      - TorBuildScript/external/openssl/fuzz/corpora
+    build:
+      - NDK="$$SDK$$/ndk/21.4.7075529" libs/build arm64
+      - pushd libs
+      - mv Nflog-android conjure dnscrypt-proxy libzmq lyrebird snowflake webtunnel
+        ~
+      - popd
+    ndk: 23.0.7599858
+
+MaintainerNotes: We move the source libs folders out of the way else gradle tries
+  to use those files and errors out "libc++_shared.so is not an ABI"
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v.*-stable$
