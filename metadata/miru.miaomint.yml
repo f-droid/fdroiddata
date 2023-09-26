@@ -341,8 +341,74 @@ Builds:
       - $$flutter$$/bin/flutter build apk
     ndk: r25c
 
+  - versionName: 1.7.1
+    versionCode: 36
+    commit: 37b5e786d94d2e33466085249579303c7675f999
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y gcc-multilib libc-dev make automake pkg-config libtool
+        nasm python3-jsonschema
+      - apt-get install -y -t bullseye-backports meson python3-jinja2
+    output: build/app/outputs/flutter-apk/*.apk
+    srclibs:
+      - flutter@stable
+      - rustup@1.25.2
+      - media-kit-libmpv-android-video-build@main
+    rm:
+      - linux
+      - macos
+      - snap
+      - windows
+    prebuild:
+      - export version=$(sed -n -E 's/.*flutter-version:\s([0-9.]+)/\1/p' .github/workflows/release.yml
+        | head -n 1)
+      - pushd $$flutter$$
+      - git checkout -f $version
+      - popd
+      - sed -i -e '/(signingConfigs/,+1d' android/app/build.gradle
+      - sed -i -e '/SettingKey.autoCheckUpdate/s/true/false/' lib/utils/miru_storage.dart
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter packages pub get
+      - file=$(ls .pub-cache/hosted/pub.dev/media_kit_libs_android_video-*/android/build.gradle)
+      - sed -i -e '/downloadDependencies/,/dependsOn/d' $file
+      - tag=$(sed -n -E 's|.*download/(v[0-9.]+)/.*|\1|p' $file | head -n 1)
+      - cd $$media-kit-libmpv-android-video-build$$
+      - git checkout -f $tag
+      - cd buildscripts
+      - sed -i -e 's/sudo//g' -e 's|./gradlew|gradle|g' *.sh
+      - sed -i -e '/download-sdk/d' download.sh
+      - sed -i -e '/git reset --hard/d' patch.sh
+    scandelete:
+      - .pub-cache
+    build:
+      - pushd $$media-kit-libmpv-android-video-build$$/buildscripts
+      - mkdir sdk
+      - ln -s $$SDK$$ ./sdk/android-sdk-linux
+      - PATH=$$flutter$$/bin/:$PATH bash bundle_default.sh
+      - popd
+      - mkdir -p build/media_kit_libs_android_video/output
+      - rm $$media-kit-libmpv-android-video-build$$/output/default-x86.jar
+      - cp $$media-kit-libmpv-android-video-build$$/output/*.jar build/media_kit_libs_android_video/output
+      - $$rustup$$/rustup-init.sh -y --default-toolchain 1.70.0 --target aarch64-linux-android
+        armv7-linux-androideabi x86_64-linux-android
+      - source $HOME/.cargo/env
+      - isarlib=$(find . -path ./.pub-cache/hosted/pub.dev/isar_flutter_libs-*/android/src/main/jniLibs)
+      - pushd .isar
+      - bash tool/build_android.sh arm64
+      - mv libisar_android_arm64.so ../$isarlib/arm64-v8a/libisar.so
+      - bash tool/build_android.sh armv7
+      - mv libisar_android_armv7.so ../$isarlib/armeabi-v7a/libisar.so
+      - bash tool/build_android.sh x64
+      - mv libisar_android_x64.so ../$isarlib/x86_64/libisar.so
+      - popd
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk
+    ndk: r25c
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 1.7.0
-CurrentVersionCode: 35
+CurrentVersion: 1.7.1
+CurrentVersionCode: 36
