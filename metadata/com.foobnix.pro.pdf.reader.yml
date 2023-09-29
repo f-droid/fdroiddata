@@ -619,42 +619,6 @@ Builds:
       - ./link_to_mupdf_1.21.1.sh
     ndk: r25b
 
-  - versionName: 8.9.5-fdroid
-    versionCode: 5426
-    disable: crash
-    commit: 4513e09c84b34e32e4f5be67e3d9fdc1bbff849e
-    subdir: app
-    sudo:
-      - apt-get update
-      - apt-get install -y g++ libglu1-mesa-dev libxcursor-dev libxi-dev libxinerama-dev
-        libxrandr-dev make mesa-common-dev pkg-config xxd
-      - apt-get install -y openjdk-17-jdk-headless
-      - update-java-alternatives -a
-    gradle:
-      - fdroid
-    srclibs:
-      - MuPDF@1.21.1
-    rm:
-      - Builder/src/libs
-    prebuild:
-      - sed -i -e '/F-DROID REMOVE THIS LINE/,+1d' ../build.gradle
-      - sed -i -e '/^if.*Fdroid/,/^}/d' -e '/enable true/d' -e '/_appGdriveKey/d'
-        -e '/_admob/d' build.gradle
-      - sed -i -e 's/-XX:MaxPermSize=4g//' ../gradle.properties
-      - mkdir src/main/jniLibs
-      - cd ../Builder
-      - sed -i -e '/^#!/a\set -e' -e '/git clone/d' -e '/mkdir mupdf/d' -e 's|.*ndk-build|$$NDK$$/ndk-build
-        -j`nproc`|' ../Builder/link_to_mupdf_1.21.1.sh
-      - cp -r $$MuPDF$$ mupdf-1.21.1
-      - rm -rf mupdf-1.21.1/thirdparty/{harfbuzz/test,curl/tests,leptonica/prog/fuzzing}
-    scanignore:
-      - Builder/fonts/fonts.zip
-      - app/src/fdroid/assets/fonts.zip
-    build:
-      - pushd ../Builder/
-      - ./link_to_mupdf_1.21.1.sh
-    ndk: r25b
-
   - versionName: 8.9.12-fdroid
     versionCode: 5458
     commit: 615787f14b965a4b466d00a562e4080d165e712d
@@ -761,7 +725,6 @@ Builds:
 
   - versionName: 8.9.46-fdroid
     versionCode: 5594
-    disable: wip update recipe
     commit: 3f07a743d53d5a576a8e7173ca1af6c0557e5a56
     subdir: app
     sudo:
@@ -773,27 +736,24 @@ Builds:
     gradle:
       - fdroid
     srclibs:
-      - MuPDF@1.23.0
+      - MuPDF@1.23.3
     rm:
       - Builder/src/libs
     prebuild:
-      - sed -i -e '/F-DROID REMOVE THIS LINE/,+1d' ../build.gradle
       - sed -i -e '/^if.*Fdroid/,/^}/d' -e '/enable true/d' -e '/_appGdriveKey/d'
         -e '/_admob/d' build.gradle
       - mkdir src/main/jniLibs
       - cd ../Builder
-      - sed -i -e '/^#!/a\set -e' -e '/git clone/d' -e 's/mkdir/mkdir -p/g' -e 's|.*ndk-build|$$NDK$$/ndk-build
-        -j`nproc`|' link_to_mupdf_1.23.0.sh
-      - cp -r $$MuPDF$$ mupdf-1.23.0
-      - rm -rf mupdf-1.22.2/thirdparty/{harfbuzz/test,curl/tests,leptonica/prog/fuzzing}
+      - sed -i -e '/^#!/a\set -e' -e '/git clone/d' -e 's/mkdir/mkdir -p/g' -e 's|".*ndk-build"|"$$NDK$$/ndk-build"|'
+        -e 's|^.*ndk-build$|$$NDK$$/ndk-build -j`nproc`|' link_to_mupdf_1.23.3.sh
+      - cp -r $$MuPDF$$ mupdf-1.23.3
+      - rm -rf mupdf-1.23.3/thirdparty/{harfbuzz/test,curl/tests,leptonica/prog/fuzzing}
     scanignore:
       - Builder/fonts/fonts.zip
       - app/src/fdroid/assets/fonts.zip
-    scandelete:
-      - Builder/mupdf-1.23.0/thirdparty/
     build:
       - pushd ../Builder/
-      - ./link_to_mupdf_1.23.0.sh
+      - ./link_to_mupdf_1.23.3.sh
     ndk: r25c
 
 MaintainerNotes: |-
