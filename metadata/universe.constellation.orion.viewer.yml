@@ -1,6 +1,3 @@
-AntiFeatures:
-  KnownVuln:
-    en-US: Uses outdated MuPDF 1.16.1 library which has security issues.
 Categories:
   - Reading
 License: GPL-3.0-or-later
@@ -31,11 +28,18 @@ Builds:
     scandelete:
       - nativeLibs/mupdf
     ndk: r20b
+    antifeatures:
+      KnownVuln:
+        en-US: Uses outdated MuPDF 1.16.1 library which has security issues.
 
   - versionName: 0.82.1
     versionCode: 208
+    disable: https://gitlab.com/fdroid/fdroiddata/-/issues/2989
     commit: 15afa2760d5e430e617e2e0cbbcb1112f11735bf
     subdir: orion-viewer
+    sudo:
+      - apt-get update
+      - apt-get install -y make g++ pkg-config
     gradle:
       - arm7
     output: build/outputs/apk/arm7/release/orion-viewer-$$VERSION$$-arm7-release-unsigned.apk
@@ -44,15 +48,9 @@ Builds:
       - gradle -b thirdparty_build.gradle downloadAndPatchDjvu downloadAndMakeMupdf
     scandelete:
       - nativeLibs/mupdf
-    ndk: r20b
+    ndk: r23c
 
-MaintainerNotes: |-
-  KnownVuln: MuPDF 1.16.1 noted at below link
-  https://github.com/max-kammerer/orion-viewer/commits/$TAG/nativeLibs/mupdfModule
-  https://github.com/max-kammerer/orion-viewer/issues/40
-  https://gitlab.com/fdroid/fdroiddata/-/merge_requests/11496
-
-AutoUpdateMode: Version
+AutoUpdateMode: None
 UpdateCheckMode: Tags
 UpdateCheckData: orion-viewer/version.properties|orion\.version\.code\s*=\s*([0-9]+)|.|orion.version.name\s*=\s*(.+)
 CurrentVersion: 0.82.1
