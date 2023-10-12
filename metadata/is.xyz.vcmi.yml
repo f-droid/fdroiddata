@@ -19,7 +19,7 @@ Description: |-
   Mods should appear in the game launcher "mods" section.
 
 RepoType: git
-Repo: https://github.com/vcmi/vcmi-android.git
+Repo: https://github.com/vcmi/vcmi.git
 
 Builds:
   - versionName: '1.4'
@@ -314,15 +314,173 @@ Builds:
       - python3 build.py build-cmake
       - python3 build.py build-app
 
-MaintainerNotes: |-
-  - Build process requires 2 NDKs: r14b to build the dependencies (SDL and boost) and r17c to build the game itself.
-  - Commit hashes for the launcher and vcmi itself match the APK released on google play. The newer commit reported in the app itself is a bug.
-  - The prebuilt section fixes a number of things to allow building dependencies and libraries from the source.
-  - Upstream uses prebuilt libs instead and their build procedures were not updated for some time.
-  - Builds split into a separate build for each architecture, with incremental version code (which must be reflected in both main "build" section and prebuild env variable).
-  - "commit" section points to the commit of the launcher repo, while "VCMI_COMMIT" var points to commit of the upstream vcmi repo.
+  - versionName: 1.3.2
+    versionCode: 13210
+    commit: 1.3.2
+    timeout: 30000
+    subdir: android/vcmi-app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y ninja-build python3-pip wget xz-utils unzip gcc g++ make libssl-dev
+    init: git revert -n c62d945b2d6e698becc16a02dc3cdd81238639c1
+    gradle:
+      - yes
+    prebuild:
+      - pushd ~
+      - wget https://dl.google.com/android/repository/android-ndk-r25c-linux.zip
+      - sha256sum -c <<< '769ee342ea75f80619d985c2da990c48b3d8eaf45f48783a2d48870d04b46108  android-ndk-r25c-linux.zip'
+      - git clone https://github.com/Kitware/CMake
+      - cd CMake
+      - git reset --hard v3.27.6
+      - mkdir build && cd build
+      - ../bootstrap && make
+      - cd ../..
+      - git clone --recurse-submodules https://github.com/conan-io/conan
+      - pushd conan
+      - git reset --hard 1.60.1
+      - pip install .
+      - popd && popd && cd ../..
+      - export CONAN_USER_HOME="$(pwd)"
+      - export CONAN_USER_HOME_SHORT="$(pwd)"
+      - export PATH="${HOME}/.local/bin:${HOME}/CMake/build/bin:$PATH"
+      - mkdir .conan
+      - cd .conan
+      - wget https://github.com/vcmi/vcmi-dependencies/releases/download/android-1.0/armeabi-v7a.txz
+      - sha256sum -c <<< 'e5a7df93703930d4e8783b8228cfdb28d73c3811d79522df8083231fea2ad00e  armeabi-v7a.txz'
+      - tar -xf armeabi-v7a.txz
+      - rm armeabi-v7a.txz
+      - cd ..
+      - printf "[tool_requires]\nandroid-ndk/r25c" >> CI/conan/base/android
+      - conan profile new default --detect
+      - conan info . --profile:build=default --profile:host=CI/conan/android-32
+      - sed -i -e 's|https.*linux\.zip$|file:///home/vagrant/android-ndk-r25c-linux.zip|'
+        .conan/data/android-ndk/r25c/_/_/export/conandata.yml
+      - sed -i -e 's/minSdk.*$/minSdk 21/' android/vcmi-app/build.gradle
+      - sed -i -e 's/versionCode.*$/versionCode $$VERCODE$$/' android/vcmi-app/build.gradle
+    scandelete:
+      - .conan
+      - osx
+    build:
+      - cd ../..
+      - export GENERATE_ONLY_BUILT_CONFIG=1
+      - export CONAN_USER_HOME="$(pwd)"
+      - export CONAN_USER_HOME_SHORT="$(pwd)"
+      - export PATH="${HOME}/.local/bin:${HOME}/CMake/build/bin:$PATH"
+      - conan install . --install-folder=conan-generated --build --profile:build=default
+        --profile:host=CI/conan/android-32 -s compiler.cppstd=11
+      - echo "ndk.dir=$(eval echo ${CONAN_USER_HOME}/.conan/data/android-ndk/r25c/_/_/package/*/bin)"
+        >> android/local.properties
+      - mkdir build
+      - cmake -S . -B build -G Ninja -D CMAKE_BUILD_TYPE=Release -D CMAKE_TOOLCHAIN_FILE=conan-generated/conan_toolchain.cmake
+      - cmake --build build
 
-AutoUpdateMode: None
-UpdateCheckMode: None
-CurrentVersion: '1.4'
-CurrentVersionCode: 1007
+  - versionName: 1.3.2
+    versionCode: 13211
+    commit: 1.3.2
+    timeout: 30000
+    subdir: android/vcmi-app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y ninja-build python3-pip wget xz-utils unzip gcc g++ make libssl-dev
+    init: git revert -n c62d945b2d6e698becc16a02dc3cdd81238639c1
+    gradle:
+      - yes
+    prebuild:
+      - pushd ~
+      - wget https://dl.google.com/android/repository/android-ndk-r25c-linux.zip
+      - sha256sum -c <<< '769ee342ea75f80619d985c2da990c48b3d8eaf45f48783a2d48870d04b46108  android-ndk-r25c-linux.zip'
+      - git clone https://github.com/Kitware/CMake
+      - cd CMake
+      - git reset --hard v3.27.6
+      - mkdir build && cd build
+      - ../bootstrap && make
+      - cd ../..
+      - git clone --recurse-submodules https://github.com/conan-io/conan
+      - pushd conan
+      - git reset --hard 1.60.1
+      - pip install .
+      - popd && popd && cd ../..
+      - export CONAN_USER_HOME="$(pwd)"
+      - export CONAN_USER_HOME_SHORT="$(pwd)"
+      - export PATH="${HOME}/.local/bin:${HOME}/CMake/build/bin:$PATH"
+      - mkdir .conan
+      - cd .conan
+      - wget https://github.com/vcmi/vcmi-dependencies/releases/download/android-1.0/aarch64-v8a.txz
+      - sha256sum -c <<< 'b41033513458e4658a628b35065c31144a50453a45e621ae4014fc8994d6e6c9  aarch64-v8a.txz'
+      - tar -xf aarch64-v8a.txz
+      - rm aarch64-v8a.txz
+      - cd ..
+      - printf "[tool_requires]\nandroid-ndk/r25c" >> CI/conan/base/android
+      - conan profile new default --detect
+      - conan info . --profile:build=default --profile:host=CI/conan/android-64
+      - sed -i -e 's|https.*linux\.zip$|file:///home/vagrant/android-ndk-r25c-linux.zip|'
+        .conan/data/android-ndk/r25c/_/_/export/conandata.yml
+      - sed -i -e 's/minSdk.*$/minSdk 21/' android/vcmi-app/build.gradle
+      - sed -i -e 's/versionCode.*$/versionCode $$VERCODE$$/' android/vcmi-app/build.gradle
+    scandelete:
+      - .conan
+      - osx
+    build:
+      - cd ../..
+      - export GENERATE_ONLY_BUILT_CONFIG=1
+      - export CONAN_USER_HOME="$(pwd)"
+      - export CONAN_USER_HOME_SHORT="$(pwd)"
+      - export PATH="${HOME}/.local/bin:${HOME}/CMake/build/bin:$PATH"
+      - conan install . --install-folder=conan-generated --build --profile:build=default
+        --profile:host=CI/conan/android-64 -s compiler.cppstd=11
+      - echo "ndk.dir=$(eval echo ${CONAN_USER_HOME}/.conan/data/android-ndk/r25c/_/_/package/*/bin)"
+        >> android/local.properties
+      - mkdir build
+      - cmake -S . -B build -G Ninja -D CMAKE_BUILD_TYPE=Release -D CMAKE_TOOLCHAIN_FILE=conan-generated/conan_toolchain.cmake
+      - cmake --build build
+
+MaintainerNotes: |-
+  VCMI contains GMS dependencies to provide TLS support on android 4.4.
+  This dependency and code was introduced by a single commit, which is reverted
+  in the "init" section. Because of this, we also bump minSdk version to 21
+  (android 5.0).
+
+  VCMI requires conan version bigger than 1.54.0 (but not 2.x) for managing and
+  building dependencies. Conan is not available in bullseye repos, so we install
+  it from source with python-pip.
+
+  Additionally, VCMI requires cmake 3.27.6 (official docs say 3.20+, however it
+  yields various compilation errors). Bullseye backports repo doesn't have 3.27.6,
+  so we build it from source.
+
+  VCMI needs android-ndk-r25c supplied by conan to build. The NDK package in conan
+  uses official google NDK, but modifies it to work with conan. We download conan build
+  files for NDK and change the conan NDK package to provide our own android-ndk-r25c
+  (in either case, conan also performs its own sha256sum check and it has a matching
+  checksum with android-ndk-r25c provided by us).
+
+  Dependencies listed for VCMI in the upstream conanfile.py (which are pulled from
+  conancenter) have various compilation errors. Instead, we download conan dependencies
+  provided by the upstream. They contain both binaries and source code, and also conan
+  build files for them, we remove binaries with scandelete. Additionally, a "--build"
+  flag is passed to conan to force rebuilding all dependencies (and their dependencies
+  and required build tools) from source.
+
+  Upstream only provides armeabi-v7a and arm64-v8a builds, and there's conan profiles only
+  for these architectures.
+
+  NDK is also required during 'gradle assemble' phase, otherwise gradle wont strip native libraries
+  and the resulting APK would be ~180 mb instead of ~25 mb. We reuse conan NDK for this.
+
+  Notes for older builds:
+  Build process requires 2 NDKs: r14b to build the dependencies (SDL and boost) and r17c to build the game itself.
+  Commit hashes for the launcher and vcmi itself match the APK released on google play. The newer commit reported in the app itself is a bug.
+  The prebuilt section fixes a number of things to allow building dependencies and libraries from the source.
+  Upstream uses prebuilt libs instead and their build procedures were not updated for some time.
+  Builds split into a separate build for each architecture, with incremental version code (which must be reflected in both main "build" section and prebuild env variable).
+  "commit" section points to the commit of the launcher repo, while "VCMI_COMMIT" var points to commit of the upstream vcmi repo.
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+VercodeOperation:
+  - 10 * %c
+  - 10 * %c + 1
+CurrentVersion: 1.3.2
+CurrentVersionCode: 13211
