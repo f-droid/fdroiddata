@@ -1,0 +1,70 @@
+AntiFeatures:
+  - NonFreeNet
+Categories:
+  - Development
+License: GPL-3.0-only
+AuthorName: Pranav Purwar
+AuthorEmail: purwarpranav80@gmail.com
+SourceCode: https://github.com/Cosmic-Ide/Cosmic-IDE
+IssueTracker: https://github.com/Cosmic-Ide/Cosmic-IDE/issues
+Donate: https://patreon.com/cosmicide
+
+AutoName: Cosmic IDE Rewrite
+
+RepoType: git
+Repo: https://github.com/Cosmic-Ide/Cosmic-IDE.git
+
+Builds:
+  - versionName: 2.0.3
+    versionCode: 23
+    commit: v2.0.3
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y openjdk-17-jdk wget
+      - update-alternatives --auto java
+    gradle:
+      - yes
+    output: build/outputs/apk/release/app-universal-release-unsigned.apk
+    rm:
+      - app/src/main/assets/*.jar
+    prebuild: sdkmanager "build-tools;33.0.0" "platforms;android-33"
+    build:
+      - cd src/main/assets
+      - wget https://repo1.maven.org/maven2/org/jetbrains/kotlin/kotlin-stdlib/1.9.0/kotlin-stdlib-1.9.0.jar
+      - sha256sum -c <<< '35aeffbe2db5aa446072cee50fcee48b7fa9e2fc51ca37c0cc7d7d0bc39d952e  kotlin-stdlib-1.9.0.jar'
+      - wget https://repo1.maven.org/maven2/org/jetbrains/kotlin/kotlin-stdlib-common/1.9.0/kotlin-stdlib-common-1.9.0.jar
+      - sha256sum -c <<< '283274204bd7c020789ec46f8f8e72af4244d7f550b3392a57e5ca006ad7aa2c  kotlin-stdlib-common-1.9.0.jar'
+      - cp "$$SDK$$/platforms/android-33/android.jar" .
+      - cp "$$SDK$$/build-tools/33.0.0/core-lambda-stubs.jar" .
+
+MaintainerNotes: |-
+  The source code of the app contains several .jar files.
+  However, they are not used in compilation of the app
+  itself, but rather packaged as assets, so they can't
+  be downloaded from maven by gradle automatically.
+
+  We remove these jars and replace with our own, obtained
+  from allowed sources: kotlin-stdlib.jar and
+  kotlin-stdlib-common.jar are downloaded from MavenCentral,
+  while android.jar and core-lambda-stubs.jar are copied
+  from android sdk, installed on buildserver.
+
+  Upstream splits apks based on architecture, however the size
+  difference is negligible. 
+
+  AntiFeatures:
+  NonFreeNet: app allows to download additional libraries
+  for projects from maven repos, however the list of these
+  repos is fixed.
+
+  Library versions:
+  kotlin-stdlib.jar: 1.9.0
+  kotlin-stdlib-common.jar: 1.9.0
+  android.jar: 33.0.0
+  core-lambda-stubs.jar: 33.0.0
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: 2.0.3
+CurrentVersionCode: 23
