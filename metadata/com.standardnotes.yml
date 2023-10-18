@@ -1,7 +1,7 @@
 Categories:
   - Security
   - Writing
-License: AGPL-3.0-or-later
+License: AGPL-3.0-only
 AuthorName: Standard Notes Ltd.
 AuthorEmail: help@standardnotes.com
 WebSite: https://standardnotes.com
@@ -11,8 +11,6 @@ Donate: https://standardnotes.com/donate
 
 AutoName: Standard Notes
 Description: |-
-  <b>NOTE:</b> Version 3.167.25 is the last one to be free or open-source.
-
   Standard Notes is a secure and private notes app. It syncs your notes securely across all your devices, including your Android devices, Windows, iOS, Linux, and Web.
 
   Private means your notes are end-to-end encrypted, so only you can read your notes. Even we can't read the contents of your notes.
@@ -13011,12 +13009,59 @@ Builds:
       - .yarn/
     ndk: r23b
 
-AutoUpdateMode: None
-UpdateCheckMode: None
-VercodeOperation:
-  - 3000310 + %c
-UpdateCheckData: https://github.com/standardnotes/app/actions/workflows/mobile.release.prod.yml|(\d+)\sworkflow\sruns|https://github.com/standardnotes/app/releases|/releases/tag/%40standardnotes%2Fmobile%40([\d.]+)
-CurrentVersion: 3.172.4
-CurrentVersionCode: 3001138
+  - versionName: 3.178.0
+    versionCode: 3002782
+    commit: '@standardnotes/mobile@3.178.0'
+    subdir: packages/mobile/android/app
+    sudo:
+      - apt-get update
+      - apt-get install -y libsecret-1-dev build-essential
+      - curl -Lo node.tar.gz https://nodejs.org/download/release/v18.6.0/node-v18.6.0-linux-x64.tar.gz
+      - echo "eff59cd54fdcd24dc09965b41dc8d347ab4ce367b6c395fd983cfb4c3a542e03 node.tar.gz"
+        | sha256sum -c -
+      - tar xzf node.tar.gz --strip-components=1 -C /usr/local/
+      - npm install -g yarn
+      - sysctl fs.inotify.max_user_watches=524288 || true
+    init:
+      - cd ../../../..
+      - yarn config set -H enableImmutableInstalls false
+      - sed -i -e '/react-native-iap/d' -e '/react-native-store-review/d' packages/mobile/package.json
+      - npm_config_build_from_source=true yarn
+    patch:
+      - remove-IAP.3.146.2.patch
+      - disable-gms-u2f-support-3.160.17.patch
+      - remove-react-native-store-review.3.177.5.patch
+    gradle:
+      - prod
+    rm:
+      - packages/mobile/ios
+    prebuild:
+      - sed -i -e '/detox/Id' -e 's/versionName appVersionName/versionName "$$VERSION$$"/'
+        -e 's/versionCode appVersionCode/versionCode $$VERCODE$$/' -e '/universalApk/s/false/true/'
+        build.gradle
+      - pushd ../../../..
+      - yarn run build:mobile
+      - popd
+      - pushd ../..
+      - yarn run android:bundle
+      - popd
+    scanignore:
+      - packages/mobile/node_modules/jsc-android
+      - packages/mobile/node_modules/react-native
+      - packages/mobile/node_modules/detox/android/build.gradle
+      - packages/mobile/node_modules/@standardnotes/react-native-utils/android/build.gradle
+      - packages/mobile/node_modules/@react-native-async-storage/async-storage/android/build.gradle
+    scandelete:
+      - node_modules/
+      - packages/mobile/node_modules
+      - packages/desktop
+      - .yarn/
+    ndk: r23b
 
-NoSourceSince: 3.167.25
+AutoUpdateMode: Version @standardnotes/mobile@%v
+UpdateCheckMode: HTTP
+VercodeOperation:
+  - 3002000 + %c
+UpdateCheckData: https://github.com/standardnotes/app/actions/workflows/mobile.release.prod.yml|(\d+)\sworkflow\sruns|https://github.com/standardnotes/app/releases|/releases/tag/%40standardnotes%2Fmobile%40([\d.]+)
+CurrentVersion: 3.178.0
+CurrentVersionCode: 3002782
