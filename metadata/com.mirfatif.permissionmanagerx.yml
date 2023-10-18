@@ -144,8 +144,27 @@ Builds:
     prebuild: sed -i -e '/pref_settings_check_for_updates_default/s/true/false/' src/main/res/values/pref_keys.xml
     ndk: r25b
 
-AutoUpdateMode: Version
+  - versionName: v1.23-fd
+    versionCode: 123
+    commit: 26f584b42db95ea691a87c8d36ab78284e784da7
+    subdir: app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y openjdk-17-jdk-headless make gcc libc-dev
+      - update-alternatives --auto java
+    gradle:
+      - fdroid
+      - foss
+    prebuild:
+      - sed -i -e '/maven-repo/d' ../buildSrc/build.gradle.kts ../settings.gradle.kts
+      - sed -i -e "s|createJarFromApk(apk, jar)|createJarFromApk('../'+apk, '../'+jar)|"
+        build.gradle
+      - sed -i -e '/pref_settings_check_for_updates_default/s/true/false/' src/main/res/values/pref_keys.xml
+    ndk: r25b
+
+AutoUpdateMode: Version +-fd %v
 UpdateCheckMode: Tags
-UpdateCheckName: Ignore
-CurrentVersion: v1.21-fd
-CurrentVersionCode: 121
+UpdateCheckData: gradle/libs.versions.toml|app-code = "(\d+)"|.|app-name = "(.+)"
+CurrentVersion: v1.23
+CurrentVersionCode: 123
