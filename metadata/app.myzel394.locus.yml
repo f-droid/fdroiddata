@@ -625,6 +625,144 @@ Builds:
         $PUB_CACHE/hosted/pub.dev/background_fetch-1.1.6/android/libs/com/transistorsoft/tsbackgroundfetch/0.5.7/tsbackgroundfetch-0.5.7.aar
       - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform=android-arm64
 
+  - versionName: 0.15.2
+    versionCode: 5381
+    commit: 612c7edeca8b9eee1810191fb3869cba9c8635c7
+    output: build/app/outputs/flutter-apk/app-x86_64-release.apk
+    srclibs:
+      - flutter@stable
+      - transistor-background-fetch@fb883de16ff3fbaaaa5ce84d829911c8a5894d25
+    rm:
+      - ios
+    prebuild:
+      - export version=$(sed -E -n -e "s/^.*flutter-version:\ '([0-9.]+)'.*$/\1/p"
+        .github/workflows/release-app.yaml)
+      - pushd $$flutter$$
+      - git checkout -f $version
+      - popd
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - sed -i -e "s/^\#f//" pubspec.yaml
+      - sed -i -e 's/^\/\/f //' android/app/build.gradle
+      - sed -i -e '/<!-- GMS -->/{N;d;}' android/app/src/main/AndroidManifest.xml
+      - sed -i -e '/checkForUpdates/d' lib/main.dart
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+      - $$flutter$$/bin/flutter gen-l10n
+      - cd .pub-cache/hosted/pub.dev/background_locator_2-*/android
+      - sed -i -e '/gms/d' build.gradle
+      - cd src/main/kotlin/yukams/app/background_locator_2
+      - sed -i -e '/gms/d' -e '/fun getAccuracy/,/^}/d' -e 's/getAccuracy//' IsolateHolderExtension.kt
+      - sed -i -e 's/GoogleLocationProviderClient/AndroidLocationProviderClient/'
+        IsolateHolderService.kt
+      - sed -i -e '/getLocationMapFromLocation.*LocationResult/,/^        }/d' -e
+        '/gms/d' provider/LocationParserUtil.kt
+      - rm provider/GoogleLocationProviderClient.kt
+    scanignore:
+      - android/build.gradle
+      - .pub-cache/hosted/pub.dev/background_fetch-*/android/build.gradle
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - pushd $$transistor-background-fetch$$/android/tsbackgroundfetch/
+      - gradle assembleRelease
+      - popd
+      - mv $$transistor-background-fetch$$/android/tsbackgroundfetch/build/outputs/aar/tsbackgroundfetch-release.aar
+        $PUB_CACHE/hosted/pub.dev/background_fetch-1.1.6/android/libs/com/transistorsoft/tsbackgroundfetch/0.5.7/tsbackgroundfetch-0.5.7.aar
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform=android-x64
+
+  - versionName: 0.15.2
+    versionCode: 5382
+    commit: 612c7edeca8b9eee1810191fb3869cba9c8635c7
+    output: build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
+    srclibs:
+      - flutter@stable
+      - transistor-background-fetch@fb883de16ff3fbaaaa5ce84d829911c8a5894d25
+    rm:
+      - ios
+    prebuild:
+      - export version=$(sed -E -n -e "s/^.*flutter-version:\ '([0-9.]+)'.*$/\1/p"
+        .github/workflows/release-app.yaml)
+      - pushd $$flutter$$
+      - git checkout -f $version
+      - popd
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - sed -i -e "s/^\#f//" pubspec.yaml
+      - sed -i -e 's/^\/\/f //' android/app/build.gradle
+      - sed -i -e '/<!-- GMS -->/{N;d;}' android/app/src/main/AndroidManifest.xml
+      - sed -i -e '/checkForUpdates/d' lib/main.dart
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+      - $$flutter$$/bin/flutter gen-l10n
+      - cd .pub-cache/hosted/pub.dev/background_locator_2-*/android
+      - sed -i -e '/gms/d' build.gradle
+      - cd src/main/kotlin/yukams/app/background_locator_2
+      - sed -i -e '/gms/d' -e '/fun getAccuracy/,/^}/d' -e 's/getAccuracy//' IsolateHolderExtension.kt
+      - sed -i -e 's/GoogleLocationProviderClient/AndroidLocationProviderClient/'
+        IsolateHolderService.kt
+      - sed -i -e '/getLocationMapFromLocation.*LocationResult/,/^        }/d' -e
+        '/gms/d' provider/LocationParserUtil.kt
+      - rm provider/GoogleLocationProviderClient.kt
+    scanignore:
+      - android/build.gradle
+      - .pub-cache/hosted/pub.dev/background_fetch-*/android/build.gradle
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - pushd $$transistor-background-fetch$$/android/tsbackgroundfetch/
+      - gradle assembleRelease
+      - popd
+      - mv $$transistor-background-fetch$$/android/tsbackgroundfetch/build/outputs/aar/tsbackgroundfetch-release.aar
+        $PUB_CACHE/hosted/pub.dev/background_fetch-1.1.6/android/libs/com/transistorsoft/tsbackgroundfetch/0.5.7/tsbackgroundfetch-0.5.7.aar
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform=android-arm
+
+  - versionName: 0.15.2
+    versionCode: 5383
+    commit: 612c7edeca8b9eee1810191fb3869cba9c8635c7
+    output: build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+    srclibs:
+      - flutter@stable
+      - transistor-background-fetch@fb883de16ff3fbaaaa5ce84d829911c8a5894d25
+    rm:
+      - ios
+    prebuild:
+      - export version=$(sed -E -n -e "s/^.*flutter-version:\ '([0-9.]+)'.*$/\1/p"
+        .github/workflows/release-app.yaml)
+      - pushd $$flutter$$
+      - git checkout -f $version
+      - popd
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - sed -i -e "s/^\#f//" pubspec.yaml
+      - sed -i -e 's/^\/\/f //' android/app/build.gradle
+      - sed -i -e '/<!-- GMS -->/{N;d;}' android/app/src/main/AndroidManifest.xml
+      - sed -i -e '/checkForUpdates/d' lib/main.dart
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+      - $$flutter$$/bin/flutter gen-l10n
+      - cd .pub-cache/hosted/pub.dev/background_locator_2-*/android
+      - sed -i -e '/gms/d' build.gradle
+      - cd src/main/kotlin/yukams/app/background_locator_2
+      - sed -i -e '/gms/d' -e '/fun getAccuracy/,/^}/d' -e 's/getAccuracy//' IsolateHolderExtension.kt
+      - sed -i -e 's/GoogleLocationProviderClient/AndroidLocationProviderClient/'
+        IsolateHolderService.kt
+      - sed -i -e '/getLocationMapFromLocation.*LocationResult/,/^        }/d' -e
+        '/gms/d' provider/LocationParserUtil.kt
+      - rm provider/GoogleLocationProviderClient.kt
+    scanignore:
+      - android/build.gradle
+      - .pub-cache/hosted/pub.dev/background_fetch-*/android/build.gradle
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - pushd $$transistor-background-fetch$$/android/tsbackgroundfetch/
+      - gradle assembleRelease
+      - popd
+      - mv $$transistor-background-fetch$$/android/tsbackgroundfetch/build/outputs/aar/tsbackgroundfetch-release.aar
+        $PUB_CACHE/hosted/pub.dev/background_fetch-1.1.6/android/libs/com/transistorsoft/tsbackgroundfetch/0.5.7/tsbackgroundfetch-0.5.7.aar
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform=android-arm64
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v[\d.]+$
 VercodeOperation:
@@ -632,5 +770,5 @@ VercodeOperation:
   - 5002 + %c * 10
   - 5003 + %c * 10
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 0.15.1
-CurrentVersionCode: 5373
+CurrentVersion: 0.15.2
+CurrentVersionCode: 5383
