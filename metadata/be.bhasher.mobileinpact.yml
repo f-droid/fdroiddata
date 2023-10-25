@@ -1,0 +1,65 @@
+AntiFeatures:
+  NonFreeNet:
+    en-US: Rely on nextinpact.com.
+Categories:
+  - Internet
+License: MIT
+AuthorName: Bhasher
+SourceCode: https://github.com/BhasherBEL/MobileInpact
+IssueTracker: https://github.com/BhasherBEL/MobileInpact/issues
+Changelog: https://github.com/BhasherBEL/MobileInpact/releases
+
+AutoName: MobileInpact
+
+RepoType: git
+Repo: https://github.com/BhasherBEL/MobileInpact
+Binaries: https://github.com/BhasherBEL/MobileInpact/releases/download/%v/app-release.apk
+
+Builds:
+  - versionName: 0.1.2
+    versionCode: 12
+    commit: 0.1.2
+    sudo:
+      - apt-get update
+      - apt-get install -y openjdk-17-jdk-headless
+      - update-java-alternatives -a
+      - mkdir -p /home/runner/
+      - chown vagrant /home/runner/
+      - mkdir -p /opt/hostedtoolcache/flutter/
+      - chown vagrant /opt/hostedtoolcache/flutter/
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@3.3.10
+    prebuild:
+      - export flutter=/opt/hostedtoolcache/flutter/stable-3.3.10-x64
+      - mv $$flutter$$ $flutter
+      - export repo=/home/runner/work/MobileInpact
+      - mkdir -p $repo
+      - cd ..
+      - mv be.bhasher.mobileinpact $repo/MobileInpact
+      - pushd $repo/MobileInpact
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $flutter/bin/flutter config --no-analytics
+      - $flutter/bin/flutter pub get
+      - popd
+      - mv $repo/MobileInpact be.bhasher.mobileinpact
+    scandelete:
+      - .pub-cache
+    build:
+      - export flutter=/opt/hostedtoolcache/flutter/stable-3.3.10-x64
+      - export repo=/home/runner/work/MobileInpact
+      - cd ..
+      - mv be.bhasher.mobileinpact $repo/MobileInpact
+      - pushd $repo/MobileInpact
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $flutter/bin/flutter build apk --release
+      - popd
+      - mv $repo/MobileInpact be.bhasher.mobileinpact
+    ndk: r21
+
+AllowedAPKSigningKeys: c8970643bca18d7eefd7f8d38ef8ac5cd6aa728bcff2e27f00888ecb0209b4ad
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: 0.1.2
+CurrentVersionCode: 12
