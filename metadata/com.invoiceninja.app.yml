@@ -1197,11 +1197,10 @@ Builds:
 
   - versionName: 5.0.127
     versionCode: 127
-    disable: fails to build
-    commit: 02a767906772ae1d535e68a0e1590f6dc5413ca7
+    commit: 1eb028e4cb45baf319908c526c07aee3b5bca393
     output: build/app/outputs/flutter-apk/app-release.apk
     srclibs:
-      - flutter@3.7.6
+      - flutter@stable
     rm:
       - ios
       - linux
@@ -1212,6 +1211,11 @@ Builds:
       - web
       - windows
     prebuild:
+      - export version=$(grep "flutter\:\ " codemagic.yaml | tr -d ' ' | cut -d ":"
+        -f2)
+      - pushd $$flutter$$
+      - git checkout -f $version
+      - popd
       - cp lib/.env.dart.example lib/.env.dart
       - cp android/app/build.gradle.dev android/app/build.gradle
       - cp android/build.gradle.foss android/build.gradle
