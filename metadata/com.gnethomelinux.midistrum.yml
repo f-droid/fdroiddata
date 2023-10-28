@@ -5,10 +5,6 @@ SourceCode: https://github.com/guysoft/midistrum
 IssueTracker: https://github.com/guysoft/midistrum/issues
 
 Name: midistrum
-Description: |-
-  An app to use android's native midi system to create an omnichord/auto harp-like strum instrument.
-  It contains a port native midi to kivy.
-  Midistrum does not generate sound on its own, it needs a synth to send midi t. For example fluidsynth. Or your PC over USB.
 
 RepoType: git
 Repo: https://github.com/guysoft/midistrum.git
@@ -51,12 +47,48 @@ Builds:
       - echo y | buildozer android release
     ndk: 25.1.8937393
 
-MaintainerNotes: |-
-  The auto accept license is disabled since fdroid sdkmanager doesn't support
-  the --licenses argument.
-  UpdateCheckMode stays as HTTP as the app has an older tag with a higher version number.
+  - versionName: 0.2.9
+    versionCode: 1021209
+    commit: v0.2.9
+    subdir: src
+    sudo:
+      - apt-get update
+      - apt-get install -y g++ libc-dev make automake libltdl-dev libtool zlib1g-dev
+        libffi-dev libssl-dev python3-pip python3-pexpect python3-virtualenv python3-sh
+        cython3 ant openjdk-17-jdk-headless
+      - apt-get install -y -t bullseye-backports python3-appdirs python3-colorama
+        python3-jinja2 python3-build python3-toml python3-packaging
+      - update-alternatives --auto java
+      - rm /opt/android-sdk/tools/bin/sdkmanager
+      - ln -s $(which sdkmanager) /opt/android-sdk/tools/bin/sdkmanager
+      - echo -e '#!/usr/bin/sh\nls /opt/android-sdk/platforms | sed "s/android-/API
+        level:\ /g"' > /opt/android-sdk/tools/bin/avdmanager
+      - chmod +x /opt/android-sdk/tools/bin/avdmanager
+    output: bin/*.apk
+    srclibs:
+      - cpython@v3.8.15
+      - python-for-android@v2023.09.16
+      - buildozer@1.5.0
+    prebuild:
+      - sdkmanager 'platforms;android-33' 'build-tools;33.0.0'
+      - sed -i -e 's/log_level =.*/log_level = 2/' -e '/^\[app\]/aandroid.ndk_path
+        = $$NDK$$\nandroid.sdk_path = $$SDK$$\nandroid.skip_update = True\np4a.source_dir
+        = $$python-for-android$$\nandroid.ant_path = /usr' -e 's/python3==3.8.15/python3==3.8.15,hostpython3==3.8.15/'
+        buildozer.spec
+    build:
+      - pushd $$cpython$$
+      - ./configure --prefix=$HOME/.local
+      - make -j`nproc`
+      - make altinstall
+      - popd
+      - pip3 install $$buildozer$$
+      - ln -s $(which cython3) $HOME/.local/bin/cython
+      - export PATH="$PATH:$HOME/.local/bin"
+      - buildozer android release
+    ndk: r25b
 
-AutoUpdateMode: Version %v
-UpdateCheckMode: None
-CurrentVersion: 0.2.7
-CurrentVersionCode: 1021207
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: src/main.py|__version_code__ = (\d+)|.|__version__ = "([\d.]+)"
+CurrentVersion: 0.2.9
+CurrentVersionCode: 1021209
