@@ -1,0 +1,58 @@
+# PLEASE REMOVE ALL COMMENTS BEFORE SUBMITTING TO F-DROID DATA!
+
+Builds:
+  - versionName: 1.0.0
+    versionCode: 100000
+    commit: v1.0.0
+    subdir: src
+    sudo:
+      - apt-get update
+      # These packages are needed to build python, etc.
+      - apt-get install -y g++ libc-dev make automake libltdl-dev libtool zlib1g-dev
+        libffi-dev libssl-dev cython3
+      # These packages are needed to install buildozer.
+      - apt-get install -y python3-pip python3-pexpect python3-virtualenv python3-sh
+      # These packages are needed to install p4a
+      - apt-get install -y -t bullseye-backports python3-appdirs python3-colorama python3-jinja2 python3-build
+        python3-toml python3-packaging
+      # Install ant so that it's not downloaded by buildozer
+      - apt-get install -y ant
+      - apt-get install -y openjdk-17-jdk-headless
+      - update-alternatives --auto java
+      # The old sdkmanager doesn't work with jdk 17 so we use the python sdkmanager.
+      # The buildozer doesn't use sdkmanager from path or the cmdline-tools.
+      - rm /opt/android-sdk/tools/bin/sdkmanager
+      - ln -s $(which sdkmanager) /opt/android-sdk/tools/bin/sdkmanager
+      # The old avdmanager doesn't work with jdk 17.
+      # It's used only to list targets so we use this simple script instead.
+      - echo -e '#!/usr/bin/sh\nls /opt/android-sdk/platforms | sed "s/android-/API
+        level:\ /g"' > /opt/android-sdk/tools/bin/avdmanager
+      - chmod +x /opt/android-sdk/tools/bin/avdmanager
+    output: bin/*.apk
+    srclibs:
+      # Python cross compiling requires a Python interpreter for the build platform.
+      # The version of the build Python must match the version of the cross compiled host Python.
+      - cpython@v3.8.18
+      # Pin these versions instead of installing the latest versions from pypi.
+      - python-for-android@v2023.09.16
+      - buildozer@1.5.0
+    prebuild:
+      # We disable the auto downloading so install them manully.
+      - sdkmanager 'platforms;android-33' 'build-tools;33.0.0'
+      # We disable the auto downloading of Android SDK/NDK, p4a and ant.
+      - sed -i -e 's/log_level =.*/log_level = 1/' -e '/^\[app\]/aandroid.ndk_path
+        = $$NDK$$\nandroid.sdk_path = $$SDK$$\nandroid.skip_update = True\np4a.source_dir
+        = $$python-for-android$$\nandroid.ant_path = /usr' buildozer.spec
+    build:
+      - pushd $$cpython$$
+      - ./configure --prefix=$HOME/.local
+      - make -j`nproc`
+      - make altinstall
+      - popd
+      - pip3 install $$buildozer$$
+      # The buildozer checks cython but Debian cython3 package only provides cython3 command.
+      - ln -s $(which cython3) /home/vagrant/.local/bin/cython
+      - export PATH="$PATH:$HOME/.local/bin"
+      # Set the abi and version code here to split the abi if it's needed.
+      - APP_ANDROID_ARCH=arm64-v8a APP_ANDROID_NUMERIC_VERSION=$$VERCODE$$ buildozer android release
+    ndk: r25b
