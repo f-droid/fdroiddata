@@ -106,74 +106,6 @@ Builds:
       - popd
       - cp $$JSword$$/target/jsword-*.jar libs/jsword.jar
 
-  - versionName: 2.3.0
-    versionCode: 180
-    disable: gradle requires android sdk maven repo to be set manually
-    commit: build-02.03.00
-    subdir: AndBible
-    init: sed -i "/android {/a compileOptions {\nsourceCompatibility JavaVersion.VERSION_1_7\ntargetCompatibility
-      JavaVersion.VERSION_1_7\n}" build.gradle
-    gradle:
-      - yes
-    srclibs:
-      - JSword@d7ad5ef
-    rm:
-      - IgnoreAndBibleExperiments
-      - AndBible/libs/*
-      - AndBible/libs
-      - AndBible/libs-src
-    prebuild:
-      - cp -r ../jsword-tweaks/src/main/. $$JSword$$/src/main
-      - sed -i "/<repositories>/,/<\/repositories>/d" $$JSword$$/pom.xml
-      - sed -i "/<dependencies>/a <dependency><groupId>com.chenlb.mmseg4j</groupId><artifactId>mmseg4j-all</artifactId><version>1.8.6</version></dependency>"
-        $$JSword$$/pom.xml
-      - sed -i -e '/ANDROID_HOME/d' build.gradle
-    build:
-      - pushd $$JSword$$
-      - mvn package -Dmaven.test.skip=true
-      - popd
-      - cp $$JSword$$/target/jsword-*.jar libs/jsword.jar
-
-  - versionName: 2.3.2
-    versionCode: 186
-    disable: gradle issue
-    commit: build-02.03.02
-    subdir: AndBible
-    gradle:
-      - yes
-    srclibs:
-      - JSword@d7ad5ef
-    rm:
-      - IgnoreAndBibleExperiments
-      - AndBible/libs/*
-      - AndBible/libs
-      - AndBible/libs-src
-    prebuild:
-      - cp -r ../jsword-tweaks/src/main/. $$JSword$$/src/main
-      - sed -i "/<repositories>/,/<\/repositories>/d" $$JSword$$/pom.xml
-      - sed -i "/<dependencies>/a <dependency><groupId>com.chenlb.mmseg4j</groupId><artifactId>mmseg4j-all</artifactId><version>1.8.6</version></dependency>"
-        $$JSword$$/pom.xml
-      - sed -i -e '/ANDROID_HOME/d' -e '/repositories {/ajcenter()' -e 's/com.android.tools.build:gradle:0.11+/com.android.tools.build:gradle:1.2.2/g'
-        -e '/apply plugin/s/android/com.android.application/g' build.gradle
-    build:
-      - pushd $$JSword$$
-      - mvn package -Dmaven.test.skip=true
-      - popd
-      - cp $$JSword$$/target/jsword-*.jar libs/jsword.jar
-
-  - versionName: 2.4.1
-    versionCode: 189
-    disable: try to fix gradle
-    commit: build-02.04.01
-    subdir: AndBible
-    gradle:
-      - yes
-    prebuild:
-      - sed -i -e '/ANDROID_HOME/d' -e '/repositories {/ajcenter()' -e 's/com.android.tools.build:gradle:0.11+/com.android.tools.build:gradle:1.5.0/g'
-        -e '/apply plugin/s/android/com.android.application/g' -e '/appcompat-v7/s/19.+/23.0.1/g'
-        -e '/instrumentTest/,+1d' -e '/packagingOptions/i}\n' build.gradle
-      - sed -i -e '/\/\*\*/,$d' build.gradle
-
   - versionName: 2.5.0
     versionCode: 192
     commit: build-02.05.00
@@ -391,33 +323,6 @@ Builds:
   - versionName: 2.8.4
     versionCode: 224
     commit: build-02.08.04
-    subdir: and-bible/app
-    gradle:
-      - yes
-    srclibs:
-      - JSword@fa6a44d05982a67f0122ffdd7b522d8ebcf43824
-    rm:
-      - and-bible/app/libs/*
-      - and-bible/libs-src
-      - ReadingPlanCreator/libs
-      - jsword-tweaks/libs
-    prebuild:
-      - sed -i "/mmseg4j/d" build.gradle
-      - cp -r ../../jsword-tweaks/src/main/. $$JSword$$/src/main
-      - sed -i "/<repositories>/,/<\/repositories>/d" $$JSword$$/pom.xml
-      - rm -rf $$JSword$$/src/main/java/org/crosswire/jsword/examples
-      - sed -i "/<dependencies>/a <dependency><groupId>com.chenlb.mmseg4j</groupId><artifactId>mmseg4j-all</artifactId><version>1.8.6</version></dependency>"
-        $$JSword$$/pom.xml
-    build:
-      - pushd $$JSword$$
-      - mvn package -Dmaven.test.skip=true
-      - popd
-      - cp $$JSword$$/target/jsword-*.jar libs/jsword.jar
-
-  - versionName: 2.9.1
-    versionCode: 230
-    disable: proguard issues
-    commit: build-02.09.01
     subdir: and-bible/app
     gradle:
       - yes
@@ -1470,20 +1375,21 @@ Builds:
 
   - versionName: 5.0.740
     versionCode: 740
+    disable: https://github.com/AndBible/and-bible/issues/2945
     commit: 5cb9cd9550e2386546677fb3a7219d9d0a781eef
     subdir: app
     sudo:
       - apt-get update
-      - apt-get install -y g++ build-essential
-      - curl -Lo node.tar.gz https://nodejs.org/dist/v14.16.0/node-v14.16.0-linux-x64.tar.gz
-      - echo "7212031d7468718d7c8f5e1766380daaabe09d54611675338e7a88a97c3e31b6 node.tar.gz"
+      - apt-get install -y openjdk-17-jdk-headless
+      - update-java-alternatives -a
+      - curl -Lo node.tar.gz https://nodejs.org/dist/v20.9.0/node-v20.9.0-linux-x64.tar.gz
+      - echo "f0919f092fbf74544438907fa083c21e76b2d7a4bc287f0607ada1553ef16f60 node.tar.gz"
         | sha256sum -c -
-      - tar xf node.tar.gz
-      - cp -a node-v14.16.0-linux-x64/. /usr/local/
+      - tar xzf node.tar.gz --strip-components=1 -C /usr/local/
     gradle:
       - fdroid
 
 AutoUpdateMode: Version
-UpdateCheckMode: Tags ^v\d+\.\d+\.\d+-fdroid$
+UpdateCheckMode: Tags ^v[\d.]+-fdroid$
 CurrentVersion: 5.0.740
 CurrentVersionCode: 740
