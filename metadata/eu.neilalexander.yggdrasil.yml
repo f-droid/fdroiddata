@@ -72,12 +72,19 @@ Builds:
     sudo:
       - apt-get update
       - apt-get install -t bullseye-backports -y golang-go
+      - apt-get install -y gcc libc-dev
     gradle:
       - yes
+    srclibs:
+      - go@go1.20.10
     prebuild:
       - sdkmanager 'platforms;android-21'
       - sed -i -e 's/-target android/-target android -androidapi 21/g' ../libs/yggdrasil-go/contrib/mobile/build
     build:
+      - pushd $$go$$/src
+      - ./make.bash
+      - popd
+      - export PATH=$$go$$/bin:$PATH
       - mkdir libs
       - cd ..
       - export GOPATH="$PWD/golang"

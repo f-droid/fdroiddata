@@ -1632,7 +1632,6 @@ Builds:
       - rm packages/app-mobile/components/CameraView.js
       - rm packages/app-mobile/components/screens/Note.js
     patch:
-      - remove-camera.patch
       - 0001-android-remove-legacy-support.patch
     gradle:
       - yes
@@ -1650,6 +1649,7 @@ Builds:
     prebuild:
       - pushd ../../../..
       - sed -i -e '/camera/d' -e '/geolocation/d' packages/app-mobile/package.json
+      - sed -i -e '/CameraView /d' packages/app-mobile/components/screens/Note.tsx
       - YARN_ENABLE_IMMUTABLE_INSTALLS=false BUILD_SEQUENCIAL=1 yarn install
       - sed -i -e '/installreferrer/,+11d' packages/app-mobile/node_modules/react-native-device-info/android/build.gradle
       - pushd packages/app-mobile/node_modules/react-native-rsa-native/android
@@ -1666,9 +1666,10 @@ Builds:
         's|xmlns:android|xmlns:tools="http://schemas.android.com/tools" xmlns:android|'
         src/main/AndroidManifest.xml
     scanignore:
+      - .yarn/install-state.gz
+      - .yarn/cache/*.zip
       - packages/app-mobile/node_modules/jsc-android
       - packages/app-mobile/node_modules/react-native/build.gradle.kts
-      - packages/app-mobile/node_modules/@bam.tech/react-native-image-resizer/android/build.gradle
       - packages/app-mobile/node_modules/@react-native-community/netinfo/android/build.gradle
       - packages/app-mobile/node_modules/@react-native-community/push-notification-ios/android/build.gradle
       - packages/app-mobile/node_modules/react-native-device-info/android/build.gradle
@@ -1692,8 +1693,6 @@ Builds:
       - packages/react-native-alarm-notification/node_modules
       - packages/react-native-saf-x/node_modules
       - node_modules
-      - .yarn/cache/
-      - .yarn/install-state.gz
     build:
       - pushd $$libvips$$
       - mkdir build
