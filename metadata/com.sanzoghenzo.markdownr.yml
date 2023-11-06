@@ -138,8 +138,28 @@ Builds:
       - export PUB_CACHE=$(pwd)/.pub-cache
       - $$flutter$$/bin/flutter build apk --release
 
+  - versionName: 1.6.0
+    versionCode: 12
+    commit: a638e3cba613025d2ae6ed30306dcda241f491fd
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@stable
+    prebuild:
+      - version=$(sed -n -E 's/.*flutter-version:\ "(.*)"/\1/p' .github/workflows/release.yml)
+      - pushd $$flutter$$
+      - git checkout -f $version
+      - popd
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter packages pub get
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 1.5.1
-CurrentVersionCode: 11
+CurrentVersion: 1.6.0
+CurrentVersionCode: 12
