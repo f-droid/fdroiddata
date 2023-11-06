@@ -12,6 +12,10 @@ Builds:
     # This must be set else the build will fail.
     # The output path can be found in the log.
     output: build/app/outputs/flutter-apk/app-release.apk
+    # If you don't want to add a submodule, then you can add flutter as a srclib
+    # and checkout the required version manually
+    srclibs:
+      - flutter@stable
     # Deletes unrelated directories,
     # remove those not needed from the list.
     rm:
@@ -21,6 +25,12 @@ Builds:
       - web
       - windows
     prebuild:
+      # Extract the flutter version and then checkout it in the flutter srclib
+      # Only needed when flutter srclib is used
+      - version=$(sed -n -E "s/.*flutter-version:\ '(.*)'/\1/p" .github/workflows/release.yml)
+      - pushd $$flutter$$
+      - git checkout -f $version
+      - popd
       # Change pub cache location so that the dart packages are scanned by the scanner
       - export PUB_CACHE=$(pwd)/.pub-cache
       - .flutter/bin/flutter config --no-analytics
