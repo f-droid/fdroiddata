@@ -9,8 +9,8 @@ Translation: https://explore.transifex.com/fcitx/fcitx5-android
 
 AutoName: Fcitx5 for Android (Anthy Plugin)
 
-RepoType: git
-Repo: https://github.com/fcitx5-android/fcitx5-android
+RepoType: srclib
+Repo: fcitx5-android
 
 Builds:
   - versionName: 0.0.6-0-g024241cf
@@ -367,6 +367,187 @@ Builds:
       - ABI=x86_64 ANDROID_NDK_ROOT=$$NDK$$ CMAKE_VERSION=3.22.1 ANDROID_PLATFORM=23
         COMP_SPELL_DICT=/usr/lib/x86_64-linux-gnu/fcitx5/libexec/comp-spell-dict runghc
         ../Main.hs -j everything
+      - popd
+      - mv $$fcitx5-android-prebuilder$$/build ../../lib/fcitx5/src/main/cpp/prebuilt
+    ndk: 25.2.9519653
+    gradleprops:
+      - buildABI=x86_64
+
+  - versionName: 0.0.8-0-g4c8399ad
+    versionCode: 61
+    commit: 4c8399ad8fdcf57e79b7f4a8514bebfabb79e143
+    subdir: plugin/anthy
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y g++ make cmake xz-utils extra-cmake-modules gettext pkg-config
+        cabal-install ghc libghc-shake-dev libghc-js-flot-data haskell-js-dgtable-utils
+        automake libghc-aeson-pretty-dev libtool openjdk-17-jdk-headless
+      - update-java-alternatives -a
+    gradle:
+      - yes
+    binary: https://github.com/fcitx5-android/fcitx5-android/releases/download/0.0.8/org.fcitx.fcitx5.android.plugin.anthy-%v-armeabi-v7a-release.apk
+    srclibs:
+      - fcitx5-android-prebuilder@868672e1b1ced9d6b46a5f7629a97718ec5a3042
+    rm:
+      - lib/fcitx5/src/main/cpp/prebuilt
+    prebuild:
+      - cp -R ../../gradle .
+      - cd ../..
+      - sdkmanager 'cmake;3.22.1'
+      - buildTimestamp=$(curl -L https://github.com/fcitx5-android/fcitx5-android/releases/download/0.0.8/build-metadata.json
+        | sed -n -E 's/.*timestamp.*"(.*)"$/\1/p')
+      - echo -e "\nbuildTimestamp=$buildTimestamp" >> gradle.properties
+      - sed -i -e '/ImportQualifiedPost/d' $$fcitx5-android-prebuilder$$/src/Main.hs
+      - sed -i -e 's/import \(.*\) qualified as/import qualified \1 as/g' $$fcitx5-android-prebuilder$$/src/*.hs
+      - sed -i -e 's|https://maven.pkg.github.com|https://jitpack.io|g' build-logic/convention/build.gradle.kts
+        lib/*/build.gradle.kts
+    scanignore:
+      - lib/fcitx5/src/main/cpp/fcitx5/src/modules/unicode/charselectdata
+    scandelete:
+      - build-logic/convention/build
+    build:
+      - pushd $$fcitx5-android-prebuilder$$
+      - cabal configure --disable-library-vanilla --enable-shared --enable-executable-dynamic
+        --ghc-options=-dynamic
+      - ABI=armeabi-v7a ANDROID_NDK_ROOT=$$NDK$$ CMAKE_VERSION=3.22.1 ANDROID_PLATFORM=23
+        ./build-cabal -j fmt libevent libintl-lite anthy-dict
+      - popd
+      - mv $$fcitx5-android-prebuilder$$/build ../../lib/fcitx5/src/main/cpp/prebuilt
+    ndk: 25.2.9519653
+    gradleprops:
+      - buildABI=armeabi-v7a
+
+  - versionName: 0.0.8-0-g4c8399ad
+    versionCode: 62
+    commit: 4c8399ad8fdcf57e79b7f4a8514bebfabb79e143
+    subdir: plugin/anthy
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y g++ make cmake xz-utils extra-cmake-modules gettext pkg-config
+        cabal-install ghc libghc-shake-dev libghc-js-flot-data haskell-js-dgtable-utils
+        automake libghc-aeson-pretty-dev libtool openjdk-17-jdk-headless
+      - update-java-alternatives -a
+    gradle:
+      - yes
+    binary: https://github.com/fcitx5-android/fcitx5-android/releases/download/0.0.8/org.fcitx.fcitx5.android.plugin.anthy-%v-arm64-v8a-release.apk
+    srclibs:
+      - fcitx5-android-prebuilder@868672e1b1ced9d6b46a5f7629a97718ec5a3042
+    rm:
+      - lib/fcitx5/src/main/cpp/prebuilt
+    prebuild:
+      - cp -R ../../gradle .
+      - cd ../..
+      - sdkmanager 'cmake;3.22.1'
+      - buildTimestamp=$(curl -L https://github.com/fcitx5-android/fcitx5-android/releases/download/0.0.8/build-metadata.json
+        | sed -n -E 's/.*timestamp.*"(.*)"$/\1/p')
+      - echo -e "\nbuildTimestamp=$buildTimestamp" >> gradle.properties
+      - sed -i -e '/ImportQualifiedPost/d' $$fcitx5-android-prebuilder$$/src/Main.hs
+      - sed -i -e 's/import \(.*\) qualified as/import qualified \1 as/g' $$fcitx5-android-prebuilder$$/src/*.hs
+      - sed -i -e 's|https://maven.pkg.github.com|https://jitpack.io|g' build-logic/convention/build.gradle.kts
+        lib/*/build.gradle.kts
+    scanignore:
+      - lib/fcitx5/src/main/cpp/fcitx5/src/modules/unicode/charselectdata
+    scandelete:
+      - build-logic/convention/build
+    build:
+      - pushd $$fcitx5-android-prebuilder$$
+      - cabal configure --disable-library-vanilla --enable-shared --enable-executable-dynamic
+        --ghc-options=-dynamic
+      - ABI=arm64-v8a ANDROID_NDK_ROOT=$$NDK$$ CMAKE_VERSION=3.22.1 ANDROID_PLATFORM=23
+        ./build-cabal -j fmt libevent libintl-lite anthy-dict
+      - popd
+      - mv $$fcitx5-android-prebuilder$$/build ../../lib/fcitx5/src/main/cpp/prebuilt
+    ndk: 25.2.9519653
+    gradleprops:
+      - buildABI=arm64-v8a
+
+  - versionName: 0.0.8-0-g4c8399ad
+    versionCode: 63
+    commit: 4c8399ad8fdcf57e79b7f4a8514bebfabb79e143
+    subdir: plugin/anthy
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y g++ make cmake xz-utils extra-cmake-modules gettext pkg-config
+        cabal-install ghc libghc-shake-dev libghc-js-flot-data haskell-js-dgtable-utils
+        automake libghc-aeson-pretty-dev libtool openjdk-17-jdk-headless
+      - update-java-alternatives -a
+    gradle:
+      - yes
+    binary: https://github.com/fcitx5-android/fcitx5-android/releases/download/0.0.8/org.fcitx.fcitx5.android.plugin.anthy-%v-x86-release.apk
+    srclibs:
+      - fcitx5-android-prebuilder@868672e1b1ced9d6b46a5f7629a97718ec5a3042
+    rm:
+      - lib/fcitx5/src/main/cpp/prebuilt
+    prebuild:
+      - cp -R ../../gradle .
+      - cd ../..
+      - sdkmanager 'cmake;3.22.1'
+      - buildTimestamp=$(curl -L https://github.com/fcitx5-android/fcitx5-android/releases/download/0.0.8/build-metadata.json
+        | sed -n -E 's/.*timestamp.*"(.*)"$/\1/p')
+      - echo -e "\nbuildTimestamp=$buildTimestamp" >> gradle.properties
+      - sed -i -e '/ImportQualifiedPost/d' $$fcitx5-android-prebuilder$$/src/Main.hs
+      - sed -i -e 's/import \(.*\) qualified as/import qualified \1 as/g' $$fcitx5-android-prebuilder$$/src/*.hs
+      - sed -i -e 's|https://maven.pkg.github.com|https://jitpack.io|g' build-logic/convention/build.gradle.kts
+        lib/*/build.gradle.kts
+    scanignore:
+      - lib/fcitx5/src/main/cpp/fcitx5/src/modules/unicode/charselectdata
+    scandelete:
+      - build-logic/convention/build
+    build:
+      - pushd $$fcitx5-android-prebuilder$$
+      - cabal configure --disable-library-vanilla --enable-shared --enable-executable-dynamic
+        --ghc-options=-dynamic
+      - popd
+      - ABI=x86 ANDROID_NDK_ROOT=$$NDK$$ CMAKE_VERSION=3.22.1 ANDROID_PLATFORM=23
+        ./build-cabal -j fmt libevent libintl-lite anthy-dict
+      - popd
+      - mv $$fcitx5-android-prebuilder$$/build ../../lib/fcitx5/src/main/cpp/prebuilt
+    ndk: 25.2.9519653
+    gradleprops:
+      - buildABI=x86
+
+  - versionName: 0.0.8-0-g4c8399ad
+    versionCode: 64
+    commit: 4c8399ad8fdcf57e79b7f4a8514bebfabb79e143
+    subdir: plugin/anthy
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y g++ make cmake xz-utils extra-cmake-modules gettext pkg-config
+        cabal-install ghc libghc-shake-dev libghc-js-flot-data haskell-js-dgtable-utils
+        automake libghc-aeson-pretty-dev libtool openjdk-17-jdk-headless
+      - update-java-alternatives -a
+    gradle:
+      - yes
+    binary: https://github.com/fcitx5-android/fcitx5-android/releases/download/0.0.8/org.fcitx.fcitx5.android.plugin.anthy-%v-x86_64-release.apk
+    srclibs:
+      - fcitx5-android-prebuilder@868672e1b1ced9d6b46a5f7629a97718ec5a3042
+    rm:
+      - lib/fcitx5/src/main/cpp/prebuilt
+    prebuild:
+      - cp -R ../../gradle .
+      - cd ../..
+      - sdkmanager 'cmake;3.22.1'
+      - buildTimestamp=$(curl -L https://github.com/fcitx5-android/fcitx5-android/releases/download/0.0.8/build-metadata.json
+        | sed -n -E 's/.*timestamp.*"(.*)"$/\1/p')
+      - echo -e "\nbuildTimestamp=$buildTimestamp" >> gradle.properties
+      - sed -i -e '/ImportQualifiedPost/d' $$fcitx5-android-prebuilder$$/src/Main.hs
+      - sed -i -e 's/import \(.*\) qualified as/import qualified \1 as/g' $$fcitx5-android-prebuilder$$/src/*.hs
+      - sed -i -e 's|https://maven.pkg.github.com|https://jitpack.io|g' build-logic/convention/build.gradle.kts
+        lib/*/build.gradle.kts
+    scanignore:
+      - lib/fcitx5/src/main/cpp/fcitx5/src/modules/unicode/charselectdata
+    scandelete:
+      - build-logic/convention/build
+    build:
+      - pushd $$fcitx5-android-prebuilder$$
+      - cabal configure --disable-library-vanilla --enable-shared --enable-executable-dynamic
+        --ghc-options=-dynamic
+      - ABI=x86_64 ANDROID_NDK_ROOT=$$NDK$$ CMAKE_VERSION=3.22.1 ANDROID_PLATFORM=23
+        ./build-cabal -j fmt libevent libintl-lite anthy-dict
       - popd
       - mv $$fcitx5-android-prebuilder$$/build ../../lib/fcitx5/src/main/cpp/prebuilt
     ndk: 25.2.9519653
