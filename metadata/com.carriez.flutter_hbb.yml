@@ -11,6 +11,8 @@ IssueTracker: https://github.com/rustdesk/rustdesk/issues
 Changelog: https://github.com/rustdesk/rustdesk/releases
 Donate: https://github.com/sponsors/rustdesk
 
+AutoName: RustDesk
+
 RepoType: git
 Repo: https://github.com/rustdesk/rustdesk
 
@@ -78,14 +80,405 @@ Builds:
       - flutter build apk --release --target-platform android-arm64,android-arm
     ndk: r22b
 
-MaintainerNotes: |-
-  flutter_rust_bridge_codegen requires cargo-ndk < 2.6.0 and ffigen which requires
-  clang 9+. scrap requires clang-sys which requires libclang. cargo-ndk doesn't
-  work with NDK > r22. ffigen 6.0.0 doesn't work with flutter_rust_bridge.
-  connects to rustdesk.com on start and sends a lot of data per https://rustdesk.com/privacy.html
-  point 3 letter d)
+  - versionName: 1.2.3-1
+    versionCode: 12301
+    commit: 45dbea57f1c509875e4340254eeb252c657e15a1
+    timeout: 14400
+    subdir: flutter
+    sudo:
+      - apt-get update
+      - apt-get install -y clang-11 cmake gcc g++ fakeroot libclang-11-dev libgstreamer1.0-dev
+        libgstreamer-plugins-base1.0-dev libgtk-3-dev make nasm ninja-build pkg-config
+        xz-utils yasm
+      - update-alternatives --auto java
+    patch:
+      - 0000-flutter-android-x86.patch
+      - 0001-x86-no-debuggable.patch
+    output: build/app/outputs/flutter-apk/app-debug.apk
+    srclibs:
+      - flutter@3.13.9
+      - rustup@1.26.0
+      - vcpkg@2023.10.19
+      - DepotTools@9f3b33a275e7a5b19d8ce4aba7960d2a38858681
+    rm:
+      - flutter/android/app/google-services.json
+      - flutter/ios
+      - flutter/test
+      - flutter/web
+    prebuild:
+      - sed -i -e '/gms/d' android/build.gradle android/app/build.gradle
+      - sed -i -e '/firebase_analytics/d' pubspec.yaml
+      - sed -i -e '/  firebase/,/    version/d' pubspec.lock
+      - sed -i -e '/firebase/Id' lib/main.dart
+    build:
+      - export TARGET=i686-linux-android ANDROID_ABI=x86 NATIVE_TARGET=i686-linux-android
+        VCPKG_TARGET=x86-android FLUTTER_PLATFORM=android-x86 FLUTTER_APK_CMD=" --local-engine-src-path=$(readlink
+        -mf $PWD/../flutter-sdk/src) --local-engine=android_jit_release_x86 --debug
+        --build-number=$$VERCODE$$ --build-name=$$VERSION$$" FLUTTER_VERSION=3.13.9
+        FLUTTER_RUST_BRIDGE_VERSION=1.80.1 RUST_VERSION=1.73 CARGO_EXPAND_VERSION=1.0.74
+        CARGO_NDK_VERSION=3.4.0
+      - export PATH=$PATH:$$flutter$$/bin/:$$DepotTools$$
+      - echo "# Populate native vcpkg dependencies"
+      - pushd $$vcpkg$$
+      - ./bootstrap-vcpkg.sh -disableMetrics
+      - export VCPKG_ROOT=$$vcpkg$$
+      - popd
+      - echo "# Add flutter dir as git safe.dir to stop flutter complaints"
+      - git config --global --add safe.directory $PWD
+      - echo "# Disable telemetry in flutter/dart and download flutter packages"
+      - flutter --disable-telemetry
+      - dart --disable-telemetry
+      - flutter config --no-analytics
+      - flutter packages pub get
+      - echo "# Install rust"
+      - pushd ..
+      - $$rustup$$/rustup-init.sh --target "$TARGET" --default-toolchain "$RUST_VERSION"
+        -y
+      - source $HOME/.cargo/env
+      - popd
+      - echo "# Install cargo-ndk"
+      - cargo install cargo-ndk --version "$CARGO_NDK_VERSION"
+      - echo "# Install rust bridge generator"
+      - cargo install cargo-expand --version "$CARGO_EXPAND_VERSION"
+      - cargo install flutter_rust_bridge_codegen --version "$FLUTTER_RUST_BRIDGE_VERSION"
+        --features "uuid"
+      - echo "# Build android native dependencies"
+      - ./build_android_deps.sh "$ANDROID_ABI"
+      - echo "# Generate FFI bindings"
+      - pushd ..
+      - flutter_rust_bridge_codegen --rust-input ./src/flutter_ffi.rs --dart-output
+        ./flutter/lib/generated_bridge.dart
+      - echo "# Build native library librustdesk.so"
+      - cp -a $$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/*
+        $VCPKG_ROOT/installed/$VCPKG_TARGET/include
+      - LIBCLANG_PATH=/usr/lib/llvm-11/lib cargo ndk --platform 21 --target "$TARGET"
+        build --release --features flutter
+      - mkdir -p flutter/android/app/src/main/jniLibs/$ANDROID_ABI
+      - cp target/$TARGET/release/liblibrustdesk.so flutter/android/app/src/main/jniLibs/$ANDROID_ABI/librustdesk.so
+      - cp $$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/$NATIVE_TARGET/libc++_shared.so
+        flutter/android/app/src/main/jniLibs/$ANDROID_ABI/
+      - $$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip flutter/android/app/src/main/jniLibs/$ANDROID_ABI/*
+      - popd
+      - echo "# Build jit_release flutter engine for android-x86"
+      - pushd ../flutter-sdk
+      - echo "## Sync flutter engine sources"
+      - echo "### We need fakeroot because chromium base image is unpacked with weird
+        uid/gid ownership"
+      - sed -i "s/FLUTTER_VERSION_PLACEHOLDER/$FLUTTER_VERSION/" .gclient
+      - export FAKEROOTDONTTRYCHOWN=1
+      - fakeroot gclient sync
+      - unset FAKEROOTDONTTRYCHOWN
+      - pushd src
+      - echo "## Patch away Google Play dependencies"
+      - rm flutter/shell/platform/android/io/flutter/app/FlutterPlayStoreSplitApplication.java
+        flutter/shell/platform/android/io/flutter/embedding/engine/deferredcomponents/PlayStoreDeferredComponentManager.java
+        flutter/shell/platform/android/io/flutter/embedding/android/FlutterPlayStoreSplitApplication.java
+      - sed -i -e '/PlayStore/d' flutter/tools/android_lint/project.xml flutter/shell/platform/android/BUILD.gn
+      - sed -i -e '/com.google.android.play/d' flutter/tools/androidx/files.json
+      - echo "## Configure android engine build"
+      - flutter/tools/gn --android --android-cpu x86 --runtime-mode=jit_release --no-goma
+        --no-enable-unittests
+      - echo "## Perform android engine build"
+      - ninja -C out/android_jit_release_x86
+      - echo "## Configure host engine build"
+      - flutter/tools/gn --android-cpu x86 --runtime-mode=jit_release --no-goma --no-enable-unittests
+      - echo "## Perform android engine build"
+      - ninja -C out/host_jit_release_x86
+      - echo "## Rename host engine"
+      - mv out/host_jit_release_x86 out/host_jit_release
+      - echo "## Mimic jit_release engine to debug to use with flutter build apk"
+      - pushd out/android_jit_release_x86
+      - sed 's/jit_release/debug/' flutter_embedding_jit_release.maven-metadata.xml
+        > flutter_embedding_debug.maven-metadata.xml
+      - sed 's/jit_release/debug/' flutter_embedding_jit_release.pom > flutter_embedding_debug.pom
+      - sed 's/jit_release/debug/' x86_jit_release.maven-metadata.xml > x86_debug.maven-metadata.xml
+      - sed 's/jit_release/debug/' x86_jit_release.pom > x86_debug.pom
+      - cp -a flutter_embedding_jit_release-sources.jar flutter_embedding_debug-sources.jar
+      - cp -a flutter_embedding_jit_release.jar flutter_embedding_debug.jar
+      - cp -a x86_jit_release.jar x86_debug.jar
+      - popd
+      - popd
+      - popd
+      - echo "# Clean up intermediate engine files and show free space"
+      - rm -rf ../flutter-sdk/src/out/android_jit_release_x86/obj ../flutter-sdk/src/out/host_jit_release/obj
+      - mv ../flutter-sdk/src/out flutter-out
+      - rm -rf ../flutter-sdk
+      - mkdir -p ../flutter-sdk/src/
+      - mv flutter-out ../flutter-sdk/src/out
+      - echo "# Build pseudo-debug apk with jit_release flutter engine"
+      - flutter build apk $FLUTTER_APK_CMD --target-platform "$FLUTTER_PLATFORM"
+      - echo "# Delete built flutter engine"
+      - rm -rf ../flutter-sdk
+    ndk: r26b
 
-AutoUpdateMode: None
-UpdateCheckMode: None
-CurrentVersion: 1.1.10-1
-CurrentVersionCode: 28
+  - versionName: 1.2.3-1
+    versionCode: 12302
+    commit: 45dbea57f1c509875e4340254eeb252c657e15a1
+    timeout: 3600
+    subdir: flutter
+    sudo:
+      - apt-get update
+      - apt-get install -y clang-11 cmake gcc g++ libclang-11-dev libgstreamer1.0-dev
+        libgstreamer-plugins-base1.0-dev libgtk-3-dev make nasm pkg-config yasm
+      - update-alternatives --auto java
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@3.13.9
+      - rustup@1.26.0
+      - vcpkg@2023.10.19
+    rm:
+      - flutter/android/app/google-services.json
+      - flutter/ios
+      - flutter/test
+      - flutter/web
+    prebuild:
+      - sed -i -e '/gms/d' android/build.gradle android/app/build.gradle
+      - sed -i -e '/firebase_analytics/d' pubspec.yaml
+      - sed -i -e '/  firebase/,/    version/d' pubspec.lock
+      - sed -i -e '/firebase/Id' lib/main.dart
+    build:
+      - echo "# Define build variables"
+      - export TARGET=armv7-linux-androideabi ANDROID_ABI=armeabi-v7a NATIVE_TARGET=arm-linux-androideabi
+        VCPKG_TARGET=arm-android FLUTTER_PLATFORM=android-arm FLUTTER_APK_CMD="--release
+        --build-number=$$VERCODE$$ --build-name=$$VERSION$$" FLUTTER_VERSION=3.13.9
+        FLUTTER_RUST_BRIDGE_VERSION=1.80.1 RUST_VERSION=1.73 CARGO_EXPAND_VERSION=1.0.74
+        CARGO_NDK_VERSION=3.4.0
+      - export PATH=$PATH:$$flutter$$/bin/
+      - echo "# Populate native vcpkg dependencies"
+      - pushd $$vcpkg$$
+      - ./bootstrap-vcpkg.sh -disableMetrics
+      - export VCPKG_ROOT=$$vcpkg$$
+      - popd
+      - echo "# Add flutter dir as git safe.dir to stop flutter complaints"
+      - git config --global --add safe.directory $PWD
+      - echo "# Disable telemetry in flutter/dart and download flutter packages"
+      - flutter --disable-telemetry
+      - dart --disable-telemetry
+      - flutter config --no-analytics
+      - flutter packages pub get
+      - echo "# Install rust"
+      - pushd ..
+      - $$rustup$$/rustup-init.sh --target "$TARGET" --default-toolchain "$RUST_VERSION"
+        -y
+      - source $HOME/.cargo/env
+      - popd
+      - echo "# Install cargo-ndk"
+      - cargo install cargo-ndk --version "$CARGO_NDK_VERSION"
+      - echo "# Install rust bridge generator"
+      - cargo install cargo-expand --version "$CARGO_EXPAND_VERSION"
+      - cargo install flutter_rust_bridge_codegen --version "$FLUTTER_RUST_BRIDGE_VERSION"
+        --features "uuid"
+      - echo "# Build android native dependencies"
+      - ./build_android_deps.sh "$ANDROID_ABI"
+      - echo "# Generate FFI bindings"
+      - pushd ..
+      - flutter_rust_bridge_codegen --rust-input ./src/flutter_ffi.rs --dart-output
+        ./flutter/lib/generated_bridge.dart
+      - echo "# Build native library librustdesk.so"
+      - cp -a $$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/*
+        $VCPKG_ROOT/installed/$VCPKG_TARGET/include
+      - LIBCLANG_PATH=/usr/lib/llvm-11/lib cargo ndk --platform 21 --target "$TARGET"
+        build --release --features flutter
+      - mkdir -p flutter/android/app/src/main/jniLibs/$ANDROID_ABI
+      - cp target/$TARGET/release/liblibrustdesk.so flutter/android/app/src/main/jniLibs/$ANDROID_ABI/librustdesk.so
+      - cp $$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/$NATIVE_TARGET/libc++_shared.so
+        flutter/android/app/src/main/jniLibs/$ANDROID_ABI/
+      - $$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip flutter/android/app/src/main/jniLibs/$ANDROID_ABI/*
+      - popd
+      - echo "# Build apk"
+      - flutter build apk $FLUTTER_APK_CMD --target-platform "$FLUTTER_PLATFORM"
+    ndk: r26b
+
+  - versionName: 1.2.3-1
+    versionCode: 12303
+    commit: 45dbea57f1c509875e4340254eeb252c657e15a1
+    timeout: 3600
+    subdir: flutter
+    sudo:
+      - apt-get update
+      - apt-get install -y clang-11 cmake gcc g++ libclang-11-dev libgstreamer1.0-dev
+        libgstreamer-plugins-base1.0-dev libgtk-3-dev make nasm pkg-config yasm
+      - update-alternatives --auto java
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@3.13.9
+      - rustup@1.26.0
+      - vcpkg@2023.10.19
+    rm:
+      - flutter/android/app/google-services.json
+      - flutter/ios
+      - flutter/test
+      - flutter/web
+    prebuild:
+      - sed -i -e '/gms/d' android/build.gradle android/app/build.gradle
+      - sed -i -e '/firebase_analytics/d' pubspec.yaml
+      - sed -i -e '/  firebase/,/    version/d' pubspec.lock
+      - sed -i -e '/firebase/Id' lib/main.dart
+    build:
+      - export TARGET=aarch64-linux-android ANDROID_ABI=arm64-v8a NATIVE_TARGET=aarch64-linux-android
+        VCPKG_TARGET=arm64-android FLUTTER_PLATFORM=android-arm64 FLUTTER_APK_CMD="--release
+        --build-number=$$VERCODE$$ --build-name=$$VERSION$$" FLUTTER_VERSION=3.13.9
+        FLUTTER_RUST_BRIDGE_VERSION=1.80.1 RUST_VERSION=1.73 CARGO_EXPAND_VERSION=1.0.74
+        CARGO_NDK_VERSION=3.4.0
+      - export PATH=$PATH:$$flutter$$/bin/
+      - echo "# Populate native vcpkg dependencies"
+      - pushd $$vcpkg$$
+      - ./bootstrap-vcpkg.sh -disableMetrics
+      - export VCPKG_ROOT=$$vcpkg$$
+      - popd
+      - echo "# Add flutter dir as git safe.dir to stop flutter complaints"
+      - git config --global --add safe.directory $PWD
+      - echo "# Disable telemetry in flutter/dart and download flutter packages"
+      - flutter --disable-telemetry
+      - dart --disable-telemetry
+      - flutter config --no-analytics
+      - flutter packages pub get
+      - echo "# Install rust"
+      - pushd ..
+      - $$rustup$$/rustup-init.sh --target "$TARGET" --default-toolchain "$RUST_VERSION"
+        -y
+      - source $HOME/.cargo/env
+      - popd
+      - echo "# Install cargo-ndk"
+      - cargo install cargo-ndk --version "$CARGO_NDK_VERSION"
+      - echo "# Install rust bridge generator"
+      - cargo install cargo-expand --version "$CARGO_EXPAND_VERSION"
+      - cargo install flutter_rust_bridge_codegen --version "$FLUTTER_RUST_BRIDGE_VERSION"
+        --features "uuid"
+      - echo "# Build android native dependencies"
+      - ./build_android_deps.sh "$ANDROID_ABI"
+      - echo "# Generate FFI bindings"
+      - pushd ..
+      - flutter_rust_bridge_codegen --rust-input ./src/flutter_ffi.rs --dart-output
+        ./flutter/lib/generated_bridge.dart
+      - echo "# Build native library librustdesk.so"
+      - cp -a $$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/*
+        $VCPKG_ROOT/installed/$VCPKG_TARGET/include
+      - LIBCLANG_PATH=/usr/lib/llvm-11/lib cargo ndk --platform 21 --target "$TARGET"
+        build --release --features flutter
+      - mkdir -p flutter/android/app/src/main/jniLibs/$ANDROID_ABI
+      - cp target/$TARGET/release/liblibrustdesk.so flutter/android/app/src/main/jniLibs/$ANDROID_ABI/librustdesk.so
+      - cp $$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/$NATIVE_TARGET/libc++_shared.so
+        flutter/android/app/src/main/jniLibs/$ANDROID_ABI/
+      - $$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip flutter/android/app/src/main/jniLibs/$ANDROID_ABI/*
+      - popd
+      - echo "# Build apk"
+      - flutter build apk $FLUTTER_APK_CMD --target-platform "$FLUTTER_PLATFORM"
+    ndk: r26b
+
+  - versionName: 1.2.3-1
+    versionCode: 12304
+    commit: 45dbea57f1c509875e4340254eeb252c657e15a1
+    timeout: 3600
+    subdir: flutter
+    sudo:
+      - apt-get update
+      - apt-get install -y clang-11 cmake gcc g++ libclang-11-dev libgstreamer1.0-dev
+        libgstreamer-plugins-base1.0-dev libgtk-3-dev make nasm pkg-config yasm
+      - update-alternatives --auto java
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@3.13.9
+      - rustup@1.26.0
+      - vcpkg@2023.10.19
+    rm:
+      - flutter/android/app/google-services.json
+      - flutter/ios
+      - flutter/test
+      - flutter/web
+    prebuild:
+      - sed -i -e '/gms/d' android/build.gradle android/app/build.gradle
+      - sed -i -e '/firebase_analytics/d' pubspec.yaml
+      - sed -i -e '/  firebase/,/    version/d' pubspec.lock
+      - sed -i -e '/firebase/Id' lib/main.dart
+    build:
+      - export TARGET=x86_64-linux-android ANDROID_ABI=x86_64 NATIVE_TARGET=x86_64-linux-android
+        VCPKG_TARGET=x64-android FLUTTER_PLATFORM=android-x64 FLUTTER_APK_CMD="--release
+        --build-number=$$VERCODE$$ --build-name=$$VERSION$$" FLUTTER_VERSION=3.13.9
+        FLUTTER_RUST_BRIDGE_VERSION=1.80.1 RUST_VERSION=1.73 CARGO_EXPAND_VERSION=1.0.74
+        CARGO_NDK_VERSION=3.4.0
+      - export PATH=$PATH:$$flutter$$/bin/
+      - echo "# Populate native vcpkg dependencies"
+      - pushd $$vcpkg$$
+      - ./bootstrap-vcpkg.sh -disableMetrics
+      - export VCPKG_ROOT=$$vcpkg$$
+      - popd
+      - echo "# Add flutter dir as git safe.dir to stop flutter complaints"
+      - git config --global --add safe.directory $PWD
+      - echo "# Disable telemetry in flutter/dart and download flutter packages"
+      - flutter --disable-telemetry
+      - dart --disable-telemetry
+      - flutter config --no-analytics
+      - flutter packages pub get
+      - echo "# Install rust"
+      - pushd ..
+      - $$rustup$$/rustup-init.sh --target "$TARGET" --default-toolchain "$RUST_VERSION"
+        -y
+      - source $HOME/.cargo/env
+      - popd
+      - echo "# Install cargo-ndk"
+      - cargo install cargo-ndk --version "$CARGO_NDK_VERSION"
+      - echo "# Install rust bridge generator"
+      - cargo install cargo-expand --version "$CARGO_EXPAND_VERSION"
+      - cargo install flutter_rust_bridge_codegen --version "$FLUTTER_RUST_BRIDGE_VERSION"
+        --features "uuid"
+      - echo "# Build android native dependencies"
+      - ./build_android_deps.sh "$ANDROID_ABI"
+      - echo "# Generate FFI bindings"
+      - pushd ..
+      - flutter_rust_bridge_codegen --rust-input ./src/flutter_ffi.rs --dart-output
+        ./flutter/lib/generated_bridge.dart
+      - echo "# Build native library librustdesk.so"
+      - cp -a $$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/*
+        $VCPKG_ROOT/installed/$VCPKG_TARGET/include
+      - LIBCLANG_PATH=/usr/lib/llvm-11/lib cargo ndk --platform 21 --target "$TARGET"
+        build --release --features flutter
+      - mkdir -p flutter/android/app/src/main/jniLibs/$ANDROID_ABI
+      - cp target/$TARGET/release/liblibrustdesk.so flutter/android/app/src/main/jniLibs/$ANDROID_ABI/librustdesk.so
+      - cp $$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/$NATIVE_TARGET/libc++_shared.so
+        flutter/android/app/src/main/jniLibs/$ANDROID_ABI/
+      - $$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip flutter/android/app/src/main/jniLibs/$ANDROID_ABI/*
+      - popd
+      - echo "# Build apk"
+      - flutter build apk $FLUTTER_APK_CMD --target-platform "$FLUTTER_PLATFORM"
+    ndk: r26b
+
+MaintainerNotes: |-
+  Licaon_Kter: Tracking AF applied because Rustdesk connects to rustdesk.com on start and sends a
+  lot of data per https://rustdesk.com/privacy.html point 3 letter d
+  .
+  basilgello: we build 4 versions for 4 different architectures but we do not use '--split-by-abi'
+  switch to avoid version code transformations deep inside flutter gradle plugin.
+  .
+  The first architecture built is x86 because building custom flutter engine requires 21GB of
+  disk space and the engine is built before gradle job installs 4GB of Android platforms and tools.
+  .
+  basilgello: flutter does not officially support x86 release apks but it is possible to build
+  jit_release apk using custom engine: https://github.com/flutter/flutter/wiki/JIT-Release-Modes
+  .
+  There is no documentation available on how to use jit_release x86 engine with 'flutter build apk'
+  so I propose the following protocol to build 'android-x86' apks:
+  - clone flutter engine of required version (using flutter-sdk/.gclient file added via
+    0002-flutter-android-x86.patch and version placeholder replaced during build to match
+    required flutter version)
+  - remove Google Play-related classes from io.flutter.app.*
+  - build host and target custom engine with gn + ninja
+  - rename flutter maven metadata from 'jit_release' to 'debug'
+  - add gradle step to remove 'android:debuggable' attribute from AndroidManifest.xml
+    (0003-x86-no-debuggable.patch)
+  - build jit_release APK using 'flutter build apk --debug --local-engine= --local-engine-src-path='
+  .
+  basilgello: rustdesk version codes do not sequentially grow so I set up the simple versioner
+  CI job under https://gitlab.com/basilgello/rustdesk-fdroid-versioner until upstream accepts
+  my proposed change.
+
+AutoUpdateMode: Version %v
+UpdateCheckMode: HTTP
+VercodeOperation:
+  - 100 * %c + 1
+  - 100 * %c + 2
+  - 100 * %c + 3
+  - 100 * %c + 4
+UpdateCheckData: https://gitlab.com/basilgello/rustdesk-fdroid-versioner/-/releases/rolling/downloads/rustdesk-version.txt|versionCode=(\d+)|.|versionName=(.*)
+CurrentVersion: 1.2.3-1
+CurrentVersionCode: 12304
