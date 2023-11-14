@@ -1,0 +1,66 @@
+Categories:
+  - Reading
+License: EUPL-1.2
+SourceCode: https://gitlab.com/TheOneWithTheBraid/f_wallet
+IssueTracker: https://gitlab.com/TheOneWithTheBraid/f_wallet/-/issues
+Changelog: https://gitlab.com/TheOneWithTheBraid/f_wallet/-/blob/HEAD/CHANGELOG.md
+
+AutoName: fWallet
+
+RepoType: git
+Repo: https://gitlab.com/TheOneWithTheBraid/f_wallet.git
+Binaries: https://gitlab.com/TheOneWithTheBraid/f_wallet/-/jobs/artifacts/v%v/raw/fWallet-%v.apk?job=build%3Aapk
+
+Builds:
+  - versionName: 1.0.6
+    versionCode: 106
+    commit: v1.0.6
+    sudo:
+      - apt-get update
+      - apt-get install -y openjdk-17-jdk-headless
+      - update-java-alternatives -a
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+      - linux
+      - macos
+      - web
+      - windows
+    prebuild:
+      - export FLUTTER_VERSION="$(cat flutter_version)"
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - pushd $$flutter$$
+      - git checkout -f $FLUTTER_VERSION
+      - popd
+      - cd ..
+      - rm -rf /tmp/build
+      - mv business.braid.f_wallet /tmp/build
+      - pushd /tmp/build
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+      - popd
+      - cp -pr /tmp/build/* business.braid.f_wallet
+      - rm -rf /tmp/build
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - cd ..
+      - rm -rf /tmp/build
+      - mv business.braid.f_wallet /tmp/build
+      - pushd /tmp/build
+      - $$flutter$$/bin/flutter gen-l10n
+      - $$flutter$$/bin/flutter build apk
+      - popd
+      - cp -pr /tmp/build/* business.braid.f_wallet
+      - rm -rf /tmp/build
+
+AllowedAPKSigningKeys: 8b3707147ce32fc1de5dfc6699736932891546620b63bf2f6eb06cd2fc32ad55
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 1.0.6
+CurrentVersionCode: 106
