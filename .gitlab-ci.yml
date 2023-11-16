@@ -320,6 +320,8 @@ checkupdates_runner:
 fdroid build:
   stage: build
   needs: []
+  # Some env vars are setup in https://gitlab.com/fdroid/fdroidserver/-/blob/master/buildserver/setup-env-vars
+  # home_vagrant=/home/vagrant
   image: registry.gitlab.com/fdroid/fdroidserver:buildserver-bullseye
   tags:
     - saas-linux-medium-amd64
@@ -356,15 +358,14 @@ fdroid build:
 
     - *install_fdroid_server
 
-    - ln -s $home_vagrant/build $CI_PROJECT_DIR/build
-
-    # make sure .gradle stores inside $CI_PROJECT_DIR to make it cacheable
-    - ln -s $home_vagrant/.gradle $CI_PROJECT_DIR/.gradle
-
-    - for d in logs tmp unsigned $home_vagrant/build $home_vagrant/.android $home_vagrant/.gradle $ANDROID_HOME; do
+    - for d in logs tmp unsigned $home_vagrant/.android $home_vagrant/.gradle $home_vagrant/metadata; do
           test -d $d || mkdir $d;
           chown -R vagrant $d;
       done
+    # make sure .gradle stores inside $CI_PROJECT_DIR to make it cacheable
+    - ln -s $home_vagrant/.gradle $CI_PROJECT_DIR/.gradle
+    - ln -s $CI_PROJECT_DIR/tmp $home_vagrant/tmp
+    - ln -s $CI_PROJECT_DIR/srclibs $home_vagrant/srclibs
 
     - export GRADLE_USER_HOME=$home_vagrant/.gradle
     # each `fdroid build --on-server` run expects sudo, then uninstalls it
@@ -383,16 +384,22 @@ fdroid build:
     - printf 'keydname\x3a "CN=Birdman, OU=Cell, O=Alcatraz, L=Alcatraz, S=California, C=US"\n' >> config.yml
     - keystore=$fdroidserver/tests/keystore.jks
     - printf "keystore\x3a $keystore\n" >> config.yml
-    - chown vagrant $keystore
 
     - APPS="$(./tools/find-changed-builds.py)"
     - for build in $APPS; do
           set -x;
-          apt-get install sudo;
-          chown -R vagrant $home_vagrant "$PWD";
+          cp -R $CI_PROJECT_DIR/build $home_vagrant/build;
+          appid=${build%:*};
+          [ -d metadata/$appid ] && cp -R metadata/$appid $home_vagrant/metadata;
+          cp -R metadata/$appid.yml $home_vagrant/metadata;
+          chown -R vagrant $home_vagrant $CI_PROJECT_DIR;
+          pushd $home_vagrant;
+          ln -s $CI_PROJECT_DIR $home_vagrant/fdroiddata;
           $fdroid fetchsrclibs $build --verbose;
+          rm $home_vagrant/fdroiddata;
           $fdroid build --verbose --test --scan-binary --on-server --no-tarball $build;
-          rm -rf "build/${build%:*}" || true;
+          popd;
+          rm -rf $home_vagrant/build || true;
           apt-get install -y openjdk-11-jdk-headless;
           update-alternatives --set java /usr/lib/jvm/java-11-openjdk-amd64/bin/java;
           ./tools/build-contains-signatures.py $build || continue;
