@@ -2057,6 +2057,31 @@ Builds:
       - gradle :syncthing:buildNative
     ndk: 25.2.9519653
 
+  - versionName: 1.26.1
+    versionCode: 4371
+    commit: e18bff3b95606b8b065028f04f4befdd5b8f23e7
+    subdir: app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y autogen automake autopoint bzip2 g++ libc-dev make gettext
+        libtool pkg-config rename shtool
+      - apt-get install -y -t bullseye-backports golang-go
+    gradle:
+      - yes
+    srclibs:
+      - go@go1.20.11
+    prebuild: sed -i -e '/signingConfig/d' build.gradle
+    scanignore:
+      - syncthing/src/github.com/syncthing/syncthing/lib/model/testdata
+    build:
+      - pushd $$go$$/src
+      - ./make.bash
+      - popd
+      - export PATH=$$go$$/bin:$PATH
+      - gradle :syncthing:buildNative
+    ndk: 25.2.9519653
+
 MaintainerNotes: |-
   The submodule in syncthing/src/github.com/syncthing/syncthing must be
   pristine, as the version/release information is taken from git.
@@ -2067,5 +2092,5 @@ MaintainerNotes: |-
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^[0-9.]*$
-CurrentVersion: 1.26.0
-CurrentVersionCode: 4368
+CurrentVersion: 1.26.1
+CurrentVersionCode: 4371
