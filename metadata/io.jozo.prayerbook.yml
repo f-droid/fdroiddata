@@ -1,0 +1,44 @@
+Categories:
+  - Reading
+License: GPL-3.0-or-later
+AuthorEmail: hi@jozo.io
+AuthorWebSite: https://jozo.io
+SourceCode: https://codeberg.org/jozo/prayer-book
+IssueTracker: https://codeberg.org/jozo/prayer-book/issues
+
+AutoName: Prayer Book
+
+RepoType: git
+Repo: https://codeberg.org/jozo/prayer-book
+Binaries: https://codeberg.org/jozo/prayer-book/releases/download/%v/app-release.apk
+
+Builds:
+  - versionName: 0.0.2
+    versionCode: 2
+    commit: 8a089c1100ae33c92173356f7df8776faba37db3
+    subdir: android/app
+    sudo:
+      - apt-get update
+      - apt-get install -y openjdk-17-jdk-headless
+      - update-java-alternatives -a
+      - sysctl fs.inotify.max_user_watches=524288 || true
+      - curl -Lo node.tar.gz https://nodejs.org/download/release/v19.3.0/node-v19.3.0-linux-x64.tar.gz
+      - echo "b525028ae5bb71b5b32cb7fce903ccce261dbfef4c7dd0f3e0ffc27cd6fc0b3f node.tar.gz"
+        | sha256sum -c -
+      - tar xzf node.tar.gz --strip-components=1 -C /usr/local/
+    init:
+      - cd ../..
+      - npm install
+      - npm run build
+      - npx cap sync android
+    gradle:
+      - yes
+    scandelete:
+      - node_modules
+
+AllowedAPKSigningKeys: f5f597716444fd6672f0a011ebe96b1356e37b28866489c664139c6027a8cc14
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: 0.0.2
+CurrentVersionCode: 2
