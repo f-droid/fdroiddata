@@ -91,13 +91,17 @@ Builds:
     versionCode: 1922210103
     commit: 34700efbce99931ddf541d6aa533287f72961f7f
     subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y openjdk-17-jdk-headless
+      - update-java-alternatives -a
     gradle:
       - api
     prebuild:
       - sed -i -e '/firebase/d' -e '/gms/d' ../build.gradle.kts build.gradle.kts
-      - sed -i -e '/Firebase/,/IN_APP_REVIEW/d' -e '/CrashlyticsExtension/,+2d' -e
-        '/ADMOB/d' -e '/localProperties.getProperty/d' build.gradle.kts
-      - sed -i -e '/Firebase/,/^    }/d' -e '/GooglePlayService/,/^    }/d' ../buildSrc/src/main/java/AppDependencies.kt
+      - sed -i -e '/CrashlyticsExtension/,+2d' -e '/ADMOB/d' -e '/admob/d' -e '/play.review/d'
+        -e '/localProperties.getProperty/d' build.gradle.kts
+      - sed -i -e '/firebase/d' -e '/gms/d' -e '/play-review/d'  ../gradle/libs.versions.toml
       - sed -i -z -E -e 's|<[^>]+gms[^>]+/>||' src/main/AndroidManifest.xml src/main/res/layout/admob_view_header.xml
       - mkdir -p src/main/java/com/google/android/play/core/review
       - echo -e "package com.google.android.play.core.review\nclass ReviewInfo" >
