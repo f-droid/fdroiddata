@@ -336,7 +336,63 @@ Builds:
         $CI_PROJECT_DIR/unsigned/; fi
     ndk: r21e
 
+  - versionName: V0.3.3
+    versionCode: 33
+    commit: 5799817e231dc7e9dd41ff9d8d1e6ce5499fe864
+    sudo:
+      - apt-get update
+      - apt-get install -y build-essential wget
+      - rm -rf /opt/android-sdk/platforms
+      - sdkmanager "platforms;android-31"
+    output: fdroid-build/android-build/build/outputs/apk/release/android-build-release-unsigned.apk
+    build:
+      - mkdir -pv build-qt
+      - cd build-qt
+      - wget -cq https://download.qt.io/official_releases/qt/5.15/5.15.10/single/qt-everywhere-opensource-src-5.15.10.tar.xz
+      - echo "b545cb83c60934adc9a6bbd27e2af79e5013de77d46f5b9f5bb2a3c762bf55ca qt-everywhere-opensource-src-5.15.10.tar.xz"
+        | sha256sum -c -
+      - tar -xkf qt-everywhere-opensource-src-5.15.10.tar.xz
+      - rm -rf ./qt-everywhere-src-5.15.10/qtpurchasing/examples
+      - mkdir qt5
+      - mkdir build
+      - cd build
+      - ../qt-everywhere-src-5.15.10/configure -xplatform android-clang --disable-rpath
+        -no-warnings-are-errors -prefix $(pwd)/../qt5 -android-ndk $$NDK$$ -android-sdk
+        $$SDK$$ -opensource -confirm-license -release -nomake examples -nomake tests
+        -no-compile-examples -no-feature-testlib -skip qt3d -skip qtactiveqt -skip
+        qtcanvas3d -skip qtcharts -skip qtdatavis3d -skip qtdeclarative -skip qtdoc
+        -skip qtgamepad -skip qtgraphicaleffects -skip qtmacextras -skip qtmultimedia
+        -skip qtnetworkauth -skip qtpurchasing -skip qtquickcontrols -skip qtquickcontrols2
+        -skip qtremoteobjects -skip qtscxml -skip qtspeech -skip qtwayland -skip qtwebview
+        -skip qtwinextras -skip qtx11extras -skip qtwebengine -skip qtlocation -skip
+        qtlottie -skip qtquick3d -skip qtquicktimeline -skip qtscript -skip qtsensors
+        -skip qtserialbus -skip qttools -skip qtxmlpatterns -skip qtwebglplugin -skip
+        qtwebchannel -skip qtvirtualkeyboard -skip qttranslations
+      - if [ -n "${CI_PROJECT_DIR:-}" ]; then make -j$(nproc) >> $CI_PROJECT_DIR/tmp/qt_build.log
+        2>&1 || tail -n 200 $CI_PROJECT_DIR/tmp/qt_build.log; else make -j$(nproc);
+        fi
+      - if [ -n "${CI_PROJECT_DIR:-}" ]; then make -j$(nproc) install >> $CI_PROJECT_DIR/tmp/qt_install.log
+        2>&1 || tail -n 200 $CI_PROJECT_DIR/tmp/qt_install.log; else make -j$(nproc)
+        install; fi
+      - cd ../../
+      - mkdir -pv fdroid-build
+      - cd fdroid-build
+      - wget -cq https://www.qcustomplot.com/release/2.1.1/QCustomPlot-source.tar.gz
+      - echo "5e2d22dec779db8f01f357cbdb25e54fbcf971adaee75eae8d7ad2444487182f QCustomPlot-source.tar.gz"
+        | sha256sum -c -
+      - tar -xvf QCustomPlot-source.tar.gz
+      - cp qcustomplot-source/qcustomplot.cpp ../src
+      - ../build-qt/qt5/bin/qmake ../src/
+      - make -j$(nproc) apk_install_target
+      - ../build-qt/qt5/bin/androiddeployqt --release --output android-build/ --input
+        android-SerialTest-deployment-settings.json
+      - if [ -n "${CI_PROJECT_DIR:-}" ]; then mkdir -pv $CI_PROJECT_DIR/unsigned/;
+        fi
+      - if [ -n "${CI_PROJECT_DIR:-}" ]; then cp -R $CI_PROJECT_DIR/build/priv.wh201906.serialtest/fdroid-build/android-build/build/outputs/apk/
+        $CI_PROJECT_DIR/unsigned/; fi
+    ndk: r21e
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: V0.3.2
-CurrentVersionCode: 32
+CurrentVersion: V0.3.3
+CurrentVersionCode: 33
