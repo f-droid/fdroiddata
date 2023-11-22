@@ -363,7 +363,7 @@ fdroid build:
     # buildserver VM host, while here it is basically in the
     # buildserver VM.
     # https://gitlab.com/fdroid/fdroid-bootstrap-buildserver/-/merge_requests/30
-    - curl --silent 'https://gitlab.com/fdroid/fdroid-bootstrap-buildserver/-/raw/master/roles/production_hardening/files/gitconfig' >> $home_vagrant/.gitconfig
+    - curl --silent 'https://gitlab.com/fdroid/fdroid-bootstrap-buildserver/-/raw/master/roles/production_hardening/files/gitconfig' >> $CI_PROJECT_DIR/../.gitconfig
 
     - for d in logs tmp unsigned $home_vagrant/.android $home_vagrant/.gradle $home_vagrant/metadata; do
           test -d $d || mkdir $d;
@@ -403,8 +403,9 @@ fdroid build:
           chown -R vagrant $home_vagrant $CI_PROJECT_DIR;
           pushd $home_vagrant;
           ln -s $CI_PROJECT_DIR $home_vagrant/fdroiddata;
+          ln -s $CI_PROJECT_DIR/../.gitconfig $home_vagrant/.gitconfig;
           $fdroid fetchsrclibs $build --verbose;
-          rm $home_vagrant/fdroiddata;
+          rm $home_vagrant/fdroiddata $home_vagrant/.gitconfig;
           $fdroid build --verbose --test --scan-binary --on-server --no-tarball $build;
           popd;
           rm -rf $home_vagrant/build || true;
