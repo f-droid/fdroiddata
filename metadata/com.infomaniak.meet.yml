@@ -89,24 +89,24 @@ Builds:
     subdir: app
     sudo:
       - apt-get update
-      - apt-get install -y -t stretch-backports jq openjdk-11-jdk-headless openjdk-11-jre-headless
-      - curl -Lo node.tar.gz https://nodejs.org/dist/v16.13.1/node-v16.13.1-linux-x64.tar.gz
-      - echo "5f80197d654fd0b749cdeddf1f07a5eac1fcf6b423a00ffc8f2d3bea9c6dc8d1 node.tar.gz"
-        | sha256sum -c -
-      - tar xf node.tar.gz
-      - cp -a node-v16.13.1-linux-x64/. /usr/local/
-      - rm -rf node-v16.13.1-linux-x64/ node.tar.xz
+      - apt-get install -y jq maven openjdk-17-jdk-headless
+      - update-java-alternatives -a
       - sysctl fs.inotify.max_user_watches=524288 || true
-      - npm i -g npm@8.3.0
+      - curl -Lo node.tar.gz https://nodejs.org/dist/latest-v16.x/node-v16.20.2-linux-x64.tar.gz
+      - echo "c9193e6c414891694759febe846f4f023bf48410a6924a8b1520c46565859665 node.tar.gz"
+        | sha256sum -c -
+      - tar xzf node.tar.gz --strip-components=1 -C /usr/local/
     gradle:
       - yes
     srclibs:
-      - jitsi-meet@android-sdk-5.1.0
+      - jitsi-meet@android-sdk-8.6.0
     prebuild:
-      - sed -i -e '/jitsi-maven-repository/d' ../build.gradle
-      - sed -i -e '/repositories {/a\        mavenLocal()' ../build.gradle
+      - sed -i -e '/jitsi-maven-repository/d' -e '/repositories {/a\        mavenLocal()'
+        ../build.gradle
       - sed -i -e "/google.firebase/aexclude\ group\:\ 'com.google.android.gms'" build.gradle
+      - sed -i -e '/Xmx1536m/d' ../gradle.properties
     build:
+      - export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
       - cd $$jitsi-meet$$
       - export LIBRE_BUILD=true
       - npm install webpack-bundle-analyzer
