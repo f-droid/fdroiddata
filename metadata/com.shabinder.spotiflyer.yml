@@ -303,10 +303,41 @@ Builds:
       - ./../ffmpeg/copy-ffmpeg-executables.sh
     ndk: r21e
 
+  - versionName: 3.6.4
+    versionCode: 32
+    commit: e418d2ee2ca3d2838470407d748994d72008c312
+    subdir: android
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y ninja-build dos2unix autoconf automake build-essential
+        libtool pkg-config yasm cmake meson nasm
+    gradle:
+      - yes
+    rm:
+      - ffmpeg/android-ffmpeg/src/main/jniLibs
+      - desktop
+      - web-app
+      - maintenance-tasks
+      - infra
+      - art
+      - spotiflyer-ios
+    prebuild: sed -i -e '/googleapis/d' -e '/jetbrains.space/d' ../build.gradle.kts
+      ../buildSrc/build.gradle.kts
+    build:
+      - export ANDROID_SDK_HOME=$$SDK$$
+      - export ANDROID_NDK_HOME=$$NDK$$
+      - find ./../ffmpeg/ -type f -name "*.sh" -exec dos2unix {} \+
+      - find ./../ffmpeg/ -type f -name "*.sh" -exec chmod u+x {} \+
+      - ./../ffmpeg/ffmpeg-android-maker/ffmpeg-android-maker.sh --android-api-level=21
+        -lame
+      - ./../ffmpeg/copy-ffmpeg-executables.sh
+    ndk: r21e
+
 MaintainerNotes: Contained Countly is configured opt-in
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: buildSrc/buildSrc/src/main/kotlin/Versions.kt|versionCode\s=\s(\d+)|.|versionName\s=\s"([\d.]+)"
-CurrentVersion: 3.6.3
-CurrentVersionCode: 31
+CurrentVersion: 3.6.4
+CurrentVersionCode: 32
