@@ -9,20 +9,31 @@ Donate: https://donate.libreoffice.org
 
 Name: LibreOffice Viewer
 Description: |-
-  LibreOffice Viewer uses the same engine as LibreOffice for Windows, Mac, and
-  Linux. This, combined with a new front-end based on Firefox for Android, reads
-  documents similarly to LibreOffice desktop.
+  You may know LibreOffice from the desktop - the free and open source office suite
+  (successor to OpenOffice) with over 200 million users worldwide. It's secure and
+  respects your privacy, not sharing your documents with anyone else. It's also
+  available for Android in a simplified form, to view documents in these formats:
 
-  Supported files:
+  * Open Document Format (odt, ods, odp, odg)
+  * Microsoft Office 2007–365 (docx, xlsx and pptx)
+  * Microsoft Office 97–2003 (doc, xls and ppt)
 
-  * Open Document Format (odt, ods and odp)
-  * Microsoft Office 2007/2010/2013 (docx, xlsx and pptx)
-  * Microsoft Office 97/2000/XP/2003 (doc, xls and ppt)
+  LibreOffice Viewer also has experimental editing features, which are not yet
+  suited to production use. (Experimental mode can be enabled in the app settings.)
+  The software is open source and made by a worldwide community, so if you'd like
+  to improve the experimental editing support, please join us!
 
-  LibreOffice Viewer also comes with a first preview of the editing functionality,
-  which is considered an experimental feature and not stable enough for mission
-  critical tasks. Feedback and bug reports are very welcome, to help developers
-  improve the quality of the application on its way to a fully-fledged editor.
+  Feedback and bug reports are very welcome, to help developers improve the quality
+  of the application. You can report bugs and attach files here:
+  https://bugs.documentfoundation.org
+
+  LibreOffice Viewer is built on the same technology as LibreOffice desktop for
+  Windows, macOS and Linux. LibreOffice Viewer is released under the Mozilla Public
+  License v2. The software is backed by a dynamic community, represented by
+  The Document Foundation, a not for profit entity based in Germany.
+
+  LibreOffice was based on OpenOffice.org (commonly known as OpenOffice).
+  Full credits: https://www.libreoffice.org/about-us/credits
 
 RepoType: git
 Repo: git://anongit.freedesktop.org/libreoffice/core
@@ -1467,6 +1478,310 @@ Builds:
       - make
     ndk: 23.2.8568313
 
+  - versionName: 7.6.3.2-android/8c4c8a83119e/F-Droid
+    versionCode: 31
+    commit: libreoffice-7.6.3.2-android
+    timeout: 43200
+    subdir: android/source
+    sudo:
+      - apt-get update
+      - apt-get install -y ant ant-optional autoconf automake bison build-essential
+        flex gperf junit4 nasm python3-dev libfontconfig1-dev libnss3-dev libservlet-api-java
+        libxml2-utils libxslt1-dev xsltproc
+    gradle:
+      - StrippedUIEditing
+    rm:
+      - onlineupdate/qa/*
+      - oox/qa/unit/data/*
+      - package/qa/cppunit/data/*
+      - qadevOOo/testdocs/qadevlibs/*.jar
+      - setup_native/source/packinfo/DS_Store*
+      - svx/qa/unit/data/*
+      - sw/qa/extras/ww8import/data/*
+      - test/signing-keys/random_seed
+      - testtools/source/cliversioning/version_libs/*.dll
+      - writerperfect/qa/unit/data/*
+    prebuild:
+      - pushd ../../
+      - sed -i -e '/debug/d' android/CustomTarget_lo_android.mk
+      - sed -i -e '/rm /d' -e '/gradlew/d' android/source/Makefile
+      - sed -i -e '/maven {/I,+2 d' android/source/build.gradle
+      - sed -i -e '/opencl.openclwrapper.hxx/d' -i -e 's/bOpenCL = .*;$/bOpenCL =
+        false;/' cui/source/dialogs/about.cxx
+      - sed -i -e '/desktop\/source\/app\/opencl/d' desktop/Library_sofficeapp.mk
+      - rm desktop/source/app/opencl.cxx
+      - sed -i '/"horst"/d' javaunohelper/test/com/sun/star/lib/uno/helper/UnoUrlTest.java
+      - sed -i -e '/debug/d' android/CustomTarget_lo_android.mk
+      - sed -i -e '/JAVA_HOME=/i CLASSPATH=/usr/share/java/servlet-api.jar \\' external/hsqldb/ExternalProject_hsqldb.mk
+      - ./autogen.sh --enable-release-build --with-vendor=F-Droid --with-android-package-name="org.documentfoundation.libreoffice"
+        --with-android-ndk=$$NDK$$ --with-android-sdk=$$SDK$$ --with-distro=LibreOfficeAndroidX86
+        --enable-android-editing --disable-dconf --with-build-platform-configure-options="--with-system-jpeg=no
+        --with-system-libxml=no --disable-dbus --disable-gconf --disable-python --disable-gui
+        --disable-gtk --disable-gstreamer-1.0"
+      - make fetch
+      - pushd external/tarballs
+      - for ARCHIVE in *.{tar.bz2,tar.gz,tar.xz,tgz}; do mkdir -p "extracted/${ARCHIVE}";
+        tar -C "extracted/${ARCHIVE}" -xaf "${ARCHIVE}"; rm "${ARCHIVE}"; done
+      - for ARCHIVE in *.zip; do mkdir -p "extracted/${ARCHIVE}"; unzip -d "extracted/${ARCHIVE}"
+        "${ARCHIVE}"; rm "${ARCHIVE}"; done
+      - popd
+      - mkdir -p instdir/program/classes/
+      - cd $_
+      - touch java_uno.jar juh.jar jurt.jar ridl.jar unoloader.jar unoil.jar
+      - popd
+      - make liboSettings.gradle versionCode=$$VERCODE$$
+    scanignore:
+      - external/lcms2/lcms2_sln
+      - instdir/program/classes/unoloader.jar
+      - instdir/program/classes/ridl.jar
+      - instdir/program/classes/unoil.jar
+      - instdir/program/classes/jurt.jar
+      - instdir/program/classes/juh.jar
+      - instdir/program/classes/java_uno.jar
+      - sd/res/buttons/*.zip
+      - solenv/gbuild/empty.zip
+    scandelete:
+      - external
+    build:
+      - pushd "../../external/tarballs/extracted/"
+      - for ARCHIVE in *.{tar.bz2,tar.gz,tar.xz,tgz}; do pushd "${ARCHIVE}"; tar -caf
+        "../../${ARCHIVE}" *; popd; done
+      - for ARCHIVE in *.zip; do pushd "${ARCHIVE}"; zip -r "../../${ARCHIVE}" *;
+        popd; done
+      - popd
+      - cd ../../
+      - rm -rf workdir instdir
+      - make
+    ndk: 23.2.8568313
+
+  - versionName: 7.6.3.2-android/8c4c8a83119e/F-Droid
+    versionCode: 32
+    commit: libreoffice-7.6.3.2-android
+    timeout: 43200
+    subdir: android/source
+    sudo:
+      - apt-get update
+      - apt-get install -y ant ant-optional autoconf automake bison build-essential
+        flex gperf junit4 nasm python3-dev libfontconfig1-dev libnss3-dev libservlet-api-java
+        libxml2-utils libxslt1-dev xsltproc
+    gradle:
+      - StrippedUIEditing
+    rm:
+      - onlineupdate/qa/*
+      - oox/qa/unit/data/*
+      - package/qa/cppunit/data/*
+      - qadevOOo/testdocs/qadevlibs/*.jar
+      - setup_native/source/packinfo/DS_Store*
+      - svx/qa/unit/data/*
+      - sw/qa/extras/ww8import/data/*
+      - test/signing-keys/random_seed
+      - testtools/source/cliversioning/version_libs/*.dll
+      - writerperfect/qa/unit/data/*
+    prebuild:
+      - pushd ../../
+      - sed -i -e '/debug/d' android/CustomTarget_lo_android.mk
+      - sed -i -e '/rm /d' -e '/gradlew/d' android/source/Makefile
+      - sed -i -e '/maven {/I,+2 d' android/source/build.gradle
+      - sed -i -e '/opencl.openclwrapper.hxx/d' -i -e 's/bOpenCL = .*;$/bOpenCL =
+        false;/' cui/source/dialogs/about.cxx
+      - sed -i -e '/desktop\/source\/app\/opencl/d' desktop/Library_sofficeapp.mk
+      - rm desktop/source/app/opencl.cxx
+      - sed -i '/"horst"/d' javaunohelper/test/com/sun/star/lib/uno/helper/UnoUrlTest.java
+      - sed -i -e '/debug/d' android/CustomTarget_lo_android.mk
+      - sed -i -e '/JAVA_HOME=/i CLASSPATH=/usr/share/java/servlet-api.jar \\' external/hsqldb/ExternalProject_hsqldb.mk
+      - ./autogen.sh --enable-release-build --with-vendor=F-Droid --with-android-package-name="org.documentfoundation.libreoffice"
+        --with-android-ndk=$$NDK$$ --with-android-sdk=$$SDK$$ --with-distro=LibreOfficeAndroidX86_64
+        --enable-android-editing --disable-dconf --with-build-platform-configure-options="--with-system-jpeg=no
+        --with-system-libxml=no --disable-dbus --disable-gconf --disable-python --disable-gui
+        --disable-gtk --disable-gstreamer-1.0"
+      - make fetch
+      - pushd external/tarballs
+      - for ARCHIVE in *.{tar.bz2,tar.gz,tar.xz,tgz}; do mkdir -p "extracted/${ARCHIVE}";
+        tar -C "extracted/${ARCHIVE}" -xaf "${ARCHIVE}"; rm "${ARCHIVE}"; done
+      - for ARCHIVE in *.zip; do mkdir -p "extracted/${ARCHIVE}"; unzip -d "extracted/${ARCHIVE}"
+        "${ARCHIVE}"; rm "${ARCHIVE}"; done
+      - popd
+      - mkdir -p instdir/program/classes/
+      - cd $_
+      - touch java_uno.jar juh.jar jurt.jar ridl.jar unoloader.jar unoil.jar
+      - popd
+      - make liboSettings.gradle versionCode=$$VERCODE$$
+    scanignore:
+      - external/lcms2/lcms2_sln
+      - instdir/program/classes/unoloader.jar
+      - instdir/program/classes/ridl.jar
+      - instdir/program/classes/unoil.jar
+      - instdir/program/classes/jurt.jar
+      - instdir/program/classes/juh.jar
+      - instdir/program/classes/java_uno.jar
+      - sd/res/buttons/*.zip
+      - solenv/gbuild/empty.zip
+    scandelete:
+      - external
+    build:
+      - pushd "../../external/tarballs/extracted/"
+      - for ARCHIVE in *.{tar.bz2,tar.gz,tar.xz,tgz}; do pushd "${ARCHIVE}"; tar -caf
+        "../../${ARCHIVE}" *; popd; done
+      - for ARCHIVE in *.zip; do pushd "${ARCHIVE}"; zip -r "../../${ARCHIVE}" *;
+        popd; done
+      - popd
+      - cd ../../
+      - rm -rf workdir instdir
+      - make
+    ndk: 23.2.8568313
+
+  - versionName: 7.6.3.2-android/8c4c8a83119e/F-Droid
+    versionCode: 33
+    commit: libreoffice-7.6.3.2-android
+    timeout: 43200
+    subdir: android/source
+    sudo:
+      - apt-get update
+      - apt-get install -y ant ant-optional autoconf automake bison build-essential
+        flex gperf junit4 nasm python3-dev libfontconfig1-dev libnss3-dev libservlet-api-java
+        libxml2-utils libxslt1-dev xsltproc
+    gradle:
+      - StrippedUIEditing
+    rm:
+      - onlineupdate/qa/*
+      - oox/qa/unit/data/*
+      - package/qa/cppunit/data/*
+      - qadevOOo/testdocs/qadevlibs/*.jar
+      - setup_native/source/packinfo/DS_Store*
+      - svx/qa/unit/data/*
+      - sw/qa/extras/ww8import/data/*
+      - test/signing-keys/random_seed
+      - testtools/source/cliversioning/version_libs/*.dll
+      - writerperfect/qa/unit/data/*
+    prebuild:
+      - pushd ../../
+      - sed -i -e '/debug/d' android/CustomTarget_lo_android.mk
+      - sed -i -e '/rm /d' -e '/gradlew/d' android/source/Makefile
+      - sed -i -e '/maven {/I,+2 d' android/source/build.gradle
+      - sed -i -e '/opencl.openclwrapper.hxx/d' -i -e 's/bOpenCL = .*;$/bOpenCL =
+        false;/' cui/source/dialogs/about.cxx
+      - sed -i -e '/desktop\/source\/app\/opencl/d' desktop/Library_sofficeapp.mk
+      - rm desktop/source/app/opencl.cxx
+      - sed -i '/"horst"/d' javaunohelper/test/com/sun/star/lib/uno/helper/UnoUrlTest.java
+      - sed -i -e '/debug/d' android/CustomTarget_lo_android.mk
+      - sed -i -e '/JAVA_HOME=/i CLASSPATH=/usr/share/java/servlet-api.jar \\' external/hsqldb/ExternalProject_hsqldb.mk
+      - ./autogen.sh --enable-release-build --with-vendor=F-Droid --with-android-package-name="org.documentfoundation.libreoffice"
+        --with-android-ndk=$$NDK$$ --with-android-sdk=$$SDK$$ --with-distro=LibreOfficeAndroid
+        --enable-android-editing --disable-dconf --with-build-platform-configure-options="--with-system-jpeg=no
+        --with-system-libxml=no --disable-dbus --disable-gconf --disable-python --disable-gui
+        --disable-gtk --disable-gstreamer-1.0"
+      - make fetch
+      - pushd external/tarballs
+      - for ARCHIVE in *.{tar.bz2,tar.gz,tar.xz,tgz}; do mkdir -p "extracted/${ARCHIVE}";
+        tar -C "extracted/${ARCHIVE}" -xaf "${ARCHIVE}"; rm "${ARCHIVE}"; done
+      - for ARCHIVE in *.zip; do mkdir -p "extracted/${ARCHIVE}"; unzip -d "extracted/${ARCHIVE}"
+        "${ARCHIVE}"; rm "${ARCHIVE}"; done
+      - popd
+      - mkdir -p instdir/program/classes/
+      - cd $_
+      - touch java_uno.jar juh.jar jurt.jar ridl.jar unoloader.jar unoil.jar
+      - popd
+      - make liboSettings.gradle versionCode=$$VERCODE$$
+    scanignore:
+      - external/lcms2/lcms2_sln
+      - instdir/program/classes/unoloader.jar
+      - instdir/program/classes/ridl.jar
+      - instdir/program/classes/unoil.jar
+      - instdir/program/classes/jurt.jar
+      - instdir/program/classes/juh.jar
+      - instdir/program/classes/java_uno.jar
+      - sd/res/buttons/*.zip
+      - solenv/gbuild/empty.zip
+    scandelete:
+      - external
+    build:
+      - pushd "../../external/tarballs/extracted/"
+      - for ARCHIVE in *.{tar.bz2,tar.gz,tar.xz,tgz}; do pushd "${ARCHIVE}"; tar -caf
+        "../../${ARCHIVE}" *; popd; done
+      - for ARCHIVE in *.zip; do pushd "${ARCHIVE}"; zip -r "../../${ARCHIVE}" *;
+        popd; done
+      - popd
+      - cd ../../
+      - rm -rf workdir instdir
+      - make
+    ndk: 23.2.8568313
+
+  - versionName: 7.6.3.2-android/8c4c8a83119e/F-Droid
+    versionCode: 34
+    commit: libreoffice-7.6.3.2-android
+    timeout: 43200
+    subdir: android/source
+    sudo:
+      - apt-get update
+      - apt-get install -y ant ant-optional autoconf automake bison build-essential
+        flex gperf junit4 nasm python3-dev libfontconfig1-dev libnss3-dev libservlet-api-java
+        libxml2-utils libxslt1-dev xsltproc
+    gradle:
+      - StrippedUIEditing
+    rm:
+      - onlineupdate/qa/*
+      - oox/qa/unit/data/*
+      - package/qa/cppunit/data/*
+      - qadevOOo/testdocs/qadevlibs/*.jar
+      - setup_native/source/packinfo/DS_Store*
+      - svx/qa/unit/data/*
+      - sw/qa/extras/ww8import/data/*
+      - test/signing-keys/random_seed
+      - testtools/source/cliversioning/version_libs/*.dll
+      - writerperfect/qa/unit/data/*
+    prebuild:
+      - pushd ../../
+      - sed -i -e '/debug/d' android/CustomTarget_lo_android.mk
+      - sed -i -e '/rm /d' -e '/gradlew/d' android/source/Makefile
+      - sed -i -e '/maven {/I,+2 d' android/source/build.gradle
+      - sed -i -e '/opencl.openclwrapper.hxx/d' -i -e 's/bOpenCL = .*;$/bOpenCL =
+        false;/' cui/source/dialogs/about.cxx
+      - sed -i -e '/desktop\/source\/app\/opencl/d' desktop/Library_sofficeapp.mk
+      - rm desktop/source/app/opencl.cxx
+      - sed -i '/"horst"/d' javaunohelper/test/com/sun/star/lib/uno/helper/UnoUrlTest.java
+      - sed -i -e '/debug/d' android/CustomTarget_lo_android.mk
+      - sed -i -e '/JAVA_HOME=/i CLASSPATH=/usr/share/java/servlet-api.jar \\' external/hsqldb/ExternalProject_hsqldb.mk
+      - ./autogen.sh --enable-release-build --with-vendor=F-Droid --with-android-package-name="org.documentfoundation.libreoffice"
+        --with-android-ndk=$$NDK$$ --with-android-sdk=$$SDK$$ --with-distro=LibreOfficeAndroidAarch64
+        --enable-android-editing --disable-dconf --with-build-platform-configure-options="--with-system-jpeg=no
+        --with-system-libxml=no --disable-dbus --disable-gconf --disable-python --disable-gui
+        --disable-gtk --disable-gstreamer-1.0"
+      - make fetch
+      - pushd external/tarballs
+      - for ARCHIVE in *.{tar.bz2,tar.gz,tar.xz,tgz}; do mkdir -p "extracted/${ARCHIVE}";
+        tar -C "extracted/${ARCHIVE}" -xaf "${ARCHIVE}"; rm "${ARCHIVE}"; done
+      - for ARCHIVE in *.zip; do mkdir -p "extracted/${ARCHIVE}"; unzip -d "extracted/${ARCHIVE}"
+        "${ARCHIVE}"; rm "${ARCHIVE}"; done
+      - popd
+      - mkdir -p instdir/program/classes/
+      - cd $_
+      - touch java_uno.jar juh.jar jurt.jar ridl.jar unoloader.jar unoil.jar
+      - popd
+      - make liboSettings.gradle versionCode=$$VERCODE$$
+    scanignore:
+      - external/lcms2/lcms2_sln
+      - instdir/program/classes/unoloader.jar
+      - instdir/program/classes/ridl.jar
+      - instdir/program/classes/unoil.jar
+      - instdir/program/classes/jurt.jar
+      - instdir/program/classes/juh.jar
+      - instdir/program/classes/java_uno.jar
+      - sd/res/buttons/*.zip
+      - solenv/gbuild/empty.zip
+    scandelete:
+      - external
+    build:
+      - pushd "../../external/tarballs/extracted/"
+      - for ARCHIVE in *.{tar.bz2,tar.gz,tar.xz,tgz}; do pushd "${ARCHIVE}"; tar -caf
+        "../../${ARCHIVE}" *; popd; done
+      - for ARCHIVE in *.zip; do pushd "${ARCHIVE}"; zip -r "../../${ARCHIVE}" *;
+        popd; done
+      - popd
+      - cd ../../
+      - rm -rf workdir instdir
+      - make
+    ndk: 23.2.8568313
+
 MaintainerNotes: |-
   To fix crashes on Tegra2 device, we might need to `sed -i -e 's/mfpu=neon/mfpu=vfpv3-d16/g' configure.ac`, but this might have consequences for other devices. Since we use our own versioncodes, maybe have a third flavor?
 
@@ -1478,14 +1793,28 @@ MaintainerNotes: |-
 
   The cd/mkdir/touch commands near the end of the prebuild are to enable fdroid to run the project clean command, which expects these dependencies.
 
-  The last line sets the version code.  Make sure this is correct.  The version needs to be in the format a.b.c.d<blah>/<commit hash>/<vendor>.  Crucially, without the right portion of the commit hash, it will fail at the end of the build with "unexpected version/version code".
+  The version needs to be in the format a.b.c.d<blah>/<commit hash>/<vendor>.  Crucially, without the right portion of the commit hash, it will fail at the end of the build with "unexpected version/version code".
 
   In the build section, the touch-ed files from the prebuild are removed before making the libreoffice core.
 
   The libreoffice build scripts spit out warning about the NDK version, so keep an eye out to make sure you have the right one.  It's usually pretty recent.
 
+  Currently, the automatic update (check) mechanism is only partly used: Since the versionCode is only set via an environment variable during the build,
+  there is currently no way for the update check to retrieve the actual version code. Therefore, the one retrieved via `UpdateCheckData` is a dummy one and
+  the correct versionCode needs to be set manually. This means that the steps mentioned below currently need to be
+  done manually for each release.
+
+  In order to update to a newer release:
+  * temporarily change to `AutoUpdateMode: Version +/<commit_hash>/F-Droid libreoffice-%v` below.
+    (This is needed because the commit hash is currently part of the `versionName`, s.a. comment above.)
+  * update the tag name in the URL used in "UpdateCheckData"
+  * update the version codes for "VercodeOperation". The first version code should match the versionCode that the corresponding release on Google Play uses.
+  * run `fdroid checkupdates --auto --allow-dirty -v org.documentfoundation.libreoffice` to auto-generate the sections to build the new versions for all architectures
+  * change back to `AutoUpdateMode: None` again.
+  * check `CurrentVersion` below matches the `versionName` in the newly generated sections above or adapt as needed.
+
 ArchivePolicy: 12
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: 7.6.2.1/56f768401134/F-Droid-editing
-CurrentVersionCode: 29
+CurrentVersion: 7.6.3.2-android/8c4c8a83119e/F-Droid
+CurrentVersionCode: 34
