@@ -57,10 +57,9 @@ Builds:
       - cp -pr /tmp/build/* business.braid.f_wallet
       - rm -rf /tmp/build
 
-  - versionName: 1.1.1
-    versionCode: 111
-    disable: https://gitlab.com/TheOneWithTheBraid/f_wallet/-/issues/3
-    commit: 22009edb288cb0b49d530e3a69685541d7b53e76
+  - versionName: 1.1.2
+    versionCode: 112
+    commit: v1.1.2
     sudo:
       - apt-get update
       - apt-get install -y openjdk-17-jdk-headless
@@ -97,8 +96,10 @@ Builds:
       - rm -rf /tmp/build
       - mv business.braid.f_wallet /tmp/build
       - pushd /tmp/build
+      - export APP_VERSION="v$(cat pubspec.yaml | grep version | awk '{ print $2 }'
+        | cut -f1 -d "+")"
       - $$flutter$$/bin/flutter gen-l10n
-      - $$flutter$$/bin/flutter build apk
+      - $$flutter$$/bin/flutter build apk --dart-define=FWALLET_IS_STABLE=true --dart-define=FWALLET_VERSION="$APP_VERSION"
       - popd
       - cp -pr /tmp/build/* business.braid.f_wallet
       - rm -rf /tmp/build
@@ -108,5 +109,5 @@ AllowedAPKSigningKeys: 8b3707147ce32fc1de5dfc6699736932891546620b63bf2f6eb06cd2f
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 1.1.1
-CurrentVersionCode: 111
+CurrentVersion: 1.1.2
+CurrentVersionCode: 112
