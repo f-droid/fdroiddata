@@ -380,7 +380,33 @@ Builds:
       - ../../build-apk.sh --fdroid
     ndk: r25c
 
+  - versionName: '2023.8'
+    versionCode: 23080099
+    commit: 2b59a16bf3dc17453166fd928ecb4f99687c8bec
+    timeout: 10800
+    subdir: android/app
+    sudo:
+      - apt-get update
+      - apt-get install -y build-essential protobuf-compiler libprotobuf-dev openjdk-17-jdk-headless
+      - update-java-alternatives -a
+    init: NDK_PATH="$$NDK$$" ../fdroid-build/init.sh
+    output: build/outputs/apk/ossProd/fdroid/app-oss-prod-fdroid-unsigned.apk
+    rm:
+      - gui
+      - graphics
+      - ios
+      - windows
+      - building/sigstore
+    prebuild:
+      - sed -i -e 's|Repositories.GradlePlugins|"https://plugins.gradle.org/m2/"|'
+        ../build.gradle.kts
+      - sed -i '/\"ios\//d' ../../Cargo.toml
+    build:
+      - NDK_PATH="$$NDK$$" source ../fdroid-build/env.sh
+      - ../../build-apk.sh --fdroid
+    ndk: r25c
+
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: '2023.7'
-CurrentVersionCode: 23070099
+CurrentVersion: '2023.8'
+CurrentVersionCode: 23080099
