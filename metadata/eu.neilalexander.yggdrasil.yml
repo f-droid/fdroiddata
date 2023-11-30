@@ -96,7 +96,39 @@ Builds:
       - cp yggdrasil.aar ../../app/libs
     ndk: r21e
 
+  - versionName: 0.1-016
+    versionCode: 16
+    commit: d1ebc977fdc415a28187eed8f50cb894116c9fb2
+    subdir: app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -t bullseye-backports -y golang-go
+      - apt-get install -y gcc libc-dev
+    gradle:
+      - yes
+    srclibs:
+      - go@go1.20.10
+    prebuild:
+      - sdkmanager 'platforms;android-21'
+      - sed -i -e 's/-target android/-target android -androidapi 21/g' ../libs/yggdrasil-go/contrib/mobile/build
+    build:
+      - pushd $$go$$/src
+      - ./make.bash
+      - popd
+      - export PATH=$$go$$/bin:$PATH
+      - mkdir libs
+      - cd ..
+      - export GOPATH="$PWD/golang"
+      - export PATH="$GOPATH/bin:$PATH"
+      - go install golang.org/x/mobile/cmd/gomobile@latest
+      - cd libs/yggdrasil-go
+      - gomobile init
+      - ./contrib/mobile/build -a
+      - cp yggdrasil.aar ../../app/libs
+    ndk: r21e
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 0.1-015
-CurrentVersionCode: 15
+CurrentVersion: 0.1-016
+CurrentVersionCode: 16
