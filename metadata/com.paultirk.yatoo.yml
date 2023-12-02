@@ -13,12 +13,12 @@ Repo: https://github.com/powerpaul17/yatoo.git
 Binaries: https://github.com/powerpaul17/yatoo/releases/download/v%v/app-release.apk
 
 Builds:
-  - versionName: 0.3.2
-    versionCode: 8
-    disable: binary deps
-    commit: e4adc9ba4d5543695a84c519b501c24e46b78d17
+  - versionName: 0.5.0
+    versionCode: 14
+    commit: v0.5.0
     subdir: android/app
     sudo:
+      - sysctl fs.inotify.max_user_watches=524288 || true
       - curl -Lo node.tar.gz https://nodejs.org/dist/v18.16.1/node-v18.16.1-linux-x64.tar.gz
       - echo "59582f51570d0857de6333620323bdeee5ae36107318f86ce5eca24747cabf5b node.tar.gz"
         | sha256sum -c -
@@ -26,20 +26,26 @@ Builds:
       - apt-get update
       - apt-get install -y openjdk-17-jdk-headless
       - update-java-alternatives -a
-    gradle:
-      - yes
+    output: build/outputs/apk/release/app-release-unsigned.apk
     prebuild:
       - cd ../..
       - npm ci
-      - npm run build-prod
-      - npx cap sync android
+      - find node_modules/ -iname "*.node" -exec rm {} \;
+    scanignore:
+      - node_modules/@capacitor/cli/assets/capacitor-cordova-android-plugins.tar.gz
     scandelete:
       - node_modules/
+    build:
+      - pushd ../..
+      - npm run build-prod
+      - npx cap sync android
+      - popd
+      - gradle assembleRelease
 
 AllowedAPKSigningKeys: 0b712c45eba65a7ee6e5ba3b4d0ab62e0a3c5386c1007b2047c2a58de9c79f31
 
-AutoUpdateMode: None
+AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v.*$
 UpdateCheckData: android/app/build.gradle|versionCode\s(\d+)||v([\d.]+)
-CurrentVersion: 0.4.3
-CurrentVersionCode: 13
+CurrentVersion: 0.5.0
+CurrentVersionCode: 14
