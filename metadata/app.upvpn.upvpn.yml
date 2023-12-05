@@ -1,0 +1,45 @@
+AntiFeatures:
+  NonFreeNet:
+    en-US: Depends on the UpVPN service.
+Categories:
+  - Connectivity
+  - Internet
+  - Security
+  - System
+License: GPL-3.0-or-later
+AuthorEmail: support@upvpn.app
+WebSite: https://upvpn.app
+SourceCode: https://github.com/upvpn/upvpn-app
+IssueTracker: https://github.com/upvpn/upvpn-app/issues
+
+AutoName: UpVPN
+
+RepoType: git
+Repo: https://github.com/upvpn/upvpn-app.git
+Binaries: https://github.com/upvpn/upvpn-app/releases/download/android-%v-%c/UpVPN-%v-%c-self-signed.apk
+
+Builds:
+  - versionName: u1-beta
+    versionCode: 4
+    commit: 8d86362a1bb80a0f003105c42c00f2c10a9f5c93
+    subdir: upvpn-android/app
+    sudo:
+      - apt-get update
+      - apt-get install -y g++ libc-dev make
+      - apt-get install -y openjdk-17-jdk-headless
+      - update-java-alternatives -a
+    gradle:
+      - yes
+    srclibs:
+      - wireguard-tools@b4f6b4f229d291daf7c35c6f1e7f4841cc6d69bc
+    prebuild:
+      - export ndkversion=$(grep ndkVersion build.gradle.kts|cut -d "\"" -f2)
+      - sdkmanager "ndk;$ndkversion"
+      - ln -s $$wireguard-tools$$ tunnel/wireguard-tools
+
+AllowedAPKSigningKeys: 5c9552f891010689cbac0194a7c129c5207ac66ab7a9a4ddb814ffcfbf666e72
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: u1-beta
+CurrentVersionCode: 4
