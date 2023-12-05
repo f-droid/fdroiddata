@@ -167,24 +167,44 @@ Builds:
 
   - versionName: 4.12.0
     versionCode: 87
+    disable: No native libs
     commit: 8a42a3327d76649d70a7c17c46e926e3275079c3
     subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y make autoconf automake gcc-multilib libc-dev
     gradle:
       - yes
     srclibs:
-      - Volley@1.1.0
+      - Libxmp@libxmp-4.6.0
+      - Volley@1.2.0
       - Groundy@e90baf9901a8be20b348bd1575d5ad782560cec8
-    prebuild: mv $$Volley$$/* ../volley
+    prebuild:
+      - sed -i -e 's/3.1.4/4.0.1/' ../build.gradle
+      - sed -i -e 's/4.4/6.1.1/' ../gradle/wrapper/gradle-wrapper.properties
+      - sed -i -e '/groundy/d' build.gradle
+      - mv $$Volley$$/* ../volley
+      - cp -a $$Groundy$$/src .
+      - ln -s $$Libxmp$$ src/main/jni/libxmp
+      - sed -i -e 's|\.\./../../../../../||g' src/main/jni/Android.mk
+      - sed -i -e 's/armeabi armeabi-v7a x86/armeabi-v7a arm64-v8a x86 x86_64/' src/main/jni/{.,libxmp/jni}/Application.mk
+      - sed -i -e '5a#include <string.h>' -e 's/return drop_audio();/drop_audio();return
+        0;/' src/main/jni/xmp-jni.c
+      - sed -i -e '/close_audio/avoid drop_audio(void);' src/main/jni/audio.h
+      - sed -i -e '1a#include <unistd.h>' src/main/jni/opensl.c
     scandelete:
       - app/libs
     build:
-      - pushd $$Groundy$$
-      - sed -i -e "s/, 'compiler', 'examples'//"  -e '/compiler/d' ../settings.gradle
-      - sed -i -e '/repo.maven.apache.org/a jcenter()' ../build.gradle
-      - gradle build
+      - pushd src/main/jni/libxmp
+      - autoconf
+      - ./configure
+      - $$NDK$$/ndk-build
       - popd
-      - mv $$Groundy$$/build/libs/groundy-1.5.jar libs
-    ndk: r21e
+      - cd src/main
+      - $$NDK$$/ndk-build
+    ndk: r26b
+    gradleprops:
+      - android.useAndroidX=true
 
 MaintainerNotes: The most recent libxmp version should be fine for all builds.
 

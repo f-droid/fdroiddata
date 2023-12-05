@@ -934,24 +934,25 @@ Builds:
     gradle:
       - fdroid
     srclibs:
-      - MuPDF@1.23.5
+      - MuPDF@1.23.7
     rm:
       - Builder/src/libs
     prebuild:
+      - export MUPDF_VERSION=1.23.7
       - sed -i -e '/^if.*Fdroid/,/^}/d' -e '/enable true/d' -e '/_appGdriveKey/d'
         -e '/_admob/d' build.gradle
       - mkdir src/main/jniLibs
       - cd ../Builder
       - sed -i -e '/^#!/a\set -e' -e '/git clone/d' -e 's/mkdir/mkdir -p/g' -e 's|".*ndk-build"|"$$NDK$$/ndk-build"|'
-        -e 's|^.*ndk-build$|$$NDK$$/ndk-build -j`nproc`|' link_to_mupdf_1.23.5.sh
-      - cp -r $$MuPDF$$ mupdf-1.23.5
-      - rm -rf mupdf-1.23.5/thirdparty/{harfbuzz/test,curl/tests,leptonica/prog/fuzzing}
+        -e 's|^.*ndk-build$|$$NDK$$/ndk-build -j`nproc`|' link_to_mupdf_$MUPDF_VERSION.sh
+      - cp -r $$MuPDF$$ mupdf-$MUPDF_VERSION
+      - rm -rf mupdf-$MUPDF_VERSION/thirdparty/{harfbuzz/test,curl/tests,leptonica/prog/fuzzing}
     scanignore:
       - Builder/fonts/fonts.zip
       - app/src/fdroid/assets/fonts.zip
     build:
       - pushd ../Builder/
-      - ./link_to_mupdf_1.23.5.sh
+      - ./link_to_mupdf_1.23.7.sh
     ndk: r26b
 
 MaintainerNotes: |-
