@@ -279,13 +279,13 @@ Builds:
       - yes
     srclibs:
       - minetest_android_deps@48ef4978ec967018991ef01fbdfc9c418fc67368
-    prebuild:
+    prebuild: sed -i -e 's/enable true/enable false/' -e '/preBuild.dependsOn getDeps/d'
+      build.gradle ../native/build.gradle
+    build:
       - export ndkversion=$(grep "ndk_version = " ../build.gradle | cut -d "'" -f
         2)
       - sdkmanager "ndk;$ndkversion"
-      - sed -i -e 's/enable true/enable false/' -e '/preBuild.dependsOn getDeps/d'
-        build.gradle ../native/build.gradle
-    build:
+      - export ANDROID_NDK=$$SDK$$/ndk/$ndkversion
       - pushd $$minetest_android_deps$$
       - git checkout -f $$VERSION$$
       - ./build.sh --all armeabi-v7a
