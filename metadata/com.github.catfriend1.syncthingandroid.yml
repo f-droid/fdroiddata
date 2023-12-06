@@ -2020,11 +2020,48 @@ Builds:
       - export PATH=$$go$$/bin:$PATH
       - gradle :syncthing:buildNative
 
+  - versionName: 1.27.0.1
+    versionCode: 1270001
+    commit: 629115a4b534c810cfab0dc734dc2d6a50237ea3
+    subdir: app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y autogen automake autopoint bzip2 g++ libc-dev make gettext
+        libtool pkg-config rename shtool
+      - apt-get install -y openjdk-17-jdk-headless
+      - update-java-alternatives -a
+      - apt-get install -y -t bullseye-backports golang-go
+    gradle:
+      - yes
+    srclibs:
+      - go@go1.21.4
+    rm:
+      - syncthing/src/github.com/syncthing/syncthing/lib/model/testdata
+    prebuild:
+      - sed -i -e '/signingConfig/d' build.gradle
+      - sed -i -e '/executable/s/python/python3/' {../syncthing,.}/build.gradle
+      - echo -e "\norg.gradle.jvmargs=-Xmx4096m" >> ../gradle.properties
+    build:
+      - export ndkversion=$(grep "NDK_VERSION = " ../syncthing/build-syncthing.py|cut
+        -d "'" -f 2)
+      - sdkmanager "ndk;$ndkversion"
+      - export ANDROID_NDK_HOME=$$SDK$$/ndk/26.1.10909125
+      - export goversion=$(grep "GO_VERSION = " ../syncthing/build-syncthing.py|cut
+        -d "'" -f 2)
+      - pushd $$go$$
+      - git checkout -f go$goversion
+      - cd src
+      - ./make.bash
+      - popd
+      - export PATH=$$go$$/bin:$PATH
+      - gradle :syncthing:buildNative
+
 MaintainerNotes: |-
   The submodule in syncthing/src/github.com/syncthing/syncthing must be
   pristine, as the version/release information is taken from git.
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v[a-z0-9.]*$
-CurrentVersion: 1.26.1.0
-CurrentVersionCode: 1260100
+CurrentVersion: 1.27.0.1
+CurrentVersionCode: 1270001
