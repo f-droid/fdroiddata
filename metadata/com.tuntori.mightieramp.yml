@@ -200,8 +200,37 @@ Builds:
       - $$flutter$$/bin/flutter build apk --release
     ndk: r21
 
+  - versionName: 1.0.10
+    versionCode: 61
+    commit: 66e91bfd04fdcd40ec89ff307f26c2612c7b2531
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@3.10.6
+    rm:
+      - ios
+      - linux
+      - web
+      - windows
+    prebuild:
+      - sed -i -e '/INTERNET/d' -e '/ACCESS_NETWORK_STATE/d' android/app/src/main/AndroidManifest.xml
+      - sed -i -e '/^  sentry:/,/^    version:/d' -e '/^  sentry_flutter:/,/^    version:/d'
+        -e '/^  youtube_explode_dart:/,/^    version:/d' pubspec.lock
+      - sed -i -e '/sentry_flutter/d' -e '/youtube_explode_dart/d' pubspec.yaml
+      - sed -i -e '/startsWith("yt:")/,/^    }/s/^      .*//g' -e '/YoutubeSource/d'
+        lib/audio/online_sources/sourceResolver.dart
+      - sed -i -e '/void addFromYoutubeSource/,/^  }/d' -e '/addFromYoutubeSource/d'
+        -e '/YoutubeSource/d' lib/audio/tracksPage.dart
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release
+    ndk: r21
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 1.0.7
-CurrentVersionCode: 57
+CurrentVersion: 1.0.10
+CurrentVersionCode: 61
