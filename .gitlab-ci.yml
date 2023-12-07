@@ -161,6 +161,42 @@ fdroid lint:
       fi
     - exit $EXITVALUE
 
+
+fdroid lint config:
+  stage: test
+  needs: []
+  image: debian:bookworm-slim
+  before_script:
+    - apt-get -qy update
+    - apt-get -qy dist-upgrade
+    - apt-get -qy install --no-install-recommends
+        ca-certificates
+        curl
+        git
+        python3-defusedxml
+        python3-git
+        python3-pyasn1-modules
+        python3-pycountry
+        python3-qrcode
+        python3-requests
+        python3-ruamel.yaml
+        yamllint
+    - export fdroidserver=$CI_PROJECT_DIR/fdroidserver
+    - *install_fdroid_server
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event" || $CI_PIPELINE_SOURCE == "push"
+      changes:
+        paths:
+          - config.yml
+          - config/*.yml
+          - config/*/*.yml
+  script:
+    - fdroid lint config/*.yml config/*/*.yml
+    # TODO once config.yml is added to fdroiddata, add it to the line above
+    - test -e config.yml || exit 0
+    - fdroid lint config.yml
+
+
 lint:
   stage: test
   needs: []
