@@ -524,6 +524,51 @@ Builds:
       - python3 ./build.py -rv binary
       - python3 ./build.py -rv app
 
+  - versionName: '26.4'
+    versionCode: 26400
+    commit: 6c807d35b241c6a22b35534af8b6fe447a66f073
+    timeout: 30000
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y g++ make pkg-config libssl-dev ninja-build clang-13 cmake
+        lld-13 xz-utils openjdk-17-jdk-headless
+      - update-alternatives --auto java
+    output: out/app-release.apk
+    srclibs:
+      - ondk@r26.1
+      - vboot@release-R91-13904.B
+    prebuild:
+      - echo -e 'version=$$VERSION$$' > ./config.prop
+      - sed -i -e 's|https://.*download/{ndk_ver}|$$ondk$$/dist|' -e 's/urllib.request.urlopen(url)/open(url,"rb")/'
+        build.py
+      - sed -i -e 's/-14/-13/' -e 's/"src",.*/"src"]/' $$ondk$$/config-linux.toml
+      - sed -i -e '/Key.CHECK_UPDATES/s/true/false/' ./app/src/main/java/com/topjohnwu/magisk/core/Config.kt
+      - sed -i -e '/dependsOn(stubTask)/d' -e 's|from(stubApk)|from(rootProject.file("out/stub-release.apk"))|'
+        buildSrc/src/main/java/Setup.kt
+    scanignore:
+      - app/shared/src/main/java/com/topjohnwu/magisk/utils/DynamicClassLoader.java
+    scandelete:
+      - native/src/external
+      - tools
+    build:
+      - mkdir out
+      - curl -Lo out/stub-release.apk https://f-droid.org/archive/com.topjohnwu.magisk_7.apk
+      - sdkmanager 'ndk;r10e'
+      - cp $$SDK$$/ndk/r10e/platforms/android-19/arch-arm/usr/lib/*.[ao] tools/ndk-bins/arm
+      - cp $$SDK$$/ndk/r10e/platforms/android-19/arch-x86/usr/lib/*.[ao] tools/ndk-bins/i686
+      - ln -s $(which gradle) ./gradlew
+      - pushd $$vboot$$
+      - make ARCH=arm futil
+      - popd
+      - cp $$vboot$$/build/futility/futility tools
+      - pushd $$ondk$$
+      - PATH=/usr/lib/llvm-13/bin/:$PATH ./build.sh x86_64
+      - popd
+      - python3 ./build.py -rv ndk
+      - python3 ./build.py -rv binary
+      - python3 ./build.py -rv app
+
 MaintainerNotes: |-
   22.1: https://github.com/topjohnwu/ndk-busybox/commit/31b2b5780bf9fe982e1f3d9df0bd4b1b44d6e394
   in submodule is removed for some unkonwn reasons. Re-add it to fix the multiple definition error.
