@@ -1,0 +1,47 @@
+Categories:
+  - Games
+License: GPL-2.0-or-later
+AuthorName: Johnny Jazeix
+SourceCode: https://github.com/petitlapin/Li-ri
+IssueTracker: https://github.com/petitlapin/Li-ri/issues
+
+AutoName: Li-Ri
+
+RepoType: git
+Repo: https://github.com/petitlapin/Li-Ri.git
+
+Builds:
+  - versionName: 3.0.0
+    versionCode: 30000
+    commit: v3.0.0
+    subdir: android/app
+    sudo:
+      - apt-get update
+      - apt-get install -y autoconf make
+    gradle:
+      - yes
+    srclibs:
+      - SDL@release-2.28.4
+      - SDL_mixer@release-2.6.3
+    prebuild:
+      - ln -s $$SDL$$     src/main/jni/SDL2
+      - ln -s $$SDL$$/include     src/main/jni/SDL2/SDL2
+      - ln -s $$SDL_mixer$$   src/main/jni/SDL2_mixer
+      - ln -s $$SDL_mixer$$/include     src/main/jni/SDL2_mixer/SDL2
+      - pushd $$SDL_mixer$$
+      - git submodule update --init external/libmodplug
+      - popd
+      - mkdir src/main/assets/
+      - cp -R ../../Sounds src/main/assets/
+      - cp ../../data/* src/main/assets/
+      - sed -i "s/SUPPORT_MOD_MODPLUG ?= false/SUPPORT_MOD_MODPLUG ?= true/" src/main/jni/SDL2_mixer/Android.mk
+    ndk: r21e
+
+MaintainerNotes: |-
+  The code is provided as is, no gameplay has been made regarding the initial version.
+  I don't plan to improve the game, my addition was mostly to not lose the original game (which is great!) and have it on Android.
+
+AutoUpdateMode: None
+UpdateCheckMode: Tags
+CurrentVersion: 3.0.0
+CurrentVersionCode: 30000
