@@ -1476,8 +1476,42 @@ Builds:
       - ./b2 headers
     ndk: r26b
 
+  - versionName: 2023.12.18-11-FDroid
+    versionCode: 23121811
+    commit: ccde5da061b16ec27554f39259772b15a72849ae
+    subdir: android/app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y g++ ninja-build
+      - apt-get install -t bullseye-backports cmake
+      - apt-get install -y openjdk-17-jdk-headless
+      - update-java-alternatives -a
+    gradle:
+      - fdroid
+    rm:
+      - iphone
+      - qt
+      - tools/shaders_compiler
+      - xcode
+    prebuild:
+      - sed -i -e '/com.google.firebase/d; /gms/d' build.gradle
+      - touch secure.properties
+      - echo '<?xml version="1.0" encoding="utf-8"?><network-security-config/>' >
+        src/main/res/xml/network_security_config.xml
+      - cp ../../private_default.h ../../private.h
+    scanignore:
+      - data/*.bin
+    scandelete:
+      - 3party
+    build:
+      - cd ../../3party/boost
+      - ./bootstrap.sh
+      - ./b2 headers
+    ndk: r26b
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags .*android$
 UpdateCheckData: android/app/src/fdroid/play/version.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 2023.11.17-17-FDroid
-CurrentVersionCode: 23111717
+CurrentVersion: 2023.12.18-11-FDroid
+CurrentVersionCode: 23121811
