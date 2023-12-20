@@ -16,75 +16,6 @@ RepoType: git
 Repo: https://git.silence.dev/Silence/Silence-Android.git
 
 Builds:
-  - versionName: 0.3.3
-    versionCode: 5
-    disable: builds, merge changes into upstream
-    commit: 66367479a4f57f347b5cbe8f6f8f632adaae7727
-    gradle:
-      - yes
-    srclibs:
-      - GradleWitness@10f1269c0aafdc1d478efc005ed48f3a47d44278
-      - PreferenceFragment@717a45433b927d2f0dfc5328f79e77c9682c37bc
-      - ShortcutBadger@3815ce2ec0c66acd7d7c0b4f2479df8fa70fed87
-      - AospMms@android-5.1.0_r3
-    forcevercode: true
-    rm:
-      - libs/*
-    prebuild:
-      - touch signing.properties
-      - pushd $$GradleWitness$$
-      - gradle jar
-      - popd
-      - cp $$GradleWitness$$/build/libs/GradleWitness.jar libs/gradle-witness.jar
-      - sed -i -e '20,22d' build.gradle
-      - pushd $$PreferenceFragment$$
-      - gradle uploadArchives
-      - popd
-      - sed -i -e '/5470f5872514a6226fa1fc6f4e000991f38805691c534cf0bd2778911fc773ad/d'
-        build.gradle
-      - mkdir smil
-      - pushd smil
-      - wget -c http://www.w3.org/TR/smil-boston-dom/java-binding.zip
-      - unzip java-binding.zip
-      - popd
-      - cp -fR smil/java/org src/
-      - rm -fR smil
-      - sed -i -e '/org.w3c.smil/d' build.gradle
-      - cp -fR $$AospMms$$/src/org src/
-
-  - versionName: 0.3.3
-    versionCode: 6
-    disable: builds, wait for upstream
-    commit: 9675ce5eecb929dcaddb43b3d9486fdb88b9ae1a
-    submodules: true
-    gradle:
-      - yes
-    srclibs:
-      - GradleWitness@10f1269c0aafdc1d478efc005ed48f3a47d44278
-    rm:
-      - libs/*.jar
-    prebuild:
-      - touch signing.properties
-      - pushd $$GradleWitness$$
-      - gradle jar
-      - popd
-      - cp $$GradleWitness$$/build/libs/GradleWitness.jar libs/gradle-witness.jar
-
-  - versionName: 0.4.2
-    versionCode: 9
-    disable: builds locally, but not on BS
-    commit: v0.4.2
-    submodules: true
-    gradle:
-      - yes
-    rm:
-      - libs/*.jar
-    prebuild:
-      - touch signing.properties
-      - ./build-witness.sh
-      - rm -rf libs/gradle-witness/build
-      - echo "org.gradle.jvmargs=-Xms512m -Xmx512m -XX:MaxPermSize=512m" >> gradle.properties
-
   - versionName: 0.5.1
     versionCode: 11
     commit: v0.5.1
@@ -98,20 +29,6 @@ Builds:
       - ./build-witness.sh
       - rm -rf libs/gradle-witness/build
       - echo "org.gradle.jvmargs=-Xms512m -Xmx512m -XX:MaxPermSize=512m" >> gradle.properties
-
-  - versionName: 0.5.2
-    versionCode: 12
-    disable: broken in upstream
-    commit: v0.5.2
-    submodules: true
-    gradle:
-      - yes
-    rm:
-      - libs/*.jar
-    prebuild:
-      - touch signing.properties
-      - ./scripts/build-witness.sh
-      - rm -rf libs/gradle-witness/build
 
   - versionName: 0.5.3
     versionCode: 100
@@ -233,34 +150,6 @@ Builds:
   - versionName: 0.11.0
     versionCode: 109
     commit: v0.11.0
-    submodules: true
-    gradle:
-      - yes
-    rm:
-      - libs/*.jar
-    prebuild:
-      - touch signing.properties
-      - ./scripts/build-witness.sh
-      - rm -rf libs/gradle-witness/build
-
-  - versionName: 0.11.1
-    versionCode: 110
-    disable: build fails
-    commit: v0.11.1
-    submodules: true
-    gradle:
-      - yes
-    rm:
-      - libs/*.jar
-    prebuild:
-      - touch signing.properties
-      - ./scripts/build-witness.sh
-      - rm -rf libs/gradle-witness/build
-
-  - versionName: 0.11.2
-    versionCode: 111
-    disable: missing dependency (removed from jcenterI
-    commit: v0.11.2
     submodules: true
     gradle:
       - yes
@@ -688,8 +577,15 @@ Builds:
 
   - versionName: 0.15.16
     versionCode: 145
+    disable: remove old apk to rebuild for arm64
     commit: v0.15.16
     submodules: true
+    sudo:
+      - echo "deb http://deb.debian.org/debian sid main" > /etc/apt/sources.list.d/stretch.list
+      - apt-get update
+      - apt-get remove openjdk-11-jdk-headless openjdk-11-jre-headless
+      - apt-get install -y -t sid openjdk-8-jdk-headless
+      - chmod -R 777 /opt/android-sdk
     gradle:
       - yes
     rm:
@@ -697,159 +593,11 @@ Builds:
       - libs/org.greenrobot.eventbus/EventBusTest/libs/*.jar
     prebuild:
       - touch signing.properties
+      - sed -i -e 's/curve25519_version = .*/curve25519_version = "0.5.0"/' build.gradle
       - ./scripts/build-witness.sh
       - rm -rf libs/gradle-witness/build
-
-  - versionName: 0.16.1-unstable
-    versionCode: 200
-    disable: old unstable
-    commit: v0.16.1-unstable
-    submodules: true
-    gradle:
-      - yes
-    rm:
-      - libs/*.jar
-    prebuild:
-      - touch signing.properties
-      - ./scripts/build-witness.sh
-      - rm -rf libs/gradle-witness/build
-
-  - versionName: 0.16.2-unstable
-    versionCode: 201
-    disable: old unstable
-    commit: v0.16.2-unstable
-    submodules: true
-    gradle:
-      - yes
-    rm:
-      - libs/*.jar
-    prebuild:
-      - touch signing.properties
-      - ./scripts/build-witness.sh
-      - rm -rf libs/gradle-witness/build
-
-  - versionName: 0.16.3-unstable
-    versionCode: 202
-    disable: old unstable
-    commit: v0.16.3-unstable
-    submodules: true
-    gradle:
-      - yes
-    rm:
-      - libs/*.jar
-    prebuild:
-      - touch signing.properties
-      - ./scripts/build-witness.sh
-      - rm -rf libs/gradle-witness/build
-
-  - versionName: 0.16.4-unstable
-    versionCode: 203
-    disable: old unstable
-    commit: v0.16.4-unstable
-    submodules: true
-    gradle:
-      - yes
-    rm:
-      - libs/*.jar
-    prebuild:
-      - touch signing.properties
-      - ./scripts/build-witness.sh
-      - rm -rf libs/gradle-witness/build
-
-  - versionName: 0.16.5-unstable
-    versionCode: 204
-    disable: old unstable
-    commit: v0.16.5-unstable
-    submodules: true
-    gradle:
-      - yes
-    rm:
-      - libs/*.jar
-      - libs/org.greenrobot.eventbus/EventBusTest/libs/*.jar
-      - libs/com.android.support.support-v4-preferencefragment/maven-repository/
-    prebuild:
-      - touch signing.properties
-      - ./scripts/build-witness.sh
-      - rm -rf libs/gradle-witness/build
-
-  - versionName: 0.16.6-unstable
-    versionCode: 205
-    disable: old unstable
-    commit: v0.16.6-unstable
-    submodules: true
-    gradle:
-      - yes
-    rm:
-      - libs/*.jar
-      - libs/org.greenrobot.eventbus/EventBusTest/libs/*.jar
-      - libs/com.android.support.support-v4-preferencefragment/maven-repository/
-    prebuild:
-      - touch signing.properties
-      - ./scripts/build-witness.sh
-      - rm -rf libs/gradle-witness/build
-
-  - versionName: 0.16.7-unstable
-    versionCode: 206
-    disable: old unstable
-    commit: v0.16.7-unstable
-    submodules: true
-    gradle:
-      - yes
-    rm:
-      - libs/*.jar
-      - libs/org.greenrobot.eventbus/EventBusTest/libs/*.jar
-      - libs/com.android.support.support-v4-preferencefragment/maven-repository/
-    prebuild:
-      - touch signing.properties
-      - ./scripts/build-witness.sh
-      - rm -rf libs/gradle-witness/build
-
-  - versionName: 0.16.8-unstable
-    versionCode: 207
-    disable: old unstable
-    commit: v0.16.8-unstable
-    submodules: true
-    gradle:
-      - yes
-    rm:
-      - libs/*.jar
-      - libs/org.greenrobot.eventbus/EventBusTest/libs/*.jar
-      - libs/com.android.support.support-v4-preferencefragment/maven-repository/
-    prebuild:
-      - touch signing.properties
-      - ./scripts/build-witness.sh
-      - rm -rf libs/gradle-witness/build
-
-  - versionName: 0.16.9-unstable
-    versionCode: 208
-    disable: old unstable
-    commit: v0.16.9-unstable
-    submodules: true
-    gradle:
-      - yes
-    rm:
-      - libs/*.jar
-      - libs/org.greenrobot.eventbus/EventBusTest/libs/*.jar
-      - libs/com.android.support.support-v4-preferencefragment/maven-repository/
-    prebuild:
-      - touch signing.properties
-      - ./scripts/build-witness.sh
-      - rm -rf libs/gradle-witness/build
-
-  - versionName: 0.16.10-unstable
-    versionCode: 209
-    disable: old unstable
-    commit: v0.16.10-unstable
-    submodules: true
-    gradle:
-      - yes
-    rm:
-      - libs/*.jar
-      - libs/org.greenrobot.eventbus/EventBusTest/libs/*.jar
-    prebuild:
-      - touch signing.properties
-      - ./scripts/build-witness.sh
-      - rm -rf libs/gradle-witness/build
+    scanignore:
+      - libs/gradle-witness.jar
 
   - versionName: 0.16.11-unstable
     versionCode: 210
@@ -867,8 +615,15 @@ Builds:
 
   - versionName: 0.16.12-unstable
     versionCode: 211
+    disable: remove old apk to rebuild for arm64
     commit: v0.16.12-unstable
     submodules: true
+    sudo:
+      - echo "deb http://deb.debian.org/debian sid main" > /etc/apt/sources.list.d/stretch.list
+      - apt-get update
+      - apt-get remove openjdk-11-jdk-headless openjdk-11-jre-headless
+      - apt-get install -y -t sid openjdk-8-jdk-headless
+      - chmod -R 777 /opt/android-sdk
     gradle:
       - yes
     rm:
@@ -876,8 +631,11 @@ Builds:
       - libs/org.greenrobot.eventbus/EventBusTest/libs/*.jar
     prebuild:
       - touch signing.properties
+      - sed -i -e 's/curve25519_version = .*/curve25519_version = "0.5.0"/' build.gradle
       - ./scripts/build-witness.sh
       - rm -rf libs/gradle-witness/build
+    scanignore:
+      - libs/gradle-witness.jar
 
 MaintainerNotes: |-
   Auto Update does not really work because the latest unstable build is newer than CV.
