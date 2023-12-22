@@ -1,0 +1,49 @@
+Categories:
+  - Games
+License: GPL-3.0-only
+AuthorName: Simon Steinmann
+SourceCode: https://github.com/simonste/jasstafel
+IssueTracker: https://github.com/simonste/jasstafel/issues
+
+AutoName: Jasstafel
+
+RepoType: git
+Repo: https://github.com/simonste/jasstafel
+
+Builds:
+  - versionName: 4.0.2
+    versionCode: 59
+    commit: v4.0.2
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+      - linux
+      - macos
+      - web
+      - windows
+    prebuild:
+      - version=$(sed -n -E "s/.*flutter-version:\ '(.*)'/\1/p" .github/workflows/build.yml)
+      - pushd $$flutter$$
+      - git checkout -f $version
+      - popd
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+      - sed -i -e '/ios/s/true/false/' pubspec.yaml
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter pub get
+      - $$flutter$$/bin/flutter pub run flutter_launcher_icons
+      - $$flutter$$/bin/flutter gen-l10n
+      - $$flutter$$/bin/flutter packages pub run build_runner build --delete-conflicting-outputs
+      - $$flutter$$/bin/flutter build apk --release
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: pubspec.yaml|version:\s.*\+(\d+)|.|version:\s(.*)\+
+CurrentVersion: 4.0.2
+CurrentVersionCode: 59
