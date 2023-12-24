@@ -1,0 +1,58 @@
+Categories:
+  - Games
+License: GPL-3.0-only
+SourceCode: https://github.com/lufebe16/freecell4maemo
+IssueTracker: https://github.com/lufebe16/freecell4maemo/issues
+
+RepoType: git
+Repo: https://github.com/lufebe16/freecell4maemo
+
+Builds:
+  - versionName: '1.9'
+    versionCode: 1021109
+    commit: ffa3f9b9374c99fd0a3105f379e725fc364be200
+    sudo:
+      - apt-get update
+      - apt-get install -y g++ libc-dev make automake libltdl-dev libtool zlib1g-dev
+        libffi-dev libssl-dev cython3
+      - apt-get install -y python3-pip python3-pexpect python3-virtualenv python3-sh
+      - apt-get install -y -t bullseye-backports python3-appdirs python3-colorama
+        python3-jinja2 python3-build python3-toml python3-packaging
+      - apt-get install -y ant
+      - apt-get install -y openjdk-17-jdk-headless
+      - update-alternatives --auto java
+      - rm /opt/android-sdk/tools/bin/sdkmanager
+      - ln -s $(which sdkmanager) /opt/android-sdk/tools/bin/sdkmanager
+      - echo -e '#!/usr/bin/sh\nls /opt/android-sdk/platforms | sed "s/android-/API
+        level:\ /g"' > /opt/android-sdk/tools/bin/avdmanager
+      - chmod +x /opt/android-sdk/tools/bin/avdmanager
+    output: bin/*.apk
+    srclibs:
+      - cpython@v3.9.9
+      - python-for-android@v2023.02.10
+      - buildozer@3ebc09e885457db4747e67a1250c2aea1ca7a046
+    prebuild:
+      - sdkmanager 'platforms;android-32' 'build-tools;32.0.0'
+      - mkdir -p ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin
+      - ./helpers/setapiforp4a >${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/avdmanager
+      - chmod 0755 ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/avdmanager
+      - sed -i -e 's/log_level =.*/log_level = 1/' -e '/^\[app\]/aandroid.ndk_path
+        = $$NDK$$\nandroid.sdk_path = $$SDK$$\np4a.source_dir = $$python-for-android$$\nandroid.ant_path
+        = /usr' buildozer.spec
+    build:
+      - pushd $$cpython$$
+      - ./configure --prefix=$HOME/.local
+      - make -j`nproc`
+      - make altinstall
+      - popd
+      - pip3 install $$buildozer$$
+      - ln -s $(which cython3) /home/vagrant/.local/bin/cython
+      - export PATH="$PATH:$HOME/.local/bin"
+      - buildozer android release
+    ndk: r25b
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^va.*$
+UpdateCheckData: output-metadata.json|versionCode[:"\s]+(\d+)|.|versionName[:"\s]+([0-9.]+)
+CurrentVersion: '1.9'
+CurrentVersionCode: 1021109
