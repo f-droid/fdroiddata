@@ -1,0 +1,53 @@
+AntiFeatures:
+  - NonFreeNet
+  - UpstreamNonFree
+Categories:
+  - Internet
+License: GPL-2.0-or-later
+AuthorName: Timothy Redaelli
+SourceCode: https://github.com/drizzt/Mercurygram
+IssueTracker: https://github.com/drizzt/Mercurygram/issues
+Translation: https://www.transifex.com/telegram/telegram/
+
+AutoName: Mercurygram
+
+RepoType: git
+Repo: https://github.com/drizzt/Mercurygram.git
+
+Builds:
+  - versionName: 10.3.2.11
+    versionCode: 4145119
+    commit: v10.3.2.11
+    subdir: TMessagesProj_App
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y ninja-build golang-go yasm cmake libuv1 make openjdk-17-jdk-headless
+      - update-alternatives --auto java
+    gradle:
+      - afat
+    rm:
+      - TMessagesProj/jni/ffmpeg/tests/ref/fate/sub-microdvd-remux
+    prebuild: echo -e 'APP_ID = 575730\nAPP_HASH = 723c7927097f8487d229438af766e329'
+      > API_KEYS
+    scandelete:
+      - TMessagesProj/jni
+    build:
+      - export NDK=$$NDK$$
+      - export NINJA_PATH=/usr/bin/ninja
+      - pushd ../TMessagesProj/jni
+      - ./build_libvpx_clang.sh
+      - ./build_ffmpeg_clang.sh
+      - ./patch_ffmpeg.sh
+      - ./patch_boringssl.sh
+      - ./build_boringssl.sh
+      - popd
+    ndk: r21e
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags v[0-9\.]+
+VercodeOperation:
+  - 10 * %c + 9
+UpdateCheckData: gradle.properties|APP_VERSION_CODE=(\d+)|.|APP_VERSION_NAME=([\d.]+)
+CurrentVersion: 10.3.2.11
+CurrentVersionCode: 4145119
