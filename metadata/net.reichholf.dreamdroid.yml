@@ -127,9 +127,16 @@ Builds:
     versionCode: 460
     commit: 9a4400824c51dd9aadcbd64836dd65be444c9d1f
     subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y openjdk-17-jdk-headless
+      - update-java-alternatives -a
     gradle:
       - fdroid
-    prebuild: sed -i -e '/enable true/d; /output.versionCodeOverride/,+2d' build.gradle
+    prebuild:
+      - sed -i -e 's/-XX:MaxPermSize=1536m//' -e 's/-XX:+CMSClassUnloadingEnabled//'
+        ../gradle.properties
+      - sed -i -e '/enable true/d; /output.versionCodeOverride/,+2d' build.gradle
 
 MaintainerNotes: |-
   Upstream builds an universal APK and separate APKs for each architecture.
