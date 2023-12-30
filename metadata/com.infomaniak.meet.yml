@@ -115,7 +115,39 @@ Builds:
       - mkdir -p "$HOME/.m2/repository/org/webkit"
       - cp -r node_modules/jsc-android/dist/org/webkit/android-jsc "$HOME/.m2/repository/org/webkit"
 
+  - versionName: 2.6.1
+    versionCode: 21
+    commit: 0dc536a481d507228f8e4fb780e18ec7d2a3470d
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y jq maven openjdk-17-jdk-headless
+      - update-java-alternatives -a
+      - sysctl fs.inotify.max_user_watches=524288 || true
+      - curl -Lo node.tar.gz https://nodejs.org/dist/latest-v16.x/node-v16.20.2-linux-x64.tar.gz
+      - echo "c9193e6c414891694759febe846f4f023bf48410a6924a8b1520c46565859665 node.tar.gz"
+        | sha256sum -c -
+      - tar xzf node.tar.gz --strip-components=1 -C /usr/local/
+    gradle:
+      - yes
+    srclibs:
+      - jitsi-meet@android-sdk-8.6.0
+    prebuild:
+      - sed -i -e '/jitsi-maven-repository/d' -e '/repositories {/a\        mavenLocal()'
+        ../build.gradle
+      - sed -i -e "/google.firebase/aexclude\ group\:\ 'com.google.android.gms'" build.gradle
+    build:
+      - export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+      - cd $$jitsi-meet$$
+      - export LIBRE_BUILD=true
+      - npm install webpack-bundle-analyzer
+      - npm install
+      - mkdir -p "$HOME/.m2"
+      - bash android/scripts/release-sdk.sh "$HOME/.m2/repository"
+      - mkdir -p "$HOME/.m2/repository/org/webkit"
+      - cp -r node_modules/jsc-android/dist/org/webkit/android-jsc "$HOME/.m2/repository/org/webkit"
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: '2.6'
-CurrentVersionCode: 20
+CurrentVersion: 2.6.1
+CurrentVersionCode: 21
