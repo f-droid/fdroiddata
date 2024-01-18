@@ -78,22 +78,9 @@ Builds:
     scandelete:
       - build-logic/convention/build
 
-  - versionName: '1.9'
-    versionCode: 9
-    disable: https://github.com/JackEblan/Geto/issues/13
-    commit: 618e8192c1c173757945fb55b4633c10581fd9f0
-    subdir: app
-    sudo:
-      - apt-get update
-      - apt-get install -y openjdk-17-jdk-headless
-      - update-alternatives --auto java
-    gradle:
-      - yes
-    scandelete:
-      - build-logic/convention/build
-
   - versionName: '1.10'
     versionCode: 10
+    disable: https://github.com/JackEblan/Geto/issues/13
     commit: 548b4ce1e1f1c6d984f44af669c11f76099ff270
     subdir: app
     sudo:
@@ -101,7 +88,12 @@ Builds:
       - apt-get install -y openjdk-17-jdk-headless
       - update-alternatives --auto java
     gradle:
-      - yes
+      - fdroid
+    rm:
+      - build-logic/convention/src/main/kotlin/AndroidApplicationFirebaseConventionPlugin.kt
+    prebuild:
+      - sed -i -e '/firebase/d' ../build.gradle.kts ../gradle/libs.versions.toml
+      - sed -i -e '/crashlytics/d' -e '/androidFirebase/,/^        }/d' ../build-logic/convention/build.gradle.kts
     scandelete:
       - build-logic/convention/build
 
