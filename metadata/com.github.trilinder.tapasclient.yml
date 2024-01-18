@@ -1,0 +1,45 @@
+AntiFeatures:
+  NonFreeNet:
+    en-US: Fully depends on Tapas
+Categories:
+  - Internet
+  - Reading
+License: MIT
+SourceCode: https://github.com/TriLinder/OpenTapasReader
+IssueTracker: https://github.com/TriLinder/OpenTapasReader/issues
+
+AutoName: OpenTapasReader
+
+RepoType: git
+Repo: https://github.com/TriLinder/OpenTapasReader
+
+Builds:
+  - versionName: 1.0.0
+    versionCode: 1
+    commit: 666f3e8dbd42671146184587c9c5be406dbf783c
+    subdir: android/app
+    sudo:
+      - sysctl fs.inotify.max_user_watches=524288 || true
+      - curl -Lo node.tar.gz https://nodejs.org/download/release/v20.10.0/node-v20.10.0-linux-x64.tar.gz
+      - echo "d3f0908a9d9190a8525c5b9a716ed91bb57e908555841b0c47f75b2a001ff91b node.tar.gz"
+        | sha256sum -c -
+      - tar xzf node.tar.gz --strip-components=1 -C /usr/local/
+      - apt-get update
+      - apt-get install -y make g++ openjdk-17-jdk-headless
+      - update-alternatives --auto java
+    init:
+      - npm install --build-from-source
+      - npm run prepare
+      - npm run build-website
+      - cd ../../
+      - npx cap sync
+      - cd android/app
+    gradle:
+      - yes
+    scandelete:
+      - node_modules
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: 1.0.0
+CurrentVersionCode: 1
