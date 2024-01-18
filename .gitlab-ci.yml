@@ -300,6 +300,11 @@ checkupdates_runner:
     - apt-get install -y openssh-client
     - git config --global user.email "fdroidci@bubu1.eu"
     - git config --global user.name "F-Droid checkupdates bot"
+
+    # gitlab.com was still vulnerable to https://terrapin-attack.com/ when this was added
+    - printf 'Ciphers -chacha20-poly1305@openssh.com,*-cbc\nMACs -*etm*,*-sha1*\n'
+        > /etc/ssh/ssh_config.d/0-terrapin-workaround.conf
+
     - mkdir -p ~/.ssh
     - chmod 700 ~/.ssh
     - cp "${GITLAB_KNOWN_HOSTS}" ~/.ssh/known_hosts
