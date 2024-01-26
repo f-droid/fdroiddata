@@ -138,8 +138,36 @@ Builds:
       - export PUB_CACHE=$(pwd)/.pub-cache
       - $$flutter$$/bin/flutter build apk
 
+  - versionName: 1.6.4
+    versionCode: 39
+    commit: 4af4462498b477bd0a2e1830cf7ce7bc0ddb03c0
+    sudo:
+      - apt-get update
+      - apt-get install -y openjdk-17-jdk-headless
+      - update-java-alternatives -a
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@3.16.0
+    rm:
+      - flatpak
+      - ios
+      - linux
+      - macos
+      - web
+    prebuild:
+      - sed -i -e '/flutter_barcode_scanner/d' pubspec.yaml
+      - sed -i -e '/flutter_barcode_scanner/,/version:/d' pubspec.lock
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 1.6.3
-CurrentVersionCode: 38
+CurrentVersion: 1.6.4
+CurrentVersionCode: 39
