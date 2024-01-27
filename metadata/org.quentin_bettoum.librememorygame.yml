@@ -70,8 +70,35 @@ Builds:
       - /tmp/godot --headless --export-release "Android" exports/libre_memory_game.apk
     ndk: 25.1.8937393
 
+  - versionName: 1.0.2
+    versionCode: 3
+    commit: 340d0caa0a7cc06cfd14c56abeb5a88c90ccb987
+    timeout: 7200
+    sudo:
+      - apt-get update
+      - apt-get install -y wget unzip
+    output: exports/libre_memory_game.apk
+    build:
+      - mkdir exports
+      - mkdir --parents ~/.config/godot
+      - wget --quiet https://github.com/godotengine/godot/releases/download/4.2.1-stable/Godot_v4.2.1-stable_linux.x86_64.zip
+      - unzip Godot_v4.2.1-stable_linux.x86_64.zip
+      - mv Godot_v4.2.1-stable_linux.x86_64 /tmp/godot
+      - wget --quiet https://github.com/godotengine/godot/releases/download/4.2.1-stable/Godot_v4.2.1-stable_export_templates.tpz
+      - mkdir --parents ~/.local/share/godot/export_templates/4.2.1.stable
+      - unzip -j Godot_v4.2.1-stable_export_templates.tpz templates/android_debug.apk
+        templates/android_release.apk -d ~/.local/share/godot/export_templates/4.2.1.stable
+      - mkdir .exports
+      - rm Godot_v4.2.1-stable_export_templates.tpz Godot_v4.2.1-stable_linux.x86_64.zip
+      - /tmp/godot --editor --quit --headless
+      - sed -i "\/export\/android\/android_sdk_path = \"\"/c export\/android\/android_sdk_path
+        = \"$$SDK$$\"" ~/.config/godot/editor_settings-4.tres
+      - rm -rf .godot
+      - /tmp/godot --headless --export-release "Android" exports/libre_memory_game.apk
+    ndk: 25.1.8937393
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: export_presets.cfg|version/code=(\d+)|.|version/name="([\d.]+)"
-CurrentVersion: 1.0.1
-CurrentVersionCode: 2
+CurrentVersion: 1.0.2
+CurrentVersionCode: 3
