@@ -487,6 +487,7 @@ Builds:
       - flutter@stable
       - rustup@1.25.2
       - media-kit-libmpv-android-video-build@v1.1.5
+      - mpv@056072bf958ffeaadd2f5a69e37f3079f18d4ead
     rm:
       - linux
       - macos
@@ -503,6 +504,7 @@ Builds:
       - export PUB_CACHE=$(pwd)/.pub-cache
       - $$flutter$$/bin/flutter config --no-analytics
       - $$flutter$$/bin/flutter packages pub get
+      - sed -i -e '/googleapis/d' .pub-cache/hosted/pub.dev/webview_cookie_manager-*/android/build.gradle
       - export file=$(ls .pub-cache/hosted/pub.dev/media_kit_libs_android_video-*/android/build.gradle)
       - export tag=$(sed -n -E 's|.*download/(v[0-9.]+)/.*|\1|p' $file | head -n 1)
       - sed -i -e '/downloadDependencies/,/dependsOn/d' $file
@@ -511,6 +513,7 @@ Builds:
       - cd buildscripts
       - sed -i -e 's/sudo//g' -e 's|./gradlew|gradle|g' *.sh
       - sed -i -e '/download-sdk/d' download.sh
+      - sed -i -e '/mkdir -p deps/a mv $$mpv$$ mpv' include/download-deps.sh
       - sed -i -e '/git reset --hard/d' patch.sh
     scandelete:
       - .pub-cache
