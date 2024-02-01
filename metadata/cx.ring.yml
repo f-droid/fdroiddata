@@ -2920,7 +2920,30 @@ Builds:
     gradleprops:
       - android.builder.sdkDownload=true
 
+  - versionName: 20240131-01
+    versionCode: 402
+    commit: 322fab89aac47edb7b598093b55c9dacacc5119e
+    timeout: 10800
+    subdir: jami-android/app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y g++ automake autopoint bzip2 gettext libtool libyaml-cpp-dev
+        make pkg-config python-is-python3 swig tar yasm
+      - apt-get install -y -t bullseye-backports cmake
+      - apt-get install -y openjdk-17-jdk-headless
+      - update-java-alternatives -a
+    gradle:
+      - withUnifiedPush
+    prebuild: sed -i -e "/android {/a lint { abortOnError = false }" build.gradle.kts
+    build:
+      - cd ../../daemon/bin/jni
+      - PACKAGEDIR=../../../jami-android/libjamiclient/src/main/java ./make-swig.sh
+    ndk: 26.1.10909125
+    gradleprops:
+      - android.builder.sdkDownload=true
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 20240126-01
-CurrentVersionCode: 401
+CurrentVersion: 20240131-01
+CurrentVersionCode: 402
