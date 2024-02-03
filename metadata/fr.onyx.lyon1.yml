@@ -59,10 +59,54 @@ Builds:
         --no-tree-shake-icons
     ndk: r25c
 
+  - versionName: 2.0.8
+    versionCode: 2050
+    commit: 0e7e61950dda7e687f5f687c6b28e3badf8c2548
+    subdir: apps/onyx
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y openjdk-17-jdk-headless
+      - update-java-alternatives -a
+      - apt-get install -y jq python3-pip gcc-multilib libc-dev make
+      - pip3 install yq
+    output: build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+    srclibs:
+      - rustup@1.26.0
+    rm:
+      - apps/onyx/ios
+      - apps/onyx/linux
+      - apps/onyx/macos
+      - apps/onyx/web
+      - apps/onyx/windows
+    prebuild:
+      - export JAVA_HOME="/usr/lib/jvm/java-17-openjdk-amd64/"
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - ../.flutter/bin/flutter config --no-analytics
+      - echo "Adding geolocator_android package override to pubspec.yaml"
+      - yq -i -Y '.dependency_overrides.geolocator_android.git = { url:"https://github.com/onyx-lyon1/flutter-geolocator.git",
+        ref:"floss", path:"geolocator_android"}' pubspec.yaml
+      - ../.flutter/bin/flutter pub get
+      - sdkmanager "ndk;21.1.6352462"
+    scanignore:
+      - apps/onyx/assets/graph.json.gz
+      - apps/.flutter/bin/cache
+    scandelete:
+      - apps/.flutter
+      - apps/onyx/.pub-cache
+    build:
+      - $$rustup$$/rustup-init.sh -y --default-toolchain 1.74.0 --target aarch64-linux-android
+      - source $HOME/.cargo/env
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - bash ./scripts/fdroid_build_isar.sh
+      - ../.flutter/bin/flutter build apk --release --split-per-abi --target-platform="android-arm64"
+        --no-tree-shake-icons
+    ndk: r25c
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 VercodeOperation:
   - '%c + 2000'
 UpdateCheckData: apps/onyx/pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 2.0.7
-CurrentVersionCode: 2048
+CurrentVersion: 2.0.8
+CurrentVersionCode: 2050
