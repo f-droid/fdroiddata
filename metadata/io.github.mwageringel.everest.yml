@@ -70,8 +70,33 @@ Builds:
       - make FLUTTER=$$flutter$$/bin/flutter assets-android
       - $$flutter$$/bin/flutter build apk --release
 
+  - versionName: 1.1.6
+    versionCode: 15
+    commit: 649200a906e4141e1b448b8c397b9090e725940f
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y make librsvg2-bin imagemagick openjdk-17-jdk-headless
+      - update-alternatives --auto java
+    output: build/app/outputs/flutter-apk/app-release.apk
+    rm:
+      - web
+      - website
+    prebuild:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - ./vendor/flutter/bin/flutter config --no-analytics
+      - ./vendor/flutter/bin/flutter pub get
+    scanignore:
+      - vendor/flutter/bin/cache
+    scandelete:
+      - vendor/flutter
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - make FLUTTER=./vendor/flutter/bin/flutter app
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^[0-9.]+$
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 1.1.5
-CurrentVersionCode: 14
+CurrentVersion: 1.1.6
+CurrentVersionCode: 15
