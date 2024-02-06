@@ -68,7 +68,60 @@ Builds:
       - mv $$siyuan$$/kernel/kernel.aar libs
     ndk: r26b
 
+  - versionName: 2.12.7
+    versionCode: 217
+    commit: 620dd33bfb53026053a683d3b4758f19a238918f
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y openjdk-17-jdk-headless
+      - update-java-alternatives -a
+      - apt-get install -t bullseye-backports -y golang-go
+      - apt-get install -y gcc libc-dev zip
+      - curl -Lo node.tar.gz https://nodejs.org/dist/v20.11.0/node-v20.11.0-linux-x64.tar.gz
+      - echo "9556262f6cd4c020af027782afba31ca6d1a37e45ac0b56cecd2d5a4daf720e0 node.tar.gz"
+        | sha256sum -c -
+      - tar xzf node.tar.gz --strip-components=1 -C /usr/local/
+      - npm install -g pnpm
+    gradle:
+      - yes
+    srclibs:
+      - siyuan@v2.12.6
+      - go@go1.21.6
+    prebuild:
+      - sed -i -e '/aliyun/d' ../build.gradle
+      - sdkmanager "platforms;android-34" "build-tools;34.0.0"
+      - cd $$siyuan$$
+      - git checkout -f 'v$$VERSION$$'
+      - sed -i -e '/CheckUpdate/d' kernel/model/mount.go
+      - sed -i -e '/return &System{/a DisableGoogleAnalytics:true,' -e '/DownloadInstallPkg/s/true/false/'
+        kernel/conf/system.go
+      - cd app
+      - pnpm install --no-frozen-lockfile
+    build:
+      - pushd $$siyuan$$/app
+      - pnpm run build:mobile
+      - zip -r app appearance guide stage changelogs
+      - popd
+      - mkdir -p src/main/assets/
+      - mv $$siyuan$$/app/app.zip src/main/assets/
+      - pushd $$go$$/src
+      - ./make.bash
+      - popd
+      - export GOPATH=$$go$$
+      - export PATH="$GOPATH/bin:$PATH"
+      - pushd $$siyuan$$/kernel
+      - go install golang.org/x/mobile/cmd/gomobile@v0.0.0-20240112133503-c713f31d574b
+      - go mod download
+      - gomobile init
+      - gomobile bind --tags fts5 -ldflags '-s -w' -v -o kernel.aar -target='android/arm64'
+        -androidapi 24 ./mobile/
+      - popd
+      - mkdir libs
+      - mv $$siyuan$$/kernel/kernel.aar libs
+    ndk: r26b
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 2.12.6
-CurrentVersionCode: 216
+CurrentVersion: 2.12.7
+CurrentVersionCode: 217
