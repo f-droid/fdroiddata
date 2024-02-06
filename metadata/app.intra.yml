@@ -65,6 +65,37 @@ Builds:
       - mv $$outline-go-tun2socks$$/build/intra/tun2socks.aar ../tun2socks
     ndk: r23b
 
+  - versionName: 1.3.9
+    versionCode: 67
+    commit: b75ed0a4cb18a02a7d0bc3eb414bbbf97ae7c3a4
+    subdir: Android/app
+    sudo:
+      - apt-get update
+      - apt-get install -y -t bullseye-backports golang-go
+      - apt-get install -y gcc libc-dev
+    gradle:
+      - yes
+    srclibs:
+      - go@go1.21.6
+    prebuild:
+      - sed -i -e '/dependencyLocking/,+3d' ../build.gradle
+      - sed -i -e "s|System.getenv('PATH')|'$$go$$/bin:$PATH'|" -e "s|'go'|'$$go$$/bin/go'|"
+        -e '/repositories {/,/^}/d' -e '/firebaseCrashlytics {/,/^            }/d'
+        build.gradle
+      - sed -i -e '/gms/d' -e '/firebase/d' ../build.gradle build.gradle
+      - cd src/main/java/app/intra
+      - sed -i -e '/FirebaseAnalytics/d' -e '/analytics.logEvent/d' sys/firebase/AnalyticsWrapper.java
+      - sed -i -e '/FirebaseCrashlytics/d' sys/firebase/LogWrapper.java
+      - sed -i -e '/getExtraIPs/a return "";}' -e '/getChoirEnabled/a return false;}'
+        -e '/try {/,/^  }/d' -e '/FirebaseRemoteConfig/d' -e '/gms/d' -e '/update()/,/^  }/d'
+        sys/firebase/RemoteConfig.java
+      - sed -i -e '/RemoteConfig.update/d' ui/MainActivity.java sys/AutoStarter.java
+      - sed -i -e '/FirebasePerformance/d' -e '/HttpMetric/d' -e '/m.metric/d' net/go/GoIntraListener.java
+    build:
+      - cd $$go$$/src
+      - ./make.bash
+    ndk: r23c
+
 AutoUpdateMode: None
 UpdateCheckMode: RepoManifest
 CurrentVersion: 1.3.9
