@@ -45,8 +45,33 @@ Builds:
       - export PUB_CACHE=$(pwd)/.pub-cache
       - $$flutter$$/bin/flutter build apk
 
+  - versionName: 1.0.5
+    versionCode: 8
+    commit: 4c557ed28d0632fbc8e486f55bbfbadae2532145
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@3.13.0
+    rm:
+      - ios
+      - linux
+      - macos
+      - web
+      - windows
+    prebuild:
+      - sed -i -e 's/minSdkVersion .*/minSdkVersion 21/' -e '/minifyEnabled/s/false/true/'
+        -e '/shrinkResources/s/false/true/' android/app/build.gradle
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter packages pub get
+      - sed -i -e '/googleapis/d' .pub-cache/hosted/pub.dev/webview_cookie_manager-*/android/build.gradle
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 1.0.4
-CurrentVersionCode: 7
+CurrentVersion: 1.0.5
+CurrentVersionCode: 8
