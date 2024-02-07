@@ -104,10 +104,57 @@ Builds:
       - cp -pr /tmp/build/* business.braid.f_wallet
       - rm -rf /tmp/build
 
+  - versionName: 1.1.4
+    versionCode: 114
+    commit: ae65e6cd66532d493b827f264ccc99958a0a4025
+    sudo:
+      - apt-get update
+      - apt-get install -y openjdk-17-jdk-headless
+      - update-java-alternatives -a
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+      - linux
+      - macos
+      - web
+      - windows
+    prebuild:
+      - export FLUTTER_VERSION="$(cat flutter_version)"
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - pushd $$flutter$$
+      - git checkout -f $FLUTTER_VERSION
+      - popd
+      - cd ..
+      - rm -rf /tmp/build
+      - mv business.braid.f_wallet /tmp/build
+      - pushd /tmp/build
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+      - popd
+      - cp -pr /tmp/build/* business.braid.f_wallet
+      - rm -rf /tmp/build
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - cd ..
+      - rm -rf /tmp/build
+      - mv business.braid.f_wallet /tmp/build
+      - pushd /tmp/build
+      - export APP_VERSION="v$(cat pubspec.yaml | grep version | awk '{ print $2 }'
+        | cut -f1 -d "+")"
+      - $$flutter$$/bin/flutter gen-l10n
+      - $$flutter$$/bin/flutter build apk --dart-define=FWALLET_IS_STABLE=true --dart-define=FWALLET_VERSION="$APP_VERSION"
+      - popd
+      - cp -pr /tmp/build/* business.braid.f_wallet
+      - rm -rf /tmp/build
+
 AllowedAPKSigningKeys: 8b3707147ce32fc1de5dfc6699736932891546620b63bf2f6eb06cd2fc32ad55
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 1.1.2
-CurrentVersionCode: 112
+CurrentVersion: 1.1.4
+CurrentVersionCode: 114
