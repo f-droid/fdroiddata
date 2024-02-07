@@ -1,0 +1,54 @@
+Categories:
+  - Games
+  - Reading
+  - Science & Education
+  - Sports & Health
+License: Unlicense
+AuthorName: hobgoblina
+AuthorEmail: strategies@lina.garden
+AuthorWebSite: https://strategies.lina.garden
+SourceCode: https://github.com/hobgoblina/oblique-strategies
+IssueTracker: https://github.com/hobgoblina/oblique-strategies/issues
+Changelog: https://github.com/hobgoblina/oblique-strategies/releases
+
+AutoName: Oblique Strategies
+
+RepoType: git
+Repo: https://github.com/hobgoblina/oblique-strategies
+
+Builds:
+  - versionName: 0.1.0
+    versionCode: 1
+    commit: v0.1.0
+    sudo:
+      - apt-get update
+      - apt-get install -y openjdk-17-jdk-headless
+      - update-alternatives --auto java
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+      - linux
+      - macos
+      - web
+      - windows
+    prebuild:
+      - version=$(sed -n -E 's/flutter:\ (.*)/\1/p' pubspec.yaml)
+      - pushd $$flutter$$
+      - git checkout -f $version
+      - popd
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter packages pub get
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags v\d+\.\d+(\.\d+)?
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 0.1.0
+CurrentVersionCode: 1
