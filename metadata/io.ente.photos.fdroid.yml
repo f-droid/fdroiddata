@@ -1668,8 +1668,59 @@ Builds:
       - thirdparty/flutter/bin/flutter build apk --flavor fdroid -t lib/main.dart
     ndk: r25c
 
+  - versionName: 0.8.56
+    versionCode: 576
+    commit: 14f773e7c2825833602f346abbcc7a6c2dd276fd
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y automake libtool make gcc-multilib libc-dev
+    output: build/app/outputs/apk/fdroid/release/app-fdroid-release.apk
+    srclibs:
+      - libsodium@ee009287afd480b60a9a4d75b19afdc0f705e9d9
+      - transistor-background-fetch@6feb11c93f4e5debf7792e7e7c444f3d62ac733c
+      - rustup@1.25.2
+    rm:
+      - ios
+      - android/app/src/main/jniLibs/*/*libtensor*.so
+    prebuild:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - thirdparty/flutter/bin/flutter config --no-analytics
+      - thirdparty/flutter/bin/flutter pub get
+    scanignore:
+      - .pub-cache/hosted/pub.dev/background_fetch-*/android/build.gradle
+      - thirdparty/flutter/bin/cache
+    scandelete:
+      - thirdparty/flutter
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$rustup$$/rustup-init.sh -y --default-toolchain 1.75.0 -t i686-linux-android
+        x86_64-linux-android -t armv7-linux-androideabi aarch64-linux-androi
+      - source $HOME/.cargo/env
+      - bash ./scripts/build_isar.sh
+      - pushd $$libsodium$$
+      - ./autogen.sh -s
+      - ./dist-build/android-armv7-a.sh
+      - ./dist-build/android-armv8-a.sh
+      - ./dist-build/android-x86.sh
+      - ./dist-build/android-x86_64.sh
+      - popd
+      - cp $$libsodium$$/libsodium-android-armv7-a/lib/libsodium.so $PUB_CACHE/hosted/pub.dev/flutter_sodium-0.2.0/android/src/main/jniLibs/armeabi-v7a/
+      - cp $$libsodium$$/libsodium-android-westmere/lib/libsodium.so $PUB_CACHE/hosted/pub.dev/flutter_sodium-0.2.0/android/src/main/jniLibs/x86_64/
+      - cp $$libsodium$$/libsodium-android-armv8-a+crypto/lib/libsodium.so $PUB_CACHE/hosted/pub.dev/flutter_sodium-0.2.0/android/src/main/jniLibs/arm64-v8a/
+      - cp $$libsodium$$/libsodium-android-i686/lib/libsodium.so $PUB_CACHE/hosted/pub.dev/flutter_sodium-0.2.0/android/src/main/jniLibs/x86/
+      - pushd $$transistor-background-fetch$$/android/tsbackgroundfetch/
+      - gradle assembleRelease
+      - gradle publishToMavenLocal
+      - popd
+      - mv $$transistor-background-fetch$$/android/tsbackgroundfetch/build/outputs/aar/tsbackgroundfetch-release.aar
+        $PUB_CACHE/hosted/pub.dev/background_fetch-1.2.1/android/libs/com/transistorsoft/tsbackgroundfetch/1.0.2/tsbackgroundfetch-1.0.2.aar
+      - thirdparty/flutter/bin/flutter build apk --flavor fdroid -t lib/main.dart
+    ndk: r25c
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^fdroid-
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 0.8.55
-CurrentVersionCode: 575
+CurrentVersion: 0.8.56
+CurrentVersionCode: 576
