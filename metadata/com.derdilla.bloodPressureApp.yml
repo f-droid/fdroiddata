@@ -410,11 +410,10 @@ Builds:
 
   - versionName: 1.6.2
     versionCode: 32
-    disable: fails to build
     commit: 591f790ffddde0da954d550ab900024048c349fc
     output: build/app/outputs/flutter-apk/app-fdroid-release.apk
     srclibs:
-      - flutter@3.10.6
+      - flutter@stable
     rm:
       - ios
       - linux
@@ -422,6 +421,11 @@ Builds:
       - web
       - windows
     prebuild:
+      - export flutterVersion=$(sed -n -E "s/.*flutter-version:\s'(.*)'/\1/p" .github/workflows/CI.yml|head
+        -1)
+      - pushd $$flutter$$
+      - git checkout -f $flutterVersion
+      - popd
       - export PUB_CACHE=$(pwd)/.pub-cache
       - $$flutter$$/bin/flutter config --no-analytics
       - $$flutter$$/bin/flutter packages pub get
