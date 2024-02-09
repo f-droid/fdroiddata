@@ -2873,7 +2873,34 @@ Builds:
     scandelete:
       - node_modules/**
 
+  - versionName: 3.122.3
+    versionCode: 396303
+    commit: c988050a8256371c1c3dc6b913ce0883b4c6e77e
+    subdir: app-android/app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y g++ make
+      - curl -Lo node.tar.gz https://nodejs.org/dist/v18.19.0/node-v18.19.0-linux-x64.tar.gz
+      - echo "153312ae9fe8684f345100e4d141a521dc542b36d8c1e09c31ac290eae98c62a node.tar.gz"
+        | sha256sum -c -
+      - tar xzf node.tar.gz --strip-components=1 -C /usr/local/
+      - sysctl fs.inotify.max_user_watches=524288 || true
+    gradle:
+      - fdroid
+    rm:
+      - app-ios
+    prebuild:
+      - cd ../..
+      - node buildSrc/fixFdroidDeps.js
+      - npm install
+      - npm run build-packages
+      - node --max-old-space-size=4096 webapp prod
+      - node buildSrc/prepareMobileBuild.js dist
+    scandelete:
+      - node_modules/**
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags tutanota-fdroid-release-*
-CurrentVersion: 3.121.4
-CurrentVersionCode: 396299
+CurrentVersion: 3.122.3
+CurrentVersionCode: 396303
