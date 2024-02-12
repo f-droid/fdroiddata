@@ -1,0 +1,44 @@
+AntiFeatures:
+  NonFreeNet:
+    en-US: Rely on myanimelist.net, livechart.me and github.com.
+Categories:
+  - Internet
+License: MIT
+AuthorName: Jica98
+AuthorEmail: jica.etzc@gmail.com
+AuthorWebSite: https://github.com/JICA98
+SourceCode: https://github.com/JICA98/DailyAL
+IssueTracker: https://github.com/JICA98/DailyAL/issues
+Changelog: https://github.com/JICA98/DailyAL/releases
+
+AutoName: DailyAL
+
+RepoType: git
+Repo: https://github.com/JICA98/DailyAL
+
+Builds:
+  - versionName: 2024.2.1
+    versionCode: 88
+    commit: 38c01caa79cd2cafeea9d519d50ceb71983ba68c
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@3.16.9
+    prebuild:
+      - export FLUTTER_VERSION=$(sed -n -E "s/flutter:\s([0-9.]+)/\1/p" versions)
+      - pushd $$flutter$$
+      - git checkout -f $FLUTTER_VERSION
+      - popd
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 2024.2.1
+CurrentVersionCode: 88
