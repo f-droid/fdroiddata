@@ -459,11 +459,15 @@ Builds:
       - apt-get install -y make
     output: build/app/outputs/flutter-apk/app-release.apk
     srclibs:
-      - flutter@3.3.10
+      - flutter@stable
     rm:
       - ios
       - test
     prebuild:
+      - export flutterVersion=$(grep flutterSdkVersion .fvm/fvm_config.json | cut -d "\"" -f 4)
+      - pushd $$flutter$$
+      - git checkout -f $flutterVersion
+      - popd
       - sed -i -e '/bool skipIOS/s/false/true/' scripts/buildLocalizedStrings
       - sdkmanager 'build-tools;31.0.0' 'build-tools;30.0.3'
       - export PUB_CACHE=$(pwd)/.pub-cache
