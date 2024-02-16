@@ -1,0 +1,47 @@
+Categories:
+  - Internet
+  - Sports & Health
+License: MIT
+WebSite: https://printpagestopdf.github.io/cb_app/
+SourceCode: https://github.com/printpagestopdf/cb_app
+IssueTracker: https://github.com/printpagestopdf/cb_app/issues
+
+AutoName: cb_app
+
+RepoType: git
+Repo: https://github.com/printpagestopdf/cb_app
+
+Builds:
+  - versionName: 1.0.0
+    versionCode: 1
+    commit: 4ce2b3abb7a98743bf8e3e9251738040848d1f45
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+      - linux
+      - macos
+      - web
+      - windows
+    prebuild:
+      - export FLUTTER_VERSION="$(cat flutter_version)"
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - pushd $$flutter$$
+      - git checkout -f $FLUTTER_VERSION
+      - popd
+      - sed -i -e "s/^\#x //" pubspec.yaml
+      - sed -i -e "/^  geolocator. any/s/any/^7.6.2/" pubspec.yaml
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter packages pub get
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 1.0.0
+CurrentVersionCode: 1
