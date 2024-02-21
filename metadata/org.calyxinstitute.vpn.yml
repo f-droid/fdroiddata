@@ -251,10 +251,37 @@ Builds:
     build: ../scripts/build_deps.sh
     ndk: r21e
 
+  - versionName: 1.2.0
+    versionCode: 170000
+    commit: 01775d13b7b53aa30da7544ea0b1995fcb19d4f3
+    subdir: app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y make g++ swig lib32stdc++6 lib32z1 autogen automake autopoint
+        libtool pkg-config po4a openjdk-17-jdk-headless
+      - update-java-alternatives -a
+    gradle:
+      - customProductionFat
+    rm:
+      - tor-android/external/openssl/fuzz
+      - tor-android/external/openssl/boringssl/fuzz
+    prebuild:
+      - sed -i -e 's|./gradlew|gradle|' ../scripts/build_deps.sh
+      - sed -i -e '/signingConfigs.getByName/d' -e 's/isEnable\ =\ true/isEnable\
+        =\ false/' ../ics-openvpn/main/build.gradle.kts
+    scandelete:
+      - bitmaskcore/obfsvpn/mobile/android/obfsvpn-sources.jar
+      - bitmaskcore/obfsvpn/mobile/android/obfsvpn.aar
+      - bitmaskcore/IPtProxy
+      - ics-openvpn/main/src/main/cpp
+      - tor-android/external
+    build: ../scripts/build_deps.sh
+    ndk: r21e
+
 MaintainerNotes: The "build" commands are extracted from build_deps.sh.
 
-AutoUpdateMode: Version
-UpdateCheckMode: Tags ^calyx\/[\d.-]+$
-UpdateCheckName: se.leap.bitmaskclient
+AutoUpdateMode: None
+UpdateCheckMode: Static
 CurrentVersion: 1.1.8-1
 CurrentVersionCode: 169001
