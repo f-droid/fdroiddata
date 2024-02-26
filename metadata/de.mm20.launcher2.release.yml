@@ -1,8 +1,6 @@
 AntiFeatures:
   NonFreeNet:
     en-US: App uses a third party service for currency exchange rates
-  UpstreamNonFree:
-    en-US: Google drive integration depends on libraries with non-free dependencies.
 Categories:
   - System
   - Theming
@@ -95,19 +93,59 @@ Builds:
     output: app/app/build/outputs/apk/fdroid/release/app-fdroid-release-unsigned.apk
     prebuild: cp libs/g-services/consumer-rules.pro libs/nextcloud/consumer-rules.pro
 
+  - versionName: 1.29.1
+    versionCode: 2024022100
+    commit: v1.29.1
+    sudo:
+      - apt-get update
+      - apt-get install openjdk-17-jdk-headless
+      - update-alternatives --auto java
+    gradle:
+      - yes
+    output: app/app/build/outputs/apk/default/release/app-default-release-unsigned.apk
+    rm:
+      - plugins/sdk/build.gradle.kts
+    prebuild:
+      - sed -i 's/4096/3072/g' gradle.properties
+      - perl -0777 -i -pe 's/signing {.*?}//sg' core/shared/build.gradle.kts
+      - perl -0777 -i -pe 's/publishing {\n    publications.*\n}\n//sg' core/shared/build.gradle.kts
+
 MaintainerNotes: |-
   Kvaesitso uses several external APIs for search providers.
   Several of them require signing up to obtain a developer API
-  key: gdrive and onedrive search, openweathermap, HERE
-  and Meteorologisk institutt. It's not possible for users
-  to provide these keys as explained here:
+  key: gdrive search, openweathermap, HERE and Meteorologisk
+  institutt. It's not possible for users to provide these keys
+  as explained here:
   https://github.com/MM2-0/Kvaesitso/issues/227#issuecomment-1366826219
-  Therefore, these features are disabled in F-Droid build.
+  If keys are not provided, these features are automatically
+  disabled during the build.
 
-  Kvaesitso uses a non-whitelisted microsoft maven repo for
-  OneDrive integration. The libraries used are open source,
-  but we still remove the respective code from the source,
-  since onedrive integration is disabled anyway.
+  core/shared/build.gradle.kts and plugins/sdk/build.gradle.kts
+  have configurations in them for publishing artifacts to
+  maven repos. They are not used during the build, but detected
+  by F-Droid scanner anyway. We patch it out from
+  core/shared/build.gradle.kts, since this module itself is
+  still used in compilation, and delete plugins/sdk/build.gradle.kts
+  because it's not used in app compilation.
+
+  Kvaesitso depended on different libraries used for gdrive
+  login in the past that pulled GMS dependency, however it's
+  not the case anymore:
+  https://github.com/MM2-0/Kvaesitso/issues/583#issuecomment-1775268896
+  The new libraries pull OpenTelemetry though, but it's unclear
+  if it's used (considering gdrive integration is disabled).
+
+  Max heap size is reduced in gradle.properties to avoid gradle
+  daemon being killed by OOM manager.
+
+  Older versions of Kvaesitso had onedrive integration that
+  depended on non-whitelisted maven repos, but it was removed.
+
+  Upstream provides an fdroid flavor, however there's no difference
+  with default flavor except for different versionName.
+
+  For some reason, F-Droid fails to pick up the correct gradle
+  version from distributionUrl if subdir is used.
 
   Older patches:
   * remove_ms-services.patch removes microsoft azure sdk maven
@@ -117,20 +155,13 @@ MaintainerNotes: |-
   of dependencies it relies on contains known non-free classes,
   according to f-droid scanner.
 
-  Patches:
   * remove_ms_g_2023012300.patch removes microsoft and google
   services from the source code, while patching of respective
   modules build.gradle.kts files is done with sed edits, since
   these files are changed often.
 
-  Upstream provides an fdroid flavor, however there's no difference
-  and it still needs to be patched.
-
-  For some reason, f-droid fails to pick up the correct gradle
-  version (compilation fails with default gradle version)
-  from distributionUrl if subdir is used.
-
-AutoUpdateMode: None
-UpdateCheckMode: None
-CurrentVersion: 1.28.0-fdroid
-CurrentVersionCode: 2023101300
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: app/app/build.gradle.kts|versionCode\s=\s.*\?:\s(\d+)|.|versionName\s=\s"(.+)"
+CurrentVersion: 1.29.1
+CurrentVersionCode: 2024022100
