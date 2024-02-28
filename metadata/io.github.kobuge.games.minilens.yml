@@ -22,40 +22,6 @@ RepoType: git
 Repo: https://github.com/KOBUGE-Games/minilens.git
 
 Builds:
-  - versionName: '1.1'
-    versionCode: 1
-    disable: com.google.android.gms remnants
-    commit: 873c2039219cd79b7d4d1dc0278c2398257a4225
-    output: minilens.apk
-    srclibs:
-      - Godot@d3b42e41b0e446938d6634c8783e575de3d0b60f
-    prebuild:
-      - mkdir minilens
-      - bash -O extglob -c "mv !(minilens) minilens"
-      - cp -R $$Godot$$ godot
-    target: android-19
-    scandelete:
-      - godot/platform/flash/lib/libGL.a
-      - godot/platform/android/libs/google_play_services/libs/google-play-services.jar
-    build:
-      - cd godot
-      - scons -j 8 p=server
-      - for libname in apk_expansion downloader_library google_play_services play_licensing;
-        do sed -i 's/android-15/android-19/' platform/android/libs/${libname}/project.properties;
-        done
-      - export ANDROID_NDK_ROOT=$$NDK$$
-      - scons -j 8 p=android target=release
-      - mkdir -p platform/android/java/libs/armeabi
-      - cp bin/libgodot.android.opt.so platform/android/java/libs/armeabi/libgodot_android.so
-      - pushd platform/android/java/
-      - ant release
-      - popd
-      - export HOME=$PWD
-      - mkdir -p ~/.godot/templates/
-      - cp platform/android/java/bin/Godot-release-unsigned.apk ~/.godot/templates/android_release.apk
-      - cd ../minilens
-      - ../godot/bin/godot_server.server.tools.* -export Android ../minilens.apk
-
   - versionName: '1.2'
     versionCode: 2
     commit: fd38f0983f9115ac9fe7a7314604fdeee61e9f09

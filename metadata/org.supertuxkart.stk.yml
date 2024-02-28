@@ -31,26 +31,6 @@ RepoType: git
 Repo: https://github.com/supertuxkart/stk-code
 
 Builds:
-  - versionName: '1.0'
-    versionCode: 1
-    disable: sdk-issues
-    commit: 91e7c51ae7aaf8be799785e8fb4126a9fc9526c4
-    subdir: android
-    srclibs:
-      - supertuxkartdeps@69590c5c344ebd914a1726563aebfae369f6d374
-    prebuild:
-      - mv ../data/supertuxkart.git ../data/supertuxkart.$$VERSION$$
-      - sed -i -e '/STK_VERSION/s/git/$$VERSION$$/g' ../src/utils/constants.cpp
-      - tar -C '../lib' -xf $$supertuxkartdeps$$/android/dependencies-android.tar.xz
-    target: android-19
-    build:
-      - export USE_SDK_WRAPPER=yes
-      - export SDK_PATH=$$SDK$$
-      - export NDK_PATH=$$NDK$$
-      - ./generate_assets.sh
-      - ./make.sh -j5
-    ndk: r13b
-
   - versionName: 0.9.3
     versionCode: 10
     commit: 0.9.3
@@ -73,31 +53,6 @@ Builds:
       - export NDK_PATH=$$NDK$$
       - ./generate_assets.sh
       - ./make.sh
-    ndk: r12b
-
-  - versionName: '1.0'
-    versionCode: 104
-    disable: delete huge apk without optimizations
-    commit: '1.0'
-    subdir: android
-    output: build/outputs/apk/android-release-unsigned.apk
-    srclibs:
-      - supertuxkartdeps@f0a772c941b77e0cdae02baac332089b3af3f4dc
-      - supertuxkartassets10@18212
-    prebuild:
-      - tar -C '../lib' -xf $$supertuxkartdeps$$/dependencies-android.tar.xz
-      - sed -i -e 's#../../stk-assets#$$supertuxkartassets10$$#' generate_assets.sh
-    scandelete:
-      - lib/curl/tests
-      - tools/windows_installer
-    build:
-      - export BUILD_TYPE=release
-      - export SDK_PATH=$$SDK$$
-      - export NDK_PATH=$$NDK$$
-      - export PROJECT_VERSION=$$VERSION$$
-      - export PROJECT_CODE=$$VERCODE$$
-      - ./generate_assets.sh
-      - ./make.sh -j`nproc`
     ndk: r12b
 
   - versionName: '1.0'
@@ -268,50 +223,6 @@ Builds:
       - ./make_deps.sh
       - ./make.sh
     ndk: r20b
-
-  - versionName: 1.4-rc1
-    versionCode: 308
-    disable: final was released
-    commit: 29067b2be007598e330dd3b7270ff6d49248c188
-    subdir: android
-    sudo:
-      - apt-get update
-      - apt-get install -y advancecomp autoconf automake cmake imagemagick libjpeg-progs
-        libogg-dev make optipng pngquant vorbis-tools wget yasm
-    output: build/outputs/apk/release/android-release-unsigned.apk
-    prebuild:
-      - sed -i -e 's#./gradlew#gradle#' -e '/Check\ if\ we\ have\ key/,+25d' -e '/ANDROID_HOME/,+10d'
-        -e 's/bundleRelease/assembleRelease/' make.sh
-      - sed -i -e '/keystore/,+3d' build.gradle
-      - sed -i -e 's#../../stk-assets#stk-assets#' generate_assets.sh
-      - wget https://github.com/supertuxkart/stk-assets-mobile/releases/download/$$VERSION$$/stk-assets-full.zip
-      - echo '8390930c6ffdbaa15b0cd3833f562c173c93c09489cbb57af4d39a065d6cd5dc  stk-assets-full.zip'
-        | sha256sum -c -
-      - unzip stk-assets-full.zip -d stk-assets
-      - git clone https://github.com/supertuxkart/dependencies
-      - cd dependencies
-      - git checkout dcdffba7f0c6b3d3b2afc792d4c8c0c25403dd56
-      - git submodule update --init --recursive
-      - mv src/* ../../lib
-    scandelete:
-      - android/stk-assets-full.zip
-      - lib/curl/tests
-      - lib/harfbuzz/test
-      - lib/mbedtls/tests
-      - lib/mbedtls/programs/fuzz
-      - lib/moltenvk/Templates/spirv-tools/build.zip
-      - lib/sdl2/Xcode/SDL/pkg-support/resources/SDL_DS_Store
-    build:
-      - export BUILD_TYPE=release
-      - export COMPILE_ARCH=all
-      - export SDK_PATH=$$SDK$$
-      - export NDK_PATH=$$SDK$$/ndk
-      - export PROJECT_VERSION=$$VERSION$$
-      - export PROJECT_CODE=$$VERCODE$$
-      - ./generate_assets.sh
-      - ./make_deps.sh
-      - bash ./make.sh
-    ndk: r23b
 
   - versionName: '1.4'
     versionCode: 312
