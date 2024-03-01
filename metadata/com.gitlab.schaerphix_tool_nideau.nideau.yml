@@ -49,9 +49,44 @@ Builds:
       - buildozer android release
     ndk: r25b
 
+  - versionName: 2.1.0
+    versionCode: 2
+    commit: fdc1d327348a3111628a0a4c687ad273ed7a37dd
+    subdir: src
+    sudo:
+      - apt-get update
+      - apt-get install -y g++ libc-dev make automake libltdl-dev libtool zlib1g-dev
+        libffi-dev libssl-dev cmake
+      - apt-get install -y python3-pip python3-pexpect python3-virtualenv python3-sh
+      - apt-get install -y -t bullseye-backports python3-appdirs python3-colorama
+        python3-jinja2 python3-build python3-toml python3-packaging
+      - apt-get install -y ant openjdk-17-jdk-headless
+      - update-alternatives --auto java
+      - rm /opt/android-sdk/tools/bin/sdkmanager
+      - ln -s $(which sdkmanager) /opt/android-sdk/tools/bin/sdkmanager
+      - echo -e '#!/usr/bin/env sh\nls /opt/android-sdk/platforms | sed "s/android-/API
+        level:\ /g"' > /opt/android-sdk/tools/bin/avdmanager
+      - chmod +x /opt/android-sdk/tools/bin/avdmanager
+    output: bin/*.apk
+    srclibs:
+      - python-for-android@v2023.09.16
+      - buildozer@1.5.0
+    prebuild:
+      - sdkmanager 'platforms;android-33' 'build-tools;33.0.0'
+      - sed -i -e 's/log_level =.*/log_level = 1/' -e '/^\[app\]/aandroid.ndk_path
+        = $$NDK$$\nandroid.sdk_path = $$SDK$$\nandroid.skip_update = True\np4a.source_dir
+        = $$python-for-android$$\nandroid.ant_path = /usr' -e 's/python3==3.10.12/python3==3.10.12,hostpython3==3.10.12/'
+        buildozer.spec
+    build:
+      - pip3 install $$buildozer$$
+      - pip3 install --upgrade Cython==0.29.33 virtualenv
+      - export PATH="$PATH:$HOME/.local/bin"
+      - buildozer android release
+    ndk: r25b
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: src/buildozer.spec|android.numeric_version = (\d+)|.|\nversion =
   ([\d.]+)
-CurrentVersion: 2.0.10
-CurrentVersionCode: 1
+CurrentVersion: 2.1.0
+CurrentVersionCode: 2
