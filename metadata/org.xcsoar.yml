@@ -639,7 +639,26 @@ Builds:
     build: make TARGET=ANDROIDFAT DEBUG=n TESTING=n -j`nproc`
     ndk: r26-beta1
 
+  - versionName: '7.42'
+    versionCode: 163
+    commit: 9ee29aa606f7ebc44604b51c966882a3b9d7c953
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y ninja-build g++ vorbis-tools librsvg2-bin imagemagick make
+        gettext quilt sox automake xsltproc cmake xz-utils pkg-config libtool
+    output: output/ANDROID/opt/build/aligned.apk
+    prebuild:
+      - platforms=$(grep ANDROID_SDK_PLATFORM build/targets.mk | sed -E 's/.*android-([0-9]+)/\1/')
+      - build_tools=$(grep build-tools build/android.mk | sed -E 's/.*\/([0-9.]+)$/\1/')
+      - sdkmanager "platforms;android-$platforms" "build-tools;$build_tools"
+    scandelete:
+      - android/ioio
+      - android/UsbSerial/usbserial/eclipse_lib
+    build: make TARGET=ANDROIDFAT DEBUG=n TESTING=n -j`nproc`
+    ndk: r26-beta1
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: '7.41'
-CurrentVersionCode: 162
+CurrentVersion: '7.42'
+CurrentVersionCode: 163
