@@ -1,0 +1,47 @@
+Categories:
+  - Games
+License: AGPL-3.0-or-later
+AuthorWebSite: https://j7126.dev
+WebSite: https://j7126.dev/projects/who-goes-first
+SourceCode: https://github.com/j7126/who_goes_first
+IssueTracker: https://github.com/j7126/who_goes_first/issues
+
+AutoName: Who Goes First?
+
+RepoType: git
+Repo: https://github.com/j7126/who_goes_first.git
+
+Builds:
+  - versionName: 1.2.0
+    versionCode: 3
+    commit: f88a99afaa1fd4206b7559729f319a55040f222c
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+      - linux
+      - web
+      - windows
+      - macos
+    prebuild:
+      - export FLUTTER_VERSION=3.19.1
+      - pushd $$flutter$$
+      - git checkout -f $FLUTTER_VERSION
+      - popd
+      - mv android/app/build.gradle_fdroid android/app/build.gradle
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export PATH=$$flutter$$/bin:$PATH
+      - flutter config --no-analytics
+      - flutter pub get
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 1.2.0
+CurrentVersionCode: 3
