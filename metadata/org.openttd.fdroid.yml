@@ -77,42 +77,35 @@ Builds:
     build: CMAKE_BIN_LOC=$$SDK$$/cmake/3.18.1/bin/ ./build.sh -z openttd
     ndk: r23b
 
-  - versionName: 13.0.rev114
-    versionCode: 1300114
-    disable: fails to build
-    commit: 767969b04d00cc2ba7239c598ce58a655fa2b8a9
+  - versionName: 13.4.rev120
+    versionCode: 1340120
+    commit: 24205dc9487a42710ca4592e5524d3ebadf16806
     submodules: true
     sudo:
       - apt-get update
-      - apt-get install -y g++ build-essential openjdk-11-jdk-headless curl
-      - apt-get install -y clang-7 libc++-7-dev libc++abi-7-dev
-      - update-alternatives --install /usr/bin/cc cc /usr/bin/clang-7 100
-      - update-alternatives --install /usr/bin/c++ c++ /usr/bin/clang++-7 100
-      - update-alternatives --set cc /usr/bin/clang-7
-      - update-alternatives --set c++ /usr/bin/clang++-7
+      - apt-get install -y g++ make libc-dev xz-utils curl pkg-config
     init:
       - ln -sf openttd project/jni/application/src
       - git submodule update --init project/jni/iconv/src project/jni/sdl* project/jni/application/openttd/src
       - sed -i -e "/GooglePlayGameServicesId/s/=.*/=/g" src/AndroidAppSettings.cfg
-      - rm -rf project/jni/sdl2_mixer/Xcode/
-      - rm -rf project/jni/sdl2_image/Xcode/
-      - rm -rf project/jni/sdl2_ttf/Xcode/
-      - rm -rf project/jni/sdl2/Xcode/
-      - rm -rf project/jni/sdl2_image/external/libwebp-1.0.3/swig/*
-      - rm -f project/themes/Sun/abstractsun.zip
+      - rm -rf project/jni/sdl2_mixer/Xcode/ project/jni/sdl2_image/Xcode/ project/jni/sdl2_ttf/Xcode/
+        project/jni/sdl2/Xcode/ project/jni/sdl2_image/external/libwebp-1.0.3/swig/*
+        project/themes/Sun/abstractsun.zip
+      - mkdir project/jni/application/openttd/data-plat-indp/
     output: project/app/build/outputs/apk/release/app-release-unsigned.apk
     prebuild:
-      - JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 $$SDK$$/tools/bin/sdkmanager 'cmake;3.18.1'
+      - sdkmanager 'cmake;3.22.1'
       - sed -i -e '/play-services/d' project/app/build-template.gradle
     scanignore:
+      - project/jni/iconv/src/icu4c-62_1-src.tgz
       - project/jni/iconv/src/icu-le-hb-1.0.3.tar.gz
       - project/jni/iconv/src/libiconv-1.15.tar.gz
       - project/jni/timidity/samples/timidity.zip
-    build: CMAKE_BIN_LOC=$$SDK$$/cmake/3.18.1/bin/ ./build.sh -z openttd
-    ndk: r23b
+    build: CMAKE_BIN_LOC=$$SDK$$/cmake/3.22.1/bin/ ./build.sh -v fdroid -z openttd
+    ndk: r23
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: ./project/jni/application/openttd/AndroidAppSettings.cfg|AppVersionCode=(\d+)|.|AppVersionName="(.*)"
-CurrentVersion: 13.0.rev114
-CurrentVersionCode: 1300114
+CurrentVersion: 13.4.rev120
+CurrentVersionCode: 1340120
