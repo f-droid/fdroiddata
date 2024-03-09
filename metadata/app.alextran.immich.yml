@@ -2378,46 +2378,6 @@ Builds:
       - $$flutter$$/bin/flutter build apk --release
     ndk: r25c
 
-  - versionName: 1.98.0
-    versionCode: 126
-    commit: 7dc5e0cc4fa4a035f1bf71564137dc35ae0679fc
-    subdir: mobile
-    submodules: true
-    sudo:
-      - apt-get update
-      - apt-get install -y gcc-multilib libc-dev make
-    output: build/app/outputs/flutter-apk/app-release.apk
-    srclibs:
-      - flutter@stable
-      - rustup@1.25.2
-    rm:
-      - design
-      - docker
-      - machine-learning
-      - mobile/ios
-      - server
-      - web
-    prebuild:
-      - export flutterVersion=$(sed -n -E 's/.*flutter-version:\s"([0-9.]+)"/\1/p'
-        ../.github/workflows/build-mobile.yml)
-      - pushd $$flutter$$
-      - git checkout -f $flutterVersion
-      - popd
-      - export PUB_CACHE=$(pwd)/.pub-cache
-      - sed -i -e "s/^\#f//" pubspec.yaml
-      - sed -i -e 's/^\/\/f //' android/app/build.gradle
-      - $$flutter$$/bin/flutter config --no-analytics
-      - $$flutter$$/bin/flutter pub get
-    scandelete:
-      - mobile/.pub-cache
-    build:
-      - $$rustup$$/rustup-init.sh -y
-      - source $HOME/.cargo/env
-      - export PUB_CACHE=$(pwd)/.pub-cache
-      - bash ./scripts/fdroid_build_isar.sh
-      - $$flutter$$/bin/flutter build apk --release
-    ndk: r25c
-
   - versionName: 1.98.1
     versionCode: 127
     commit: 430561d692c48b8ba5e81e94fdfa595204219f12
