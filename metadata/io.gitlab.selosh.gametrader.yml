@@ -1,0 +1,68 @@
+AntiFeatures:
+  NonFreeNet:
+    en-US: Depends on SteamTrades.com
+Categories:
+  - Games
+  - Internet
+License: GPL-3.0-only
+AuthorName: Saladin Shaban
+AuthorEmail: alepsaladin@gmail.com
+SourceCode: https://github.com/saladinalep/gametrader
+IssueTracker: https://github.com/saladinalep/gametrader/issues
+Changelog: https://github.com/saladinalep/gametrader/releases
+Donate: https://selosh.gitlab.io/donate/
+Bitcoin: 3Kjua4N2DpxNazoTkmZ4JDmCH9rjgcKvXZ
+Litecoin: LTFJoF93YzX3w1Ly6QtgVQuHub8YLg5RmT
+
+AutoName: Game Trader
+
+RepoType: git
+Repo: https://github.com/saladinalep/gametrader
+Binaries: https://github.com/saladinalep/gametrader/releases/download/%v/gametrader-%v.apk
+
+Builds:
+  - versionName: 1.0.0
+    versionCode: 1
+    commit: 1.0.0
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@3.16.9
+    rm:
+      - ios
+      - linux
+      - macos
+      - test
+      - web
+      - windows
+    prebuild:
+      - mkdir -p /home/vagrant/selosh
+      - cd ..
+      - mv io.gitlab.selosh.gametrader /home/vagrant/selosh
+      - pushd /home/vagrant/selosh/io.gitlab.selosh.gametrader
+      - export FLUTTER_VERSION=$(sed -n -E "s/flutter:\s([0-9.]+)/\1/p" srclibs)
+      - pushd $$flutter$$
+      - git checkout -f $FLUTTER_VERSION
+      - popd
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter packages pub get
+      - popd
+      - mv /home/vagrant/selosh/io.gitlab.selosh.gametrader io.gitlab.selosh.gametrader
+    scandelete:
+      - .pub-cache
+    build:
+      - cd ..
+      - mv io.gitlab.selosh.gametrader /home/vagrant/selosh
+      - pushd /home/vagrant/selosh/io.gitlab.selosh.gametrader
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk
+      - popd
+      - mv /home/vagrant/selosh/io.gitlab.selosh.gametrader io.gitlab.selosh.gametrader
+
+AllowedAPKSigningKeys: e60cdd1e78313c0bdf27f5f2c54fb55e86e6642f18eb613c2d98568b1af33fdb
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 1.0.0
+CurrentVersionCode: 1
