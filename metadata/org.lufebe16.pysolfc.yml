@@ -295,34 +295,35 @@ Builds:
   - versionName: 2.24.0
     versionCode: 102122400
     commit: 77fd05e65aef2bbd93c8db26d6a6ade4e2335c95
+    subdir: buildozer
     sudo:
       - apt-get update
-      - apt-get install -y ant autoconf build-essential ccache gettext imagemagick
-        libffi-dev libltdl-dev libssl-dev libtool python3-tk virtualenv wget zlib1g-dev
+      - apt-get install -y g++ libc-dev make automake libltdl-dev libtool zlib1g-dev
+        libffi-dev libssl-dev
+      - apt-get install -y python3-pip python3-pexpect python3-virtualenv python3-sh
+      - apt-get install -y -t bullseye-backports python3-appdirs python3-colorama
+        python3-jinja2 python3-build python3-toml python3-packaging
+      - apt-get install -y ant
+      - apt-get install -y ccache gettext imagemagick python3-tk
       - rm /opt/android-sdk/tools/bin/sdkmanager
       - ln -s $(which sdkmanager) /opt/android-sdk/tools/bin/sdkmanager
-    output: buildozer/bin/pysolfc-$$VERSION$$-arm64-v8a_armeabi-v7a-release-unsigned.apk
+    output: bin/pysolfc-$$VERSION$$-arm64-v8a_armeabi-v7a-release-unsigned.apk
+    srclibs:
+      - python-for-android@v2023.09.16
     prebuild:
-      - sdkmanager 'build-tools;32.0.0' 'platforms;android-32'
-      - pushd buildozer
-      - mkdir -p ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin
-      - ./helpers/setapiforp4a >${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/avdmanager
-      - chmod 0755 ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/avdmanager
-      - virtualenv --python=python3 ${HOME}/PYSOLENV
-      - . ${HOME}/PYSOLENV/bin/activate
+      - sdkmanager 'build-tools;33.0.0' 'platforms;android-33'
+      - sed -i -e 's|/usr/bin/bash|/bin/bash|' resize4k
+      - mkdir -p $$SDK$$/cmdline-tools/latest/bin
+      - ./helpers/setapiforp4a > $$SDK$$/cmdline-tools/latest/bin/avdmanager
+      - chmod 0755 $$SDK$$/cmdline-tools/latest/bin/avdmanager
       - python3 -m pip install -r pipreq.txt
       - ./fdroid.init
-      - sed -r "s:#? ?android\.sdk_path =.*:android.sdk_path = $$SDK$$:" -i buildozer.spec
-      - sed -r "s:#? ?android\.ndk_path =.*:android.ndk_path = $$NDK$$:" -i buildozer.spec
-      - sed -r "s:#? ?android\.ant_path =.*:android.ant_path = $(which ant):" -i buildozer.spec
-      - deactivate
-      - popd
+      - sed -i -e 's/log_level =.*/log_level = 1/' -e '/^\[app\]/aandroid.ndk_path
+        = $$NDK$$\nandroid.sdk_path = $$SDK$$\np4a.source_dir = $$python-for-android$$\nandroid.ant_path
+        = /usr' buildozer.spec
     build:
-      - pushd buildozer
-      - . ${HOME}/PYSOLENV/bin/activate
+      - export PATH="$PATH:$HOME/.local/bin"
       - ./buildozer.run release
-      - deactivate
-      - popd
     ndk: r25b
 
 AutoUpdateMode: Version
