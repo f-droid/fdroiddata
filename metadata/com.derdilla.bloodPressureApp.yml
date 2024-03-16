@@ -435,8 +435,35 @@ Builds:
       - export PUB_CACHE=$(pwd)/.pub-cache
       - $$flutter$$/bin/flutter build apk --flavor fdroid
 
+  - versionName: 1.6.3
+    versionCode: 33
+    commit: 5ab56f41566244bf8241d26bad4524c69ae5cf63
+    output: build/app/outputs/flutter-apk/app-fdroid-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+      - linux
+      - macos
+      - web
+      - windows
+    prebuild:
+      - export flutterVersion=$(sed -n -E "s/.*flutter-version:\s'(.*)'/\1/p" .github/workflows/CI.yml|head
+        -1)
+      - pushd $$flutter$$
+      - git checkout -f $flutterVersion
+      - popd
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter packages pub get
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --flavor fdroid
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: android/app/build.gradle|versionCode (\d+)|.|versionName "(.+)"
-CurrentVersion: 1.6.2
-CurrentVersionCode: 32
+CurrentVersion: 1.6.3
+CurrentVersionCode: 33
