@@ -1,0 +1,64 @@
+Categories:
+  - Games
+License: AGPL-3.0-only
+AuthorName: Quentin BETTOUM
+AuthorEmail: quentin.dev@mailo.com
+SourceCode: https://codeberg.org/quentin-bettoum/libre-memory-game
+IssueTracker: https://codeberg.org/quentin-bettoum/libre-memory-game/issues
+Changelog: https://codeberg.org/quentin-bettoum/libre-memory-game/src/branch/main/CHANGELOG.md
+Liberapay: quentin-bettoum
+Bitcoin: bc1qdff4g4lrtj949lh0gmayduu0ujf5zyzel5qcw9
+Litecoin: MP4mi4z1HkuhX5Up1gFKGXC7oRoMMWCjoJ
+
+RepoType: git
+Repo: https://codeberg.org/quentin-bettoum/libre-memory-game.git
+
+Builds:
+  - versionName: 1.0.2
+    versionCode: 3
+    commit: 340d0caa0a7cc06cfd14c56abeb5a88c90ccb987
+    timeout: 14400
+    sudo:
+      - apt-get update
+      - apt-get install -y pkgconf clang scons
+      - apt-get install -y openjdk-17-jdk-headless
+      - update-java-alternatives -a
+    output: libre-memory-game.apk
+    srclibs:
+      - Godot@b09f793f564a6c95dc76acc654b390e68441bd01
+    prebuild:
+      - mkdir -p android
+      - pushd $$Godot$$
+      - scons --clean platform=linuxbsd target=editor use_llvm=yes tools=yes
+      - scons --clean platform=android arch=arm64v8 production=yes target=template_release
+      - scons --clean platform=android arch=armv7 production=yes target=template_release
+      - cd platform/android/java
+      - ./gradlew cleanGodotTemplates
+      - popd
+    build:
+      - export ANDROID_SDK_ROOT=$$SDK$$
+      - export ANDROID_NDK_ROOT=$$NDK$$
+      - export GODOT_CFG=~/.config/godot/editor_settings-4.tres
+      - export GODOT_TMPL=$$Godot$$/bin/android_release.apk
+      - pushd $$Godot$$
+      - scons -j `nproc` platform=linuxbsd target=editor use_llvm=yes tools=yes
+      - scons -j `nproc` platform=android arch=arm64v8 production=yes target=template_release
+      - scons -j `nproc` platform=android arch=armv7 production=yes target=template_release
+      - cd platform/android/java
+      - ./gradlew generateGodotTemplates
+      - popd
+      - $$Godot$$/bin/godot.linuxbsd.editor.x86_64.llvm --headless --check-only --quit
+        project.godot
+      - sed -i -e 's:\(^.*android_sdk_path\)\s*=.*$:\1 = "$$SDK$$":' $GODOT_CFG
+      - sed -i -e '/custom_template\/release/s|=.*|="$$Godot$$/bin/android_release.apk"|'
+        export_presets.cfg
+      - $$Godot$$/bin/godot.linuxbsd.editor.x86_64.llvm --headless --export-release
+      - $$Godot$$/bin/godot.linuxbsd.editor.x86_64.llvm --headless --export-release
+        'Android' libre-memory-game.apk
+    ndk: 26.2.11394342
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: export_presets.cfg|version/code=(\d+)|.|version/name="([\d.]+)"
+CurrentVersion: 1.0.2
+CurrentVersionCode: 3
