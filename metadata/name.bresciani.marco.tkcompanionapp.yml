@@ -14,7 +14,7 @@ Liberapay: marcoXbresciani
 AutoName: TKCompanionApp
 
 RepoType: git
-Repo: https://codeberg.org/marco.bresciani/TKCompanionApp
+Repo: https://codeberg.org/marco.bresciani/TKCompanionApp.git
 
 Builds:
   - versionName: 0.2.9
@@ -1398,10 +1398,42 @@ Builds:
       - node_modules/
     ndk: r21e
 
+  - versionName: 7.1.0
+    versionCode: 710
+    commit: 8ef6fe5f86074d428c12ecd991d161d2dc6e9e13
+    subdir: android/app
+    sudo:
+      - apt-get update
+      - apt-get install -y npm
+      - sysctl fs.inotify.max_user_watches=524288 || true
+    init:
+      - export NODE_VERSION=$(node --version | sed 's/v//')
+      - export NPM_VERSION=$(npm --version | sed 's/v//')
+      - sed -i -e "s/\"node\":\ \".*\"/\"node\":\ \"$NODE_VERSION\"/" -e "s/\"npm\":\
+        \".*\"/\"npm\":\ \"$NPM_VERSION\"/" ../../package.json
+      - npm install
+    gradle:
+      - yes
+    prebuild:
+      - sed -i -e '/installReferrerVersion/,+11d' ../../node_modules/react-native-device-info/android/build.gradle
+      - sed -i -e "/swiperefreshlayout/a implementation(project(':react-native-device-info'))
+        { exclude group\x3a 'com.google.firebase'\\ exclude group\x3a 'com.google.android.gms'\\
+        exclude group\x3a 'com.android.installreferrer'\\ }" build.gradle
+    scanignore:
+      - node_modules/jsc-android
+      - node_modules/react-native/sdks/hermesc/linux64-bin/hermesc
+      - node_modules/react-native-safe-area-context/android/build.gradle
+      - node_modules/react-native-device-info/android/build.gradle
+      - node_modules/react-native-vector-icons/android/build.gradle
+      - node_modules/@react-native-async-storage/async-storage/android/build.gradle
+    scandelete:
+      - node_modules/
+    ndk: r21e
+
 MaintainerNotes: scanignore is used to allow the "node_modules/react-native/android"
   local Maven repository.
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 7.0.0
-CurrentVersionCode: 700
+CurrentVersion: 7.1.0
+CurrentVersionCode: 710
