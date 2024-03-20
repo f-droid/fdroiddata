@@ -171,7 +171,30 @@ Builds:
       - android/ci_build_vcpkg_client.sh
       - rm -rf 3rdParty/android/ 3rdParty/buildCache/ /tmp/android-ndk-*.zip
 
+  - versionName: 8.0.0
+    versionCode: 80000
+    commit: client_release/8.0/8.0.0
+    subdir: android/BOINC/app
+    sudo:
+      - apt-get update
+      - apt-get install -y g++ pkg-config make libc-dev wget libncurses5 m4 autoconf
+        automake libtool python-is-python3 zip
+    gradle:
+      - yes
+    rm:
+      - clientgui/res/*.zip
+      - clientscr/progress/simt
+    prebuild:
+      - sed -i -e 's/versionCode buildVersionCode.*/versionCode $$VERCODE$$/' build.gradle
+      - sed -i -e 's/versionName buildVersionName.*/versionName "$$VERSION$$"/' build.gradle
+      - sed -i -e '/xiaomi_.* {/,/}/d' build.gradle
+    build:
+      - cd ../../..
+      - export VCPKG_FEATURE_FLAGS=-binarycaching
+      - android/ci_build_vcpkg_client.sh
+      - rm -rf 3rdParty/android/ 3rdParty/buildCache/ /tmp/android-ndk-*.zip
+
 AutoUpdateMode: None
 UpdateCheckMode: Static
-CurrentVersion: 7.24.1
-CurrentVersionCode: 72401
+CurrentVersion: 8.0.0
+CurrentVersionCode: 80000
