@@ -151,17 +151,20 @@ Builds:
     versionCode: 9
     commit: aa1df83855e36e13b2978a2d85a06e32ab481b9c
     submodules: true
+    sudo:
+      - mkdir -p /home/sawyer/AndroidStudioProjects
+      - chown vagrant -R /home/sawyer/AndroidStudioProjects
     output: build/app/outputs/flutter-apk/app-release.apk
     prebuild:
       - cd ..
-      - mkdir -p /tmp/build
-      - mv com.nyx.custom_uploader /tmp/build
-      - pushd /tmp/build/com.nyx.custom_uploader
+      - export repo=/home/sawyer/AndroidStudioProjects
+      - mv com.nyx.custom_uploader $repo/custom_uploader
+      - pushd $repo/custom_uploader
       - export PUB_CACHE=$(pwd)/.pub-cache
       - flutter/bin/flutter config --no-analytics
       - flutter/bin/flutter packages pub get
       - popd
-      - mv /tmp/build/com.nyx.custom_uploader com.nyx.custom_uploader
+      - mv $repo/custom_uploader com.nyx.custom_uploader
     scanignore:
       - flutter/bin/cache
     scandelete:
@@ -169,13 +172,14 @@ Builds:
       - .pub-cache
     build:
       - cd ..
-      - mv com.nyx.custom_uploader /tmp/build
-      - pushd /tmp/build/com.nyx.custom_uploader
+      - export repo=/home/sawyer/AndroidStudioProjects
+      - mv com.nyx.custom_uploader $repo/custom_uploader
+      - pushd $repo/custom_uploader
       - export PUB_CACHE=$(pwd)/.pub-cache
       - flutter/bin/flutter pub run build_runner build -d
       - flutter/bin/flutter build apk --release
       - popd
-      - mv /tmp/build/com.nyx.custom_uploader com.nyx.custom_uploader
+      - mv $repo/custom_uploader com.nyx.custom_uploader
 
 AllowedAPKSigningKeys: c0d4c4793aa5a005016d46b0fd8be47f213a5faad55e1532791b1158fcf6a18f
 
