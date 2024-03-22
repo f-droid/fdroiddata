@@ -329,57 +329,20 @@ Builds:
       - deactivate
       - rm -rf env
 
-  - versionName: 0.38.0
-    versionCode: 1710757914
-    commit: v0.38.0
-    subdir: mobile/app
-    sudo:
-      - apt-get update
-      - apt-get install -y build-essential libffi-dev libltdl-dev libssl-dev virtualenv
-        zlib1g-dev
-      - cd build/srclib/cpython
-      - ./configure
-      - make -j`nproc`
-      - make altinstall
-    gradle:
-      - yes
-    srclibs:
-      - cpython@v3.7.7
-    prebuild:
-      - cd ../..
-      - virtualenv --python=python3.7 env
-      - source env/bin/activate
-      - echo "builds={'fdroid':{'post_build':['build_mobile.py'],'gradle_buildtype':'copyonly'}}"
-        >> localbuildsettings.py
-      - ./build.py fdroid
-      - deactivate
-      - rm -rf env
-
   - versionName: 0.38.1
     versionCode: 1710945781
-    commit: v0.38.1
+    commit: 0e44227e1b583bf358baeabace74f2fc50155a04
     subdir: mobile/app
-    sudo:
-      - apt-get update
-      - apt-get install -y build-essential libffi-dev libltdl-dev libssl-dev virtualenv
-        zlib1g-dev
-      - cd build/srclib/cpython
-      - ./configure
-      - make -j`nproc`
-      - make altinstall
     gradle:
       - yes
-    srclibs:
-      - cpython@v3.7.7
     prebuild:
+      - sed -i -e '/com.android.tools.build/s/3.3.2/7.4.2/' ../build.gradle
+      - sed -i -e 's/4.10.1/7.5/' ../gradle/wrapper/gradle-wrapper.properties
+      - sed -i -e '/metaFDroid(variant/d' build.gradle
       - cd ../..
-      - virtualenv --python=python3.7 env
-      - source env/bin/activate
       - echo "builds={'fdroid':{'post_build':['build_mobile.py'],'gradle_buildtype':'copyonly'}}"
         >> localbuildsettings.py
       - ./build.py fdroid
-      - deactivate
-      - rm -rf env
 
 AutoUpdateMode: Version v%v
 UpdateCheckMode: HTTP
