@@ -746,10 +746,86 @@ Builds:
       - make -C build apk
     ndk: r21e
 
+  - versionName: '21.0'
+    versionCode: 2100000
+    commit: 60c450005472e6d38929bb28c07d00589102818d
+    timeout: 28000
+    sudo:
+      - apt-get update
+      - apt-get install autoconf bison build-essential curl flex gawk libcurl4-openssl-dev
+        unzip zip zlib1g-dev
+    output: build/tools/android/packaging/xbmc/build/outputs/apk/release/xbmc-release-unsigned.apk
+    prebuild:
+      - git show fdef39a321bdce2cb924882edaad4c52831a5b28 | patch -p1 -R -s --no-backup-if-mismatch
+      - sed -i -e '/gradlew/d' -e '/gradle-wrapper.jar/d' cmake/scripts/android/Install.cmake
+      - sed -i -e 's#./gradlew#gradle#' -e '\!@cp xbmc/build!d' tools/android/packaging/Makefile.in
+      - sed -i -e '/^    signingConfigs {/,/^    }/d' -e '/signingConfig/d' tools/android/packaging/xbmc/build.gradle.in
+    scanignore:
+      - addons/webinterface.default/lib/soundmanager/swf/soundmanager2_flash_xdomain.zip
+    scandelete:
+      - lib/
+      - project/
+      - tools/
+      - xbmc/filesystem/test
+    build:
+      - pushd tools/depends/
+      - ./bootstrap
+      - ./configure --host=arm-linux-androideabi --with-sdk-path=$$SDK$$ --with-ndk-path=$$NDK$$
+        --prefix=$PWD/output --disable-debug
+      - make -j $(nproc)
+      - popd
+      - make -C tools/depends/target/binary-addons -j $(nproc) ADDONS='audioencoder.*
+        game.* kodi.* metadata.album.* metadata.artists.* metadata.common.* metadata.generic.*
+        metadata.local metadata.themoviedb.* metadata.tvshows.* repository.* resource.*
+        screensaver.* script.* service.* skin.* webinterface.* xbmc.*'
+      - make -C tools/depends/target/cmakebuildsys
+      - make -C build -j $(nproc)
+      - make -C build apk
+    ndk: r21e
+
+  - versionName: '21.0'
+    versionCode: 2100001
+    commit: 60c450005472e6d38929bb28c07d00589102818d
+    timeout: 28000
+    sudo:
+      - apt-get update
+      - apt-get install autoconf bison build-essential curl flex gawk libcurl4-openssl-dev
+        unzip zip zlib1g-dev
+    output: build/tools/android/packaging/xbmc/build/outputs/apk/release/xbmc-release-unsigned.apk
+    prebuild:
+      - git show fdef39a321bdce2cb924882edaad4c52831a5b28 | patch -p1 -R -s --no-backup-if-mismatch
+      - sed -i -e '/gradlew/d' -e '/gradle-wrapper.jar/d' cmake/scripts/android/Install.cmake
+      - sed -i -e 's#./gradlew#gradle#' -e '\!@cp xbmc/build!d' tools/android/packaging/Makefile.in
+      - sed -i -e '/^    signingConfigs {/,/^    }/d' -e '/signingConfig/d' tools/android/packaging/xbmc/build.gradle.in
+    scanignore:
+      - addons/webinterface.default/lib/soundmanager/swf/soundmanager2_flash_xdomain.zip
+    scandelete:
+      - lib/
+      - project/
+      - tools/
+      - xbmc/filesystem/test
+    build:
+      - pushd tools/depends/
+      - ./bootstrap
+      - ./configure --host=aarch64-linux-android --with-sdk-path=$$SDK$$ --with-ndk-path=$$NDK$$
+        --prefix=$PWD/output --disable-debug
+      - make -j $(nproc)
+      - popd
+      - make -C tools/depends/target/binary-addons -j $(nproc) ADDONS='audioencoder.*
+        game.* kodi.* metadata.album.* metadata.artists.* metadata.common.* metadata.generic.*
+        metadata.local metadata.themoviedb.* metadata.tvshows.* repository.* resource.*
+        screensaver.* script.* service.* skin.* webinterface.* xbmc.*'
+      - make -C tools/depends/target/cmakebuildsys
+      - make -C build -j $(nproc)
+      - make -C build apk
+    ndk: r21e
+
 MaintainerNotes: |-
   18.0-groovy.patch was <a href="https://github.com/xbmc/xbmc/issues/6860#issuecomment-461122155">provided by upstream</a>; it makes the build use the Debian groovy package instead of a prebuilt JAR.
 
-  Since Kodi 20.2 we build Groovy from source because Debian ships too old version (2.4.21). Groovy 4.0 wants JDK 16+, but Kodi fails to build with JDK 17 ("Unsupported class file major version 61"), so we use two JDKs.
+  We build Groovy from source for Kodi 20.x because Debian ships too old version (2.4.21). Groovy 4.0 wants JDK 16+, but Kodi fails to build with JDK 17 ("Unsupported class file major version 61"), so we use two JDKs.
+
+  Kodi 21.x builds Groovy and Apache Commons libraries from source via its own build system. We revert fdef39a321bdce2cb924882edaad4c52831a5b28 because F-Droid does not support Android App Bundles.
 
   Build instructions are available <a href="https://github.com/xbmc/xbmc/blob/master/docs/README.Android.md">here</a>.
 
@@ -758,5 +834,5 @@ MaintainerNotes: |-
 ArchivePolicy: 4
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: '20.5'
-CurrentVersionCode: 2005001
+CurrentVersion: '21.0'
+CurrentVersionCode: 2100001
