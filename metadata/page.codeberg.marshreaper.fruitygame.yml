@@ -311,8 +311,50 @@ Builds:
       - echo "build end"
     ndk: 23.2.8568313
 
+  - versionName: '2.6'
+    versionCode: 17
+    commit: 98f06f59558c085e595032d53b3a1a9e3d13d56b
+    sudo:
+      - apt-get update
+      - apt-get install -y clang gettext pkg-config scons
+    output: game/FruityGame.apk
+    srclibs:
+      - Godot@3.5.3-stable
+    build:
+      - export HOME=$PWD
+      - cp -R $$Godot$$ godot
+      - keytool -keyalg RSA -genkey -v -keystore debug.keystore -storepass android
+        -alias androiddebugkey -keypass android -dname "CN=Android Debug,O=Android,C=US"
+      - mkdir -p ./.config/godot/
+      - export SDK_PATH="export/android/android_sdk_path = \"$$SDK$$\""
+      - export DEBUG_KEYSTORE_PATH="export/android/debug_keystore = \"$PWD/debug.keystore\""
+      - echo '[gd_resource type="EditorSettings" format=2]' >> ./.config/godot/editor_settings-3.tres
+      - echo "[resource]"  >> ./.config/godot/editor_settings-3.tres
+      - echo $SDK_PATH >> ./.config/godot/editor_settings-3.tres
+      - echo $DEBUG_KEYSTORE_PATH >> ./.config/godot/editor_settings-3.tres
+      - echo 'export/android/debug_keystore_user = "androiddebugkey"' >> ./.config/godot/editor_settings-3.tres
+      - echo 'export/android/debug_keystore_pass = "android"' >> ./.config/godot/editor_settings-3.tres
+      - cd godot
+      - scons -j `nproc` platform=server use_llvm=yes unix_global_settings_path=".."
+      - export ANDROID_NDK_ROOT=$$NDK$$
+      - scons -j `nproc` use_llvm=yes p=android target=release  unix_global_settings_path=".."
+        android_arch=armv7
+      - scons -j `nproc` use_llvm=yes p=android target=release  unix_global_settings_path=".."
+        android_arch=arm64v8
+      - pushd platform/android/java/
+      - gradle generateGodotTemplates
+      - popd
+      - cd ..
+      - mkdir -p ./.local/share/godot/templates/3.5.3.stable/
+      - echo "3.5.3.stable" >> ./.local/share/godot/templates/3.5.3.stable/version.txt
+      - cp godot/bin/android_release.apk ./.local/share/godot/templates/3.5.3.stable/
+      - ./godot/bin/godot_server.* -v --path game --export Android FruityGame.apk
+      - find . -iname "*.apk"
+      - echo "build end"
+    ndk: 23.2.8568313
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: game/export_presets.cfg|version/code=(\d+)|.|version/name="([\d.]+)"
-CurrentVersion: '2.5'
-CurrentVersionCode: 16
+CurrentVersion: '2.6'
+CurrentVersionCode: 17
