@@ -1292,16 +1292,17 @@ Builds:
 
   - versionName: 1.60.1-t2caffeeb4-g6f7ae79a31c
     versionCode: 200
+    disable: go downloads go automatically. Next version this is not needed anymore.
     commit: de01d49351e037957cf090494843ff152b3ed51f
     subdir: android
     sudo:
       - apt-get update
-      - apt-get install -y -t bullseye-backports golang-go
-      - apt-get install -y build-essential
+      - apt-get install -y -t bookworm-backports golang-go
+      - apt-get install -y gcc libc-dev make
     gradle:
       - fdroid
     srclibs:
-      - tailscale-go@e6ce5b50036022c91783161890eabecfddc5ae79
+      - tailscale-go@f86d7c8ef64a0f8a2516fc23652eee28abc8d8e0
     prebuild:
       - echo -e "\norg.gradle.jvmargs=-Xmx4096m" >> gradle.properties
       - sdkmanager 'platforms;android-31' 'platform-tools' 'build-tools;33.0.2'
@@ -1309,7 +1310,7 @@ Builds:
         -e 's/list_installed/list/' ../Makefile
     build:
       - export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
-      - export TOOLCHAINREV=$(go run tailscale.com/cmd/printdep --go)
+      - export TOOLCHAINREV=$(cat ../go.toolchain.rev)
       - export TOOLCHAINDIR=${HOME}/.cache/tailscale-android-go-$TOOLCHAINREV
       - ANDROID_NDK_ROOT=$$NDK$$ make -C .. env
       - pushd $$tailscale-go$$
