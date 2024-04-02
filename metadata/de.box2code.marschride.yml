@@ -1,0 +1,52 @@
+AntiFeatures:
+  NonFreeNet:
+    en-US: Rely on OpenStreetMap.
+Categories:
+  - Sports & Health
+License: GPL-3.0-or-later
+WebSite: https://stefan.box2code.de/2022/01/23/marschride/
+SourceCode: https://bitbucket.org/bobbery/marschride/src/HEAD/
+IssueTracker: https://bitbucket.org/bobbery/marschride/jira
+
+Name: MarschRide
+AutoName: MarschRide
+
+RepoType: git
+Repo: https://bitbucket.org/bobbery/marschride.git
+
+Builds:
+  - versionName: 1.0.10
+    versionCode: 11
+    commit: v1.0.10
+    submodules: true
+    sudo:
+      - echo "deb https://deb.debian.org/debian bullseye main" > /etc/apt/sources.list.d/bullseye.list
+      - apt-get update
+      - apt-get install -y -t bullseye openjdk-11-jdk-headless
+      - update-java-alternatives --set java-1.11.0-openjdk-amd64
+    output: build/app/outputs/flutter-apk/app-release.apk
+    rm:
+      - ios
+      - linux
+      - web
+    prebuild:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - flutter/bin/flutter config --no-analytics
+      - flutter/bin/flutter pub get
+      - patch $PUB_CACHE/hosted/pub.dartlang.org/flutter_map_location-0.12.0/lib/src/location_layer.dart
+        patches/locLayer.patch
+    scanignore:
+      - flutter/bin/cache
+      - flutter/packages/flutter_tools/gradle/flutter.gradle
+    scandelete:
+      - flutter
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - flutter/bin/flutter build apk
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 1.0.10
+CurrentVersionCode: 11
