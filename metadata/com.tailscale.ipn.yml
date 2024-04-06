@@ -1325,9 +1325,43 @@ Builds:
       - ANDROID_NDK_ROOT=$$NDK$$ make -C .. android/libs/ipn.aar
     ndk: r23b
 
+  - versionName: 1.61.105-t7429e8912-g12210d3f26b
+    versionCode: 201
+    commit: a9ff722b024870c4a0e82d8260de539e0d8067c8
+    subdir: android
+    sudo:
+      - apt-get update
+      - apt-get install -y -t bookworm-backports golang-go
+      - apt-get install -y gcc libc-dev make
+    gradle:
+      - fdroid
+    srclibs:
+      - tailscale-go@f86d7c8ef64a0f8a2516fc23652eee28abc8d8e0
+    prebuild:
+      - echo -e "\norg.gradle.jvmargs=-Xmx4096m" >> gradle.properties
+      - sdkmanager 'platforms;android-31' 'platform-tools' 'build-tools;33.0.2'
+      - sed -i -e '/rm -rf/,+2d' -e 's!$(ANDROID_HOME)/cmdline-tools/latest/bin/sdkmanager!sdkmanager!g'
+        -e 's/list_installed/list/' ../Makefile
+    build:
+      - export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+      - export TOOLCHAINREV=$(cat ../go.toolchain.rev)
+      - export TOOLCHAINDIR=${HOME}/.cache/tailscale-android-go-$TOOLCHAINREV
+      - ANDROID_NDK_ROOT=$$NDK$$ make -C .. env
+      - pushd $$tailscale-go$$
+      - git checkout $TOOLCHAINREV
+      - pushd src
+      - ./make.bash
+      - popd
+      - popd
+      - mkdir -p $(dirname $TOOLCHAINDIR)
+      - ln -s $$tailscale-go$$ $TOOLCHAINDIR
+      - export PATH=$TOOLCHAINDIR/bin:$PATH
+      - ANDROID_NDK_ROOT=$$NDK$$ make -C .. android/libs/ipn.aar
+    ndk: r23b
+
 MaintainerNotes: Tracking reported at https://gitlab.com/fdroid/fdroiddata/-/issues/2601
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 1.60.1-t2caffeeb4-g6f7ae79a31c
-CurrentVersionCode: 200
+CurrentVersion: 1.61.105-t7429e8912-g12210d3f26b
+CurrentVersionCode: 201
