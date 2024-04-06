@@ -58,8 +58,50 @@ Builds:
       - npx cordova compile android --release -- --packageType=apk
     ndk: r23c
 
-AutoUpdateMode: Version
-UpdateCheckMode: Tags ^android
-UpdateCheckData: config.xml|android-versionCode="(\d+)"|.|version="([\d.]+)"\sandroid
-CurrentVersion: 1.8.1
-CurrentVersionCode: 42
+  - versionName: 1.12.1
+    versionCode: 43
+    commit: 425d6c20448578a4301a5fc9d291978b1fbdbc72
+    sudo:
+      - apt-get update
+      - apt-get install -y make npm
+      - apt-get install -y -t bookworm-backports golang-go
+      - sysctl fs.inotify.max_user_watches=524288 || true
+    init:
+      - sed -i -e '/"electron/d' -e '/puppeteer/d' -e '/engines/,/^  },/d' package.json
+      - npm install
+    output: platforms/android/app/build/outputs/apk/**/*.apk
+    srclibs:
+      - outline-go-tun2socks@v3.4.0
+    rm:
+      - src/cordova/plugin/apple
+      - src/electron
+      - src/infrastructure/electron
+      - src/www/app/electron*
+      - third_party
+      - tools
+    prebuild:
+      - sed -i -e '/copy_third_party/d' src/cordova/plugin/plugin.xml
+      - sed -i -z -E -e 's|<source-file[^>]+android/libs[^>]+>||g' src/cordova/plugin/plugin.xml
+      - sed -i -e 's/buildNumber.*/buildNumber:\ $$VERCODE$$,/' src/build/get_build_parameters.mjs
+      - sed -i -e '/throw/d' src/www/build.action.mjs
+      - npm run action cordova/setup android -- --buildMode=release --versionName=$$VERSION$$
+    scandelete:
+      - node_modules
+    build:
+      - sdkmanager 'build-tools;32.0.0' 'platforms;android-32'
+      - pushd $$outline-go-tun2socks$$
+      - make android
+      - popd
+      - cp $$outline-go-tun2socks$$/build/android/tun2socks.aar platforms/android/app/src/main/libs/tun2socks.aar
+      - mkdir -p third_party/outline-go-tun2socks/android
+      - cp $$outline-go-tun2socks$$/build/android/tun2socks.aar third_party/outline-go-tun2socks/android/tun2socks.aar
+      - npx cordova compile android --release -- --packageType=apk --gradleArg=--include-build=../../src/cordova/android/OutlineAndroidLib
+    ndk: r23b
+
+MaintainerNotes: The upstream version code is generated based on the timestamp. We
+  just increase it for every update.
+
+AutoUpdateMode: None
+UpdateCheckMode: None
+CurrentVersion: 1.12.1
+CurrentVersionCode: 43
