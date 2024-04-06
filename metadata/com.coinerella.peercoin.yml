@@ -1398,7 +1398,7 @@ Builds:
     output: build/app/outputs/flutter-apk/app-release.apk
     srclibs:
       - flutter@3.16.2
-      - transistor-background-fetch@8eb0a1c6290e1a8be3734e897cd12423f4a0f5ed
+      - transistor-background-fetch@0dd1457588ba031f11e9452f125144aac8a9b75f
     rm:
       - ios
       - test_driver
@@ -1406,18 +1406,15 @@ Builds:
       - export PUB_CACHE=$(pwd)/.pub-cache
       - $$flutter$$/bin/flutter config --no-analytics
       - $$flutter$$/bin/flutter packages pub get
-    scanignore:
-      - android/build.gradle
-      - .pub-cache/hosted/pub.dev/background_fetch-*/android/build.gradle
+      - sed -i -e '/maven {/,/^        }/cmavenLocal()' android/build.gradle .pub-cache/hosted/pub.dev/background_fetch-*/android/build.gradle
     scandelete:
       - .pub-cache
     build:
       - export PUB_CACHE=$(pwd)/.pub-cache
       - pushd $$transistor-background-fetch$$/android/tsbackgroundfetch/
       - gradle assembleRelease
+      - gradle publishToMavenLocal
       - popd
-      - mv $$transistor-background-fetch$$/android/tsbackgroundfetch/build/outputs/aar/tsbackgroundfetch-release.aar
-        $PUB_CACHE/hosted/pub.dev/background_fetch-1.2.1/android/libs/com/transistorsoft/tsbackgroundfetch/1.0.2/tsbackgroundfetch-1.0.2.aar
       - $$flutter$$/bin/flutter pub run flutter_launcher_icons:main -f fdroid_flutter_launcher_icons.yaml
       - $$flutter$$/bin/flutter pub run flutter_native_splash:create
       - $$flutter$$/bin/flutter packages pub run build_runner build --delete-conflicting-outputs
