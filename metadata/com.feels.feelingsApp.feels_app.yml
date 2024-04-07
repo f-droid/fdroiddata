@@ -1,0 +1,57 @@
+Categories:
+  - Sports & Health
+  - Writing
+License: Apache-2.0
+AuthorName: seras
+SourceCode: https://github.com/seras42/feels_app
+IssueTracker: https://github.com/seras42/feels_app/issues
+
+AutoName: Feels App
+
+RepoType: git
+Repo: https://github.com/seras42/feels_app
+Binaries: https://github.com/seras42/feels_app/releases/download/%v/app-release.apk
+
+Builds:
+  - versionName: 0.0.2
+    versionCode: 2
+    commit: 091bbdb95bcaccbdbda257d20887689f47eecc5a
+    sudo:
+      - mkdir -p /var/home/user/StudioProjects
+      - chown vagrant -R /var/home/user/StudioProjects
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@stable
+    prebuild:
+      - cd ..
+      - export repo=/var/home/user/StudioProjects
+      - mv com.feels.feelingsApp.feels_app $repo/feels_app
+      - pushd $repo/feels_app
+      - version=$(cat flutter-version)
+      - pushd $$flutter$$
+      - git checkout -f $version
+      - popd
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter packages pub get
+      - popd
+      - mv $repo/feels_app com.feels.feelingsApp.feels_app
+    scandelete:
+      - .pub-cache
+    build:
+      - cd ..
+      - export repo=/var/home/user/StudioProjects
+      - mv com.feels.feelingsApp.feels_app $repo/feels_app
+      - pushd $repo/feels_app
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release
+      - popd
+      - mv $repo/feels_app com.feels.feelingsApp.feels_app
+
+AllowedAPKSigningKeys: dba4276855c4e4fcf8cab3243c844d10f485abe5a4028c668e1c58926670d541
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 0.0.2
+CurrentVersionCode: 2
