@@ -1,0 +1,60 @@
+AntiFeatures:
+  NonFreeNet:
+    en-US: This app depends on meteo.gr for weather data.
+Categories:
+  - Internet
+  - Science & Education
+License: GPL-3.0-or-later
+AuthorName: Spiros Vlachos
+SourceCode: https://gitlab.com/vitaspiros/meteo-weather-gr
+
+AutoName: Meteo Weather Greece
+
+RepoType: git
+Repo: https://gitlab.com/vitaspiros/meteo-weather-gr.git
+Binaries: https://gitlab.com/vitaspiros/meteo-weather-gr/-/raw/v%v/prebuilt/app-release.apk
+
+Builds:
+  - versionName: '1.0'
+    versionCode: 1
+    commit: v1.0
+    submodules: true
+    sudo:
+      - mkdir -p /home/spiros
+      - chown vagrant /home/spiros
+    output: build/app/outputs/flutter-apk/app-release.apk
+    rm:
+      - prebuilt
+    prebuild:
+      - export repo=/home/spiros/StudioProjects
+      - mkdir -p $repo
+      - cd ..
+      - mv com.vitabytes.meteoweathergr $repo/meteo-weather-gr
+      - pushd $repo/meteo-weather-gr
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - flutter/bin/flutter config --no-analytics
+      - flutter/bin/flutter pub get
+      - popd
+      - mv $repo/meteo-weather-gr com.vitabytes.meteoweathergr
+    scanignore:
+      - flutter/bin/cache
+    scandelete:
+      - .pub-cache
+      - flutter/dev/integration_tests
+      - flutter/packages/flutter_tools/gradle
+    build:
+      - export repo=/home/spiros/StudioProjects
+      - cd ..
+      - mv com.vitabytes.meteoweathergr $repo/meteo-weather-gr
+      - pushd $repo/meteo-weather-gr
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - flutter/bin/flutter build apk --target-platform=android-arm64,android-arm
+      - popd
+      - mv $repo/meteo-weather-gr com.vitabytes.meteoweathergr
+
+AllowedAPKSigningKeys: 22564ba94994e69586834c10b48837830db355df77824e0504c42839babf17a0
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: '1.0'
+CurrentVersionCode: 1
