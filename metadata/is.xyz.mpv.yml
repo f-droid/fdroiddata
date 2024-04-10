@@ -557,7 +557,66 @@ Builds:
       - ./buildall.sh
     ndk: r26b
 
+  - versionName: 2024-04-09-release
+    versionCode: 34
+    commit: 61bb90e16232838c325b75adbdae931b672a6677
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y make automake pkg-config libtool nasm python3-jsonschema
+        meson python3-jinja2
+    gradle:
+      - default
+    srclibs:
+      - mbedtls@v3.5.2
+      - dav1d@f6e05da0937f7fcbe7ad6ffc0a0fa94ab0059658
+      - FFmpeg@083443d67cb159ce469e5d902346b8d0c2cd1c93
+      - freetype2@VER-2-13-2
+      - fribidi@v1.0.13
+      - harfbuzz@8.3.0
+      - libunibreak@libunibreak_6_1
+      - libass@d160f8dd08bb7c6d6fe3d798519bf70ca8e6f669
+      - libplacebo@7b29435072143ee8b7e131947e055d3780ae4e47
+      - mpv@f974382ca06655ac34debce7284ce87d01e5abd1
+    prebuild:
+      - sed -i -e '/enable true/d' -e '/universalBase/s/8000/0/' build.gradle
+      - cd ../buildscripts/
+      - mkdir -p sdk
+      - ln -s $$NDK$$ sdk/android-ndk-r26c
+      - mkdir -p deps
+      - pushd deps/
+      - cp -r $$mbedtls$$ mbedtls
+      - cp -r $$dav1d$$ dav1d
+      - cp -r $$FFmpeg$$ ffmpeg
+      - cp -r $$freetype2$$ freetype2
+      - cp -r $$fribidi$$ fribidi
+      - cp -r $$harfbuzz$$ harfbuzz
+      - cp -r $$libunibreak$$ unibreak
+      - cp -r $$libass$$ libass
+      - cp -r $$libplacebo$$ libplacebo
+      - cp -r $$mpv$$ mpv
+      - mkdir lua
+      - curl -Lo lua.tar.gz https://www.lua.org/ftp/lua-5.2.4.tar.gz
+      - echo "b9e2e4aad6789b3b63a056d442f7b39f0ecfca3ae0f1fc0ae4e9614401b69f4b lua.tar.gz"
+        | sha256sum -c -
+      - tar -xz --strip-components=1 -C lua -f lua.tar.gz
+      - cd unibreak
+      - ./bootstrap
+      - popd
+      - sed -i -e '/gradlew/d' scripts/mpv-android.sh
+      - sed -i -e '/"$target" == "mpv-android"/,/ls -lh/d' buildall.sh
+    scandelete:
+      - buildscripts/deps/mbedtls/
+      - buildscripts/deps/lua.tar.gz
+      - buildscripts/deps/libplacebo/3rdparty/jinja/tests/res/package.zip
+    build:
+      - cd ../buildscripts/
+      - ./buildall.sh --arch arm64 mpv
+      - ./buildall.sh --arch x86_64 mpv
+      - ./buildall.sh
+    ndk: r26c
+
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: 2023-11-30-release
-CurrentVersionCode: 33
+CurrentVersion: 2024-04-09-release
+CurrentVersionCode: 34
