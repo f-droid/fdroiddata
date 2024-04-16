@@ -945,14 +945,14 @@ Builds:
     commit: c8789de7b1590fc7d7aedc330c55838f81ee89e3
     sudo:
       - sysctl fs.inotify.max_user_watches=524288
-      - curl -Lo node.tar.gz https://nodejs.org/dist/v18.16.0/node-v18.16.0-linux-x64.tar.gz
-      - echo "fc83046a93d2189d919005a348db3b2372b598a145d84eb9781a3a4b0f032e95  node.tar.gz"
-        | sha256sum -c -
-      - tar xzf node.tar.gz --strip-components=1 -C /usr/local/
+      - apt-get update
+      - apt-get install -y npm
       - npm -g install yarn
     init: yarn install
     output: android/app/build/outputs/apk/release/app-release.apk
     prebuild:
+      - echo -e "\norg.gradle.jvmargs=-Xms1g -Xmx5g -XX:+UseParallelGC -Dfile.encoding=UTF-8
+        -XX:MaxMetaspaceSize=1g" >> gradle.properties
       - sdkmanager 'cmake;3.22.1'
       - yarn expo prebuild
       - cp -r script/res/node_modules/* node_modules/
@@ -998,7 +998,7 @@ Builds:
     build:
       - cd android/app
       - gradle assembleRelease
-    ndk: r23b
+    ndk: 23.1.7779620
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
