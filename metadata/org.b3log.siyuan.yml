@@ -601,7 +601,50 @@ Builds:
       - mv $$siyuan$$/kernel/kernel.aar libs
     ndk: r26b
 
+  - versionName: 3.0.10
+    versionCode: 230
+    commit: e8dce2cf8045eae8026b59c2e0a2a54aa45f65da
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -t bookworm-backports -y golang-go
+      - apt-get install -y gcc libc-dev zip npm
+      - npm install -g pnpm
+    gradle:
+      - yes
+    srclibs:
+      - siyuan@v2.12.6
+    prebuild:
+      - sed -i -e '/aliyun/d' ../build.gradle
+      - sdkmanager "platforms;android-34" "build-tools;34.0.0"
+      - cd $$siyuan$$
+      - git checkout -f 'v$$VERSION$$'
+      - sed -i -e '/CheckUpdate/d' kernel/model/mount.go
+      - sed -i -e '/return &System{/a DisableGoogleAnalytics:true,' -e '/DownloadInstallPkg/s/true/false/'
+        kernel/conf/system.go
+      - cd app
+      - pnpm install --no-frozen-lockfile
+    build:
+      - pushd $$siyuan$$/app
+      - pnpm run build:mobile
+      - zip -r app appearance guide stage changelogs
+      - popd
+      - mkdir -p src/main/assets/
+      - mv $$siyuan$$/app/app.zip src/main/assets/
+      - export GOPATH=$(pwd)
+      - export PATH="$GOPATH/bin:$PATH"
+      - pushd $$siyuan$$/kernel
+      - go install golang.org/x/mobile/cmd/gomobile@v0.0.0-20240112133503-c713f31d574b
+      - go mod download
+      - gomobile init
+      - gomobile bind --tags fts5 -ldflags '-s -w' -v -o kernel.aar -target='android/arm64'
+        -androidapi 24 ./mobile/
+      - popd
+      - mkdir libs
+      - mv $$siyuan$$/kernel/kernel.aar libs
+    ndk: r26b
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 3.0.9
-CurrentVersionCode: 229
+CurrentVersion: 3.0.10
+CurrentVersionCode: 230
