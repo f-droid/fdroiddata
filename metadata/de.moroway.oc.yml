@@ -490,8 +490,29 @@ Builds:
       - node_modules/cordova-android/framework/cordova-publish.gradle
     build: cordova build android --release -- --packageType=apk
 
+  - versionName: 9.1.5
+    versionCode: 90105
+    commit: 758ade320933a06ab4b21e5ddf50bbc99794685b
+    sudo:
+      - sysctl fs.inotify.max_user_watches=524288 || true
+      - curl -Lo node.tar.gz https://nodejs.org/dist/v18.18.0/node-v18.18.0-linux-x64.tar.gz
+      - echo "8aae62b6b3a5d659459c35c51e4373b950d11595a273db16c6162c712c5533a2 node.tar.gz"
+        | sha256sum -c -
+      - tar xzf node.tar.gz --strip-components=1 -C /usr/local/
+      - npm install -g npm@latest
+      - npm install -g cordova
+    output: platforms/android/app/build/outputs/apk/release/app-release-unsigned.apk
+    prebuild:
+      - sdkmanager 'platforms;android-33' 'build-tools;33.0.2'
+      - cordova platform add android
+    scanignore:
+      - moroway-app-oc/assets/3d/background-3d/background-3d.bin
+    scandelete:
+      - node_modules/cordova-android/framework/cordova-publish.gradle
+    build: cordova build android --release -- --packageType=apk
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: fdroid_version.txt|.+,(\d+)|.|(.+),\d+
-CurrentVersion: 9.1.4
-CurrentVersionCode: 90104
+CurrentVersion: 9.1.5
+CurrentVersionCode: 90105
