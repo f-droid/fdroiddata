@@ -8459,6 +8459,362 @@ Builds:
       - separateApk=true
       - reactNativeArchitectures=x86_64
 
+  - versionName: 2.15.0
+    versionCode: 51201
+    commit: e0429bd5210133ba04bd770d1f5c30cda386d436
+    subdir: android/app
+    sudo:
+      - sysctl fs.inotify.max_user_watches=524288 || true
+      - apt-get update
+      - apt-get install -y npm
+      - npm -g install yarn npm@9
+    init:
+      - cd ../..
+      - sed -i -e '/react-native-in-app-review/d' package.json
+      - sed -i -e "/fs.existsSync('dist')/,+2d" scripts/generate-assets.js
+      - mkdir -p dist/assets
+      - sed -i -e '/mmjstool":\ {/,/^    },/d' package-lock.json
+      - npm install --ignore-scripts
+    gradle:
+      - yes
+    output: build/outputs/apk/release/app-armeabi-v7a-release-unsigned.apk
+    rm:
+      - ios
+      - node_modules/react-native-notifications/lib/android/app/src/main/java/com/wix/reactnativenotifications/fcm/FcmInstanceIdListenerService.java
+    prebuild:
+      - sed -i -e 's/Xmx2048m/Xmx8092m/' ../gradle.properties
+      - sed -i -e 's/versionCode .*/versionCode $$VERCODE$$/' -e 's/universalApk .*/universalApk
+        false/' -e '/applicationVariants/,+12d' build.gradle
+      - sed -i -e '/gms/d' ../build.gradle build.gradle
+      - sed -i -e 's|$rootDir.*Detox-android|https://jitpack.io|' ../build.gradle
+      - sed -i -e '/bundleCommand/a nodeExecutableAndArgs = ["node","--max-old-space-size=12000"]'
+        -e '/firebase/d' -e '/detox/d' build.gradle
+      - cd ../..
+      - npx patch-package --error-on-fail
+      - sed -i -e '/InAppReview/d' app/screens/review_app/index.tsx
+      - sed -i -e 's/InAppReview.isAvailable()/false/' -e '/InAppReview/d' app/utils/reviews.ts
+      - sed -E -i '/installreferrer/,+11d' node_modules/react-native-device-info/android/build.gradle
+      - sed -i -e 's|maven.fabric.io/public|jitpack.io|' node_modules/react-native-math-view/android/build.gradle
+      - sed -i -e 's|def command =.*sdkmanager|def command = "sdkmanager|' node_modules/react-native-navigation/lib/android/app/build.gradle
+      - cp node_modules/@mattermost/compass-icons/font/compass-icons.ttf assets/fonts/
+      - cp node_modules/@mattermost/compass-icons/font/compass-icons.ttf android/app/src/main/assets/fonts
+      - cd node_modules/react-native-notifications/lib/android/app
+      - sed -i -e '/firebase-messaging/d' build.gradle
+      - sed -i -e '/google-services/d' ../build.gradle
+      - sed -i -e '/FcmInstanceIdListenerService/,/<service/d' src/main/AndroidManifest.xml
+      - sed -i -e '/FirebaseApp/d' src/main/java/com/wix/reactnativenotifications/RNNotificationsPackage.java
+      - sed -i -e '/FirebaseMessaging.getInstance/,/});/d' -e '/FirebaseMessaging/d'
+        src/main/java/com/wix/reactnativenotifications/fcm/FcmToken.java
+    scanignore:
+      - node_modules/detox/android/build.gradle
+      - node_modules/detox/android/detox/publishing.gradle
+      - node_modules/jsc-android
+      - node_modules/@mattermost/react-native-emm/android/build.gradle
+      - node_modules/@mattermost/react-native-network-client/android/build.gradle
+      - node_modules/@mattermost/react-native-paste-input/android/build.gradle
+      - node_modules/@mattermost/react-native-turbo-log/android/build.gradle
+      - node_modules/@react-native-camera-roll/camera-roll/android/build.gradle
+      - node_modules/@react-native-community/netinfo/android/build.gradle
+      - node_modules/@react-native-cookies/cookies/android/build.gradle
+      - node_modules/react-native-create-thumbnail/android/build.gradle
+      - node_modules/react-native-device-info/android/build.gradle
+      - node_modules/react-native-fast-image/android/build.gradle
+      - node_modules/react-native-haptic-feedback/android/build.gradle
+      - node_modules/react-native-image-picker/android/build.gradle
+      - node_modules/react-native-linear-gradient/android/build.gradle
+      - node_modules/react-native-localize/android/build.gradle
+      - node_modules/react-native-math-view/android/build.gradle
+      - node_modules/react-native-navigation/lib/android/build.gradle
+      - node_modules/react-native-notifications/lib/android/build.gradle
+      - node_modules/react-native-permissions/android/build.gradle
+      - node_modules/react-native-reanimated/android/build.gradle
+      - node_modules/react-native-safe-area-context/android/build.gradle
+      - node_modules/react-native-screens/android/build.gradle
+      - node_modules/react-native/sdks/hermesc/linux64-bin/hermesc
+      - node_modules/react-native-share/android/build.gradle
+      - node_modules/react-native-svg/android/build.gradle
+      - node_modules/react-native-vector-icons/android/build.gradle
+      - node_modules/react-native-webview/android/build.gradle
+      - node_modules/@stream-io/flat-list-mvcp/android/build.gradle
+    scandelete:
+      - node_modules
+    build:
+      - pushd ../..
+      - node scripts/generate-assets.js
+      - ./node_modules/.bin/jetify
+      - popd
+    ndk: r23b
+    gradleprops:
+      - separateApk=true
+      - reactNativeArchitectures=armeabi-v7a
+
+  - versionName: 2.15.0
+    versionCode: 51202
+    commit: e0429bd5210133ba04bd770d1f5c30cda386d436
+    subdir: android/app
+    sudo:
+      - sysctl fs.inotify.max_user_watches=524288 || true
+      - apt-get update
+      - apt-get install -y npm
+      - npm -g install yarn npm@9
+    init:
+      - cd ../..
+      - sed -i -e '/react-native-in-app-review/d' package.json
+      - sed -i -e "/fs.existsSync('dist')/,+2d" scripts/generate-assets.js
+      - mkdir -p dist/assets
+      - sed -i -e '/mmjstool":\ {/,/^    },/d' package-lock.json
+      - npm install --ignore-scripts
+    gradle:
+      - yes
+    output: build/outputs/apk/release/app-x86-release-unsigned.apk
+    rm:
+      - ios
+      - node_modules/react-native-notifications/lib/android/app/src/main/java/com/wix/reactnativenotifications/fcm/FcmInstanceIdListenerService.java
+    prebuild:
+      - sed -i -e 's/Xmx2048m/Xmx8092m/' ../gradle.properties
+      - sed -i -e 's/versionCode .*/versionCode $$VERCODE$$/' -e 's/universalApk .*/universalApk
+        false/' -e '/applicationVariants/,+12d' build.gradle
+      - sed -i -e '/gms/d' ../build.gradle build.gradle
+      - sed -i -e 's|$rootDir.*Detox-android|https://jitpack.io|' ../build.gradle
+      - sed -i -e '/bundleCommand/a nodeExecutableAndArgs = ["node","--max-old-space-size=12000"]'
+        -e '/firebase/d' -e '/detox/d' build.gradle
+      - cd ../..
+      - npx patch-package --error-on-fail
+      - sed -i -e '/InAppReview/d' app/screens/review_app/index.tsx
+      - sed -i -e 's/InAppReview.isAvailable()/false/' -e '/InAppReview/d' app/utils/reviews.ts
+      - sed -E -i '/installreferrer/,+11d' node_modules/react-native-device-info/android/build.gradle
+      - sed -i -e 's|maven.fabric.io/public|jitpack.io|' node_modules/react-native-math-view/android/build.gradle
+      - sed -i -e 's|def command =.*sdkmanager|def command = "sdkmanager|' node_modules/react-native-navigation/lib/android/app/build.gradle
+      - cp node_modules/@mattermost/compass-icons/font/compass-icons.ttf assets/fonts/
+      - cp node_modules/@mattermost/compass-icons/font/compass-icons.ttf android/app/src/main/assets/fonts
+      - cd node_modules/react-native-notifications/lib/android/app
+      - sed -i -e '/firebase-messaging/d' build.gradle
+      - sed -i -e '/google-services/d' ../build.gradle
+      - sed -i -e '/FcmInstanceIdListenerService/,/<service/d' src/main/AndroidManifest.xml
+      - sed -i -e '/FirebaseApp/d' src/main/java/com/wix/reactnativenotifications/RNNotificationsPackage.java
+      - sed -i -e '/FirebaseMessaging.getInstance/,/});/d' -e '/FirebaseMessaging/d'
+        src/main/java/com/wix/reactnativenotifications/fcm/FcmToken.java
+    scanignore:
+      - node_modules/detox/android/build.gradle
+      - node_modules/detox/android/detox/publishing.gradle
+      - node_modules/jsc-android
+      - node_modules/@mattermost/react-native-emm/android/build.gradle
+      - node_modules/@mattermost/react-native-network-client/android/build.gradle
+      - node_modules/@mattermost/react-native-paste-input/android/build.gradle
+      - node_modules/@mattermost/react-native-turbo-log/android/build.gradle
+      - node_modules/@react-native-camera-roll/camera-roll/android/build.gradle
+      - node_modules/@react-native-community/netinfo/android/build.gradle
+      - node_modules/@react-native-cookies/cookies/android/build.gradle
+      - node_modules/react-native-create-thumbnail/android/build.gradle
+      - node_modules/react-native-device-info/android/build.gradle
+      - node_modules/react-native-fast-image/android/build.gradle
+      - node_modules/react-native-haptic-feedback/android/build.gradle
+      - node_modules/react-native-image-picker/android/build.gradle
+      - node_modules/react-native-linear-gradient/android/build.gradle
+      - node_modules/react-native-localize/android/build.gradle
+      - node_modules/react-native-math-view/android/build.gradle
+      - node_modules/react-native-navigation/lib/android/build.gradle
+      - node_modules/react-native-notifications/lib/android/build.gradle
+      - node_modules/react-native-permissions/android/build.gradle
+      - node_modules/react-native-reanimated/android/build.gradle
+      - node_modules/react-native-safe-area-context/android/build.gradle
+      - node_modules/react-native-screens/android/build.gradle
+      - node_modules/react-native/sdks/hermesc/linux64-bin/hermesc
+      - node_modules/react-native-share/android/build.gradle
+      - node_modules/react-native-svg/android/build.gradle
+      - node_modules/react-native-vector-icons/android/build.gradle
+      - node_modules/react-native-webview/android/build.gradle
+      - node_modules/@stream-io/flat-list-mvcp/android/build.gradle
+    scandelete:
+      - node_modules
+    build:
+      - pushd ../..
+      - node scripts/generate-assets.js
+      - ./node_modules/.bin/jetify
+      - popd
+    ndk: r23b
+    gradleprops:
+      - separateApk=true
+      - reactNativeArchitectures=x86
+
+  - versionName: 2.15.0
+    versionCode: 51203
+    commit: e0429bd5210133ba04bd770d1f5c30cda386d436
+    subdir: android/app
+    sudo:
+      - sysctl fs.inotify.max_user_watches=524288 || true
+      - apt-get update
+      - apt-get install -y npm
+      - npm -g install yarn npm@9
+    init:
+      - cd ../..
+      - sed -i -e '/react-native-in-app-review/d' package.json
+      - sed -i -e "/fs.existsSync('dist')/,+2d" scripts/generate-assets.js
+      - mkdir -p dist/assets
+      - sed -i -e '/mmjstool":\ {/,/^    },/d' package-lock.json
+      - npm install --ignore-scripts
+    gradle:
+      - yes
+    output: build/outputs/apk/release/app-arm64-v8a-release-unsigned.apk
+    rm:
+      - ios
+      - node_modules/react-native-notifications/lib/android/app/src/main/java/com/wix/reactnativenotifications/fcm/FcmInstanceIdListenerService.java
+    prebuild:
+      - sed -i -e 's/Xmx2048m/Xmx8092m/' ../gradle.properties
+      - sed -i -e 's/versionCode .*/versionCode $$VERCODE$$/' -e 's/universalApk .*/universalApk
+        false/' -e '/applicationVariants/,+12d' build.gradle
+      - sed -i -e '/gms/d' ../build.gradle build.gradle
+      - sed -i -e 's|$rootDir.*Detox-android|https://jitpack.io|' ../build.gradle
+      - sed -i -e '/bundleCommand/a nodeExecutableAndArgs = ["node","--max-old-space-size=12000"]'
+        -e '/firebase/d' -e '/detox/d' build.gradle
+      - cd ../..
+      - npx patch-package --error-on-fail
+      - sed -i -e '/InAppReview/d' app/screens/review_app/index.tsx
+      - sed -i -e 's/InAppReview.isAvailable()/false/' -e '/InAppReview/d' app/utils/reviews.ts
+      - sed -E -i '/installreferrer/,+11d' node_modules/react-native-device-info/android/build.gradle
+      - sed -i -e 's|maven.fabric.io/public|jitpack.io|' node_modules/react-native-math-view/android/build.gradle
+      - sed -i -e 's|def command =.*sdkmanager|def command = "sdkmanager|' node_modules/react-native-navigation/lib/android/app/build.gradle
+      - cp node_modules/@mattermost/compass-icons/font/compass-icons.ttf assets/fonts/
+      - cp node_modules/@mattermost/compass-icons/font/compass-icons.ttf android/app/src/main/assets/fonts
+      - cd node_modules/react-native-notifications/lib/android/app
+      - sed -i -e '/firebase-messaging/d' build.gradle
+      - sed -i -e '/google-services/d' ../build.gradle
+      - sed -i -e '/FcmInstanceIdListenerService/,/<service/d' src/main/AndroidManifest.xml
+      - sed -i -e '/FirebaseApp/d' src/main/java/com/wix/reactnativenotifications/RNNotificationsPackage.java
+      - sed -i -e '/FirebaseMessaging.getInstance/,/});/d' -e '/FirebaseMessaging/d'
+        src/main/java/com/wix/reactnativenotifications/fcm/FcmToken.java
+    scanignore:
+      - node_modules/detox/android/build.gradle
+      - node_modules/detox/android/detox/publishing.gradle
+      - node_modules/jsc-android
+      - node_modules/@mattermost/react-native-emm/android/build.gradle
+      - node_modules/@mattermost/react-native-network-client/android/build.gradle
+      - node_modules/@mattermost/react-native-paste-input/android/build.gradle
+      - node_modules/@mattermost/react-native-turbo-log/android/build.gradle
+      - node_modules/@react-native-camera-roll/camera-roll/android/build.gradle
+      - node_modules/@react-native-community/netinfo/android/build.gradle
+      - node_modules/@react-native-cookies/cookies/android/build.gradle
+      - node_modules/react-native-create-thumbnail/android/build.gradle
+      - node_modules/react-native-device-info/android/build.gradle
+      - node_modules/react-native-fast-image/android/build.gradle
+      - node_modules/react-native-haptic-feedback/android/build.gradle
+      - node_modules/react-native-image-picker/android/build.gradle
+      - node_modules/react-native-linear-gradient/android/build.gradle
+      - node_modules/react-native-localize/android/build.gradle
+      - node_modules/react-native-math-view/android/build.gradle
+      - node_modules/react-native-navigation/lib/android/build.gradle
+      - node_modules/react-native-notifications/lib/android/build.gradle
+      - node_modules/react-native-permissions/android/build.gradle
+      - node_modules/react-native-reanimated/android/build.gradle
+      - node_modules/react-native-safe-area-context/android/build.gradle
+      - node_modules/react-native-screens/android/build.gradle
+      - node_modules/react-native/sdks/hermesc/linux64-bin/hermesc
+      - node_modules/react-native-share/android/build.gradle
+      - node_modules/react-native-svg/android/build.gradle
+      - node_modules/react-native-vector-icons/android/build.gradle
+      - node_modules/react-native-webview/android/build.gradle
+      - node_modules/@stream-io/flat-list-mvcp/android/build.gradle
+    scandelete:
+      - node_modules
+    build:
+      - pushd ../..
+      - node scripts/generate-assets.js
+      - ./node_modules/.bin/jetify
+      - popd
+    ndk: r23b
+    gradleprops:
+      - separateApk=true
+      - reactNativeArchitectures=arm64-v8a
+
+  - versionName: 2.15.0
+    versionCode: 51204
+    commit: e0429bd5210133ba04bd770d1f5c30cda386d436
+    subdir: android/app
+    sudo:
+      - sysctl fs.inotify.max_user_watches=524288 || true
+      - apt-get update
+      - apt-get install -y npm
+      - npm -g install yarn npm@9
+    init:
+      - cd ../..
+      - sed -i -e '/react-native-in-app-review/d' package.json
+      - sed -i -e "/fs.existsSync('dist')/,+2d" scripts/generate-assets.js
+      - mkdir -p dist/assets
+      - sed -i -e '/mmjstool":\ {/,/^    },/d' package-lock.json
+      - npm install --ignore-scripts
+    gradle:
+      - yes
+    output: build/outputs/apk/release/app-x86_64-release-unsigned.apk
+    rm:
+      - ios
+      - node_modules/react-native-notifications/lib/android/app/src/main/java/com/wix/reactnativenotifications/fcm/FcmInstanceIdListenerService.java
+    prebuild:
+      - sed -i -e 's/Xmx2048m/Xmx8092m/' ../gradle.properties
+      - sed -i -e 's/versionCode .*/versionCode $$VERCODE$$/' -e 's/universalApk .*/universalApk
+        false/' -e '/applicationVariants/,+12d' build.gradle
+      - sed -i -e '/gms/d' ../build.gradle build.gradle
+      - sed -i -e 's|$rootDir.*Detox-android|https://jitpack.io|' ../build.gradle
+      - sed -i -e '/bundleCommand/a nodeExecutableAndArgs = ["node","--max-old-space-size=12000"]'
+        -e '/firebase/d' -e '/detox/d' build.gradle
+      - cd ../..
+      - npx patch-package --error-on-fail
+      - sed -i -e '/InAppReview/d' app/screens/review_app/index.tsx
+      - sed -i -e 's/InAppReview.isAvailable()/false/' -e '/InAppReview/d' app/utils/reviews.ts
+      - sed -E -i '/installreferrer/,+11d' node_modules/react-native-device-info/android/build.gradle
+      - sed -i -e 's|maven.fabric.io/public|jitpack.io|' node_modules/react-native-math-view/android/build.gradle
+      - sed -i -e 's|def command =.*sdkmanager|def command = "sdkmanager|' node_modules/react-native-navigation/lib/android/app/build.gradle
+      - cp node_modules/@mattermost/compass-icons/font/compass-icons.ttf assets/fonts/
+      - cp node_modules/@mattermost/compass-icons/font/compass-icons.ttf android/app/src/main/assets/fonts
+      - cd node_modules/react-native-notifications/lib/android/app
+      - sed -i -e '/firebase-messaging/d' build.gradle
+      - sed -i -e '/google-services/d' ../build.gradle
+      - sed -i -e '/FcmInstanceIdListenerService/,/<service/d' src/main/AndroidManifest.xml
+      - sed -i -e '/FirebaseApp/d' src/main/java/com/wix/reactnativenotifications/RNNotificationsPackage.java
+      - sed -i -e '/FirebaseMessaging.getInstance/,/});/d' -e '/FirebaseMessaging/d'
+        src/main/java/com/wix/reactnativenotifications/fcm/FcmToken.java
+    scanignore:
+      - node_modules/detox/android/build.gradle
+      - node_modules/detox/android/detox/publishing.gradle
+      - node_modules/jsc-android
+      - node_modules/@mattermost/react-native-emm/android/build.gradle
+      - node_modules/@mattermost/react-native-network-client/android/build.gradle
+      - node_modules/@mattermost/react-native-paste-input/android/build.gradle
+      - node_modules/@mattermost/react-native-turbo-log/android/build.gradle
+      - node_modules/@react-native-camera-roll/camera-roll/android/build.gradle
+      - node_modules/@react-native-community/netinfo/android/build.gradle
+      - node_modules/@react-native-cookies/cookies/android/build.gradle
+      - node_modules/react-native-create-thumbnail/android/build.gradle
+      - node_modules/react-native-device-info/android/build.gradle
+      - node_modules/react-native-fast-image/android/build.gradle
+      - node_modules/react-native-haptic-feedback/android/build.gradle
+      - node_modules/react-native-image-picker/android/build.gradle
+      - node_modules/react-native-linear-gradient/android/build.gradle
+      - node_modules/react-native-localize/android/build.gradle
+      - node_modules/react-native-math-view/android/build.gradle
+      - node_modules/react-native-navigation/lib/android/build.gradle
+      - node_modules/react-native-notifications/lib/android/build.gradle
+      - node_modules/react-native-permissions/android/build.gradle
+      - node_modules/react-native-reanimated/android/build.gradle
+      - node_modules/react-native-safe-area-context/android/build.gradle
+      - node_modules/react-native-screens/android/build.gradle
+      - node_modules/react-native/sdks/hermesc/linux64-bin/hermesc
+      - node_modules/react-native-share/android/build.gradle
+      - node_modules/react-native-svg/android/build.gradle
+      - node_modules/react-native-vector-icons/android/build.gradle
+      - node_modules/react-native-webview/android/build.gradle
+      - node_modules/@stream-io/flat-list-mvcp/android/build.gradle
+    scandelete:
+      - node_modules
+    build:
+      - pushd ../..
+      - node scripts/generate-assets.js
+      - ./node_modules/.bin/jetify
+      - popd
+    ndk: r23b
+    gradleprops:
+      - separateApk=true
+      - reactNativeArchitectures=x86_64
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 VercodeOperation:
@@ -8466,5 +8822,5 @@ VercodeOperation:
   - 100 * %c + 2
   - 100 * %c + 3
   - 100 * %c + 4
-CurrentVersion: 2.14.0
-CurrentVersionCode: 50904
+CurrentVersion: 2.15.0
+CurrentVersionCode: 51204
