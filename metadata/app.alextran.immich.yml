@@ -2618,8 +2618,48 @@ Builds:
       - $$flutter$$/bin/flutter build apk --release
     ndk: r25c
 
+  - versionName: 1.102.3
+    versionCode: 134
+    commit: a2180a467d09c01ec41c1481e51c7485d5a82046
+    subdir: mobile
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y gcc-multilib libc-dev make
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@stable
+      - rustup@1.25.2
+    rm:
+      - design
+      - docker
+      - machine-learning
+      - mobile/ios
+      - server
+      - web
+    prebuild:
+      - export flutterVersion=$(sed -n -E 's/.*flutter-version:\s"([0-9.]+)"/\1/p'
+        ../.github/workflows/build-mobile.yml)
+      - pushd $$flutter$$
+      - git checkout -f $flutterVersion
+      - popd
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - sed -i -e "s/^\#f//" pubspec.yaml
+      - sed -i -e 's/^\/\/f //' android/app/build.gradle
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+    scandelete:
+      - mobile/.pub-cache
+    build:
+      - $$rustup$$/rustup-init.sh -y
+      - source $HOME/.cargo/env
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - bash ./scripts/fdroid_build_isar.sh
+      - $$flutter$$/bin/flutter build apk --release
+    ndk: r25c
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: mobile/pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 1.102.0
-CurrentVersionCode: 132
+CurrentVersion: 1.102.3
+CurrentVersionCode: 134
