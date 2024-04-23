@@ -3481,11 +3481,41 @@ Builds:
       - popd
     ndk: r21e
 
+  - versionName: 10.10.1
+    versionCode: 45839
+    commit: v10.10.1
+    subdir: TMessagesProj_App
+    submodules: true
+    sudo:
+      - echo "deb https://deb.debian.org/debian bullseye main" > /etc/apt/sources.list.d/bullseye.list
+      - apt-get update
+      - apt-get install -y cmake golang-go libuv1 make ninja-build yasm
+      - apt-get install -y -t bullseye openjdk-11-jdk-headless
+      - update-java-alternatives --set java-1.11.0-openjdk-amd64
+    gradle:
+      - afat
+    rm:
+      - TMessagesProj/jni/ffmpeg/tests/ref/fate/sub-microdvd-remux
+    prebuild: echo -e 'APP_ID = 105810\nAPP_HASH = 3e7a52498eec003c5896a330e5d29397'
+      > API_KEYS
+    scandelete:
+      - TMessagesProj/jni
+    build:
+      - export NDK=$$NDK$$
+      - export NINJA_PATH=/usr/bin/ninja
+      - pushd ../TMessagesProj/jni
+      - ./build_libvpx_clang.sh
+      - ./build_ffmpeg_clang.sh
+      - ./patch_ffmpeg.sh
+      - ./patch_boringssl.sh
+      - ./build_boringssl.sh
+      - popd
+    ndk: 21.4.7075529
+
 MaintainerNotes: Update check mode not working because of version code calculations
   for different flavours.
 
-ArchivePolicy: 3
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: 10.9.1
-CurrentVersionCode: 44649
+CurrentVersion: 10.10.1
+CurrentVersionCode: 45839
