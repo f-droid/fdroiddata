@@ -834,6 +834,190 @@ Builds:
     gradleprops:
       - buildABI=x86_64
 
+  - versionName: 0.0.9-0-g8dc51356
+    versionCode: 71
+    commit: 8dc51356d30f1eba8c5ede9d680bd2ee8be59747
+    subdir: app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y g++ libtool make automake gettext bzip2 xz-utils zstd pkg-config
+        cmake extra-cmake-modules ninja-build libfmt-dev libboost-all-dev libfcitx5utils-dev
+        opencc ghc cabal-install libghc-shake-dev libghc-aeson-pretty-dev libghc-js-flot-data
+        haskell-js-dgtable-utils fcitx5-modules python-is-python3
+    gradle:
+      - yes
+    binary: https://github.com/fcitx5-android/fcitx5-android/releases/download/0.0.9/org.fcitx.fcitx5.android-%v-armeabi-v7a-release.apk
+    srclibs:
+      - fcitx5-android-prebuilder@a242121699c037e9f97725db3aa15d78efc9b1ae
+    rm:
+      - lib/fcitx5/src/main/cpp/prebuilt
+    prebuild:
+      - cd ..
+      - sdkmanager 'cmake;3.22.1'
+      - buildTimestamp=$(curl -L https://github.com/fcitx5-android/fcitx5-android/releases/download/0.0.9/build-metadata.json
+        | sed -n -E 's/.*timestamp.*"(.*)"$/\1/p')
+      - echo -e "\nbuildTimestamp=$buildTimestamp" >> gradle.properties
+      - sed -i -e '/ImportQualifiedPost/d' $$fcitx5-android-prebuilder$$/src/Main.hs
+      - sed -i -e 's/import \(.*\) qualified as/import qualified \1 as/g' $$fcitx5-android-prebuilder$$/src/*.hs
+      - sed -i -e 's|https://maven.pkg.github.com|https://jitpack.io|g' build-logic/convention/build.gradle.kts
+        lib/*/build.gradle.kts
+    scanignore:
+      - lib/fcitx5/src/main/cpp/fcitx5/src/modules/unicode/charselectdata
+    scandelete:
+      - build-logic/convention/build
+    build:
+      - pushd $$fcitx5-android-prebuilder$$
+      - cabal configure --disable-library-vanilla --enable-shared --enable-executable-dynamic
+        --ghc-options=-dynamic
+      - ABI=armeabi-v7a ANDROID_NDK_ROOT=$$NDK$$ CMAKE_VERSION=3.22.1 ANDROID_PLATFORM=23
+        COMP_SPELL_DICT=/usr/lib/x86_64-linux-gnu/fcitx5/libexec/comp-spell-dict ./build-cabal
+        -j spell-dict fmt libuv libintl-lite boost marisa opencc libime lua chinese-addons-data
+        zstd
+      - popd
+      - mv $$fcitx5-android-prebuilder$$/build ../lib/fcitx5/src/main/cpp/prebuilt
+    ndk: 25.2.9519653
+    gradleprops:
+      - buildABI=armeabi-v7a
+
+  - versionName: 0.0.9-0-g8dc51356
+    versionCode: 72
+    commit: 8dc51356d30f1eba8c5ede9d680bd2ee8be59747
+    subdir: app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y g++ libtool make automake gettext bzip2 xz-utils zstd pkg-config
+        cmake extra-cmake-modules ninja-build libfmt-dev libboost-all-dev libfcitx5utils-dev
+        opencc ghc cabal-install libghc-shake-dev libghc-aeson-pretty-dev libghc-js-flot-data
+        haskell-js-dgtable-utils fcitx5-modules python-is-python3
+    gradle:
+      - yes
+    binary: https://github.com/fcitx5-android/fcitx5-android/releases/download/0.0.9/org.fcitx.fcitx5.android-%v-arm64-v8a-release.apk
+    srclibs:
+      - fcitx5-android-prebuilder@a242121699c037e9f97725db3aa15d78efc9b1ae
+    rm:
+      - lib/fcitx5/src/main/cpp/prebuilt
+    prebuild:
+      - cd ..
+      - sdkmanager 'cmake;3.22.1'
+      - buildTimestamp=$(curl -L https://github.com/fcitx5-android/fcitx5-android/releases/download/0.0.9/build-metadata.json
+        | sed -n -E 's/.*timestamp.*"(.*)"$/\1/p')
+      - echo -e "\nbuildTimestamp=$buildTimestamp" >> gradle.properties
+      - sed -i -e '/ImportQualifiedPost/d' $$fcitx5-android-prebuilder$$/src/Main.hs
+      - sed -i -e 's/import \(.*\) qualified as/import qualified \1 as/g' $$fcitx5-android-prebuilder$$/src/*.hs
+      - sed -i -e 's|https://maven.pkg.github.com|https://jitpack.io|g' build-logic/convention/build.gradle.kts
+        lib/*/build.gradle.kts
+    scanignore:
+      - lib/fcitx5/src/main/cpp/fcitx5/src/modules/unicode/charselectdata
+    scandelete:
+      - build-logic/convention/build
+    build:
+      - pushd $$fcitx5-android-prebuilder$$
+      - cabal configure --disable-library-vanilla --enable-shared --enable-executable-dynamic
+        --ghc-options=-dynamic
+      - ABI=arm64-v8a ANDROID_NDK_ROOT=$$NDK$$ CMAKE_VERSION=3.22.1 ANDROID_PLATFORM=23
+        COMP_SPELL_DICT=/usr/lib/x86_64-linux-gnu/fcitx5/libexec/comp-spell-dict ./build-cabal
+        -j spell-dict fmt libuv libintl-lite boost marisa opencc libime lua chinese-addons-data
+        zstd
+      - popd
+      - mv $$fcitx5-android-prebuilder$$/build ../lib/fcitx5/src/main/cpp/prebuilt
+    ndk: 25.2.9519653
+    gradleprops:
+      - buildABI=arm64-v8a
+
+  - versionName: 0.0.9-0-g8dc51356
+    versionCode: 73
+    commit: 8dc51356d30f1eba8c5ede9d680bd2ee8be59747
+    subdir: app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y g++ libtool make automake gettext bzip2 xz-utils zstd pkg-config
+        cmake extra-cmake-modules ninja-build libfmt-dev libboost-all-dev libfcitx5utils-dev
+        opencc ghc cabal-install libghc-shake-dev libghc-aeson-pretty-dev libghc-js-flot-data
+        haskell-js-dgtable-utils fcitx5-modules python-is-python3
+    gradle:
+      - yes
+    binary: https://github.com/fcitx5-android/fcitx5-android/releases/download/0.0.9/org.fcitx.fcitx5.android-%v-x86-release.apk
+    srclibs:
+      - fcitx5-android-prebuilder@a242121699c037e9f97725db3aa15d78efc9b1ae
+    rm:
+      - lib/fcitx5/src/main/cpp/prebuilt
+    prebuild:
+      - cd ..
+      - sdkmanager 'cmake;3.22.1'
+      - buildTimestamp=$(curl -L https://github.com/fcitx5-android/fcitx5-android/releases/download/0.0.9/build-metadata.json
+        | sed -n -E 's/.*timestamp.*"(.*)"$/\1/p')
+      - echo -e "\nbuildTimestamp=$buildTimestamp" >> gradle.properties
+      - sed -i -e '/ImportQualifiedPost/d' $$fcitx5-android-prebuilder$$/src/Main.hs
+      - sed -i -e 's/import \(.*\) qualified as/import qualified \1 as/g' $$fcitx5-android-prebuilder$$/src/*.hs
+      - sed -i -e 's|https://maven.pkg.github.com|https://jitpack.io|g' build-logic/convention/build.gradle.kts
+        lib/*/build.gradle.kts
+    scanignore:
+      - lib/fcitx5/src/main/cpp/fcitx5/src/modules/unicode/charselectdata
+    scandelete:
+      - build-logic/convention/build
+    build:
+      - pushd $$fcitx5-android-prebuilder$$
+      - cabal configure --disable-library-vanilla --enable-shared --enable-executable-dynamic
+        --ghc-options=-dynamic
+      - ABI=x86 ANDROID_NDK_ROOT=$$NDK$$ CMAKE_VERSION=3.22.1 ANDROID_PLATFORM=23
+        COMP_SPELL_DICT=/usr/lib/x86_64-linux-gnu/fcitx5/libexec/comp-spell-dict ./build-cabal
+        -j spell-dict fmt libuv libintl-lite boost marisa opencc libime lua chinese-addons-data
+        zstd
+      - popd
+      - mv $$fcitx5-android-prebuilder$$/build ../lib/fcitx5/src/main/cpp/prebuilt
+    ndk: 25.2.9519653
+    gradleprops:
+      - buildABI=x86
+
+  - versionName: 0.0.9-0-g8dc51356
+    versionCode: 74
+    commit: 8dc51356d30f1eba8c5ede9d680bd2ee8be59747
+    subdir: app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y g++ libtool make automake gettext bzip2 xz-utils zstd pkg-config
+        cmake extra-cmake-modules ninja-build libfmt-dev libboost-all-dev libfcitx5utils-dev
+        opencc ghc cabal-install libghc-shake-dev libghc-aeson-pretty-dev libghc-js-flot-data
+        haskell-js-dgtable-utils fcitx5-modules python-is-python3
+    gradle:
+      - yes
+    binary: https://github.com/fcitx5-android/fcitx5-android/releases/download/0.0.9/org.fcitx.fcitx5.android-%v-x86_64-release.apk
+    srclibs:
+      - fcitx5-android-prebuilder@a242121699c037e9f97725db3aa15d78efc9b1ae
+    rm:
+      - lib/fcitx5/src/main/cpp/prebuilt
+    prebuild:
+      - cd ..
+      - sdkmanager 'cmake;3.22.1'
+      - buildTimestamp=$(curl -L https://github.com/fcitx5-android/fcitx5-android/releases/download/0.0.9/build-metadata.json
+        | sed -n -E 's/.*timestamp.*"(.*)"$/\1/p')
+      - echo -e "\nbuildTimestamp=$buildTimestamp" >> gradle.properties
+      - sed -i -e '/ImportQualifiedPost/d' $$fcitx5-android-prebuilder$$/src/Main.hs
+      - sed -i -e 's/import \(.*\) qualified as/import qualified \1 as/g' $$fcitx5-android-prebuilder$$/src/*.hs
+      - sed -i -e 's|https://maven.pkg.github.com|https://jitpack.io|g' build-logic/convention/build.gradle.kts
+        lib/*/build.gradle.kts
+    scanignore:
+      - lib/fcitx5/src/main/cpp/fcitx5/src/modules/unicode/charselectdata
+    scandelete:
+      - build-logic/convention/build
+    build:
+      - pushd $$fcitx5-android-prebuilder$$
+      - cabal configure --disable-library-vanilla --enable-shared --enable-executable-dynamic
+        --ghc-options=-dynamic
+      - ABI=x86_64 ANDROID_NDK_ROOT=$$NDK$$ CMAKE_VERSION=3.22.1 ANDROID_PLATFORM=23
+        COMP_SPELL_DICT=/usr/lib/x86_64-linux-gnu/fcitx5/libexec/comp-spell-dict ./build-cabal
+        -j spell-dict fmt libuv libintl-lite boost marisa opencc libime lua chinese-addons-data
+        zstd
+      - popd
+      - mv $$fcitx5-android-prebuilder$$/build ../lib/fcitx5/src/main/cpp/prebuilt
+    ndk: 25.2.9519653
+    gradleprops:
+      - buildABI=x86_64
+
 AllowedAPKSigningKeys: e4db1e9edff13629d07de4bbf8165fe9bd8557ab55092672da8e40dbe484ecd7
 
 AutoUpdateMode: None
@@ -845,5 +1029,5 @@ VercodeOperation:
   - 10 * %c + 4
 UpdateCheckData: https://raw.githubusercontent.com/fcitx5-android/fcitx5-android/master/build-logic/convention/src/main/kotlin/Versions.kt|baseVersionCode
   = (\d+)|https://github.com/fcitx5-android/fcitx5-android/releases/latest/download/build-metadata.json|"versionName":\s"(.*)"
-CurrentVersion: 0.0.8-0-g4c8399ad
-CurrentVersionCode: 64
+CurrentVersion: 0.0.9-0-g8dc51356
+CurrentVersionCode: 74

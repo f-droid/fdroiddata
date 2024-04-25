@@ -58,6 +58,26 @@ Builds:
     scandelete:
       - build-logic/convention/build
 
+  - versionName: 0.0.9-0-g8dc51356
+    versionCode: 72
+    commit: 8dc51356d30f1eba8c5ede9d680bd2ee8be59747
+    subdir: plugin/clipboard-filter
+    gradle:
+      - yes
+    binary: https://github.com/fcitx5-android/fcitx5-android/releases/download/0.0.9/org.fcitx.fcitx5.android.plugin.clipboard_filter-%v-release.apk
+    prebuild:
+      - cp -R ../../gradle .
+      - cd ../..
+      - sed -i -e 's|git@github.com:|https://github.com/|g' .gitmodules
+      - git submodule update --init plugin/clipboard-filter/ClearURLsRules
+      - buildTimestamp=$(curl -L https://github.com/fcitx5-android/fcitx5-android/releases/download/0.0.9/build-metadata.plugin.clipboard_filter.json
+        | sed -n -E 's/.*timestamp.*"(.*)"$/\1/p')
+      - echo -e "\nbuildTimestamp=$buildTimestamp" >> gradle.properties
+      - sed -i -e 's|https://maven.pkg.github.com|https://jitpack.io|g' build-logic/convention/build.gradle.kts
+        lib/*/build.gradle.kts
+    scandelete:
+      - build-logic/convention/build
+
 AllowedAPKSigningKeys: e4db1e9edff13629d07de4bbf8165fe9bd8557ab55092672da8e40dbe484ecd7
 
 AutoUpdateMode: None
@@ -66,5 +86,5 @@ VercodeOperation:
   - 10 * %c + 2
 UpdateCheckData: https://raw.githubusercontent.com/fcitx5-android/fcitx5-android/master/build-logic/convention/src/main/kotlin/Versions.kt|baseVersionCode
   = (\d+)|https://github.com/fcitx5-android/fcitx5-android/releases/latest/download/build-metadata.plugin.clipboard_filter.json|"versionName":\s"(.*)"
-CurrentVersion: 0.0.8-0-g4c8399ad
-CurrentVersionCode: 62
+CurrentVersion: 0.0.9-0-g8dc51356
+CurrentVersionCode: 72
