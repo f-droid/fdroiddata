@@ -127,10 +127,37 @@ Builds:
       - popd
       - gradle assembleRelease
 
+  - versionName: 0.8.0
+    versionCode: 18
+    commit: 272b140a14beb0ef3bf986d224584df4da63f703
+    subdir: android/app
+    sudo:
+      - sysctl fs.inotify.max_user_watches=524288 || true
+      - curl -Lo node.tar.gz https://nodejs.org/dist/v18.16.1/node-v18.16.1-linux-x64.tar.gz
+      - echo "59582f51570d0857de6333620323bdeee5ae36107318f86ce5eca24747cabf5b node.tar.gz"
+        | sha256sum -c -
+      - tar xzf node.tar.gz --strip-components=1 -C /usr/local/
+      - apt-get update
+    output: build/outputs/apk/release/app-release-unsigned.apk
+    prebuild:
+      - cd ../..
+      - npm ci
+      - find node_modules/ -iname "*.node" -exec rm {} \;
+    scanignore:
+      - node_modules/@capacitor/cli/assets/capacitor-cordova-android-plugins.tar.gz
+    scandelete:
+      - node_modules/
+    build:
+      - pushd ../..
+      - npm run build-prod
+      - npx cap sync android
+      - popd
+      - gradle assembleRelease
+
 AllowedAPKSigningKeys: 0b712c45eba65a7ee6e5ba3b4d0ab62e0a3c5386c1007b2047c2a58de9c79f31
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v.*$
 UpdateCheckData: android/app/build.gradle|versionCode\s(\d+)||v([\d.]+)
-CurrentVersion: 0.7.0
-CurrentVersionCode: 17
+CurrentVersion: 0.8.0
+CurrentVersionCode: 18
