@@ -17,6 +17,7 @@ Repo: https://github.com/Ragebreaker/asteroids-revenge.git
 Builds:
   - versionName: 0.10.3
     versionCode: 100041
+    disable: audio bugs
     commit: dbd58f2298cb26bc71d835bdf585e93f0e23adab
     timeout: 10800
     sudo:
@@ -28,7 +29,7 @@ Builds:
     prebuild:
       - pushd $$Godot$$
       - scons --clean platform=linuxbsd target=editor use_llvm=yes tools=yes
-      - scons --clean platform=android arch=arm64v8 production=yes target=template_release
+      - scons --clean platform=android arch=armv7 production=yes target=template_release
       - cd platform/android/java
       - gradle cleanGodotTemplates
       - popd
@@ -53,6 +54,7 @@ Builds:
 
   - versionName: 0.10.3
     versionCode: 100042
+    disable: audio bugs
     commit: dbd58f2298cb26bc71d835bdf585e93f0e23adab
     timeout: 10800
     sudo:
@@ -89,6 +91,7 @@ Builds:
 
   - versionName: 0.10.4
     versionCode: 100051
+    disable: audio bugs
     commit: e326b08d5ec472ee5b205c8bef87a7e56e701c67
     timeout: 10800
     sudo:
@@ -100,7 +103,7 @@ Builds:
     prebuild:
       - pushd $$Godot$$
       - scons --clean platform=linuxbsd target=editor use_llvm=yes tools=yes
-      - scons --clean platform=android arch=arm64v8 production=yes target=template_release
+      - scons --clean platform=android arch=armv7 production=yes target=template_release
       - cd platform/android/java
       - gradle cleanGodotTemplates
       - popd
@@ -125,6 +128,7 @@ Builds:
 
   - versionName: 0.10.4
     versionCode: 100052
+    disable: audio bugs
     commit: e326b08d5ec472ee5b205c8bef87a7e56e701c67
     timeout: 10800
     sudo:
@@ -161,6 +165,7 @@ Builds:
 
   - versionName: 0.10.4
     versionCode: 100053
+    disable: audio bugs
     commit: 8cf1010cb8be35386586d33f4f43ba355dde1280
     timeout: 10800
     sudo:
@@ -172,7 +177,7 @@ Builds:
     prebuild:
       - pushd $$Godot$$
       - scons --clean platform=linuxbsd target=editor use_llvm=yes tools=yes
-      - scons --clean platform=android arch=arm64v8 production=yes target=template_release
+      - scons --clean platform=android arch=armv7 production=yes target=template_release
       - cd platform/android/java
       - gradle cleanGodotTemplates
       - popd
@@ -197,6 +202,7 @@ Builds:
 
   - versionName: 0.10.4
     versionCode: 100054
+    disable: audio bugs
     commit: 8cf1010cb8be35386586d33f4f43ba355dde1280
     timeout: 10800
     sudo:
@@ -240,15 +246,16 @@ Builds:
       - apt-get install -y pkgconf clang scons
     output: asteroids_revenge.apk
     srclibs:
-      - Godot@4.2.1-stable
+      - Godot@4.2.2-stable
     prebuild:
       - pushd $$Godot$$
       - scons --clean platform=linuxbsd target=editor use_llvm=yes tools=yes
-      - scons --clean platform=android arch=arm64v8 production=yes target=template_release
+      - scons --clean platform=android arch=armv7 production=yes target=template_release
       - cd platform/android/java
       - gradle cleanGodotTemplates
       - popd
     build:
+      - export JAVA_HOME=$(dirname $(dirname $(readlink -f $(which javac))))
       - export ANDROID_SDK_ROOT=$$SDK$$
       - export ANDROID_NDK_ROOT=$$NDK$$
       - export GODOT_CFG=~/.config/godot/editor_settings-4.tres
@@ -258,8 +265,10 @@ Builds:
       - cd platform/android/java
       - gradle generateGodotTemplates
       - popd
-      - $$Godot$$/bin/godot.linuxbsd.editor.x86_64.llvm --headless --check-only --quit
-        project.godot
+      - $$Godot$$/bin/godot.linuxbsd.editor.x86_64.llvm --headless --import
+      - sed -i -e 's:\(^.*package/signed\)\s*=.*$:\1 = false:' export_presets.cfg
+      - sed -i "s|export/android/java_sdk_path=.*|export/android/java_sdk_path=\"${JAVA_HOME}\"|"
+        $GODOT_CFG
       - sed -i -e 's:\(^.*android_sdk_path\)\s*=.*$:\1 = "$$SDK$$":' $GODOT_CFG
       - sed -i -e '/custom_template\/release/s|=.*|="$$Godot$$/bin/android_release.apk"|'
         export_presets.cfg
@@ -276,15 +285,9 @@ Builds:
       - apt-get install -y pkgconf clang scons
     output: asteroids_revenge.apk
     srclibs:
-      - Godot@4.2.1-stable
-    prebuild:
-      - pushd $$Godot$$
-      - scons --clean platform=linuxbsd target=editor use_llvm=yes tools=yes
-      - scons --clean platform=android arch=arm64v8 production=yes target=template_release
-      - cd platform/android/java
-      - gradle cleanGodotTemplates
-      - popd
+      - Godot@4.2.2-stable
     build:
+      - export JAVA_HOME=$(dirname $(dirname $(readlink -f $(which javac))))
       - export ANDROID_SDK_ROOT=$$SDK$$
       - export ANDROID_NDK_ROOT=$$NDK$$
       - export GODOT_CFG=~/.config/godot/editor_settings-4.tres
@@ -294,8 +297,10 @@ Builds:
       - cd platform/android/java
       - gradle generateGodotTemplates
       - popd
-      - $$Godot$$/bin/godot.linuxbsd.editor.x86_64.llvm --headless --check-only --quit
-        project.godot
+      - $$Godot$$/bin/godot.linuxbsd.editor.x86_64.llvm --headless --import
+      - sed -i -e 's:\(^.*package/signed\)\s*=.*$:\1 = false:' export_presets.cfg
+      - sed -i "s|export/android/java_sdk_path=.*|export/android/java_sdk_path=\"${JAVA_HOME}\"|"
+        $GODOT_CFG
       - sed -i -e 's:\(^.*android_sdk_path\)\s*=.*$:\1 = "$$SDK$$":' $GODOT_CFG
       - sed -i -e '/custom_template\/release/s|=.*|="$$Godot$$/bin/android_release.apk"|'
         export_presets.cfg
