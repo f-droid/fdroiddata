@@ -1169,11 +1169,62 @@ Builds:
       - export USER=vagrant
       - ARCHES="aarch64" ./scripts/android/build-android.sh -s $$COMMIT$$
 
+  - versionName: '5.7'
+    versionCode: 200
+    commit: d5a0c5e56a9c8598ea859e1b625a006cab086759
+    timeout: 30000
+    sudo:
+      - apt-get update
+      - apt-get install -y xz-utils zipalign zip
+      - mkdir -m 0755 /nix
+      - chown vagrant /nix
+      - chown -R vagrant /tmp
+    init: git checkout v$$VERSION$$-armv7a
+    output: ./simplex-chat-armeabi-v7a.apk
+    rm:
+      - ./docs/themes/simplex-chat.sample.zip
+    prebuild:
+      - cp -r ./apps/multiplatform/gradle .
+      - sed -i -e '/maven.pkg.jetbrains.space/d' ./apps/multiplatform/{build,settings}.gradle.kts
+      - sed -i -e '/gradleConfig/d' ./apps/multiplatform/android/build.gradle.kts
+      - sed -i -e '/tasks/Q' ./apps/multiplatform/android/build.gradle.kts
+      - sed -i -e 's/git checkout.*/:/' ./scripts/android/build-android.sh
+      - sed -i -e 's/.*commit.*/:/' ./scripts/android/build-android.sh
+      - sed -i -e 's/android.version_code=.*/android.version_code=$$VERCODE$$/' ./apps/multiplatform/gradle.properties
+    build:
+      - gradle -v
+      - export USER=vagrant
+      - ARCHES="armv7a" ./scripts/android/build-android.sh -s $$COMMIT$$
+
+  - versionName: '5.7'
+    versionCode: 201
+    commit: d5a0c5e56a9c8598ea859e1b625a006cab086759
+    timeout: 60000
+    sudo:
+      - apt-get update
+      - apt-get install -y xz-utils zipalign zip
+      - mkdir -m 0755 /nix
+      - chown vagrant /nix
+      - chown -R vagrant /tmp
+    output: ./simplex-chat-arm64-v8a.apk
+    rm:
+      - ./docs/themes/simplex-chat.sample.zip
+    prebuild:
+      - cp -r ./apps/multiplatform/gradle .
+      - sed -i -e '/maven.pkg.jetbrains.space/d' ./apps/multiplatform/{build,settings}.gradle.kts
+      - sed -i -e '/gradleConfig/d' ./apps/multiplatform/android/build.gradle.kts
+      - sed -i -e '/tasks/Q' ./apps/multiplatform/android/build.gradle.kts
+      - sed -i -e 's/android.version_code=.*/android.version_code=$$VERCODE$$/' ./apps/multiplatform/gradle.properties
+    build:
+      - gradle -v
+      - export USER=vagrant
+      - ARCHES="aarch64" ./scripts/android/build-android.sh -s $$COMMIT$$
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v[\d.]+-fdroid$
 VercodeOperation:
   - '%c'
   - '%c+1'
 UpdateCheckData: apps/multiplatform/gradle.properties|android\.version_code\s*=\s*(\d+)|apps/multiplatform/gradle.properties|android\.version_name\s*=\s*([\d.]+)
-CurrentVersion: 5.6.1
-CurrentVersionCode: 194
+CurrentVersion: '5.7'
+CurrentVersionCode: 201
