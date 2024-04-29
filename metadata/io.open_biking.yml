@@ -1,0 +1,52 @@
+Categories:
+  - Sports & Health
+License: AGPL-3.0-or-later
+SourceCode: https://gitlab.com/loikki1/open-biking
+IssueTracker: https://gitlab.com/loikki1/open-biking/issues
+
+RepoType: git
+Repo: https://gitlab.com/loikki1/open-biking.git
+
+Builds:
+  - versionName: 1.0.0
+    versionCode: 1
+    commit: 1.0.0
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y npm make gcc libc-dev golang-go
+    output: gen/android/app/build/outputs/apk/universal/release/app-universal-release-unsigned.apk
+    srclibs:
+      - rustup@1.27.0
+      - esbuild@v0.19.12
+    prebuild:
+      - cd frontend
+      - npm install
+      - cd ..
+      - export NDK_HOME=$$NDK$$
+      - export RANLIB=${NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ranlib
+      - $$rustup$$/rustup-init.sh -y --default-toolchain 1.76.0
+      - source $HOME/.cargo/env
+      - cargo install tauri-cli@2.0.0-beta.13
+      - rm -rf gen/android
+      - cargo tauri android init
+      - cargo tauri icon icon.png
+      - sed -i 's/signingConfig .*//' android-files/build.gradle.kts
+      - ./copy-android
+    scandelete:
+      - frontend/node_modules
+    build:
+      - pushd $$esbuild$$
+      - make esbuild
+      - popd
+      - mv $$esbuild$$/esbuild frontend/node_modules/@esbuild/linux-x64/bin/esbuild
+      - source $HOME/.cargo/env
+      - export NDK_HOME=$$NDK$$
+      - export RANLIB=${NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ranlib
+      - cargo tauri android build --features tauri --apk
+    ndk: 25.1.8937393
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: 0.0.1
+CurrentVersionCode: 1
