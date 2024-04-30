@@ -1171,7 +1171,6 @@ Builds:
 
   - versionName: '5.7'
     versionCode: 200
-    disable: waiting
     commit: d5a0c5e56a9c8598ea859e1b625a006cab086759
     timeout: 30000
     sudo:
@@ -1180,26 +1179,23 @@ Builds:
       - mkdir -m 0755 /nix
       - chown vagrant /nix
       - chown -R vagrant /tmp
-    init: git checkout v$$VERSION$$-armv7a
+    init:
+      - TAG=$(git tag --points-at HEAD | head -n1) && export TAG=${TAG%%-*}
+      - git checkout ${TAG}-armv7a
     output: ./simplex-chat-armeabi-v7a.apk
     rm:
       - ./docs/themes/simplex-chat.sample.zip
     prebuild:
       - cp -r ./apps/multiplatform/gradle .
       - sed -i -e '/maven.pkg.jetbrains.space/d' ./apps/multiplatform/{build,settings}.gradle.kts
-      - sed -i -e '/gradleConfig/d' ./apps/multiplatform/android/build.gradle.kts
-      - sed -i -e '/tasks/Q' ./apps/multiplatform/android/build.gradle.kts
-      - sed -i -e 's/git checkout.*/:/' ./scripts/android/build-android.sh
-      - sed -i -e 's/.*commit.*/:/' ./scripts/android/build-android.sh
       - sed -i -e 's/android.version_code=.*/android.version_code=$$VERCODE$$/' ./apps/multiplatform/gradle.properties
     build:
       - gradle -v
       - export USER=vagrant
-      - ARCHES="armv7a" ./scripts/android/build-android.sh -s $$COMMIT$$
+      - ARCHES="armv7a" ./scripts/android/build-android.sh -gs
 
   - versionName: '5.7'
     versionCode: 201
-    disable: waiting
     commit: d5a0c5e56a9c8598ea859e1b625a006cab086759
     timeout: 60000
     sudo:
@@ -1214,13 +1210,11 @@ Builds:
     prebuild:
       - cp -r ./apps/multiplatform/gradle .
       - sed -i -e '/maven.pkg.jetbrains.space/d' ./apps/multiplatform/{build,settings}.gradle.kts
-      - sed -i -e '/gradleConfig/d' ./apps/multiplatform/android/build.gradle.kts
-      - sed -i -e '/tasks/Q' ./apps/multiplatform/android/build.gradle.kts
       - sed -i -e 's/android.version_code=.*/android.version_code=$$VERCODE$$/' ./apps/multiplatform/gradle.properties
     build:
       - gradle -v
       - export USER=vagrant
-      - ARCHES="aarch64" ./scripts/android/build-android.sh -s $$COMMIT$$
+      - ARCHES="aarch64" ./scripts/android/build-android.sh -gs
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v[\d.]+-fdroid$
