@@ -823,8 +823,42 @@ Builds:
       - $$flutter$$/bin/flutter build apk --release
     ndk: r21e
 
+  - versionName: 1.20.0
+    versionCode: 3532
+    commit: 0d13a99fbd32a69ec430ae746911bf24fd0d8ea6
+    sudo:
+      - apt-get update
+      - apt-get install -y ninja-build
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+      - linux
+      - macos
+      - test
+      - web
+      - windows
+      - winuwp
+    prebuild:
+      - source .github/workflows/versions.env
+      - pushd $$flutter$$
+      - git checkout -f $FLUTTER_VERSION
+      - popd
+      - sdkmanager 'cmake;3.18.1'
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+      - sed -i -e '/core-google-shortcuts/d' .pub-cache/git/flutter_shortcuts-*/android/build.gradle
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release
+    ndk: r21e
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags v\d+.\d+.\d+
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 1.19.2
-CurrentVersionCode: 3531
+CurrentVersion: 1.20.0
+CurrentVersionCode: 3532
