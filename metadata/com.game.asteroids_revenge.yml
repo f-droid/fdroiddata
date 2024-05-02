@@ -286,6 +286,13 @@ Builds:
     output: asteroids_revenge.apk
     srclibs:
       - Godot@4.2.2-stable
+    prebuild:
+      - pushd $$Godot$$
+      - scons --clean platform=linuxbsd target=editor use_llvm=yes tools=yes
+      - scons --clean platform=android arch=armv7 production=yes target=template_release
+      - cd platform/android/java
+      - gradle cleanGodotTemplates
+      - popd
     build:
       - export JAVA_HOME=$(dirname $(dirname $(readlink -f $(which javac))))
       - export ANDROID_SDK_ROOT=$$SDK$$

@@ -132,12 +132,8 @@ Builds:
     commit: 272b140a14beb0ef3bf986d224584df4da63f703
     subdir: android/app
     sudo:
-      - sysctl fs.inotify.max_user_watches=524288 || true
-      - curl -Lo node.tar.gz https://nodejs.org/dist/v18.16.1/node-v18.16.1-linux-x64.tar.gz
-      - echo "59582f51570d0857de6333620323bdeee5ae36107318f86ce5eca24747cabf5b node.tar.gz"
-        | sha256sum -c -
-      - tar xzf node.tar.gz --strip-components=1 -C /usr/local/
       - apt-get update
+      - apt-get install -y npm
     output: build/outputs/apk/release/app-release-unsigned.apk
     prebuild:
       - cd ../..
@@ -151,6 +147,8 @@ Builds:
       - pushd ../..
       - npm run build-prod
       - npx cap sync android
+      - sed -i -e "s/\"COMMIT_HASH\",void 0/\"COMMIT_HASH\",\"$(git rev-parse --short=7
+        HEAD)\"/" android/app/src/main/assets/public/main.js
       - popd
       - gradle assembleRelease
 
