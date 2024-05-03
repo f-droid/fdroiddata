@@ -4291,6 +4291,165 @@ Builds:
     antifeatures:
       - UpstreamNonFree
 
+  - versionName: 5.2.5
+    versionCode: 520051
+    commit: cce13828d9e63f650f5f01b59df58982805fc9e4
+    sudo:
+      - apt-get update
+      - apt-get install -y build-essential cmake doxygen meson nasm pkgconf python3-pystache
+        yasm
+    gradle:
+      - yes
+    output: app/build/outputs/apk/release/linphone-android-release-*.apk
+    srclibs:
+      - linphone-sdk@5.2.37
+    rm:
+      - app/google-services.json
+    prebuild:
+      - pushd $$linphone-sdk$$
+      - export LINPHONE_SDK_VERSION=$(git tag --sort=v:refname --list '[0-9].[0-9].[0-9][0-9]'
+        --list '[0-9].[0-9].[0-9]' | tail -1)
+      - echo "Using Linphone SDK" $LINPHONE_SDK_VERSION
+      - git checkout $LINPHONE_SDK_VERSION
+      - git submodule update --init --recursive
+      - rm -R liblinphone/wrappers/java/classes/org/linphone/core/tools/firebase
+      - sed -i -e '/import com.google.firebase.FirebaseApp/d' -e '/FirebaseApp.initializeApp/d'
+        liblinphone/wrappers/java/classes/org/linphone/core/tools/PushNotificationUtils.java
+      - popd
+      - sed -i -e '/FirebaseMessaging/,+6d' app/src/main/AndroidManifest.xml
+      - sed -i -e '/com.google.firebase/d' $$linphone-sdk$$/cmake/Android/gradle/build.gradle.cmake
+        build.gradle app/build.gradle
+      - sed -i -e '/google-services/d' build.gradle
+      - sed -i -e '/keystore/d' -e '/repositories/,+17d' -e 's/${project.version}/$$VERSION$$/g'
+        -e '/com.google.gms.google-services/d' -e '/org.linphone:linphone-sdk-android/d'
+        -e "s/'\*.jar'/'linphone-sdk-android-release.aar'/" -e 's/appVersionCode =
+        .*/appVersionCode = $$VERCODE$$/' app/build.gradle
+      - sed -i -e '/FirebaseCrashlytics/d' app/src/main/java/org/linphone/core/CoreContext.kt
+      - sed -i -e 's|https://www.linphone.org/releases||' -e 's|push_notification=.*|push_notification=0|'
+        app/src/main/assets/linphonerc_default
+      - sed -i -e '/ndk.dir/d' local.properties
+      - sed -i -e '16,22d' settings.gradle
+    scanignore:
+      - settings.gradle
+    build:
+      - pushd $$linphone-sdk$$
+      - cmake --preset=android-sdk -B build-android -DLINPHONESDK_ANDROID_ARCHS=armv7
+        -DENABLE_GPL_THIRD_PARTIES=ON -DENABLE_G729=ON
+      - cmake --build build-android --parallel $(nproc)
+      - popd
+      - mkdir app/libs
+      - cp $$linphone-sdk$$/build-android/linphone-sdk/bin/outputs/aar/linphone-sdk-android-release.aar
+        app/libs/
+    ndk: 25.1.8937393
+    antifeatures:
+      - UpstreamNonFree
+
+  - versionName: 5.2.5
+    versionCode: 520052
+    commit: cce13828d9e63f650f5f01b59df58982805fc9e4
+    sudo:
+      - apt-get update
+      - apt-get install -y build-essential cmake doxygen meson nasm pkgconf python3-pystache
+        yasm
+    gradle:
+      - yes
+    output: app/build/outputs/apk/release/linphone-android-release-*.apk
+    srclibs:
+      - linphone-sdk@5.2.37
+    rm:
+      - app/google-services.json
+    prebuild:
+      - pushd $$linphone-sdk$$
+      - export LINPHONE_SDK_VERSION=$(git tag --sort=v:refname --list '[0-9].[0-9].[0-9][0-9]'
+        --list '[0-9].[0-9].[0-9]' | tail -1)
+      - echo "Using Linphone SDK" $LINPHONE_SDK_VERSION
+      - git checkout $LINPHONE_SDK_VERSION
+      - git submodule update --init --recursive
+      - rm -R liblinphone/wrappers/java/classes/org/linphone/core/tools/firebase
+      - sed -i -e '/import com.google.firebase.FirebaseApp/d' -e '/FirebaseApp.initializeApp/d'
+        liblinphone/wrappers/java/classes/org/linphone/core/tools/PushNotificationUtils.java
+      - popd
+      - sed -i -e '/FirebaseMessaging/,+6d' app/src/main/AndroidManifest.xml
+      - sed -i -e '/com.google.firebase/d' $$linphone-sdk$$/cmake/Android/gradle/build.gradle.cmake
+        build.gradle app/build.gradle
+      - sed -i -e '/google-services/d' build.gradle
+      - sed -i -e '/keystore/d' -e '/repositories/,+17d' -e 's/${project.version}/$$VERSION$$/g'
+        -e '/com.google.gms.google-services/d' -e '/org.linphone:linphone-sdk-android/d'
+        -e "s/'\*.jar'/'linphone-sdk-android-release.aar'/" -e 's/appVersionCode =
+        .*/appVersionCode = $$VERCODE$$/' app/build.gradle
+      - sed -i -e '/FirebaseCrashlytics/d' app/src/main/java/org/linphone/core/CoreContext.kt
+      - sed -i -e 's|https://www.linphone.org/releases||' -e 's|push_notification=.*|push_notification=0|'
+        app/src/main/assets/linphonerc_default
+      - sed -i -e '/ndk.dir/d' local.properties
+      - sed -i -e '16,22d' settings.gradle
+    scanignore:
+      - settings.gradle
+    build:
+      - pushd $$linphone-sdk$$
+      - cmake --preset=android-sdk -B build-android -DLINPHONESDK_ANDROID_ARCHS=x86
+        -DENABLE_GPL_THIRD_PARTIES=ON -DENABLE_G729=ON
+      - cmake --build build-android --parallel $(nproc)
+      - popd
+      - mkdir app/libs
+      - cp $$linphone-sdk$$/build-android/linphone-sdk/bin/outputs/aar/linphone-sdk-android-release.aar
+        app/libs/
+    ndk: 25.1.8937393
+    antifeatures:
+      - UpstreamNonFree
+
+  - versionName: 5.2.5
+    versionCode: 520053
+    commit: cce13828d9e63f650f5f01b59df58982805fc9e4
+    sudo:
+      - apt-get update
+      - apt-get install -y build-essential cmake doxygen meson nasm pkgconf python3-pystache
+        yasm
+    gradle:
+      - yes
+    output: app/build/outputs/apk/release/linphone-android-release-*.apk
+    srclibs:
+      - linphone-sdk@5.2.37
+    rm:
+      - app/google-services.json
+    prebuild:
+      - pushd $$linphone-sdk$$
+      - export LINPHONE_SDK_VERSION=$(git tag --sort=v:refname --list '[0-9].[0-9].[0-9][0-9]'
+        --list '[0-9].[0-9].[0-9]' | tail -1)
+      - echo "Using Linphone SDK" $LINPHONE_SDK_VERSION
+      - git checkout $LINPHONE_SDK_VERSION
+      - git submodule update --init --recursive
+      - rm -R liblinphone/wrappers/java/classes/org/linphone/core/tools/firebase
+      - sed -i -e '/import com.google.firebase.FirebaseApp/d' -e '/FirebaseApp.initializeApp/d'
+        liblinphone/wrappers/java/classes/org/linphone/core/tools/PushNotificationUtils.java
+      - popd
+      - sed -i -e '/FirebaseMessaging/,+6d' app/src/main/AndroidManifest.xml
+      - sed -i -e '/com.google.firebase/d' $$linphone-sdk$$/cmake/Android/gradle/build.gradle.cmake
+        build.gradle app/build.gradle
+      - sed -i -e '/google-services/d' build.gradle
+      - sed -i -e '/keystore/d' -e '/repositories/,+17d' -e 's/${project.version}/$$VERSION$$/g'
+        -e '/com.google.gms.google-services/d' -e '/org.linphone:linphone-sdk-android/d'
+        -e "s/'\*.jar'/'linphone-sdk-android-release.aar'/" -e 's/appVersionCode =
+        .*/appVersionCode = $$VERCODE$$/' app/build.gradle
+      - sed -i -e '/FirebaseCrashlytics/d' app/src/main/java/org/linphone/core/CoreContext.kt
+      - sed -i -e 's|https://www.linphone.org/releases||' -e 's|push_notification=.*|push_notification=0|'
+        app/src/main/assets/linphonerc_default
+      - sed -i -e '/ndk.dir/d' local.properties
+      - sed -i -e '16,22d' settings.gradle
+    scanignore:
+      - settings.gradle
+    build:
+      - pushd $$linphone-sdk$$
+      - cmake --preset=android-sdk -B build-android -DLINPHONESDK_ANDROID_ARCHS=arm64
+        -DENABLE_GPL_THIRD_PARTIES=ON -DENABLE_G729=ON
+      - cmake --build build-android --parallel $(nproc)
+      - popd
+      - mkdir app/libs
+      - cp $$linphone-sdk$$/build-android/linphone-sdk/bin/outputs/aar/linphone-sdk-android-release.aar
+        app/libs/
+    ndk: 25.1.8937393
+    antifeatures:
+      - UpstreamNonFree
+
 MaintainerNotes: |-
   We pull linphone-sdk at one random tag (since master is not allowed) and then checkout the latest tag available.
   We patch linphone-sdk to remove GMS and Firebase, thus UpstreamNonFree.
@@ -4302,5 +4461,5 @@ VercodeOperation:
   - '%c * 10 + 2'
   - '%c * 10 + 3'
 UpdateCheckData: app/build.gradle|appVersionCode = (\d+)|.|appVersionName = "(.*)"
-CurrentVersion: 5.2.4
-CurrentVersionCode: 520043
+CurrentVersion: 5.2.5
+CurrentVersionCode: 520053
