@@ -847,9 +847,34 @@ Builds:
     gradle:
       - aosp
 
+  - versionName: 12.1.20-aosp
+    versionCode: 120120
+    commit: f7f93c1a889b8804200eaa5cc63ddc8883912a2f
+    subdir: oeffi
+    submodules: true
+    sudo:
+      - ln -fs /usr/share/zoneinfo/CET /etc/localtime
+      - dpkg-reconfigure -f noninteractive tzdata
+      - echo "deb https://deb.debian.org/debian bullseye main" > /etc/apt/sources.list.d/bullseye.list
+      - apt-get update
+      - apt-get install -y gradle disorderfs
+      - apt-get install -y -t bullseye openjdk-11-jdk-headless
+      - update-java-alternatives --set java-1.11.0-openjdk-amd64
+    init:
+      - rm /home/vagrant/fdroidserver/gradlew-fdroid
+      - ln -s /usr/bin/gradle /home/vagrant/fdroidserver/gradlew-fdroid
+      - cd ../..
+      - mv de.schildbach.oeffi de.schildbach.oeffi_underlying
+      - mkdir de.schildbach.oeffi
+      - disorderfs --sort-dirents=yes --reverse-dirents=no de.schildbach.oeffi_underlying
+        de.schildbach.oeffi
+      - cd de.schildbach.oeffi/oeffi
+    gradle:
+      - aosp
+
 AllowedAPKSigningKeys: ba61b88f0f4364006fa6db84b2b92fa61912a02771659b207c41272104c2e5c4
 
 AutoUpdateMode: Version +-aosp %v
 UpdateCheckMode: Tags ^v[0-9]+(\.[0-9]+)*$
-CurrentVersion: 12.1.19
-CurrentVersionCode: 120119
+CurrentVersion: 12.1.20
+CurrentVersionCode: 120120
