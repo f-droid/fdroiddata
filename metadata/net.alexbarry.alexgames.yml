@@ -1,0 +1,51 @@
+Categories:
+  - Games
+License: AGPL-3.0-only
+AuthorName: Alex Barry
+WebSite: https://alexbarry.github.io/AlexGames/
+SourceCode: https://github.com/alexbarry/AlexGames
+IssueTracker: https://github.com/alexbarry/AlexGames/issues
+
+AutoName: AlexGames
+
+RepoType: git
+Repo: https://github.com/alexbarry/AlexGames.git
+
+Builds:
+  - versionName: 0.0.3
+    versionCode: 2
+    commit: stable
+    subdir: src/android/app
+    sudo:
+      - apt-get update
+      - apt-get install xz-utils make cmake wget zlib1g-dev zip python3-venv
+    gradle:
+      - universal
+    srclibs:
+      - emscripten@3.1.57
+      - wordfreq@v3.0.2
+      - zlib@v1.3.1
+    build:
+      - pushd $$emscripten$$
+      - ./emsdk install latest
+      - ./emsdk activate latest
+      - source ./emsdk_env.sh
+      - popd
+      - pushd $$zlib$$
+      - emconfigure ./configure
+      - emcmake cmake .
+      - cmake --build .
+      - popd
+      - cd ../../..
+      - mkdir third_party
+      - ln -s $$zlib$$ third_party/zlib
+      - python3 -m venv alexgames_venv
+      - source alexgames_venv/bin/activate
+      - python3 -m pip install $$wordfreq$$
+      - build/wasm/build.sh -- -j32
+      - src/android/cp_games_assets.sh
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: 0.0.3
+CurrentVersionCode: 2
