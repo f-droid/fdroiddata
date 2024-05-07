@@ -15006,10 +15006,69 @@ Builds:
       - .yarn/
     ndk: r23b
 
+  - versionName: 3.194.3
+    versionCode: 3003095
+    commit: '@standardnotes/mobile@3.194.3'
+    subdir: packages/mobile/android/app
+    sudo:
+      - apt-get update
+      - apt-get install -y libsecret-1-dev make g++ libc-dev jq npm bzip2
+      - npm install -g yarn
+      - sysctl fs.inotify.max_user_watches=524288 || true
+      - echo "deb https://deb.debian.org/debian bullseye main" > /etc/apt/sources.list.d/bullseye.list
+      - apt-get update
+      - apt-get install -y -t bullseye openjdk-11-jdk-headless
+      - update-java-alternatives --set java-1.11.0-openjdk-amd64
+    init:
+      - cd ../../../..
+      - yarn config set -H enableImmutableInstalls false
+      - tmpfile=$(mktemp) && cp packages/mobile/package.json "$tmpfile" && jq -r 'del
+        (.devDependencies["react-native-iap"]) | del (.dependencies["react-native-store-review"])'
+        "$tmpfile" > packages/mobile/package.json && rm "$tmpfile"
+      - npm_config_build_from_source=true yarn
+    patch:
+      - remove-IAP.3.146.2.patch
+      - disable-gms-u2f-support-3.160.17.patch
+      - remove-react-native-store-review.3.177.5.patch
+    gradle:
+      - prod
+    srclibs:
+      - meypod-notifee@eeee41593e4e183e967eac4e99f9bcf5bedb8d57
+    rm:
+      - packages/mobile/ios
+    prebuild:
+      - sed -i -e '/detox/Id' -e 's/versionName appVersionName/versionName "$$VERSION$$"/'
+        -e 's/versionCode appVersionCode/versionCode $$VERCODE$$/' -e '/universalApk/s/false/true/'
+        build.gradle
+      - pushd ../../../..
+      - sed -E -i 's/^.*(fabric|com\.(crashlytics|google\.(firebase|android.gms))).*$//g'
+        packages/mobile/node_modules/@notifee/react-native/android/build.gradle
+      - echo 'include(":notifee_core")' >> packages/mobile/android/settings.gradle
+      - echo 'project(":notifee_core").projectDir = file("$$meypod-notifee$$/android")'
+        >> packages/mobile/android/settings.gradle
+      - yarn run build:mobile
+      - popd
+      - pushd ../..
+      - yarn run android:bundle
+      - popd
+    scanignore:
+      - packages/mobile/node_modules/jsc-android
+      - packages/mobile/node_modules/react-native
+      - packages/mobile/node_modules/@notifee/react-native/android/build.gradle
+      - packages/mobile/node_modules/detox/android/build.gradle
+      - packages/mobile/node_modules/@standardnotes/react-native-utils/android/build.gradle
+      - packages/mobile/node_modules/@react-native-async-storage/async-storage/android/build.gradle
+    scandelete:
+      - node_modules/
+      - packages/mobile/node_modules
+      - packages/desktop
+      - .yarn/
+    ndk: r23b
+
 AutoUpdateMode: Version @standardnotes/mobile@%v
 UpdateCheckMode: HTTP
 VercodeOperation:
   - 3002000 + %c
 UpdateCheckData: https://api.github.com/repos/standardnotes/app/actions/workflows/mobile.release.prod.yml/runs|"run_number":(\d+)|https://api.github.com/repos/standardnotes/app/releases|@standardnotes/mobile@([\d.]+)
-CurrentVersion: 3.194.2
-CurrentVersionCode: 3003094
+CurrentVersion: 3.194.3
+CurrentVersionCode: 3003095
