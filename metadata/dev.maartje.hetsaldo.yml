@@ -136,10 +136,49 @@ Builds:
       - popd
       - mv /tmp/build dev.maartje.hetsaldo
 
+  - versionName: 1.2.0
+    versionCode: 4
+    commit: 2ae486a330f5dd193e66ffeaf933198cf9c72bf6
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+      - linux
+      - macos
+      - web
+      - windows
+    prebuild:
+      - export FLUTTER_VERSION="$(cat flutter_version)"
+      - pushd $$flutter$$
+      - git checkout -f $FLUTTER_VERSION
+      - popd
+      - cd ..
+      - mv dev.maartje.hetsaldo /tmp/build
+      - pushd /tmp/build
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+      - popd
+      - mv /tmp/build dev.maartje.hetsaldo
+    scandelete:
+      - .pub-cache
+    build:
+      - cd ..
+      - mv dev.maartje.hetsaldo /tmp/build
+      - pushd /tmp/build
+      - export APP_VERSION="v$(cat pubspec.yaml | grep version | awk '{ print $2 }'
+        | cut -f1 -d "+")"
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter gen-l10n
+      - $$flutter$$/bin/flutter build apk --dart-define=HETSALDO_IS_STABLE=true --dart-define=HETSALDO_VERSION="$APP_VERSION"
+      - popd
+      - mv /tmp/build dev.maartje.hetsaldo
+
 AllowedAPKSigningKeys: 9929d01526075eaabcc7bde081660f8c6b320943dc2fa35b59189c4ec53ca5fd
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 1.1.1
-CurrentVersionCode: 3
+CurrentVersion: 1.2.0
+CurrentVersionCode: 4
