@@ -295,8 +295,35 @@ Builds:
       - popd
       - mv $$minetest_android_deps$$/deps ../native
 
+  - versionName: 5.8.1-android
+    versionCode: 48
+    commit: d445638265886ed9f0ae680eebc18c976d7e5387
+    subdir: android/app
+    sudo:
+      - apt-get update
+      - apt-get install -y cmake gcc-multilib gettext make wget xz-utils
+    gradle:
+      - yes
+    srclibs:
+      - minetest_android_deps@48ef4978ec967018991ef01fbdfc9c418fc67368
+    prebuild: sed -i -e 's/enable true/enable false/' -e '/preBuild.dependsOn getDeps/d'
+      build.gradle ../native/build.gradle
+    build:
+      - export ndkversion=$(grep "ndk_version = " ../build.gradle | cut -d "'" -f
+        2)
+      - sdkmanager "ndk;$ndkversion"
+      - export ANDROID_NDK=$$SDK$$/ndk/$ndkversion
+      - pushd $$minetest_android_deps$$
+      - git checkout -f $$VERSION$$
+      - ./build.sh --all armeabi-v7a
+      - ./build.sh --all arm64-v8a
+      - ./build.sh --all x86
+      - ./build.sh --all x86_64
+      - popd
+      - mv $$minetest_android_deps$$/deps ../native
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: android/build.gradle|"versionCode", (\d+)||(.*)
-CurrentVersion: 5.8.0
-CurrentVersionCode: 46
+CurrentVersion: 5.8.1-android
+CurrentVersionCode: 48
