@@ -48,7 +48,37 @@ Builds:
       - ndk-build
     ndk: r21d
 
+  - versionName: 0.4.3
+    versionCode: 20
+    commit: b6cd1025e73cdc57b01e026b7d79bf8580749e64
+    subdir: doom
+    sudo:
+      - echo "deb https://deb.debian.org/debian bullseye main" > /etc/apt/sources.list.d/bullseye.list
+      - apt-get update
+      - apt-get install -y file
+      - apt-get install -y -t bullseye openjdk-11-jdk-headless
+      - update-java-alternatives --set java-1.11.0-openjdk-amd64
+    gradle:
+      - yes
+    prebuild:
+      - sed -i -e 's/abiFilters "armeabi-v7a"/abiFilters "arm64-v8a"/g' -e 's://ndk.abiFilters
+        'armeabi-v7a','arm64-v8a','x86_64':ndk.abiFilters 'arm64-v8a':' -e 's/versionCode
+        19/versionCode 20/' build.gradle
+      - sed -i -e '/SDL_timer.h/a#define HAVE_GCC_ATOMICS 1' src/main/jni/SDL/src/atomic/SDL_spinlock.c
+      - cd ..
+      - sed -i -e 's/nvllsvm/emileb/' .gitmodules
+      - git submodule update --init --recursive
+    scanignore:
+      - doom/src/main/jni/gzdoom_android/wadsrc/static/indexfont
+    scandelete:
+      - .
+    build:
+      - cd src/main/jni
+      - sed -i -e 's:armeabi-v7a:arm64-v8a:' Application.mk
+      - ndk-build -j$(nproc)
+    ndk: 21.3.6528147
+
 AutoUpdateMode: None
 UpdateCheckMode: None
 CurrentVersion: 0.4.3
-CurrentVersionCode: 19
+CurrentVersionCode: 20
