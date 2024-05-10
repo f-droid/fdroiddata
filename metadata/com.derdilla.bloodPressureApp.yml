@@ -462,8 +462,38 @@ Builds:
       - export PUB_CACHE=$(pwd)/.pub-cache
       - $$flutter$$/bin/flutter build apk --flavor fdroid
 
+  - versionName: 1.6.4
+    versionCode: 34
+    commit: 330b9203f9aa63373ced9a9944a85d29a4115988
+    subdir: app
+    output: build/app/outputs/flutter-apk/app-fdroid-release.apk
+    srclibs:
+      - flutter@beta
+    rm:
+      - app/ios
+      - app/linux
+      - app/macos
+      - app/web
+      - app/windows
+      - app/test
+      - docs
+    prebuild:
+      - export flutterVersion=$(sed -n -E "s/.*f-droid-flutter:\s*(.*)/\1/p" pubspec.yaml)
+      - '[[ $flutterVersion ]] || exit 1'
+      - pushd $$flutter$$
+      - git checkout -f $flutterVersion
+      - popd
+      - export PUB_CACHE=.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter packages pub get
+    scandelete:
+      - app/.pub-cache
+    build:
+      - export PUB_CACHE=.pub-cache
+      - $$flutter$$/bin/flutter build apk --flavor fdroid --release --obfuscate --split-debug-info=./build/debug-info
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-UpdateCheckData: android/app/build.gradle|versionCode (\d+)|.|versionName "(.+)"
-CurrentVersion: 1.6.3
-CurrentVersionCode: 33
+UpdateCheckData: app/pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 1.6.4
+CurrentVersionCode: 34
