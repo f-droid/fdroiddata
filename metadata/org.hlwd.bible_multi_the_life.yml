@@ -407,22 +407,27 @@ Builds:
   - versionName: 1.26.0
     versionCode: 20240507
     commit: b21b3a9d47894a7565622b96215ce0bb827d8ca0
-    sudo:
-      - apt-get update
-      - rm -fr /opt/android-sdk/ndk/*
+    sudo: rm -fr /opt/android-sdk/ndk/*
     output: build/app/outputs/flutter-apk/app-release.apk
     srclibs:
-      - flutter@3.0.2
+      - flutter@3.19.6
     rm:
       - apk
       - ios
       - linux
       - macos
       - snap
-    build:
+    prebuild:
+      - sed -i -e 's/7.4.2-all/7.5-all/' android/gradle/wrapper/gradle-wrapper.properties
+      - export PUB_CACHE=$(pwd)/.pub-cache
       - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
       - $$flutter$$/bin/flutter build apk
-    ndk: r21
+    ndk: 21.0.6113669
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
