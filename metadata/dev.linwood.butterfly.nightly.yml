@@ -1753,8 +1753,35 @@ Builds:
       - export PUB_CACHE=$(pwd)/.pub-cache
       - $$flutter$$/bin/flutter build apk --flavor nightly
 
+  - versionName: 2.1.0
+    versionCode: 104
+    commit: 5e32dfacd6c30d2b97dbbc76e92ca24d7667b31c
+    subdir: app
+    output: build/app/outputs/flutter-apk/app-nightly-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - app/ios
+      - app/linux
+      - app/macos
+      - app/web
+      - app/windows
+    prebuild:
+      - export version=$(cat ../FLUTTER_VERSION)
+      - pushd $$flutter$$
+      - git checkout -f $version
+      - popd
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+    scandelete:
+      - app/.pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --flavor nightly
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v.+$
 UpdateCheckData: app/pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 2.1.0-rc.3
-CurrentVersionCode: 103
+CurrentVersion: 2.1.0
+CurrentVersionCode: 104
