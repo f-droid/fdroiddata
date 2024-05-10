@@ -59,17 +59,24 @@ Builds:
 
   - versionName: 0.8.3a
     versionCode: 100021
-    disable: https://gitlab.com/eightbitwonders/app/-/issues/6
-    commit: 8bfd97140a0f361f132684a4bb2909093646185f
+    commit: 362d9e2c4e7040e80bf25529d168c1ebebc4b8fd
     subdir: app
+    submodules: true
     sudo:
-      - apt update
+      - echo "deb https://deb.debian.org/debian bullseye main" > /etc/apt/sources.list.d/bullseye.list
+      - apt-get update
       - apt install -y asciidoctor
+      - apt-get install -y -t bullseye openjdk-11-jdk-headless
+      - update-java-alternatives --set java-1.11.0-openjdk-amd64
     gradle:
       - yes
+    prebuild: sed -i -e '/register("appstore"/,/^        }/d' -e '/register("playstore"/,/^        }/d'
+      build.gradle
     scanignore:
-      - app/src/androidTest/assets/testcart.bin
-    ndk: r23b
+      - app/src/main/res/raw/screenshot
+    scandelete:
+      - app/src
+    ndk: 23.1.7779620
 
 AllowedAPKSigningKeys: b5c9b409283bf66dd6114e7a0ca87953c1af223bad7cdde9c7c4145277849191
 
