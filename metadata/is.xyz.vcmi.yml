@@ -1062,12 +1062,12 @@ Builds:
     submodules: true
     sudo:
       - apt-get update
-      - apt-get install -y ninja-build python3-pip xz-utils unzip g++ make libssl-dev
+      - apt-get install -y ninja-build pipx xz-utils unzip g++ make libssl-dev
+      - apt-get install -y cmake -t bookworm-backports
     init: git revert -n c62d945b2d6e698becc16a02dc3cdd81238639c1
     gradle:
       - yes
     srclibs:
-      - CMake@v3.27.6
       - conan@1.60.1
     prebuild:
       - pushd ~
@@ -1075,13 +1075,7 @@ Builds:
       - sha256sum -c <<< '769ee342ea75f80619d985c2da990c48b3d8eaf45f48783a2d48870d04b46108
         ndk.zip'
       - popd
-      - pushd $$CMake$$
-      - mkdir build
-      - cd build
-      - ../bootstrap
-      - make
-      - popd
-      - pip install $$conan$$
+      - pipx install $$conan$$
       - cd ../..
       - export CONAN_USER_HOME="$(pwd)"
       - export CONAN_USER_HOME_SHORT="$(pwd)"
@@ -1124,12 +1118,12 @@ Builds:
     submodules: true
     sudo:
       - apt-get update
-      - apt-get install -y ninja-build python3-pip xz-utils unzip g++ make libssl-dev
+      - apt-get install -y ninja-build pipx xz-utils unzip g++ make libssl-dev
+      - apt-get install -y cmake -t bookworm-backports
     init: git revert -n c62d945b2d6e698becc16a02dc3cdd81238639c1
     gradle:
       - yes
     srclibs:
-      - CMake@v3.27.6
       - conan@1.60.1
     prebuild:
       - pushd ~
@@ -1137,17 +1131,11 @@ Builds:
       - sha256sum -c <<< '769ee342ea75f80619d985c2da990c48b3d8eaf45f48783a2d48870d04b46108
         ndk.zip'
       - popd
-      - pushd $$CMake$$
-      - mkdir build
-      - cd build
-      - ../bootstrap
-      - make
-      - popd
-      - pip install $$conan$$
+      - pipx install $$conan$$
       - cd ../..
       - export CONAN_USER_HOME="$(pwd)"
       - export CONAN_USER_HOME_SHORT="$(pwd)"
-      - export PATH="${HOME}/.local/bin:$$CMake$$/build/bin:$PATH"
+      - export PATH="${HOME}/.local/bin:$PATH"
       - mkdir .conan
       - pushd .conan
       - curl -Lo aarch64-v8a.txz https://github.com/vcmi/vcmi-dependencies/releases/download/android-1.0/aarch64-v8a.txz
@@ -1169,7 +1157,7 @@ Builds:
       - export GENERATE_ONLY_BUILT_CONFIG=1
       - export CONAN_USER_HOME="$(pwd)"
       - export CONAN_USER_HOME_SHORT="$(pwd)"
-      - export PATH="${HOME}/.local/bin:$$CMake$$/build/bin:$PATH"
+      - export PATH="${HOME}/.local/bin:$PATH"
       - conan install . --install-folder=conan-generated --build --profile:build=default
         --profile:host=CI/conan/android-64 -s compiler.cppstd=11
       - echo "ndk.dir=$(eval echo ${CONAN_USER_HOME}/.conan/data/android-ndk/r25c/_/_/package/*/bin)"
@@ -1187,10 +1175,6 @@ MaintainerNotes: |-
   VCMI requires conan version bigger than 1.54.0 (but not 2.x) for managing and
   building dependencies. Conan is not available in bullseye repos, so we install
   it from source with python-pip.
-
-  Additionally, VCMI requires cmake 3.27.6 (official docs say 3.20+, however it
-  yields various compilation errors). Bullseye backports repo doesn't have 3.27.6,
-  so we build it from source.
 
   VCMI needs android-ndk-r25c supplied by conan to build. The NDK package in conan
   uses official google NDK, but modifies it to work with conan. We download conan build
@@ -1218,6 +1202,9 @@ MaintainerNotes: |-
   Upstream uses prebuilt libs instead and their build procedures were not updated for some time.
   Builds split into a separate build for each architecture, with incremental version code (which must be reflected in both main "build" section and prebuild env variable).
   "commit" section points to the commit of the launcher repo, while "VCMI_COMMIT" var points to commit of the upstream vcmi repo.
+
+  VCMI requires cmake 3.27.6 (official docs say 3.20+, however it yields various compilation errors). Bullseye backports repo doesn't have 3.27.6,
+  so we build it from source.
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
