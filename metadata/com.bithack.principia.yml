@@ -1,0 +1,45 @@
+AntiFeatures:
+  NonFreeNet:
+    en-US: The domain for the main community site is hardcoded into the app.
+Categories:
+  - Games
+License: BSD-3-Clause
+WebSite: https://principia-web.se/
+SourceCode: https://github.com/Bithack/principia
+IssueTracker: https://github.com/Bithack/principia/issues
+Changelog: https://principia-web.se/wiki/Changelog
+Liberapay: rollerozxa
+
+AutoName: Principia
+
+RepoType: git
+Repo: https://github.com/Bithack/principia.git
+
+Builds:
+  - versionName: 2024.02.29
+    versionCode: 35
+    commit: f6af58b19571fc0e1067470b2be525c6527182a6
+    subdir: build-android/principia
+    sudo:
+      - apt-get update
+      - apt-get install -y cmake gcc-multilib gettext make wget xz-utils
+    gradle:
+      - yes
+    srclibs:
+      - principia-android-deps@3a526799a5c04c49446e46d4a3279563a91a0f91
+    prebuild: sed -i -e '/preBuild.dependsOn getDeps/d' build.gradle
+    scandelete:
+      - testmaps/
+    build:
+      - pushd $$principia-android-deps$$
+      - ./build.sh --all armeabi-v7a
+      - ./build.sh --all arm64-v8a
+      - ./build.sh --all x86_64
+      - popd
+      - mv $$principia-android-deps$$/deps ../
+    ndk: r23c
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: 2024.02.29
+CurrentVersionCode: 35
