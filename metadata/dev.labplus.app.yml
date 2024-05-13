@@ -1,0 +1,66 @@
+Categories:
+  - Development
+License: MIT
+AuthorName: thelooter
+AuthorEmail: labplus@thelooter.de
+SourceCode: https://github.com/thelooter/labplus_for_gitlab
+IssueTracker: https://github.com/thelooter/labplus_for_gitlab/issues
+
+AutoName: Lab+
+
+RepoType: git
+Repo: https://github.com/thelooter/labplus_for_gitlab
+Binaries: https://github.com/thelooter/labplus_for_gitlab/releases/download/%v/app-signed-release.apk
+
+Builds:
+  - versionName: 1.4.1
+    versionCode: 1
+    commit: 1.4.1
+    sudo:
+      - mkdir -p /home/thelooter
+      - chown vagrant /home/thelooter
+    output: build/app/outputs/flutter-apk/app-fdroid-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+      - linux
+      - macos
+      - web
+      - windows
+    prebuild:
+      - export repo=/home/thelooter/Documents/Coding/Dart
+      - mkdir -p $repo
+      - cd ..
+      - mv dev.labplus.app $repo/labplus_for_gitlab
+      - pushd $repo/labplus_for_gitlab
+      - version=$(sed -n -E "s/.*flutter-version:\ '(.*)'/\1/p" .github/workflows/release.yml)
+      - pushd $$flutter$$
+      - git checkout -f $version
+      - popd
+      - export PATH=$$flutter$$/bin:$PATH
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - flutter config --no-analytics
+      - flutter pub get
+      - popd
+      - mv $repo/labplus_for_gitlab dev.labplus.app
+    scanignore:
+      - .pub-cache
+    build:
+      - export repo=/home/thelooter/Documents/Coding/Dart
+      - cd ..
+      - mv dev.labplus.app $repo/labplus_for_gitlab
+      - pushd $repo/labplus_for_gitlab
+      - export PATH=$$flutter$$/bin:$PATH
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - flutter build apk --flavor fdroid --no-tree-shake-icons
+      - popd
+      - mv $repo/labplus_for_gitlab dev.labplus.app
+
+AllowedAPKSigningKeys: 059ebbe6de138d078ad9d5b3626803f0ecc82f93992629154816719dd6263bd5
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^[0-9.]*$
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 1.4.1
+CurrentVersionCode: 1
