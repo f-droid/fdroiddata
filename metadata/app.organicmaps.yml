@@ -1576,8 +1576,38 @@ Builds:
       - ./bootstrap.sh
       - ./b2 headers
 
+  - versionName: 2024.05.11-3-FDroid
+    versionCode: 24051103
+    commit: d8a071a02319e1d724ae6677c148c57fdb159337
+    subdir: android/app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y g++ ninja-build cmake
+    gradle:
+      - fdroid
+    rm:
+      - iphone
+      - qt
+      - tools/shaders_compiler
+      - xcode
+    prebuild:
+      - sed -i -e '/com.google.firebase/d; /gms/d' build.gradle
+      - touch secure.properties
+      - echo '<?xml version="1.0" encoding="utf-8"?><network-security-config/>' >
+        src/main/res/xml/network_security_config.xml
+      - cp ../../private_default.h ../../private.h
+    scanignore:
+      - data/*.bin
+    scandelete:
+      - 3party
+    build:
+      - cd ../../3party/boost
+      - ./bootstrap.sh
+      - ./b2 headers
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags .*android$
 UpdateCheckData: android/app/src/fdroid/play/version.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 2024.05.04-9-FDroid
-CurrentVersionCode: 24050409
+CurrentVersion: 2024.05.11-3-FDroid
+CurrentVersionCode: 24051103
