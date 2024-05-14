@@ -50,31 +50,43 @@ Builds:
 
   - versionName: 3.2.3
     versionCode: 26
-    disable: https://github.com/AlienKevin/wordshk_app/issues/2
-    commit: 3fbdbfcab811ccaec9524971897cb06f6c6f3829
+    commit: 7ac0658eecb6984fd69205a8be7e616835cb2f85
     sudo:
       - apt-get update
-      - apt-get install -y make
-    output: build/app/outputs/flutter-apk/app-release.apk
+      - apt-get install -y make libclang-dev llvm
+    output: build/app/outputs/flutter-apk/app-foss-release.apk
     srclibs:
-      - flutter@3.19.3
-      - rustup@1.26.0
+      - flutter@3.19.6
+      - rustup@1.27.0
     rm:
       - ios
       - test
-    build:
-      - pushd rust
-      - $$rustup$$/rustup-init.sh -y --default-toolchain 1.76.0 -t aarch64-linux-android
-      - source $HOME/.cargo/env
-      - cargo install cargo-ndk --version 3.4.0
-      - rustup target add aarch64-linux-android
-      - cargo ndk -o ../android/app/src/main/jniLibs --target aarch64-linux-android
-        build --release
-      - popd
+    prebuild:
+      - sed -i -e '/digital_ink_view_full/d' -e '/DigitalInkViewFull/,+3c return const
+        DigitalInkViewFoss();' lib/widgets/digital_ink_view.dart
+      - sed -i -e '/mlkit/d' pubspec.yaml
+      - sed -i -e '/mlkit/,/version/d' pubspec.lock
+      - export PUB_CACHE=$(pwd)/.pub-cache
       - $$flutter$$/bin/flutter config --no-analytics
       - $$flutter$$/bin/flutter packages pub get
+    scanignore:
+      - assets/dict.db.gz
+    scandelete:
+      - .pub-cache
+    build:
+      - pushd rust
+      - $$rustup$$/rustup-init.sh -y --default-toolchain 1.78.0 -t aarch64-linux-android
+      - source $HOME/.cargo/env
+      - rustup target add aarch64-linux-android
+      - popd
+      - export FLUTTER_RUST_BRIDGE_VERSION=$(sed -n -e '/flutter_rust_bridge/,/version/s/.*version:\s"\(.*\)"/\1/p'
+        pubspec.lock)
+      - cargo install flutter_rust_bridge_codegen --version $FLUTTER_RUST_BRIDGE_VERSION
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - PATH=$$flutter$$/bin/:$PATH flutter_rust_bridge_codegen generate
       - $$flutter$$/bin/flutter build apk --release --target-platform android-arm64
-    ndk: r26b
+        --flavor foss
+    ndk: 26.1.10909125
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
