@@ -426,7 +426,31 @@ Builds:
       - popd
     ndk: r23c
 
+  - versionName: 2.52.0
+    versionCode: 2520000
+    commit: 8dba5a00e50864497e14d2c4e6f5b7d45a1879a1
+    subdir: app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y bzip2 cmake g++ make
+    gradle:
+      - yes
+    rm:
+      - app/jni/openssl/fuzz
+      - app/jni/openssl/boringssl/fuzz
+    prebuild:
+      - sed -i -e 's/enable true/enable false/' build.gradle
+      - echo -e "\norg.gradle.jvmargs=-Xmx4096m" >> ../gradle.properties
+    build:
+      - pushd jni
+      - ./build_boost.sh
+      - ./build_openssl.sh
+      - ./build_miniupnpc.sh
+      - popd
+    ndk: r23c
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 2.51.0
-CurrentVersionCode: 2510000
+CurrentVersion: 2.52.0
+CurrentVersionCode: 2520000
