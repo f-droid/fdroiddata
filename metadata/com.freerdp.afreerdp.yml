@@ -210,7 +210,33 @@ Builds:
         $$SDK$$/ndk/15.2.4203891 --conf scripts/android-build-release.conf
     ndk: r25c
 
+  - versionName: 3.5.1
+    versionCode: 3005001
+    commit: eda5c99686e15327f2f37b9cadf307e852b96adf
+    subdir: client/Android/Studio/aFreeRDP
+    sudo:
+      - apt-get update
+      - apt-get install -y make pkg-config wget file libncurses5
+    gradle:
+      - yes
+    rm:
+      - client/Mac
+      - client/Wayland
+      - client/Windows
+      - client/X11
+      - client/iOS
+    prebuild:
+      - sed -i -e '/androidGitVersion {/a format "%tag%"' build.gradle
+      - sed -i -e '/hasProperty/,+2d' -e '/println/d' ../build.gradle
+      - sed -i -e 's/wget/wget -q/' ../../../../scripts/android-build-common.sh
+    build:
+      - cd ../../../..
+      - sdkmanager 'cmake;3.18.1' 'ndk;15.2.4203891'
+      - scripts/android-build-freerdp.sh --ndk $$NDK$$ --sdk $$SDK$$ --openh264 --openh264-ndk
+        $$SDK$$/ndk/15.2.4203891 --release
+    ndk: r25c
+
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: 2.11.0
-CurrentVersionCode: 2011000
+CurrentVersion: 3.5.1
+CurrentVersionCode: 3005001
