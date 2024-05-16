@@ -15,7 +15,7 @@ Binaries: https://github.com/thelooter/labplus_for_gitlab/releases/download/%v/a
 Builds:
   - versionName: 1.4.1
     versionCode: 1
-    commit: 1.4.1
+    commit: ffc5765bd5db082a3b6f2b6bb8721d80d9ae6908
     sudo:
       - mkdir -p /home/thelooter
       - chown vagrant /home/thelooter
@@ -34,7 +34,9 @@ Builds:
       - cd ..
       - mv dev.labplus.app $repo/labplus_for_gitlab
       - pushd $repo/labplus_for_gitlab
-      - version=$(sed -n -E "s/.*flutter-version:\ '(.*)'/\1/p" .github/workflows/release.yml)
+      - version=$(sed -n -E 's/.*flutter-version:\ "(.*)"/\1/p' .github/workflows/release.yml|tail
+        -n1)
+      - '[[ $version ]] || exit 1'
       - pushd $$flutter$$
       - git checkout -f $version
       - popd
@@ -57,7 +59,7 @@ Builds:
       - popd
       - mv $repo/labplus_for_gitlab dev.labplus.app
 
-AllowedAPKSigningKeys: 059ebbe6de138d078ad9d5b3626803f0ecc82f93992629154816719dd6263bd5
+AllowedAPKSigningKeys: 42d544512f2f6019469e333603f4c017477f12a706019666a39bcf86b23b6254
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^[0-9.]*$
