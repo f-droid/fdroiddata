@@ -1166,6 +1166,118 @@ Builds:
       - cmake -S . -B build -G Ninja -D CMAKE_BUILD_TYPE=Release -D CMAKE_TOOLCHAIN_FILE=conan-generated/conan_toolchain.cmake
       - cmake --build build
 
+  - versionName: 1.5.1
+    versionCode: 15130
+    commit: 194b3389f903584b46c5b60418595874b1e37c39
+    timeout: 30000
+    subdir: android/vcmi-app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y ninja-build pipx xz-utils unzip g++ make libssl-dev
+      - apt-get install -y cmake -t bookworm-backports
+    init: git revert -n c62d945b2d6e698becc16a02dc3cdd81238639c1
+    gradle:
+      - yes
+    srclibs:
+      - conan@1.60.1
+    prebuild:
+      - pushd ~
+      - curl -Lo ndk.zip https://dl.google.com/android/repository/android-ndk-r25c-linux.zip
+      - sha256sum -c <<< '769ee342ea75f80619d985c2da990c48b3d8eaf45f48783a2d48870d04b46108
+        ndk.zip'
+      - popd
+      - pipx install $$conan$$
+      - cd ../..
+      - export CONAN_USER_HOME="$(pwd)"
+      - export CONAN_USER_HOME_SHORT="$(pwd)"
+      - export PATH="${HOME}/.local/bin:$$CMake$$/build/bin:$PATH"
+      - mkdir .conan
+      - pushd .conan
+      - curl -Lo armeabi-v7a.txz https://github.com/vcmi/vcmi-dependencies/releases/download/android-1.0/armeabi-v7a.txz
+      - sha256sum -c <<< 'e5a7df93703930d4e8783b8228cfdb28d73c3811d79522df8083231fea2ad00e  armeabi-v7a.txz'
+      - tar -xf armeabi-v7a.txz
+      - rm armeabi-v7a.txz
+      - popd
+      - printf "[tool_requires]\nandroid-ndk/r25c" >> CI/conan/base/android
+      - conan profile new default --detect
+      - conan info . --profile:build=default --profile:host=CI/conan/android-32
+      - sed -i -e 's|https.*linux\.zip$|file:///home/vagrant/ndk.zip|' .conan/data/android-ndk/r25c/_/_/export/conandata.yml
+      - sed -i -e 's/minSdk.*$/minSdk 21/' android/vcmi-app/build.gradle
+      - sed -i -e 's/versionCode.*$/versionCode $$VERCODE$$/' android/vcmi-app/build.gradle
+    scandelete:
+      - .conan
+      - osx
+    build:
+      - cd ../..
+      - export GENERATE_ONLY_BUILT_CONFIG=1
+      - export CONAN_USER_HOME="$(pwd)"
+      - export CONAN_USER_HOME_SHORT="$(pwd)"
+      - export PATH="${HOME}/.local/bin:$$CMake$$/build/bin:$PATH"
+      - conan install . --install-folder=conan-generated --build --profile:build=default
+        --profile:host=CI/conan/android-32 -s compiler.cppstd=11
+      - echo "ndk.dir=$(eval echo ${CONAN_USER_HOME}/.conan/data/android-ndk/r25c/_/_/package/*/bin)"
+        >> android/local.properties
+      - mkdir build
+      - cmake -S . -B build -G Ninja -D CMAKE_BUILD_TYPE=Release -D CMAKE_TOOLCHAIN_FILE=conan-generated/conan_toolchain.cmake
+      - cmake --build build
+
+  - versionName: 1.5.1
+    versionCode: 15131
+    commit: 194b3389f903584b46c5b60418595874b1e37c39
+    timeout: 30000
+    subdir: android/vcmi-app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y ninja-build pipx xz-utils unzip g++ make libssl-dev
+      - apt-get install -y cmake -t bookworm-backports
+    init: git revert -n c62d945b2d6e698becc16a02dc3cdd81238639c1
+    gradle:
+      - yes
+    srclibs:
+      - conan@1.60.1
+    prebuild:
+      - pushd ~
+      - curl -Lo ndk.zip https://dl.google.com/android/repository/android-ndk-r25c-linux.zip
+      - sha256sum -c <<< '769ee342ea75f80619d985c2da990c48b3d8eaf45f48783a2d48870d04b46108
+        ndk.zip'
+      - popd
+      - pipx install $$conan$$
+      - cd ../..
+      - export CONAN_USER_HOME="$(pwd)"
+      - export CONAN_USER_HOME_SHORT="$(pwd)"
+      - export PATH="${HOME}/.local/bin:$PATH"
+      - mkdir .conan
+      - pushd .conan
+      - curl -Lo aarch64-v8a.txz https://github.com/vcmi/vcmi-dependencies/releases/download/android-1.0/aarch64-v8a.txz
+      - sha256sum -c <<< 'b41033513458e4658a628b35065c31144a50453a45e621ae4014fc8994d6e6c9  aarch64-v8a.txz'
+      - tar -xf aarch64-v8a.txz
+      - rm aarch64-v8a.txz
+      - popd
+      - printf "[tool_requires]\nandroid-ndk/r25c" >> CI/conan/base/android
+      - conan profile new default --detect
+      - conan info . --profile:build=default --profile:host=CI/conan/android-64
+      - sed -i -e 's|https.*linux\.zip$|file:///home/vagrant/ndk.zip|' .conan/data/android-ndk/r25c/_/_/export/conandata.yml
+      - sed -i -e 's/minSdk.*$/minSdk 21/' android/vcmi-app/build.gradle
+      - sed -i -e 's/versionCode.*$/versionCode $$VERCODE$$/' android/vcmi-app/build.gradle
+    scandelete:
+      - .conan
+      - osx
+    build:
+      - cd ../..
+      - export GENERATE_ONLY_BUILT_CONFIG=1
+      - export CONAN_USER_HOME="$(pwd)"
+      - export CONAN_USER_HOME_SHORT="$(pwd)"
+      - export PATH="${HOME}/.local/bin:$PATH"
+      - conan install . --install-folder=conan-generated --build --profile:build=default
+        --profile:host=CI/conan/android-64 -s compiler.cppstd=11
+      - echo "ndk.dir=$(eval echo ${CONAN_USER_HOME}/.conan/data/android-ndk/r25c/_/_/package/*/bin)"
+        >> android/local.properties
+      - mkdir build
+      - cmake -S . -B build -G Ninja -D CMAKE_BUILD_TYPE=Release -D CMAKE_TOOLCHAIN_FILE=conan-generated/conan_toolchain.cmake
+      - cmake --build build
+
 MaintainerNotes: |-
   VCMI contains GMS dependencies to provide TLS support on android 4.4.
   This dependency and code was introduced by a single commit, which is reverted
@@ -1211,5 +1323,5 @@ UpdateCheckMode: Tags
 VercodeOperation:
   - 10 * %c
   - 10 * %c + 1
-CurrentVersion: 1.5.0
-CurrentVersionCode: 15001
+CurrentVersion: 1.5.1
+CurrentVersionCode: 15131
