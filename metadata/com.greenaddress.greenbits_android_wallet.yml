@@ -2422,6 +2422,41 @@ Builds:
       - popd
     ndk: 25.1.8937393
 
+  - versionName: 4.0.28
+    versionCode: 22000428
+    commit: a14807e77150f00764f5579ccbe6c469d4257dd5
+    subdir: green
+    sudo:
+      - apt-get update
+      - apt-get install -y automake clang cmake jq libffi-dev libtool make pkg-config
+        swig virtualenv xz-utils
+    gradle:
+      - production
+      - FDroid
+    srclibs:
+      - rustup@1.25.2
+    rm:
+      - gradle/verification-metadata.xml
+    prebuild:
+      - sed -i -e '/mvn.breez/d' -e '/zendesk/d' ../build.gradle.kts
+      - sed -i -e '/libs.breez.sdk.kmp/d' -e 's!// api(libs.breez.sdk.android)!api(libs.breez.sdk.android)!'
+        ../common/build.gradle.kts
+      - sed -i -e '/signingConfigs {/,+8d' -e '/signingConfigs.getByName/,+3d' -e
+        '/versionNameSuffix/d' build.gradle.kts
+      - sed -i -e '/jetbrains.space/d' ../settings.gradle.kts
+    build:
+      - $$rustup$$/rustup-init.sh -y
+      - source $HOME/.cargo/env
+      - rustup install 1.68.0
+      - rustup target add aarch64-linux-android armv7-linux-androideabi
+      - pushd ../gdk
+      - JAVA_HOME=$(readlink -f /usr/bin/javac | sed "s:/bin/javac::") PATH=$HOME/.local/bin:$PATH
+        ./prepare_gdk_clang.sh arm64-v8a
+      - JAVA_HOME=$(readlink -f /usr/bin/javac | sed "s:/bin/javac::") PATH=$HOME/.local/bin:$PATH
+        ./prepare_gdk_clang.sh armeabi-v7a
+      - popd
+    ndk: 25.1.8937393
+
 MaintainerNotes: |-
   Watch prepare_gdk_clang.sh for changes on new builds.
 
@@ -2431,9 +2466,10 @@ MaintainerNotes: |-
   for each chain runnin on localhost. They are used to speed up SPV verification when possible and they
   can be verified independently by checking each hash against the blockchain.
 
-AutoUpdateMode: None
+AutoUpdateMode: Version
 UpdateCheckMode: Tags
 VercodeOperation:
   - 22000000 + %c
-CurrentVersion: 4.0.26
-CurrentVersionCode: 22000426
+UpdateCheckData: green/build.gradle.kts|versionCode\s=\s(\d+)|.|versionName\s=\s"([\d.]+)"
+CurrentVersion: 4.0.28
+CurrentVersionCode: 22000428
