@@ -1,0 +1,181 @@
+Categories:
+  - Sports & Health
+License: AGPL-3.0-or-later
+AuthorName: Loikki
+SourceCode: https://gitlab.com/loikki1/menugenerator
+IssueTracker: https://gitlab.com/loikki1/menugenerator/issues
+
+RepoType: git
+Repo: https://gitlab.com/loikki1/menugenerator.git
+
+Builds:
+  - versionName: 1.1.0
+    versionCode: 11
+    commit: 1.1.0
+    sudo:
+      - apt-get update
+      - apt-get install -y npm make gcc libc-dev golang-go
+    output: gen/android/app/build/outputs/apk/arm/release/app-*-release-unsigned.apk
+    srclibs:
+      - rustup@1.27.0
+      - esbuild@v0.20.2
+    prebuild:
+      - cd frontend
+      - npm install
+      - cd ..
+      - export NDK_HOME=$$NDK$$
+      - export RANLIB=${NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ranlib
+      - $$rustup$$/rustup-init.sh -y --default-toolchain 1.76.0 --target armv7-linux-androideabi
+      - source $HOME/.cargo/env
+      - source versions
+      - cargo install tauri-cli@2.0.0-beta.$TAURI_CLI_VERSION
+      - rm -rf gen/android
+      - cargo tauri android init
+      - cargo tauri icon icon.png
+      - printenv
+      - sed -i 's/versionCode=\"[0-9]\+/&1/' android-files/AndroidManifest.xml
+      - sed -i 's/versionCode = [0-9]\+/&1/' android-files/build.gradle.kts
+      - ./copy-android
+    scandelete:
+      - frontend/node_modules
+    build:
+      - pushd $$esbuild$$
+      - make esbuild
+      - popd
+      - mv $$esbuild$$/esbuild frontend/node_modules/@esbuild/linux-x64/bin/esbuild
+      - source $HOME/.cargo/env
+      - export NDK_HOME=$$NDK$$
+      - export RANLIB=${NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ranlib
+      - cargo tauri android build --features tauri --apk --split-per-abi --target
+        armv7
+    ndk: 25.1.8937393
+
+  - versionName: 1.1.0
+    versionCode: 12
+    commit: 1.1.0
+    sudo:
+      - apt-get update
+      - apt-get install -y npm make gcc libc-dev golang-go
+    output: gen/android/app/build/outputs/apk/arm64/release/app-*-release-unsigned.apk
+    srclibs:
+      - rustup@1.27.0
+      - esbuild@v0.20.2
+    prebuild:
+      - cd frontend
+      - npm install
+      - cd ..
+      - export NDK_HOME=$$NDK$$
+      - export RANLIB=${NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ranlib
+      - $$rustup$$/rustup-init.sh -y --default-toolchain 1.76.0 --target aarch64-linux-android
+      - source $HOME/.cargo/env
+      - source versions
+      - cargo install tauri-cli@2.0.0-beta.$TAURI_CLI_VERSION
+      - rm -rf gen/android
+      - cargo tauri android init
+      - cargo tauri icon icon.png
+      - sed -i 's/versionCode=\"[0-9]\+/&2/' android-files/AndroidManifest.xml
+      - sed -i 's/versionCode = [0-9]\+/&2/' android-files/build.gradle.kts
+      - ./copy-android
+    scandelete:
+      - frontend/node_modules
+    build:
+      - pushd $$esbuild$$
+      - make esbuild
+      - popd
+      - mv $$esbuild$$/esbuild frontend/node_modules/@esbuild/linux-x64/bin/esbuild
+      - source $HOME/.cargo/env
+      - export NDK_HOME=$$NDK$$
+      - export RANLIB=${NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ranlib
+      - cargo tauri android build --features tauri --apk --split-per-abi --target
+        aarch64
+    ndk: 25.1.8937393
+
+  - versionName: 1.1.0
+    versionCode: 13
+    commit: 1.1.0
+    sudo:
+      - apt-get update
+      - apt-get install -y npm make gcc libc-dev golang-go
+    output: gen/android/app/build/outputs/apk/x86/release/app-*-release-unsigned.apk
+    srclibs:
+      - rustup@1.27.0
+      - esbuild@v0.20.2
+    prebuild:
+      - cd frontend
+      - npm install
+      - cd ..
+      - export NDK_HOME=$$NDK$$
+      - export RANLIB=${NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ranlib
+      - $$rustup$$/rustup-init.sh -y --default-toolchain 1.76.0 --target i686-linux-android
+      - source $HOME/.cargo/env
+      - source versions
+      - cargo install tauri-cli@2.0.0-beta.$TAURI_CLI_VERSION
+      - rm -rf gen/android
+      - cargo tauri android init
+      - cargo tauri icon icon.png
+      - sed -i 's/versionCode=\"[0-9]\+/&3/' android-files/AndroidManifest.xml
+      - sed -i 's/versionCode = [0-9]\+/&3/' android-files/build.gradle.kts
+      - ./copy-android
+    scandelete:
+      - frontend/node_modules
+    build:
+      - pushd $$esbuild$$
+      - make esbuild
+      - popd
+      - mv $$esbuild$$/esbuild frontend/node_modules/@esbuild/linux-x64/bin/esbuild
+      - source $HOME/.cargo/env
+      - export NDK_HOME=$$NDK$$
+      - export RANLIB=${NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ranlib
+      - cargo tauri android build --features tauri --apk --split-per-abi --target
+        i686
+    ndk: 25.1.8937393
+
+  - versionName: 1.1.0
+    versionCode: 14
+    commit: 1.1.0
+    sudo:
+      - apt-get update
+      - apt-get install -y npm make gcc libc-dev golang-go
+    output: gen/android/app/build/outputs/apk/x86_64/release/app-*-release-unsigned.apk
+    srclibs:
+      - rustup@1.27.0
+      - esbuild@v0.20.2
+    prebuild:
+      - cd frontend
+      - npm install
+      - cd ..
+      - export NDK_HOME=$$NDK$$
+      - export RANLIB=${NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ranlib
+      - $$rustup$$/rustup-init.sh -y --default-toolchain 1.76.0 --target x86_64-linux-android
+      - source $HOME/.cargo/env
+      - source versions
+      - cargo install tauri-cli@2.0.0-beta.$TAURI_CLI_VERSION
+      - rm -rf gen/android
+      - cargo tauri android init
+      - cargo tauri icon icon.png
+      - sed -i 's/versionCode=\"[0-9]\+/&4/' android-files/AndroidManifest.xml
+      - sed -i 's/versionCode = [0-9]\+/&4/' android-files/build.gradle.kts
+      - ./copy-android
+    scandelete:
+      - frontend/node_modules
+    build:
+      - pushd $$esbuild$$
+      - make esbuild
+      - popd
+      - mv $$esbuild$$/esbuild frontend/node_modules/@esbuild/linux-x64/bin/esbuild
+      - source $HOME/.cargo/env
+      - export NDK_HOME=$$NDK$$
+      - export RANLIB=${NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ranlib
+      - cargo tauri android build --features tauri --apk --split-per-abi --target
+        x86_64
+    ndk: 25.1.8937393
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+VercodeOperation:
+  - 10 * %c + 1
+  - 10 * %c + 2
+  - 10 * %c + 3
+  - 10 * %c + 4
+CurrentVersion: 1.1.0
+CurrentVersionCode: 14
