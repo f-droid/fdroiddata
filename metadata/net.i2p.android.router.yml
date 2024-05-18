@@ -824,6 +824,29 @@ Builds:
     gradleprops:
       - I2P_VERSION=2.5.0
 
+  - versionName: 2.5.2
+    versionCode: 4745283
+    commit: ea68f116e16fa8025d72c61d9cb9be9a2fa56264
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y ant gettext
+    gradle:
+      - legacy
+    srclibs:
+      - I2P@168c4ffe4f620b5c5f7b568f20059c72ecf0d94e
+    rm:
+      - gradle/wrapper
+    prebuild:
+      - echo -e "i2psrc=$$I2P$$" >> ../lib/client/local.properties
+      - echo -e "sdk.dir=$$SDK$$\nndk.dir=$$NDK$$\ni2psrc=$$I2P$$" >> ../routerjars/local.properties
+      - cp -R $$I2P$$ ../i2p.i2p
+      - sed -i -e '/abortOnError/acheckReleaseBuilds false' build.gradle
+    scandelete:
+      - lib/client/src/main/jniLibs
+      - i2p.i2p
+    ndk: r19c
+
 AutoUpdateMode: None
 UpdateCheckMode: Tags
 UpdateCheckData: app/build.gradle|versionCode (\d+)|gradle.properties|I2P_ANDROID_VERSION=([\d.]+)
