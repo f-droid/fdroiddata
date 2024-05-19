@@ -1,0 +1,66 @@
+Categories:
+  - Games
+License: GPL-3.0-only
+AuthorName: Matthew "LettucePie"
+AuthorEmail: thelettucepie@gmail.com
+WebSite: https://lettucepie.itch.io/flicky-bee
+SourceCode: https://github.com/lettucepie/flicky_bee
+IssueTracker: https://github.com/LettucePie/flicky_bee/issues
+
+AutoName: Flicky Bee
+
+RepoType: git
+Repo: https://github.com/LettucePie/flicky_bee.git
+
+Builds:
+  - versionName: '1.3'
+    versionCode: 5
+    commit: c9f80f79cca548bcb361656f0c87855f3c36dc4c
+    sudo:
+      - echo "deb https://deb.debian.org/debian bullseye main" > /etc/apt/sources.list.d/bullseye.list
+      - apt-get update
+      - apt-get install -y -t bullseye openjdk-11-jdk-headless
+      - apt-get install -y clang scons pkg-config build-essential libx11-dev libxcursor-dev
+        libxinerama-dev libgl1-mesa-dev libglu-dev libasound2-dev libpulse-dev libudev-dev
+        libxi-dev libxrandr-dev
+      - update-java-alternatives --set java-1.11.0-openjdk-amd64
+    output: game/flicky_bee.apk
+    srclibs:
+      - Godot@5222a99f5d38cd5346254cefed8f65315bca4fcb
+    prebuild:
+      - mv fdroid/export_presets.cfg game/export_presets.cfg
+      - mkdir -p $HOME/.config/godot
+      - mv fdroid/editor_settings-4.tres $HOME/.config/godot/editor_settings-4.tres
+    build:
+      - cd ..
+      - BASE=$(pwd)
+      - cd srclib/Godot/
+      - GODOTPATH=$(pwd)
+      - scons platform=linuxbsd use_llvm=yes target=editor
+      - scons platform=android target=template_release arch=armv7
+      - scons platform=android target=template_release arch=arm64v8
+      - scons platform=android target=template_debug arch=armv7
+      - scons platform=android target=template_debug arch=arm64v8
+      - cd platform/android/java
+      - gradle generateGodotTemplates
+      - cd $GODOTPATH
+      - cd bin
+      - mkdir -p /home/vagrant/.local/share/godot/export_templates/4.0.3.stable/
+      - mv ./android_debug.apk $HOME/.local/share/godot/export_templates/4.0.3.stable/
+      - mv ./android_release.apk $HOME/.local/share/godot/export_templates/4.0.3.stable/
+      - cd $BASE
+      - keytool -keyalg RSA -genkeypair -alias androiddebugkey -keypass android -keystore
+        debug.keystore -storepass android -dname "CN=Android Debug,O=Android,C=US"
+        -validity 9999 -deststoretype pkcs12
+      - export SDK_PATH="export/android/android_sdk_path = \"$$SDK$$\""
+      - export DEBUG_KEYSTORE_PATH="export/android/debug_keystore = \"$PWD/debug.keystore\""
+      - echo $SDK_PATH >> $HOME/.config/godot/editor_settings-4.tres
+      - echo $DEBUG_KEYSTORE_PATH >> $HOME/.config/godot/editor_settings-4.tres
+      - ./srclib/Godot/bin/godot.linuxbsd.editor.x86_64.llvm --headless --export-release
+        ./org.lettucepie.flickybee/game/project.godot Android flicky_bee.apk
+    ndk: 23.2.8568313
+
+AutoUpdateMode: None
+UpdateCheckMode: None
+CurrentVersion: '1.3'
+CurrentVersionCode: 5
