@@ -255,13 +255,46 @@ Builds:
       - conan remote add odr https://odr.jfrog.io/artifactory/api/conan/odr-conan
     ndk: r23b
 
-MaintainerNotes: |-
-  Init submodule manully because there is private recursive submodule
-  conan pinned to 1.45.0 since 1.46.+ depends on Jinja2 >3 which is not available for Python 3.5.3 in Stretch, see https://github.com/conan-io/conan/pull/10710/files
-  Future versions, use cmake from sloppy 3.16 system wide AND install 3.18 from sdkmanager
+  - versionName: '3.26'
+    versionCode: 179
+    commit: 08186c4d4af88bd22f560ec9f64ecdfda0a66067
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y make ninja-build cmake pipx
+      - PIPX_HOME=/opt/pipx PIPX_BIN_DIR=/usr/local/bin pipx install conan==1.64.1
+    gradle:
+      - pro
+    srclibs:
+      - OpenDocument.core@v3.0.0
+    prebuild:
+      - sed -i -e '/gms/d' -e '/firebase/d' {.,..}/build.gradle
+      - sed -i -e '/com.google.android.play/d' -e '/ump/d' -e '/pro"/d' build.gradle
+      - sed -i -e '/INTERNET/d' -e '/^        <meta-data/,+5d' -e '/property/,+4d'
+        src/main/AndroidManifest.xml
+      - cd src/main/java/at/tomtasche/reader
+      - sed -i -e '/gms/d' -e '/play.core/d' -e '/firebase/d' -e '/void initializeProprietaryLibraries/,/^    }/d'
+        -e '/initializeProprietaryLibraries/d' -e 's/billingManager.hasPurchased()/true/'
+        ui/activity/*.java background/FileLoader.java background/LoaderService.java
+      - sed -i -e '/private Uri doFirebaseConvert/,/^    }/d' -e 's/viewerUri = doFirebaseConvert(options)/return/'
+        -e '/gms/d' -e '/firebase/Id' -e '/Storage/d' -e '/auth /d' -e '/storage /d'
+        background/OnlineLoader.java
+      - sed -i -e '/getBooleanConfig("show_in_app_rating/,/});/d' -e '/void offerUpload/,/^    }/d'
+        -e '/offerUpload/d' -e '/void requestInAppRating/,/^    }/d' -e '/requestInAppRating/d'
+        ui/activity/DocumentFragment.java
+      - sed -i -e 's/configManager.getBooleanConfig(".*")/null/' background/OdfLoader.java
+      - for class in AdManager AnalyticsManager BillingManager ConfigManager CrashManager
+        HelpManager; do echo "package at.tomtasche.reader.nonfree; public class ${class}
+        {}" > nonfree/${class}.java; sed -i -e "/${class}\./Id" background/*.java
+        ui/*/*.java ui/*.java; done
+    build:
+      - export coreVersion=$(sed -n -E 's/odrcore\/([0-9.]+)@/\1/p' ../conanfile.txt)
+      - git -C $$OpenDocument.core$$ checkout -f v$coreVersion
+      - conan export $$OpenDocument.core$$ odrcore/$coreVersion@
+    ndk: r26b
 
 AutoUpdateMode: None
 UpdateCheckMode: HTTP
 UpdateCheckData: https://raw.githubusercontent.com/opendocument-app/OpenDocument.droid/master/app/src/main/AndroidManifest.xml|versionCode="(\d+)|.|versionName="([\d.]+)
-CurrentVersion: '3.24'
-CurrentVersionCode: 178
+CurrentVersion: '3.26'
+CurrentVersionCode: 179
