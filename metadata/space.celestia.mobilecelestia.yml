@@ -1,0 +1,114 @@
+AntiFeatures:
+  NonFreeNet:
+    en-US: Connects to celestia.mobi and cvws.icloud-content.com for help/tutorials/add-ons
+Categories:
+  - Science & Education
+License: GPL-2.0-or-later
+AuthorName: Levin Li
+AuthorEmail: celestia.mobile@outlook.com
+WebSite: https://celestia.mobi/
+SourceCode: https://github.com/celestiamobile/AndroidCelestia/
+IssueTracker: https://github.com/celestiamobile/AndroidCelestia/issues/
+Changelog: https://github.com/celestiamobile/AndroidCelestia/releases/
+
+AutoName: Celestia
+
+RepoType: git
+Repo: https://github.com/celestiamobile/AndroidCelestia.git
+
+Builds:
+  - versionName: 1.7.1
+    versionCode: 521
+    commit: a2cd9c4c7570b7a82302f9ce7f28be18c011e71f
+    timeout: 30000
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install cmake csh gcc-multilib gettext gperf g++-multilib make meson
+        ncompress wget xz-utils zsh
+    gradle:
+      - unofficial
+    prebuild:
+      - export CELESTIA_HASH=$(sed -nr 's/^Celestia=(.*)$/\1/p' ../versions.txt)
+      - export CONTENT_HASH=$(sed -nr 's/^CelestiaContent=(.*)$/\1/p' ../versions.txt)
+      - export LOC_HASH=$(sed -nr 's/^CelestiaLocalization=(.*)$/\1/p' ../versions.txt)
+      - export DEP_HASH=$(sed -nr 's/^apple-android=(.*)$/\1/p' ../versions.txt)
+      - cd ../../ && mkdir deps && cd deps
+      - git clone https://dev.azure.com/CelestiaProject/Celestia/_git/apple-android
+      - git clone --recurse-submodules https://github.com/celestiamobile/Celestia
+      - git clone https://github.com/CelestiaProject/CelestiaContent
+      - git clone https://github.com/celestiamobile/CelestiaLocalization
+      - cd Celestia && git reset --hard $CELESTIA_HASH && cd -
+      - cd CelestiaContent && git reset --hard $CONTENT_HASH && cd -
+      - cd CelestiaLocalization && git reset --hard $LOC_HASH && cd -
+      - cd apple-android && git reset --hard $DEP_HASH
+      - chmod +x download.sh prepare_icu.sh build_android.sh
+      - mkdir tmp && cd tmp
+      - cp ../download.sh .
+      - cp ../versions.sh .
+      - ./download.sh
+      - mv json.hpp ../.
+      - mkdir targz tarxz tgz tz
+      - for i in $(ls | grep ".tar.gz"); do cd "targz"; tar -xzf "../${i}"; pwd; cd
+        ../; done
+      - for i in $(ls | grep ".tar.xz"); do  cd "tarxz"; tar -xJf "../${i}"; pwd;
+        cd ../; done
+      - for i in $(ls | grep ".tgz"); do cd "tgz"; tar -xzf "../${i}"; pwd; cd ../;
+        done
+      - for i in $(ls | grep ".tar.Z"); do cd "tz"; tar -xZf "../${i}"; pwd; cd ../;
+        done
+      - cd ../../../
+      - mv deps space.celestia.mobilecelestia/.
+    scandelete:
+      - deps
+    build:
+      - mv ../deps/* ../../.
+      - rm -d ../deps
+      - cd ../../apple-android/tmp
+      - cd targz; for i in $(ls); do tar -cvzf "../../${i}.tar.gz" "${i}"; done; cd
+        ..
+      - cd tarxz; for i in $(ls); do tar -cvJf "../../${i}.tar.xz" "${i}"; done; cd
+        ..
+      - cd tgz; for i in $(ls); do tar -cvzf "../../${i}.tgz" "${i}"; done; cd ..
+      - cd tz; for i in $(ls); do tar -cvZf "../../${i}.tar.Z" "${i}"; done; cd ../../
+      - rm -rf tmp
+      - ./prepare_icu.sh
+      - mkdir android
+      - export SDK_PATH="$$SDK$$/ndk/$(ls $$SDK$$/ndk/)"
+      - ./build_android.sh "$(pwd)/android" "$SDK_PATH"
+      - cd ../space.celestia.mobilecelestia
+      - mkdir dependencies
+      - mv ../apple-android/android/* dependencies/.
+      - cd ..
+      - sh "$(pwd)/space.celestia.mobilecelestia/app/run_gperf.sh" "$(pwd)/Celestia"
+
+MaintainerNotes: |-
+  Celestia for android requires 4 more repositories to build:
+    - Celestia;
+    - CelestiaContent;
+    - CelestiaLocalization;
+    - apple-android (contains build scripts for dependencies).
+  These repositories need to be present in parent directory of AndroidCelestia.
+  Commit hashes for these repositories are located upstream in 'versions.txt'
+  file. We parse this file to get the correct hashes for dependencies.
+
+  During the prebuild they are temporarily moved into AndroidCelestia directory
+  to allow f-droid scanner to scan it. Third party dependencies are downloaded
+  with './prebuild.sh' during prebuilt stage, however they are compressed
+  and only unpacked during the build stage with './prepare_icu.sh' and './build_android.sh'
+  scripts. Because of that, we unpack these archives during the prebuild stage
+  to allow F-Droid scanner to scan them, and then pack it back so build scripts
+  can process them as expected.
+
+  During the build stage, we move previously cloned repositories in their expected
+  locations. Third party dependencies are also built and moved to AndroidCelestia
+  directory.
+
+  F-Droid scanner detects various binaries in third party libraries, however
+  these are various test data and other files not needed for actual compilation.
+  They can be safely scandeleted.
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: 1.7.1
+CurrentVersionCode: 521
