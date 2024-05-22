@@ -392,10 +392,38 @@ Builds:
       - popd
     ndk: 21.4.7075529
 
+  - versionName: 10.12.0.0
+    versionCode: 4710009
+    commit: d9b8bd8773bfae016c6a32130bf25189717a052c
+    subdir: TMessagesProj_App
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y cmake golang-go libuv1 make ninja-build yasm
+    gradle:
+      - afat
+    rm:
+      - TMessagesProj/jni/ffmpeg/tests/ref/fate/sub-microdvd-remux
+    prebuild: echo -e 'APP_ID = 575730\nAPP_HASH = 723c7927097f8487d229438af766e329'
+      > API_KEYS
+    scandelete:
+      - TMessagesProj/jni
+    build:
+      - export NDK=$$NDK$$
+      - export NINJA_PATH=/usr/bin/ninja
+      - pushd ../TMessagesProj/jni
+      - ./build_libvpx_clang.sh
+      - ./build_ffmpeg_clang.sh
+      - ./patch_ffmpeg.sh
+      - ./patch_boringssl.sh
+      - ./build_boringssl.sh
+      - popd
+    ndk: 21.4.7075529
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 VercodeOperation:
   - 10 * %c + 9
 UpdateCheckData: gradle.properties|MG_VERSION_CODE=(\d+)|.|MG_VERSION_NAME=([\d.]+)
-CurrentVersion: 10.10.1.2
-CurrentVersionCode: 4583029
+CurrentVersion: 10.12.0.0
+CurrentVersionCode: 4710009
