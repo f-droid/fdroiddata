@@ -499,12 +499,13 @@ Builds:
   - versionName: 1.6.9
     versionCode: 1598
     commit: d21431188cd7beacfecc7929aa5b44d4e03d3fa9
-    subdir: instances/app
+    subdir: instances/android/app
     submodules: true
     gradle:
       - yes
     prebuild:
-      - printf "\nversion_code=$$VERCODE$$\nversion_name=$$VERSION$$" >> ../../gradle.properties
+      - sed -i -e 's/version_code", Integer.MAX_VALUE/version_code", $$VERCODE$$/'
+        -e 's/version_name", DEBUG_VERSION/version_name", "$$VERSION$$"/'  ../../../build-logic/plugins/convention/src/main/kotlin/com/flipperdevices/buildlogic/ApkConfig.kt
       - sdkmanager 'cmake;3.22.1'
     scandelete:
       - build-logic/plugins/convention/build
