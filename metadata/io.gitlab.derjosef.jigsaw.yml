@@ -1,0 +1,77 @@
+Categories:
+  - Games
+License: GPL-3.0-or-later
+AuthorName: Josef Ott
+SourceCode: https://gitlab.com/derjosef/jigsaw
+IssueTracker: https://gitlab.com/derjosef/jigsaw/-/issues
+
+AutoName: Jigsaw
+
+RepoType: git
+Repo: https://gitlab.com/derjosef/jigsaw.git
+
+Builds:
+  - versionName: 1.0.0
+    versionCode: 10001
+    commit: v1.0.0
+    sudo:
+      - apt-get update
+      - apt-get install -y pkgconf clang scons
+    output: jigsaw.apk
+    srclibs:
+      - Godot@89f70e98d209563abb4dbc1f8cd5d76c81eb7940
+    build:
+      - export ANDROID_SDK_ROOT="$$SDK$$"
+      - export BUILD_PWD="$PWD"
+      - export ANDROID_NDK_ROOT="$$NDK$$"
+      - export JAVA_HOME="$(dirname $(which java))/.."
+      - pushd $$Godot$$
+      - scons -j `nproc` platform=linuxbsd target=editor
+      - scons -j `nproc` platform=android target=template_release arch=arm32 profile="$BUILD_PWD/fdroid-config.py"
+      - cd platform/android/java
+      - gradle generateGodotTemplates
+      - popd
+      - sed -i -r ' s|(custom_template/release)=".*"|\1="$$Godot$$/bin/android_release.apk"|;
+        s|(architectures/armeabi-v7a)=.*|\1=true|; s|(version/code)=.*|\1=$$VERCODE$$|'
+        export_presets.cfg
+      - touch $$Godot$$/bin/_sc_
+      - $$Godot$$/bin/godot.linuxbsd.editor.x86_64 --headless --verbose --export-release
+        Android jigsaw.apk --quit-after 10
+      - $$Godot$$/bin/godot.linuxbsd.editor.x86_64 --headless --verbose --export-release
+        Android jigsaw.apk
+    ndk: 23.2.8568313
+
+  - versionName: 1.0.0
+    versionCode: 10002
+    commit: v1.0.0
+    sudo:
+      - apt-get update
+      - apt-get install -y pkgconf clang scons
+    output: jigsaw.apk
+    srclibs:
+      - Godot@89f70e98d209563abb4dbc1f8cd5d76c81eb7940
+    build:
+      - export ANDROID_SDK_ROOT="$$SDK$$"
+      - export BUILD_PWD="$PWD"
+      - export ANDROID_NDK_ROOT="$$NDK$$"
+      - export JAVA_HOME="$(dirname $(which java))/.."
+      - pushd $$Godot$$
+      - scons -j `nproc` platform=linuxbsd target=editor
+      - scons -j `nproc` platform=android target=template_release arch=arm64 profile="$BUILD_PWD/fdroid-config.py"
+      - cd platform/android/java
+      - gradle generateGodotTemplates
+      - popd
+      - sed -i -r ' s|(custom_template/release)=".*"|\1="$$Godot$$/bin/android_release.apk"|;
+        s|(architectures/arm64-v8a)=.*|\1=true|; s|(version/code)=.*|\1=$$VERCODE$$|'
+        export_presets.cfg
+      - touch $$Godot$$/bin/_sc_
+      - $$Godot$$/bin/godot.linuxbsd.editor.x86_64 --headless --verbose --export-release
+        Android jigsaw.apk --quit-after 10
+      - $$Godot$$/bin/godot.linuxbsd.editor.x86_64 --headless --verbose --export-release
+        Android jigsaw.apk
+    ndk: 23.2.8568313
+
+AutoUpdateMode: None
+UpdateCheckMode: None
+CurrentVersion: 1.0.0
+CurrentVersionCode: 10002
