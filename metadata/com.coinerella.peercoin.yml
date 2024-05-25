@@ -1504,10 +1504,38 @@ Builds:
       - $$flutter$$/bin/flutter packages pub run build_runner build --delete-conflicting-outputs
       - $$flutter$$/bin/flutter build apk
 
+  - versionName: 1.2.7
+    versionCode: 140
+    commit: ba41a617c1ed957e82e0401d76dbbe82f2ac20d1
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@3.16.2
+      - transistor-background-fetch@0dd1457588ba031f11e9452f125144aac8a9b75f
+    rm:
+      - ios
+      - test_driver
+    prebuild:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter packages pub get
+      - sed -i -e '/maven {/,/^        }/cmavenLocal()' android/build.gradle .pub-cache/hosted/pub.dev/background_fetch-*/android/build.gradle
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - pushd $$transistor-background-fetch$$/android/tsbackgroundfetch/
+      - gradle assembleRelease
+      - gradle publishToMavenLocal
+      - popd
+      - $$flutter$$/bin/flutter pub run flutter_launcher_icons:main -f fdroid_flutter_launcher_icons.yaml
+      - $$flutter$$/bin/flutter pub run flutter_native_splash:create
+      - $$flutter$$/bin/flutter packages pub run build_runner build --delete-conflicting-outputs
+      - $$flutter$$/bin/flutter build apk
+
 MaintainerNotes: Ignore local maven repo for flutter_background_fetch.
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 1.2.6
-CurrentVersionCode: 139
+CurrentVersion: 1.2.7
+CurrentVersionCode: 140
