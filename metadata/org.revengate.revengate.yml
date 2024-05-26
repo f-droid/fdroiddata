@@ -540,8 +540,42 @@ Builds:
         APK' bin/revengate.apk
     ndk: 23.2.8568313
 
+  - versionName: 0.12.7
+    versionCode: 1028127
+    commit: a48f50d989aa80a146c739ac6ff19f879ef16e5d
+    sudo:
+      - apt-get update
+      - apt-get install -y python3-invoke build-essential scons pkg-config libx11-dev
+        libxcursor-dev libxinerama-dev libgl1-mesa-dev libglu-dev libasound2-dev libpulse-dev
+        libudev-dev libxi-dev libxrandr-dev
+    output: bin/revengate.apk
+    srclibs:
+      - Godot@4.2.2-stable
+    prebuild:
+      - mkdir -p bin
+      - mkdir -p android
+      - pushd $$Godot$$
+      - git clean -fixd
+      - popd
+    build:
+      - export ANDROID_SDK_ROOT=$$SDK$$
+      - export ANDROID_NDK_ROOT=$$NDK$$
+      - export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+      - pushd $$Godot$$
+      - scons -j `nproc` platform=linuxbsd target=editor
+      - scons -j `nproc` platform=android target=template_release arch=arm64
+      - cd platform/android/java
+      - ./gradlew generateGodotTemplates
+      - popd
+      - invoke make-fdroid-presets $$Godot$$
+      - $$Godot$$/bin/godot.linuxbsd.editor.x86_64 --headless --export-release 'Android
+        APK' bin/revengate.apk
+      - $$Godot$$/bin/godot.linuxbsd.editor.x86_64 --headless --export-release 'Android
+        APK' bin/revengate.apk
+    ndk: 23.2.8568313
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: src/constants.gd|const VERSION_CODE := (\d+)|.|const VERSION := "([\d.]+)"
-CurrentVersion: 0.12.6
-CurrentVersionCode: 1028126
+CurrentVersion: 0.12.7
+CurrentVersionCode: 1028127
