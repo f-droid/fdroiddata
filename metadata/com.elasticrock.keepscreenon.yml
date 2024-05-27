@@ -266,15 +266,16 @@ Builds:
 
   - versionName: 1.18.1
     versionCode: 27
-    disable: https://github.com/elastic-rock/KeepScreenOn/issues/26
     commit: a769647b75c59910d308b98759aee7e70408c152
     subdir: app
     gradle:
       - yes
     srclibs:
-      - reproducible-apk-tools@v0.2.3
-    postbuild: $$reproducible-apk-tools$$/inplace-fix.py --zipalign fix-newlines $$OUT$$
-      'META-INF/services/*'
+      - reproducible-apk-tools@v0.2.6
+    prebuild: echo -e '\ntasks.register<Exec>("crlf") { executable("bash"); args("-c",
+      "$$reproducible-apk-tools$$/inplace-fix.py --zipalign fix-newlines build/intermediates/merged_java_res/release/minifyReleaseWithR8/base.jar
+      META-INF/services/*"); workingDir(project.projectDir) }\ntasks.configureEach
+      { if (name == "minifyReleaseWithR8") { finalizedBy("crlf") } }' >> build.gradle.kts
 
 AllowedAPKSigningKeys: bb9503be1486028133b33eabce9732100e9a331065e32fa2a033a93498bae6d6
 
