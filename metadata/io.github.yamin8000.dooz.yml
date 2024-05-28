@@ -12,7 +12,7 @@ AutoName: Dooz
 
 RepoType: git
 Repo: https://github.com/yamin8000/Dooz.git
-Binaries: https://github.com/yamin8000/Dooz/releases/download/%v/app-release.apk
+Binaries: https://github.com/yamin8000/Dooz/releases/download/%v/io.github.yamin8000.dooz-v%c-n%v-release.apk
 
 Builds:
   - versionName: 1.0.3
@@ -127,15 +127,30 @@ Builds:
       - update-java-alternatives -a
     gradle:
       - yes
+    binary: https://github.com/yamin8000/Dooz/releases/download/%v/app-release.apk
     srclibs:
       - reproducible-apk-tools@v0.2.3
     prebuild: sed -i -e 's/-XX:MaxPermSize=2048m//' ../gradle.properties
     postbuild: $$reproducible-apk-tools$$/inplace-fix.py --zipalign fix-newlines $$OUT$$
       'META-INF/services/*'
 
+  - versionName: 1.0.18
+    versionCode: 18
+    commit: fac433d4b132682d4d3bdb6b6ddb6c173890dcfa
+    subdir: app
+    gradle:
+      - yes
+    srclibs:
+      - reproducible-apk-tools@v0.2.6
+    prebuild: echo -e '\ntasks.register<Exec>("crlf") { executable("bash"); args("-c",
+      "$$reproducible-apk-tools$$/inplace-fix.py --zipalign fix-newlines build/intermediates/merged_java_res/release/minifyReleaseWithR8/base.jar
+      META-INF/services/*"); workingDir(project.projectDir) }\ntasks.configureEach
+      { if (name == "minifyReleaseWithR8") { finalizedBy("crlf") } }' >> build.gradle.kts
+
 AllowedAPKSigningKeys: c5fc36a2d18057155a471f456216f0b1f07755f33147f938c92ea6275dced4d2
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 1.0.14
-CurrentVersionCode: 14
+UpdateCheckData: app/build.gradle.kts|versionCode\s=\s(\d+)|.|versionName\s=\s"([\d.]+)"
+CurrentVersion: 1.0.18
+CurrentVersionCode: 18
