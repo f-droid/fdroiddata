@@ -1,0 +1,52 @@
+AntiFeatures:
+  NonFreeNet:
+    en-US: App depends on dl.monde-diplomatique.de website.
+  Tracking:
+    en-US: App sends tracking data to sentry.taz.de
+Categories:
+  - Multimedia
+  - Reading
+  - Science & Education
+License: AGPL-3.0-or-later
+WebSite: https://monde-diplomatique.de
+SourceCode: https://github.com/die-tageszeitung/taz-neo
+IssueTracker: https://github.com/die-tageszeitung/taz-neo/issues
+
+AutoName: LMd - Le Monde diplomatique DE
+
+RepoType: git
+Repo: https://github.com/die-tageszeitung/taz-neo
+
+Builds:
+  - versionName: 2.1.2
+    versionCode: 20102900
+    commit: lmd-2.1.2
+    subdir: app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y make file
+    output: build/outputs/apk/freeLmdProduction/unminifiedRelease/app-free-lmd-production-unminifiedRelease-unsigned.apk
+    prebuild:
+      - pushd ../thirdparty/mupdf-jni
+      - git apply ../../scripts/mupdf-mavenlocal.patch
+      - touch "settings.gradle"
+      - sed -i -e "s/'-j4'/'-j`nproc`'/" build.gradle
+      - popd
+    scandelete:
+      - thirdparty/mupdf-jni/libmupdf/thirdparty
+    build:
+      - pushd ../thirdparty/mupdf-jni
+      - make -C libmupdf generate
+      - gradle assembleRelease publishReleasePublicationToMavenLocal
+      - popd
+      - export VERSION_IGNORES_DIRTY_TREE=true
+      - export SENTRY_ENVIRONMENT=fdroid
+      - gradle assembleFreeLmdProductionUnminifiedRelease
+
+MaintainerNotes: Dynamic versionName and version code, so no autoupdates possible.
+
+AutoUpdateMode: None
+UpdateCheckMode: None
+CurrentVersion: 2.1.2
+CurrentVersionCode: 20102900
