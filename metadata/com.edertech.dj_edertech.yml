@@ -1,0 +1,49 @@
+AntiFeatures:
+  NonFreeNet:
+    en-US: Downloads playlist and music files from gitlab.com.
+Categories:
+  - Multimedia
+License: MIT
+AuthorName: Ederson Duarte Itabaiana
+AuthorEmail: djedertechshow@gmail.com
+SourceCode: https://gitlab.com/edertech/dj_edertech
+IssueTracker: https://gitlab.com/edertech/dj_edertech/issues
+
+AutoName: DJ Edertech
+
+RepoType: git
+Repo: https://gitlab.com/edertech/dj_edertech.git
+
+Builds:
+  - versionName: 1.0.0
+    versionCode: 1
+    commit: 5251c64616d1dcaaa909bc851e9f1d73983d615b
+    output: build/app/outputs/apk/release/app-release-unsigned.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+      - linux
+      - macos
+      - web
+    prebuild:
+      - export FLUTTER_VERSION=$(cat flutter_version.txt)
+      - '[[ -z $FLUTTER_VERSION ]] && exit 1'
+      - pushd $$flutter$$
+      - git checkout -f $FLUTTER_VERSION
+      - popd
+      - sed -i -e '/flutter_barcode_scanner/d' pubspec.yaml
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 1.0.0
+CurrentVersionCode: 1
