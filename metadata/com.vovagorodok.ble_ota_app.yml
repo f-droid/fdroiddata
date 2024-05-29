@@ -1,0 +1,44 @@
+Categories:
+  - Development
+License: MIT
+AuthorName: vovagorodok
+SourceCode: https://github.com/vovagorodok/ble_ota_app
+IssueTracker: https://github.com/vovagorodok/ble_ota_app/issues
+
+AutoName: BleOta
+
+RepoType: git
+Repo: https://github.com/vovagorodok/ble_ota_app
+
+Builds:
+  - versionName: 1.0.1
+    versionCode: 2
+    commit: 4750a87f77ec756833659cd5e8b852168819ffc7
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+      - linux
+      - macos
+      - web
+      - windows
+    prebuild:
+      - sed -i -e '/signingConfigs.debug/d' android/app/build.gradle
+      - flutterVersion=$(sed -n -E "s/.*flutter-version:\ '(.*)'/\1/p" .github/workflows/dart.yml)
+      - '[[ $flutterVersion ]] || exit 1'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 1.0.1
+CurrentVersionCode: 2
