@@ -43,29 +43,18 @@ Builds:
     postbuild: $$reproducible-apk-tools$$/inplace-fix.py --zipalign fix-newlines $$OUT$$
       'META-INF/services/*'
 
-  - versionName: 1.1.1
-    versionCode: 5
-    disable: https://github.com/devhyper/open-video-editor/issues/63
-    commit: 5c1afbf5f0491274bf5e5d2faf2be347c8f5e6ed
-    subdir: app
-    gradle:
-      - yes
-    srclibs:
-      - reproducible-apk-tools@v0.2.3
-    postbuild: $$reproducible-apk-tools$$/inplace-fix.py --zipalign fix-newlines $$OUT$$
-      'META-INF/services/*'
-
   - versionName: 1.1.2
     versionCode: 6
-    disable: https://github.com/devhyper/open-video-editor/issues/75
     commit: ece0f0de4e5cec4c5ca5103160ccf0726270a0b6
     subdir: app
     gradle:
       - yes
     srclibs:
-      - reproducible-apk-tools@v0.2.3
-    postbuild: $$reproducible-apk-tools$$/inplace-fix.py --zipalign fix-newlines $$OUT$$
-      'META-INF/services/*'
+      - reproducible-apk-tools@v0.2.7
+    prebuild: echo -e '\ntasks.register<Exec>("crlf") { executable("bash"); args("-c",
+      "$$reproducible-apk-tools$$/inplace-fix.py --zipalign fix-newlines build/intermediates/merged_java_res/release/base.jar
+      META-INF/services/*"); workingDir(project.projectDir) }\ntasks.configureEach
+      { if (name == "minifyReleaseWithR8") { finalizedBy("crlf") } }' >> build.gradle.kts
 
 AllowedAPKSigningKeys: 84df644cc5dbd4ea50602b9f23e4fbf3b22ee5cd2182437bef72c7c799f12db6
 
