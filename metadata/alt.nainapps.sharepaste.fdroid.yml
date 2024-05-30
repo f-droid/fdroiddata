@@ -1,0 +1,41 @@
+AntiFeatures:
+  NonFreeNet:
+    en-US: Depends on privatebin.net server
+Categories:
+  - Internet
+License: AGPL-3.0-only
+SourceCode: https://github.com/nain-F49FF806/sharepaste.oo
+IssueTracker: https://github.com/nain-F49FF806/sharepaste.oo/issues
+
+AutoName: Share Paste O2
+
+RepoType: git
+Repo: https://github.com/nain-F49FF806/sharepaste.oo.git
+
+Builds:
+  - versionName: 2024.05.21
+    versionCode: 1716312000
+    commit: 0f1aecd6072a1c428a414a1a2093d7c17d101c24
+    subdir: android/app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y make
+    output: build/outputs/apk/source-fdroid/release/app-source-fdroid-release-unsigned.apk
+    srclibs:
+      - rustup@1.25.2
+    prebuild: gradle clean
+    build:
+      - export ANDROID_NDK_ROOT=$$NDK$$
+      - $$rustup$$/rustup-init.sh -y --default-toolchain 1.77.1 --target aarch64-linux-android
+        armv7-linux-androideabi
+      - source $HOME/.cargo/env
+      - cargo install cargo-ndk@3.4.0 --locked
+      - gradle assembleSource-FdroidRelease
+    ndk: 25.1.8937393
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckName: alt.nainapps.sharepaste
+CurrentVersion: 2024.05.21
+CurrentVersionCode: 1716312000
