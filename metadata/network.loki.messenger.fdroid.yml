@@ -955,10 +955,43 @@ Builds:
       - libsession-util/libsession-util/external
     ndk: r25
 
+  - versionName: 1.18.4
+    versionCode: 3735
+    commit: b544961d282a5efb6199fdcd10b7529f6fd03d86
+    subdir: app
+    submodules: true
+    gradle:
+      - website
+    srclibs:
+      - session-lazysodium-android@883c0aada48d4211d5fca30d025a90f9b2919edf
+    rm:
+      - liblazysodium
+    prebuild:
+      - ln -s $$session-lazysodium-android$$/app ../liblazysodium
+      - ln -s $$session-lazysodium-android$$/session-lazysodium-java ..
+      - sed -i -e '/gms/d' -e 's/raw.github.com.*"/jitpack.io"/' -e 's|developer.huawei.com/repo/|jitpack.io|'
+        ../build.gradle
+      - sed -i -e '/gms/d' -e '/firebase-messaging/,/^    }/d' -e '/enable true/d'
+        -e '/circular-progress-button/s/1.1.3-S2/1.1.3/' -e '/defaultConfig/a applicationId
+        "network.loki.messenger.fdroid"' -e 's/ext.websiteUpdateUrl = ".*"/ext.websiteUpdateUrl
+        = "null"/g' -e '/PLAY_STORE_DISABLED/s/false/true/g' build.gradle
+      - sed -i -E -e '/app_name/s/>(.+)</>\1 F-Droid</' src/main/res/*/strings.xml
+      - for uri in $(sed -n -E 's/android:authorities="network.loki.(.*)"/\1/p' src/main/AndroidManifest.xml);
+        do find src/main/java/org/thoughtcrime/securesms -type f -exec sed -i -e "s/network.loki.$uri/network.loki.fdroid.$uri/"
+        {} +; done
+      - sed -i -e '/READ_PHONE_STATE/d' -e '/c2dm/d' -e 's/ACCESS_SESSION_SECRETS/fdroid.ACCESS_SESSION_SECRETS/'
+        -e '/android:authorities/s/network.loki/network.loki.fdroid/' src/main/AndroidManifest.xml
+      - sed -i -e '/fun toggleFCM()/,/^    }/d' -e 's/toggleFCM/toggleBackgroundPolling/'
+        src/main/java/org/thoughtcrime/securesms/onboarding/PNModeActivity.kt
+      - sdkmanager 'cmake;3.22.1'
+    scandelete:
+      - libsession-util/libsession-util/external
+    ndk: r25
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 VercodeOperation:
   - 10*%c+5
 UpdateCheckData: app/build.gradle|canonicalVersionCode\s=\s(\d+)|.|canonicalVersionName\s=\s"([\d.]+)"
-CurrentVersion: 1.18.3
-CurrentVersionCode: 3725
+CurrentVersion: 1.18.4
+CurrentVersionCode: 3735
