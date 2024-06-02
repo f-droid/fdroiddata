@@ -528,28 +528,24 @@ Builds:
 
   - versionName: 5.0.0
     versionCode: 98
+    disable: https://github.com/kubenav/kubenav/issues/694
     commit: c14b496da38804200a4a9194bc66d844e6df4bda
     sudo:
       - apt-get update
-      - apt-get install -y -t bullseye-backports golang-go
+      - apt-get install -y -t bookworm-backports golang-go
     output: build/app/outputs/flutter-apk/app-release.apk
     srclibs:
       - flutter@stable
     rm:
       - ios
-      - linux
-      - kubenav.io
-      - macos
-      - windows
     prebuild:
-      - flutterVerion=$(sed -n -E "s/.*flutter-version:\s'([0-9.]+)'/\1/p" .github/workflows/continuous-delivery.yaml
+      - flutterVersion=$(sed -n -E "s/.*flutter-version:\s'([0-9.]+)'/\1/p" .github/workflows/continuous-delivery.yaml
         | head -n 1)
+      - '[[ $flutterVersion ]] || exit 1'
       - pushd $$flutter$$
-      - git checkout -f $flutterVerion
+      - git checkout -f $flutterVersion
       - popd
-      - sed -i -e 's/Platform.isAndroid/Platform.isIOS/g' lib/widgets/home/overview/overview_actions.dart
-        lib/widgets/settings/settings/settings_sponsor.dart lib/widgets/settings/settings/sponsor/settings_sponsor_banner.dart
-        lib/repositories/sponsor_repository.dart
+      - sed -i -e '/gms/d' android/app/build.gradle
       - export PUB_CACHE=$(pwd)/.pub-cache
       - $$flutter$$/bin/flutter config --no-analytics
       - $$flutter$$/bin/flutter pub get
@@ -570,7 +566,7 @@ Builds:
       - $$flutter$$/bin/flutter build apk --release
     ndk: r23c
 
-AutoUpdateMode: Version
+AutoUpdateMode: None
 UpdateCheckMode: Tags
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
 CurrentVersion: 5.0.0
