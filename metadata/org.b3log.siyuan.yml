@@ -644,7 +644,53 @@ Builds:
       - mv $$siyuan$$/kernel/kernel.aar libs
     ndk: r26b
 
+  - versionName: 3.0.16
+    versionCode: 236
+    commit: bbf36a91fd43e23390d871c8eda0592190ed29ad
+    subdir: app
+    sudo:
+      - echo "deb https://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
+      - apt-get update
+      - apt-get install -t trixie -y golang-go
+      - apt-get install -y gcc libc-dev zip npm
+      - npm install -g pnpm@v8.14.1
+    gradle:
+      - official
+    srclibs:
+      - siyuan@v3.0.16
+    prebuild:
+      - sed -i -e '/aliyun/d' ../build.gradle
+      - sed -i -e '/signing/d' build.gradle
+      - sdkmanager "platforms;android-34" "build-tools;34.0.0"
+      - cd $$siyuan$$
+      - git checkout -f 'v$$VERSION$$'
+      - sed -i -e '/CheckUpdate/d' kernel/model/mount.go
+      - sed -i -e '/return &System{/a DisableGoogleAnalytics:true,' -e '/DownloadInstallPkg/s/true/false/'
+        kernel/conf/system.go
+      - cd app
+      - pnpm install --no-frozen-lockfile
+    build:
+      - pushd $$siyuan$$/app
+      - pnpm run build:mobile
+      - zip -r app appearance guide stage changelogs
+      - popd
+      - mkdir -p src/main/assets/
+      - mv $$siyuan$$/app/app.zip src/main/assets/
+      - export GOPATH=$(pwd)
+      - export PATH="$GOPATH/bin:$PATH"
+      - pushd $$siyuan$$/kernel
+      - go install golang.org/x/mobile/cmd/gomobile@v0.0.0-20240112133503-c713f31d574b
+      - go mod download
+      - gomobile init
+      - gomobile bind --tags fts5 -ldflags '-s -w' -v -o kernel.aar -target='android/arm64'
+        -androidapi 24 ./mobile/
+      - popd
+      - mkdir libs
+      - mv $$siyuan$$/kernel/kernel.aar libs
+    ndk: r26b
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 3.0.10
-CurrentVersionCode: 230
+UpdateCheckData: build.gradle|siyuanVersionCode = (\d+)|.|siyuanVersionName = "([\d.]+)"
+CurrentVersion: 3.0.16
+CurrentVersionCode: 236
