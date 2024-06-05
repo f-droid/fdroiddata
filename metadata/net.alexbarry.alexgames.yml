@@ -14,36 +14,40 @@ Repo: https://github.com/alexbarry/AlexGames.git
 Builds:
   - versionName: 0.0.3
     versionCode: 2
-    commit: stable
+    disable: rebuild
+    commit: 618502eb21567b713ab3f2f37b40a98e7b27767d
     subdir: src/android/app
     sudo:
       - apt-get update
-      - apt-get install xz-utils make cmake wget zlib1g-dev zip python3-venv
+      - apt-get install xz-utils make cmake wget zlib1g-dev zip python3-venv emscripten
+      - sed -i -e '/!isFileURI(wasmBinaryFile) &&/a#if ENVIRONMENT_MAY_BE_NODE\n!ENVIRONMENT_IS_NODE
+        &&\n#endif' /usr/share/emscripten/src/preamble.js
+      - sed -i -e '/FROZEN_CACHE/d' /usr/share/emscripten/.emscripten
     gradle:
       - universal
     srclibs:
-      - emscripten@3.1.57
       - wordfreq@v3.0.2
       - zlib@v1.3.1
+    prebuild:
+      - cd ../../..
+      - sed -i -e '/-Wno-unused-main/d' build/wasm/CMakeLists.txt
+      - mkdir third_party
+      - ln -s $$zlib$$ third_party/zlib
     build:
-      - pushd $$emscripten$$
-      - ./emsdk install latest
-      - ./emsdk activate latest
-      - source ./emsdk_env.sh
-      - popd
-      - pushd $$zlib$$
+      - cd ../../..
+      - pushd third_party/zlib
       - emconfigure ./configure
       - emcmake cmake .
       - cmake --build .
       - popd
-      - cd ../../..
-      - mkdir third_party
-      - ln -s $$zlib$$ third_party/zlib
       - python3 -m venv alexgames_venv
       - source alexgames_venv/bin/activate
       - python3 -m pip install $$wordfreq$$
-      - build/wasm/build.sh -- -j32
+      - build/wasm/build.sh -- -j$(nproc)
       - src/android/cp_games_assets.sh
+
+MaintainerNotes: Apply https://github.com/emscripten-core/emscripten/pull/16917 to
+  emscripten to make it work with nodejs 18.
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
