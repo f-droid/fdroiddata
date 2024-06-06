@@ -736,7 +736,67 @@ Builds:
       - ./buildall.sh
     ndk: r26d
 
+  - versionName: 2024-06-05-release
+    versionCode: 37
+    commit: d16ecf19d138428cba8b89c1cdf3b7a509aee622
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y make automake pkg-config libtool nasm python3-jsonschema
+        meson python3-jinja2
+    gradle:
+      - default
+    srclibs:
+      - mbedtls@v3.5.2
+      - dav1d@da2cc7817cff218b30f2c813a8a142a43f9376bd
+      - FFmpeg@f0b747ef1a9b9bfd0942a6d459f642b4b993b378
+      - freetype2@VER-2-13-2
+      - fribidi@v1.0.14
+      - harfbuzz@8.5.0
+      - libunibreak@libunibreak_6_1
+      - libass@a0aefba3cf357f74bf67410d71a1e0cf37d6c3da
+      - libplacebo@79a2efcb747641b38e3ceea87b75065820936567
+      - mpv@112fa549beb52ab3d75999c8d8a82936e13001c4
+    prebuild:
+      - sed -i -e '/enable true/d' -e '/universalBase/s/8000/0/' build.gradle
+      - cd ../buildscripts/
+      - mkdir -p sdk
+      - ln -s $$NDK$$ sdk/android-ndk-r26d
+      - mkdir -p deps
+      - pushd deps/
+      - cp -r $$mbedtls$$ mbedtls
+      - cp -r $$dav1d$$ dav1d
+      - cp -r $$FFmpeg$$ ffmpeg
+      - cp -r $$freetype2$$ freetype2
+      - cp -r $$fribidi$$ fribidi
+      - cp -r $$harfbuzz$$ harfbuzz
+      - cp -r $$libunibreak$$ unibreak
+      - cp -r $$libass$$ libass
+      - cp -r $$libplacebo$$ libplacebo
+      - cp -r $$mpv$$ mpv
+      - mkdir lua
+      - curl -Lo lua.tar.gz https://www.lua.org/ftp/lua-5.2.4.tar.gz
+      - echo "b9e2e4aad6789b3b63a056d442f7b39f0ecfca3ae0f1fc0ae4e9614401b69f4b lua.tar.gz"
+        | sha256sum -c -
+      - tar -xz --strip-components=1 -C lua -f lua.tar.gz
+      - cd unibreak
+      - ./bootstrap
+      - popd
+      - sed -i -e '/gradlew/d' scripts/mpv-android.sh
+      - sed -i -e '/"$target" == "mpv-android"/,/ls -lh/d' -e 's/pkg-config =/pkgconfig
+        =/' buildall.sh
+    scandelete:
+      - buildscripts/deps/mbedtls/
+      - buildscripts/deps/lua.tar.gz
+      - buildscripts/deps/libplacebo/3rdparty/jinja/tests/res/package.zip
+    build:
+      - cd ../buildscripts/
+      - ./buildall.sh --arch arm64 mpv
+      - ./buildall.sh --arch x86_64 mpv
+      - ./buildall.sh
+    ndk: r26d
+
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: 2024-05-24-release
-CurrentVersionCode: 36
+CurrentVersion: 2024-06-05-release
+CurrentVersionCode: 37
