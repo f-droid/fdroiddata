@@ -86,16 +86,16 @@ Builds:
 
   - versionName: 2.1.1
     versionCode: 3
+    disable: build failed
     commit: 5af2ab6b19a7aabed3a1ae733d157074b43a0bc9
     subdir: src
     sudo:
       - apt-get update
       - apt-get install -y g++ libc-dev make automake libltdl-dev libtool zlib1g-dev
         libffi-dev libssl-dev cmake
-      - apt-get install -y python3-pip python3-pexpect python3-virtualenv python3-sh
-      - apt-get install -y -t bullseye-backports python3-appdirs python3-colorama
-        python3-jinja2 python3-build python3-toml python3-packaging
-      - apt-get install -y ant openjdk-17-jdk-headless
+      - apt-get install -y python3-venv python3-pexpect python3-virtualenv python3-sh
+        python3-appdirs python3-colorama python3-jinja2 python3-build python3-toml
+        python3-packaging python3-distlib python3-filelock
       - rm /opt/android-sdk/tools/bin/sdkmanager
       - ln -s $(which sdkmanager) /opt/android-sdk/tools/bin/sdkmanager
       - echo -e '#!/usr/bin/env sh\nls /opt/android-sdk/platforms | sed "s/android-/API
@@ -107,14 +107,15 @@ Builds:
       - buildozer@1.5.0
     prebuild:
       - sdkmanager 'platforms;android-33' 'build-tools;33.0.0'
-      - sed -i -e 's/log_level =.*/log_level = 1/' -e '/^\[app\]/aandroid.ndk_path
+      - sed -i -e 's/log_level =.*/log_level = 2/' -e '/^\[app\]/aandroid.ndk_path
         = $$NDK$$\nandroid.sdk_path = $$SDK$$\nandroid.skip_update = True\np4a.source_dir
         = $$python-for-android$$\nandroid.ant_path = /usr' -e 's/python3==3.10.12/python3==3.10.12,hostpython3==3.10.12/'
         buildozer.spec
     build:
-      - pip3 install $$buildozer$$
-      - pip3 install --upgrade Cython==0.29.33 virtualenv
-      - export PATH="$PATH:$HOME/.local/bin"
+      - python3 -m venv --system-site-packages .
+      - source bin/activate
+      - pip install $$buildozer$$
+      - pip install Cython==0.29.33 virtualenv
       - buildozer android release
     ndk: r25b
 
