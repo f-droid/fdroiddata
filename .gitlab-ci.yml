@@ -93,9 +93,9 @@ variables:
 checkupdates:
   stage: test
   needs: []
-  image: debian:bookworm-slim
   tags:
-    - saas-linux-medium-amd64
+    - saas-linux-large-amd64
+  image: debian:bookworm-slim
   rules: *app_verification_rules
   before_script:
     - *install_fdroid_server_deb
@@ -115,8 +115,6 @@ git redirect:
   stage: test
   needs: []
   image: debian:bookworm-slim
-  tags:
-    - saas-linux-medium-amd64
   rules: *app_verification_rules
   script:
     - apt-get -qy update
@@ -134,8 +132,6 @@ fdroid lint:
   stage: test
   needs: []
   image: debian:bookworm-slim
-  tags:
-    - saas-linux-medium-amd64
   rules: *app_verification_rules
   before_script:
     - *install_fdroid_server_deb
@@ -200,8 +196,6 @@ lint:
   stage: test
   needs: []
   image: debian:bookworm-slim
-  tags:
-    - saas-linux-medium-amd64
   rules: *app_verification_rules
   script:
     - apt-get -qy update
@@ -360,11 +354,11 @@ checkupdates_runner:
 fdroid build:
   stage: build
   needs: []
+  tags:
+    - saas-linux-large-amd64
   # Some env vars are setup in https://gitlab.com/fdroid/fdroidserver/-/blob/master/buildserver/setup-env-vars
   # home_vagrant=/home/vagrant
   image: registry.gitlab.com/fdroid/fdroidserver:buildserver-bookworm
-  tags:
-    - saas-linux-medium-amd64
   artifacts:
     name: "${CI_PROJECT_PATH}_${CI_JOB_STAGE}_${CI_COMMIT_REF_NAME}_${CI_COMMIT_SHA}"
     paths:
@@ -471,6 +465,8 @@ fdroid build:
 # to GitLab Pages.
 pages:
   stage: deploy
+  tags:
+    - saas-linux-large-amd64
   image: registry.gitlab.com/fdroid/fdroidserver:buildserver-bookworm
   only:
     refs:
