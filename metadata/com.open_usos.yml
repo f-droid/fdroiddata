@@ -1,0 +1,71 @@
+AntiFeatures:
+  NonFreeNet:
+    en-US: Depends on srv27.mikr.us and *.edu.pl servers
+    pl-PL: Zależy od serwerów srv27.mikr.us i *.edu.pl
+Categories:
+  - Science & Education
+License: GPL-3.0-only
+SourceCode: https://github.com/OpenUSOS/OpenUSOS
+IssueTracker: https://github.com/OpenUSOS/OpenUSOS/issues
+
+AutoName: OpenUSOS
+
+RepoType: git
+Repo: https://github.com/OpenUSOS/OpenUSOS.git
+Binaries: https://github.com/OpenUSOS/OpenUSOS/releases/download/%v/app-release.apk
+
+Builds:
+  - versionName: 1.0.1
+    versionCode: 1
+    commit: 02d4203d8a544b034060f9c74ded7dcce1ac8732
+    submodules: true
+    sudo:
+      - mkdir -p /home/Oskar
+      - chown vagrant /home/Oskar
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - transistor-background-fetch@44fa41067fa12a2417dd404b5fac567fb68013d3
+    rm:
+      - ios
+      - test
+    prebuild:
+      - export repo=/home/Oskar/StudioProjects
+      - mkdir -p $repo
+      - cd ..
+      - mv com.open_usos $repo/open_usos
+      - pushd $repo/open_usos
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - flutter/bin/flutter config --no-analytics
+      - flutter/bin/flutter packages pub get
+      - popd
+      - mv $repo/open_usos com.open_usos
+    scanignore:
+      - .pub-cache/hosted/pub.dev/background_fetch-1.3.5/android/build.gradle
+      - android/build.gradle
+      - flutter/bin/cache
+    scandelete:
+      - flutter
+      - .pub-cache
+    build:
+      - export repo=/home/Oskar/StudioProjects
+      - cd ..
+      - mv com.open_usos $repo/open_usos
+      - pushd $repo/open_usos
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - pushd $$transistor-background-fetch$$/android/tsbackgroundfetch/
+      - gradle assembleRelease
+      - gradle publishToMavenLocal
+      - popd
+      - mv $$transistor-background-fetch$$/android/tsbackgroundfetch/build/outputs/aar/tsbackgroundfetch-release.aar
+        $PUB_CACHE/hosted/pub.dev/background_fetch-1.3.5/android/libs/com/transistorsoft/tsbackgroundfetch/1.0.2/tsbackgroundfetch-1.0.2.aar
+      - flutter/bin/flutter build apk
+      - popd
+      - mv $repo/open_usos com.open_usos
+
+AllowedAPKSigningKeys: 49168bf3f2e9b5119139d464df455c4458336dfc542d6dbf7139e2a135567a9e
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 1.0.1
+CurrentVersionCode: 1
