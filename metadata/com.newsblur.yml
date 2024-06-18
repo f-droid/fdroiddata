@@ -1613,7 +1613,34 @@ Builds:
       - echo 'package com.newsblur.activity;class SubscriptionActivity:NbActivity()
         {}' > activity/SubscriptionActivity.kt
 
+  - versionName: 13.2.4
+    versionCode: 220
+    commit: dc2c2165651bdb622992d15bf57c62b8b5803591
+    subdir: clients/android/NewsBlur/app
+    gradle:
+      - yes
+    rm:
+      - clients/android/NewsBlur/app/src/main/java/com/newsblur/service/SubscriptionSyncService.kt
+      - clients/android/NewsBlur/app/src/main/java/com/newsblur/subscription
+    prebuild:
+      - pushd ../../../..
+      - mv clients/android/NewsBlur ..
+      - rm -r ./*
+      - mkdir -p clients/android
+      - mv ../NewsBlur clients/android
+      - popd
+      - sed -i -e '/playCore/d' -e '/billing/d' build.gradle.kts
+      - sed -i -z -E -e 's/<service[^>]+SubscriptionSyncService[^>]+\/>//' src/main/AndroidManifest.xml
+      - cd src/main/java/com/newsblur
+      - sed -i -e '/play.core/d' -e '/void checkInAppReview/,/^    }/d' -e '/checkInAppReview/d'
+        -e '/reviewInfo != null/,/^        }$/c super.onBackPressed();' -e '/Review/d'
+        activity/FeedItemsList.java
+      - sed -i -e '/SubscriptionSyncService/d' activity/InitActivity.kt activity/LoginProgress.kt
+        util/PrefsUtils.java
+      - echo 'package com.newsblur.activity;class SubscriptionActivity:NbActivity()
+        {}' > activity/SubscriptionActivity.kt
+
 AutoUpdateMode: None
 UpdateCheckMode: RepoManifest
-CurrentVersion: 13.0.0
-CurrentVersionCode: 212
+CurrentVersion: 13.2.4
+CurrentVersionCode: 220
