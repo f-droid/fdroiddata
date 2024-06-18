@@ -31,7 +31,7 @@ Description: |-
   Reddit Community: <a href="https://termux.com/community">https://termux.com/community</a>
 
 RepoType: git
-Repo: https://github.com/termux/termux-app
+Repo: https://github.com/termux/termux-app.git
 
 Builds:
   - versionName: '0.16'
@@ -757,12 +757,18 @@ Builds:
     versionCode: 1000
     commit: 43317b78c920a48254f8846f5e14b5f873faa271
     subdir: app
+    sudo:
+      - echo "deb https://deb.debian.org/debian bullseye main" > /etc/apt/sources.list.d/bullseye.list
+      - apt-get update
+      - apt-get install -y file
+      - apt-get install -y -t bullseye openjdk-11-jdk-headless
+      - update-java-alternatives --set java-1.11.0-openjdk-amd64
     gradle:
       - yes
     prebuild:
       - sed -i -e '/publishing {/,/^    }/d' ../terminal-{emulator,view}/build.gradle
       - sed -i -e '/publishing {/,/^    }/d' ../termux-shared/build.gradle
-    ndk: r22b
+    ndk: 22.1.7171670
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v\d+\.\d+\.\d+$
