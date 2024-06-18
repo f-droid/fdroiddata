@@ -1339,8 +1339,38 @@ Builds:
       - ./run fdroid build
     ndk: r21e
 
+  - versionName: 9.5.8
+    versionCode: 750
+    commit: d47fc2bb2ab0f73e564c90d75d978b5400967fae
+    timeout: 10800
+    subdir: TMessagesProj
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y ninja-build yasm cmake libuv1 make
+    gradle:
+      - miniFdroid
+    output: build/outputs/apk/mini/*/*.apk
+    rm:
+      - TMessagesProj_*
+    prebuild:
+      - sed -i -e '/firebase/d' -e '/gms/d' {..,.}/build.gradle
+      - sed -i -e 's/def verCode = 710/def verCode = 711/' build.gradle
+      - echo -e "\norg.gradle.jvmargs=-Xms1024m -Xmx4096m -XX:MaxPermSize=4096m" >>
+        ../gradle.properties
+      - cd ..
+      - ./run fdroid prebuild
+      - $HOME/.go/bin/go install golang.org/x/mobile/cmd/gomobile@v0.0.0-20210220033013-bdb1ca9a1e08
+      - cd TMessagesProj/jni/libwebp
+      - git fetch
+      - git checkout 20ceff7eb3ccb679bd299f3d481309e10cbf2616
+    build:
+      - cd ..
+      - ./run fdroid build
+    ndk: r21e
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v[0-9.]+$
 UpdateCheckData: TMessagesProj/build.gradle|verCode\s=\s(\d+)|.|verName\s=\s"(.+)"
-CurrentVersion: 9.3.3
-CurrentVersionCode: 711
+CurrentVersion: 9.5.8
+CurrentVersionCode: 750
