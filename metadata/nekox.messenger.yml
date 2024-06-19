@@ -1346,8 +1346,11 @@ Builds:
     subdir: TMessagesProj
     submodules: true
     sudo:
+      - echo "deb https://deb.debian.org/debian bullseye main" > /etc/apt/sources.list.d/bullseye.list
       - apt-get update
-      - apt-get install -y ninja-build yasm cmake libuv1 make
+      - apt-get install -y cmake golang-go make ninja-build libuv1 yasm
+      - apt-get install -y -t bullseye openjdk-11-jdk-headless
+      - update-java-alternatives --set java-1.11.0-openjdk-amd64
     gradle:
       - miniFdroid
     output: build/outputs/apk/mini/*/*.apk
@@ -1355,19 +1358,18 @@ Builds:
       - TMessagesProj_*
     prebuild:
       - sed -i -e '/firebase/d' -e '/gms/d' {..,.}/build.gradle
-      - sed -i -e 's/def verCode = 710/def verCode = 711/' build.gradle
       - echo -e "\norg.gradle.jvmargs=-Xms1024m -Xmx4096m -XX:MaxPermSize=4096m" >>
         ../gradle.properties
       - cd ..
+      - sed -i -e '/Install Golang/,+6d' bin/fdroid/prebuild.sh
       - ./run fdroid prebuild
-      - $HOME/.go/bin/go install golang.org/x/mobile/cmd/gomobile@v0.0.0-20210220033013-bdb1ca9a1e08
-      - cd TMessagesProj/jni/libwebp
-      - git fetch
-      - git checkout 20ceff7eb3ccb679bd299f3d481309e10cbf2616
+      - go install golang.org/x/mobile/cmd/gomobile@v0.0.0-20210220033013-bdb1ca9a1e08
+    scandelete:
+      - TMessagesProj/jni/third_party/breakpad/src/third_party
     build:
       - cd ..
       - ./run fdroid build
-    ndk: r21e
+    ndk: 21.4.7075529
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v[0-9.]+$
