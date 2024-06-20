@@ -202,16 +202,18 @@ Builds:
     subdir: XrcbApp/android/app
     sudo:
       - sysctl fs.inotify.max_user_watches=524288 || true
-      - curl -Lo node.tar.gz https://nodejs.org/dist/v16.17.0/node-v16.17.0-linux-x64.tar.gz
-      - echo "4827808e50b8ee42b4dadf056835287dac267b9cff56cea56e70843bf8cecb79  node.tar.gz"
-        | sha256sum -c -
-      - tar xzf node.tar.gz --strip-components=1 -C /usr/local/
+      - echo "deb https://deb.debian.org/debian bullseye main" > /etc/apt/sources.list.d/bullseye.list
+      - apt-get update
+      - apt-get install -y npm
+      - apt-get install -y -t bullseye openjdk-11-jdk-headless
+      - update-java-alternatives --set java-1.11.0-openjdk-amd64
     init: npm install --no-optional --build-from-source
     gradle:
       - yes
     rm:
       - XrcbApp/ios
-    prebuild: sed -i -e '/signingConfig signingConfigs/d' build.gradle
+    prebuild: sed -i -e '/signingConfig signingConfigs/d' -e '/project.ext.react =
+      \[/a nodeExecutableAndArgs:["node","--openssl-legacy-provider"],' build.gradle
     scanignore:
       - XrcbApp/android/build.gradle
       - XrcbApp/node_modules/jsc-android/
@@ -224,7 +226,7 @@ Builds:
       - XrcbApp/node_modules/react-native-track-player/android/build.gradle
     scandelete:
       - XrcbApp/node_modules/
-    ndk: r20b
+    ndk: 20.1.5948944
 
 MaintainerNotes: XRCB server soft is FOSS, so this should become TetheredNet later.
 
