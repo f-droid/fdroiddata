@@ -1,0 +1,56 @@
+AntiFeatures:
+  NonFreeNet:
+    en-US: Depends on koofr.eu servers
+Categories:
+  - System
+License: MIT
+AuthorWebSite: https://koofr.eu
+WebSite: https://vault.koofr.net
+SourceCode: https://github.com/koofr/vault
+IssueTracker: https://github.com/koofr/vault/issues
+Changelog: https://github.com/koofr/vault/releases
+
+AutoName: Koofr Vault
+
+RepoType: git
+Repo: https://github.com/koofr/vault.git
+
+Builds:
+  - versionName: 0.1.16
+    versionCode: 116001
+    commit: 07cd570ed3f749867397fa1267b19e03bfc0db7b
+    subdir: vault-android/app
+    sudo:
+      - echo "deb https://deb.debian.org/debian bullseye main" > /etc/apt/sources.list.d/bullseye.list
+      - apt-get update
+      - apt-get install -y -t bullseye openjdk-11-jdk-headless
+    gradle:
+      - yes
+    srclibs:
+      - PhotoView@565505d5cb84f5977771b5d2ccb7726338e77224
+      - rustup@1.27.0
+    rm:
+      - vault-android/app/libs/com/github/chrisbanes/PhotoView/565505d5cb/*ar
+    scanignore:
+      - vault-android/settings.gradle.kts
+    build:
+      - pushd $$PhotoView$$
+      - export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+      - sed -i "s/version = '2.3.0'/version = '565505d5cb'/" photoview/build.gradle
+      - gradle publishToMavenLocal
+      - popd
+      - mv $$PhotoView$$/photoview/build/outputs/aar/photoview-release.aar libs/com/github/chrisbanes/PhotoView/565505d5cb/PhotoView-565505d5cb.aar
+      - export GRADLE_CARGO_PROFILE=release
+      - export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+      - $$rustup$$/rustup-init.sh -y --default-toolchain 1.75.0 --target aarch64-linux-android
+        armv7-linux-androideabi x86_64-linux-android i686-linux-android
+      - source $HOME/.cargo/env
+      - gradle generateUniFFIBindings
+      - gradle cargoBuild
+      - gradle bundleRelease
+    ndk: 26.0.10792818
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: 0.1.16
+CurrentVersionCode: 116001
