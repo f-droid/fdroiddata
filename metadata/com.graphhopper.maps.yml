@@ -368,7 +368,38 @@ Builds:
       - node_modules/
       - graphhopper-maps/node_modules/
 
+  - versionName: 2.0.0
+    versionCode: 16
+    commit: 6f04686c54f1441f2673d5103e91933de95526fb
+    subdir: android/app
+    submodules: true
+    sudo:
+      - sysctl fs.inotify.max_user_watches=524288
+      - apt-get update
+      - curl -Lo node.tar.gz https://nodejs.org/dist/v16.20.1/node-v16.20.1-linux-x64.tar.gz
+      - echo "c76d2aabd2d02542505fd24e18876fb8515e23638531249277272def42ab54e3 node.tar.gz"
+        | sha256sum -c -
+      - tar xzf node.tar.gz --strip-components=1 -C /usr/local/
+    init:
+      - cd ../..
+      - cp config.js graphhopper-maps/
+      - cd graphhopper-maps
+      - rm -rf node_modules
+      - npm install
+      - npm run fdroid
+      - mv dist/bundle.*.js dist/bundle.js
+      - cd ..
+      - npm install
+      - npm run build
+      - cp config.js dist/
+      - npx cap sync
+    gradle:
+      - yes
+    scandelete:
+      - node_modules/
+      - graphhopper-maps/node_modules/
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 1.5.1
-CurrentVersionCode: 12
+CurrentVersion: 2.0.0
+CurrentVersionCode: 16
