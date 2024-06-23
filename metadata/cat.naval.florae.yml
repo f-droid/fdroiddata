@@ -49,7 +49,7 @@ Builds:
     submodules: true
     output: build/app/outputs/flutter-apk/app-release.apk
     srclibs:
-      - transistor-background-fetch@fb883de16ff3fbaaaa5ce84d829911c8a5894d2
+      - transistor-background-fetch@0dd1457588ba031f11e9452f125144aac8a9b75f
     rm:
       - test
       - docs
@@ -57,11 +57,9 @@ Builds:
       - export PUB_CACHE=$(pwd)/.pub-cache
       - .flutter/bin/flutter config --no-analytics
       - .flutter/bin/flutter pub get
+      - sed -i -e '/maven {/,/^        }/cmavenLocal()' android/build.gradle .pub-cache/hosted/pub.dev/background_fetch-*/android/build.gradle
     scanignore:
-      - .flutter/packages/flutter_tools/gradle/flutter.gradle
       - .flutter/bin/cache
-      - android/build.gradle
-      - .pub-cache/hosted/pub.dev/background_fetch-*/android/build.gradle
     scandelete:
       - .flutter
       - .pub-cache
@@ -69,9 +67,8 @@ Builds:
       - export PUB_CACHE=$(pwd)/.pub-cache
       - pushd $$transistor-background-fetch$$/android/tsbackgroundfetch/
       - gradle assembleRelease
+      - gradle publishToMavenLocal
       - popd
-      - mv $$transistor-background-fetch$$/android/tsbackgroundfetch/build/outputs/aar/tsbackgroundfetch-release.aar
-        $PUB_CACHE/hosted/pub.dev/background_fetch-1.1.5/android/libs/com/transistorsoft/tsbackgroundfetch/0.5.7/tsbackgroundfetch-0.5.7.aar
       - .flutter/bin/flutter build apk
 
 AutoUpdateMode: Version
