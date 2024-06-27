@@ -1,0 +1,62 @@
+Categories:
+  - Games
+License: GPL-3.0-only
+AuthorName: Ranger
+AuthorEmail: ranger.traction707@aleeas.com
+AuthorWebSite: https://thebreakthrough.netlify.app/
+WebSite: https://ranger-nf.itch.io/blastoff
+SourceCode: https://github.com/Ranger-NF/BlastOff
+IssueTracker: https://github.com/Ranger-NF/BlastOff/issues
+Changelog: https://github.com/Ranger-NF/BlastOff/blob/HEAD/CHANGELOG.md
+Liberapay: Ranger-NF
+
+RepoType: git
+Repo: https://github.com/Ranger-NF/BlastOff.git
+
+Builds:
+  - versionName: 1.2.0
+    versionCode: 100011
+    commit: 757057d4ff2e9be165fc4336a142d0c9b3f04bad
+    timeout: 10800
+    sudo:
+      - apt-get update
+      - apt-get install -y pkgconf clang scons
+    output: blastoff.apk
+    srclibs:
+      - Godot@4.2.2-stable
+    prebuild:
+      - pushd $$Godot$$
+      - scons --clean platform=linuxbsd target=editor use_llvm=yes tools=yes
+      - scons --clean platform=android arch=armv7 production=yes target=template_release
+      - scons --clean platform=android arch=arm64v8 production=yes target=template_release
+      - cd platform/android/java
+      - gradle cleanGodotTemplates
+      - popd
+    build:
+      - export JAVA_HOME=$(dirname $(dirname $(readlink -f $(which javac))))
+      - export ANDROID_SDK_ROOT=$$SDK$$
+      - export ANDROID_NDK_ROOT=$$NDK$$
+      - export GODOT_CFG=~/.config/godot/editor_settings-4.tres
+      - pushd $$Godot$$
+      - scons -j `nproc` platform=linuxbsd target=editor use_llvm=yes tools=yes
+      - scons -j `nproc` platform=android arch=armv7 production=yes target=template_release
+      - scons -j `nproc` platform=android arch=arm64v8 production=yes target=template_release
+      - cd platform/android/java
+      - gradle generateGodotTemplates
+      - popd
+      - $$Godot$$/bin/godot.linuxbsd.editor.x86_64.llvm --headless --import
+      - sed -i -e 's:\(^.*package/signed\)\s*=.*$:\1 = false:' export_presets.cfg
+      - sed -i "s|export/android/java_sdk_path=.*|export/android/java_sdk_path=\"${JAVA_HOME}\"|"
+        $GODOT_CFG
+      - sed -i -e 's:\(^.*android_sdk_path\)\s*=.*$:\1 = "$$SDK$$":' $GODOT_CFG
+      - sed -i -e '/custom_template\/release/s|=.*|="$$Godot$$/bin/android_release.apk"|'
+        export_presets.cfg
+      - $$Godot$$/bin/godot.linuxbsd.editor.x86_64.llvm --headless --export-release
+        'Android' blastoff.apk
+    ndk: 25.1.8937393
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: export_presets.cfg|version/code=(\d+)|.|version/name="([\d.]+)"
+CurrentVersion: 1.2.0
+CurrentVersionCode: 100011
