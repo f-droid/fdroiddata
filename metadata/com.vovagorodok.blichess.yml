@@ -1,0 +1,49 @@
+AntiFeatures:
+  NonFreeNet:
+    en-US: Rely on lichess.org
+  NonFreeAssets:
+    en-US: Some graphics used are CC BY-NC-SA and thus not libre.
+Categories:
+  - Games
+License: GPL-3.0-or-later
+AuthorName: vovagorodok
+SourceCode: https://github.com/vovagorodok/blichess/
+IssueTracker: https://github.com/vovagorodok/blichess/issues
+Translation: https://crowdin.com/project/lichess
+Changelog: https://github.com/vovagorodok/blichess/releases
+Donate: https://lichess.org/patron
+
+AutoName: blichess
+
+RepoType: git
+Repo: https://github.com/vovagorodok/blichess
+
+Builds:
+  - versionName: 8.0.0+ble1.0.0
+    versionCode: 3
+    commit: 2873b71bc171fa3a8d5fb6f14f920a0c1c223aa5
+    subdir: android/app
+    sudo:
+      - apt-get update
+      - apt-get install -y g++ make npm
+    init:
+      - pushd ../..
+      - npm install
+      - touch www/index.html
+      - npx cap update android
+      - npm run fetch-nnue
+      - sed 's/lichess\.dev/lichess.org/g' appconfig.dev.json > appconfig.prod.json
+    gradle:
+      - yes
+    rm:
+      - ios/
+    scandelete:
+      - node_modules/
+    build:
+      - pushd ../..
+      - APP_MODE=release APP_CONFIG=prod npm run build
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: 8.0.0+ble1.0.0
+CurrentVersionCode: 3
