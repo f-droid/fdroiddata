@@ -12,7 +12,7 @@ Liberapay: suve
 AutoName: Colorful
 
 RepoType: git
-Repo: https://github.com/suve/pl.suve.colorful.android.git
+Repo: https://github.com/suve/LD25.git
 
 Builds:
   - versionName: '2.0'
@@ -97,7 +97,86 @@ Builds:
       - ln -srnf build/lib android/app/src/main/jniLibs
     ndk: r21e
 
+  - versionName: '2.1'
+    versionCode: 20100
+    commit: release-2.1
+    subdir: android/app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y fpc make optipng vorbis-tools
+    gradle:
+      - yes
+    srclibs:
+      - fpc@3d2b1f062e1e79d64b56a496f9eecd6084fa5803
+    rm:
+      - android/libs/SDL2/Xcode/
+      - android/libs/SDL2_image/Xcode/
+      - android/libs/SDL2_mixer/Xcode/
+      - android/libs/SDL2_image/external/libjxl/
+      - android/libs/SDL2_image/external/libwebp/swig/libwebp.jar
+    build:
+      - pushd $$fpc$$
+      - mkdir -p install
+      - pushd compiler
+      - make cycle
+      - make install INSTALL_PREFIX=$$fpc$$/install
+      - popd
+      - export PATH=$$NDK$$/toolchains/x86_64-4.9/prebuilt/linux-x86_64/bin:$PATH
+      - export PATH=$$NDK$$/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64/bin:$PATH
+      - export PATH=$$NDK$$/toolchains/arm-linux-androideabi-4.9/prebuilt/linux-x86_64/bin:$PATH
+      - export PATH=$$NDK$$/toolchains/x86-4.9/prebuilt/linux-x86_64/bin:$PATH
+      - make crossinstall OS_TARGET=android CPU_TARGET=x86_64 INSTALL_PREFIX=$(pwd)/install
+        PP=$$fpc$$/install/lib/fpc/3.2.2/ppcx64
+      - make crossinstall OS_TARGET=android CPU_TARGET=aarch64 INSTALL_PREFIX=$(pwd)/install
+        PP=$$fpc$$/install/lib/fpc/3.2.2/ppcx64
+      - make crossinstall OS_TARGET=android CPU_TARGET=arm INSTALL_PREFIX=$(pwd)/install
+        PP=$$fpc$$/install/lib/fpc/3.2.2/ppcx64
+      - make crossinstall OS_TARGET=android CPU_TARGET=i386 INSTALL_PREFIX=$(pwd)/install
+        PP=$$fpc$$/install/lib/fpc/3.2.2/ppcx64
+      - popd
+      - cd ../..
+      - export ANDROID_SDK_ROOT=$$SDK$$
+      - export ANDROID_NDK_ROOT=$$NDK$$
+      - export ANDROID_API=21
+      - ./android/build-SDL2.sh --arch x86_64 --arch aarch64 --arch arm --arch x86
+      - mkdir -p ./build/obj/local/{x86_64,arm64-v8a,armeabi-v7a,x86}/objs/colorful
+      - ./configure.sh --fpc="$$fpc$$/install/lib/fpc/3.2.3/ppcrossx64" --flags="-Px86_64"
+        --flags="-Fu$$fpc$$/install/lib/fpc/3.2.3/units/*" --flags="-Fu$$fpc$$/install/lib/fpc/3.2.3/units/x86_64-android/*"
+        --flags="-e$$NDK$$/toolchains/x84_64-4.9/prebuilt/linux-x86_64/bin/" --flags="-Fl$$NDK$$/platforms/android-21/arch-x86_64/usr/lib64"
+        --android=true --debug=false --donate=false --flags="-Fl$(pwd)/build/lib/x86_64"
+        --flags="-FE$(pwd)/build/lib/x86_64" --flags="-FU$(pwd)/build/obj/local/x86_64/objs/colorful/"
+      - make executable
+      - ./configure.sh --fpc="$$fpc$$/install/lib/fpc/3.2.3/ppcrossa64" --flags="-Paarch64"
+        --flags="-Fu$$fpc$$/install/lib/fpc/3.2.3/units/*" --flags="-Fu$$fpc$$/install/lib/fpc/3.2.3/units/aarch64-android/*"
+        --flags="-e$$NDK$$/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64/bin/"
+        --flags="-Fl$$NDK$$/platforms/android-21/arch-arm64/usr/lib" --android=true
+        --debug=false --donate=false --flags="-Fl$(pwd)/build/lib/arm64-v8a" --flags="-FE$(pwd)/build/lib/arm64-v8a"
+        --flags="-FU$(pwd)/build/obj/local/arm64-v8a/objs/colorful/"
+      - make executable
+      - ./configure.sh --fpc="$$fpc$$/install/lib/fpc/3.2.3/ppcrossarm" --flags="-Parm"
+        --flags="-Fu$$fpc$$/install/lib/fpc/3.2.3/units/*" --flags="-Fu$$fpc$$/install/lib/fpc/3.2.3/units/arm-android/*"
+        --flags="-e$$NDK$$/toolchains/arm-linux-androideabi-4.9/prebuilt/linux-x86_64/bin/"
+        --flags="-Fl$$NDK$$/platforms/android-21/arch-arm/usr/lib" --android=true
+        --debug=false --donate=false --flags="-Fl$(pwd)/build/lib/armeabi-v7a" --flags="-FE$(pwd)/build/lib/armeabi-v7a"
+        --flags="-FU$(pwd)/build/obj/local/armeabi-v7a/objs/colorful/"
+      - make executable
+      - ./configure.sh --fpc="$$fpc$$/install/lib/fpc/3.2.3/ppcross386" --flags="-Pi386"
+        --flags="-Fu$$fpc$$/install/lib/fpc/3.2.3/units/*" --flags="-Fu$$fpc$$/install/lib/fpc/3.2.3/units/i386-android/*"
+        --flags="-e$$NDK$$/toolchains/x86-4.9/prebuilt/linux-x86_64/bin/" --flags="-Fl$$NDK$$/platforms/android-21/arch-x86/usr/lib"
+        --android=true --debug=false --donate=false --flags="-Fl$(pwd)/build/lib/x86"
+        --flags="-FE$(pwd)/build/lib/x86" --flags="-FU$(pwd)/build/obj/local/x86/objs/colorful/"
+      - make executable
+      - make -j assets
+      - mkdir -p android/app/src/main/assets/
+      - ln -srnf build/gfx android/app/src/main/assets/gfx
+      - ln -srnf build/map android/app/src/main/assets/map
+      - ln -srnf build/sfx android/app/src/main/assets/sfx
+      - ln -srnf build/slides android/app/src/main/assets/slides
+      - ln -srnf build/lib android/app/src/main/jniLibs
+    ndk: r21e
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^release-
-CurrentVersion: '2.0'
-CurrentVersionCode: 2000
+CurrentVersion: '2.1'
+CurrentVersionCode: 20100
