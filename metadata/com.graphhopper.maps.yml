@@ -396,7 +396,35 @@ Builds:
       - node_modules/
       - graphhopper-maps/node_modules/
 
+  - versionName: 2.0.4
+    versionCode: 18
+    commit: 48653727b0ba1c7bbfe13b79932e447efaa15327
+    subdir: android/app
+    submodules: true
+    sudo:
+      - sysctl fs.inotify.max_user_watches=524288
+      - apt-get update
+      - apt-get install npm
+    init:
+      - cd ../..
+      - cp config.js graphhopper-maps/
+      - cd graphhopper-maps
+      - rm -rf node_modules
+      - npm install
+      - npm run fdroid
+      - mv dist/bundle.*.js dist/bundle.js
+      - cd ..
+      - npm install
+      - npm run build
+      - cp config.js dist/
+      - npx cap sync
+    gradle:
+      - yes
+    scandelete:
+      - node_modules/
+      - graphhopper-maps/node_modules/
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 2.0.3
-CurrentVersionCode: 17
+CurrentVersion: 2.0.4
+CurrentVersionCode: 18
