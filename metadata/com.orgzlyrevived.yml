@@ -102,7 +102,6 @@ Builds:
 
   - versionName: 1.8.24
     versionCode: 212
-    disable: https://github.com/orgzly-revived/orgzly-android-revived/issues/107#issuecomment-2196829960
     commit: 201a086b123a24e7e0e3909091fe4d4c7b766c37
     subdir: app
     sudo:
@@ -112,6 +111,13 @@ Builds:
       - update-java-alternatives --set java-1.11.0-openjdk-amd64
     gradle:
       - fdroid
+    srclibs:
+      - reproducible-apk-tools@719c3471fd1bcb807510dc8e035a69e395ca37f4
+    ndk: 26.3.11579264
+    postbuild:
+      - mv $$OUT$$ unaligned.apk
+      - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
+        --replace unaligned.apk $$OUT$$
 
 AllowedAPKSigningKeys: 6fc9c2e22d07d25ce77e2e963455053c38b8318a1a2491b3ed95d50cba85493d
 
