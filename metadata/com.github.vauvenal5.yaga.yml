@@ -429,8 +429,30 @@ Builds:
       - $$flutter$$/bin/flutter pub run build_runner build --delete-conflicting-outputs
       - $$flutter$$/bin/flutter build apk --flavor play
 
+  - versionName: 0.43.0
+    versionCode: 4300
+    commit: bedf5c6c3127c0f708241e61c9f62708b48c7c5a
+    output: build/app/outputs/flutter-apk/app-play-release.apk
+    srclibs:
+      - flutter@stable
+    prebuild:
+      - version=$(sed -n -E 's/.*"flutterSdkVersion":\ "(.*)",/\1/p' .fvm/fvm_config.json)
+      - pushd $$flutter$$
+      - git checkout -f $version
+      - popd
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter pub run flutter_launcher_icons:main
+      - $$flutter$$/bin/flutter pub run build_runner build --delete-conflicting-outputs
+      - $$flutter$$/bin/flutter build apk --flavor play
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v.*$
 UpdateCheckData: pubspec.yaml|version:\s\d+\.\d+\.\d+\+(\d+)|.|version:\s(\d+\.\d+\.\d+)\+\d+
-CurrentVersion: 0.42.1
-CurrentVersionCode: 4201
+CurrentVersion: 0.43.0
+CurrentVersionCode: 4300
