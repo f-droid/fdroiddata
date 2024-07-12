@@ -1484,6 +1484,98 @@ Builds:
       - cmake --build build
     ndk: r25c
 
+  - versionName: 1.5.4
+    versionCode: 15400
+    commit: 286a70c007cc8ec1c0b36eb157d6b2b89b7f1dda
+    timeout: 30000
+    subdir: android/vcmi-app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y ninja-build pipx xz-utils unzip g++ make libssl-dev
+      - apt-get install -y cmake -t bookworm-backports
+    gradle:
+      - yes
+    srclibs:
+      - conan@1.60.1
+    prebuild:
+      - pipx install $$conan$$
+      - cd ../..
+      - export CONAN_USER_HOME="$(pwd)"
+      - export CONAN_USER_HOME_SHORT="$(pwd)"
+      - export PATH="${HOME}/.local/bin:$$CMake$$/build/bin:$PATH"
+      - mkdir .conan
+      - pushd .conan
+      - curl -Lo armeabi-v7a.txz https://github.com/vcmi/vcmi-dependencies/releases/download/android-1.1/armeabi-v7a.txz
+      - sha256sum -c <<< 'b7a3c26530ef9e0deccc5d28fd9644985caa4d22bc6ee3613a6143034e7ed7eb  armeabi-v7a.txz'
+      - tar -xf armeabi-v7a.txz
+      - rm armeabi-v7a.txz
+      - popd
+      - conan profile new default --detect
+      - conan info . --profile:build=default --profile:host=CI/conan/android-32
+      - sed -i -e 's/versionCode.*$/versionCode $$VERCODE$$/' android/vcmi-app/build.gradle
+    scandelete:
+      - .conan
+      - osx
+    build:
+      - cd ../..
+      - export GENERATE_ONLY_BUILT_CONFIG=1
+      - export CONAN_USER_HOME="$(pwd)"
+      - export CONAN_USER_HOME_SHORT="$(pwd)"
+      - export PATH="${HOME}/.local/bin:$$CMake$$/build/bin:$PATH"
+      - conan install . --install-folder=conan-generated --build --profile:build=default
+        --profile:host=CI/conan/android-32 -s compiler.cppstd=11 -c tools.android:ndk_path=$$NDK$$
+      - mkdir build
+      - cmake -S . -B build -G Ninja -D CMAKE_BUILD_TYPE=Release -D CMAKE_TOOLCHAIN_FILE=conan-generated/conan_toolchain.cmake
+      - cmake --build build
+    ndk: r25c
+
+  - versionName: 1.5.4
+    versionCode: 15401
+    commit: 286a70c007cc8ec1c0b36eb157d6b2b89b7f1dda
+    timeout: 30000
+    subdir: android/vcmi-app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y ninja-build pipx xz-utils unzip g++ make libssl-dev
+      - apt-get install -y cmake -t bookworm-backports
+    gradle:
+      - yes
+    srclibs:
+      - conan@1.60.1
+    prebuild:
+      - pipx install $$conan$$
+      - cd ../..
+      - export CONAN_USER_HOME="$(pwd)"
+      - export CONAN_USER_HOME_SHORT="$(pwd)"
+      - export PATH="${HOME}/.local/bin:$PATH"
+      - mkdir .conan
+      - pushd .conan
+      - curl -Lo aarch64-v8a.txz https://github.com/vcmi/vcmi-dependencies/releases/download/android-1.1/aarch64-v8a.txz
+      - sha256sum -c <<< 'ea8d97b4ec714bbc19fe216e8a47f26ee23faeffceabc2c93adc6d4023eaa1ee  aarch64-v8a.txz'
+      - tar -xf aarch64-v8a.txz
+      - rm aarch64-v8a.txz
+      - popd
+      - conan profile new default --detect
+      - conan info . --profile:build=default --profile:host=CI/conan/android-64
+      - sed -i -e 's/versionCode.*$/versionCode $$VERCODE$$/' android/vcmi-app/build.gradle
+    scandelete:
+      - .conan
+      - osx
+    build:
+      - cd ../..
+      - export GENERATE_ONLY_BUILT_CONFIG=1
+      - export CONAN_USER_HOME="$(pwd)"
+      - export CONAN_USER_HOME_SHORT="$(pwd)"
+      - export PATH="${HOME}/.local/bin:$PATH"
+      - conan install . --install-folder=conan-generated --build --profile:build=default
+        --profile:host=CI/conan/android-64 -s compiler.cppstd=11 -c tools.android:ndk_path=$$NDK$$
+      - mkdir build
+      - cmake -S . -B build -G Ninja -D CMAKE_BUILD_TYPE=Release -D CMAKE_TOOLCHAIN_FILE=conan-generated/conan_toolchain.cmake
+      - cmake --build build
+    ndk: r25c
+
 MaintainerNotes: |-
   VCMI requires conan version bigger than 1.54.0 (but not 2.x) for managing and
   building dependencies. Conan is not available in bullseye repos, so we install
@@ -1530,5 +1622,5 @@ UpdateCheckMode: Tags
 VercodeOperation:
   - 10 * %c
   - 10 * %c + 1
-CurrentVersion: 1.5.3
-CurrentVersionCode: 15311
+CurrentVersion: 1.5.4
+CurrentVersionCode: 15401
