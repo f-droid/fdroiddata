@@ -1,0 +1,51 @@
+Categories:
+  - Connectivity
+  - Internet
+License: GPL-3.0-or-later
+AuthorName: Andy Wang
+AuthorEmail: andy.wang99@icloud.com
+SourceCode: https://github.com/cbeuw/Cloak-android
+IssueTracker: https://github.com/cbeuw/Cloak-android/issues
+Donate: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=SAUYKGSREP8GL&source=url
+Bitcoin: bc1q59yvpnh0356qq9vf0j2y7hx36t9ysap30spx9h
+
+AutoName: Cloak
+
+RepoType: git
+Repo: https://github.com/cbeuw/Cloak-android.git
+
+Builds:
+  - versionName: 2.9.0
+    versionCode: 22
+    commit: a754ec67ae0bbf68019ec355192dd37fac971acf
+    subdir: app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y -t bookworm-backports golang
+      - apt-get install -y gcc libc-dev make
+    gradle:
+      - yes
+    binary: https://github.com/cbeuw/Cloak-android/releases/download/v%v-5/ck-client-%v-signed.apk
+    srclibs:
+      - go@go1.22.4
+    prebuild:
+      - export NDK_VERSION=$(sed -n -E "s/.*ndk-version:\s(.*)/\1/p" ../.github/workflows/android.yml)
+      - sdkmanager "ndk;$NDK_VERSION"
+      - export GO_VERSION=$(sed -n -E "s/.*go-version:\s'([0-9.]+)'/\1/p" ../.github/workflows/android.yml)
+      - git -C $$go$$ checkout -f go$GO_VERSION
+    build:
+      - pushd $$go$$/src
+      - ./make.bash
+      - popd
+      - export GOPATH=$$go$$
+      - export PATH="$GOPATH/bin:$PATH"
+      - cd src
+      - ANDROID_NDK_HOME=$$SDK$$/ndk/$(ls $$SDK$$/ndk/) ./build.sh
+
+AllowedAPKSigningKeys: 670a8d4d3da302886858770e8067f5b381237274132f917e7822bd6914700f24
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: 2.9.0
+CurrentVersionCode: 22
