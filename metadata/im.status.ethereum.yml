@@ -5,14 +5,14 @@ Categories:
 License: MPL-2.0
 AuthorWebSite: https://statusnetwork.com/
 WebSite: https://status.im/
-SourceCode: https://github.com/status-im/status-react
-IssueTracker: https://github.com/status-im/status-react/issues
+SourceCode: https://github.com/status-im/status-mobile
+IssueTracker: https://github.com/status-im/status-mobile/issues
 Changelog: https://github.com/status-im/status-mobile/releases
 
 AutoName: Status
 
 RepoType: git
-Repo: https://github.com/status-im/status-react.git
+Repo: https://github.com/status-im/status-mobile.git
 
 Builds:
   - versionName: 1.11.1
@@ -236,13 +236,33 @@ Builds:
       - ulimit -n 4096
       - make build-fdroid BUILD_NUMBER=$$VERCODE$$
 
+  - versionName: 1.20.6
+    versionCode: 2024071711
+    commit: 3d6dbacf36fc6704d91d07507152c5d0a2aeca90
+    timeout: 18000
+    sudo:
+      - apt-get update
+      - apt-get install -y make xz-utils
+      - cd build/im.status.ethereum
+      - make fdroid-build-env
+    init: nix/scripts/setup.sh
+    output: result/app-release-unsigned.apk
+    prebuild: sed -i -e '/extra/d' nix/nix.conf
+    scanignore:
+      - android/build.gradle
+    scandelete:
+      - ios
+    build:
+      - ulimit -n 8192
+      - make build-fdroid BUILD_NUMBER=$$VERCODE$$
+
 MaintainerNotes: |-
   Status.im mobile app is built in a deterministic way using Nix package manager.
   Because of this we disable Gradle builds via F-Droid and run `make release-android`.
   For information on how to submit updates see this readme.
-  https://github.com/status-im/status-react/blob/develop/doc/FDROID.md
+  https://github.com/status-im/status-mobile/blob/develop/doc/FDROID.md
 
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: 1.20.3
-CurrentVersionCode: 2023022315
+CurrentVersion: 1.20.6
+CurrentVersionCode: 2024071711
