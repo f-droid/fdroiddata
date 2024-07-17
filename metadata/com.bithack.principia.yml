@@ -41,6 +41,7 @@ Builds:
 
   - versionName: 2024.06.28
     versionCode: 36
+    disable: https://gitlab.com/fdroid/fdroiddata/-/issues/3317
     commit: 5b141eadd4f5ea4d364991b6d8edaea7f388a2e7
     subdir: build-android/principia
     sudo:
@@ -86,7 +87,28 @@ Builds:
       - mv $$principia-android-deps$$/deps ../
     ndk: r26c
 
+  - versionName: 2024.07.12-fdroid
+    versionCode: 38
+    commit: 93da889308bd55939cabc4f1a398f0e49d31c792
+    subdir: build-android/principia
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y cmake gcc-multilib gettext make wget xz-utils
+    gradle:
+      - yes
+    prebuild: sed -i -e '/preBuild.dependsOn getDeps/d' build.gradle
+    scandelete:
+      - testmaps/
+    build:
+      - cd deps-src
+      - ./build.sh --all armeabi-v7a
+      - ./build.sh --all arm64-v8a
+      - ./build.sh --all x86_64
+      - mv deps ../..
+    ndk: r26c
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 2024.07.12
-CurrentVersionCode: 37
+CurrentVersion: 2024.07.12-fdroid
+CurrentVersionCode: 38
