@@ -10,11 +10,11 @@ AutoName: Sensor Server
 
 RepoType: git
 Repo: https://github.com/umer0586/SensorServer.git
-Binaries: https://github.com/umer0586/SensorServer/releases/download/v%v/SensorServer-v%v.apk
 
 Builds:
   - versionName: 3.2.1
     versionCode: 21
+    disable: https://gitlab.com/fdroid/fdroiddata/-/merge_requests/15371#note_1998493151
     commit: v3.2.1
     subdir: app
     gradle:
@@ -22,6 +22,7 @@ Builds:
 
   - versionName: 4.0.0
     versionCode: 22
+    disable: https://gitlab.com/fdroid/fdroiddata/-/merge_requests/15371#note_1998493151
     commit: c3274332b4480c9283f328d2e96a360df21e7de3
     subdir: app
     gradle:
@@ -29,6 +30,7 @@ Builds:
 
   - versionName: 5.1.0
     versionCode: 24
+    disable: https://gitlab.com/fdroid/fdroiddata/-/merge_requests/15371#note_1998493151
     commit: 844a695e5f412fd6076043feb5c1a4718e1a5e2d
     subdir: app
     sudo:
@@ -40,6 +42,7 @@ Builds:
 
   - versionName: 5.2.0
     versionCode: 25
+    disable: https://gitlab.com/fdroid/fdroiddata/-/merge_requests/15371#note_1998493151
     commit: eb07df132216d5f9d2542cfb5b3a893a33471a2c
     subdir: app
     sudo:
@@ -51,6 +54,7 @@ Builds:
 
   - versionName: 5.3.0
     versionCode: 26
+    disable: https://gitlab.com/fdroid/fdroiddata/-/merge_requests/15371#note_1998493151
     commit: 38d7853db8fb22a67bdb2a0304c1793fb4023f01
     subdir: app
     sudo:
@@ -62,13 +66,25 @@ Builds:
 
   - versionName: 6.0.0
     versionCode: 27
-    disable: https://github.com/umer0586/SensorServer/issues/32#issuecomment-2205825565
     commit: a2086d17702ae7b2e797e9b53a588e659dc7e678
     subdir: app
     gradle:
       - yes
-
-AllowedAPKSigningKeys: fc20c11e46319aaedd0fab6876bfcb2f06afb57f53ea14748590676e727b3200
+    srclibs:
+      - flutter@3.22.2
+    rm:
+      - app/src/main/assets/webapp
+    prebuild:
+      - cd ../sensors_dashboard
+      - export PUB_CACHE=$(pwd)/../.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+    scandelete:
+      - .pub-cache
+    build:
+      - cd ..
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - PATH=$$flutter$$/bin/:$PATH python3 deploy_web_app.py
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
