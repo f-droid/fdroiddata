@@ -104,8 +104,35 @@ Builds:
     build: CMAKE_BIN_LOC=$$SDK$$/cmake/3.22.1/bin/ ./build.sh -v fdroid -z openttd
     ndk: r23
 
+  - versionName: 14.1.rev128
+    versionCode: 1410128
+    commit: b8dcbb83e865a77b4b5e2b58284e0a5426e51847
+    sudo:
+      - apt-get update
+      - apt-get install -y g++ make libc-dev xz-utils curl pkg-config
+    init:
+      - ln -sf openttd project/jni/application/src
+      - git submodule update --init project/jni/iconv/src project/jni/sdl* project/jni/application/openttd/src
+      - git -C project/jni/sdl2_image submodule update --init external/jpeg external/libpng
+      - sed -i -e "/GooglePlayGameServicesId/s/=.*/=/g" src/AndroidAppSettings.cfg
+      - rm -rf project/jni/sdl2_mixer/Xcode/ project/jni/sdl2_image/Xcode/ project/jni/sdl2_ttf/Xcode/
+        project/jni/sdl2/Xcode/ project/jni/sdl2_image/external/libwebp-1.0.3/swig/*
+        project/themes/Sun/abstractsun.zip
+    output: project/app/build/outputs/apk/release/app-release-unsigned.apk
+    prebuild:
+      - sdkmanager 'cmake;3.22.1'
+      - sed -i -e '/play-services/d' project/app/build-template.gradle
+    scanignore:
+      - project/jni/iconv/src/icu4c-62_1-src.tgz
+      - project/jni/iconv/src/icu-le-hb-1.0.3.tar.gz
+      - project/jni/iconv/src/libiconv-1.15.tar.gz
+      - project/jni/timidity/samples/timidity.zip
+      - project/jni/openssl/openssl-1.1.1j.tar.gz
+    build: CMAKE_BIN_LOC=$$SDK$$/cmake/3.22.1/bin/ ./build.sh -v fdroid -z openttd
+    ndk: r25
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: ./project/jni/application/openttd/AndroidAppSettings.cfg|AppVersionCode=(\d+)|.|AppVersionName="(.*)"
-CurrentVersion: 13.4.rev120
-CurrentVersionCode: 1340120
+CurrentVersion: 14.1.rev128
+CurrentVersionCode: 1410128
