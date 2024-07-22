@@ -1,0 +1,80 @@
+AntiFeatures:
+  NonFreeNet:
+    en-US: Rely on jawg.io
+Categories:
+  - Navigation
+License: AGPL-3.0-only
+AuthorName: Wyatt Agathe
+AuthorWebSite: https://jumpingpants.codeberg.page
+WebSite: https://jumpingpants.codeberg.page/opentransit
+SourceCode: https://codeberg.org/JumpingPants/OpenLynx
+IssueTracker: https://codeberg.org/JumpingPants/OpenLynx/issues
+Changelog: https://codeberg.org/JumpingPants/OpenLynx/releases
+Donate: https://jumpingpants.codeberg.page/donate
+Liberapay: JumpingPants
+
+AutoName: OpenLynx
+
+RepoType: git
+Repo: https://codeberg.org/JumpingPants/OpenLynx.git
+
+Builds:
+  - versionName: '20240714.2'
+    versionCode: 42
+    commit: c789cc62c0abec0b57c2d700314c2b98cefe8f18
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y build-essential scons pkg-config libx11-dev libxcursor-dev
+        libxinerama-dev libgl1-mesa-dev libglu-dev libasound2-dev libpulse-dev libudev-dev
+        libxi-dev libxrandr-dev unzip wget
+    output: bin/OpenLynx.apk
+    srclibs:
+      - Godot@4.2.2-stable
+    prebuild:
+      - mkdir -p bin
+      - mkdir -p android
+      - pushd $$Godot$$
+      - git clean -fixd
+    build:
+      - echo "Setting up export templates"
+      - cd ~
+      - wget https://github.com/godotengine/godot/releases/download/4.2.2-stable/Godot_v4.2.2-stable_export_templates.tpz
+      - unzip Godot_v4.2.2-stable_export_templates.tpz
+      - mkdir -p ~/build/page.codeberg.jumpingpants.opentransit/app/android/build
+      - touch ~/build/page.codeberg.jumpingpants.opentransit/app/android/.build_version
+      - echo "4.2.2.stable" > ~/build/page.codeberg.jumpingpants.opentransit/app/android/.build_version
+      - unzip ./templates/android_source.zip -d ~/build/page.codeberg.jumpingpants.opentransit/app/android/build
+      - mkdir -p ~/.local/share/godot/export_templates/4.2.2.stable/
+      - mv ./templates/* ~/.local/share/godot/export_templates/4.2.2.stable/
+      - echo "Compiling Geolocation Plugin"
+      - cd ~/build/page.codeberg.jumpingpants.opentransit/Godot_Geolocation_Plugin
+      - touch ./local.properties
+      - echo sdk.dir=$$SDK$$ > ./local.properties
+      - gradle build
+      - mkdir -p ~/build/page.codeberg.jumpingpants.opentransit/app/android/plugins
+      - mv app/build/outputs/aar/GeolocationPlugin.debug.aar ~/build/page.codeberg.jumpingpants.opentransit/app/android/plugins
+      - wget https://codeberg.org/JumpingPants/Godot_Geolocation_Plugin/releases/download/latest/GeolocationPlugin.debug.gdap
+        -P ~/build/page.codeberg.jumpingpants.opentransit/app/android/plugins
+      - touch ~/build/page.codeberg.jumpingpants.opentransit/app/android/build/.gdignore
+      - echo "Compiling Godot Engine and Export Templates"
+      - cd ~/build/page.codeberg.jumpingpants.opentransit
+      - export ANDROID_SDK_ROOT=$$SDK$$
+      - export ANDROID_NDK_ROOT=$$NDK$$
+      - export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+      - pushd $$Godot$$
+      - scons -j `nproc` platform=linuxbsd target=editor
+      - scons -j `nproc` platform=android target=template_release arch=arm64v8
+      - cd platform/android/java
+      - ./gradlew generateGodotTemplates
+      - popd
+      - cd app
+      - $$Godot$$/bin/godot.linuxbsd.editor.x86_64 --import --headless --export-release
+        'Android' ~/build/page.codeberg.jumpingpants.opentransit/bin/OpenLynx.apk
+    ndk: 23.2.8568313
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: app/export_presets.cfg|version/code=(\d+)|.|version/name="([\d.]+)"
+CurrentVersion: '20240714.2'
+CurrentVersionCode: 42
