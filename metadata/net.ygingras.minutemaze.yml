@@ -1,0 +1,49 @@
+Categories:
+  - Games
+License: GPL-3.0-only
+AuthorName: Yannick Gingras
+AuthorWebSite: http://ygingras.net
+WebSite: https://gitlab.com/ygingras/minute-maze/
+SourceCode: https://gitlab.com/ygingras/minute-maze/
+IssueTracker: https://gitlab.com/ygingras/minute-maze/-/issues
+
+RepoType: git
+Repo: https://gitlab.com/ygingras/minute-maze.git
+
+Builds:
+  - versionName: 0.1.0
+    versionCode: 100
+    commit: 07cc85da5af44214436cfa2ab01d42c77f9cc2f4
+    sudo:
+      - apt-get update
+      - apt-get install -y python3-invoke build-essential scons pkg-config libx11-dev
+        libxcursor-dev libxinerama-dev libgl1-mesa-dev libglu-dev libasound2-dev libpulse-dev
+        libudev-dev libxi-dev libxrandr-dev
+    output: bin/minute-maze.apk
+    srclibs:
+      - Godot@82cedc83c9069125207c128f9a07ce3d82c317cc
+    prebuild:
+      - mkdir -p bin
+      - mkdir -p android
+      - pushd $$Godot$$
+      - popd
+    build:
+      - export ANDROID_SDK_ROOT=$$SDK$$
+      - export ANDROID_NDK_ROOT=$$NDK$$
+      - export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+      - pushd $$Godot$$
+      - scons -j `nproc` platform=linuxbsd target=editor
+      - scons -j `nproc` platform=android target=template_release arch=arm64
+      - cd platform/android/java
+      - gradle generateGodotTemplates
+      - popd
+      - invoke make-fdroid-presets $$Godot$$
+      - $$Godot$$/bin/godot.linuxbsd.editor.x86_64 --headless --export-release 'Android
+        APK' bin/minute-maze.apk
+    ndk: 23.2.8568313
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: src/consts.gd|const VERSION_CODE := (\d+)|.|const VERSION := "([\d.]+)"
+CurrentVersion: 0.1.0
+CurrentVersionCode: 100
