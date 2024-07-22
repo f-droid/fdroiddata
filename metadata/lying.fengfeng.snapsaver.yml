@@ -1,0 +1,59 @@
+Categories:
+  - Multimedia
+License: Apache-2.0
+AuthorName: Li Linfeng
+AuthorEmail: Niels_Lee@outlook.com
+SourceCode: https://github.com/NielsLee/SnapSaver
+IssueTracker: https://github.com/NielsLee/SnapSaver/issues
+Changelog: https://github.com/NielsLee/SnapSaver/releases
+
+AutoName: SnapSaver
+
+RepoType: git
+Repo: https://github.com/NielsLee/SnapSaver.git
+Binaries: https://github.com/NielsLee/SnapSaver/releases/download/v%v/app-release.apk
+
+Builds:
+  - versionName: 0.1.0
+    versionCode: 1
+    commit: 7165d60aff67d9cedf4122b2aad0b31f4a6dc516
+    submodules: true
+    sudo:
+      - mkdir -p /home/runner
+      - chown vagrant /home/runner
+    output: build/app/outputs/flutter-apk/app-release.apk
+    rm:
+      - ios
+    prebuild:
+      - export repo=/home/runner/work/SnapSaver
+      - mkdir -p $repo
+      - cd ..
+      - mv lying.fengfeng.snapsaver $repo/SnapSaver
+      - pushd $repo/SnapSaver
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - .flutter/bin/flutter config --no-analytics
+      - .flutter/bin/flutter pub get
+      - popd
+      - mv $repo/SnapSaver lying.fengfeng.snapsaver
+    scanignore:
+      - .flutter/bin/cache
+    scandelete:
+      - .flutter
+      - .pub-cache
+    build:
+      - export repo=/home/runner/work/SnapSaver
+      - cd ..
+      - mv lying.fengfeng.snapsaver $repo/SnapSaver
+      - pushd $repo/SnapSaver
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - .flutter/bin/flutter build apk --release
+      - popd
+      - mv $repo/SnapSaver lying.fengfeng.snapsaver
+
+AllowedAPKSigningKeys: f6df1e0513719d034a926106a5d9f37bf05457e8a7521e091910d3cf4802e10e
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 0.1.0
+CurrentVersionCode: 1
