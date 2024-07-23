@@ -1,0 +1,43 @@
+Categories:
+  - Connectivity
+License: GPL-3.0-only
+AuthorName: Hagay Goshen
+AuthorEmail: hg40005000@gmail.com
+SourceCode: https://github.com/hagaygo/OpenWrtManager
+IssueTracker: https://github.com/hagaygo/OpenWrtManager/issues
+Changelog: https://github.com/hagaygo/OpenWrtManager/releases
+
+AutoName: OpenWrt Manager
+
+RepoType: git
+Repo: https://github.com/hagaygo/OpenWRTManager.git
+
+Builds:
+  - versionName: 1.33.0
+    versionCode: 201330
+    commit: e90d1372055e0fe634988f2291dda1950481c134
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+      - windows
+    prebuild:
+      - export flutterVersion=$(cat flutter.version)
+      - pushd $$flutter$$
+      - git checkout -f $flutterVersion
+      - popd
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter packages pub get
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 1.33.0
+CurrentVersionCode: 201330
