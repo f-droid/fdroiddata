@@ -779,9 +779,8 @@ Builds:
     commit: 012ea862b94446e7da9fc3bd43801fb74336f1ca
     submodules: true
     sudo:
-      - echo "deb http://deb.debian.org/debian testing main" > /etc/apt/sources.list.d/testing.list
       - apt-get update
-      - apt-get install -y -t testing golang-go
+      - apt-get install -y -t bookworm-backports golang-go
     output: build/app/outputs/flutter-apk/app-beta-release.apk
     srclibs:
       - flutter@stable
@@ -798,7 +797,7 @@ Builds:
       - pushd $$flutter$$
       - git checkout -f $version
       - popd
-      - sdkmanager 'platforms;android-32' 'build-tools;32.0.0'
+      - sdkmanager 'platforms;android-34' 'build-tools;34.0.0'
       - $$flutter$$/bin/flutter config --no-analytics
       - $$flutter$$/bin/flutter pub get
     scandelete:
@@ -808,10 +807,11 @@ Builds:
       - export PATH="$GOPATH/bin:$PATH"
       - go install golang.org/x/mobile/cmd/gomobile@latest
       - gomobile init
-      - gomobile bind -target android -o android/irmagobridge/irmagobridge.aar github.com/privacybydesign/irmamobile/irmagobridge
+      - gomobile bind -target android -androidapi 19 -o android/irmagobridge/irmagobridge.aar
+        github.com/privacybydesign/irmamobile/irmagobridge
       - export PUB_CACHE=$(pwd)/.pub-cache
       - $$flutter$$/bin/flutter build apk --flavor beta
-    ndk: r21e
+    ndk: r25c
 
 MaintainerNotes: uses Sentry.io configured as opt-in
 
