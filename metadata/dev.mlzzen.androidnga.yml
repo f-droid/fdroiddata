@@ -1,0 +1,60 @@
+AntiFeatures:
+  - NonFreeNet
+  - UpstreamNonFree
+Categories:
+  - Internet
+  - Reading
+License: GPL-2.0-only
+AuthorName: mlzzen
+AuthorEmail: mlzzen@qq.com
+AuthorWebSite: https://mlzzen.github.io/blog/
+SourceCode: https://github.com/mlzzen/open-nga
+IssueTracker: https://github.com/mlzzen/open-nga/issues
+
+AutoName: OPEN NGA
+
+RepoType: git
+Repo: https://github.com/mlzzen/open-nga
+
+Builds:
+  - versionName: v1.0.1
+    versionCode: 1000001
+    commit: b760e4c1d70fdab751020e50aff4a64f1ddd0559
+    subdir: nga_phone_base_3.0
+    gradle:
+      - yes
+    srclibs:
+      - android-floating-action-button@2396953e0f8a1f329756320bd0663d250aadac83
+    rm:
+      - nga_phone_base_3.0/libs/*.aar
+      - lib_cloud
+    prebuild:
+      - sed -i -e 's|mirrors.cloud.tencent.com/gradle/gradle-7.3-bin|services.gradle.org/distributions/gradle-7.3.3-bin|'
+        ../gradle/wrapper/gradle-wrapper.properties
+      - sed -i -e '/aliyun/d' ../build.gradle
+      - sed -i -e '/lib_cloud/d' -e '/arouter-api/s/com.alibaba/com.github.alibaba.ARouter/'
+        -e 's/com.alibaba:arouter-compiler:1.1.4/com.github.alibaba.ARouter:arouter-compiler:1.1.1/'
+        build.gradle
+      - sed -i -e 's/com.nshmura:recyclertablayout:1.5.0/com.github.nshmura:RecyclerTabLayout:1.4.0/'
+        -e 's/com.zhouyou:signseekbar:1.0.6/com.github.zhou-you:EasySignSeekBar:8c52404ab6/'
+        -e 's/net.steamcrafted:load-toast/com.github.code-mc:loadtoast/' -e 's/me.imid.swipebacklayout.lib:library:1.1.0/com.github.ikew0ng:SwipeBackLayout:e1d109e5fe/'
+        ../lib_common/build.gradle
+      - sed -i -e "s/':lib_cloud',//" ../settings.gradle
+      - find -type f -name "*.java" -exec sed -i -e '/CloudServerManager/d' {} +
+      - cd $$android-floating-action-button$$
+      - sed -i -e 's/3.1.1/7.2.0/' ../build.gradle
+      - sed -i -e '/gradle-mvn-push/d' build.gradle
+      - rm -rf ../gradle
+    scanignore:
+      - nga_phone_base_3.0/src/main/java/sp/phone/util/PluginUtils.java
+    build:
+      - pushd $$android-floating-action-button$$
+      - gradle assembleRelease
+      - popd
+      - mv $$android-floating-action-button$$/build/outputs/aar/*.aar libs/floatingactionmenu.aar
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: build.gradle|appVersionCode\s=\s(\d+)|.|appVersionName\s=\s'(v[\d.]+)'
+CurrentVersion: v1.0.1
+CurrentVersionCode: 1000001
