@@ -68,10 +68,20 @@ Builds:
     commit: 1a9343c9c4277d0ffef138e3cd18b9f085eccf14
     output: build/app/outputs/flutter-apk/app-fdroid-release.apk
     srclibs:
-      - flutter@2.2.3
-    prebuild: sed -i -e 's|git@github.com:|https://github.com/|' pubspec.lock pubspec.yaml
-    build:
+      - flutter@3.22.3
+    rm:
+      - ios
+      - linux
+      - snap
+      - test
+    prebuild:
+      - export PUB_CACHE=$(pwd)/.pub-cache
       - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
       - $$flutter$$/bin/flutter build apk --flavor fdroid
 
 AutoUpdateMode: Version
