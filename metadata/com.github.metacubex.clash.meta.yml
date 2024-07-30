@@ -498,21 +498,14 @@ Builds:
     submodules: true
     sudo:
       - apt-get update
-      - apt-get install -t bullseye-backports -y golang-go
-      - apt-get install -y gcc libc-dev
-    output: build/outputs/apk/meta/release/*.apk
-    srclibs:
-      - go@go1.20.13
+      - apt-get install -t bookworm-backports -y golang-go
+    gradle:
+      - meta
     prebuild:
-      - sed -i -e '/isEnable = true/d' -e 's|maven.kr328.app/releases|jitpack.io|'
+      - sed -i -e '/isEnable = true/d' -e 's|raw.githubusercontent.com/.*/releases|jitpack.io|'
         ../build.gradle.kts
       - sed -i -e 's/com.github.kr328.golang:gradle-plugin:$golang/com.github.Kr328.golang-android-plugin:gradle-plugin:cc84891461/'
         -e 's/:$kaidl/:7710f4347c/' ../settings.gradle.kts
-    build:
-      - pushd $$go$$/src
-      - ./make.bash
-      - popd
-      - PATH=$$go$$/bin:$PATH gradle assembleMetaRelease
     ndk: r23
 
 AutoUpdateMode: Version +.Meta v%v
