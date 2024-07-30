@@ -491,8 +491,32 @@ Builds:
       - PATH=$$go$$/bin:$PATH gradle assembleMetaRelease
     ndk: r23
 
+  - versionName: 2.10.2.Meta
+    versionCode: 210002
+    commit: 143c84d47b6e636195bbdc8ca89b8617c84e4196
+    subdir: app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -t bullseye-backports -y golang-go
+      - apt-get install -y gcc libc-dev
+    output: build/outputs/apk/meta/release/*.apk
+    srclibs:
+      - go@go1.20.13
+    prebuild:
+      - sed -i -e '/isEnable = true/d' -e 's|maven.kr328.app/releases|jitpack.io|'
+        ../build.gradle.kts
+      - sed -i -e 's/com.github.kr328.golang:gradle-plugin:$golang/com.github.Kr328.golang-android-plugin:gradle-plugin:cc84891461/'
+        -e 's/:$kaidl/:7710f4347c/' ../settings.gradle.kts
+    build:
+      - pushd $$go$$/src
+      - ./make.bash
+      - popd
+      - PATH=$$go$$/bin:$PATH gradle assembleMetaRelease
+    ndk: r23
+
 AutoUpdateMode: Version +.Meta v%v
 UpdateCheckMode: Tags
 UpdateCheckName: com.github.metacubex.clash
-CurrentVersion: 2.10.1
-CurrentVersionCode: 210001
+CurrentVersion: 2.10.2
+CurrentVersionCode: 210002
