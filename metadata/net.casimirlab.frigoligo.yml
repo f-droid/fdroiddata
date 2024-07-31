@@ -193,10 +193,69 @@ Builds:
       - mv $repo/frigoligo net.casimirlab.frigoligo
     ndk: r26d
 
+  - versionName: 1.2.0
+    versionCode: 35
+    commit: 99ba02e453bfe0bf3c5b1a09b30a5077e99031bf
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y gcc-multilib libc-dev make
+      - mkdir -p /home/runner/
+      - chown vagrant /home/runner/
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@stable
+      - rustup@1.27.0
+      - transistor-background-fetch@0dd1457588ba031f11e9452f125144aac8a9b75f
+    rm:
+      - .github
+      - appimage
+      - ios
+      - linux
+      - macos
+      - test
+      - test_driver
+      - tools
+      - web
+      - windows
+    prebuild:
+      - export repo=/home/runner/work/frigoligo
+      - mkdir -p $repo
+      - cd ..
+      - mv net.casimirlab.frigoligo $repo/frigoligo
+      - pushd $repo/frigoligo
+      - export FLUTTER_VERSION=$(cat .flutter-version)
+      - git -C $$flutter$$ checkout -f $FLUTTER_VERSION
+      - export PUB_CACHE=/home/runner/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter packages pub get
+      - export CARGO_HOME=/home/runner/.cargo
+      - $$rustup$$/rustup-init.sh -y --default-toolchain 1.75.0
+      - sed -i -e '/maven {/,/^        }/cmavenLocal()' android/build.gradle $PUB_CACHE/hosted/pub.dev/background_fetch-*/android/build.gradle
+      - popd
+      - mv $repo/frigoligo net.casimirlab.frigoligo
+    build:
+      - export repo=/home/runner/work/frigoligo
+      - export PUB_CACHE=/home/runner/.pub-cache
+      - export CARGO_HOME=/home/runner/.cargo
+      - cd ..
+      - mv net.casimirlab.frigoligo $repo/frigoligo
+      - pushd $repo/frigoligo
+      - pushd $$transistor-background-fetch$$/android/tsbackgroundfetch/
+      - gradle assembleRelease
+      - gradle publishToMavenLocal
+      - popd
+      - source $CARGO_HOME/env
+      - ./third_party_sources/build.sh
+      - $$flutter$$/bin/flutter build apk --release
+      - popd
+      - mv $repo/frigoligo net.casimirlab.frigoligo
+    ndk: r26d
+
 AllowedAPKSigningKeys: 5ac383c981bb53ea5a873cf6086d0a6a0a2f557420694ed5ae4c495677aafd5c
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v.*$
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 1.1.1
-CurrentVersionCode: 34
+CurrentVersion: 1.2.0
+CurrentVersionCode: 35
