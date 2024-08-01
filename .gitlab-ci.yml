@@ -337,9 +337,8 @@ checkupdates_runner:
     - echo "${#CHECKUPDATES_APPIDS[@]}"
 
     - fdroid checkupdates --allow-dirty --auto --commit "${CHECKUPDATES_APPIDS[@]}" 2>&1 | tee /tmp/out || true
-    - git pull --rebase origin master
     # when two jobs try to push at the same time they occasionally fail, so try it again
-    - while ! git push origin HEAD:master; do git pull --rebase origin master; done
+    - while ! git push origin HEAD:master; do git pull --rebase --strategy-option=ours origin master; done
     - echo "============== Summary ====================="
     - 'grep -v "INFO: Processing" /tmp/out || true'
 
