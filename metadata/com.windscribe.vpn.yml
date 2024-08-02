@@ -309,14 +309,13 @@ Builds:
 
   - versionName: '3.77'
     versionCode: 1447
-    disable: https://gitlab.com/fdroid/fdroiddata/-/merge_requests/15359
-    commit: 2a73c7e3588b95c7475dbc9f407fc7bf01383a31
+    commit: e3a1142ebdfab529aaf14728c6bdc76ce11cd489
     subdir: mobile
     submodules: true
     sudo:
       - apt-get update
       - apt-get install -y automake bison flex gettext gperf libtool make pkg-config
-        swig jq
+        swig jq curl zip unzip tar cmake git musl-dev cmake perl golang ninja-build
     gradle:
       - fdroid
     srclibs:
@@ -336,36 +335,61 @@ Builds:
       - openvpn/src/main/cpp/mbedtls/tests/data_files/hash_file_3
       - tv
       - strongswan/libs
+      - strongswan-src/testing/hosts/alice/etc/raddb/certs/random
+      - wgtunnel/tools/elf-cleaner/tests
+      - wstunnel/src/main/jniLibs/arm64-v8a/libproxy.so
+      - wstunnel/src/main/jniLibs/x86/libproxy.so
+      - wstunnel/src/main/jniLibs/armeabi-v7a/libproxy.so
+      - wstunnel/src/main/jniLibs/x86_64/libproxy.so
+      - base/src/main/libs/wsnet.aar
     prebuild:
-      - sed -i 's/23.0.7599858/21.4.7075529/g' ../openvpn/build.gradle.kts
-      - sed -i 's/compileSdkVersion 32/compileSdkVersion 32\n    ndkVersion "21.4.7075529"/g'
+      - sed -i 's/23.0.7599858/23.2.8568313/g' ../openvpn/build.gradle.kts ../base/build.gradle
+        build.gradle
+      - sed -i 's/compileSdkVersion 33/compileSdkVersion 33\n    ndkVersion "23.2.8568313"/g'
         build.gradle
     build:
+      - git clone https://github.com/Microsoft/vcpkg.git
+      - git clone https://github.com/Microsoft/vcpkg-tool.git
+      - pushd vcpkg-tool
+      - mkdir build && pushd build
+      - cmake -DCMAKE_BUILD_TYPE=Release -G 'Ninja' -DVCPKG_DEVELOPMENT_WARNINGS=OFF
+        ..
+      - cmake --build .
+      - popd && popd && pushd vcpkg
+      - git reset --hard f7423ee180c4b7f40d43402c2feb3859161ef625
+      - cp -a ../vcpkg-tool/build/vcpkg vcpkg
+      - touch "vcpkg.disable-metrics"
+      - export VCPKG_ROOT="$PWD"
+      - popd
       - export ANDROID_NDK_HOME="$ANDROID_NDK"
       - export PATH=$PATH:$ANDROID_SDK/tools:$ANDROID_SDK/platform-tools:$ANDROID_NDK_HOME
       - export OpenSSL="$$OpenSSL$$"
       - strongswanLibsSrc="$PWD/../strongswan-src/src/frontends/android/app/src/main/libs/*"
       - strongswanLibsDst="$PWD/../strongswan/libs"
-      - cd ../tools
+      - export ANDROID_NDK=$(ls -d $ANDROID_SDK_ROOT/ndk/*/ | head -n 1)
+      - cd ..
+      - git apply hide_release_block.patch
+      - tools/build_wsnet.sh
+      - tools/build_wstunnel.sh
+      - cd tools
       - chmod +x build_strongswan.sh
       - ./build_strongswan.sh
       - cd ../strongswan-src/src/frontends/android/app
-      - sed -i 's/compileSdkVersion 32/compileSdkVersion 32\n    ndkVersion "21.4.7075529"/g'
+      - sed -i 's/compileSdkVersion 33/compileSdkVersion 33\n    ndkVersion "23.2.8568313"/g'
         build.gradle
       - gradle assembleRelease
       - cp -r $strongswanLibsSrc $strongswanLibsDst
-    ndk: r21e
+    ndk: r23c
 
   - versionName: '3.77'
     versionCode: 1448
-    disable: https://gitlab.com/fdroid/fdroiddata/-/merge_requests/15359
-    commit: 2a73c7e3588b95c7475dbc9f407fc7bf01383a31
+    commit: e3a1142ebdfab529aaf14728c6bdc76ce11cd489
     subdir: tv
     submodules: true
     sudo:
       - apt-get update
       - apt-get install -y automake bison flex gettext gperf libtool make pkg-config
-        swig jq
+        swig jq curl zip unzip tar cmake git musl-dev cmake perl golang ninja-build
     gradle:
       - fdroid
     srclibs:
@@ -385,25 +409,51 @@ Builds:
       - openvpn/src/main/cpp/mbedtls/tests/data_files/hash_file_3
       - mobile
       - strongswan/libs
+      - strongswan-src/testing/hosts/alice/etc/raddb/certs/random
+      - wgtunnel/tools/elf-cleaner/tests
+      - wstunnel/src/main/jniLibs/arm64-v8a/libproxy.so
+      - wstunnel/src/main/jniLibs/x86/libproxy.so
+      - wstunnel/src/main/jniLibs/armeabi-v7a/libproxy.so
+      - wstunnel/src/main/jniLibs/x86_64/libproxy.so
+      - base/src/main/libs/wsnet.aar
     prebuild:
-      - sed -i 's/23.0.7599858/21.4.7075529/g' ../openvpn/build.gradle.kts
-      - sed -i 's/compileSdkVersion 32/compileSdkVersion 32\n    ndkVersion "21.4.7075529"/g'
+      - sed -i 's/23.0.7599858/23.2.8568313/g' ../openvpn/build.gradle.kts ../base/build.gradle
+        build.gradle
+      - sed -i 's/compileSdkVersion 33/compileSdkVersion 33\n    ndkVersion "23.2.8568313"/g'
         build.gradle
     build:
+      - git clone https://github.com/Microsoft/vcpkg.git
+      - git clone https://github.com/Microsoft/vcpkg-tool.git
+      - pushd vcpkg-tool
+      - mkdir build && pushd build
+      - cmake -DCMAKE_BUILD_TYPE=Release -G 'Ninja' -DVCPKG_DEVELOPMENT_WARNINGS=OFF
+        ..
+      - cmake --build .
+      - popd && popd && pushd vcpkg
+      - git reset --hard f7423ee180c4b7f40d43402c2feb3859161ef625
+      - cp -a ../vcpkg-tool/build/vcpkg vcpkg
+      - touch "vcpkg.disable-metrics"
+      - export VCPKG_ROOT="$PWD"
+      - popd
       - export ANDROID_NDK_HOME="$ANDROID_NDK"
       - export PATH=$PATH:$ANDROID_SDK/tools:$ANDROID_SDK/platform-tools:$ANDROID_NDK_HOME
       - export OpenSSL="$$OpenSSL$$"
       - strongswanLibsSrc="$PWD/../strongswan-src/src/frontends/android/app/src/main/libs/*"
       - strongswanLibsDst="$PWD/../strongswan/libs"
-      - cd ../tools
+      - export ANDROID_NDK=$(ls -d $ANDROID_SDK_ROOT/ndk/*/ | head -n 1)
+      - cd ..
+      - git apply hide_release_block.patch
+      - tools/build_wsnet.sh
+      - tools/build_wstunnel.sh
+      - cd tools
       - chmod +x build_strongswan.sh
       - ./build_strongswan.sh
       - cd ../strongswan-src/src/frontends/android/app
-      - sed -i 's/compileSdkVersion 32/compileSdkVersion 32\n    ndkVersion "21.4.7075529"/g'
+      - sed -i 's/compileSdkVersion 33/compileSdkVersion 33\n    ndkVersion "23.2.8568313"/g'
         build.gradle
       - gradle assembleRelease
       - cp -r $strongswanLibsSrc $strongswanLibsDst
-    ndk: r21e
+    ndk: r23c
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
