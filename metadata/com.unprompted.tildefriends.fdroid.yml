@@ -1,0 +1,48 @@
+Categories:
+  - Connectivity
+  - Development
+  - Internet
+License: MIT
+AuthorName: Cory McWilliams
+AuthorEmail: cory@tildefriends.net
+WebSite: https://www.tildefriends.net/
+SourceCode: https://dev.tildefriends.net/cory/tildefriends
+
+AutoName: Tilde Friends
+
+RepoType: git
+Repo: https://dev.tildefriends.net/cory/tildefriends.git
+Binaries: https://dev.tildefriends.net/cory/tildefriends/releases/download/v%v/TildeFriends-%v.fdroid.apk
+
+Builds:
+  - versionName: 0.0.21.1
+    versionCode: 25
+    commit: e6f5399d536edb6d64ffd334429c28e0b6079530
+    subdir: src/android
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y ant make zip
+    prebuild: sdkmanager "platforms;android-34" "build-tools;34.0.0"
+    androidupdate:
+      - no
+    scandelete:
+      - deps/libuv/docs/src/static/diagrams.key/Index.zip
+      - deps/openssl_src/cloudflare-quiche/*
+      - deps/openssl_src/fuzz/*
+      - deps/openssl_src/gost-engine/*
+      - deps/openssl_src/test/*
+      - deps/openssl_src/tlslite-ng/*
+    build:
+      - mkdir bin/
+      - ANDROID_SDK=$$SDK$$ ANDROID_NDK=$$NDK$$ ANDROID_NDK_ROOT=$$NDK$$ make -C ../../
+        -j`nproc` fdroid
+    ndk: r26d
+
+AllowedAPKSigningKeys: 5a427d8831ebfe129f2a0c1e8a6d324a2d7d6f5873ab3e7d88342ca7afccc147
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^v[0-9\.]+$
+UpdateCheckName: com.unprompted.tildefriends
+CurrentVersion: 0.0.21.1
+CurrentVersionCode: 25
