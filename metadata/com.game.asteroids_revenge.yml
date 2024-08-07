@@ -415,34 +415,26 @@ Builds:
     output: asteroids_revenge.apk
     srclibs:
       - Godot@4.2.2-stable
-    prebuild:
-      - pushd $$Godot$$
-      - scons --clean platform=linuxbsd target=editor use_llvm=yes tools=yes
-      - scons --clean platform=android arch=armv7 production=yes target=template_release
-      - cd platform/android/java
-      - gradle cleanGodotTemplates
-      - popd
     build:
       - export JAVA_HOME=$(dirname $(dirname $(readlink -f $(which javac))))
       - export ANDROID_SDK_ROOT=$$SDK$$
       - export ANDROID_NDK_ROOT=$$NDK$$
-      - export GODOT_CFG=~/.config/godot/editor_settings-4.tres
       - pushd $$Godot$$
-      - scons -j `nproc` platform=linuxbsd target=editor use_llvm=yes tools=yes
-      - scons -j `nproc` platform=android arch=armv7 production=yes target=template_release
+      - scons -j `nproc` platform=linuxbsd target=editor
+      - scons -j `nproc` platform=android target=template_release arch=arm32
       - cd platform/android/java
       - gradle generateGodotTemplates
       - popd
-      - $$Godot$$/bin/godot.linuxbsd.editor.x86_64.llvm --headless --import
       - sed -i -e 's:\(^.*package/signed\)\s*=.*$:\1 = false:' export_presets.cfg
-      - sed -i "s|export/android/java_sdk_path=.*|export/android/java_sdk_path=\"${JAVA_HOME}\"|"
-        $GODOT_CFG
-      - sed -i -e 's:\(^.*android_sdk_path\)\s*=.*$:\1 = "$$SDK$$":' $GODOT_CFG
       - sed -i -e '/custom_template\/release/s|=.*|="$$Godot$$/bin/android_release.apk"|'
         export_presets.cfg
-      - $$Godot$$/bin/godot.linuxbsd.editor.x86_64.llvm --headless --export-release
-        'Android arm32' asteroids_revenge.apk
-    ndk: 25.1.8937393
+      - $$Godot$$/bin/godot.linuxbsd.editor.x86_64 --headless --import
+      - export GODOT_CFG=$(ls ~/.config/godot/editor_settings-*.tres)
+      - sed -i -e "s:\(^.*java_sdk_path\)\s*=.*$:\1 = "$JAVA_HOME":" $GODOT_CFG
+      - sed -i -e 's:\(^.*android_sdk_path\)\s*=.*$:\1 = "$$SDK$$":' $GODOT_CFG
+      - $$Godot$$/bin/godot.linuxbsd.editor.x86_64 --headless --export-release 'Android
+        arm32' asteroids_revenge.apk
+    ndk: 23.2.8568313
 
   - versionName: 0.10.11
     versionCode: 100094
@@ -454,34 +446,26 @@ Builds:
     output: asteroids_revenge.apk
     srclibs:
       - Godot@4.2.2-stable
-    prebuild:
-      - pushd $$Godot$$
-      - scons --clean platform=linuxbsd target=editor use_llvm=yes tools=yes
-      - scons --clean platform=android arch=armv7 production=yes target=template_release
-      - cd platform/android/java
-      - gradle cleanGodotTemplates
-      - popd
     build:
       - export JAVA_HOME=$(dirname $(dirname $(readlink -f $(which javac))))
       - export ANDROID_SDK_ROOT=$$SDK$$
       - export ANDROID_NDK_ROOT=$$NDK$$
-      - export GODOT_CFG=~/.config/godot/editor_settings-4.tres
       - pushd $$Godot$$
-      - scons -j `nproc` platform=linuxbsd target=editor use_llvm=yes tools=yes
-      - scons -j `nproc` platform=android arch=arm64v8 production=yes target=template_release
+      - scons -j `nproc` platform=linuxbsd target=editor
+      - scons -j `nproc` platform=android target=template_release arch=arm64
       - cd platform/android/java
       - gradle generateGodotTemplates
       - popd
-      - $$Godot$$/bin/godot.linuxbsd.editor.x86_64.llvm --headless --import
       - sed -i -e 's:\(^.*package/signed\)\s*=.*$:\1 = false:' export_presets.cfg
-      - sed -i "s|export/android/java_sdk_path=.*|export/android/java_sdk_path=\"${JAVA_HOME}\"|"
-        $GODOT_CFG
-      - sed -i -e 's:\(^.*android_sdk_path\)\s*=.*$:\1 = "$$SDK$$":' $GODOT_CFG
       - sed -i -e '/custom_template\/release/s|=.*|="$$Godot$$/bin/android_release.apk"|'
         export_presets.cfg
-      - $$Godot$$/bin/godot.linuxbsd.editor.x86_64.llvm --headless --export-release
-        'Android arm64' asteroids_revenge.apk
-    ndk: 25.1.8937393
+      - $$Godot$$/bin/godot.linuxbsd.editor.x86_64 --headless --import
+      - export GODOT_CFG=$(ls ~/.config/godot/editor_settings-*.tres)
+      - sed -i -e "s:\(^.*java_sdk_path\)\s*=.*$:\1 = "$JAVA_HOME":" $GODOT_CFG
+      - sed -i -e 's:\(^.*android_sdk_path\)\s*=.*$:\1 = "$$SDK$$":' $GODOT_CFG
+      - $$Godot$$/bin/godot.linuxbsd.editor.x86_64 --headless --export-release 'Android
+        arm64' asteroids_revenge.apk
+    ndk: 23.2.8568313
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
