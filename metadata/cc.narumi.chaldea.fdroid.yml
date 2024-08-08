@@ -1425,8 +1425,38 @@ Builds:
       - export PUB_CACHE=$(pwd)/.pub-cache
       - $$flutter$$/bin/flutter build apk --flavor fdroid
 
+  - versionName: 2.5.12
+    versionCode: 973
+    commit: bc700b578f31271ee1c692421693d5728d6d033f
+    output: build/app/outputs/flutter-apk/app-fdroid-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+      - linux
+      - macos
+      - test
+      - web
+      - windows
+    prebuild:
+      - export version=$(grep "\ \ FLUTTER_VERSION" .github/workflows/deploy-github-release.yml
+        | cut -d "\"" -f2)
+      - pushd $$flutter$$
+      - git checkout -f $version
+      - popd
+      - sdkmanager 'cmake;3.10.2.4988404'
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/dart scripts/patch_before_build.dart fdroid
+      - $$flutter$$/bin/flutter pub get
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --flavor fdroid
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v[\d.]+
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 2.5.11
-CurrentVersionCode: 972
+CurrentVersion: 2.5.12
+CurrentVersionCode: 973
