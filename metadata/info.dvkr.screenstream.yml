@@ -1266,18 +1266,13 @@ Builds:
 
   - versionName: 4.1.10
     versionCode: 41010
+    disable: https://gitlab.com/fdroid/fdroiddata/-/jobs/7583192659#L442
     commit: b73d3b017c724b807e3cf83b605a6a536b9a3db8
     subdir: app
-    sudo:
-      - chmod -R 777 /opt/android-sdk
-      - apt-get update
     gradle:
-      - firebasefree
+      - FDroid
     srclibs:
       - Material-Dialogs@3.3.0
-    rm:
-      - app/libs/bottomsheets-release.aar
-      - mjpeg/libs/bottomsheets-release.aar
     prebuild:
       - sed -i -e '/google.services/d' -e '/firebase.crashlytics/d' -e '/googleServices/d'
         -e '/firebaseCrashlytics/d' ../build.gradle.kts
@@ -1285,17 +1280,6 @@ Builds:
         -e '/firebaseImplementation/d' -e '/ad.pubId/,+3d' build.gradle.kts ../gradle/libs.versions.toml
       - sed -i -e '/google-/d' -e '/play-/d' -e '/firebase-/d' ../gradle/libs.versions.toml
       - sed -i -e '/:webrtc/d' ../settings.gradle.kts
-      - pushd $$Material-Dialogs$$
-      - sed -i -e '241d' bottomsheets/src/main/java/com/afollestad/materialdialogs/bottomsheets/BottomSheet.kt
-    build:
-      - pushd $$Material-Dialogs$$
-      - export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
-      - gradle bottomsheets:assembleRelease
-      - popd
-      - cp $$Material-Dialogs$$/bottomsheets/build/outputs/aar/bottomsheets-release.aar
-        libs/
-      - cp $$Material-Dialogs$$/bottomsheets/build/outputs/aar/bottomsheets-release.aar
-        ../mjpeg/libs/
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
