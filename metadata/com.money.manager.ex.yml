@@ -233,13 +233,11 @@ Builds:
     versionCode: 1037
     commit: 5733fd0db61e941214fb18d8589abce7a863c803
     subdir: app
-    sudo:
-      - echo "deb https://deb.debian.org/debian bullseye main" > /etc/apt/sources.list.d/bullseye.list
-      - apt-get update
-      - apt-get install -y -t bullseye openjdk-11-jdk-headless
-      - update-java-alternatives --set java-1.11.0-openjdk-amd64
     gradle:
       - yes
+    prebuild: for class in tree code comp file main model parser processing util jvm;
+      do sed -i -e "/jvmargs/s|$| --add-opens=jdk.compiler/com.sun.tools.javac.${class}=ALL-UNNAMED|"
+      ../gradle.properties; done
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^[0-9.]*$
