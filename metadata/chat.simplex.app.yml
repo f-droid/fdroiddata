@@ -1568,11 +1568,58 @@ Builds:
       - export USER=vagrant
       - ARCHES="aarch64" ./scripts/android/build-android.sh -gs
 
+  - versionName: 6.0.1
+    versionCode: 232
+    commit: 82c4d77c739b8f4283acfc9b4ba2b9ef9b92cf00
+    timeout: 30000
+    sudo:
+      - apt-get update
+      - apt-get install -y xz-utils zipalign zip
+      - mkdir -m 0755 /nix
+      - chown vagrant /nix
+      - chown -R vagrant /tmp
+    init:
+      - TAG=$(git tag --points-at HEAD | head -n1) && export TAG=${TAG%%-*}
+      - git checkout ${TAG}-armv7a
+    output: ./simplex-chat-armeabi-v7a.apk
+    rm:
+      - ./docs/themes/simplex-chat.sample.zip
+    prebuild:
+      - cp -r ./apps/multiplatform/gradle .
+      - sed -i -e '/maven.pkg.jetbrains.space/d' ./apps/multiplatform/{build,settings}.gradle.kts
+      - sed -i -e 's/android.version_code=.*/android.version_code=$$VERCODE$$/' ./apps/multiplatform/gradle.properties
+    build:
+      - gradle -v
+      - export USER=vagrant
+      - ARCHES="armv7a" ./scripts/android/build-android.sh -gs
+
+  - versionName: 6.0.1
+    versionCode: 233
+    commit: 82c4d77c739b8f4283acfc9b4ba2b9ef9b92cf00
+    timeout: 60000
+    sudo:
+      - apt-get update
+      - apt-get install -y xz-utils zipalign zip
+      - mkdir -m 0755 /nix
+      - chown vagrant /nix
+      - chown -R vagrant /tmp
+    output: ./simplex-chat-arm64-v8a.apk
+    rm:
+      - ./docs/themes/simplex-chat.sample.zip
+    prebuild:
+      - cp -r ./apps/multiplatform/gradle .
+      - sed -i -e '/maven.pkg.jetbrains.space/d' ./apps/multiplatform/{build,settings}.gradle.kts
+      - sed -i -e 's/android.version_code=.*/android.version_code=$$VERCODE$$/' ./apps/multiplatform/gradle.properties
+    build:
+      - gradle -v
+      - export USER=vagrant
+      - ARCHES="aarch64" ./scripts/android/build-android.sh -gs
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v[\d.]+-fdroid$
 VercodeOperation:
   - '%c'
   - '%c+1'
 UpdateCheckData: apps/multiplatform/gradle.properties|android\.version_code\s*=\s*(\d+)|apps/multiplatform/gradle.properties|android\.version_name\s*=\s*([\d.]+)
-CurrentVersion: '6.0'
-CurrentVersionCode: 231
+CurrentVersion: 6.0.1
+CurrentVersionCode: 233
