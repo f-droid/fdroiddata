@@ -513,8 +513,39 @@ Builds:
       - make fdroid BUILD_NO=$$VERCODE$$
     ndk: r20
 
+  - versionName: 0.11.3
+    versionCode: 761
+    commit: v0.11.3
+    sudo:
+      - apt-get update
+      - apt-get install -y make
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+      - test
+    prebuild:
+      - export flutterVersion=$(grep flutterSdkVersion .fvm/fvm_config.json | cut
+        -d "\"" -f 4)
+      - pushd $$flutter$$
+      - git checkout -f $flutterVersion
+      - popd
+      - sed -i -e '/bool skipIOS/s/false/true/' scripts/buildLocalizedStrings
+      - sdkmanager 'build-tools;31.0.0' 'build-tools;30.0.3'
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export PATH=$$flutter$$/bin:$$flutter$$/bin/cache/dart-sdk/bin/:$PATH
+      - make fdroid BUILD_NO=$$VERCODE$$
+    ndk: r20
+
 AutoUpdateMode: Version v%v
 UpdateCheckMode: HTTP
 UpdateCheckData: https://zerodogg.gitlab.io/org.zerodogg.migraineLog/latest.yml|versionCode:\s(\d+)|.|version:\s(.+)
-CurrentVersion: 0.11.2
-CurrentVersionCode: 756
+CurrentVersion: 0.11.3
+CurrentVersionCode: 761
