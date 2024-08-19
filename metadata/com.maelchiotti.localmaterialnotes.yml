@@ -1,0 +1,63 @@
+Categories:
+  - Writing
+License: AGPL-3.0-or-later
+AuthorName: Maël Chiotti
+AuthorEmail: contact@maelchiotti.dev
+AuthorWebSite: https://maelchiotti.dev/
+SourceCode: https://github.com/maelchiotti/LocalMaterialNotes
+IssueTracker: https://github.com/maelchiotti/LocalMaterialNotes/issues
+Translation: https://crowdin.com/project/localmaterialnotes
+Changelog: https://github.com/maelchiotti/LocalMaterialNotes/blob/HEAD/CHANGELOG.md
+
+AutoName: Material Notes
+
+RepoType: git
+Repo: https://github.com/maelchiotti/LocalMaterialNotes
+Binaries: https://github.com/maelchiotti/LocalMaterialNotes/releases/download/v%v/localmaterialnotes_v%v.apk
+
+Builds:
+  - versionName: 1.5.2
+    versionCode: 120
+    commit: 892d56d43d710cecff1c0b73591d6cea0e10a5ea
+    sudo:
+      - mkdir -p /home/runner/
+      - chown vagrant /home/runner/
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@stable
+    prebuild:
+      - export version=$(grep flutter\:\  pubspec.yaml | cut -d ":" -f2)
+      - pushd $$flutter$$
+      - git checkout -f $version
+      - popd
+      - mkdir -p /home/runner/work/LocalMaterialNotes/
+      - cd ..
+      - mv com.maelchiotti.localmaterialnotes /home/runner/work/LocalMaterialNotes/LocalMaterialNotes
+      - export HOME=/home/runner
+      - pushd $HOME/work/LocalMaterialNotes/LocalMaterialNotes/
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+      - popd
+      - mv $HOME/work/LocalMaterialNotes/LocalMaterialNotes com.maelchiotti.localmaterialnotes
+    scanignore:
+      - .pub-cache
+    build:
+      - cd ..
+      - mv com.maelchiotti.localmaterialnotes /home/runner/work/LocalMaterialNotes/LocalMaterialNotes
+      - export HOME=/home/runner
+      - pushd $HOME/work/LocalMaterialNotes/LocalMaterialNotes/
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release
+      - popd
+      - mv $HOME/work/LocalMaterialNotes/LocalMaterialNotes com.maelchiotti.localmaterialnotes
+
+AllowedAPKSigningKeys: 21ac3d89d9ab7a3483d9261ab7f8fdf688d3703abac11099ce09bf26094b4337
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+VercodeOperation:
+  - '%c * 10'
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 1.5.2
+CurrentVersionCode: 120
