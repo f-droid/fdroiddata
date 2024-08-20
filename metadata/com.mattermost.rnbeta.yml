@@ -10236,8 +10236,8 @@ Builds:
       - reactNativeArchitectures=x86_64
 
   - versionName: 2.19.0
-    versionCode: 54501
-    commit: cb6f22e5b79570cdc6c1158d850ef94e215c8166
+    versionCode: 54401
+    commit: 043d5291433127b7a5076463d01f2f9264e02b0c
     subdir: android/app
     sudo:
       - sysctl fs.inotify.max_user_watches=524288 || true
@@ -10246,11 +10246,11 @@ Builds:
       - npm -g install yarn npm@9
     init:
       - cd ../..
-      - sed -i -e '/react-native-in-app-review/d' package.json
+      - sed -i -e '/expo-store-review/d' package.json
       - sed -i -e "/fs.existsSync('dist')/,+2d" scripts/generate-assets.js
       - mkdir -p dist/assets
       - sed -i -e '/mmjstool":\ {/,/^    },/d' package-lock.json
-      - npm install --ignore-scripts
+      - npm install --ignore-scripts --build-from-source
     gradle:
       - yes
     output: build/outputs/apk/release/app-armeabi-v7a-release-unsigned.apk
@@ -10260,16 +10260,18 @@ Builds:
     prebuild:
       - sed -i -e 's/Xmx2048m/Xmx8092m/' ../gradle.properties
       - sed -i -e 's/versionCode .*/versionCode $$VERCODE$$/' -e 's/universalApk .*/universalApk
-        false/' -e '/applicationVariants/,+12d' build.gradle
-      - sed -i -e '/gms/d' ../build.gradle build.gradle ../buildscript-gradle.lockfile
-      - sed -i -e 's|$rootDir.*Detox-android|https://jitpack.io|' ../build.gradle
-      - sed -i -e '/bundleCommand/a nodeExecutableAndArgs = ["node","--max-old-space-size=12000"]'
-        -e '/firebase/d' -e '/detox/d' build.gradle
+        false/' -e '/applicationVariants/,+12d' -e '/bundleCommand/a nodeExecutableAndArgs
+        = ["node","--max-old-space-size=12000"]' -e '/firebase/d' -e '/detox/d' build.gradle
+      - sed -i -e '/gms/d' -e 's|$rootDir.*Detox-android|https://jitpack.io|' ../build.gradle
+        build.gradle ../buildscript-gradle.lockfile
       - cd ../..
       - npx patch-package --error-on-fail
-      - sed -i -e '/InAppReview/d' app/screens/review_app/index.tsx
-      - sed -i -e 's/InAppReview.isAvailable()/false/' -e '/InAppReview/d' app/utils/reviews.ts
-      - sed -E -i '/installreferrer/,+11d' node_modules/react-native-device-info/android/build.gradle
+      - sed -i -e '/requestReview/d' app/screens/review_app/index.tsx
+      - sed -i -e 's/await isAvailableAsync()/false/' -e '/isAvailableAsync/d' app/utils/reviews.ts
+      - sed -i -e '/extension-ima/d' node_modules/react-native-video/android/build.gradle
+      - sed -i -e '/installreferrer/d' node_modules/expo-application/android/build.gradle
+      - sed -i -e '/com.android.installreferrer.api/d' -e '/StringBuilder()/,/^      })/d'
+        -e '/getInstallReferrerAsync/apromise.resolve("")' node_modules/expo-application/android/src/main/java/expo/modules/application/ApplicationModule.kt
       - sed -i -e 's|maven.fabric.io/public|jitpack.io|' node_modules/react-native-math-view/android/build.gradle
       - sed -i -e 's|def command =.*sdkmanager|def command = "sdkmanager|' node_modules/react-native-navigation/lib/android/app/build.gradle
       - cp node_modules/@mattermost/compass-icons/font/compass-icons.ttf assets/fonts/
@@ -10282,8 +10284,13 @@ Builds:
       - sed -i -e '/FirebaseMessaging.getInstance/,/});/d' -e '/FirebaseMessaging/d'
         src/main/java/com/wix/reactnativenotifications/fcm/FcmToken.java
     scanignore:
+      - libraries/@mattermost/hardware-keyboard/android/build.gradle
+      - libraries/@mattermost/rnshare/android/build.gradle
+      - libraries/@mattermost/rnutils/android/build.gradle
       - node_modules/detox/android/build.gradle
       - node_modules/detox/android/detox/publishing.gradle
+      - node_modules/expo-modules-autolinking/scripts/android/autolinking_implementation.gradle
+      - node_modules/expo-modules-core/android/ExpoModulesCorePlugin.gradle
       - node_modules/jsc-android
       - node_modules/@mattermost/react-native-emm/android/build.gradle
       - node_modules/@mattermost/react-native-network-client/android/build.gradle
@@ -10292,12 +10299,8 @@ Builds:
       - node_modules/@react-native-camera-roll/camera-roll/android/build.gradle
       - node_modules/@react-native-community/netinfo/android/build.gradle
       - node_modules/@react-native-cookies/cookies/android/build.gradle
-      - node_modules/react-native-create-thumbnail/android/build.gradle
-      - node_modules/react-native-device-info/android/build.gradle
-      - node_modules/react-native-fast-image/android/build.gradle
       - node_modules/react-native-haptic-feedback/android/build.gradle
       - node_modules/react-native-image-picker/android/build.gradle
-      - node_modules/react-native-linear-gradient/android/build.gradle
       - node_modules/react-native-localize/android/build.gradle
       - node_modules/react-native-math-view/android/build.gradle
       - node_modules/react-native-navigation/lib/android/build.gradle
@@ -10311,7 +10314,7 @@ Builds:
       - node_modules/react-native-share/android/build.gradle
       - node_modules/react-native-svg/android/build.gradle
       - node_modules/react-native-vector-icons/android/build.gradle
-      - node_modules/react-native-webview/android/build.gradle
+      - node_modules/react-native-video/android/build.gradle
       - node_modules/@stream-io/flat-list-mvcp/android/build.gradle
     scandelete:
       - node_modules
@@ -10325,8 +10328,8 @@ Builds:
       - reactNativeArchitectures=armeabi-v7a
 
   - versionName: 2.19.0
-    versionCode: 54502
-    commit: cb6f22e5b79570cdc6c1158d850ef94e215c8166
+    versionCode: 54402
+    commit: 043d5291433127b7a5076463d01f2f9264e02b0c
     subdir: android/app
     sudo:
       - sysctl fs.inotify.max_user_watches=524288 || true
@@ -10335,11 +10338,11 @@ Builds:
       - npm -g install yarn npm@9
     init:
       - cd ../..
-      - sed -i -e '/react-native-in-app-review/d' package.json
+      - sed -i -e '/expo-store-review/d' package.json
       - sed -i -e "/fs.existsSync('dist')/,+2d" scripts/generate-assets.js
       - mkdir -p dist/assets
       - sed -i -e '/mmjstool":\ {/,/^    },/d' package-lock.json
-      - npm install --ignore-scripts
+      - npm install --ignore-scripts --build-from-source
     gradle:
       - yes
     output: build/outputs/apk/release/app-x86-release-unsigned.apk
@@ -10349,16 +10352,18 @@ Builds:
     prebuild:
       - sed -i -e 's/Xmx2048m/Xmx8092m/' ../gradle.properties
       - sed -i -e 's/versionCode .*/versionCode $$VERCODE$$/' -e 's/universalApk .*/universalApk
-        false/' -e '/applicationVariants/,+12d' build.gradle
-      - sed -i -e '/gms/d' ../build.gradle build.gradle ../buildscript-gradle.lockfile
-      - sed -i -e 's|$rootDir.*Detox-android|https://jitpack.io|' ../build.gradle
-      - sed -i -e '/bundleCommand/a nodeExecutableAndArgs = ["node","--max-old-space-size=12000"]'
-        -e '/firebase/d' -e '/detox/d' build.gradle
+        false/' -e '/applicationVariants/,+12d' -e '/bundleCommand/a nodeExecutableAndArgs
+        = ["node","--max-old-space-size=12000"]' -e '/firebase/d' -e '/detox/d' build.gradle
+      - sed -i -e '/gms/d' -e 's|$rootDir.*Detox-android|https://jitpack.io|' ../build.gradle
+        build.gradle ../buildscript-gradle.lockfile
       - cd ../..
       - npx patch-package --error-on-fail
-      - sed -i -e '/InAppReview/d' app/screens/review_app/index.tsx
-      - sed -i -e 's/InAppReview.isAvailable()/false/' -e '/InAppReview/d' app/utils/reviews.ts
-      - sed -E -i '/installreferrer/,+11d' node_modules/react-native-device-info/android/build.gradle
+      - sed -i -e '/requestReview/d' app/screens/review_app/index.tsx
+      - sed -i -e 's/await isAvailableAsync()/false/' -e '/isAvailableAsync/d' app/utils/reviews.ts
+      - sed -i -e '/extension-ima/d' node_modules/react-native-video/android/build.gradle
+      - sed -i -e '/installreferrer/d' node_modules/expo-application/android/build.gradle
+      - sed -i -e '/com.android.installreferrer.api/d' -e '/StringBuilder()/,/^      })/d'
+        -e '/getInstallReferrerAsync/apromise.resolve("")' node_modules/expo-application/android/src/main/java/expo/modules/application/ApplicationModule.kt
       - sed -i -e 's|maven.fabric.io/public|jitpack.io|' node_modules/react-native-math-view/android/build.gradle
       - sed -i -e 's|def command =.*sdkmanager|def command = "sdkmanager|' node_modules/react-native-navigation/lib/android/app/build.gradle
       - cp node_modules/@mattermost/compass-icons/font/compass-icons.ttf assets/fonts/
@@ -10371,8 +10376,13 @@ Builds:
       - sed -i -e '/FirebaseMessaging.getInstance/,/});/d' -e '/FirebaseMessaging/d'
         src/main/java/com/wix/reactnativenotifications/fcm/FcmToken.java
     scanignore:
+      - libraries/@mattermost/hardware-keyboard/android/build.gradle
+      - libraries/@mattermost/rnshare/android/build.gradle
+      - libraries/@mattermost/rnutils/android/build.gradle
       - node_modules/detox/android/build.gradle
       - node_modules/detox/android/detox/publishing.gradle
+      - node_modules/expo-modules-autolinking/scripts/android/autolinking_implementation.gradle
+      - node_modules/expo-modules-core/android/ExpoModulesCorePlugin.gradle
       - node_modules/jsc-android
       - node_modules/@mattermost/react-native-emm/android/build.gradle
       - node_modules/@mattermost/react-native-network-client/android/build.gradle
@@ -10381,12 +10391,8 @@ Builds:
       - node_modules/@react-native-camera-roll/camera-roll/android/build.gradle
       - node_modules/@react-native-community/netinfo/android/build.gradle
       - node_modules/@react-native-cookies/cookies/android/build.gradle
-      - node_modules/react-native-create-thumbnail/android/build.gradle
-      - node_modules/react-native-device-info/android/build.gradle
-      - node_modules/react-native-fast-image/android/build.gradle
       - node_modules/react-native-haptic-feedback/android/build.gradle
       - node_modules/react-native-image-picker/android/build.gradle
-      - node_modules/react-native-linear-gradient/android/build.gradle
       - node_modules/react-native-localize/android/build.gradle
       - node_modules/react-native-math-view/android/build.gradle
       - node_modules/react-native-navigation/lib/android/build.gradle
@@ -10400,7 +10406,7 @@ Builds:
       - node_modules/react-native-share/android/build.gradle
       - node_modules/react-native-svg/android/build.gradle
       - node_modules/react-native-vector-icons/android/build.gradle
-      - node_modules/react-native-webview/android/build.gradle
+      - node_modules/react-native-video/android/build.gradle
       - node_modules/@stream-io/flat-list-mvcp/android/build.gradle
     scandelete:
       - node_modules
@@ -10414,8 +10420,8 @@ Builds:
       - reactNativeArchitectures=x86
 
   - versionName: 2.19.0
-    versionCode: 54503
-    commit: cb6f22e5b79570cdc6c1158d850ef94e215c8166
+    versionCode: 54403
+    commit: 043d5291433127b7a5076463d01f2f9264e02b0c
     subdir: android/app
     sudo:
       - sysctl fs.inotify.max_user_watches=524288 || true
@@ -10424,11 +10430,11 @@ Builds:
       - npm -g install yarn npm@9
     init:
       - cd ../..
-      - sed -i -e '/react-native-in-app-review/d' package.json
+      - sed -i -e '/expo-store-review/d' package.json
       - sed -i -e "/fs.existsSync('dist')/,+2d" scripts/generate-assets.js
       - mkdir -p dist/assets
       - sed -i -e '/mmjstool":\ {/,/^    },/d' package-lock.json
-      - npm install --ignore-scripts
+      - npm install --ignore-scripts --build-from-source
     gradle:
       - yes
     output: build/outputs/apk/release/app-arm64-v8a-release-unsigned.apk
@@ -10438,16 +10444,18 @@ Builds:
     prebuild:
       - sed -i -e 's/Xmx2048m/Xmx8092m/' ../gradle.properties
       - sed -i -e 's/versionCode .*/versionCode $$VERCODE$$/' -e 's/universalApk .*/universalApk
-        false/' -e '/applicationVariants/,+12d' build.gradle
-      - sed -i -e '/gms/d' ../build.gradle build.gradle ../buildscript-gradle.lockfile
-      - sed -i -e 's|$rootDir.*Detox-android|https://jitpack.io|' ../build.gradle
-      - sed -i -e '/bundleCommand/a nodeExecutableAndArgs = ["node","--max-old-space-size=12000"]'
-        -e '/firebase/d' -e '/detox/d' build.gradle
+        false/' -e '/applicationVariants/,+12d' -e '/bundleCommand/a nodeExecutableAndArgs
+        = ["node","--max-old-space-size=12000"]' -e '/firebase/d' -e '/detox/d' build.gradle
+      - sed -i -e '/gms/d' -e 's|$rootDir.*Detox-android|https://jitpack.io|' ../build.gradle
+        build.gradle ../buildscript-gradle.lockfile
       - cd ../..
       - npx patch-package --error-on-fail
-      - sed -i -e '/InAppReview/d' app/screens/review_app/index.tsx
-      - sed -i -e 's/InAppReview.isAvailable()/false/' -e '/InAppReview/d' app/utils/reviews.ts
-      - sed -E -i '/installreferrer/,+11d' node_modules/react-native-device-info/android/build.gradle
+      - sed -i -e '/requestReview/d' app/screens/review_app/index.tsx
+      - sed -i -e 's/await isAvailableAsync()/false/' -e '/isAvailableAsync/d' app/utils/reviews.ts
+      - sed -i -e '/extension-ima/d' node_modules/react-native-video/android/build.gradle
+      - sed -i -e '/installreferrer/d' node_modules/expo-application/android/build.gradle
+      - sed -i -e '/com.android.installreferrer.api/d' -e '/StringBuilder()/,/^      })/d'
+        -e '/getInstallReferrerAsync/apromise.resolve("")' node_modules/expo-application/android/src/main/java/expo/modules/application/ApplicationModule.kt
       - sed -i -e 's|maven.fabric.io/public|jitpack.io|' node_modules/react-native-math-view/android/build.gradle
       - sed -i -e 's|def command =.*sdkmanager|def command = "sdkmanager|' node_modules/react-native-navigation/lib/android/app/build.gradle
       - cp node_modules/@mattermost/compass-icons/font/compass-icons.ttf assets/fonts/
@@ -10460,8 +10468,13 @@ Builds:
       - sed -i -e '/FirebaseMessaging.getInstance/,/});/d' -e '/FirebaseMessaging/d'
         src/main/java/com/wix/reactnativenotifications/fcm/FcmToken.java
     scanignore:
+      - libraries/@mattermost/hardware-keyboard/android/build.gradle
+      - libraries/@mattermost/rnshare/android/build.gradle
+      - libraries/@mattermost/rnutils/android/build.gradle
       - node_modules/detox/android/build.gradle
       - node_modules/detox/android/detox/publishing.gradle
+      - node_modules/expo-modules-autolinking/scripts/android/autolinking_implementation.gradle
+      - node_modules/expo-modules-core/android/ExpoModulesCorePlugin.gradle
       - node_modules/jsc-android
       - node_modules/@mattermost/react-native-emm/android/build.gradle
       - node_modules/@mattermost/react-native-network-client/android/build.gradle
@@ -10470,12 +10483,8 @@ Builds:
       - node_modules/@react-native-camera-roll/camera-roll/android/build.gradle
       - node_modules/@react-native-community/netinfo/android/build.gradle
       - node_modules/@react-native-cookies/cookies/android/build.gradle
-      - node_modules/react-native-create-thumbnail/android/build.gradle
-      - node_modules/react-native-device-info/android/build.gradle
-      - node_modules/react-native-fast-image/android/build.gradle
       - node_modules/react-native-haptic-feedback/android/build.gradle
       - node_modules/react-native-image-picker/android/build.gradle
-      - node_modules/react-native-linear-gradient/android/build.gradle
       - node_modules/react-native-localize/android/build.gradle
       - node_modules/react-native-math-view/android/build.gradle
       - node_modules/react-native-navigation/lib/android/build.gradle
@@ -10489,7 +10498,7 @@ Builds:
       - node_modules/react-native-share/android/build.gradle
       - node_modules/react-native-svg/android/build.gradle
       - node_modules/react-native-vector-icons/android/build.gradle
-      - node_modules/react-native-webview/android/build.gradle
+      - node_modules/react-native-video/android/build.gradle
       - node_modules/@stream-io/flat-list-mvcp/android/build.gradle
     scandelete:
       - node_modules
@@ -10503,8 +10512,8 @@ Builds:
       - reactNativeArchitectures=arm64-v8a
 
   - versionName: 2.19.0
-    versionCode: 54504
-    commit: cb6f22e5b79570cdc6c1158d850ef94e215c8166
+    versionCode: 54404
+    commit: 043d5291433127b7a5076463d01f2f9264e02b0c
     subdir: android/app
     sudo:
       - sysctl fs.inotify.max_user_watches=524288 || true
@@ -10513,11 +10522,11 @@ Builds:
       - npm -g install yarn npm@9
     init:
       - cd ../..
-      - sed -i -e '/react-native-in-app-review/d' package.json
+      - sed -i -e '/expo-store-review/d' package.json
       - sed -i -e "/fs.existsSync('dist')/,+2d" scripts/generate-assets.js
       - mkdir -p dist/assets
       - sed -i -e '/mmjstool":\ {/,/^    },/d' package-lock.json
-      - npm install --ignore-scripts
+      - npm install --ignore-scripts --build-from-source
     gradle:
       - yes
     output: build/outputs/apk/release/app-x86_64-release-unsigned.apk
@@ -10527,16 +10536,18 @@ Builds:
     prebuild:
       - sed -i -e 's/Xmx2048m/Xmx8092m/' ../gradle.properties
       - sed -i -e 's/versionCode .*/versionCode $$VERCODE$$/' -e 's/universalApk .*/universalApk
-        false/' -e '/applicationVariants/,+12d' build.gradle
-      - sed -i -e '/gms/d' ../build.gradle build.gradle ../buildscript-gradle.lockfile
-      - sed -i -e 's|$rootDir.*Detox-android|https://jitpack.io|' ../build.gradle
-      - sed -i -e '/bundleCommand/a nodeExecutableAndArgs = ["node","--max-old-space-size=12000"]'
-        -e '/firebase/d' -e '/detox/d' build.gradle
+        false/' -e '/applicationVariants/,+12d' -e '/bundleCommand/a nodeExecutableAndArgs
+        = ["node","--max-old-space-size=12000"]' -e '/firebase/d' -e '/detox/d' build.gradle
+      - sed -i -e '/gms/d' -e 's|$rootDir.*Detox-android|https://jitpack.io|' ../build.gradle
+        build.gradle ../buildscript-gradle.lockfile
       - cd ../..
       - npx patch-package --error-on-fail
-      - sed -i -e '/InAppReview/d' app/screens/review_app/index.tsx
-      - sed -i -e 's/InAppReview.isAvailable()/false/' -e '/InAppReview/d' app/utils/reviews.ts
-      - sed -E -i '/installreferrer/,+11d' node_modules/react-native-device-info/android/build.gradle
+      - sed -i -e '/requestReview/d' app/screens/review_app/index.tsx
+      - sed -i -e 's/await isAvailableAsync()/false/' -e '/isAvailableAsync/d' app/utils/reviews.ts
+      - sed -i -e '/extension-ima/d' node_modules/react-native-video/android/build.gradle
+      - sed -i -e '/installreferrer/d' node_modules/expo-application/android/build.gradle
+      - sed -i -e '/com.android.installreferrer.api/d' -e '/StringBuilder()/,/^      })/d'
+        -e '/getInstallReferrerAsync/apromise.resolve("")' node_modules/expo-application/android/src/main/java/expo/modules/application/ApplicationModule.kt
       - sed -i -e 's|maven.fabric.io/public|jitpack.io|' node_modules/react-native-math-view/android/build.gradle
       - sed -i -e 's|def command =.*sdkmanager|def command = "sdkmanager|' node_modules/react-native-navigation/lib/android/app/build.gradle
       - cp node_modules/@mattermost/compass-icons/font/compass-icons.ttf assets/fonts/
@@ -10549,8 +10560,13 @@ Builds:
       - sed -i -e '/FirebaseMessaging.getInstance/,/});/d' -e '/FirebaseMessaging/d'
         src/main/java/com/wix/reactnativenotifications/fcm/FcmToken.java
     scanignore:
+      - libraries/@mattermost/hardware-keyboard/android/build.gradle
+      - libraries/@mattermost/rnshare/android/build.gradle
+      - libraries/@mattermost/rnutils/android/build.gradle
       - node_modules/detox/android/build.gradle
       - node_modules/detox/android/detox/publishing.gradle
+      - node_modules/expo-modules-autolinking/scripts/android/autolinking_implementation.gradle
+      - node_modules/expo-modules-core/android/ExpoModulesCorePlugin.gradle
       - node_modules/jsc-android
       - node_modules/@mattermost/react-native-emm/android/build.gradle
       - node_modules/@mattermost/react-native-network-client/android/build.gradle
@@ -10559,12 +10575,8 @@ Builds:
       - node_modules/@react-native-camera-roll/camera-roll/android/build.gradle
       - node_modules/@react-native-community/netinfo/android/build.gradle
       - node_modules/@react-native-cookies/cookies/android/build.gradle
-      - node_modules/react-native-create-thumbnail/android/build.gradle
-      - node_modules/react-native-device-info/android/build.gradle
-      - node_modules/react-native-fast-image/android/build.gradle
       - node_modules/react-native-haptic-feedback/android/build.gradle
       - node_modules/react-native-image-picker/android/build.gradle
-      - node_modules/react-native-linear-gradient/android/build.gradle
       - node_modules/react-native-localize/android/build.gradle
       - node_modules/react-native-math-view/android/build.gradle
       - node_modules/react-native-navigation/lib/android/build.gradle
@@ -10578,7 +10590,7 @@ Builds:
       - node_modules/react-native-share/android/build.gradle
       - node_modules/react-native-svg/android/build.gradle
       - node_modules/react-native-vector-icons/android/build.gradle
-      - node_modules/react-native-webview/android/build.gradle
+      - node_modules/react-native-video/android/build.gradle
       - node_modules/@stream-io/flat-list-mvcp/android/build.gradle
     scandelete:
       - node_modules
@@ -10591,6 +10603,9 @@ Builds:
       - separateApk=true
       - reactNativeArchitectures=x86_64
 
+MaintainerNotes: scanner might detect 'com/google/ads/interactivemedia/v3/api/AdEvent'
+  stubs from react-native-video
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 VercodeOperation:
@@ -10599,4 +10614,4 @@ VercodeOperation:
   - 100 * %c + 3
   - 100 * %c + 4
 CurrentVersion: 2.19.0
-CurrentVersionCode: 54504
+CurrentVersionCode: 54404
