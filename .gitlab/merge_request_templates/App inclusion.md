@@ -6,6 +6,8 @@
 
 **After all pipelines pass you can trigger the issue bot manually but do not trigger it too much which bloats the merge request.**
 
+**F-Droid CI runners are under Gitlab's FOSS program, so there's no need for you to pay for any CI time. If Gitlab starts asking for phone numbers or credit cards don't submit anything, just leave a note in the MR so we know we need to trigger the CI.**
+
 **Please remove above lines!**
 
 
