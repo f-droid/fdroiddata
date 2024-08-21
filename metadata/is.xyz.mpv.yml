@@ -796,7 +796,66 @@ Builds:
       - ./buildall.sh
     ndk: r26d
 
+  - versionName: 2024-08-20-release
+    versionCode: 38
+    commit: 26f9064fd088bff6ee7dca0a2c0b391b5dea4001
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y make automake pkg-config libtool nasm python3-jsonschema
+        meson python3-jinja2
+    gradle:
+      - default
+    srclibs:
+      - mbedtls@v3.5.2
+      - dav1d@5ef6b241f05a2b9058b58136da4b25842aefba96
+      - FFmpeg@507c2a57746d503cd97e1dd520e563a1f1b85fee
+      - freetype2@VER-2-13-2
+      - fribidi@v1.0.15
+      - harfbuzz@9.0.0
+      - libunibreak@libunibreak_6_1
+      - libass@5c00ca266dd49dd7cf93a79f09a661ab1ff66439
+      - libplacebo@82bf46ae8b4cacd2523f994da292e4d12312c026
+      - mpv@f44c29b223d7f0187ccf938eb1651671c8e92cf3
+    prebuild:
+      - sed -i -e '/enable true/d' -e '/universalBase/s/8000/0/' build.gradle
+      - cd ../buildscripts/
+      - mkdir -p sdk
+      - ln -s $$NDK$$ sdk/android-ndk-r27
+      - mkdir -p deps
+      - pushd deps/
+      - cp -r $$mbedtls$$ mbedtls
+      - cp -r $$dav1d$$ dav1d
+      - cp -r $$FFmpeg$$ ffmpeg
+      - cp -r $$freetype2$$ freetype2
+      - cp -r $$fribidi$$ fribidi
+      - cp -r $$harfbuzz$$ harfbuzz
+      - cp -r $$libunibreak$$ unibreak
+      - cp -r $$libass$$ libass
+      - cp -r $$libplacebo$$ libplacebo
+      - cp -r $$mpv$$ mpv
+      - mkdir lua
+      - curl -Lo lua.tar.gz https://www.lua.org/ftp/lua-5.2.4.tar.gz
+      - echo "b9e2e4aad6789b3b63a056d442f7b39f0ecfca3ae0f1fc0ae4e9614401b69f4b lua.tar.gz"
+        | sha256sum -c -
+      - tar -xz --strip-components=1 -C lua -f lua.tar.gz
+      - cd unibreak
+      - ./bootstrap
+      - popd
+      - sed -i -e '/gradlew/d' scripts/mpv-android.sh
+      - sed -i -e '/"$target" == "mpv-android"/,/ls -lh/d' buildall.sh
+    scandelete:
+      - buildscripts/deps/mbedtls/
+      - buildscripts/deps/lua.tar.gz
+      - buildscripts/deps/libplacebo/3rdparty/jinja/tests/res/package.zip
+    build:
+      - cd ../buildscripts/
+      - ./buildall.sh --arch arm64 mpv
+      - ./buildall.sh --arch x86_64 mpv
+      - ./buildall.sh
+    ndk: r27
+
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: 2024-06-05-release
-CurrentVersionCode: 37
+CurrentVersion: 2024-08-20-release
+CurrentVersionCode: 38
