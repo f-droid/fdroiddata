@@ -105,7 +105,29 @@ Builds:
     scandelete:
       - node_modules
 
+  - versionName: 3.1.7
+    versionCode: 30107
+    commit: 2862df245d8a90acc8a05ed7e473a86a6231a12f
+    subdir: android/app
+    sudo:
+      - sysctl fs.inotify.max_user_watches=524288 || true
+      - apt-get update
+      - apt-get install -y make npm
+    gradle:
+      - fdroid
+    rm:
+      - android/app/build_google.gradle
+    prebuild:
+      - sed -i -e '/gms/d' ../build.gradle
+      - sed -i -e '/geolocation/d' ../../package.json
+      - cd ../..
+      - npm install --build-from-source
+      - npm run build
+      - npx cap sync
+    scandelete:
+      - node_modules
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 3.1.6
-CurrentVersionCode: 30106
+CurrentVersion: 3.1.7
+CurrentVersionCode: 30107
