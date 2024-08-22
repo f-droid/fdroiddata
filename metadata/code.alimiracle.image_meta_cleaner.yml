@@ -1,0 +1,56 @@
+Categories:
+  - Multimedia
+License: GPL-3.0-only
+SourceCode: https://notabug.org/alimiracle/image_meta_cleaner
+IssueTracker: https://notabug.org/alimiracle/image_meta_cleaner/issues
+
+AutoName: Image Meta Cleaner
+
+RepoType: git
+Repo: https://codeberg.org/alimiracle/image_meta_cleaner.git
+Binaries: https://codeberg.org/alimiracle/image_meta_cleaner/releases/download/%v/app-release.apk
+
+Builds:
+  - versionName: 1.1.0
+    versionCode: 1
+    commit: 9466c9176def74e3480b34e1b4893c28ea8ded91
+    sudo:
+      - mkdir -p /home/ali
+      - chown vagrant /home/ali
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@stable
+    prebuild:
+      - export version=$(grep Flutter flutter_version | cut -d " " -f2)
+      - pushd $$flutter$$
+      - git checkout -f $version
+      - popd
+      - export repo=/home/ali
+      - mkdir -p $repo
+      - cd ..
+      - mv code.alimiracle.image_meta_cleaner $repo/image_meta_cleaner
+      - pushd $repo/image_meta_cleaner
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter packages pub get
+      - popd
+      - mv $repo/image_meta_cleaner code.alimiracle.image_meta_cleaner
+    scandelete:
+      - .pub-cache
+    build:
+      - export repo=/home/ali
+      - cd ..
+      - mv code.alimiracle.image_meta_cleaner $repo/image_meta_cleaner
+      - pushd $repo/image_meta_cleaner
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk
+      - popd
+      - mv $repo/image_meta_cleaner code.alimiracle.image_meta_cleaner
+
+AllowedAPKSigningKeys: 02226fdacb7cbfba69e9f3f66f3448e072dd96be3ae75c78dde3bb58eaf20929
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 1.1.0
+CurrentVersionCode: 1
