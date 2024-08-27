@@ -249,8 +249,30 @@ Builds:
       - $$flutter$$/bin/flutter packages pub run build_runner build --delete-conflicting-outputs
       - $$flutter$$/bin/flutter build apk --release --no-tree-shake-icons
 
+  - versionName: 1.7.3
+    versionCode: 10703
+    commit: d6a0cec655008b086810e61ae84373c106773101
+    submodules: true
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@stable
+    prebuild:
+      - export version="$(sed -E -n -e 's/^.*flutter:\ ([0-9.]+)/\1/p' pubspec.yaml)"
+      - pushd $$flutter$$
+      - git checkout -f $version
+      - popd
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter packages pub get
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter packages pub run build_runner build --delete-conflicting-outputs
+      - $$flutter$$/bin/flutter build apk --release --no-tree-shake-icons
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 1.7.2
-CurrentVersionCode: 10702
+CurrentVersion: 1.7.3
+CurrentVersionCode: 10703
