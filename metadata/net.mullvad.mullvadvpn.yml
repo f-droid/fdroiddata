@@ -634,6 +634,32 @@ Builds:
       - ../../build-apk.sh --fdroid
     ndk: r25c
 
+  - versionName: 2024.4-beta2
+    versionCode: 24040002
+    commit: 282351fe65d1005554b3d29b1b10c0fd01b745a6
+    timeout: 10800
+    subdir: android/app
+    sudo:
+      - apt-get update
+      - apt-get install -y build-essential protobuf-compiler libprotobuf-dev
+    init: NDK_PATH="$$NDK$$" ../fdroid-build/init.sh
+    output: build/outputs/apk/ossProd/fdroid/app-oss-prod-fdroid-unsigned.apk
+    rm:
+      - gui
+      - graphics
+      - ios
+      - windows
+      - building/sigstore
+    prebuild:
+      - git -C ../.. submodule update --init --recursive --depth=1 wireguard-go-rs
+      - sed -i -e 's|Repositories.GradlePlugins|"https://plugins.gradle.org/m2/"|'
+        ../build.gradle.kts
+      - sed -i '/\"ios\//d' ../../Cargo.toml
+    build:
+      - NDK_PATH="$$NDK$$" source ../fdroid-build/env.sh
+      - ../../build-apk.sh --fdroid
+    ndk: r25c
+
 AutoUpdateMode: None
 UpdateCheckMode: None
 CurrentVersion: '2024.3'
