@@ -37,8 +37,28 @@ Builds:
       - export PUB_CACHE=$(pwd)/.pub-cache
       - $$flutter$$/bin/flutter build apk --release
 
+  - versionName: 2024.8.1
+    versionCode: 93
+    commit: 5fbaa36096454f247f8c5308fcae9562f7e8c447
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@3.16.9
+    prebuild:
+      - export FLUTTER_VERSION=$(sed -n -E "s/flutter:\s([0-9.]+)/\1/p" versions)
+      - pushd $$flutter$$
+      - git checkout -f $FLUTTER_VERSION
+      - popd
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 2024.2.1
-CurrentVersionCode: 88
+CurrentVersion: 2024.8.1
+CurrentVersionCode: 93
