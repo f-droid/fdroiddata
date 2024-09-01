@@ -1952,6 +1952,30 @@ Builds:
     gradle:
       - prod
 
+  - versionName: '10.16'
+    versionCode: 101600
+    commit: v10.16
+    subdir: wallet
+    sudo:
+      - ln -fs /usr/share/zoneinfo/CET /etc/localtime
+      - dpkg-reconfigure -f noninteractive tzdata
+      - echo "deb https://deb.debian.org/debian bullseye main" > /etc/apt/sources.list.d/bullseye.list
+      - apt-get update
+      - apt-get install -y gradle disorderfs
+      - apt-get install -y -t bullseye openjdk-11-jdk-headless
+      - update-java-alternatives --set java-1.11.0-openjdk-amd64
+    init:
+      - rm /home/vagrant/fdroidserver/gradlew-fdroid
+      - ln -s /usr/bin/gradle /home/vagrant/fdroidserver/gradlew-fdroid
+      - cd ../..
+      - mv de.schildbach.wallet de.schildbach.wallet_underlying
+      - mkdir de.schildbach.wallet
+      - disorderfs --sort-dirents=yes --reverse-dirents=no de.schildbach.wallet_underlying
+        de.schildbach.wallet
+      - cd de.schildbach.wallet/wallet
+    gradle:
+      - prod
+
 MaintainerNotes: |-
   When adding new versions, the build recipe must follow the reference build at
   https://github.com/bitcoin-wallet/bitcoin-wallet/blob/main/build.Containerfile
@@ -1959,5 +1983,5 @@ MaintainerNotes: |-
 
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: '10.15'
-CurrentVersionCode: 101500
+CurrentVersion: '10.16'
+CurrentVersionCode: 101600
