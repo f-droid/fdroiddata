@@ -27,7 +27,24 @@ Builds:
       - mvn -f doorsofdoom/pom.xml clean install
       - mvn -f android-mvn/pom.xml clean install android:apk
 
-AutoUpdateMode: None
-UpdateCheckMode: None
-CurrentVersion: 0.0.4
-CurrentVersionCode: 1
+  - versionName: 0.0.5
+    versionCode: 2
+    commit: v0.0.5
+    sudo:
+      - echo "deb http://deb.debian.org/debian sid main" > /etc/apt/sources.list.d/sid.list
+      - apt-get update
+      - apt-get install -y maven
+      - apt-get install -y -t sid openjdk-8-jdk-headless
+      - update-java-alternatives --set java-1.8.0-openjdk-amd64
+    output: android-mvn/target/doorsofdoom.apk
+    prebuild: sdkmanager "build-tools;33.0.2" "platforms;android-26"
+    build:
+      - mvn -f doorsofdoom/pom.xml clean install
+      - mvn -f android-mvn/pom.xml -Dcartridge.artifactId=doorsofdoom -Dcartridge.groupId=com.github.msx80.omicron
+        -Dcartridge.version=$$VERSION$$ clean install android:apk
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: doorsofdoom/src/main/resources/omicron.properties|omicron.versionCode=(\d+)||
+CurrentVersion: 0.0.5
+CurrentVersionCode: 2
