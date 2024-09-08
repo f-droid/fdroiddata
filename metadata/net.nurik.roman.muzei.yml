@@ -403,6 +403,38 @@ Builds:
         />' src/main/AndroidManifest.xml
       - sed -i -e '/signing {/,/^}/d' -e '/^publishing {/,/^}/d' ../muzei-api/build.gradle
 
+  - versionName: 3.6.2
+    versionCode: 360005
+    commit: 82f4a194fe34572e4a3fa4670d64560f15d99bb3
+    subdir: main
+    gradle:
+      - yes
+    forceversion: true
+    rm:
+      - wearable
+      - example-watchface
+      - legacy-standalone
+      - example-unsplash
+      - main/google-services.json
+      - android-client-common/src/main/java/com/google/android/apps/muzei/wearable
+      - main/src/main/java/com/google/android/apps/muzei/wearable
+    prebuild:
+      - sed -i -e '/gms/d' -e '/firebase/d' -e '/libs.coroutines.playservices/d' -e
+        '/libs.wearable.playservices/d' ../build.gradle ../*/build.gradle
+      - sed -i -e '/signingConfigs.release/d' -e '/FirebasePerformance/,/}$/d' -e
+        '/kotlinx-coroutines-play-services/d' build.gradle
+      - sed -i -e '/props/d' ../muzei-api/build.gradle
+      - pushd src/main/java/com/google/android/apps/muzei
+      - sed -i -e '/com.google.firebase/d' -e '/Firebase.analytics.logEvent.*)$/d'
+        -e '/Firebase.analytics.logEvent.*{$/,/}$/d' -e '/Firebase.analytics.logEvent($/,/)$/d'
+        -e '/Firebase/d' *.kt */*.kt
+      - sed -i -e '/WearableController/d' MuzeiWallpaperService.kt
+      - popd
+      - sed -i -z -E -e 's/<service\s+\S+wearable.*service>//' src/main/AndroidManifest.xml
+      - sed -i -e '/<queries>/i <uses-permission android:name="android.permission.INTERNET"
+        />' src/main/AndroidManifest.xml
+      - sed -i -e '/signing {/,/^}/d' -e '/^publishing {/,/^}/d' ../muzei-api/build.gradle
+
 MaintainerNotes: |-
   Custom version format, use the tag name as version name.
 
@@ -413,5 +445,5 @@ MaintainerNotes: |-
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v.*$
 UpdateCheckData: version.properties|code\s=\s(\d+)||v(.*)
-CurrentVersion: 3.6.1
-CurrentVersionCode: 360003
+CurrentVersion: 3.6.2
+CurrentVersionCode: 360005
