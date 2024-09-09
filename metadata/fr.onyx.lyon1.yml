@@ -1,6 +1,6 @@
 AntiFeatures:
   TetheredNet:
-    en-US: Rely on OpenStreetMap.
+    en-US: Rely on OpenStreetMap
 Categories:
   - Science & Education
 License: GPL-3.0-or-later
@@ -105,8 +105,7 @@ Builds:
 
   - versionName: 2.0.9
     versionCode: 2051
-    disable: https://github.com/onyx-lyon1/onyx/issues/43
-    commit: 3c11382b8acebe78d44d27580d13eddc6988a7cf
+    commit: 95003a896076a5969b01d872c4c56ed1d21c761b
     subdir: apps/onyx
     submodules: true
     sudo:
@@ -122,13 +121,15 @@ Builds:
       - apps/onyx/web
       - apps/onyx/windows
     prebuild:
-      - export JAVA_HOME="/usr/lib/jvm/java-17-openjdk-amd64/"
+      - export PATH="$PATH:$HOME/build/fr.onyx.lyon1/apps/onyx/.pub-cache/bin:$HOME/build/fr.onyx.lyon1/apps/.flutter/bin"
       - export PUB_CACHE=$(pwd)/.pub-cache
       - ../.flutter/bin/flutter config --no-analytics
       - echo "Adding geolocator_android package override to pubspec.yaml"
       - yq -i -Y '.dependency_overrides.geolocator_android.git = { url:"https://github.com/onyx-lyon1/flutter-geolocator.git",
         ref:"floss", path:"geolocator_android"}' pubspec.yaml
       - ../.flutter/bin/flutter pub get
+      - dart pub global activate melos
+      - melos bootstrap
       - sdkmanager "ndk;21.1.6352462"
     scanignore:
       - apps/onyx/assets/graph.json.gz
@@ -137,11 +138,9 @@ Builds:
       - apps/.flutter
       - apps/onyx/.pub-cache
     build:
-      - $$rustup$$/rustup-init.sh -y --default-toolchain 1.74.0 --target aarch64-linux-android
-      - source $HOME/.cargo/env
+      - export PATH="$PATH:$HOME/build/fr.onyx.lyon1/apps/onyx/.pub-cache/bin:$HOME/build/fr.onyx.lyon1/apps/.flutter/bin"
       - export PUB_CACHE=$(pwd)/.pub-cache
-      - bash ./scripts/fdroid_build_isar.sh
-      - ../.flutter/bin/flutter build apk --release --split-per-abi --target-platform="android-arm64"
+      - flutter build apk --release --split-per-abi --target-platform="android-arm64"
         --no-tree-shake-icons
     ndk: r25c
 
