@@ -39,10 +39,15 @@ Builds:
     versionCode: 31
     commit: 2d35dc062031ba486ccd0bdd9e7d3a369345e6e3
     subdir: app
+    sudo:
+      - export CPUS_MAX=6
+      - export CPUS=$(getconf _NPROCESSORS_ONLN)
+      - for (( c=$CPUS_MAX; c<$CPUS; c++ )) ; do echo 0 > /sys/devices/system/cpu/cpu$c/online
+        ; done
     gradle:
       - yes
     srclibs:
-      - reproducible-apk-tools@v0.2.7
+      - reproducible-apk-tools@v0.2.8
     ndk: 26.3.11579264
     postbuild: $$reproducible-apk-tools$$/inplace-fix.py --page-size 16 fix-newlines
       $$OUT$$ 'META-INF/services/*' 'res/*.json'
