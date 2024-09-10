@@ -3,6 +3,8 @@
 set -e
 
 last_commit=$(git log --grep='Update known apks' | grep commit | head -n 1 | sed -E -n 's/commit (.*)/\1/p')
+echo "Last known apks update at: $last_commit"
+echo "HEAD at: $(git rev-parse HEAD)"
 changed_files=$(git diff --name-only "$last_commit" HEAD)
 
 for file in $changed_files; do
