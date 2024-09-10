@@ -14,7 +14,7 @@ for file in $changed_files; do
     new_versions=$(grep "+    versionCode: "  <<< "$diff" | sed -E -n "s/.*versionCode: ([0-9]+)/\1/p")
     # When an old version is removed the diff may have both deletion and addition for the same version
     for version in $removed_versions; do
-      new_versions=$(sed "/$version/d" <<< "$new_versions")
+      new_versions=$(sed "/^${version}$/d" <<< "$new_versions")
     done
     new_version_num=$(wc -l <<< "$new_versions")
 
