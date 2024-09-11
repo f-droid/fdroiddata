@@ -8,6 +8,7 @@ echo "HEAD at: $(git rev-parse HEAD)"
 changed_files=$(git diff --name-only "$last_commit" HEAD)
 
 for file in $changed_files; do
+  grep -q "AutoUpdateMode: None" $file && continue
   if [[ $file == *.yml && $(dirname "$file") == "metadata" ]]; then
     diff=$(git diff "$last_commit" HEAD -- "$file")
     removed_versions=$(grep "\-    versionCode: " <<< "$diff" | sed -E -n "s/.*versionCode: ([0-9]+)/\1/p")
