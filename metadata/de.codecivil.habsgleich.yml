@@ -1,0 +1,47 @@
+Categories:
+  - Science & Education
+  - Sports & Health
+  - Writing
+License: GPL-3.0-or-later
+AuthorName: codecivil.de
+AuthorEmail: fdroid@codecivil.de
+AuthorWebSite: https://www2.codecivil.de
+WebSite: https://habsgleich.docs.codecivil.de
+SourceCode: https://gitlab.com/codecivil/habsgleich/
+Donate: https://paypal.me/codecivil
+Liberapay: codecivil
+
+AutoName: HabsGleich
+
+RepoType: git
+Repo: https://gitlab.com/codecivil/habsgleich.git
+
+Builds:
+  - versionName: 1.8.1
+    versionCode: 10801
+    commit: 5374eaef5f04991b437e1e922126c81ba871520a
+    sudo:
+      - echo "deb https://deb.debian.org/debian bullseye main" > /etc/apt/sources.list.d/bullseye.list
+      - apt-get update
+      - apt-get install npm
+      - apt-get install -y -t bullseye openjdk-11-jdk-headless
+      - update-java-alternatives --set java-1.11.0-openjdk-amd64
+      - npm install -g npm@7.5.2
+      - npm install -g cordova@11.1.0
+    output: platforms/android/app/build/outputs/apk/release/app-release-unsigned.apk
+    prebuild:
+      - sdkmanager 'platforms;android-34' 'build-tools;30.0.3'
+      - cordova platform add android
+      - cordova plugin add cordova-plugin-android-permissions
+      - cordova plugin add cordova-plugin-dialogs
+      - cordova plugin add cordova-plugin-file
+      - sed -i 's/.*<uses-permission.*INTERNET.*//' platforms/android/app/src/main/AndroidManifest.xml
+    scandelete:
+      - node_modules/cordova-android/framework/cordova-publish.gradle
+    build: cordova build android --release -- --packageType=apk
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: fdroid_version.txt|.+,(\d+)|.|(.+),\d+
+CurrentVersion: 1.8.1
+CurrentVersionCode: 10801
