@@ -1,0 +1,46 @@
+Categories:
+  - Science & Education
+License: GPL-3.0-only
+AuthorName: Luca Delucchi
+AuthorEmail: luca.delucchi@fmach.it
+AuthorWebSite: https://cri.fmach.it/Personale/Delucchi-Luca
+WebSite: https://digiagriapp.gitlab.io/digiagriapp-website/
+SourceCode: https://gitlab.com/digiagriapp/digiagriapp_mobile
+IssueTracker: https://gitlab.com/digiagriapp/digiagriapp_mobile/issues
+
+AutoName: DigiAgriApp
+
+RepoType: git
+Repo: https://gitlab.com/digiagriapp/digiagriapp_mobile.git
+
+Builds:
+  - versionName: 0.1.1
+    versionCode: 2
+    commit: 75efb7b55f332ed8d0b652e9f282c8e234a1e298
+    submodules: true
+    output: build/app/outputs/flutter-apk/app-release.apk
+    rm:
+      - ios
+      - macos
+      - linux
+      - web
+    prebuild:
+      - sed -i -e 's/^#f//' pubspec.yaml
+      - sed -i -e '/shrinkResources/d' -e '/minifyEnabled/d' -e'/gms/d' android/app/build.gradle
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - flutter/bin/flutter config --no-analytics
+      - flutter/bin/flutter packages pub get
+    scanignore:
+      - flutter/bin/cache
+    scandelete:
+      - .pub-cache
+      - flutter
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - flutter/bin/flutter build apk
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^v[\d.]+$
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 0.1.1
+CurrentVersionCode: 2
