@@ -23,7 +23,7 @@ for file in $changed_files; do
 
     if [[ $new_version_num -gt $keep_num ]]; then
       remove_versions=$(head -n -"$keep_num" <<< "$new_versions")
-      echo "Cleaning $file $remove_versions"
+      echo "Cleaning $file: ${remove_versions//$'\n'/ }"
       for version in $remove_versions; do
         sed -i "/versionCode: $version/,/^$/d" "$file"
         sed -i -E -z 's/\n  - versionName:[^\n]+\n  -/\n  -/' "$file"
