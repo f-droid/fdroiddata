@@ -1,0 +1,43 @@
+Categories:
+  - Multimedia
+License: AGPL-3.0-only
+AuthorName: WardPearce
+AuthorEmail: wardpearce@pm.me
+AuthorWebSite: https://wardpearce.com
+WebSite: https://materialio.us
+SourceCode: https://github.com/Materialious/Materialious
+
+AutoName: Materialious
+
+RepoType: git
+Repo: https://github.com/Materialious/Materialious.git
+
+Builds:
+  - versionName: 1.3.2
+    versionCode: 31
+    commit: 7b554e25bc5d7689fd8281b23c867089c4f41d6a
+    subdir: materialious/android/app
+    sudo:
+      - apt-get update
+      - apt-get install -y npm golang-go make
+    gradle:
+      - yes
+    srclibs:
+      - esbuild@v0.19.12
+    prebuild:
+      - cd ../..
+      - npm install
+      - npm run build
+      - npx cap sync
+    scandelete:
+      - materialious/node_modules
+    build:
+      - pushd $$esbuild$$
+      - make esbuild
+      - popd
+      - mv $$esbuild$$/esbuild ../../node_modules/@esbuild/linux-x64/bin/esbuild
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: 1.3.2
+CurrentVersionCode: 31
