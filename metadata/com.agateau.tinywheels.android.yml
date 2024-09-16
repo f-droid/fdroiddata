@@ -406,14 +406,16 @@ Builds:
     subdir: android
     sudo:
       - apt-get update
-      - apt-get install -y python3-pip make imagemagick-6.q16
+      - apt-get install -y python3-pip python3-venv make imagemagick-6.q16
     gradle:
       - itchio
     prebuild: sed -i -e 's#./gradlew#gradle#' ../Makefile
     scandelete:
       - android/libs/
     build:
-      - pip3 install --user -r ../requirements.txt
+      - python3 -m venv .
+      - source bin/activate
+      - pip3 install -r ../requirements.txt
       - gradle tools:dist -b ../build.gradle
       - make -C .. assets
       - make -C .. packer
