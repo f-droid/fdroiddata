@@ -144,14 +144,14 @@ fdroid lint:
     - function set_error() { export EXITVALUE=1; printf "\x1b[31mERROR `history|tail -2|head -1|cut -b 6-500`\x1b[0m\n"; }
     - |
       if [ -n "$CHANGED" ]; then
-        fdroid lint -f $CHANGED || {
-            set_error;
-            printf "\nThese files have lint issues:\n";
-            fdroid rewritemeta -l $CHANGED;
-            printf "\nThese are the formatting issues:\n";
-            fdroid rewritemeta $CHANGED;
-            git --no-pager diff --color=always;
-        }
+          fdroid rewritemeta $CHANGED;
+          git diff --exit-code > /dev/null || {
+              set_error;
+              printf "\nThese files have lint issues:\n";
+              git diff --name-only;
+              printf "\nThese are the formatting issues:\n";
+              printf "$(git --no-pager diff --color=always --ws-error-highlight=all | sed 's/\r/^M/')";
+          }
       fi
     - exit $EXITVALUE
 
