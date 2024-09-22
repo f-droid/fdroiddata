@@ -1508,6 +1508,7 @@ Builds:
     binary: https://github.com/vicolo-dev/chrono/releases/download/v%v/chrono-v%v-x86_64.apk
     srclibs:
       - flutter@stable
+      - transistor-background-fetch@44fa41067fa12a2417dd404b5fac567fb68013d3
     prebuild:
       - version=$(sed -n -E 's/.*flutter-version:\ "(.*)"/\1/p' .github/workflows/android-release.yml)
       - pushd $$flutter$$
@@ -1521,6 +1522,8 @@ Builds:
       - export PUB_CACHE=$(pwd)/.pub-cache
       - $$flutter$$/bin/flutter config --no-analytics
       - $$flutter$$/bin/flutter pub get
+      - sed -i -e 's/maven {.*}/mavenLocal()/' android/build.gradle
+      - sed -i -e '/maven {/,/^        }/cmavenLocal()' .pub-cache/hosted/pub.dev/background_fetch-*/android/build.gradle
       - popd
       - mv $repo/chrono com.vicolo.chrono
     scandelete:
@@ -1530,6 +1533,10 @@ Builds:
       - cd ..
       - mv com.vicolo.chrono $repo/chrono
       - pushd $repo/chrono
+      - pushd $$transistor-background-fetch$$/android/tsbackgroundfetch/
+      - gradle assembleRelease
+      - gradle publishToMavenLocal
+      - popd
       - export PUB_CACHE=$(pwd)/.pub-cache
       - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform="android-x64"
         --flavor prod
