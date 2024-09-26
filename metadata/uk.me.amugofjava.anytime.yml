@@ -1,0 +1,70 @@
+AntiFeatures:
+  NonFreeNet:
+    en-US: Discover podcast on Apple iTunes by default
+  TetheredNet:
+    en-US: Rely on Apple iTunes and podcastindex.org for podcast discover
+Categories:
+  - Multimedia
+License: BSD-3-Clause
+AuthorName: Ben Hills
+AuthorEmail: hello@anytimeplayer.app
+AuthorWebSite: https://anytimeplayer.app
+SourceCode: https://github.com/amugofjava/anytime_podcast_player
+IssueTracker: https://github.com/amugofjava/anytime_podcast_player/issues
+Donate: https://ko-fi.com/amugofjava
+
+AutoName: Anytime Player
+
+RepoType: git
+Repo: https://github.com/amugofjava/anytime_podcast_player.git
+Binaries: https://github.com/amugofjava/anytime_podcast_player/releases/download/release%2Fv%v/anytime.apk
+
+Builds:
+  - versionName: 1.3.9
+    versionCode: 154
+    commit: 8a3cf84e19989b70d44b12301d339425d9450d79
+    sudo:
+      - mkdir -p /home/ben
+      - chown vagrant /home/ben
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+    prebuild:
+      - version=$(sed -n -E "s/.*flutter-version:\ '(.*)'/\1/p" .github/workflows/dart.yml|head
+        -n1)
+      - pushd $$flutter$$
+      - git checkout -f $version
+      - popd
+      - export repo=/home/ben/Development/projects
+      - mkdir -p $repo
+      - cd ..
+      - mv uk.me.amugofjava.anytime $repo/anytime_podcast_player
+      - pushd $repo/anytime_podcast_player
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter packages pub get
+      - popd
+      - mv $repo/anytime_podcast_player uk.me.amugofjava.anytime
+    scandelete:
+      - .pub-cache
+    build:
+      - export repo=/home/ben/Development/projects
+      - cd ..
+      - mv uk.me.amugofjava.anytime $repo/anytime_podcast_player
+      - pushd $repo/anytime_podcast_player
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export PATH=$$flutter$$/bin/:$PATH
+      - $$flutter$$/bin/flutter build apk --dart-define=PINDEX_KEY=GZPFJZEGAVEXUMJVVKKG
+        --dart-define=PINDEX_SECRET=ERm5XxCu36nKek7wynXmPrpj7L7PuDkKmzxFwTjZ --dart-define=FEEDBACK_URL=https://anytimeplayer.app/feedback.html
+      - popd
+      - mv $repo/anytime_podcast_player uk.me.amugofjava.anytime
+
+AllowedAPKSigningKeys: f02b7519e4012c1449fdbb2d8cf21c1aa0a33da7e75c06ad798bf078016c7885
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 1.3.9
+CurrentVersionCode: 154
