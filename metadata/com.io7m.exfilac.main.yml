@@ -1,0 +1,58 @@
+Categories:
+  - Connectivity
+  - Development
+  - Internet
+License: ISC
+AuthorName: Mark Raynsford
+AuthorEmail: exfilac@io7m.com
+AuthorWebSite: https://www.io7m.com/
+WebSite: https://www.io7m.com/software/exfilac
+SourceCode: https://github.com/io7m-com/exfilac
+IssueTracker: https://github.com/io7m-com/exfilac/issues
+Liberapay: io7m
+
+RepoType: git
+Repo: https://github.com/io7m-com/exfilac.git
+Binaries: https://github.com/io7m-com/exfilac/releases/download/com.io7m.exfilac-%v/com.io7m.exfilac-%v.apk
+
+Builds:
+  - versionName: 1.0.5
+    versionCode: 1015
+    commit: bdb9aa1d92d5b06de6c8058a1470f7dc1f9c61d3
+    subdir: com.io7m.exfilac.main
+    sudo:
+      - echo "deb https://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
+      - apt-get update
+      - apt-get install -y -t trixie openjdk-21-jdk-headless
+      - update-alternatives --auto java
+    gradle:
+      - yes
+    prebuild:
+      - cd ..
+      - java -Dmake.gradle=false make/Make.java
+    scandelete:
+      - xstructural.jar
+      - ktlint.jar
+
+AllowedAPKSigningKeys: 888ffca70ad0c128c05e67794e06f056cacaa2049c97fcbb9bdbba9c3d3d63b5
+
+MaintainerNotes: |-
+  In an attempt to reduce the maintenance burden that Gradle introduces,
+  the application build downloads a couple of tools from Maven Central and runs
+  them before Gradle is used in any form (instead of using Gradle plugins).
+
+  1. It downloads Ktlint and runs it over the source code for Kotlin linting.
+  2. It downloads xstructural, which is used to generate XHTML documentation
+     that's then copied into the Android assets directory for the app.
+
+  The jar files are not used after the initial execution. All of the jar files
+  and binaries have free/open licenses.
+
+  See: https://github.com/pinterest/ktlint
+  See: https://github.com/io7m-com/xstructural
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: gradle.properties|VERSION_CODE=(\d+)||
+CurrentVersion: 1.0.5
+CurrentVersionCode: 1015
