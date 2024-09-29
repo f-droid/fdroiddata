@@ -797,6 +797,7 @@ Builds:
 
   - versionName: 5.9.18
     versionCode: 230
+    disable: native libs are not stripped
     commit: 5c85948d549ab2a9de65012bd6cfb14d8bc20671
     subdir: app
     submodules: true
@@ -805,11 +806,12 @@ Builds:
       - apt-get install -y automake autopoint dpkg-dev file libtool pkg-config
     gradle:
       - foss
-    prebuild: sed -i -e '/maven.fabric.io/d; /io.fabric/d; /firebase/d; /google-services/d;
-      /signingConfigs.release/d' build.gradle ../build.gradle ../CommonUtils/build.gradle
+    prebuild:
+      - sed -i -e /firebase/d' -e '/gms/d' -e '/signingConfigs.release/d' {..,.}/build.gradle
+      - sed -i -e '/android {/a ndkVersion "25.2.9519653"' build.gradle
     scandelete:
       - aria2lib/src/main/jniLibs
-    ndk: r25
+    ndk: r25c
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
