@@ -2678,7 +2678,7 @@ Builds:
 
   - versionName: 0.9.46
     versionCode: 946
-    disable: fails to build
+    disable: missing libs compared with upstream
     commit: f995589a02a422bb6aa379d9b090228813946483
     subdir: mobile
     submodules: true
@@ -2711,6 +2711,7 @@ Builds:
       - cd $$media-kit-libmpv-android-video-build$$
       - git checkout -f $tag
       - cd buildscripts
+      - sed -i -e '/debug-symbols-default/d' bundle_default.sh
       - sed -i -e 's/sudo//g' -e 's|./gradlew|gradle|g' *.sh
       - sed -i -e '/download-sdk/d' download.sh
       - sed -i -e '/mkdir -p deps/a mv $$mpv$$ mpv' include/download-deps.sh
@@ -2747,7 +2748,8 @@ Builds:
       - PATH=$FLUTTER:$PATH bash bundle_default.sh
       - popd
       - mkdir -p build/media_kit_libs_android_video/output
-      - cp $$media-kit-libmpv-android-video-build$$/output/default-*.jar build/media_kit_libs_android_video/output
+      - cp $$media-kit-libmpv-android-video-build$$/buildscripts/example/build/app/outputs/apk/release/default-*.jar
+        build/media_kit_libs_android_video/output
       - thirdparty/flutter/bin/flutter build apk --flavor fdroid -t lib/main.dart
     ndk: 25.2.9519653
     antifeatures:
