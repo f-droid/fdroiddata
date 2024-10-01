@@ -892,9 +892,14 @@ Builds:
       - app/web
       - app/windows
     prebuild:
-      - git -C $$flutter$$ checkout -f $(cat ../FLUTTER_VERSION)
+      - sdkmanager 'ndk;23.1.7779620' 'ndk;26.1.10909125'
+      - export version=$(grep "^  flutter:" pubspec.yaml | cut -d ":" -f2|head -n1)
+      - pushd $$flutter$$
+      - git checkout -f $version
+      - popd
       - export PUB_CACHE=$(pwd)/.pub-cache
       - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
     scandelete:
       - app/.pub-cache
     build:
