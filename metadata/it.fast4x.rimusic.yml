@@ -511,8 +511,14 @@ Builds:
 
   - versionName: 0.6.54
     versionCode: 58
-    commit: 3f060bc9591d7f99dc8f9d34f6197642f73fa049
+    disable: wrong appname
+    commit: 3ee849712116335a1f192f655eb283bab241ac0e
     subdir: composeApp
+    sudo:
+      - echo "deb https://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
+      - apt-get update
+      - apt-get install -y -t trixie openjdk-21-jdk-headless
+      - update-alternatives --auto java
     gradle:
       - foss
     binary: https://github.com/fast4x/RiMusic/releases/download/v%v/app-foss-release.apk
@@ -520,11 +526,10 @@ Builds:
       - reproducible-apk-tools@v0.2.8
     rm:
       - bundletool.jar
+    prebuild: sed -i -e '/jetbrains.space/d' -e '/androidx.dev/d' ../settings.gradle.kts
+      build.gradle.kts
     postbuild: $$reproducible-apk-tools$$/inplace-fix.py --zipalign fix-newlines $$OUT$$
-      'META-INF/services/*' 'res/m0.html' 'composeResources/rimusic.composeapp.generated.resources/drawable/app_icon.xml'
-      'composeResources/rimusic.composeapp.generated.resources/drawable/app_logo_text.xml'
-      'composeResources/rimusic.composeapp.generated.resources/drawable/app_logo.xml'
-      'composeResources/rimusic.composeapp.generated.resources/drawable/compose-multiplatform.xml'
+      'META-INF/services/*' 'res/m0.html' 'composeResources/rimusic.composeapp.generated.resources/drawable/*.xml'
 
 AllowedAPKSigningKeys: a1ba8bd74af8f92cb3719a072113a218cfaec02bce2b736a280e31d8cd11808c
 
