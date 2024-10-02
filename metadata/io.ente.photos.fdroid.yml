@@ -2678,7 +2678,6 @@ Builds:
 
   - versionName: 0.9.46
     versionCode: 946
-    disable: missing libs compared with upstream
     commit: f995589a02a422bb6aa379d9b090228813946483
     subdir: mobile
     submodules: true
@@ -2714,7 +2713,8 @@ Builds:
       - sed -i -e '/debug-symbols-default/d' bundle_default.sh
       - sed -i -e 's/sudo//g' -e 's|./gradlew|gradle|g' *.sh
       - sed -i -e '/download-sdk/d' download.sh
-      - sed -i -e '/mkdir -p deps/a mv $$mpv$$ mpv' include/download-deps.sh
+      - sed -i -e '/mkdir -p deps/a mv $$mpv$$ mpv' -e 's/single-branch --branch main/single-branch
+        --branch media_kit-v1.1.10/' include/download-deps.sh
       - sed -i -e '/git reset --hard/d' patch.sh
     scanignore:
       - mobile/.pub-cache/hosted/pub.dev/background_fetch-*/android/build.gradle
@@ -2748,8 +2748,7 @@ Builds:
       - PATH=$FLUTTER:$PATH bash bundle_default.sh
       - popd
       - mkdir -p build/media_kit_libs_android_video/output
-      - cp $$media-kit-libmpv-android-video-build$$/buildscripts/example/build/app/outputs/apk/release/default-*.jar
-        build/media_kit_libs_android_video/output
+      - cp $$media-kit-libmpv-android-video-build$$/output/default-*.jar build/media_kit_libs_android_video/output
       - thirdparty/flutter/bin/flutter build apk --flavor fdroid -t lib/main.dart
     ndk: 25.2.9519653
     antifeatures:
