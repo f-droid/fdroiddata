@@ -255,7 +255,32 @@ Builds:
     scandelete:
       - node_modules
 
+  - versionName: 3.1.15
+    versionCode: 30115
+    commit: 0b645c260f6386fc80a87c4dd8c017aa67a6ab1a
+    subdir: android/app
+    sudo:
+      - sysctl fs.inotify.max_user_watches=524288 || true
+      - apt-get update
+      - apt-get install -y make npm
+    gradle:
+      - fdroid
+    rm:
+      - android/app/build_google.gradle
+    prebuild:
+      - sed -i -e '/gms/d' ../build.gradle
+      - sed -i -e '/geolocation/d' ../../package.json
+      - cd ../..
+      - echo R1BGX2tleT1GRHJvaWQtOWtwbHc4YW4K | base64 --decode > .env
+      - echo c2lnbmFsZW1lbnRfdXJsPWh0dHBzOi8vd3d3Lmdlb3BvcnRhaWwuZ291di5mci93cC1qc29uL3dwL3YyLwo=
+        | base64 --decode >> .env
+      - npm install --build-from-source
+      - npm run build
+      - npx cap sync
+    scandelete:
+      - node_modules
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 3.1.14
-CurrentVersionCode: 30114
+CurrentVersion: 3.1.15
+CurrentVersionCode: 30115
