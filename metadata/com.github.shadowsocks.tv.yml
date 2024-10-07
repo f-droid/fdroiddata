@@ -257,13 +257,16 @@ Builds:
       - sed -i -z -E -e 's/<Preference[^<]+ossLicenses[^>]+>//' src/main/res/xml/pref_main.xml
       - sed -i -e '/isEnable/s/true/false/' ../buildSrc/src/main/kotlin/Helpers.kt
     build:
+      - export rustVersion=$(grep RUST_VERSION ../.circleci/config.yml | cut -d ":"
+        -f2 | head -n1)
+      - '[[ $rustVersion ]] || exit 1'
       - $$rustup$$/rustup-init.sh -y
       - source $HOME/.cargo/env
-      - rustup default 1.65.0
+      - rustup default $rustVersion
       - cd ../core/src/main/rust/shadowsocks-rust
       - rustup target add armv7-linux-androideabi aarch64-linux-android i686-linux-android
         x86_64-linux-android
-    ndk: r25b
+    ndk: 27.0.12077973
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
