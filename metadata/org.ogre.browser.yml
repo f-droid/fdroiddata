@@ -297,12 +297,60 @@ Builds:
       - gradle -b SampleBrowserNDK/build.gradle assembleRelease
     ndk: r21e
 
+  - versionName: 14.3.0
+    versionCode: 18
+    commit: v14.3.0
+    sudo:
+      - apt update
+      - apt install -y make cmake
+    output: SampleBrowserNDK/app/build/outputs/apk/release/app-release-unsigned.apk
+    prebuild:
+      - sed -i 's/android:versionCode="1"/android:versionCode="$$VERCODE$$"/' CMake/Templates/AndroidManifest.xml.in
+      - sed -i '4ilintOptions { abortOnError false }' CMake/Templates/app.gradle.in
+      - rm PlugIns/RsImageCodec/src/Cargo.toml
+    scanignore:
+      - Media/packs/
+      - Samples/Media/packs/
+      - Samples/Media/volumeTerrain/
+      - Tests/Media/misc/
+    build:
+      - cmake -DCMAKE_BUILD_TYPE=Release -DOGRE_BUILD_COMPONENT_JAVA=OFF -DANDROID_PLATFORM=android-16
+        -DANDROID_ABI=arm64-v8a -DANDROID_ARM_NEON=TRUE -DCMAKE_TOOLCHAIN_FILE=$$NDK$$/build/cmake/android.toolchain.cmake
+        .
+      - cmake --build . -- -j $(nproc)
+      - gradle -b SampleBrowserNDK/build.gradle assembleRelease
+    ndk: r21e
+
+  - versionName: 14.3.0
+    versionCode: 19
+    commit: v14.3.0
+    sudo:
+      - apt update
+      - apt install -y make cmake
+    output: SampleBrowserNDK/app/build/outputs/apk/release/app-release-unsigned.apk
+    prebuild:
+      - sed -i 's/android:versionCode="1"/android:versionCode="$$VERCODE$$"/' CMake/Templates/AndroidManifest.xml.in
+      - sed -i '4ilintOptions { abortOnError false }' CMake/Templates/app.gradle.in
+      - rm PlugIns/RsImageCodec/src/Cargo.toml
+    scanignore:
+      - Media/packs/
+      - Samples/Media/packs/
+      - Samples/Media/volumeTerrain/
+      - Tests/Media/misc/
+    build:
+      - cmake -DCMAKE_BUILD_TYPE=Release -DOGRE_BUILD_COMPONENT_JAVA=OFF -DANDROID_PLATFORM=android-16
+        -DANDROID_ABI=x86 -DCMAKE_TOOLCHAIN_FILE=$$NDK$$/build/cmake/android.toolchain.cmake
+        .
+      - cmake --build . -- -j $(nproc)
+      - gradle -b SampleBrowserNDK/build.gradle assembleRelease
+    ndk: r21e
+
 MaintainerNotes: |-
   For documentation of cmake options see:
-  https://ogrecave.github.io/ogre/api/latest/building-ogre.html#autotoc_md260
+  https://ogrecave.github.io/ogre/api/latest/building-ogre.html#autotoc_md266
 
 ArchivePolicy: 6
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: 13.2.4
-CurrentVersionCode: 17
+CurrentVersion: 14.3.0
+CurrentVersionCode: 19
