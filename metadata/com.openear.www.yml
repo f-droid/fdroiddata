@@ -110,13 +110,13 @@ Builds:
 
   - versionName: '1.9'
     versionCode: 46
-    disable: https://gitlab.com/fdroid/fdroiddata/-/merge_requests/15892
-    commit: 357987901c3dc437372488e546be771cb8e56e50
+    commit: a921bf506a390c5745f3eec9b1f9747650a9f4b0
     subdir: android/app
     sudo:
       - sysctl fs.inotify.max_user_watches=524288
       - apt-get update
       - apt-get install -y npm
+      - apt-get install -y libvips-dev make g++
       - npm -g install yarn
       - npm -g install @ionic/cli
     gradle:
@@ -124,7 +124,7 @@ Builds:
     prebuild:
       - sed -i -e '/gms/d' {..,.}/build.gradle
       - cd ../..
-      - yarn
+      - yarn --verbose install | grep -vE '^verbose [^ ]+ (Performing|Creating|Copying)'
       - sed -i -e 's/ && capacitor open android//' package.json
       - sed -i '/com.google.android.gms:play-services-location/d' node_modules/@capacitor/android/capacitor/build.gradle
       - sed -i '/com.google.firebase:firebase-messaging/d' node_modules/@capacitor/android/capacitor/build.gradle
@@ -135,7 +135,7 @@ Builds:
       - rm -rf node_modules/@capacitor/android/capacitor/src/main/java/com/getcapacitor/CapacitorFirebaseMessagingService.java
       - rm -rf node_modules/@capacitor/android/capacitor/src/main/java/com/getcapacitor/plugin/PushNotifications.java
       - rm -rf node_modules/@capacitor/android/capacitor/src/main/java/com/getcapacitor/plugin/Geolocation.java
-      - yarn build
+      - yarn --verbose build
     scandelete:
       - node_modules/
 
