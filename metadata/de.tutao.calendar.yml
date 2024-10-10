@@ -1,0 +1,61 @@
+AntiFeatures:
+  NonFreeNet:
+    en-US: Rely on tuta.com
+Categories:
+  - Internet
+License: GPL-3.0-or-later
+AuthorName: Tutao GmbH
+AuthorEmail: hello@tutao.de
+WebSite: https://tuta.com
+SourceCode: https://github.com/tutao/tutanota
+IssueTracker: https://github.com/tutao/tutanota/issues
+Translation: https://tuta.com/blog/posts/tutanota-translation-project
+Changelog: https://github.com/tutao/tutanota/releases
+Donate: https://tuta.com/community#donate
+Bitcoin: 3MDrR5gaMvL8sphuQLX6BvPPKYNArdXsv6
+
+AutoName: Tuta Calendar
+
+RepoType: git
+Repo: https://github.com/tutao/tutanota.git
+
+Builds:
+  - versionName: 246.241004.0
+    versionCode: 39
+    commit: 457a01990195a038a76aaab23bfa945685c1c039
+    subdir: app-android/calendar
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y g++ make emscripten
+      - curl -Lo node.tar.gz https://nodejs.org/dist/v20.11.1/node-v20.11.1-linux-x64.tar.gz
+      - echo "bf3a779bef19452da90fb88358ec2c57e0d2f882839b20dc6afc297b6aafc0d7 node.tar.gz"
+        | sha256sum -c -
+      - tar xzf node.tar.gz --strip-components=1 -C /usr/local/
+      - sysctl fs.inotify.max_user_watches=524288 || true
+    gradle:
+      - fdroid
+    srclibs:
+      - rustup@1.27.1
+    rm:
+      - app-ios
+    prebuild:
+      - cd ../..
+      - node buildSrc/fixFdroidDeps.js
+      - npm install
+      - npm run build-packages
+      - node --max-old-space-size=4096 webapp prod --app calendar
+      - node buildSrc/prepareMobileBuild.js dist calendar
+      - $$rustup$$/rustup-init.sh -y --default-toolchain 1.79.0 --target aarch64-linux-android
+        armv7-linux-androideabi x86_64-linux-android i686-linux-android
+      - source $HOME/.cargo/env
+      - sed -i -e "/cargo {/a cargoCommand = \"$(which cargo)\"\nrustcCommand = \"$(which
+        rustc)\"" -e "s|\"cargo\"|\"$(which cargo)\"|" tuta-sdk/android/sdk/build.gradle.kts
+    scandelete:
+      - node_modules
+    ndk: r26b
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags tuta-calendar-fdroid-release-*
+CurrentVersion: 246.241004.0
+CurrentVersionCode: 39
