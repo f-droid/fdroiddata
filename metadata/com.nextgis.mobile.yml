@@ -17,9 +17,6 @@ Description: |-
   * record tracks;
   * show coordinates, speed, elevation etc.
 
-  <b>Note:</b> This app will currently not see updates in F-Droid as it introduced
-  proprietary components to its source.
-
 RepoType: git
 Repo: https://github.com/nextgis/android_gisapp
 
@@ -44,11 +41,27 @@ Builds:
     prebuild: sed -i "s/\(buildscript {\)/\1\n System.properties['com.android.build.gradle.overrideVersionCheck']
       = 'true'/" ../build.gradle
 
-MaintainerNotes: Since 2.5 GMS is used.
+  - versionName: 2.8.0
+    versionCode: 134
+    commit: 2c0abaae645a9bbd1a25f6bf825247548b4d1752
+    subdir: app
+    submodules: true
+    gradle:
+      - yes
+    srclibs:
+      - nextgis-easypicker@4946e995390fac70d510272a51aff618418d05f5
+    prebuild:
+      - mv $$nextgis-easypicker$$/easypicker ../easypicker
+      - sed -i -e '/android {/a namespace "com.keenfin.easypicker"' ../easypicker/build.gradle
+      - sed -i -e '/gms/d' {..,.}/build.gradle
+      - sed -i -e '/gms/d' -e '/getTracker() {/,/^    }/d' -e '/getTracker/d' -e '/setExceptionHandler()
+        {/,/^    }/d' -e '/setExceptionHandler/d' -e '/GoogleAnalytics/d' -e '/mTracker/d'
+        -e '/sendEvent/,/^    }/s/^        .*//' -e '/sendScreen/,/^    }/s/^        .*//'
+        src/main/java/com/nextgis/mobile/MainApplication.java
+    scanignore:
+      - app/src/main/res/raw/mapnik.zip
 
 AutoUpdateMode: None
-UpdateCheckMode: None
-CurrentVersion: '2.4'
-CurrentVersionCode: 16
-
-NoSourceSince: '2.4'
+UpdateCheckMode: RepoManifest
+CurrentVersion: 2.8.0
+CurrentVersionCode: 134
