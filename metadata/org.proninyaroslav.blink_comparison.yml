@@ -11,7 +11,7 @@ Translation: https://github.com/proninyaroslav/blink-comparison/blob/HEAD/CONTRI
 Changelog: https://github.com/proninyaroslav/blink-comparison/blob/HEAD/NEWS.md
 Donate: https://github.com/proninyaroslav/blink-comparison#-donation
 Liberapay: proninyaroslav
-Bitcoin: 1Af9DgxtWvVp6bFiYQw2MeWtRzTXshRYpB
+Bitcoin: 12isaLkH8nZ4DkFguVFeYrGHqQi7EEgUrM
 
 AutoName: Blink Comparison
 
@@ -75,8 +75,84 @@ Builds:
       - $$flutter$$/bin/flutter config --no-analytics
       - $$flutter$$/bin/flutter build apk
 
-AutoUpdateMode: Version
-UpdateCheckMode: Tags
-UpdateCheckData: pubspec.yaml|version:\s.*\+(\d+)|.|version:\s([\d.]+)\+
-CurrentVersion: 1.1.1
-CurrentVersionCode: 5
+  - versionName: 1.2.0
+    versionCode: 5061
+    commit: 1.2.0
+    output: build/app/outputs/flutter-apk/app-armeabi-v7a-fdroid-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+      - test
+    prebuild:
+      - export flutterVersion=$(sed -n -E 's/.*FLUTTER_VERSION:\s"([0-9.]+)"/\1/p'
+        .github/workflows/flutter_release_build.yml)
+      - pushd $$flutter$$
+      - git checkout -f $flutterVersion
+      - popd
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --flavor fdroid --target-platform="android-arm"
+
+  - versionName: 1.2.0
+    versionCode: 5062
+    commit: 1.2.0
+    output: build/app/outputs/flutter-apk/app-arm64-v8a-fdroid-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+      - test
+    prebuild:
+      - export flutterVersion=$(sed -n -E 's/.*FLUTTER_VERSION:\s"([0-9.]+)"/\1/p'
+        .github/workflows/flutter_release_build.yml)
+      - pushd $$flutter$$
+      - git checkout -f $flutterVersion
+      - popd
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --flavor fdroid --target-platform="android-arm64"
+
+  - versionName: 1.2.0
+    versionCode: 5063
+    commit: 1.2.0
+    output: build/app/outputs/flutter-apk/app-x86_64-fdroid-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+      - test
+    prebuild:
+      - export flutterVersion=$(sed -n -E 's/.*FLUTTER_VERSION:\s"([0-9.]+)"/\1/p'
+        .github/workflows/flutter_release_build.yml)
+      - pushd $$flutter$$
+      - git checkout -f $flutterVersion
+      - popd
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --flavor fdroid --target-platform="android-x64"
+
+AutoUpdateMode: Version %v
+UpdateCheckMode: HTTP
+VercodeOperation:
+  - '%c + 1'
+  - '%c + 2'
+  - '%c + 3'
+UpdateCheckData: https://github.com/proninyaroslav/blink-comparison/releases/latest/download/version.txt|android-build-number=([0-9]+)|.|android-build-name=([.0-9]+)
+CurrentVersion: 1.2.0
+CurrentVersionCode: 5063
