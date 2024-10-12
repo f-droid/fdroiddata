@@ -105,26 +105,25 @@ Builds:
 
   - versionName: 2.5.7
     versionCode: 65
-    disable: https://gitlab.com/andrei-pavel/radio-romania/-/issues/1
     commit: 16632f144895366b1de2741b805cbb7b8312107d
     output: build/app/outputs/apk/fdroid/release/app-fdroid-release.apk
     srclibs:
-      - flutter@3.0.2
+      - flutter@3.24.1
     rm:
       - linux
       - test
       - web
     prebuild:
+      - sed -i -e '/android {/a namespace "ro.radioromaniaactualitati.podcasts"' -e
+        '/sdkVersion/s/33/34/' android/app/build.gradle
       - export PUB_CACHE=$(pwd)/.pub-cache
-      - export PATH=$$flutter$$/bin:$PATH
-      - flutter config --no-analytics
-      - flutter pub get
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
     scandelete:
       - .pub-cache
     build:
       - export PUB_CACHE=$(pwd)/.pub-cache
-      - export PATH=$$flutter$$/bin:$PATH
-      - flutter build apk --release --flavor fdroid
+      - $$flutter$$/bin/flutter build apk --release --flavor fdroid
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
