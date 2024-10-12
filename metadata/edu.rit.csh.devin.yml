@@ -10,11 +10,6 @@ IssueTracker: https://github.com/ComputerScienceHouse/devin/issues
 Donate: https://www.rit.edu/giving/ComputerScienceHouse
 
 AutoName: Flask
-Description: |-
-  Flask lets you drop items from the vending machines on floor at Computer Science House!
-
-  Flask can be used to check item availability / stock, prices, and of course make
-  purchases from the comfort of your smartphone.
 
 RepoType: git
 Repo: https://github.com/ComputerScienceHouse/devin.git
@@ -54,15 +49,21 @@ Builds:
 
   - versionName: 1.1.1
     versionCode: 5
-    disable: https://github.com/ComputerScienceHouse/devin/issues/6
     commit: 0e65941d185ab7e14b2d0a4472dfa02c168c2230
     output: build/app/outputs/flutter-apk/app-release.apk
     srclibs:
       - flutter@3.0.5
     rm:
       - ios
+    prebuild:
+      - sed -i -e '/minifyEnabled/d' -e '/shrinkResources/d' android/app/build.gradle
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+    scandelete:
+      - .pub-cache
     build:
-      - $$flutter$$/bin/flutter packages pub get
+      - export PUB_CACHE=$(pwd)/.pub-cache
       - $$flutter$$/bin/flutter build apk
 
 AutoUpdateMode: Version

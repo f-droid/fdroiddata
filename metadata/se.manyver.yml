@@ -2805,59 +2805,6 @@ Builds:
       - npm run build-android-assets
     ndk: r21e
 
-  - versionName: 0.2309.4-beta-fdroid
-    versionCode: 150
-    disable: https://gitlab.com/staltz/manyverse/-/issues/2207
-    commit: 2b581be04adb16b4ab6ca255c7bf66ecd8d93ef7
-    timeout: 80000
-    subdir: android/app
-    sudo:
-      - apt-get update
-      - apt-get install -y g++ g++-multilib make libtool python2 python-is-python2
-        autoconf automake libtool
-      - curl -Lo node.tar.gz https://nodejs.org/dist/v12.19.1/node-v12.19.1-linux-x64.tar.gz
-      - echo "858c5201c9572a8ec797f6cb966669cd38d5b5181b93eb5917f9ebdf89471b9f node.tar.gz"
-        | sha256sum -c -
-      - tar xzf node.tar.gz
-      - cp -a node-v12.19.1-linux-x64/. /usr/local/
-      - sysctl fs.inotify.max_user_watches=524288
-      - npm install -g react-native-cli
-    init: npm install --no-optional
-    gradle:
-      - fdroid
-    srclibs:
-      - NodejsMobile@nodejs-mobile-v0.3.3
-    rm:
-      - node_modules/react-native/ReactAndroid/src/main/third-party/java/buck-android-support/buck-android-support.jar
-      - node_modules/react-native/template/
-      - desktop
-      - ios
-      - test
-    prebuild:
-      - sed -i -e '/lifecycle/d' ../build.gradle
-      - sed -i -e '/signingConfig signingConfigs/d' build.gradle
-    scanignore:
-      - android/build.gradle
-      - node_modules/react-native/android
-      - node_modules/jsc-android
-      - node_modules/hermes-engine
-      - node_modules/react-native-blurhash/android/build.gradle
-      - node_modules/react-native-localize/android/build.gradle
-      - node_modules/react-native-svg/android/build.gradle
-      - node_modules/react-native-vector-icons/android/build.gradle
-      - node_modules/@react-native-async-storage/async-storage/android/build.gradle
-    scandelete:
-      - node_modules
-    build:
-      - pushd $$NodejsMobile$$
-      - ./tools/android_build.sh $$NDK$$ arm
-      - ./tools/android_build.sh $$NDK$$ arm64
-      - popd
-      - mv $$NodejsMobile$$/out_android/armeabi-v7a/libnode.so ../../node_modules/nodejs-mobile-react-native/android/libnode/bin/armeabi-v7a/libnode.so
-      - mv $$NodejsMobile$$/out_android/arm64-v8a/libnode.so ../../node_modules/nodejs-mobile-react-native/android/libnode/bin/arm64-v8a/libnode.so
-      - npm run build-android-assets
-    ndk: r24
-
 MaintainerNotes: scanignore is used to allow the "node_modules/react-native/android"
   local Maven repository which contains the prebuilt react-native library which we
   get from npm.

@@ -2,19 +2,18 @@ Categories:
   - Multimedia
   - System
 License: AGPL-3.0-only
-AuthorName: Alex Tran
-AuthorEmail: alex.tran1502@gmail.com
-AuthorWebSite: https://hautran.net
-SourceCode: https://github.com/alextran1502/immich
-IssueTracker: https://github.com/alextran1502/immich/issues
-Changelog: https://github.com/alextran1502/immich/releases
-Donate: https://github.com/sponsors/alextran1502
-Bitcoin: 1PtkQfxHViZ8ugQ6U1sEzwoaBuT67xAUaj
+AuthorName: FUTO
+AuthorWebSite: https://futo.org/
+WebSite: https://immich.app/
+SourceCode: https://github.com/immich-app/immich
+IssueTracker: https://github.com/immich-app/immich/issues
+Changelog: https://github.com/immich-app/immich/releases
+Donate: https://buy.immich.app/
 
 AutoName: Immich
 
 RepoType: git
-Repo: https://github.com/alextran1502/immich.git
+Repo: https://github.com/immich-app/immich.git
 
 Builds:
   - versionName: 1.5.1
@@ -3100,10 +3099,50 @@ Builds:
       - $$flutter$$/bin/flutter build apk --release
     ndk: 25.2.9519653
 
-  - versionName: 1.115.0
-    versionCode: 159
-    disable: https://github.com/immich-app/immich/issues/12425
-    commit: 230eff4e1a537de9db40c2b2a2ad7fb5de487da0
+  - versionName: 1.116.2
+    versionCode: 161
+    commit: 8bbcd5c31e4a227f92864ae2977c4033bc0c50b7
+    subdir: mobile
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y gcc-multilib libc-dev make
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@stable
+      - rustup@1.25.2
+    rm:
+      - design
+      - docker
+      - machine-learning
+      - mobile/ios
+      - server
+      - web
+    prebuild:
+      - cp .isar-cargo.lock .isar/Cargo.lock
+      - export flutterVersion=$(sed -n -E "s/.*flutter:\s([0-9.]+)/\1/p" pubspec.yaml)
+      - '[[ $flutterVersion ]] || exit 1'
+      - pushd $$flutter$$
+      - git checkout -f $flutterVersion
+      - popd
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - sed -i -e "s/^\#f//" pubspec.yaml
+      - sed -i -e 's/^\/\/f //' android/app/build.gradle
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+    scandelete:
+      - mobile/.pub-cache
+    build:
+      - $$rustup$$/rustup-init.sh -y
+      - source $HOME/.cargo/env
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - bash ./scripts/fdroid_build_isar.sh
+      - $$flutter$$/bin/flutter build apk --release
+    ndk: 25.2.9519653
+
+  - versionName: 1.117.0
+    versionCode: 162
+    commit: 6b8462402ba2fa48d4ddbce924b5e3e0987155eb
     subdir: mobile
     submodules: true
     sudo:
@@ -3145,5 +3184,5 @@ Builds:
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: mobile/pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 1.115.0
-CurrentVersionCode: 159
+CurrentVersion: 1.117.0
+CurrentVersionCode: 162

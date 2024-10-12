@@ -351,8 +351,36 @@ Builds:
       - popd
       - mv $$minetest_android_deps$$/deps ../native
 
+  - versionName: 5.9.1
+    versionCode: 5090100
+    commit: 71d9f1771c356c377f556748b05d77deb2c6ca86
+    subdir: android/app
+    sudo:
+      - apt-get update
+      - apt-get install -y cmake gcc-multilib gettext make wget xz-utils
+    gradle:
+      - yes
+    srclibs:
+      - minetest_android_deps@5dcfde6acde07788fb3b0ed340f472c31a79b7d3
+    prebuild: sed -i -e 's/enable true/enable false/' -e '/preBuild.dependsOn getDeps/d'
+      -e 's/versionCode .*/versionCode $$VERCODE$$/' build.gradle ../native/build.gradle
+    build:
+      - export ndkversion=$(grep "ndk_version = " ../build.gradle | cut -d "'" -f
+        2)
+      - sdkmanager "ndk;$ndkversion"
+      - export ANDROID_NDK=$$SDK$$/ndk/$ndkversion
+      - pushd $$minetest_android_deps$$
+      - ./build.sh --all armeabi-v7a
+      - ./build.sh --all arm64-v8a
+      - ./build.sh --all x86
+      - ./build.sh --all x86_64
+      - popd
+      - mv $$minetest_android_deps$$/deps ../native
+
+MaintainerNotes: No AUM as the deps repo does not get tagged on app release, also
+  dynamic versions.
+
 AutoUpdateMode: None
-UpdateCheckMode: Tags
-UpdateCheckData: android/build.gradle|"versionCode", (\d+)||(.*)
-CurrentVersion: 5.9.0
-CurrentVersionCode: 51
+UpdateCheckMode: None
+CurrentVersion: 5.9.1
+CurrentVersionCode: 5090100

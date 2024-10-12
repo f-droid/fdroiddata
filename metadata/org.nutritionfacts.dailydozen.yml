@@ -232,18 +232,27 @@ Builds:
       - archive/OriginalApp.zip
     prebuild: sed -i -e '/gms/d' -e '/firebase/d' {.,..}/build.gradle
 
-  - versionName: '26'
-    versionCode: 90
-    disable: https://github.com/nutritionfactsorg/daily-dozen-android/issues/255
-    commit: 1f741381f10dfba0b4e80cefecaccc6c4eb2ae2a
+  - versionName: '27'
+    versionCode: 91
+    commit: d70853e16f3d7cd54ef93bb34d8597c714363b66
     subdir: app
     gradle:
       - fdroid
+    srclibs:
+      - ActiveAndroid@08c6335cd7324c6e72da536b0c6fffa5a798f6a2
     rm:
       - archive/OriginalApp.zip
-    prebuild: sed -i -e '/gms/d' -e '/firebase/d' {.,..}/build.gradle
+      - app/libs/*.jar
+    prebuild:
+      - sed -i -e '/gms/d' -e '/firebase/d' {.,..}/build.gradle
+      - sed -i -e 's/-XX:MaxPermSize=512m//' ../gradle.properties
+      - cp -a $$ActiveAndroid$$/src/com src/main/java
+      - sed -i -e '/dependencies {/a implementation "androidx.collection:collection:1.4.3"'
+        build.gradle
+      - sed -i -e 's/android.support.v4.util.LruCache/androidx.collection.LruCache/'
+        src/main/java/com/activeandroid/Cache.java
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v[0-9.]*$
-CurrentVersion: '26'
-CurrentVersionCode: 90
+CurrentVersion: '27'
+CurrentVersionCode: 91

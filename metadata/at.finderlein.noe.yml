@@ -11,7 +11,6 @@ WebSite: https://finderlein.at
 SourceCode: https://github.com/finderlein/noefinderlein_flutter
 IssueTracker: https://github.com/finderlein/noefinderlein_flutter/issues/new/choose
 Donate: https://finderlein.at/donate
-FlattrID: w7ke2k
 Liberapay: derqurps
 
 AutoName: NÖ Finderlein
@@ -228,7 +227,6 @@ Builds:
 
   - versionName: 2.0.20
     versionCode: 2020
-    disable: https://github.com/finderlein/noefinderlein_flutter/issues/4
     commit: 8330d83fe21d89a0f9003032d1378e8409a7666b
     output: build/app/outputs/flutter-apk/app-release.apk
     srclibs:
@@ -253,6 +251,13 @@ Builds:
       - export PUB_CACHE=$(pwd)/.pub-cache
       - $$flutter$$/bin/flutter config --no-analytics
       - $$flutter$$/bin/flutter pub get
+      - cd .pub-cache/hosted/pub.dev/geolocator_android-*/android
+      - sed -i -e '/gms/d' build.gradle
+      - cd src/main/java/com/baseflow/geolocator/location
+      - rm FusedLocationClient.java
+      - sed -i -e '/if (forceAndroidLocationManager) {/,/^  }/c return new LocationManagerClient(context,
+        locationOptions);}' -e '/isGooglePlayServicesAvailable/,/^  }/d' -e '/gms/d'
+        GeolocationManager.java
     scandelete:
       - .pub-cache
     build:
@@ -260,10 +265,10 @@ Builds:
       - echo 'var mapAccessToken = "pk.eyJ1IjoiZGVycXVycHMiLCJhIjoiY2wzY3dqeGhkMDJxeTNja2p1cHZmNWJhYSJ9.dnnM2GDwtxAVog4xvJzTJw";'>
         lib/auth/secrets.dart
       - $$flutter$$/bin/flutter pub run build_runner build
-      - $$flutter$$/bin/flutter build apk --release --dart-define=ANDROID_FLOSS=true
+      - $$flutter$$/bin/flutter build apk --release --dart-define=IS_RELEASE=true
 
 AutoUpdateMode: Version
-UpdateCheckMode: Tags v\d+.\d+.\d+
+UpdateCheckMode: Tags v[\d.]+
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
 CurrentVersion: 2.0.20
 CurrentVersionCode: 2020

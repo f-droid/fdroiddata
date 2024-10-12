@@ -7,6 +7,8 @@ AuthorWebSite: https://www.henrikrydgard.com/
 WebSite: https://www.ppsspp.org/
 SourceCode: https://github.com/hrydgard/ppsspp
 IssueTracker: https://github.com/hrydgard/ppsspp/issues
+Translation: https://www.ppsspp.org/docs/development/translation/
+Changelog: https://www.ppsspp.org/news/
 
 AutoName: PPSSPP
 Description: |-
@@ -489,35 +491,53 @@ Builds:
       - cd ../android
       - ./ab.sh
 
-  - versionName: 1.2.1.0
-    versionCode: 12100
-    disable: "weird \"android-arm64-build.sh: build_arm64: not found\" that I (mvdan)\
-      \ can't reproduce on my laptop"
-    commit: v1.2.1
+  - versionName: 1.17.1
+    versionCode: 117010000
+    commit: d479b74ed9c3e321bc3735da29bc125a2ac3b9b2
     subdir: android
     submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install make yasm
+    gradle:
+      - normal
     rm:
       - dx9sdk
       - pspautotests
-    scanignore:
-      - android/android-ndk-profiler
+      - UWP
+      - Windows
+      - macOS
+    prebuild:
+      - sed -i -e '/androidgitversion/s/0.4.5/0.4.14/' -e 's/%-dirty%//' build.gradle
+      - cd ../ffmpeg
+      - sed -i -e 's/windows/linux/' android_*.sh
+      - sed -i -e 's/android-9/android-16/' -e '/^build_ARMv6/d' -e 's/--extra-cflags="/--extra-cflags="
+        -D__ANDROID_API__=16/' android_armeabi-v7a.sh
+      - sed -i -e 's/--extra-cflags="/--extra-cflags=" -D__ANDROID_API__=21/' android_arm64-v8a.sh
+        android_x86_64.sh
     scandelete:
-      - ffmpeg
+      - android/libs
       - ext/armips/Tests
+      - ext/openxr/android
+      - ext/openxr/stub
+      - ext/vulkan
+      - ext/rapidjson/package.json
+      - ext/libchdr/deps/zstd-*/tests
+      - ext/zstd/tests
+      - ffmpeg
+      - libretro/libretro-common/samples
+      - source_assets
+      - SDL/macOS
     build:
       - cd ../ffmpeg
-      - sed -i -e 's@^NDK.*@NDK=$$NDK$$@' -e 's/windows.*/linux-x86*/' android-build.sh
-        android-arm64-build.sh android-x64-build.sh ax86-build.sh
-      - sh android-build.sh
-      - sh android-arm64-build.sh
-      - sh android-x64-build.sh
-      - sh ax86-build.sh
-      - cd ../android
-      - ./ab.sh
+      - ./android_arm64-v8a.sh
+      - ./android_armeabi-v7a.sh
+      - ./android_x86_64.sh
+    ndk: r21e
+    gradleprops:
+      - f_droid
 
 AutoUpdateMode: None
-UpdateCheckMode: Tags
-VercodeOperation:
-  - '%c*10'
-CurrentVersion: 1.14.4.0
-CurrentVersionCode: 1140400000
+UpdateCheckMode: None
+CurrentVersion: 1.17.1
+CurrentVersionCode: 117010000

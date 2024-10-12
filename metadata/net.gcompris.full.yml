@@ -1316,7 +1316,173 @@ Builds:
       - make apk_release
     ndk: 21.4.7075529
 
+  - versionName: '4.2'
+    versionCode: 40200
+    commit: V4.2
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y cmake g++ gettext libarchive13 libgl1-mesa-dev libncurses5
+        make python-is-python3 zlib1g-dev
+    output: android-build/android-build/GCompris-Android-release-armeabi-v7a-dl-$$VERSION$$.apk
+    srclibs:
+      - extra-cmake-modules@v5.99.0
+      - OpenSSL@OpenSSL_1_1_1w
+    prebuild: mkdir qt/ android-build/
+    build:
+      - sdkmanager 'platforms;android-28'
+      - export ANDROID_NDK=$$NDK$$
+      - export ANDROID_NDK_ROOT=$$NDK$$
+      - export ANDROID_SDK_ROOT=$$SDK$$
+      - export ANDROID_API_VERSION=android-28
+      - export QT_VERSION=5.12
+      - export PREFIX=$(pwd)/qt/install/
+      - export OPENSSL_LIBS=-L$PREFIX'/lib -lssl -lcrypto'
+      - pushd $$OpenSSL$$
+      - PATH=$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH ./Configure shared
+        android-arm -D__ANDROID_API__=16 --prefix=$PREFIX
+      - PATH=$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH make SHLIB_VERSION_NUMBER=
+        SHLIB_EXT=_1_1.so build_libs install_sw
+      - popd
+      - pushd qt/
+      - git clone https://code.qt.io/qt/qtbase.git --single-branch --branch $QT_VERSION
+      - pushd qtbase
+      - sed -i -e 's/javac -source 6 -target 6/javac -source 8 -target 8/' mkspecs/features/java.prf
+      - sed -i -e 's/3.2.0/7.2.0/' src/android/templates/build.gradle
+      - sed -i -e 's/4.6/7.3.3/' src/3rdparty/gradle/gradle/wrapper/gradle-wrapper.properties
+      - sed -i "/lintOptions/i    defaultConfig {\n        minSdkVersion 16\n        targetSdkVersion
+        33\n    }" src/android/templates/build.gradle
+      - sed -i '/<string.h>/a \#include <limits>\n\#include <algorithm>' src/corelib/global/qendian.h
+      - sed -i '/<QtCore\/qbytearray.h>/a \#include <limits>\n\#include <algorithm>'
+        src/corelib/tools/qbytearraymatcher.h
+      - sed -i '/<stdio.h>/a \#include <limits>\n\#include <algorithm>' src/tools/moc/generator.cpp
+      - ./configure -xplatform android-clang --disable-rpath -openssl-linked -nomake
+        tests -nomake examples -android-ndk $$NDK$$ -android-sdk $$SDK$$ -no-warnings-are-errors
+        -opensource -confirm-license -prefix $PREFIX -I$PREFIX/include
+      - make -j$(nproc)
+      - make install
+      - popd
+      - export CMAKE_QT_LIB=${PREFIX}/lib/cmake/
+      - git clone https://code.qt.io/qt/qtdeclarative.git --single-branch --branch=$QT_VERSION
+      - pushd qtdeclarative
+      - sed -i '/qv4global_p.h>/a \#include <limits>\n\#include <algorithm>\n' src/qml/jsruntime/qv4propertykey_p.h
+      - QMAKESPEC=android-clang $PREFIX/bin/qmake .
+      - make -j$(nproc)
+      - make install
+      - popd
+      - for module in qtquickcontrols2 qtsvg qtandroidextras qtgraphicaleffects qttools
+        qtmultimedia qtimageformats qtcharts qtsensors qttranslations; do git clone
+        https://code.qt.io/qt/${module}.git --single-branch --branch=$QT_VERSION
+      - pushd ${module}
+      - QMAKESPEC=android-clang $PREFIX/bin/qmake .
+      - make -j$(nproc)
+      - make install
+      - popd; done
+      - popd
+      - mkdir $$extra-cmake-modules$$/build
+      - pushd $$extra-cmake-modules$$/build
+      - cmake -DCMAKE_INSTALL_PREFIX=. -DBUILD_HTML_DOCS=OFF -DBUILD_MAN_DOCS=OFF
+        -DBUILD_TESTING=OFF ..
+      - make -j$(nproc)
+      - make install
+      - popd
+      - sed -i 's=${OPENSSL_DIR}/libcrypto.so.1.1=$$OpenSSL$$/libcrypto.so=g' android/CMakeLists.txt
+      - sed -i 's=${OPENSSL_DIR}/libssl.so.1.1=$$OpenSSL$$/libssl.so=g' android/CMakeLists.txt
+      - pushd android-build
+      - cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_ANDROID_API=16 -DCMAKE_TOOLCHAIN_FILE=$$extra-cmake-modules$$/build/share/ECM/toolchain/Android.cmake
+        -DANDROID_ABI=armeabi-v7a -DQt5_DIR=${CMAKE_QT_LIB}/Qt5/ -DCMAKE_FIND_ROOT_PATH=${PREFIX}/lib/
+        -Wno-dev ../
+      - pushd ../poqm
+      - sed -i 's=\\"==g' en/gcompris_qt.po
+      - popd
+      - make -j$(nproc)
+      - make apk_release
+    ndk: 21.4.7075529
+
+  - versionName: '4.2'
+    versionCode: 40201
+    commit: V4.2
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y cmake g++ gettext libarchive13 libgl1-mesa-dev libncurses5
+        make python-is-python3 zlib1g-dev
+    output: android-build/android-build/GCompris-Android-release-arm64-v8a-dl-4.2.apk
+    srclibs:
+      - extra-cmake-modules@v5.99.0
+      - OpenSSL@OpenSSL_1_1_1w
+    prebuild: mkdir qt/ android-build/
+    build:
+      - sdkmanager 'platforms;android-28'
+      - export ANDROID_NDK=$$NDK$$
+      - export ANDROID_NDK_ROOT=$$NDK$$
+      - export ANDROID_SDK_ROOT=$$SDK$$
+      - export ANDROID_API_VERSION=android-28
+      - export QT_VERSION=5.12
+      - export PREFIX=$(pwd)/qt/install/
+      - export OPENSSL_LIBS=-L$PREFIX'/lib -lssl -lcrypto'
+      - pushd $$OpenSSL$$
+      - PATH=$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH ./Configure shared
+        android-arm64 -D__ANDROID_API__=21 --prefix=$PREFIX
+      - PATH=$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH make SHLIB_VERSION_NUMBER=
+        SHLIB_EXT=_1_1.so build_libs install_sw
+      - popd
+      - pushd qt/
+      - git clone https://code.qt.io/qt/qtbase.git --single-branch --branch $QT_VERSION
+      - pushd qtbase
+      - sed -i -e 's/javac -source 6 -target 6/javac -source 8 -target 8/' mkspecs/features/java.prf
+      - sed -i -e 's/3.2.0/7.2.0/' src/android/templates/build.gradle
+      - sed -i -e 's/4.6/7.3.3/' src/3rdparty/gradle/gradle/wrapper/gradle-wrapper.properties
+      - sed -i "/lintOptions/i    defaultConfig {\n        minSdkVersion 16\n        targetSdkVersion
+        33\n    }" src/android/templates/build.gradle
+      - sed -i '/<string.h>/a \#include <limits>\n\#include <algorithm>' src/corelib/global/qendian.h
+      - sed -i '/<QtCore\/qbytearray.h>/a \#include <limits>\n\#include <algorithm>'
+        src/corelib/tools/qbytearraymatcher.h
+      - sed -i '/<stdio.h>/a \#include <limits>\n\#include <algorithm>' src/tools/moc/generator.cpp
+      - ./configure -xplatform android-clang --disable-rpath -openssl-linked -nomake
+        tests -nomake examples -android-ndk $$NDK$$ -android-sdk $$SDK$$ -no-warnings-are-errors
+        -android-arch arm64-v8a -opensource -confirm-license -prefix $PREFIX -I$PREFIX/include
+      - make -j$(nproc)
+      - make install
+      - popd
+      - export CMAKE_QT_LIB=${PREFIX}/lib/cmake/
+      - git clone https://code.qt.io/qt/qtdeclarative.git --single-branch --branch=$QT_VERSION
+      - pushd qtdeclarative
+      - sed -i '/qv4global_p.h>/a \#include <limits>\n\#include <algorithm>\n' src/qml/jsruntime/qv4propertykey_p.h
+      - QMAKESPEC=android-clang $PREFIX/bin/qmake .
+      - make -j$(nproc)
+      - make install
+      - popd
+      - for module in qtquickcontrols2 qtsvg qtandroidextras qtgraphicaleffects qttools
+        qtmultimedia qtimageformats qtcharts qtsensors qttranslations; do git clone
+        https://code.qt.io/qt/${module}.git --single-branch --branch=$QT_VERSION
+      - pushd ${module}
+      - QMAKESPEC=android-clang $PREFIX/bin/qmake .
+      - make -j$(nproc)
+      - make install
+      - popd; done
+      - popd
+      - mkdir $$extra-cmake-modules$$/build
+      - pushd $$extra-cmake-modules$$/build
+      - cmake -DCMAKE_INSTALL_PREFIX=. -DBUILD_HTML_DOCS=OFF -DBUILD_MAN_DOCS=OFF
+        -DBUILD_TESTING=OFF ..
+      - make -j$(nproc)
+      - make install
+      - popd
+      - sed -i 's=${OPENSSL_DIR}/libcrypto.so.1.1=$$OpenSSL$$/libcrypto.so=g' android/CMakeLists.txt
+      - sed -i 's=${OPENSSL_DIR}/libssl.so.1.1=$$OpenSSL$$/libssl.so=g' android/CMakeLists.txt
+      - pushd android-build
+      - cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_ANDROID_API=21 -DCMAKE_TOOLCHAIN_FILE=$$extra-cmake-modules$$/build/share/ECM/toolchain/Android.cmake
+        -DANDROID_ABI=arm64-v8a -DQt5_DIR=${CMAKE_QT_LIB}/Qt5/ -DCMAKE_FIND_ROOT_PATH=${PREFIX}/lib/
+        -Wno-dev ../
+      - pushd ../poqm
+      - sed -i 's=\\"==g' en/gcompris_qt.po
+      - popd
+      - make -j$(nproc)
+      - make apk_release
+    ndk: 21.4.7075529
+
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: '4.1'
-CurrentVersionCode: 40101
+CurrentVersion: '4.2'
+CurrentVersionCode: 40201

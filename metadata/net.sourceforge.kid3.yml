@@ -498,8 +498,146 @@ Builds:
       - popd
     ndk: 23.1.7779620
 
+  - versionName: 3.9.6
+    versionCode: 30
+    commit: 44e1328ad6a0269704830281823a4f7d8e0e4ba4
+    timeout: 14400
+    sudo:
+      - apt-get update
+      - apt-get install -y 7zip build-essential cmake docbook-xsl make ninja-build
+        python-is-python3 libclang-dev
+    output: android-build/kid3/android/android-build/build/outputs/apk/release/android-build-release-unsigned.apk
+    srclibs:
+      - Qt5@v6.5.3
+    prebuild:
+      - sdkmanager 'platforms;android-33' 'build-tools;33.0.0'
+      - cd $$Qt5$$
+      - ./init-repository -f --module-subset=qtbase,qtdeclarative,qtimageformats,qtmultimedia,qtshadertools,qtsvg,qttools,qttranslations
+    target: android-22
+    build:
+      - export JAVA_HOME=$(readlink -f /usr/bin/javac | sed "s:/bin/javac::")
+      - export ANDROID_SDK_ROOT=$$SDK$$ ANDROID_NDK_ROOT=$$NDK$$
+      - export ANDROID_API_VERSION=android-31
+      - export PATH=${JAVA_HOME}/bin:${PATH}
+      - export BUILD_DIR=$(readlink -f ${PWD})/android-build
+      - export QT_HOST_BUILD=$(readlink -f ${PWD}/../srclib)/build-host-qt
+      - export QT_HOST_PREFIX=$(readlink -f ${PWD}/../srclib)/qt/6.5.3/gcc_64
+      - export QT_BUILD=$(readlink -f ${PWD}/../srclib)/build-qt
+      - export QTPREFIX=$(readlink -f ${PWD}/../srclib)/qt/6.5.3/android_armv7
+      - rm -rf $QT_HOST_PREFIX $QT_HOST_BUILD $QTPREFIX $QT_BUILD
+      - mkdir -p $BUILD_DIR $QT_HOST_PREFIX $QT_HOST_BUILD $QTPREFIX $QT_BUILD
+      - pushd ${BUILD_DIR}
+      - COMPILER=cross-android ../build.sh libs
+      - popd
+      - pushd ${QT_HOST_BUILD}
+      - $$Qt5$$/configure -opensource -confirm-license -prefix $QT_HOST_PREFIX -release
+        -submodules qtbase,qttools -nomake tests -nomake examples -no-sql-mysql -no-dbus
+        -no-openssl -no-glib -no-icu -no-cups -no-fontconfig -no-gtk -no-egl -skip
+        qtnetwork,qtsql,qtxml,qtprintsupport,qttestlib,qtwebengine,qtgamepad,qtwebchannel
+        -skip qtwebview,qtwebsockets,qtwebglplugin,qtserialport,qtnetworkauth,qt3d,qtsensors
+        -skip qtwayland,qtxmlpatterns,qtscxml,qtscript,qtconnectivity,qtimageformats
+        -skip qtlanguageserver,qtquicktimeline,qtquick3d,qt5compat,qtactiveqt,qtcharts
+        -skip qtcoap,qtdatavis3d,qthttpserver,qtpositioning,qtdoc,qtgrpc,qtlocation,qtlottie
+        -skip qtmqtt,qtopcua,qtquick3dphysics,qtquickeffectmaker,qtremoteobjects,qtserialbus
+        -skip qtspeech,qtvirtualkeyboard -no-opengl -no-feature-debug -no-feature-itemmodeltester
+        -no-feature-concurrent -- -D CMAKE_INSTALL_MESSAGE=NEVER
+      - cmake --build . --parallel
+      - cmake --install .
+      - popd
+      - pushd ${QT_BUILD}
+      - $$Qt5$$/configure -platform android-clang --disable-rpath -opensource -confirm-license
+        -silent -prefix $QTPREFIX -release -nomake tests -nomake examples -no-sql-mysql
+        -no-dbus -no-use-gold-linker -sysconfdir /etc/xdg -opengl es2 -android-sdk
+        $$SDK$$ -android-ndk $$NDK$$ -android-arch armeabi-v7a -android-ndk-platform
+        android-23 -skip qtwebengine,qtgamepad,qtwebchannel,qtwebview,qtwebsockets,qtwebglplugin
+        -skip qtserialport,qtnetworkauth,qt3d,qtsensors,qtwayland,qtxmlpatterns,qtscxml
+        -skip qtscript,qtconnectivity,qtlanguageserver,qtquicktimeline,qtquick3d,qt5compat
+        -skip qtactiveqt,qtcharts,qtcoap,qtdatavis3d,qthttpserver,qtpositioning,qtdoc,qtgrpc
+        -skip qtlocation,qtlottie,qtmqtt,qtopcua,qtquick3dphysics,qtquickeffectmaker
+        -skip qtremoteobjects,qtserialbus,qtspeech,qtvirtualkeyboard -no-feature-debug
+        -no-feature-itemmodeltester -qt-host-path $QT_HOST_PREFIX -openssl-runtime
+        -- -D OPENSSL_ROOT_DIR=$BUILD_DIR/buildroot/usr/local -D CMAKE_INSTALL_MESSAGE=NEVER
+      - cmake --build . --parallel
+      - cmake --install .
+      - popd
+      - pushd ${BUILD_DIR}
+      - COMPILER=cross-android QTBINARYDIR=$QT_HOST_PREFIX/bin ../build.sh package
+      - popd
+    ndk: 23.1.7779620
+
+  - versionName: 3.9.6
+    versionCode: 31
+    commit: 44e1328ad6a0269704830281823a4f7d8e0e4ba4
+    timeout: 14400
+    sudo:
+      - apt-get update
+      - apt-get install -y 7zip build-essential cmake docbook-xsl make ninja-build
+        python-is-python3 libclang-dev
+    output: android-build/kid3/android/android-build/build/outputs/apk/release/android-build-release-unsigned.apk
+    srclibs:
+      - Qt5@v6.5.3
+    prebuild:
+      - sdkmanager 'platforms;android-33' 'build-tools;33.0.0'
+      - cd $$Qt5$$
+      - ./init-repository -f --module-subset=qtbase,qtdeclarative,qtimageformats,qtmultimedia,qtshadertools,qtsvg,qttools,qttranslations
+    target: android-22
+    build:
+      - export JAVA_HOME=$(readlink -f /usr/bin/javac | sed "s:/bin/javac::")
+      - export ANDROID_SDK_ROOT=$$SDK$$ ANDROID_NDK_ROOT=$$NDK$$
+      - export ANDROID_API_VERSION=android-31
+      - export PATH=${JAVA_HOME}/bin:${PATH}
+      - export BUILD_DIR=$(readlink -f ${PWD})/android-build
+      - export QT_HOST_BUILD=$(readlink -f ${PWD}/../srclib)/build-host-qt
+      - export QT_HOST_PREFIX=$(readlink -f ${PWD}/../srclib)/qt/6.5.3/gcc_64
+      - export QT_BUILD=$(readlink -f ${PWD}/../srclib)/build-qt
+      - export QTPREFIX=$(readlink -f ${PWD}/../srclib)/qt/6.5.3/android_arm64_v8a
+      - rm -rf $QT_HOST_PREFIX $QT_HOST_BUILD $QTPREFIX $QT_BUILD
+      - mkdir -p $BUILD_DIR $QT_HOST_PREFIX $QT_HOST_BUILD $QTPREFIX $QT_BUILD
+      - pushd ${BUILD_DIR}
+      - COMPILER=cross-android ../build.sh libs
+      - popd
+      - pushd ${QT_HOST_BUILD}
+      - $$Qt5$$/configure -opensource -confirm-license -prefix $QT_HOST_PREFIX -release
+        -submodules qtbase,qttools -nomake tests -nomake examples -no-sql-mysql -no-dbus
+        -no-openssl -no-glib -no-icu -no-cups -no-fontconfig -no-gtk -no-egl -skip
+        qtnetwork,qtsql,qtxml,qtprintsupport,qttestlib,qtwebengine,qtgamepad,qtwebchannel
+        -skip qtwebview,qtwebsockets,qtwebglplugin,qtserialport,qtnetworkauth,qt3d,qtsensors
+        -skip qtwayland,qtxmlpatterns,qtscxml,qtscript,qtconnectivity,qtimageformats
+        -skip qtlanguageserver,qtquicktimeline,qtquick3d,qt5compat,qtactiveqt,qtcharts
+        -skip qtcoap,qtdatavis3d,qthttpserver,qtpositioning,qtdoc,qtgrpc,qtlocation,qtlottie
+        -skip qtmqtt,qtopcua,qtquick3dphysics,qtquickeffectmaker,qtremoteobjects,qtserialbus
+        -skip qtspeech,qtvirtualkeyboard -no-opengl -no-feature-debug -no-feature-itemmodeltester
+        -no-feature-concurrent -- -D CMAKE_INSTALL_MESSAGE=NEVER
+      - cmake --build . --parallel
+      - cmake --install .
+      - popd
+      - pushd ${QT_BUILD}
+      - $$Qt5$$/configure -platform android-clang --disable-rpath -opensource -confirm-license
+        -silent -prefix $QTPREFIX -release -nomake tests -nomake examples -no-sql-mysql
+        -no-dbus -no-use-gold-linker -sysconfdir /etc/xdg -opengl es2 -android-sdk
+        $$SDK$$ -android-ndk $$NDK$$ -android-abis arm64-v8a -android-ndk-platform
+        android-23 -skip qtwebengine,qtgamepad,qtwebchannel,qtwebview,qtwebsockets,qtwebglplugin
+        -skip qtserialport,qtnetworkauth,qt3d,qtsensors,qtwayland,qtxmlpatterns,qtscxml
+        -skip qtscript,qtconnectivity,qtlanguageserver,qtquicktimeline,qtquick3d,qt5compat
+        -skip qtactiveqt,qtcharts,qtcoap,qtdatavis3d,qthttpserver,qtpositioning,qtdoc,qtgrpc
+        -skip qtlocation,qtlottie,qtmqtt,qtopcua,qtquick3dphysics,qtquickeffectmaker
+        -skip qtremoteobjects,qtserialbus,qtspeech,qtvirtualkeyboard -no-feature-debug
+        -no-feature-itemmodeltester -qt-host-path $QT_HOST_PREFIX -openssl-runtime
+        -- -D OPENSSL_ROOT_DIR=$BUILD_DIR/buildroot/usr/local -D CMAKE_INSTALL_MESSAGE=NEVER
+      - cmake --build . --parallel
+      - cmake --install .
+      - popd
+      - sed -i -e 's/\(set(QT_ANDROID_APP_VERSION_CODE\) .*/\1 $$VERCODE$$)/' CMakeLists.txt
+      - pushd ${BUILD_DIR}
+      - COMPILER=cross-android QTBINARYDIR=$QT_HOST_PREFIX/bin ../build.sh package
+      - popd
+    ndk: 23.1.7779620
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v.*$
+VercodeOperation:
+  - '%c'
+  - '%c+1'
 UpdateCheckData: CMakeLists.txt|set\(QT_ANDROID_APP_VERSION_CODE\s+(\d+)\)|kid3.spec|Version:\s*(\S+)
-CurrentVersion: 3.9.5
-CurrentVersionCode: 29
+CurrentVersion: 3.9.6
+CurrentVersionCode: 31

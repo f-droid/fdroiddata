@@ -40,8 +40,28 @@ Builds:
       - node_modules/cordova-android/framework/cordova-publish.gradle
     build: cordova build android --release -- --packageType=apk
 
+  - versionName: 1.8.2
+    versionCode: 10802
+    commit: f412a3d593df75e0bb5058f1ff21691497b2307e
+    sudo:
+      - apt-get update
+      - apt-get install -y npm
+      - npm install -g npm@9.2.0
+      - npm install -g cordova@12.0.0
+    output: platforms/android/app/build/outputs/apk/release/app-release-unsigned.apk
+    prebuild:
+      - sdkmanager 'platforms;android-34' 'build-tools;34.0.0'
+      - cordova platform add android
+      - cordova plugin add cordova-plugin-android-permissions
+      - cordova plugin add cordova-plugin-dialogs
+      - cordova plugin add cordova-plugin-file
+      - sed -i 's/.*<uses-permission.*INTERNET.*//' platforms/android/app/src/main/AndroidManifest.xml
+    scandelete:
+      - node_modules/cordova-android/framework/cordova-publish.gradle
+    build: cordova build android --release -- --packageType=apk
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: fdroid_version.txt|.+,(\d+)|.|(.+),\d+
-CurrentVersion: 1.8.1
-CurrentVersionCode: 10801
+CurrentVersion: 1.8.2
+CurrentVersionCode: 10802

@@ -718,78 +718,10 @@ Builds:
       - mv $$dxtorandroid$$/external/lib/arm64-v8a/libtor.so src/main/jniLibs/arm64-v8a/libtor.arm64.so
     ndk: r21d
 
-  - versionName: 0.9.5
-    versionCode: 57
-    disable: https://gitlab.com/DrXtreme/anonymousmessenger/-/issues/1
-    commit: 0edc71571f8bafe1544adc5df27645b0d917bc1e
-    subdir: app
-    sudo:
-      - apt-get update
-      - apt-get install -y autogen build-essential gcc-arm-linux-gnueabihf libevent-dev
-      - apt-get install -y openjdk-17-jdk-headless
-      - update-java-alternatives -a
-    gradle:
-      - yes
-    srclibs:
-      - dxtorandroid@29d917c6eddd23c77db3248d3c873532a87dd791
-      - obfs4@b5a9f3c5d239b2b1d2d5877c043c5893635334a0
-    rm:
-      - app/src/main/jniLibs/*/*.so
-    prebuild: sed -i -e 's/com.example.anonymousmessenger/com.dx.anonymousmessenger/'
-      build.gradle
-    build:
-      - pushd $$obfs4$$
-      - curl -Lso go.tar.gz https://golang.org/dl/go1.15.4.linux-amd64.tar.gz
-      - echo "eb61005f0b932c93b424a3a4eaa67d72196c79129d9a3ea8578047683e2c80d5 go.tar.gz"
-        | sha256sum -c -
-      - tar xzvf go.tar.gz
-      - export GOPATH=$(pwd)/go
-      - export GOROOT=$(pwd)/go
-      - export PATH=$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
-      - export ARCH=arm
-      - CC=armv7a-linux-androideabi21-clang CXX=armv7a-linux-androideabi21-clang++
-        GOOS=android GOARCH=$ARCH ./go/bin/go install std
-      - CGO_ENABLED=1 CC=armv7a-linux-androideabi21-clang CXX=armv7a-linux-androideabi21-clang++
-        GOOS=android GOARCH=$ARCH ./go/bin/go build -v -o obfs4proxy/obfs4proxy.${ARCH}.so
-        ./obfs4proxy
-      - export ARCH=arm64
-      - CC=aarch64-linux-android21-clang CXX=aarch64-linux-android21-clang++ GOOS=android
-        GOARCH=$ARCH ./go/bin/go install std
-      - CGO_ENABLED=1 CC=aarch64-linux-android21-clang CXX=aarch64-linux-android21-clang++
-        GOOS=android GOARCH=$ARCH ./go/bin/go build -v -o obfs4proxy/obfs4proxy.${ARCH}.so
-        ./obfs4proxy
-      - export ARCH=386
-      - CC=i686-linux-android21-clang CXX=i686-linux-android21-clang++ GOOS=android
-        GOARCH=$ARCH ./go/bin/go install std
-      - CGO_ENABLED=1 CC=i686-linux-android21-clang CXX=i686-linux-android21-clang++
-        GOOS=android GOARCH=$ARCH ./go/bin/go build -v -o obfs4proxy/obfs4proxy.x86.so
-        ./obfs4proxy
-      - export ARCH=amd64
-      - CC=x86_64-linux-android21-clang CXX=x86_64-linux-android21-clang++ GOOS=android
-        GOARCH=$ARCH ./go/bin/go install std
-      - CGO_ENABLED=1 CC=x86_64-linux-android21-clang CXX=x86_64-linux-android21-clang++
-        GOOS=android GOARCH=$ARCH ./go/bin/go build -v -o obfs4proxy/obfs4proxy.x86_64.so
-        ./obfs4proxy
-      - popd
-      - mv $$obfs4$$/obfs4proxy/obfs4proxy.x86.so src/main/jniLibs/x86/obfs4proxy.x86.so
-      - mv $$obfs4$$/obfs4proxy/obfs4proxy.x86_64.so src/main/jniLibs/x86_64/obfs4proxy.x86_64.so
-      - mv $$obfs4$$/obfs4proxy/obfs4proxy.arm.so src/main/jniLibs/armeabi-v7a/obfs4proxy.arm.so
-      - mv $$obfs4$$/obfs4proxy/obfs4proxy.arm64.so src/main/jniLibs/arm64-v8a/obfs4proxy.arm64.so
-      - pushd $$dxtorandroid$$
-      - ./tor-droid-make.sh fetch
-      - export APP_ABI=x86
-      - unset NDK_PLATFORM_LEVEL
-      - unset PIEFLAGS
-      - make -C external clean tor
-      - ./tor-droid-make.sh build
-      - popd
-      - mv $$dxtorandroid$$/external/lib/x86/libtor.so src/main/jniLibs/x86/libtor.x86.so
-      - mv $$dxtorandroid$$/external/lib/x86_64/libtor.so src/main/jniLibs/x86_64/libtor.x86_64.so
-      - mv $$dxtorandroid$$/external/lib/armeabi-v7a/libtor.so src/main/jniLibs/armeabi-v7a/libtor.arm.so
-      - mv $$dxtorandroid$$/external/lib/arm64-v8a/libtor.so src/main/jniLibs/arm64-v8a/libtor.arm64.so
-    ndk: r21d
-
-AutoUpdateMode: Version
-UpdateCheckMode: Tags
+ArchivePolicy: 0
+AutoUpdateMode: None
+UpdateCheckMode: None
 CurrentVersion: 0.9.5
 CurrentVersionCode: 57
+
+NoSourceSince: 0.9.5

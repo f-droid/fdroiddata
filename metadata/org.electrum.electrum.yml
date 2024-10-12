@@ -1,0 +1,278 @@
+Categories:
+  - Money
+License: MIT
+AuthorName: spesmilo
+WebSite: https://electrum.org
+SourceCode: https://github.com/spesmilo/electrum
+IssueTracker: https://github.com/spesmilo/electrum/issues
+Changelog: https://github.com/spesmilo/electrum/blob/HEAD/RELEASE-NOTES
+
+AutoName: Electrum
+
+RepoType: git
+Repo: https://github.com/spesmilo/electrum.git
+
+Builds:
+  - versionName: 4.5.5.0
+    versionCode: 24050500
+    commit: eeaf18db0db7ca808c17de66909bc9c9b950308e
+    timeout: 14400
+    submodules: true
+    sudo:
+      - ln -sf /usr/bin/sdkmanager /opt/android-sdk/tools/bin/sdkmanager
+      - mkdir -p /home/user/wspace/ /opt/android/
+      - rm -rf /etc/apt/sources.list /etc/apt/preferences.d/*
+      - echo "deb https://snapshot.debian.org/archive/debian/20230629T090352Z/ bookworm
+        main" > /etc/apt/sources.list
+      - echo "deb-src https://snapshot.debian.org/archive/debian/20230629T090352Z/
+        bookworm main" >> /etc/apt/sources.list
+      - 'echo "Package: *" > /etc/apt/preferences.d/snapshot'
+      - 'echo "Pin: origin \"snapshot.debian.org\"" >> /etc/apt/preferences.d/snapshot'
+      - 'echo "Pin-Priority: 1001" >> /etc/apt/preferences.d/snapshot'
+      - apt-get update
+      - apt-get install --yes --no-install-recommends --allow-downgrades unzip python3
+        python3-dev python3-pip python3-setuptools python3-venv wget lbzip2 patch
+        software-properties-common zip rsync build-essential ccache autoconf autopoint
+        libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 cmake
+        libffi-dev libssl-dev automake gettext libltdl-dev libopengl-dev libegl-dev
+        dos2unix
+      - chmod 777 -R /opt /home/user/wspace/
+    output: dist/Electrum-$$VERSION$$-armeabi-v7a-release-unsigned.apk
+    binary: https://download.electrum.org/4.5.5/Electrum-%v-armeabi-v7a-release.apk
+    srclibs:
+      - spesmilo-buildozer@master
+      - spesmilo-python-for-android@develop
+    prebuild:
+      - git checkout -f 7263a49129d14db288a01b0b9d569422baddf5e1
+      - project_path=$(pwd)
+      - '[ ! -d "/home/user/wspace/electrum" ] && cp -rf "$project_path" /home/user/wspace/electrum
+        && rm -rf "$project_path" && ln -snf /home/user/wspace/electrum "$project_path"'
+      - pushd /home/user/wspace/electrum
+      - ANDROID_SDK_BUILD_TOOLS_VERSION=$(cat contrib/android/Dockerfile | grep ANDROID_SDK_BUILD_TOOLS_VERSION
+        | sed -n 's/.*"\(.*\)".*/\1/p' | sed -n '1p')
+      - sdkmanager "platforms;android-31" "build-tools;${ANDROID_SDK_BUILD_TOOLS_VERSION}"
+        "extras;android;m2repository"
+      - ln -snf $$SDK$$ /opt/android/android-sdk
+      - cp -rf $$NDK$$ /opt/android/android-ndk-r23b
+      - ln -snf /opt/android/android-ndk-r23b /opt/android/android-ndk
+      - ln -snf $$spesmilo-python-for-android$$ /opt/python-for-android
+      - ln -snf $$spesmilo-buildozer$$ /opt/buildozer
+      - export PROJECT_ROOT="$PWD" CONTRIB="$PWD/contrib" LOCALE="$PWD/electrum/locale/"
+      - '"$CONTRIB"/make_packages.sh || (echo "make_packages failed" && exit 1)'
+      - rm -rf "$LOCALE"
+      - '"$CONTRIB/build_locale.sh" "$CONTRIB/deterministic-build/electrum-locale/locale/"
+        "$LOCALE"'
+      - export VIRTUAL_ENV="/opt/venv"
+      - python3 -m venv ${VIRTUAL_ENV}
+      - source "$VIRTUAL_ENV/bin/activate"
+      - python3 -m pip install --no-build-isolation --no-dependencies -r ./contrib/deterministic-build/requirements-build-base.txt
+      - 'python3 -m pip install --no-build-isolation --no-dependencies --no-binary
+        :all: -r ./contrib/deterministic-build/requirements-build-android.txt'
+      - git config --global --add safe.directory /opt/buildozer
+      - git config --global --add safe.directory /opt/python-for-android
+      - BUILDOZER_CHECKOUT_COMMIT=$(cat contrib/android/Dockerfile | grep checkout
+        | sed -n 's/.*git checkout "\(.*\)" .*/\1/p' | sed -n '1p')
+      - P4A_CHECKOUT_COMMIT=$(cat contrib/android/Dockerfile | grep checkout | sed
+        -n 's/.*git checkout "\(.*\)" .*/\1/p' | sed -n '2p')
+      - popd
+      - pushd /opt/buildozer
+      - git checkout "$BUILDOZER_CHECKOUT_COMMIT"
+      - python3 -m pip install --no-build-isolation --no-dependencies -e .
+      - popd
+      - pushd /opt/python-for-android
+      - git checkout "$P4A_CHECKOUT_COMMIT"
+      - python3 -m pip install --no-build-isolation --no-dependencies -e .
+      - popd
+    scandelete:
+      - packages
+      - contrib/.venv_make_packages
+    build:
+      - pushd /home/user/wspace/electrum/contrib/android
+      - export VIRTUAL_ENV="/opt/venv"
+      - source "$VIRTUAL_ENV/bin/activate"
+      - mkdir -p /home/vagrant/tmp
+      - export APP_ANDROID_ARCHS=armeabi-v7a ELEC_APK_GUI=qml
+      - export BUILDOZER_LOG_LEVEL=1
+      - make release
+    ndk: r23b
+
+  - versionName: 4.5.5.0
+    versionCode: 34050500
+    commit: eeaf18db0db7ca808c17de66909bc9c9b950308e
+    timeout: 14400
+    submodules: true
+    sudo:
+      - ln -sf /usr/bin/sdkmanager /opt/android-sdk/tools/bin/sdkmanager
+      - mkdir -p /home/user/wspace/ /opt/android/
+      - rm -rf /etc/apt/sources.list /etc/apt/preferences.d/*
+      - echo "deb https://snapshot.debian.org/archive/debian/20230629T090352Z/ bookworm
+        main" > /etc/apt/sources.list
+      - echo "deb-src https://snapshot.debian.org/archive/debian/20230629T090352Z/
+        bookworm main" >> /etc/apt/sources.list
+      - 'echo "Package: *" > /etc/apt/preferences.d/snapshot'
+      - 'echo "Pin: origin \"snapshot.debian.org\"" >> /etc/apt/preferences.d/snapshot'
+      - 'echo "Pin-Priority: 1001" >> /etc/apt/preferences.d/snapshot'
+      - apt-get update
+      - apt-get install --yes --no-install-recommends --allow-downgrades unzip python3
+        python3-dev python3-pip python3-setuptools python3-venv wget lbzip2 patch
+        software-properties-common zip rsync build-essential ccache autoconf autopoint
+        libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 cmake
+        libffi-dev libssl-dev automake gettext libltdl-dev libopengl-dev libegl-dev
+        dos2unix
+      - chmod 777 -R /opt /home/user/wspace/
+    output: dist/Electrum-$$VERSION$$-arm64-v8a-release-unsigned.apk
+    binary: https://download.electrum.org/4.5.5/Electrum-%v-arm64-v8a-release.apk
+    srclibs:
+      - spesmilo-buildozer@master
+      - spesmilo-python-for-android@develop
+    prebuild:
+      - git checkout -f 7263a49129d14db288a01b0b9d569422baddf5e1
+      - project_path=$(pwd)
+      - '[ ! -d "/home/user/wspace/electrum" ] && cp -rf "$project_path" /home/user/wspace/electrum
+        && rm -rf "$project_path" && ln -snf /home/user/wspace/electrum "$project_path"'
+      - pushd /home/user/wspace/electrum
+      - ANDROID_SDK_BUILD_TOOLS_VERSION=$(cat contrib/android/Dockerfile | grep ANDROID_SDK_BUILD_TOOLS_VERSION
+        | sed -n 's/.*"\(.*\)".*/\1/p' | sed -n '1p')
+      - sdkmanager "platforms;android-31" "build-tools;${ANDROID_SDK_BUILD_TOOLS_VERSION}"
+        "extras;android;m2repository"
+      - ln -snf $$SDK$$ /opt/android/android-sdk
+      - cp -rf $$NDK$$ /opt/android/android-ndk-r23b
+      - ln -snf /opt/android/android-ndk-r23b /opt/android/android-ndk
+      - ln -snf $$spesmilo-python-for-android$$ /opt/python-for-android
+      - ln -snf $$spesmilo-buildozer$$ /opt/buildozer
+      - export PROJECT_ROOT="$PWD" CONTRIB="$PWD/contrib" LOCALE="$PWD/electrum/locale/"
+      - '"$CONTRIB"/make_packages.sh || (echo "make_packages failed" && exit 1)'
+      - rm -rf "$LOCALE"
+      - '"$CONTRIB/build_locale.sh" "$CONTRIB/deterministic-build/electrum-locale/locale/"
+        "$LOCALE"'
+      - export VIRTUAL_ENV="/opt/venv"
+      - python3 -m venv ${VIRTUAL_ENV}
+      - source "$VIRTUAL_ENV/bin/activate"
+      - python3 -m pip install --no-build-isolation --no-dependencies -r ./contrib/deterministic-build/requirements-build-base.txt
+      - 'python3 -m pip install --no-build-isolation --no-dependencies --no-binary
+        :all: -r ./contrib/deterministic-build/requirements-build-android.txt'
+      - git config --global --add safe.directory /opt/buildozer
+      - git config --global --add safe.directory /opt/python-for-android
+      - BUILDOZER_CHECKOUT_COMMIT=$(cat contrib/android/Dockerfile | grep checkout
+        | sed -n 's/.*git checkout "\(.*\)" .*/\1/p' | sed -n '1p')
+      - P4A_CHECKOUT_COMMIT=$(cat contrib/android/Dockerfile | grep checkout | sed
+        -n 's/.*git checkout "\(.*\)" .*/\1/p' | sed -n '2p')
+      - popd
+      - pushd /opt/buildozer
+      - git checkout "$BUILDOZER_CHECKOUT_COMMIT"
+      - python3 -m pip install --no-build-isolation --no-dependencies -e .
+      - popd
+      - pushd /opt/python-for-android
+      - git checkout "$P4A_CHECKOUT_COMMIT"
+      - python3 -m pip install --no-build-isolation --no-dependencies -e .
+      - popd
+    scandelete:
+      - packages
+      - contrib/.venv_make_packages
+    build:
+      - pushd /home/user/wspace/electrum/contrib/android
+      - export VIRTUAL_ENV="/opt/venv"
+      - source "$VIRTUAL_ENV/bin/activate"
+      - mkdir -p /home/vagrant/tmp
+      - export APP_ANDROID_ARCHS=arm64-v8a ELEC_APK_GUI=qml
+      - export BUILDOZER_LOG_LEVEL=1
+      - make release
+    ndk: r23b
+
+  - versionName: 4.5.5.0
+    versionCode: 44050500
+    commit: eeaf18db0db7ca808c17de66909bc9c9b950308e
+    timeout: 14400
+    submodules: true
+    sudo:
+      - ln -sf /usr/bin/sdkmanager /opt/android-sdk/tools/bin/sdkmanager
+      - mkdir -p /home/user/wspace/ /opt/android/
+      - rm -rf /etc/apt/sources.list /etc/apt/preferences.d/*
+      - echo "deb https://snapshot.debian.org/archive/debian/20230629T090352Z/ bookworm
+        main" > /etc/apt/sources.list
+      - echo "deb-src https://snapshot.debian.org/archive/debian/20230629T090352Z/
+        bookworm main" >> /etc/apt/sources.list
+      - 'echo "Package: *" > /etc/apt/preferences.d/snapshot'
+      - 'echo "Pin: origin \"snapshot.debian.org\"" >> /etc/apt/preferences.d/snapshot'
+      - 'echo "Pin-Priority: 1001" >> /etc/apt/preferences.d/snapshot'
+      - apt-get update
+      - apt-get install --yes --no-install-recommends --allow-downgrades unzip python3
+        python3-dev python3-pip python3-setuptools python3-venv wget lbzip2 patch
+        software-properties-common zip rsync build-essential ccache autoconf autopoint
+        libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 cmake
+        libffi-dev libssl-dev automake gettext libltdl-dev libopengl-dev libegl-dev
+        dos2unix
+      - chmod 777 -R /opt /home/user/wspace/
+    output: dist/Electrum-$$VERSION$$-x86_64-release-unsigned.apk
+    binary: https://download.electrum.org/4.5.5/Electrum-%v-x86_64-release.apk
+    srclibs:
+      - spesmilo-buildozer@master
+      - spesmilo-python-for-android@develop
+    prebuild:
+      - git checkout -f 7263a49129d14db288a01b0b9d569422baddf5e1
+      - project_path=$(pwd)
+      - '[ ! -d "/home/user/wspace/electrum" ] && cp -rf "$project_path" /home/user/wspace/electrum
+        && rm -rf "$project_path" && ln -snf /home/user/wspace/electrum "$project_path"'
+      - pushd /home/user/wspace/electrum
+      - ANDROID_SDK_BUILD_TOOLS_VERSION=$(cat contrib/android/Dockerfile | grep ANDROID_SDK_BUILD_TOOLS_VERSION
+        | sed -n 's/.*"\(.*\)".*/\1/p' | sed -n '1p')
+      - sdkmanager "platforms;android-31" "build-tools;${ANDROID_SDK_BUILD_TOOLS_VERSION}"
+        "extras;android;m2repository"
+      - ln -snf $$SDK$$ /opt/android/android-sdk
+      - cp -rf $$NDK$$ /opt/android/android-ndk-r23b
+      - ln -snf /opt/android/android-ndk-r23b /opt/android/android-ndk
+      - ln -snf $$spesmilo-python-for-android$$ /opt/python-for-android
+      - ln -snf $$spesmilo-buildozer$$ /opt/buildozer
+      - export PROJECT_ROOT="$PWD" CONTRIB="$PWD/contrib" LOCALE="$PWD/electrum/locale/"
+      - '"$CONTRIB"/make_packages.sh || (echo "make_packages failed" && exit 1)'
+      - rm -rf "$LOCALE"
+      - '"$CONTRIB/build_locale.sh" "$CONTRIB/deterministic-build/electrum-locale/locale/"
+        "$LOCALE"'
+      - export VIRTUAL_ENV="/opt/venv"
+      - python3 -m venv ${VIRTUAL_ENV}
+      - source "$VIRTUAL_ENV/bin/activate"
+      - python3 -m pip install --no-build-isolation --no-dependencies -r ./contrib/deterministic-build/requirements-build-base.txt
+      - 'python3 -m pip install --no-build-isolation --no-dependencies --no-binary
+        :all: -r ./contrib/deterministic-build/requirements-build-android.txt'
+      - git config --global --add safe.directory /opt/buildozer
+      - git config --global --add safe.directory /opt/python-for-android
+      - BUILDOZER_CHECKOUT_COMMIT=$(cat contrib/android/Dockerfile | grep checkout
+        | sed -n 's/.*git checkout "\(.*\)" .*/\1/p' | sed -n '1p')
+      - P4A_CHECKOUT_COMMIT=$(cat contrib/android/Dockerfile | grep checkout | sed
+        -n 's/.*git checkout "\(.*\)" .*/\1/p' | sed -n '2p')
+      - popd
+      - pushd /opt/buildozer
+      - git checkout "$BUILDOZER_CHECKOUT_COMMIT"
+      - python3 -m pip install --no-build-isolation --no-dependencies -e .
+      - popd
+      - pushd /opt/python-for-android
+      - git checkout "$P4A_CHECKOUT_COMMIT"
+      - python3 -m pip install --no-build-isolation --no-dependencies -e .
+      - popd
+    scandelete:
+      - packages
+      - contrib/.venv_make_packages
+    build:
+      - pushd /home/user/wspace/electrum/contrib/android
+      - export VIRTUAL_ENV="/opt/venv"
+      - source "$VIRTUAL_ENV/bin/activate"
+      - mkdir -p /home/vagrant/tmp
+      - export APP_ANDROID_ARCHS=x86_64 ELEC_APK_GUI=qml
+      - export BUILDOZER_LOG_LEVEL=1
+      - make release
+    ndk: r23b
+
+AllowedAPKSigningKeys: e543d576fa0f2a33d412bca4c7d61e2301830e956e7d947e75b9052d176027d3
+
+MaintainerNotes: |-
+  When updating this file, please note that:
+  - paths affect the build. specially ndk and working directory.
+  - apt sources in sudo command are up to date with 
+    https://github.com/spesmilo/electrum/blob/master/contrib/android/apt.sources.list and
+    https://github.com/spesmilo/electrum/blob/master/contrib/android/apt.preferences
+  - ndk version is same as the one in buildozer_qml.spec file
+
+AutoUpdateMode: None
+UpdateCheckMode: None
+CurrentVersion: 4.5.5.0
+CurrentVersionCode: 44050500

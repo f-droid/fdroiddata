@@ -225,8 +225,51 @@ Builds:
         x86_64-linux-android
     ndk: r25b
 
+  - versionName: 5.3.4-nightly
+    versionCode: 5030450
+    commit: 970eb2bf127fe68463d90c2b4d4a06f76d451160
+    subdir: tv
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y build-essential file
+    gradle:
+      - freedom
+    srclibs:
+      - rustup@1.25.1
+    rm:
+      - core/src/main/jni/badvpn/lwip/test/fuzz/inputs
+      - core/src/main/jni/badvpn/lime
+      - mobile
+    prebuild:
+      - echo "rust.rustcCommand=$HOME/.cargo/bin/rustc" >> ../local.properties
+      - echo "rust.cargoCommand=$HOME/.cargo/bin/cargo" >> ../local.properties
+      - echo "rust.pythonCommand=/usr/bin/python3" >> ../local.properties
+      - sed -i -e '/gms/d' -e '/firebase/d' ../build.gradle.kts build.gradle.kts
+      - sed -i -e '/gms/d' -e '/firebase/d' -e '/kotlinx-coroutines-play-services/d'
+        ../core/build.gradle.kts
+      - pushd ../core/src/main
+      - sed -i -E -e '/service_subscription_working/s/%d(.*)%d/%1$d\1%2$d/' res/*/strings.xml
+      - cd java/com/github/shadowsocks
+      - sed -i -e '/firebase/Id' Core.kt bg/BaseService.kt
+      - popd
+      - sed -i -e '/OssLicensesMenuActivity/d' src/main/java/com/github/shadowsocks/tv/MainPreferenceFragment.kt
+      - sed -i -z -E -e 's/<Preference[^<]+ossLicenses[^>]+>//' src/main/res/xml/pref_main.xml
+      - sed -i -e '/isEnable/s/true/false/' ../buildSrc/src/main/kotlin/Helpers.kt
+    build:
+      - export rustVersion=$(grep RUST_VERSION ../.circleci/config.yml | cut -d ":"
+        -f2 | head -n1)
+      - '[[ $rustVersion ]] || exit 1'
+      - $$rustup$$/rustup-init.sh -y
+      - source $HOME/.cargo/env
+      - rustup default $rustVersion
+      - cd ../core/src/main/rust/shadowsocks-rust
+      - rustup target add armv7-linux-androideabi aarch64-linux-android i686-linux-android
+        x86_64-linux-android
+    ndk: 27.0.12077973
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: buildSrc/src/main/kotlin/Helpers.kt|versionCode\s=\s(\d+)|.|versionName\s=\s"(.+)"
-CurrentVersion: 5.3.3-nightly
-CurrentVersionCode: 5030350
+CurrentVersion: 5.3.4-nightly
+CurrentVersionCode: 5030450
