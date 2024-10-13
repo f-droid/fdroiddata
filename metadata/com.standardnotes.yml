@@ -621,10 +621,9 @@ Builds:
       - .yarn/
     ndk: r23b
 
-  - versionName: 3.195.8
-    versionCode: 3003114
-    disable: fails to start, notifee error
-    commit: '@standardnotes/mobile@3.195.8'
+  - versionName: 3.195.9
+    versionCode: 3003117
+    commit: '@standardnotes/mobile@3.195.9'
     subdir: packages/mobile/android/app
     sudo:
       - apt-get update
@@ -633,6 +632,8 @@ Builds:
       - sysctl fs.inotify.max_user_watches=524288 || true
     init:
       - cd ../../../..
+      - sed -i -e 's/version:\ 7.8.0/version:\ 9.1.1/' -e 's/npm:7.8.0/npm:9.1.1/'
+        -e '/800233/d' yarn.lock
       - yarn config set -H enableImmutableInstalls false
       - tmpfile=$(mktemp) && cp packages/mobile/package.json "$tmpfile" && jq -r 'del
         (.devDependencies["react-native-iap"]) | del (.dependencies["react-native-store-review"])'
@@ -645,7 +646,7 @@ Builds:
     gradle:
       - prod
     srclibs:
-      - meypod-notifee@36713fb9ae8993421b5c4bc7f4d31e93b11b6627
+      - notifee@@notifee/react-native@9.1.1
     rm:
       - packages/mobile/ios
     prebuild:
@@ -658,11 +659,6 @@ Builds:
         -e '/legacyGetErrorMessage() {/,/^    }/d' -e 's/legacyGetErrorMessage()/"LegacyAndroid"/g'
         -e '/FingerprintIdentify/Id' src/main/java/com/hieuvp/fingerprint/ReactNativeFingerprintScannerModule.java
       - popd
-      - sed -E -i 's/^.*(fabric|com\.(crashlytics|google\.(firebase|android.gms))).*$//g'
-        ../../node_modules/@notifee/react-native/android/build.gradle
-      - echo 'include(":notifee_core")' >> ../settings.gradle
-      - echo 'project(":notifee_core").projectDir = file("$$meypod-notifee$$/android")'
-        >> ../settings.gradle
       - cd ../../../..
       - yarn run build:mobile
       - cd packages/mobile
@@ -679,9 +675,15 @@ Builds:
       - packages/mobile/node_modules
       - packages/desktop
       - .yarn/
+    build:
+      - pushd $$notifee$$/android
+      - gradle publishAarPublicationToMavenRepository
+      - popd
+      - rm -rf ../../node_modules/@notifee/react-native/android/libs
+      - mv $$notifee$$/packages/react-native/android/libs ../../node_modules/@notifee/react-native/android/
     ndk: 26.1.10909125
 
-AutoUpdateMode: None
+AutoUpdateMode: Version @standardnotes/mobile@%v
 UpdateCheckMode: HTTP
 VercodeOperation:
   - 3002000 + %c
