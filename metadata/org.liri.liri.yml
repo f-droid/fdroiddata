@@ -151,6 +151,39 @@ Builds:
       - sed -i "s/SUPPORT_MOD_MODPLUG ?= false/SUPPORT_MOD_MODPLUG ?= true/" src/main/jni/SDL2_mixer/Android.mk
     ndk: r21e
 
+  - versionName: 3.1.5
+    versionCode: 30105
+    commit: v3.1.5
+    subdir: android/app
+    sudo:
+      - apt-get update
+      - apt-get install -y autoconf make
+    gradle:
+      - yes
+    srclibs:
+      - SDL@release-2.28.5
+      - SDL_mixer@release-2.6.3
+    prebuild:
+      - cp -R $$SDL$$/android-project/app/src/main/java/org/libsdl/ src/main/java/org/
+      - ln -s $$SDL$$     src/main/jni/SDL2
+      - ln -s $$SDL$$/include     src/main/jni/SDL2/SDL2
+      - ln -s $$SDL_mixer$$   src/main/jni/SDL2_mixer
+      - ln -s $$SDL_mixer$$/include     src/main/jni/SDL2_mixer/SDL2
+      - pushd $$SDL_mixer$$
+      - git submodule update --init external/libmodplug
+      - popd
+      - git clone https://github.com/brofield/simpleini.git src/main/jni/simpleini
+      - mkdir src/main/assets/
+      - cp -R ../../Sounds src/main/assets/
+      - cp ../../data/* src/main/assets/
+      - cp ../../src/config.h.in ../../src/config.h
+      - sed -i "s/@LIRI_VERSION@/$$VERSION$$/" ../../src/config.h
+      - sed -i "s/@LIRI_DATA_DIR@//" ../../src/config.h
+      - sed -i "s/SUPPORT_MOD_MODPLUG ?= false/SUPPORT_MOD_MODPLUG ?= true/" src/main/jni/SDL2_mixer/Android.mk
+      - sed -i 's/4.2.1/7.2.0/' ../../android/build.gradle
+      - sed -i 's/7.0.2/7.3.3/' ../../android/gradle/wrapper/gradle-wrapper.properties
+    ndk: 21.4.7075529
+
 MaintainerNotes: |-
   The code is provided as is, no gameplay has been made regarding the initial version.
   I don't plan to improve the game, my addition was mostly to not lose the original game (which is great!) and have it on Android.
