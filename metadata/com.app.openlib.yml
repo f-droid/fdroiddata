@@ -119,8 +119,32 @@ Builds:
       - export PUB_CACHE=$(pwd)/.pub-cache
       - $$flutter$$/bin/flutter build apk
 
+  - versionName: 1.0.9
+    versionCode: 12
+    commit: 1e84848d39d84f39307b584538ae76a8855606e6
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@3.24.3
+    rm:
+      - ios
+      - linux
+      - macos
+      - web
+      - windows
+    prebuild:
+      - sed -i -e 's/minSdkVersion .*/minSdkVersion 21/' -e '/minifyEnabled/s/false/true/'
+        -e '/shrinkResources/s/false/true/' android/app/build.gradle
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter packages pub get
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 1.0.8
-CurrentVersionCode: 11
+CurrentVersion: 1.0.9
+CurrentVersionCode: 12
