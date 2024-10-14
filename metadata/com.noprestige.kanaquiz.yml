@@ -34,13 +34,21 @@ Builds:
       - sed -i -e '/crashlytics/,+2d' -e '/firebase/d' -e '/io.fabric/d' build.gradle
     build: gradle assemblePure
 
-  - versionName: 0.15-pure
-    versionCode: 19
-    disable: https://github.com/theblackwidower/KanaQuiz/issues/18
-    commit: 1645b4474f0bb68d4c344fd8af6851cbd638c59c
+  - versionName: 0.15.1-pure
+    versionCode: 20
+    commit: 7806b120959c4408ce0325144028d1c59192c8ae
     subdir: app
     output: build/outputs/apk/pure/app-pure-unsigned.apk
-    prebuild: sed -i -e '/gms/d' -e '/firebase/d' {.,..}/build.gradle
+    srclibs:
+      - FontProvider@fbd7c6618529fbaade6500297d7bc7dc57097064
+    prebuild:
+      - sed -i -e '/gms/d' -e '/firebase/d' -e '/jcenter/d' -e '/fontprovider/d' {.,..}/build.gradle
+      - sed -i -e '/acra/s/5.10.1/5.2.1/' build.gradle
+      - cp -a $$FontProvider$$/api/src/main/java src/main
+      - find src/main/java/moe/shizuku/fontprovider -iname *.java -exec sed -i -e
+        's/android.support.annotation/androidx.annotation/' {} \;
+      - sed -i -e '/fontprovider/a <uses-permission android:name="moe.shizuku.fontprovider.BIND"/>'
+        src/main/AndroidManifest.xml
     build: gradle assemblePure
 
 MaintainerNotes: We can't enable auto update because the version name has a suffix.
