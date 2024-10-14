@@ -106,23 +106,25 @@ Builds:
 
   - versionName: 14.1.rev128
     versionCode: 1410128
-    disable: doesn't work
     commit: b8dcbb83e865a77b4b5e2b58284e0a5426e51847
+    submodules: true
     sudo:
       - apt-get update
-      - apt-get install -y g++ make libc-dev xz-utils curl pkg-config
-    init:
-      - ln -sf openttd project/jni/application/src
-      - git submodule update --init project/jni/iconv/src project/jni/sdl* project/jni/application/openttd/src
-      - git -C project/jni/sdl2_image submodule update --init external/jpeg external/libpng
-      - sed -i -e "/GooglePlayGameServicesId/s/=.*/=/g" src/AndroidAppSettings.cfg
-      - rm -rf project/jni/sdl2_mixer/Xcode/ project/jni/sdl2_image/Xcode/ project/jni/sdl2_ttf/Xcode/
-        project/jni/sdl2/Xcode/ project/jni/sdl2_image/external/libwebp-1.0.3/swig/*
-        project/themes/Sun/abstractsun.zip
+      - apt-get install -y g++ make libc-dev xz-utils curl pkg-config zip
     output: project/app/build/outputs/apk/release/app-release-unsigned.apk
+    rm:
+      - project/jni/*/Xcode/
+      - project/jni/sdl2_image/external/dav1d
+      - project/jni/sdl2_image/external/libavif
+      - project/jni/sdl2_image/external/libjxl
+      - project/jni/sdl2_image/external/libtiff
+      - project/jni/sdl2_image/external/libwebp
+      - project/jni/sdl2_image/external/zlib
+      - project/themes/Sun/abstractsun.zip
     prebuild:
       - sdkmanager 'cmake;3.22.1'
-      - sed -i -e '/play-services/d' project/app/build-template.gradle
+      - sed -i -e '/play-services/d' -e '/ndkVersion/a ndkPath "$$NDK$$"' project/app/build-template.gradle
+      - sed -i -e "/GooglePlayGameServicesId/s/=.*/=/g" project/jni/application/openttd/AndroidAppSettings.cfg
     scanignore:
       - project/jni/iconv/src/icu4c-62_1-src.tgz
       - project/jni/iconv/src/icu-le-hb-1.0.3.tar.gz
@@ -130,10 +132,10 @@ Builds:
       - project/jni/timidity/samples/timidity.zip
       - project/jni/openssl/openssl-1.1.1j.tar.gz
     build: CMAKE_BIN_LOC=$$SDK$$/cmake/3.22.1/bin/ ./build.sh -v fdroid -z openttd
-    ndk: r25
+    ndk: r25c
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-UpdateCheckData: ./project/jni/application/openttd/AndroidAppSettings.cfg|AppVersionCode=(\d+)|.|AppVersionName="(.*)"
+UpdateCheckData: project/jni/application/openttd/AndroidAppSettings.cfg|AppVersionCode=(\d+)|.|AppVersionName="(.*)"
 CurrentVersion: 14.1.rev128
 CurrentVersionCode: 1410128
