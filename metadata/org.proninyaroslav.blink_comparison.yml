@@ -154,12 +154,117 @@ Builds:
       - export PUB_CACHE=$(pwd)/.pub-cache
       - $$flutter$$/bin/flutter build apk --flavor fdroid --target-platform="android-x64"
 
-AutoUpdateMode: None
+  - versionName: 1.2.1
+    versionCode: 5071
+    commit: 1.2.1
+    sudo:
+      - apt-get update
+      - apt-get install -y automake libtool make
+    output: build/app/outputs/flutter-apk/app-armeabi-v7a-fdroid-release.apk
+    srclibs:
+      - flutter@stable
+      - libsodium@stable
+    rm:
+      - ios
+      - test
+    prebuild:
+      - export flutterVersion=$(sed -n -E 's/.*FLUTTER_VERSION:\s"([0-9.]+)"/\1/p'
+        .github/workflows/flutter_release_build.yml)
+      - pushd $$flutter$$
+      - git checkout -f $flutterVersion
+      - popd
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export SODIUM_LIBS=$(sed -n -E 's/.*sodium_libs:\s([0-9.]+)/\1/p' pubspec.yaml)
+      - pushd $$libsodium$$
+      - ./autogen.sh -s
+      - ./dist-build/android-armv7-a.sh
+      - popd
+      - cp $$libsodium$$/libsodium-android-armv7-a/lib/libsodium.so $PUB_CACHE/hosted/pub.dev/sodium_libs-$SODIUM_LIBS/android/src/main/jniLibs/armeabi-v7a/
+      - $$flutter$$/bin/flutter build apk --flavor fdroid --target-platform="android-arm"
+    ndk: r25b
+
+  - versionName: 1.2.1
+    versionCode: 5072
+    commit: 1.2.1
+    sudo:
+      - apt-get update
+      - apt-get install -y automake libtool make
+    output: build/app/outputs/flutter-apk/app-arm64-v8a-fdroid-release.apk
+    srclibs:
+      - flutter@stable
+      - libsodium@stable
+    rm:
+      - ios
+      - test
+    prebuild:
+      - export flutterVersion=$(sed -n -E 's/.*FLUTTER_VERSION:\s"([0-9.]+)"/\1/p'
+        .github/workflows/flutter_release_build.yml)
+      - pushd $$flutter$$
+      - git checkout -f $flutterVersion
+      - popd
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export SODIUM_LIBS=$(sed -n -E 's/.*sodium_libs:\s([0-9.]+)/\1/p' pubspec.yaml)
+      - pushd $$libsodium$$
+      - ./autogen.sh -s
+      - ./dist-build/android-armv8-a.sh
+      - popd
+      - cp $$libsodium$$/libsodium-android-armv8-a+crypto/lib/libsodium.so $PUB_CACHE/hosted/pub.dev/sodium_libs-$SODIUM_LIBS/android/src/main/jniLibs/arm64-v8a/
+      - $$flutter$$/bin/flutter build apk --flavor fdroid --target-platform="android-arm64"
+    ndk: r25b
+
+  - versionName: 1.2.1
+    versionCode: 5073
+    commit: 1.2.1
+    sudo:
+      - apt-get update
+      - apt-get install -y automake libtool make
+    output: build/app/outputs/flutter-apk/app-x86_64-fdroid-release.apk
+    srclibs:
+      - flutter@stable
+      - libsodium@stable
+    rm:
+      - ios
+      - test
+    prebuild:
+      - export flutterVersion=$(sed -n -E 's/.*FLUTTER_VERSION:\s"([0-9.]+)"/\1/p'
+        .github/workflows/flutter_release_build.yml)
+      - pushd $$flutter$$
+      - git checkout -f $flutterVersion
+      - popd
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export SODIUM_LIBS=$(sed -n -E 's/.*sodium_libs:\s([0-9.]+)/\1/p' pubspec.yaml)
+      - pushd $$libsodium$$
+      - ./autogen.sh -s
+      - ./dist-build/android-x86_64.sh
+      - popd
+      - cp $$libsodium$$/libsodium-android-westmere/lib/libsodium.so $PUB_CACHE/hosted/pub.dev/sodium_libs-$SODIUM_LIBS/android/src/main/jniLibs/x86_64/
+      - $$flutter$$/bin/flutter build apk --flavor fdroid --target-platform="android-x64"
+    ndk: r25b
+
+AutoUpdateMode: Version %v
 UpdateCheckMode: HTTP
 VercodeOperation:
   - '%c + 1'
   - '%c + 2'
   - '%c + 3'
 UpdateCheckData: https://github.com/proninyaroslav/blink-comparison/releases/latest/download/version.txt|android-build-number=([0-9]+)|.|android-build-name=([.0-9]+)
-CurrentVersion: 1.2.0
-CurrentVersionCode: 5063
+CurrentVersion: 1.2.1
+CurrentVersionCode: 5073
