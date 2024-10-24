@@ -155,7 +155,32 @@ Builds:
       - cp yggdrasil.aar ../../app/libs
     ndk: r21e
 
+  - versionName: 0.1-019
+    versionCode: 19
+    commit: e211111d60dcd833a1158f70fc2a19b0578dd956
+    subdir: app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -t bookworm-backports -y golang-go
+    gradle:
+      - yes
+    prebuild:
+      - sdkmanager 'platforms;android-21'
+      - sed -i -e 's/-target android/-target android -androidapi 21/g' ../libs/yggdrasil-go/contrib/mobile/build
+    build:
+      - mkdir libs
+      - cd ..
+      - export GOPATH="$PWD/golang"
+      - export PATH="$GOPATH/bin:$PATH"
+      - go install golang.org/x/mobile/cmd/gomobile@latest
+      - cd libs/yggdrasil-go
+      - gomobile init
+      - ./contrib/mobile/build -a
+      - cp yggdrasil.aar ../../app/libs
+    ndk: r21e
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 0.1-018
-CurrentVersionCode: 18
+CurrentVersion: 0.1-019
+CurrentVersionCode: 19
