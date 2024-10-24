@@ -1252,6 +1252,38 @@ Builds:
       - ./link_to_mupdf_1.24.1.sh
     ndk: 26.3.11579264
 
+  - versionName: 8.9.181-fdroid
+    versionCode: 6102
+    commit: 4264e3baa4815884b4fce3d3eb298f214e3166d1
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y g++ libglu1-mesa-dev libxcursor-dev libxi-dev libxinerama-dev
+        libxrandr-dev make mesa-common-dev pkg-config xxd
+    gradle:
+      - fdroid
+    srclibs:
+      - MuPDF@1.24.1
+    rm:
+      - Builder/src/libs
+      - desctop
+    prebuild:
+      - export MUPDF_VERSION=1.24.1
+      - sed -i -e '/^if.*Fdroid/,/^}/d' -e '/enable true/d' -e '/_appGdriveKey/d'
+        -e '/_admob/d' build.gradle
+      - mkdir src/main/jniLibs
+      - cd ../Builder
+      - sed -i -e '/^#!/a\set -e' -e '/git clone/d' -e 's/mkdir/mkdir -p/g' -e 's|".*ndk-build"|"$$NDK$$/ndk-build"|'
+        -e 's|^.*ndk-build$|$$NDK$$/ndk-build -j`nproc`|' link_to_mupdf_$MUPDF_VERSION.sh
+      - cp -r $$MuPDF$$ mupdf-$MUPDF_VERSION
+      - rm -rf mupdf-$MUPDF_VERSION/thirdparty/{harfbuzz/test,curl/tests,leptonica/prog/fuzzing}
+    scanignore:
+      - Builder/fonts/fonts.zip
+    build:
+      - pushd ../Builder/
+      - ./link_to_mupdf_1.24.1.sh
+    ndk: 26.3.11579264
+
 MaintainerNotes: |-
   * Upstream builds separate APKs for each architecture but we build an universal APK.
   * scanner will detect GMS (/com/google/android/gms) in these APKs; those are only stubs here, see https://gitlab.com/fdroid/fdroiddata/-/issues/2272#note_493741256
@@ -1261,5 +1293,5 @@ AutoUpdateMode: Version +-fdroid %v
 UpdateCheckMode: Tags
 UpdateCheckData: app/build.gradle|\s+FDroidCodeNumber = (\d+)|.|\s+FDroidVersionNumber
   = "([^\"]+)"
-CurrentVersion: 8.9.175
-CurrentVersionCode: 6090
+CurrentVersion: 8.9.181
+CurrentVersionCode: 6102
