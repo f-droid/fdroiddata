@@ -478,3 +478,18 @@ check_git_repos:
     - test -d public || mkdir public
     - cp `git status | grep -Eo 'metadata/.*\.yml'` public/ || true
     - exit $EXITVALUE
+
+
+# checkupdates should only be allowed to modify app metadata files,
+# e.g. metadata/*.yml.  Anything else should throw an error here.
+checkupdates_filter:
+  image: debian:bookworm-slim
+  stage: test
+  rules:
+    - if: $CI_PROJECT_PATH == 'fdroid/checkupdates-bot-fdroiddata'
+  script:
+    - apt-get update
+    - apt-get -qy install --no-install-recommends git
+    - git fetch https://gitlab.com/fdroid/fdroiddata.git
+    - echo "Checking for modifications to restricted paths:"
+    - ! (git diff --merge-base FETCH_HEAD HEAD --name-only | grep -v '^metadata/\S*\.yml$')
