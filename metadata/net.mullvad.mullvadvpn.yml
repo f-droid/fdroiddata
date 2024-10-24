@@ -715,7 +715,36 @@ Builds:
       - ../../build-apk.sh --fdroid
     ndk: r25c
 
+  - versionName: '2024.7'
+    versionCode: 24070099
+    commit: 9d745c87c2296363b053cfe67a8ba5779bde7ced
+    timeout: 10800
+    subdir: android/app
+    sudo:
+      - apt-get update
+      - apt-get install -y build-essential protobuf-compiler libprotobuf-dev
+    init: NDK_PATH="$$NDK$$" ../fdroid-build/init.sh
+    output: build/outputs/apk/ossProd/fdroid/app-oss-prod-fdroid-unsigned.apk
+    rm:
+      - gui
+      - graphics
+      - ios
+      - windows
+      - building/sigstore
+      - android/lib/billing
+    prebuild:
+      - git -C ../.. submodule update --init --recursive --depth=1 wireguard-go-rs
+      - sed -i -e 's|Repositories.GradlePlugins|"https://plugins.gradle.org/m2/"|'
+        ../build.gradle.kts
+      - sed -i '/\"ios\//d' ../../Cargo.toml
+      - sed -i '/^android-billingclient/d' ../gradle/libs.versions.toml
+    build:
+      - NDK_PATH="$$NDK$$" source ../fdroid-build/env.sh
+      - cargo install --force cbindgen --version "0.26.0"
+      - ../../build-apk.sh --fdroid
+    ndk: r25c
+
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: '2024.4'
-CurrentVersionCode: 24040099
+CurrentVersion: '2024.7'
+CurrentVersionCode: 24070099
