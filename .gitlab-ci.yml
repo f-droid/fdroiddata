@@ -502,3 +502,68 @@ checkupdates_filter:
       else
           echo "All file modifications match paths checkupdates-bot is allowed to change."
       fi
+
+
+strip EXIF:
+  stage: test
+  needs: []
+  image: debian:bookworm-slim
+  rules:
+    - changes:
+        paths:
+          - "**.JPEG"
+          - "**.JPEg"
+          - "**.JPeG"
+          - "**.JPeg"
+          - "**.JpEG"
+          - "**.JpEg"
+          - "**.JpeG"
+          - "**.Jpeg"
+          - "**.jPEG"
+          - "**.jPEg"
+          - "**.jPeG"
+          - "**.jPeg"
+          - "**.jpEG"
+          - "**.jpEg"
+          - "**.jpeG"
+          - "**.jpeg"
+
+          - "**.JPG"
+          - "**.JPg"
+          - "**.JpG"
+          - "**.Jpg"
+          - "**.jPG"
+          - "**.jPg"
+          - "**.jpG"
+          - "**.jpg"
+
+          - "**.PNG"
+          - "**.PNg"
+          - "**.PnG"
+          - "**.Png"
+          - "**.pNG"
+          - "**.pNg"
+          - "**.pnG"
+          - "**.png"
+
+  script:
+    - apt-get -qy update
+    - apt-get -qy dist-upgrade
+    - apt-get -qy install --no-install-recommends exiftool git
+
+    # JPEG
+    - find . -type f  -iname "*.jpg" -o -iname "*.jpeg"  -exec chmod a-x {} \;
+    - find . -type f  -iname "*.jpg" -o -iname "*.jpeg"  -exec exiftool -quiet -all= {} \;
+
+    # PNG
+    - find . -type f -iname "*.png" -exec chmod a-x {} \;
+    - find . -type f -iname "*.png" -exec exiftool -quiet -all= {} \;
+
+    - git diff --exit-code --color || {
+        printf "\x1b[31mERROR Image files (JPEG, PNG) should be stripped and not be set executable:\x1b[0m\n";
+        echo "Try using exiftool, jpegoptim, optipng (e.g. `exiftool -all= foo.png`).";
+        echo "For more info, see:";
+        echo "https://umbrella.cisco.com/blog/picture-perfect-how-jpg-exif-data-hides-malware";
+        echo "https://beinset.medium.com/exif-metadata-a-hidden-door-to-cyber-vulnerabilities-52b0dd2ff4de";
+        exit 1;
+      }
