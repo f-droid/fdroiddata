@@ -1,0 +1,58 @@
+Categories:
+  - Connectivity
+  - Internet
+  - Writing
+License: Apache-2.0
+WebSite: https://thunderbird.net
+SourceCode: https://github.com/thunderbird/thunderbird-android
+IssueTracker: https://github.com/thunderbird/thunderbird-android/issues
+Translation: https://hosted.weblate.org/projects/tb-android/
+Changelog: https://github.com/thunderbird/thunderbird-android/releases/
+Donate: https://www.thunderbird.net/?form=tfa&utm_campaign=android_metadata&utm_medium=web&utm_source=fdroid.org&utm_content=link_release_listing
+
+AutoName: 'Thunderbird: Free Your Inbox'
+
+RepoType: git
+Repo: https://github.com/thunderbird/thunderbird-android.git
+Binaries: https://ftp.mozilla.org/pub/thunderbird-mobile/android/releases/%v/thunderbird-%v.apk
+
+Builds:
+  - versionName: '8.0'
+    versionCode: 4
+    commit: e8f11477f608287a4517a4a05766ccfa9c97cb88
+    gradle:
+      - foss
+    output: app-thunderbird/build/outputs/apk/foss/release/app-thunderbird-foss-release-unsigned.apk
+    rm:
+      - feature/funding/googleplay
+    prebuild:
+      - sed -i -e '/maven.mozilla.org\/maven2/d' -e '/glean/d' -e '/app-k9mail/d'
+        -e '/googleplay/d' settings.gradle.kts
+      - sed -i -e 's/feature.funding.googleplay/feature.funding.link/' app-thunderbird/build.gradle.kts
+      - gradle clean
+    scandelete:
+      - build-plugin
+
+AllowedAPKSigningKeys: b6524779b3dbbc5ac17a5ac271ddb29dcfbf723578c238e03c3c217811356dd1
+
+MaintainerNotes: |-
+  Thunderbird for Android is based on K-9 Mail. The source repository contains both applications, a
+  symlink points to the correct metadata path. We're using the `foss` flavor for submission to
+  f-droid, while the `full` flavor will be reserved for the Play Store.
+
+  Thunderbird on the Play Store has two separate application ids and listings. This listing is the
+  release targeted at the majority of our users.
+
+  The source code may have a few pointers to potentially unwanted features. There is the Play Store
+  billing library, which we're going to use to collect financial contributions in the Play Store
+  flavor. The f-droid variant simply links out to our fundraising page in a web browser. There is
+  also Glean telemetry, which is currently disabled. When we re-enable it, we expect it will meet
+  the opt-in requirements set in the policies.
+
+  Auto updates are currently disabled and will be done manually. We strive to enable auto updates
+  soon after the release. We'll also switch to tags instead of the commit once the tagging is done.
+
+AutoUpdateMode: None
+UpdateCheckMode: None
+CurrentVersion: '8.0'
+CurrentVersionCode: 4
