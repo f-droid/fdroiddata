@@ -485,11 +485,17 @@ check_git_repos:
 checkupdates_filter:
   image: debian:bookworm-slim
   stage: test
+  needs: []
   rules:
     - if: $CI_PROJECT_PATH == 'fdroid/checkupdates-bot-fdroiddata'
   script:
     - apt-get update
     - apt-get -qy install --no-install-recommends ca-certificates git
     - git fetch https://gitlab.com/fdroid/fdroiddata.git
-    - echo "Checking for modifications to restricted paths:"
-    - ! (git diff --merge-base FETCH_HEAD HEAD --name-only | grep -v '^metadata/\S*\.yml$')
+    - |
+      if git diff --merge-base FETCH_HEAD HEAD --name-only | grep -v '^metadata/\S*\.yml$'; then
+          printf "\x1b[31mERROR Modifications to paths checkupdates-bot is not allowed to change! \x1b[0m\n"
+          exit 1
+      else
+          echo "All file modifications match paths checkupdates-bot is allowed to change."
+      fi
