@@ -380,13 +380,16 @@ fdroid build:
           $fdroid fetchsrclibs $build --verbose;
           rm $home_vagrant/fdroiddata $home_vagrant/.gitconfig;
           $fdroid build --verbose --test --refresh-scanner --scan-binary --on-server --no-tarball $build;
+          apt-get install sudo;
+          for apk in tmp/binaries/$appid_*.apk; do
+            $fdroid scanner --verbose --exit-code $apk;
+          done;
           popd;
           rm -rf $home_vagrant/build || true;
           rm -rf $ANDROID_HOME/ndk || true;
           apt-get install -y openjdk-17-jdk-headless;
           update-alternatives --set java /usr/lib/jvm/java-17-openjdk-amd64/bin/java;
           ./tools/build-contains-signatures.py $build || continue;
-          apt-get install sudo;
           $fdroid publish --verbose --error-on-failed $build;
       done
 
