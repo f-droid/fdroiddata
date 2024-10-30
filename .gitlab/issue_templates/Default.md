@@ -13,7 +13,7 @@
     * https://gitlab.com/fdroid/wiki/-/wikis/FAQ#how-long-does-it-take-for-my-app-to-show-up-on-website-and-client
 
     Optionally, you can also use a third party app to track build status:
-    https://f-droid.org/en/packages/de.storchp.fdroidbuildstatus/
+    https://f-droid.org/packages/de.storchp.fdroidbuildstatus/
 -->
 
 
