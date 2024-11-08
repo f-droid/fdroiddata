@@ -2,8 +2,8 @@
 
 set -e
 
-last_commit=$(git log --grep='Update known apks' | grep commit | head -n 1 | sed -E -n 's/commit (.*)/\1/p')
-echo "Last known apks update at: $last_commit"
+last_commit=$(curl https://f-droid.org/repo/status/running.json | jq -r '.fdroiddata.commitId')
+echo "This build cycle started at: $last_commit"
 echo "HEAD at: $(git rev-parse HEAD)"
 changed_files=$(git diff --name-only --diff-filter=AM "$last_commit" HEAD)
 
