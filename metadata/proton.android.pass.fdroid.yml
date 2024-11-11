@@ -267,6 +267,56 @@ Builds:
     gradleprops:
       - apkBuild=true
 
+  - versionName: 1.27.1
+    versionCode: 12701000
+    commit: c79adbecd7449ba244651d07e2b8e9796e16eefb
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y make golang-go
+    gradle:
+      - fdroid
+      - prod
+    srclibs:
+      - proton-gomobile-build-tool@9375f8893b85718f717e0b465a156e27c491d1e9
+      - protoncore@e87ee6de512763d4b530d6097d3329ffb81ca6e8
+      - proton-pass-contents-proto-definition@1.1.2
+    rm:
+      - pass/in-app-updates/impl
+      - pass/in-app-review/impl
+    prebuild:
+      - echo -e "\norg.gradle.jvmargs=-Xms1g -Xmx5g -XX:+UseParallelGC -Dfile.encoding=UTF-8
+        -XX:MaxMetaspaceSize=1g" >> ../gradle.properties
+      - sed -i -e 's/+ jobId//' build.gradle.kts
+      - sed -i -e '/plugins {/,/^}/d' -e '/includeCoreBuild {/,/^}/d' ../settings.gradle.kts
+      - sed -i -e '/signingConfigs/d' -e '/signingConfig/,/}$/d' build.gradle.kts
+      - sed -i -e '/io.sentry.android.gradle/d' build.gradle.kts
+      - sed -i -e '/sentry {/,/^}/d' build.gradle.kts
+      - sed -i -e 's_System.getenv().containsKey("CI")_true_g' ../build.gradle.kts
+      - sed -i -e 's|../../proton-libs/gopenpgp/gopenpgp.aar|libs/gopenpgp.aar|' build.gradle.kts
+      - sed -i -e 's|../proton-libs/gopenpgp/gopenpgp.aar|app/libs/gopenpgp.aar|'
+        ../pass/{crypto,data}/impl/build.gradle.kts
+      - sed -i -E -e "/go_version/s/[0-9.]+/$(go version | sed -n -E 's/.*go([0-9.]+).*/\1/p')/"
+        $$protoncore$$/gopenpgp/build-config.json
+      - sed -i -e '/app-update/d;/app-review/d' ../gradle/libs.versions.toml
+      - export PROTOBUF_TAG=$(sed -n -e 's/^val PROTOBUF_TAG = "\(.*\)".*/\1/p' ../settings.gradle.kts)
+      - pushd $$proton-pass-contents-proto-definition$$
+      - git checkout -f $PROTOBUF_TAG
+      - popd
+    scandelete:
+      - build-logic/module-generator
+    build:
+      - sdkmanager 'platforms;android-34'
+      - mkdir libs
+      - pushd $$proton-gomobile-build-tool$$
+      - make build cfg=$$protoncore$$/gopenpgp/build-config.json
+      - popd
+      - mv $$proton-gomobile-build-tool$$/out/android/gopenpgp.aar libs
+      - mv $$proton-pass-contents-proto-definition$$ ../pass/protos/contents-proto-definition
+    ndk: r23c
+    gradleprops:
+      - apkBuild=true
+
 MaintainerNotes: |
   The protoncore library should only be needed when building the gopenpgp library, and the exact tag should not matter.
   The proton-pass-contents-proto-definition srclib is checked out at 1.1.2 initially, but then the exact version is extracted from the settings.gradle.kts file and checked out at build time.
@@ -274,5 +324,5 @@ MaintainerNotes: |
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: metadata/fdroid_version.txt|versionCode=(\d+)|.|versionName=(.*)
-CurrentVersion: 1.27.0
-CurrentVersionCode: 12700000
+CurrentVersion: 1.27.1
+CurrentVersionCode: 12701000
