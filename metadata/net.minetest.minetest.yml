@@ -9,22 +9,7 @@ Changelog: https://dev.minetest.net/Changelog
 Donate: https://www.minetest.net/get-involved/#donate
 Liberapay: Minetest
 
-Name: Minetest
-AutoName: Minetest
-Description: |-
-  Minetest is a near infinite world block sandbox game and a game engine, inspired
-  by InfiniMiner, Minecraft and the like.
-
-  Features:
-
-  * Explore, dig and build in a voxel world, and craft stuff from raw materials to help you along the way.
-  * Play with your friends on public servers or self hosted servers
-  * Easy plugin based Modding API used to add blocks, tools and features to the game.
-  * Voxel based lighting with gameplay consequences (light caves and buildings with torches)
-  * Almost infinite world and several beautiful map generators.
-  * Runs natively on Windows, Linux, OS X, FreeBSD and Android
-  * Supports multiple languages, translated by the community.
-  * A constant development to add new functionalities for end-users
+AutoName: Luanti
 
 RepoType: git
 Repo: https://github.com/minetest/minetest.git
@@ -377,10 +362,36 @@ Builds:
       - popd
       - mv $$minetest_android_deps$$/deps ../native
 
+  - versionName: 5.10.0
+    versionCode: 5100000
+    commit: 568f7a8e8fb457c7b7bcfd3211c7f3f0481ed2e7
+    subdir: android/app
+    sudo:
+      - apt-get update
+      - apt-get install -y cmake gcc-multilib gettext make wget xz-utils
+    gradle:
+      - yes
+    srclibs:
+      - minetest_android_deps@5.10.0
+    prebuild: sed -i -e 's/enable true/enable false/' -e '/preBuild.dependsOn getDeps/d'
+      -e 's/versionCode .*/versionCode $$VERCODE$$/' build.gradle ../native/build.gradle
+    build:
+      - export ndkversion=$(grep "ndk_version = " ../build.gradle | cut -d "'" -f
+        2)
+      - sdkmanager "ndk;$ndkversion"
+      - export ANDROID_NDK=$$SDK$$/ndk/$ndkversion
+      - pushd $$minetest_android_deps$$
+      - ./build.sh --all armeabi-v7a
+      - ./build.sh --all arm64-v8a
+      - ./build.sh --all x86
+      - ./build.sh --all x86_64
+      - popd
+      - mv $$minetest_android_deps$$/deps ../native
+
 MaintainerNotes: No AUM as the deps repo does not get tagged on app release, also
   dynamic versions.
 
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: 5.9.1
-CurrentVersionCode: 5090100
+CurrentVersion: 5.10.0
+CurrentVersionCode: 5100000
