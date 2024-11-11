@@ -413,8 +413,30 @@ Builds:
       - export PUB_CACHE=$(pwd)/.pub-cache
       - $$flutter$$/bin/flutter build apk --target lib/main_fdroid.dart
 
+  - versionName: 2.8.2
+    versionCode: 52
+    commit: b1f2d20ab279a8459e1859fecf0d0cf760d00cb7
+    output: build/app/outputs/apk/release/app-release-unsigned.apk
+    srclibs:
+      - flutter@3.24.4
+    rm:
+      - ios
+    prebuild:
+      - sed -i '/keystoreProperties.load(new FileInputStream(keystorePropertiesFile))/d'
+        android/app/build.gradle
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub remove patrol
+      - $$flutter$$/bin/flutter pub remove in_app_review
+      - $$flutter$$/bin/flutter pub get
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --target lib/main_fdroid.dart
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 2.8.0
-CurrentVersionCode: 51
+CurrentVersion: 2.8.2
+CurrentVersionCode: 52
