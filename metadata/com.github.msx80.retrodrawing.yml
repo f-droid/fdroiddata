@@ -34,10 +34,30 @@ Builds:
       - cartridge.artifactId=retrodrawing
       - cartridge.groupId=com.github.msx80.omicron
 
+  - versionName: 0.0.4
+    versionCode: 4
+    commit: 3fab9ad285fa5538cb421b7369ee49c5ea0221e0
+    subdir: android-wrapper/app
+    sudo:
+      - echo "deb http://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
+      - apt-get update
+      - apt-get install -y -t trixie openjdk-17-jdk-headless
+      - apt-get install -y maven
+      - update-java-alternatives --set java-1.17.0-openjdk-amd64
+    gradle:
+      - yes
+    prebuild:
+      - sdkmanager "build-tools;33.0.2" "platforms;android-26" "platforms;android-34"
+      - mvn -f ../../retrodrawing/pom.xml clean install
+      - sed -i 's/property(\x27cartridge\.version\x27)/\x27$$VERSION$$\x27/' build.gradle
+    gradleprops:
+      - cartridge.artifactId=retrodrawing
+      - cartridge.groupId=com.github.msx80.omicron
+
 AllowedAPKSigningKeys: a297b15de94d3d5459c1be74bf088020ffd26a5af7ecce0e964bb1a85d976ba6
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: retrodrawing/pom.xml|<version>\d+\.\d+\.(\d+)<\/version>||([\d.]+)
-CurrentVersion: 0.0.3
-CurrentVersionCode: 3
+CurrentVersion: 0.0.4
+CurrentVersionCode: 4
