@@ -81,7 +81,36 @@ Builds:
       - ./scripts/build-x86_64-linux-android -j$(nproc) release
     ndk: r21e
 
+  - versionName: 0.8.0
+    versionCode: 14
+    commit: 4a07bd521fafeafd6c64058b85397b0d409290bb
+    subdir: atox
+    sudo:
+      - mkdir -p /home/robin/code
+      - chown vagrant /home/robin/code
+      - apt-get update
+      - apt-get install -y autoconf automake cmake g++ libtool make pkg-config yasm
+      - curl -Lo sbt.tgz https://github.com/sbt/sbt/releases/download/v1.10.5/sbt-1.10.5.tgz
+      - echo "fb2232e051ff963e949d610077866d250cf8d18c312fcfd04f07fbffc3d5e92f sbt.tgz"
+        | sha256sum -c -
+      - tar xzf sbt.tgz --strip-components=1 -C /usr/local/
+    gradle:
+      - yes
+    build:
+      - export repo=/home/robin/code
+      - cd ../..
+      - mv ltd.evilcorp.atox $repo/atox2
+      - pushd $repo/atox2
+      - ./scripts/build-host -j$(nproc)
+      - ./scripts/build-aarch64-linux-android -j$(nproc) release
+      - ./scripts/build-arm-linux-androideabi -j$(nproc) release
+      - ./scripts/build-i686-linux-android -j$(nproc) release
+      - ./scripts/build-x86_64-linux-android -j$(nproc) release
+      - popd
+      - mv $repo/atox2 ltd.evilcorp.atox
+    ndk: r21e
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 0.7.3
-CurrentVersionCode: 13
+CurrentVersion: 0.8.0
+CurrentVersionCode: 14
