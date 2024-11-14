@@ -157,7 +157,79 @@ Builds:
       - mv $$react-native-reanimated$$/build/outputs/aar/android-release.aar ../../node_modules/react-native-reanimated/android/react-native-reanimated-67-jsc.aar
     ndk: r24
 
+  - versionName: '27.232'
+    versionCode: 232
+    commit: a115df1f71c9dc31e9b41060a8d57b51c017d786
+    subdir: android/app
+    sudo:
+      - sysctl fs.inotify.max_user_watches=524288 || true
+      - echo "deb https://deb.debian.org/debian bullseye main" > /etc/apt/sources.list.d/bullseye.list
+      - apt-get update
+      - apt-get install -y npm
+      - apt-get install -y -t bullseye openjdk-11-jdk-headless
+      - update-java-alternatives --set java-1.11.0-openjdk-amd64
+      - npm -g install yarn
+    gradle:
+      - yes
+    srclibs:
+      - react-native-reanimated@2.2.4
+    rm:
+      - android/app/src/main/java/com/zulipmobile/notifications/FcmListenerService.kt
+      - ios
+    prebuild:
+      - sed -i -e 's/enable true/enable false/' -e '/firebase/d' -e "/android {/a
+        packagingOptions {pickFirst 'lib/*/*.so'}" build.gradle
+      - sed -i -e '/<service/,/service>/d' -e '/com.zulipmobile/a <uses-permission
+        android:name="com.google.android.finsky.permission.BIND_GET_INSTALL_REFERRER_SERVICE"
+        tools:node="remove" \/>' -e '/com.zulipmobile/a <uses-permission android:name="com.android.vending.CHECK_LICENSE"
+        tools:node="remove" \/>' src/main/AndroidManifest.xml
+      - sed -i -e '/firebase/d' -e '/FirebaseInstanceId/,/addOnFailureListener/d'
+        -e '/googlePlayServicesAvailability/,/^    }/s/^        .*//' -e '/gms/d'
+        src/main/java/com/zulipmobile/notifications/NotificationsModule.kt
+      - cd ../..
+      - yarn install
+      - sed -i -e '/checkCompatibility/,/^    });/d' src/boot/CompatibilityChecker.js
+      - pushd $$react-native-reanimated$$
+      - sed -i -e "s!+' //.*!0.68.5'!" build.gradle
+    scanignore:
+      - android/build.gradle
+      - node_modules/jsc-android
+      - node_modules/hermes-engine/android
+      - node_modules/hermes-engine/linux64-bin/hermesc
+      - node_modules/react-native/ReactAndroid/build.gradle
+      - node_modules/react-native-document-picker/android/build.gradle
+      - node_modules/react-native-image-picker/android/build.gradle
+      - node_modules/react-native-safe-area-context/android/build.gradle
+      - node_modules/react-native-screens/android/build.gradle
+      - node_modules/react-native-vector-icons/android/build.gradle
+      - node_modules/react-native-webview/android/build.gradle
+      - node_modules/expo/android/build.gradle
+      - node_modules/expo-constants/android/build.gradle
+      - node_modules/expo-error-recovery/android/build.gradle
+      - node_modules/expo-file-system/android/build.gradle
+      - node_modules/expo-font/android/build.gradle
+      - node_modules/expo-keep-awake/android/build.gradle
+      - node_modules/expo-mail-composer/android/build.gradle
+      - node_modules/expo-modules-core/android/build.gradle
+      - node_modules/expo-screen-orientation/android/build.gradle
+      - node_modules/expo-sqlite/android/build.gradle
+      - node_modules/expo-web-browser/android/build.gradle
+      - node_modules/@react-native-async-storage/async-storage/android/build.gradle
+      - node_modules/@react-native-camera-roll/camera-roll/android/build.gradle
+      - node_modules/@react-native-community/masked-view/android/build.gradle
+      - node_modules/@react-native-community/netinfo/android/build.gradle
+      - node_modules/@react-native-community/push-notification-ios/android/build.gradle
+    scandelete:
+      - node_modules
+    build:
+      - pushd $$react-native-reanimated$$
+      - yarn add react-native@0.68.5
+      - gradle :assembleRelease
+      - popd
+      - mv $$react-native-reanimated$$/build/outputs/aar/android-release.aar ../../node_modules/react-native-reanimated/android/react-native-reanimated-67-jsc.aar
+    ndk: r24
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: '27.231'
-CurrentVersionCode: 231
+CurrentVersion: '27.232'
+CurrentVersionCode: 232
