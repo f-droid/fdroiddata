@@ -1726,8 +1726,40 @@ Builds:
       - echo 'package com.newsblur.activity;class SubscriptionActivity:NbActivity()
         {}' > activity/SubscriptionActivity.kt
 
+  - versionName: 13.3.2
+    versionCode: 231
+    commit: 9466747a0d2595edb078d93445ce2d1ac2013efb
+    subdir: clients/android/NewsBlur/app
+    sudo:
+      - echo "deb https://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
+      - apt-get update
+      - apt-get install -y -t trixie openjdk-21-jdk-headless
+      - update-alternatives --auto java
+    gradle:
+      - yes
+    rm:
+      - clients/android/NewsBlur/app/src/main/java/com/newsblur/service/SubscriptionSyncService.kt
+      - clients/android/NewsBlur/app/src/main/java/com/newsblur/subscription/
+    prebuild:
+      - pushd ../../../..
+      - mv clients/android/NewsBlur ..
+      - rm -r ./*
+      - mkdir -p clients/android
+      - mv ../NewsBlur clients/android
+      - popd
+      - sed -i -e '/play/d' -e '/billing/d' build.gradle.kts
+      - sed -i -z -E -e 's/<service[^>]+SubscriptionSyncService[^>]+\/>//' src/main/AndroidManifest.xml
+      - cd src/main/java/com/newsblur
+      - sed -i -e '/gms/d' -e '/play.core/d' -e '/void checkInAppReview/,/^    }/d'
+        -e '/checkInAppReview/d' -e '/reviewInfo != null/,/^        }$/c super.onBackPressed();'
+        -e '/Review/d' activity/FeedItemsList.java
+      - sed -i -e '/SubscriptionSyncService/d' activity/InitActivity.kt activity/LoginProgress.kt
+        util/PrefsUtils.java
+      - echo 'package com.newsblur.activity;class SubscriptionActivity:NbActivity()
+        {}' > activity/SubscriptionActivity.kt
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: clients/android/NewsBlur/buildSrc/src/main/java/Config.kt|versionCode\s=\s(\d+)|.|versionName\s=\s"(.*)"
 CurrentVersion: 13.3.2
-CurrentVersionCode: 230
+CurrentVersionCode: 231
