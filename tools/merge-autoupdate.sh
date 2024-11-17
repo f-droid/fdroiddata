@@ -13,7 +13,7 @@ for mr in $mr_list; do
   fi
   draft=$(echo $mr_stat | jq -r '.draft')
   if [[ $(echo $mr_stat | jq -r '.title | test("bot: Update CurrentVersion of .*")') == "true" && $draft == "false" ]]; then
-    $glab mr update --draft
+    $glab mr update $mr --draft
     draft="true"
   fi
   if [[ $(echo $mr_stat | jq -r '.pipeline.status == "success"') == "true" && $draft == "false" ]]; then
