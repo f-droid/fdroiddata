@@ -821,6 +821,80 @@ Builds:
       - make -C build apk
     ndk: r21e
 
+  - versionName: '21.1'
+    versionCode: 2101000
+    commit: 183eb85f108c3d8b44a578de80f575f27afe9b9a
+    timeout: 28000
+    sudo:
+      - apt-get update
+      - apt-get install autoconf bison build-essential curl flex gawk libcurl4-openssl-dev
+        unzip zip zlib1g-dev
+    output: build/tools/android/packaging/xbmc/build/outputs/apk/release/xbmc-release-unsigned.apk
+    prebuild:
+      - git show fdef39a321bdce2cb924882edaad4c52831a5b28 | patch -p1 -R -s --no-backup-if-mismatch
+      - sed -i -e '/gradlew/d' -e '/gradle-wrapper.jar/d' cmake/scripts/android/Install.cmake
+      - sed -i -e 's#./gradlew#gradle#' -e '\!@cp xbmc/build!d' tools/android/packaging/Makefile.in
+      - sed -i -e '/^    signingConfigs {/,/^    }/d' -e '/signingConfig/d' tools/android/packaging/xbmc/build.gradle.in
+    scanignore:
+      - addons/webinterface.default/lib/soundmanager/swf/soundmanager2_flash_xdomain.zip
+    scandelete:
+      - lib/
+      - project/
+      - tools/
+      - xbmc/filesystem/test
+    build:
+      - pushd tools/depends/
+      - ./bootstrap
+      - ./configure --host=arm-linux-androideabi --with-sdk-path=$$SDK$$ --with-ndk-path=$$NDK$$
+        --prefix=$PWD/output --disable-debug
+      - make -j $(nproc)
+      - popd
+      - make -C tools/depends/target/binary-addons -j $(nproc) ADDONS='audioencoder.*
+        game.* kodi.* metadata.album.* metadata.artists.* metadata.common.* metadata.generic.*
+        metadata.local metadata.themoviedb.* metadata.tvshows.* repository.* resource.*
+        screensaver.* script.* service.* skin.* webinterface.* xbmc.*'
+      - make -C tools/depends/target/cmakebuildsys
+      - make -C build -j $(nproc)
+      - make -C build apk
+    ndk: 21.4.7075529
+
+  - versionName: '21.1'
+    versionCode: 2101001
+    commit: 183eb85f108c3d8b44a578de80f575f27afe9b9a
+    timeout: 28000
+    sudo:
+      - apt-get update
+      - apt-get install autoconf bison build-essential curl flex gawk libcurl4-openssl-dev
+        unzip zip zlib1g-dev
+    output: build/tools/android/packaging/xbmc/build/outputs/apk/release/xbmc-release-unsigned.apk
+    prebuild:
+      - git show fdef39a321bdce2cb924882edaad4c52831a5b28 | patch -p1 -R -s --no-backup-if-mismatch
+      - sed -i -e '/gradlew/d' -e '/gradle-wrapper.jar/d' cmake/scripts/android/Install.cmake
+      - sed -i -e 's#./gradlew#gradle#' -e '\!@cp xbmc/build!d' tools/android/packaging/Makefile.in
+      - sed -i -e '/^    signingConfigs {/,/^    }/d' -e '/signingConfig/d' tools/android/packaging/xbmc/build.gradle.in
+    scanignore:
+      - addons/webinterface.default/lib/soundmanager/swf/soundmanager2_flash_xdomain.zip
+    scandelete:
+      - lib/
+      - project/
+      - tools/
+      - xbmc/filesystem/test
+    build:
+      - pushd tools/depends/
+      - ./bootstrap
+      - ./configure --host=aarch64-linux-android --with-sdk-path=$$SDK$$ --with-ndk-path=$$NDK$$
+        --prefix=$PWD/output --disable-debug
+      - make -j $(nproc)
+      - popd
+      - make -C tools/depends/target/binary-addons -j $(nproc) ADDONS='audioencoder.*
+        game.* kodi.* metadata.album.* metadata.artists.* metadata.common.* metadata.generic.*
+        metadata.local metadata.themoviedb.* metadata.tvshows.* repository.* resource.*
+        screensaver.* script.* service.* skin.* webinterface.* xbmc.*'
+      - make -C tools/depends/target/cmakebuildsys
+      - make -C build -j $(nproc)
+      - make -C build apk
+    ndk: 21.4.7075529
+
 MaintainerNotes: |-
   18.0-groovy.patch was <a href="https://github.com/xbmc/xbmc/issues/6860#issuecomment-461122155">provided by upstream</a>; it makes the build use the Debian groovy package instead of a prebuilt JAR.
 
@@ -835,5 +909,5 @@ MaintainerNotes: |-
 ArchivePolicy: 4
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: '21.0'
-CurrentVersionCode: 2100001
+CurrentVersion: '21.1'
+CurrentVersionCode: 2101001
