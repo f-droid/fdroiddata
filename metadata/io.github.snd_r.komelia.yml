@@ -1,0 +1,39 @@
+Categories:
+  - Internet
+  - Multimedia
+  - Reading
+License: Apache-2.0
+AuthorName: Snd-R
+SourceCode: https://github.com/Snd-R/Komelia
+IssueTracker: https://github.com/Snd-R/Komelia/issues
+
+RepoType: git
+Repo: https://github.com/Snd-R/Komelia
+
+Builds:
+  - versionName: 0.11.1
+    versionCode: 1
+    commit: 7694cbffb9ee36f2b44ca081fd186957dcf81c96
+    subdir: komelia-app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y cmake ninja-build pkg-config nasm automake libtool gettext
+        texinfo make libltdl-dev
+      - apt-get install -y -t bookworm-backports meson
+    gradle:
+      - yes
+    scandelete:
+      - third_party/jbr-api
+      - third_party/secret-service
+    build:
+      - cd ..
+      - git apply ./patches/disable_self_updates.patch
+      - NDK_PATH=$$NDK$$ ./cmake/android-arm64-build.sh
+      - gradle android-arm64_copyJniLibs
+    ndk: r26d
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: 0.11.1
+CurrentVersionCode: 1
