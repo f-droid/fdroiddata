@@ -642,8 +642,37 @@ Builds:
         APK' bin/revengate.apk
     ndk: 23.2.8568313
 
+  - versionName: 0.13.0
+    versionCode: 2001300
+    commit: 21b0cb49a84a1fada7e171064b68f1183818c32c
+    sudo:
+      - apt-get update
+      - apt-get install -y python3-invoke build-essential scons pkg-config libx11-dev
+        libxcursor-dev libxinerama-dev libgl1-mesa-dev libglu-dev libasound2-dev libpulse-dev
+        libudev-dev libxi-dev libxrandr-dev
+    output: bin/revengate.apk
+    srclibs:
+      - Godot@4.3-stable
+    prebuild:
+      - mkdir -p bin
+      - mkdir -p android
+    build:
+      - export ANDROID_SDK_ROOT=$$SDK$$
+      - export ANDROID_NDK_ROOT=$$NDK$$
+      - export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+      - pushd $$Godot$$
+      - scons -j `nproc` platform=linuxbsd target=editor
+      - scons -j `nproc` platform=android target=template_release arch=arm64
+      - cd platform/android/java
+      - gradle generateGodotTemplates
+      - popd
+      - invoke make-fdroid-presets $$Godot$$
+      - $$Godot$$/bin/godot.linuxbsd.editor.x86_64 --headless --export-release 'Android
+        APK' bin/revengate.apk
+    ndk: 23.2.8568313
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: src/constants.gd|const VERSION_CODE := (\d+)|.|const VERSION := "([\d.]+)"
-CurrentVersion: 0.12.9
-CurrentVersionCode: 1028129
+CurrentVersion: 0.13.0
+CurrentVersionCode: 2001300
