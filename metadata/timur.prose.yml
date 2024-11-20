@@ -44,10 +44,40 @@ Builds:
       - cd src/main/go
       - ./gobuild
 
+  - versionName: 0.9.7
+    versionCode: 97
+    commit: 777aaf44c3d31a8be8d3b077d9c3d18a752ed956
+    sudo:
+      - apt-get update
+      - apt-get install -t bookworm-backports -y golang-go
+      - apt-get install -y gcc libc-dev
+    gradle:
+      - yes
+    srclibs:
+      - go@go1.23.0
+    prebuild:
+      - export goVersion=$(grep go\  src/main/go/go.mod | cut -d " " -f2)
+      - '[[ $goVersion ]] || exit 1'
+      - git -C $$go$$ checkout -f go$goVersion
+      - ./proppatch.sh gradle.properties appVersionName "$$VERSION$$"
+      - ./proppatch.sh gradle.properties appVersionCode $$VERCODE$$
+      - ./proppatch.sh gradle.properties baseUrlRel "https://timur.mobi/prose/"
+      - ./proppatch.sh gradle.properties android.useAndroidX true
+      - ./proppatch.sh gradle.properties android.defaults.buildfeatures.buildconfig
+        true
+    build:
+      - pushd $$go$$/src
+      - ./make.bash
+      - popd
+      - export GOPATH=$$go$$
+      - export PATH="$GOPATH/bin:$PATH"
+      - cd src/main/go
+      - ./gobuild
+
 AllowedAPKSigningKeys: 0b2c8663fafe65f73c5a0ec60d38392c64384d9b91cc9712db3b748874fe5c75
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: gradle-build.sh|appVersionCode\s(\d+)|.|appVersionName\s"(.*)"
-CurrentVersion: 0.9.4
-CurrentVersionCode: 94
+CurrentVersion: 0.9.7
+CurrentVersionCode: 97
