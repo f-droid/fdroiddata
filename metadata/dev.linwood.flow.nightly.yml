@@ -110,10 +110,9 @@ Builds:
       - app/web
       - app/windows
     prebuild:
-      - export version=$(cat ../FLUTTER_VERSION)
-      - pushd $$flutter$$
-      - git checkout -f $version
-      - popd
+      - export version=$(grep "^  flutter:" pubspec.yaml | cut -d ":" -f2|head -n1)
+      - '[[ $version ]] || exit 1'
+      - git -C $$flutter$$ checkout -f $version      
       - export PUB_CACHE=$(pwd)/.pub-cache
       - $$flutter$$/bin/flutter config --no-analytics
     scandelete:
