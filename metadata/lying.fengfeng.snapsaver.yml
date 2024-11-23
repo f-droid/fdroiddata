@@ -159,10 +159,47 @@ Builds:
       - popd
       - mv $repo/SnapSaver lying.fengfeng.snapsaver
 
+  - versionName: 0.5.0
+    versionCode: 5
+    commit: 5642c04f772191d9869b4b216bb4667c46d82e18
+    submodules: true
+    sudo:
+      - mkdir -p /home/runner
+      - chown vagrant /home/runner
+    output: build/app/outputs/flutter-apk/app-release.apk
+    rm:
+      - ios
+    prebuild:
+      - sed -i -e '/googleapis.com/d' android/build.gradle
+      - export repo=/home/runner/work/SnapSaver
+      - mkdir -p $repo
+      - cd ..
+      - mv lying.fengfeng.snapsaver $repo/SnapSaver
+      - pushd $repo/SnapSaver
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - .flutter/bin/flutter config --no-analytics
+      - .flutter/bin/flutter pub get
+      - popd
+      - mv $repo/SnapSaver lying.fengfeng.snapsaver
+    scanignore:
+      - .flutter/bin/cache
+    scandelete:
+      - .flutter
+      - .pub-cache
+    build:
+      - export repo=/home/runner/work/SnapSaver
+      - cd ..
+      - mv lying.fengfeng.snapsaver $repo/SnapSaver
+      - pushd $repo/SnapSaver
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - .flutter/bin/flutter build apk --release
+      - popd
+      - mv $repo/SnapSaver lying.fengfeng.snapsaver
+
 AllowedAPKSigningKeys: f6df1e0513719d034a926106a5d9f37bf05457e8a7521e091910d3cf4802e10e
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 0.4.0
-CurrentVersionCode: 4
+CurrentVersion: 0.5.0
+CurrentVersionCode: 5
