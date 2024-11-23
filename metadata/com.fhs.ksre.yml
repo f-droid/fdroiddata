@@ -566,6 +566,86 @@ Builds:
       - gradle assembleRelease
     ndk: r25c
 
+  - versionName: 1.4.9
+    versionCode: 149
+    commit: e4f1bbd0daafa7c2bbbbfe61e4552181019cdb59
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y gcc libc-dev make ccache unzip bzip2 autoconf autoconf-archive
+        automake cmake libtool-bin clang-15 lld-15 llvm-15
+      - apt-get install -y libgmp-dev libmpfr-dev libmpc-dev libssl-dev libbz2-dev
+        liblzma-dev bc xz-utils
+      - apt-get install -y libavcodec-dev libavformat-dev libswresample-dev libswscale-dev
+        libfreetype6-dev libfribidi-dev libsdl2-dev libsdl2-image-dev libsdl2-gfx-dev
+        libsdl2-mixer-dev libsdl2-ttf-dev libjpeg-dev
+    output: renpy-build/renpy/rapt3/project/app/build/outputs/apk/release/app-release-unsigned.apk
+    srclibs:
+      - renpy@8.2.1.24030407
+      - renpy-build@b77bf97c623e26c00df487f815dc18b68a1eeabe
+      - pygame_sdl2@4fadf87b8c3e9d607b97709d3bbf3df6a7fab102
+      - cpython@v3.10.13
+    prebuild:
+      - sed -i -e 's/, "INTERNET"//' .android.json
+      - sed -i -e '/persistent.hdisabled/s/False/True/' game/config.rpy
+      - sdkmanager 'ndk;21.3.6528147'
+      - ln -s $$renpy-build$$ .
+      - pushd renpy-build
+      - sed -i -e 's|c.var("sysroot", .*)|c.var("sysroot", "/")|' renpybuild/run.py
+      - sed -i -e '/sysroot/d' -e '/live2d/d' -e '/steam/d' tasks/__init__.py
+      - sed -i -e '/steamapi/d' tasks/pythonlib.py
+      - sed -i -e "s|^sdkmanager =.*|sdkmanager = '$(which sdkmanager)'|" -e '/jdk_requirement/s/21/17/'
+        rapt/buildlib/rapt/plat.py
+      - sed -i -e '/plat.gradlew/i \        sys.exit(0)' -e '/config.numeric_version
+        =/d' rapt/buildlib/rapt/build.py
+      - sed -i -e '/signingConfigs {/,/^    }/d' -e '/signingConfig /d' rapt/templates/app-build.gradle
+      - pushd rapt/prototype/
+      - rm -r renpyiap
+      - sed -i '/com.google.android.play/d' renpyandroid/build.gradle
+      - sed -i -e '/play.core/d' -e '/gms/d' -e 's/implements AssetPackStateUpdateListener//'
+        -e '/AssetPackManager/d' -e '/boolean checkPack/,/^    }/d' -e '/onStateUpdate/,/^    }/d'
+        -e '/assetPackStates/d' -e '/Constants.assetPacks.length/,/^ \{8\}}/s/^ \{12\}.*//'
+        -e '/Constants.assetPacks.length/athrow new UnsupportedOperationException("Handling
+        of asset packs removed for F-Droid build.");' renpyandroid/src/main/java/org/renpy/android/PythonSDLActivity.java
+      - popd
+      - mkdir -p tmp/cross.android/
+      - ln -s $$NDK$$ tmp/cross.android/android-ndk-r25c
+      - ln -s $$renpy$$ renpy
+      - sed -i -e '/live2dmodel/d' renpy/module/Setup
+      - sed -i -e 's/"rapt"/"rapt3"/g' renpy/launcher/game/android.rpy
+      - sed -i -e '/does not exist/s/raise //' renpy/launcher/game/distribute.rpy
+      - sed -i -e 's/8.3.0/8.2.1/' renpy/renpy/versions.py
+      - ln -s $$pygame_sdl2$$ pygame_sdl2
+      - ln -s $$pygame_sdl2$$ renpy/pygame_sdl2
+      - popd
+      - mkdir ksre/
+      - mv android* game project.json .android.json ksre/
+    build:
+      - pushd $$cpython$$
+      - ./configure --prefix=$$cpython$$
+      - make -j`nproc`
+      - make install
+      - popd
+      - export PATH=$$cpython$$/bin/:$PATH
+      - export ROOT=$(pwd)
+      - cd renpy-build
+      - mkdir -p tmp/venv
+      - python3 -m venv tmp/venv
+      - source tmp/venv/bin/activate
+      - pip3 install -r requirements.txt
+      - python3 pygame_sdl2/setup.py install_headers
+      - RENPY_DEPS_INSTALL=/usr:/usr/lib/x86_64-linux-gnu/ ./renpy/run.sh renpy/launcher
+        quit
+      - ./build.py --platform linux --arch x86_64
+      - ./build.py --platform android --arch arm64_v8a
+      - cd renpy
+      - ./renpy3.sh launcher android_build $ROOT/ksre/
+      - cd rapt3/project
+      - ln -s $ROOT/renpy-build/tmp/build/sdl2.android-arm64_v8a/SDL2-*/android-project/app/src/main/java/org/libsdl
+        renpyandroid/src/main/java/org
+      - gradle assembleRelease
+    ndk: r25c
+
 MaintainerNotes: |
   1. NSFW content is disabled by default.
   2. Some patches were used to build renpy on Bullseye with old clang, python and autoconf in 1.4.2 and 1.4.3.
@@ -580,5 +660,5 @@ MaintainerNotes: |
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: .android.json|"numeric_version":\s(\d+)|.android.json|"version":\s"([\d.]+)"
-CurrentVersion: 1.4.8
-CurrentVersionCode: 148
+CurrentVersion: 1.4.9
+CurrentVersionCode: 149
