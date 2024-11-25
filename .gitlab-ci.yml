@@ -104,6 +104,7 @@ checkupdates:
   script:
     - |
       set -xe
+    - chown -R $(whoami) .
     - *get_changed_builds
     - |
       if [ -n "$CHANGED" ]; then
@@ -120,6 +121,7 @@ git redirect:
     - apt-get -qy update
     - apt-get -qy dist-upgrade
     - apt-get -qy install --no-install-recommends ca-certificates git python3 python3-yaml
+    - chown -R $(whoami) .
     - *get_changed_apps
     - test -n "$CHANGED" || exit 0
     - tools/rewrite-git-redirects.py $CHANGED
@@ -138,6 +140,7 @@ fdroid lint:
     - export fdroidserver=$PWD/fdroidserver
     - *install_fdroid_server
   script:
+    - chown -R $(whoami) .
     - cp tools/lint_config.yml config.yml
     - *get_changed_apps
     - export EXITVALUE=0
@@ -213,6 +216,7 @@ lint:
     - export EXITVALUE=0
     - function set_error() { export EXITVALUE=1; printf "\x1b[31mERROR `history|tail -2|head -1|cut -b 6-500`\x1b[0m\n"; }
 
+    - chown -R $(whoami) .
     - find metadata/ -name '*.jp*g' -o -name '*.png' | xargs exiftool -all=
     - echo "these images have EXIF that must be stripped:"
     - git --no-pager diff --stat
@@ -233,6 +237,7 @@ schema validation:
   before_script:
     - pip install check-jsonschema
   script:
+    - chown -R $(whoami) .
     - check-jsonschema --check-metaschema schemas/metadata.json || exit 1
     - *get_target_source_refs
     - git diff --exit-code --name-only "${TARGET_REF}...${SOURCE_REF}" schemas/metadata.json
@@ -294,6 +299,7 @@ fdroid build:
     ANDROID_HOME: /opt/android-sdk
     ANDROID_SDK_ROOT: ${ANDROID_HOME}
   script:
+    - chown -R $(whoami) .
     - test -d build || mkdir build
     - *get_changed_builds
     - test -n "$(printf "$CHANGED" | tr -d '[:space:]')"
