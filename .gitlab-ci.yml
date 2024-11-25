@@ -544,3 +544,29 @@ strip EXIF:
         echo "https://beinset.medium.com/exif-metadata-a-hidden-door-to-cyber-vulnerabilities-52b0dd2ff4de";
         exit 1;
       }
+
+repo/index.html:
+  stage: test
+  needs: []
+  image: debian:bookworm-slim
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        paths:
+          - .gitlab-ci.yml
+          - repo/index.*
+    # only check pushes to fdroids own repo
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_PROJECT_PATH == "fdroid/fdroiddata"
+      changes:
+        compare_to: 'refs/heads/master'
+        paths:
+          - .gitlab-ci.yml
+          - repo/index.*
+  script:
+    - apt-get -qy update
+    - apt-get -qy install --no-install-recommends linkchecker tidy
+    - export EXITVALUE=0
+    - function set_error() { export EXITVALUE=1; printf "\x1b[31mERROR `history|tail -2|head -1|cut -b 6-500`\x1b[0m\n"; }
+    - linkchecker repo/index.html || set_error
+    - tidy repo/index.html || set_error
+    - exit $EXITVALUE
