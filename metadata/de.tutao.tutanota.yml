@@ -3596,7 +3596,42 @@ Builds:
     scandelete:
       - node_modules/**
 
+  - versionName: 252.241122.0
+    versionCode: 396415
+    commit: 5b64a54953f39b4c54cd336a2a0978bead0d98c5
+    subdir: app-android/app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y g++ make emscripten
+      - curl -Lo node.tar.gz https://nodejs.org/dist/v20.11.1/node-v20.11.1-linux-x64.tar.gz
+      - echo "bf3a779bef19452da90fb88358ec2c57e0d2f882839b20dc6afc297b6aafc0d7 node.tar.gz"
+        | sha256sum -c -
+      - tar xzf node.tar.gz --strip-components=1 -C /usr/local/
+      - sysctl fs.inotify.max_user_watches=524288 || true
+    gradle:
+      - fdroid
+    srclibs:
+      - rustup@1.27.1
+    rm:
+      - app-ios
+    prebuild:
+      - sdkmanager "ndk;26.1.10909125"
+      - cd ../..
+      - node buildSrc/fixFdroidDeps.js
+      - npm install
+      - npm run build-packages
+      - node --max-old-space-size=4096 webapp prod
+      - node buildSrc/prepareMobileBuild.js dist
+      - $$rustup$$/rustup-init.sh -y --default-toolchain 1.79.0 --target aarch64-linux-android
+        armv7-linux-androideabi x86_64-linux-android i686-linux-android
+      - source $HOME/.cargo/env
+      - sed -i -e "/cargo {/a cargoCommand = \"$(which cargo)\"\nrustcCommand = \"$(which
+        rustc)\"" -e "s|\"cargo\"|\"$(which cargo)\"|" tuta-sdk/android/sdk/build.gradle.kts
+    scandelete:
+      - node_modules/**
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags tutanota-fdroid-release-*
-CurrentVersion: 251.241112.0
-CurrentVersionCode: 396409
+CurrentVersion: 252.241122.0
+CurrentVersionCode: 396415
