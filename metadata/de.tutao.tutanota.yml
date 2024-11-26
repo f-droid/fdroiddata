@@ -3616,20 +3616,19 @@ Builds:
     rm:
       - app-ios
     prebuild:
-      - sdkmanager "ndk;26.1.10909125"
       - cd ../..
       - node buildSrc/fixFdroidDeps.js
       - npm install
       - npm run build-packages
-      - node --max-old-space-size=4096 webapp prod
       - node buildSrc/prepareMobileBuild.js dist
       - $$rustup$$/rustup-init.sh -y --default-toolchain 1.79.0 --target aarch64-linux-android
         armv7-linux-androideabi x86_64-linux-android i686-linux-android
-      - source $HOME/.cargo/env
       - sed -i -e "/cargo {/a cargoCommand = \"$(which cargo)\"\nrustcCommand = \"$(which
         rustc)\"" -e "s|\"cargo\"|\"$(which cargo)\"|" tuta-sdk/android/sdk/build.gradle.kts
     scandelete:
-      - node_modules/**
+      - node_modules
+    build: node --max-old-space-size=4096 webapp prod
+    ndk: r26b
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags tutanota-fdroid-release-*
