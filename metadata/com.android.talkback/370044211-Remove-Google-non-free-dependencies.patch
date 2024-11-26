@@ -1,0 +1,751 @@
+From 862ede598dacfc555d91c88f5e1267e7de73ffbf Mon Sep 17 00:00:00 2001
+From: Oliver Scott <olivercscott@gmail.com>
+Date: Tue, 26 Nov 2024 17:40:10 -0500
+Subject: [PATCH] Remove Google non-free dependencies
+
+Change-Id: I7eb79930334b12f3c6e34078a45400537bd3c54f
+---
+ .../src/phone/AndroidManifest.xml             |   1 -
+ shared.gradle                                 |   3 -
+ talkback/src/main/AndroidManifest.xml         |  10 -
+ .../talkback/TalkBackApplication.java         |   8 +-
+ .../talkback/TalkBackService.java             |  26 +-
+ .../talkback/TouchInteractionMonitor.java     |   9 +-
+ .../actor/FocusActorForScreenStateChange.java |  19 +-
+ .../talkback/actor/ImageCaptioner.java        |  66 +--
+ .../talkback/actor/gemini/GeminiActor.java    |   9 -
+ .../TelevisionNavigationController.java       |  10 +-
+ .../talkback/logging/EventLatencyLogger.java  |   6 +-
+ .../marvin/talkback/TalkBackService.java      |  26 +-
+ 16 files changed, 26 insertions(+), 804 deletions(-)
+
+diff --git a/braille/brailledisplay/src/phone/AndroidManifest.xml b/braille/brailledisplay/src/phone/AndroidManifest.xml
+index 0d54b3a9..8c011ecb 100644
+--- a/braille/brailledisplay/src/phone/AndroidManifest.xml
++++ b/braille/brailledisplay/src/phone/AndroidManifest.xml
+@@ -11,7 +11,6 @@
+   <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"  android:maxSdkVersion="30" />
+   <uses-permission android:name="android.permission.BLUETOOTH" android:maxSdkVersion="30" />
+   <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" android:maxSdkVersion="30" />
+-  <uses-permission android:name="android.permission.INTERNET" />
+   <!-- Bluetooth permissions introduced in API level 31. -->
+   <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+   <uses-permission android:name="android.permission.BLUETOOTH_SCAN" android:usesPermissionFlags="neverForLocation" />
+diff --git a/shared.gradle b/shared.gradle
+index 697cb322..e557e5c9 100644
+--- a/shared.gradle
++++ b/shared.gradle
+@@ -54,9 +54,7 @@ dependencies {
+ 
+     // Google common
+     implementation 'com.google.guava:guava:31.0-jre'
+-    implementation 'com.google.android.gms:play-services-mlkit-text-recognition:17.0.1'
+     implementation 'com.google.android.material:material:1.5.0'
+-    implementation 'com.google.android.play:core:1.10.3'
+ 
+     // Support library
+     implementation 'androidx.annotation:annotation:1.2.0'
+@@ -77,10 +75,6 @@ dependencies {
+     annotationProcessor 'com.google.auto.value:auto-value:1.8.2'
+     implementation 'javax.annotation:javax.annotation-api:1.3.2'
+ 
+-    implementation 'androidx.wear:wear:1.2.0-rc01'
+-    implementation 'androidx.wear:wear-remote-interactions:1.0.0'
+-    implementation 'com.google.android.support:wearable:2.8.1'
+-
+     implementation 'com.google.zxing:core:3.5.1'
+ 
+     // UI understanding
+diff --git a/talkback/src/main/AndroidManifest.xml b/talkback/src/main/AndroidManifest.xml
+index 93e21e91..6d313e6f 100644
+--- a/talkback/src/main/AndroidManifest.xml
++++ b/talkback/src/main/AndroidManifest.xml
+@@ -32,21 +32,11 @@
+     <!-- Required for App Enumeration -->
+     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"/>
+ 
+-    <!-- Required for sending data to Google Analytics. -->
+-    <uses-permission android:name="android.permission.INTERNET" />
+-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+-
+     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+ 
+     <!-- Required for calling Service.startForeground after API 28. -->
+     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+ 
+-    <!-- Required for Primes. -->
+-    <uses-permission android:name="android.permission.GET_PACKAGE_SIZE" />
+-
+-    <!-- Used to control Primes collection using Gservices flags -->
+-    <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES" />
+-
+     <!-- Required for posting notifications, beginning in Android T. -->
+     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+ 
+diff --git a/talkback/src/main/java/com/google/android/accessibility/talkback/TalkBackApplication.java b/talkback/src/main/java/com/google/android/accessibility/talkback/TalkBackApplication.java
+index 99687d17..1759e7a1 100644
+--- a/talkback/src/main/java/com/google/android/accessibility/talkback/TalkBackApplication.java
++++ b/talkback/src/main/java/com/google/android/accessibility/talkback/TalkBackApplication.java
+@@ -16,17 +16,17 @@
+ 
+ package com.google.android.accessibility.talkback;
+ 
++import android.app.Application;
++
+ import com.google.android.accessibility.talkback.training.PageConfigMapperImpl;
+ import com.google.android.accessibility.talkback.training.TrainingConfigMapperImpl;
+ import com.google.android.accessibility.talkback.trainingcommon.TrainingActivityInterfaceInjector;
+ import com.google.android.accessibility.utils.FormFactorUtils;
+-import com.google.android.play.core.splitcompat.SplitCompatApplication;
+ 
+ /**
+- * A top level Application for TalkBack. It extends SplitCompatApplication to enable SplitCompat,
+- * which allows our app to access code and resources from a downloaded module.
++ * A top level Application for TalkBack
+  */
+-public class TalkBackApplication extends SplitCompatApplication {
++public class TalkBackApplication extends Application {
+ 
+   @Override
+   public void onCreate() {
+diff --git a/talkback/src/main/java/com/google/android/accessibility/talkback/TalkBackService.java b/talkback/src/main/java/com/google/android/accessibility/talkback/TalkBackService.java
+index f9bca7ab..df03a32e 100644
+--- a/talkback/src/main/java/com/google/android/accessibility/talkback/TalkBackService.java
++++ b/talkback/src/main/java/com/google/android/accessibility/talkback/TalkBackService.java
+@@ -87,7 +87,6 @@ import com.google.android.accessibility.braille.interfaces.TalkBackForBrailleIme
+ import com.google.android.accessibility.braille.interfaces.TalkBackForBrailleIme.BrailleImeForTalkBackProvider;
+ import com.google.android.accessibility.brailleime.BrailleIme;
+ import com.google.android.accessibility.talkback.Feedback.DeviceInfo.Action;
+-import com.google.android.accessibility.talkback.PrimesController.TimerAction;
+ import com.google.android.accessibility.talkback.TalkBackExitController.TrainingState;
+ import com.google.android.accessibility.talkback.actor.AutoScrollActor;
+ import com.google.android.accessibility.talkback.actor.DimScreenActor;
+@@ -657,7 +656,6 @@ public class TalkBackService extends AccessibilityService
+ 
+   private GestureShortcutMapping gestureShortcutMapping;
+   private NodeMenuRuleProcessor nodeMenuRuleProcessor;
+-  private PrimesController primesController;
+   private SpeechLanguage speechLanguage;
+   private ImageCaptioner imageCaptioner;
+   private TalkBackExitController talkBackExitController;
+@@ -982,13 +980,6 @@ public class TalkBackService extends AccessibilityService
+   protected final boolean onKeyEvent(KeyEvent keyEvent) {
+     boolean result = onKeyEventInternal(keyEvent);
+ 
+-    if (primesController != null) {
+-      // We use keyEvent.getEventTime() as starting point because we don't know how long the
+-      // message was enqueued before onKeyEvent() has started.
+-      primesController.recordDuration(
+-          TimerAction.KEY_EVENT, keyEvent.getEventTime(), SystemClock.uptimeMillis());
+-    }
+-
+     return result;
+   }
+ 
+@@ -1121,7 +1112,6 @@ public class TalkBackService extends AccessibilityService
+     }
+     Performance perf = Performance.getInstance();
+     EventId eventId = perf.onGestureEventReceived(gestureId);
+-    primesController.startTimer(TimerAction.GESTURE_EVENT);
+ 
+     switch (gestureId) {
+       case GESTURE_FAKED_SPLIT_TYPING:
+@@ -1152,7 +1142,6 @@ public class TalkBackService extends AccessibilityService
+     // Preceding event handling frequently initiates a framework action, which in turn
+     // cascades a focus event, which in turn generates feedback.
+     perf.onHandlerDone(eventId);
+-    primesController.stopTimer(TimerAction.GESTURE_EVENT);
+     return true;
+   }
+ 
+@@ -1340,15 +1329,12 @@ public class TalkBackService extends AccessibilityService
+   @Override
+   protected void onServiceConnected() {
+     LogUtils.v(TAG, "System bound to service.");
+-    primesController = new PrimesController();
+-    primesController.initialize(getApplication());
+-    primesController.startTimer(TimerAction.START_UP);
+ 
+     SharedPreferencesUtils.migrateSharedPreferences(this);
+     prefs = SharedPreferencesUtils.getSharedPreferences(this);
+ 
+     if (FeatureFlagReader.logEventBasedLatency(getBaseContext())) {
+-      eventLatencyLogger = new EventLatencyLogger(primesController, getApplicationContext(), prefs);
++      eventLatencyLogger = new EventLatencyLogger(getApplicationContext(), prefs);
+     }
+ 
+     if (FeatureFlagReader.usePeriodAsSeparator(getBaseContext())) {
+@@ -1435,8 +1421,6 @@ public class TalkBackService extends AccessibilityService
+     Intent intent = new Intent(INTENT_TALKBACK_ENABLED);
+     intent.setPackage(getPackageName());
+     sendBroadcast(intent);
+-
+-    primesController.stopTimer(TimerAction.START_UP);
+   }
+ 
+   /**
+@@ -1596,7 +1580,7 @@ public class TalkBackService extends AccessibilityService
+ 
+     imageCaptioner =
+         new ImageCaptioner(
+-            this, imageCaptionStorage, accessibilityFocusMonitor, analytics, primesController);
++            this, imageCaptionStorage, accessibilityFocusMonitor, analytics);
+     GeminiFunctionUtils.setImageCaptioner(imageCaptioner);
+ 
+     // TODO: ScreenState should be passed through pipeline.
+@@ -1670,7 +1654,6 @@ public class TalkBackService extends AccessibilityService
+         new GeminiActor(
+             this,
+             analytics,
+-            primesController,
+             GeminiConfiguration.useAratea(this)
+                 ? new ArateaEndpoint(this, getApplication())
+                 : new GeminiRestEndpoint(
+@@ -1720,7 +1703,7 @@ public class TalkBackService extends AccessibilityService
+                 scroller,
+                 focuser,
+                 new FocusActorForScreenStateChange(
+-                    this, inputMethodMonitor, focusFinder, primesController),
++                    this, inputMethodMonitor, focusFinder),
+                 new FocusActorForTapAndTouchExploration(),
+                 directionNavigationActor,
+                 new SearchScreenNodeStrategy(/* observer= */ null, labelManager),
+@@ -1986,7 +1969,6 @@ public class TalkBackService extends AccessibilityService
+               /* service= */ this,
+               accessibilityFocusMonitor,
+               inputMethodMonitor,
+-              primesController,
+               menuManager,
+               pipeline.getFeedbackReturner(),
+               TvNavigation.useHandlerThread(/* context= */ this));
+@@ -3314,7 +3296,7 @@ public class TalkBackService extends AccessibilityService
+         }
+         TouchInteractionMonitor touchInteractionMonitor =
+             new TouchInteractionMonitor(
+-                context, touchInteractionController, this, primesController);
++                context, touchInteractionController, this);
+         touchInteractionMonitor.setMultiFingerGesturesEnabled(true);
+         touchInteractionMonitor.setTwoFingerPassthroughEnabled(true);
+         touchInteractionMonitor.setServiceHandlesDoubleTap(true);
+diff --git a/talkback/src/main/java/com/google/android/accessibility/talkback/TouchInteractionMonitor.java b/talkback/src/main/java/com/google/android/accessibility/talkback/TouchInteractionMonitor.java
+index 9087bb99..b945680f 100644
+--- a/talkback/src/main/java/com/google/android/accessibility/talkback/TouchInteractionMonitor.java
++++ b/talkback/src/main/java/com/google/android/accessibility/talkback/TouchInteractionMonitor.java
+@@ -27,7 +27,6 @@ import static android.view.MotionEvent.ACTION_DOWN;
+ import static android.view.MotionEvent.ACTION_MOVE;
+ import static android.view.MotionEvent.ACTION_POINTER_DOWN;
+ import static android.view.MotionEvent.INVALID_POINTER_ID;
+-import static com.google.android.accessibility.talkback.PrimesController.TimerAction.TOUCH_CONTROLLER_STATE_CHANGE_LATENCY;
+ import static com.google.android.accessibility.utils.gestures.GestureManifold.GESTURE_FAKED_SPLIT_TYPING;
+ import static com.google.android.accessibility.utils.gestures.GestureManifold.GESTURE_TOUCH_EXPLORE;
+ 
+@@ -151,7 +150,6 @@ public class TouchInteractionMonitor
+   private EventId eventId;
+   private final int displayId;
+   private final boolean handleStateChangeInMainThread;
+-  private final PrimesController primesController;
+   private final Queue<CallerInfo> callerInfos;
+ 
+   private static class CallerInfo {
+@@ -174,13 +172,11 @@ public class TouchInteractionMonitor
+   public TouchInteractionMonitor(
+       Context context,
+       TouchInteractionController controller,
+-      TalkBackService service,
+-      PrimesController primesController) {
++      TalkBackService service) {
+     this.context = context;
+     this.controller = controller;
+     receivedPointerTracker = new ReceivedPointerTracker();
+     this.service = service;
+-    this.primesController = primesController;
+     handleStateChangeInMainThread = FeatureFlagReader.handleStateChangeInMainThread(context);
+     displayId = context.getDisplay().getDisplayId();
+     mainHandler = new Handler(context.getMainLooper());
+@@ -808,8 +804,7 @@ public class TouchInteractionMonitor
+     if (handleStateChangeInMainThread) {
+       long currentTime = SystemClock.uptimeMillis();
+       if (currentTime >= requestStartTime) {
+-        primesController.recordDuration(
+-            TOUCH_CONTROLLER_STATE_CHANGE_LATENCY, requestStartTime, currentTime);
++
+       }
+     }
+   }
+diff --git a/talkback/src/main/java/com/google/android/accessibility/talkback/actor/FocusActorForScreenStateChange.java b/talkback/src/main/java/com/google/android/accessibility/talkback/actor/FocusActorForScreenStateChange.java
+index 47d97a1e..4a91e07f 100644
+--- a/talkback/src/main/java/com/google/android/accessibility/talkback/actor/FocusActorForScreenStateChange.java
++++ b/talkback/src/main/java/com/google/android/accessibility/talkback/actor/FocusActorForScreenStateChange.java
+@@ -28,8 +28,6 @@ import androidx.core.view.accessibility.AccessibilityNodeInfoCompat;
+ import com.google.android.accessibility.talkback.ActorState;
+ import com.google.android.accessibility.talkback.Feedback;
+ import com.google.android.accessibility.talkback.Pipeline;
+-import com.google.android.accessibility.talkback.PrimesController;
+-import com.google.android.accessibility.talkback.PrimesController.TimerAction;
+ import com.google.android.accessibility.talkback.actor.helper.FocusActorHelper;
+ import com.google.android.accessibility.talkback.focusmanagement.NavigationTarget;
+ import com.google.android.accessibility.talkback.focusmanagement.interpreter.ScreenState;
+@@ -83,7 +81,6 @@ public class FocusActorForScreenStateChange {
+ 
+   private Pipeline.FeedbackReturner pipeline;
+   private ActorState actorState;
+-  private final PrimesController primesController;
+ 
+   private final InputMethodMonitor inputMethodMonitor;
+   private final FocusFinder focusFinder;
+@@ -96,9 +93,7 @@ public class FocusActorForScreenStateChange {
+   public FocusActorForScreenStateChange(
+       @NonNull AccessibilityService service,
+       @NonNull InputMethodMonitor inputMethodMonitor,
+-      @NonNull FocusFinder focusFinder,
+-      @NonNull PrimesController primesController) {
+-    this.primesController = primesController;
++      @NonNull FocusFinder focusFinder) {
+     this.focusFinder = focusFinder;
+     this.service = service;
+     this.inputMethodMonitor = inputMethodMonitor;
+@@ -193,7 +188,6 @@ public class FocusActorForScreenStateChange {
+     if (lastFocusAction == null) {
+       return false;
+     }
+-    long startTime = primesController.getTime();
+ 
+     AccessibilityNodeInfoCompat nodeToRestoreFocus =
+         FocusActionRecord.getFocusableNodeFromFocusRecord(root, focusFinder, lastFocusAction);
+@@ -223,8 +217,7 @@ public class FocusActorForScreenStateChange {
+       screenState.consumeInterpretFirstTimeWhenWakeUp();
+     }
+     if (success) {
+-      primesController.recordDuration(
+-          TimerAction.INITIAL_FOCUS_RESTORE, startTime, primesController.getTime());
++
+     }
+ 
+     return success;
+@@ -252,7 +245,6 @@ public class FocusActorForScreenStateChange {
+     if (nodeForSync == null) {
+       return false;
+     }
+-    long startTime = primesController.getTime();
+ 
+     boolean firstTime = screenState.isInterpretFirstTimeWhenWakeUp();
+     boolean forceMuteFeedback =
+@@ -269,8 +261,7 @@ public class FocusActorForScreenStateChange {
+       screenState.consumeInterpretFirstTimeWhenWakeUp();
+     }
+     if (success) {
+-      primesController.recordDuration(
+-          TimerAction.INITIAL_FOCUS_FOLLOW_INPUT, startTime, primesController.getTime());
++
+     }
+ 
+     return success;
+@@ -365,7 +356,6 @@ public class FocusActorForScreenStateChange {
+     if (root == null) {
+       return false;
+     }
+-    long startTime = primesController.getTime();
+ 
+     @Nullable CharSequence windowTitle = screenState.getWindowTitle(currentActiveWindow.getId());
+ 
+@@ -437,8 +427,7 @@ public class FocusActorForScreenStateChange {
+       screenState.consumeInterpretFirstTimeWhenWakeUp();
+     }
+     if (success) {
+-      primesController.recordDuration(
+-          TimerAction.INITIAL_FOCUS_FIRST_CONTENT, startTime, primesController.getTime());
++
+     }
+ 
+     return success;
+diff --git a/talkback/src/main/java/com/google/android/accessibility/talkback/actor/ImageCaptioner.java b/talkback/src/main/java/com/google/android/accessibility/talkback/actor/ImageCaptioner.java
+index 95ac5958..0672605d 100644
+--- a/talkback/src/main/java/com/google/android/accessibility/talkback/actor/ImageCaptioner.java
++++ b/talkback/src/main/java/com/google/android/accessibility/talkback/actor/ImageCaptioner.java
+@@ -17,14 +17,6 @@
+ package com.google.android.accessibility.talkback.actor;
+ 
+ import static com.google.android.accessibility.talkback.Feedback.Focus.Action.MUTE_NEXT_FOCUS;
+-import static com.google.android.accessibility.talkback.PrimesController.TimerAction.IMAGE_CAPTION_ICON_LABEL_FAILED;
+-import static com.google.android.accessibility.talkback.PrimesController.TimerAction.IMAGE_CAPTION_ICON_LABEL_SUCCEED;
+-import static com.google.android.accessibility.talkback.PrimesController.TimerAction.IMAGE_CAPTION_IMAGE_DESCRIPTION_FAILED;
+-import static com.google.android.accessibility.talkback.PrimesController.TimerAction.IMAGE_CAPTION_IMAGE_DESCRIPTION_SUCCEED;
+-import static com.google.android.accessibility.talkback.PrimesController.TimerAction.IMAGE_CAPTION_IMAGE_PROCESS_BLOCK_OVERLAY;
+-import static com.google.android.accessibility.talkback.PrimesController.TimerAction.IMAGE_CAPTION_OCR_FAILED;
+-import static com.google.android.accessibility.talkback.PrimesController.TimerAction.IMAGE_CAPTION_OCR_SUCCEED;
+-import static com.google.android.accessibility.talkback.PrimesController.TimerAction.LATENCY_BETWEEN_SCREENSHOT_CAPTURE_REQUEST;
+ import static com.google.android.accessibility.talkback.actor.ImageCaptioner.CaptionNodeType.IMAGE;
+ import static com.google.android.accessibility.talkback.actor.ImageCaptioner.CaptionNodeType.NONE;
+ import static com.google.android.accessibility.talkback.actor.ImageCaptioner.CaptionNodeType.UNLABELLED_VIEW;
+@@ -92,7 +84,6 @@ import com.google.android.accessibility.talkback.FeatureFlagReader;
+ import com.google.android.accessibility.talkback.Feedback;
+ import com.google.android.accessibility.talkback.Feedback.TriggerIntent.Action;
+ import com.google.android.accessibility.talkback.Pipeline;
+-import com.google.android.accessibility.talkback.PrimesController;
+ import com.google.android.accessibility.talkback.R;
+ import com.google.android.accessibility.talkback.actor.gemini.GeminiOptInDialog;
+ import com.google.android.accessibility.talkback.analytics.TalkBackAnalytics;
+@@ -106,7 +97,6 @@ import com.google.android.accessibility.talkback.dynamicfeature.ModuleDownloadPr
+ import com.google.android.accessibility.talkback.focusmanagement.AccessibilityFocusMonitor;
+ import com.google.android.accessibility.talkback.icondetection.IconAnnotationsDetectorFactory;
+ import com.google.android.accessibility.talkback.imagecaption.CaptionRequest;
+-import com.google.android.accessibility.talkback.imagecaption.CharacterCaptionRequest;
+ import com.google.android.accessibility.talkback.imagecaption.IconDetectionRequest;
+ import com.google.android.accessibility.talkback.imagecaption.ImageCaptionConstants.AutomaticImageCaptioningState;
+ import com.google.android.accessibility.talkback.imagecaption.ImageCaptionConstants.DownloadDialogResources;
+@@ -192,7 +182,6 @@ public class ImageCaptioner extends Handler
+   private final ImageCaptionStorage imageCaptionStorage;
+   private final AccessibilityFocusMonitor accessibilityFocusMonitor;
+   private final TalkBackAnalytics analytics;
+-  private final PrimesController primesController;
+   private final IconDetectionModuleDownloadPrompter iconDetectionModuleDownloadPrompter;
+   @VisibleForTesting @Nullable IconAnnotationsDetector iconAnnotationsDetector;
+   private boolean iconAnnotationsDetectorStarted = false;
+@@ -211,8 +200,6 @@ public class ImageCaptioner extends Handler
+   private int requestId = 0;
+ 
+   private final RequestList<ScreenshotCaptureRequest> screenshotRequests;
+-  private final RequestList<CharacterCaptionRequest> characterCaptionRequests =
+-      new RequestList<>(CAPTION_REQUEST_CAPACITY);
+   private final RequestList<IconDetectionRequest> iconDetectionRequests =
+       new RequestList<>(CAPTION_REQUEST_CAPACITY);
+   private final RequestList<ImageDescriptionRequest> imageDescriptionRequests =
+@@ -230,8 +217,7 @@ public class ImageCaptioner extends Handler
+       IconDetectionModuleDownloadPrompter iconDetectionModuleDownloadPrompter,
+       ImageDescriptionModuleDownloadPrompter imageDescriptionModuleDownloadPrompter,
+       AccessibilityFocusMonitor accessibilityFocusMonitor,
+-      TalkBackAnalytics analytics,
+-      PrimesController primesController) {
++      TalkBackAnalytics analytics) {
+     super(Looper.myLooper());
+     this.service = service;
+     prefs = SharedPreferencesUtils.getSharedPreferences(service);
+@@ -240,7 +226,6 @@ public class ImageCaptioner extends Handler
+     this.accessibilityFocusMonitor = accessibilityFocusMonitor;
+     this.captionResults = new HashMap<>();
+     this.analytics = analytics;
+-    this.primesController = primesController;
+     this.iconDetectionModuleDownloadPrompter = iconDetectionModuleDownloadPrompter;
+     this.imageDescriptionModuleDownloadPrompter = imageDescriptionModuleDownloadPrompter;
+     initialize();
+@@ -250,8 +235,7 @@ public class ImageCaptioner extends Handler
+       AccessibilityService service,
+       ImageCaptionStorage imageCaptionStorage,
+       AccessibilityFocusMonitor accessibilityFocusMonitor,
+-      TalkBackAnalytics analytics,
+-      PrimesController primesController) {
++      TalkBackAnalytics analytics) {
+     super(Looper.myLooper());
+     this.service = service;
+     prefs = SharedPreferencesUtils.getSharedPreferences(service);
+@@ -261,7 +245,6 @@ public class ImageCaptioner extends Handler
+     this.accessibilityFocusMonitor = accessibilityFocusMonitor;
+     this.captionResults = new HashMap<>();
+     this.analytics = analytics;
+-    this.primesController = primesController;
+     Downloader downloader = DownloaderFactory.create(service);
+     downloader.updateAllDownloadStatus();
+     iconDetectionModuleDownloadPrompter =
+@@ -1273,8 +1256,6 @@ public class ImageCaptioner extends Handler
+ 
+   @VisibleForTesting
+   void onScreenshotCapturePending(boolean scheduled, Duration intervalTime) {
+-    primesController.recordDuration(
+-        LATENCY_BETWEEN_SCREENSHOT_CAPTURE_REQUEST, intervalTime.toMillis());
+     if (scheduled) {
+       return;
+     }
+@@ -1288,7 +1269,6 @@ public class ImageCaptioner extends Handler
+   void onCharacterCaptionFinish(
+       CaptionRequest request, AccessibilityNode node, Result result, boolean isUserRequested) {
+     if (request.getDurationMillis() != INVALID_DURATION) {
+-      primesController.recordDuration(IMAGE_CAPTION_OCR_SUCCEED, request.getDurationMillis());
+     }
+     analytics.onImageCaptionEvent(IMAGE_CAPTION_EVENT_OCR_PERFORM_SUCCEED);
+     LogUtils.v(
+@@ -1297,7 +1277,6 @@ public class ImageCaptioner extends Handler
+             + StringBuilderUtils.joinFields(
+                 StringBuilderUtils.optionalSubObj("result", result.text()),
+                 StringBuilderUtils.optionalSubObj("node", node)));
+-    characterCaptionRequests.performNextRequest();
+ 
+     handleResult(request.getRequestId(), node, result, isUserRequested);
+     imageCaptionStorage.updateCharacterCaptionResult(node, result);
+@@ -1306,36 +1285,14 @@ public class ImageCaptioner extends Handler
+   @VisibleForTesting
+   void addCaptionRequest(
+       int id, AccessibilityNodeInfoCompat node, Bitmap screenCapture, boolean isUserRequested) {
+-    characterCaptionRequests.addRequest(
+-        new CharacterCaptionRequest(
+-            id,
+-            service,
+-            node,
+-            screenCapture,
+-            /* onFinishListener= */ this::onCharacterCaptionFinish,
+-            /* onErrorListener= */ (errorRequest, errorNode, errorCode, userRequest) -> {
+-              if (errorRequest.getDurationMillis() != INVALID_DURATION) {
+-                primesController.recordDuration(
+-                    IMAGE_CAPTION_OCR_FAILED, errorRequest.getDurationMillis());
+-              }
+-              analytics.onImageCaptionEvent(IMAGE_CAPTION_EVENT_OCR_PERFORM_FAIL);
+-              LogUtils.v(TAG, "onError(), error= %s", Request.errorName(errorCode));
+-              characterCaptionRequests.performNextRequest();
+-              handleResult(
+-                  errorRequest.getRequestId(),
+-                  AccessibilityNode.takeOwnership(node),
+-                  Result.create(OCR, /* result= */ null),
+-                  userRequest);
+-            },
+-            isUserRequested));
++
+   }
+ 
+   @VisibleForTesting
+   void onIconDetectionFinish(
+       CaptionRequest request, AccessibilityNode node, Result result, boolean isUserRequested) {
+     if (request.getDurationMillis() != INVALID_DURATION) {
+-      primesController.recordDuration(
+-          IMAGE_CAPTION_ICON_LABEL_SUCCEED, request.getDurationMillis());
++
+     }
+     analytics.onImageCaptionEvent(IMAGE_CAPTION_EVENT_ICON_DETECT_SUCCEED);
+     LogUtils.v(TAG, "onIconDetectionFinish() result=%s node=%s", result.text(), node);
+@@ -1358,8 +1315,7 @@ public class ImageCaptioner extends Handler
+             /* onFinishListener= */ this::onIconDetectionFinish,
+             /* onErrorListener= */ (errorRequest, errorNode, errorCode, userRequest) -> {
+               if (errorRequest.getDurationMillis() != INVALID_DURATION) {
+-                primesController.recordDuration(
+-                    IMAGE_CAPTION_ICON_LABEL_FAILED, errorRequest.getDurationMillis());
++;
+               }
+               analytics.onImageCaptionEvent(IMAGE_CAPTION_EVENT_ICON_DETECT_FAIL);
+               LogUtils.v(TAG, "onError(), error=%s", Request.errorName(errorCode));
+@@ -1376,8 +1332,7 @@ public class ImageCaptioner extends Handler
+   private void onImageDescriptionFinish(
+       CaptionRequest request, AccessibilityNode node, Result result, boolean isUserRequested) {
+     if (request.getDurationMillis() != INVALID_DURATION) {
+-      primesController.recordDuration(
+-          IMAGE_CAPTION_IMAGE_DESCRIPTION_SUCCEED, request.getDurationMillis());
++
+     }
+     analytics.onImageCaptionEvent(IMAGE_CAPTION_EVENT_IMAGE_DESCRIBE_SUCCEED);
+     LogUtils.v(
+@@ -1405,8 +1360,7 @@ public class ImageCaptioner extends Handler
+             /* onFinishListener= */ this::onImageDescriptionFinish,
+             /* onErrorListener= */ (errorRequest, errorNode, errorCode, userRequest) -> {
+               if (errorRequest.getDurationMillis() != INVALID_DURATION) {
+-                primesController.recordDuration(
+-                    IMAGE_CAPTION_IMAGE_DESCRIPTION_FAILED, errorRequest.getDurationMillis());
++
+               }
+               analytics.onImageCaptionEvent(IMAGE_CAPTION_EVENT_IMAGE_DESCRIBE_FAIL);
+               LogUtils.v(TAG, "onError(), error=%s", Request.errorName(errorCode));
+@@ -1495,14 +1449,13 @@ public class ImageCaptioner extends Handler
+   @VisibleForTesting
+   void clearRequests() {
+     screenshotRequests.clear();
+-    characterCaptionRequests.clear();
+     iconDetectionRequests.clear();
+     captionResults.clear();
+   }
+ 
+   @VisibleForTesting
+   int getWaitingCharacterCaptionRequestSize() {
+-    return characterCaptionRequests.getWaitingRequestSize();
++    return 0;
+   }
+ 
+   @VisibleForTesting
+@@ -1708,7 +1661,6 @@ public class ImageCaptioner extends Handler
+       }
+       LogUtils.w(TAG, "Caption request is timeout.");
+       screenshotRequests.clear();
+-      characterCaptionRequests.clear();
+       iconDetectionRequests.clear();
+       imageDescriptionRequests.clear();
+       captionResults.forEach((key, value) -> value.recycleAndClearScreenshots());
+@@ -1723,8 +1675,6 @@ public class ImageCaptioner extends Handler
+ 
+     long startTime = SystemClock.uptimeMillis();
+     blockedScreenCapture = blockOverlaps(root, node, screenCapture);
+-    primesController.recordDuration(
+-        IMAGE_CAPTION_IMAGE_PROCESS_BLOCK_OVERLAY, startTime, SystemClock.uptimeMillis());
+     if (blockedScreenCapture == null) {
+       blockedScreenCapture = screenCapture;
+     } else {
+diff --git a/talkback/src/main/java/com/google/android/accessibility/talkback/actor/gemini/GeminiActor.java b/talkback/src/main/java/com/google/android/accessibility/talkback/actor/gemini/GeminiActor.java
+index defa22ab..0ae7c1bd 100644
+--- a/talkback/src/main/java/com/google/android/accessibility/talkback/actor/gemini/GeminiActor.java
++++ b/talkback/src/main/java/com/google/android/accessibility/talkback/actor/gemini/GeminiActor.java
+@@ -16,8 +16,6 @@
+ 
+ package com.google.android.accessibility.talkback.actor.gemini;
+ 
+-import static com.google.android.accessibility.talkback.PrimesController.TimerAction.GEMINI_ON_DEVICE_RESPONSE_LATENCY;
+-import static com.google.android.accessibility.talkback.PrimesController.TimerAction.GEMINI_RESPONSE_LATENCY;
+ import static com.google.android.accessibility.utils.Performance.EVENT_ID_UNTRACKED;
+ 
+ import android.content.Context;
+@@ -28,7 +26,6 @@ import android.os.SystemClock;
+ import androidx.annotation.StringRes;
+ import com.google.android.accessibility.talkback.Feedback;
+ import com.google.android.accessibility.talkback.Pipeline;
+-import com.google.android.accessibility.talkback.PrimesController;
+ import com.google.android.accessibility.talkback.R;
+ import com.google.android.accessibility.talkback.actor.gemini.AiCoreEndpoint.AiFeatureDownloadCallback;
+ import com.google.android.accessibility.talkback.analytics.TalkBackAnalytics;
+@@ -107,7 +104,6 @@ public class GeminiActor {
+   private final AiCoreEndpoint aiCoreEndpoint;
+   private Pipeline.FeedbackReturner pipeline;
+   private final TalkBackAnalytics analytics;
+-  private final PrimesController primesController;
+   // Record the start time of Gemini request, with which TalkBack can measure the latency when the
+   // Gemini response is received.
+   private long startTime;
+@@ -143,12 +139,10 @@ public class GeminiActor {
+   public GeminiActor(
+       Context context,
+       TalkBackAnalytics analytics,
+-      PrimesController primesController,
+       GeminiEndpoint geminiEndpoint,
+       AiCoreEndpoint aiCoreEndpoint) {
+     this.context = context;
+     this.analytics = analytics;
+-    this.primesController = primesController;
+     this.geminiEndpoint = geminiEndpoint;
+     this.mainHandler = new Handler(context.getMainLooper());
+     this.progressToneDelayed =
+@@ -275,12 +269,9 @@ public class GeminiActor {
+           responseImageCaptionResult(requestId, text, /* isSuccess= */ true, manualTrigger);
+         }
+         analytics.onGeminiEvent(TalkBackAnalytics.GEMINI_SUCCESS);
+-        PrimesController.TimerAction action = GEMINI_RESPONSE_LATENCY;
+         if (requestIdMap.containsKey(requestId)
+             && Objects.equals(requestIdMap.get(requestId), Boolean.FALSE)) {
+-          action = GEMINI_ON_DEVICE_RESPONSE_LATENCY;
+         }
+-        primesController.recordDuration(action, startTime, SystemClock.uptimeMillis());
+         break;
+       case ERROR_PARSING_RESULT:
+         responseImageCaptionResult(
+diff --git a/talkback/src/main/java/com/google/android/accessibility/talkback/controller/TelevisionNavigationController.java b/talkback/src/main/java/com/google/android/accessibility/talkback/controller/TelevisionNavigationController.java
+index 0090f77d..e8648c90 100644
+--- a/talkback/src/main/java/com/google/android/accessibility/talkback/controller/TelevisionNavigationController.java
++++ b/talkback/src/main/java/com/google/android/accessibility/talkback/controller/TelevisionNavigationController.java
+@@ -48,8 +48,6 @@ import androidx.core.content.ContextCompat;
+ import androidx.core.view.accessibility.AccessibilityNodeInfoCompat;
+ import com.google.android.accessibility.talkback.Feedback;
+ import com.google.android.accessibility.talkback.Pipeline;
+-import com.google.android.accessibility.talkback.PrimesController;
+-import com.google.android.accessibility.talkback.PrimesController.TimerAction;
+ import com.google.android.accessibility.talkback.R;
+ import com.google.android.accessibility.talkback.TalkBackService;
+ import com.google.android.accessibility.talkback.TvNavigation;
+@@ -105,7 +103,6 @@ public class TelevisionNavigationController implements ServiceKeyEventListener {
+   private final TalkBackService service;
+   private final AccessibilityFocusMonitor accessibilityFocusMonitor;
+   private final InputMethodMonitor inputMethodMonitor;
+-  private final PrimesController primesController;
+   private final Pipeline.FeedbackReturner pipeline;
+   private final BroadcastReceiver treeDebugBroadcastReceiver =
+       new BroadcastReceiver() {
+@@ -150,7 +147,6 @@ public class TelevisionNavigationController implements ServiceKeyEventListener {
+       @NonNull TalkBackService service,
+       @NonNull AccessibilityFocusMonitor accessibilityFocusMonitor,
+       @NonNull InputMethodMonitor inputMethodMonitor,
+-      @NonNull PrimesController primesController,
+       @NonNull ListMenuManager listMenuManager,
+       Pipeline.@NonNull FeedbackReturner pipeline,
+       boolean useHandlerThread) {
+@@ -158,7 +154,6 @@ public class TelevisionNavigationController implements ServiceKeyEventListener {
+     this.accessibilityFocusMonitor = accessibilityFocusMonitor;
+     this.inputMethodMonitor = inputMethodMonitor;
+     this.pipeline = pipeline;
+-    this.primesController = primesController;
+     this.useHandlerThread = useHandlerThread;
+     this.listMenuManager = listMenuManager;
+ 
+@@ -304,10 +299,7 @@ public class TelevisionNavigationController implements ServiceKeyEventListener {
+             if (eventId != null) {
+               // We use keyEvent.getEventTime() as starting point because we don't know how long the
+               // message was enqueued before onKeyEvent() has started.
+-              primesController.recordDuration(
+-                  TimerAction.DPAD_NAVIGATION,
+-                  eventId.getEventTimeMs(),
+-                  SystemClock.uptimeMillis());
++
+             }
+           }
+         }
+diff --git a/talkback/src/main/java/com/google/android/accessibility/talkback/logging/EventLatencyLogger.java b/talkback/src/main/java/com/google/android/accessibility/talkback/logging/EventLatencyLogger.java
+index 38313889..feb009d1 100644
+--- a/talkback/src/main/java/com/google/android/accessibility/talkback/logging/EventLatencyLogger.java
++++ b/talkback/src/main/java/com/google/android/accessibility/talkback/logging/EventLatencyLogger.java
+@@ -19,7 +19,6 @@ package com.google.android.accessibility.talkback.logging;
+ import android.content.Context;
+ import android.content.SharedPreferences;
+ import android.os.Handler;
+-import com.google.android.accessibility.talkback.PrimesController;
+ import com.google.android.accessibility.utils.LatencyTracker;
+ import com.google.android.accessibility.utils.Performance.EventData;
+ import com.google.android.accessibility.utils.output.FailoverTextToSpeech.FailoverTtsListener;
+@@ -27,13 +26,12 @@ import com.google.android.accessibility.utils.output.FailoverTextToSpeech.Uttera
+ import com.google.android.libraries.accessibility.utils.concurrent.HandlerExecutor;
+ import java.util.concurrent.Executor;
+ 
+-/** Logs the event-based latency via {@link PrimesController}. */
++/** Logs the event-based latency */
+ public class EventLatencyLogger implements LatencyTracker, FailoverTtsListener {
+ 
+   private final Executor executor;
+ 
+-  public EventLatencyLogger(
+-      PrimesController primesController, Context context, SharedPreferences prefs) {
++  public EventLatencyLogger(Context context, SharedPreferences prefs) {
+     executor = new HandlerExecutor(new Handler(context.getMainLooper()));
+   }
+ 
+diff --git a/talkback/src/wear/java/com/google/android/marvin/talkback/TalkBackService.java b/talkback/src/wear/java/com/google/android/marvin/talkback/TalkBackService.java
+index 0a8f694a..dd8d5d86 100644
+--- a/talkback/src/wear/java/com/google/android/marvin/talkback/TalkBackService.java
++++ b/talkback/src/wear/java/com/google/android/marvin/talkback/TalkBackService.java
+@@ -7,8 +7,6 @@ import android.content.Context;
+ import android.content.pm.PackageManager;
+ import android.media.AudioDeviceInfo;
+ import android.media.AudioManager;
+-import android.support.wearable.input.WearableButtons;
+-import android.support.wearable.input.WearableButtons.ButtonInfo;
+ import android.util.Pair;
+ import android.view.KeyEvent;
+ import android.view.MotionEvent;
+@@ -118,29 +116,7 @@ public class TalkBackService extends com.google.android.accessibility.talkback.T
+     if (!FormFactorUtils.getInstance().isAndroidWear()) {
+       return volumeButtons;
+     }
+-    if (WearableButtons.getButtonCount(context) != NUM_STEM_BUTTONS_REQUIRED) {
+-      return volumeButtons;
+-    }
+-    ButtonInfo keyCodeStem1Info = WearableButtons.getButtonInfo(context, KeyEvent.KEYCODE_STEM_1);
+-    ButtonInfo keyCodeStem2Info = WearableButtons.getButtonInfo(context, KeyEvent.KEYCODE_STEM_2);
+-    if (keyCodeStem1Info == null || keyCodeStem2Info == null) {
+-      return volumeButtons;
+-    }
+-    float x1 = keyCodeStem1Info.getX();
+-    float x2 = keyCodeStem2Info.getX();
+-    float y1 = keyCodeStem1Info.getY();
+-    float y2 = keyCodeStem2Info.getY();
+-    // Check the X-position is on the same side.
+-    double center = context.getResources().getDisplayMetrics().widthPixels * 0.5;
+-    if (!(x1 > center && x2 > center) || (x1 < center && x2 < center)) {
+-      return volumeButtons;
+-    }
+-    // Check the Y-position to determine the top and bottom button.
+-    if (y1 > y2) {
+-      return new Pair<>(KeyEvent.KEYCODE_STEM_2, KeyEvent.KEYCODE_STEM_1);
+-    } else {
+-      return new Pair<>(KeyEvent.KEYCODE_STEM_1, KeyEvent.KEYCODE_STEM_2);
+-    }
++    return null;
+   }
+ 
+   /** Change only the Code and keep all the other values in KeyEvent. */
