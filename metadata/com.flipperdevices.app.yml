@@ -562,8 +562,36 @@ Builds:
       - is_sentry_publish=false
       - is_metric_enabled=false
 
+  - versionName: 1.8.1
+    versionCode: 1846
+    commit: 7af93e0d7df1c3fbd14a4d26db9411d81b2b521c
+    subdir: instances/android/app
+    submodules: true
+    gradle:
+      - yes
+    rm:
+      - components/notification/impl
+      - components/selfupdater/googleplay
+      - components/wearable/emulate
+      - components/wearable/sync/handheld/impl
+      - components/wearable/sync/wear
+      - instances/wearable
+    prebuild:
+      - sed -i -e 's/version_code", Integer.MAX_VALUE/version_code", $$VERCODE$$/'
+        -e 's/version_name", DEBUG_VERSION/version_name", "$$VERSION$$"/'  ../../../build-logic/plugins/convention/src/main/kotlin/com/flipperdevices/buildlogic/ApkConfig.kt
+      - sed -i -e '/libs.wear.gms/d' ../../../components/wearable/sync/common/build.gradle.kts
+        build.gradle.kts
+      - sdkmanager 'cmake;3.22.1'
+    scandelete:
+      - build-logic/plugins/convention/build
+    ndk: 26.1.10909125
+    gradleprops:
+      - is_google_feature=false
+      - is_sentry_publish=false
+      - is_metric_enabled=false
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags (\d+\.){3}\d+-release
 UpdateCheckData: '|[\d.]+\.(\d+)-release||([\d.]+)\.\d+-release'
-CurrentVersion: 1.8.0
-CurrentVersionCode: 1828
+CurrentVersion: 1.8.1
+CurrentVersionCode: 1846
