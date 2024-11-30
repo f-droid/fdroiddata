@@ -212,8 +212,44 @@ Builds:
       - sed -i -e '/signingConfig /d' build.gradle
       - gradle assembleRelease
 
+  - versionName: 3.1.7
+    versionCode: 322
+    commit: 275382ae81595757e2194be26d4952ce29a03ad6
+    sudo:
+      - apt-get update
+      - apt-get install -y npm jq
+    output: android/app/build/outputs/apk/release/app-release-unsigned.apk
+    rm:
+      - components/storeReview/storeRating.tsx
+    prebuild:
+      - npm remove expo-store-review
+      - npm install --build-from-source
+      - npm install lottie-react-native
+      - npm install @react-native-picker/picker --save
+      - sed -i -e '/Rating/d' screens/settings.tsx
+    scanignore:
+      - node_modules/react-native-vector-icons/android/build.gradle
+      - node_modules/react-native-reanimated/android/build.gradle
+      - node_modules/expo-modules-core/android/ExpoModulesCorePlugin.gradle
+      - node_modules/lottie-react-native/android/build.gradle
+      - node_modules/@react-native-async-storage/async-storage/android/build.gradle
+      - node_modules/expo-modules-autolinking/scripts/android/autolinking_implementation.gradle
+      - node_modules/react-native-safe-area-context/android/build.gradle
+      - node_modules/@react-native-picker/picker/android/build.gradle
+      - node_modules/react-native-svg/android/build.gradle
+      - node_modules/react-native-screens/android/build.gradle
+      - node_modules/react-native/sdks/hermesc/linux64-bin/hermesc
+    scandelete:
+      - node_modules
+    build:
+      - npm run build
+      - npx expo prebuild --clean
+      - cd android/app
+      - sed -i -e '/signingConfig /d' build.gradle
+      - gradle assembleRelease
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: app.json|"versionCode":\s(\d+),|.|"version":\s"(.*)",
-CurrentVersion: 3.1.6
-CurrentVersionCode: 319
+CurrentVersion: 3.1.7
+CurrentVersionCode: 322
