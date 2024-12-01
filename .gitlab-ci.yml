@@ -198,6 +198,7 @@ fdroid lint config:
           - config/*.yml
           - config/*/*.yml
   script:
+    - chown -R $(whoami) .
     - fdroid lint config/*.yml config/*/*.yml
     # TODO once config.yml is added to fdroiddata, add it to the line above
     - test -e config.yml || exit 0
@@ -261,6 +262,7 @@ trigger-issuebot:
     when: always
     expire_in: 1 week
   script:
+    - chown -R $(whoami) .
     - mkdir logs
     - export | grep -F CI_ | grep -vFi -e password -e token > logs/export.txt
     - apk add --no-cache bash curl
@@ -461,6 +463,7 @@ check_git_repos:
     - apt-get update
     - apt-get -qy install --no-install-recommends ca-certificates git python3-colorama python3-yaml
     - tools/check-git-repo-availability.py || export EXITVALUE=1
+    - chown -R $(whoami) .
     - test -d public || mkdir public
     - cp `git status | grep -Eo 'metadata/.*\.yml'` public/ || true
     - exit $EXITVALUE
@@ -477,6 +480,7 @@ checkupdates_filter:
   script:
     - apt-get update
     - apt-get -qy install --no-install-recommends ca-certificates git
+    - chown -R $(whoami) .
     - git fetch https://gitlab.com/fdroid/fdroiddata.git
     - |
       if git diff --merge-base FETCH_HEAD HEAD --name-only | grep -v '^metadata/\S*\.yml$'; then
@@ -533,6 +537,7 @@ strip EXIF:
     - apt-get -qy update
     - apt-get -qy dist-upgrade
     - apt-get -qy install --no-install-recommends exiftool git
+    - chown -R $(whoami) .
 
     # JPEG
     - find . -type f  -iname "*.jpg" -o -iname "*.jpeg"  -exec chmod a-x {} \;
