@@ -40,11 +40,21 @@ Builds:
     versionCode: 125
     commit: 868675346ea51d0aa5b87c58fc137fabb2727543
     subdir: androidApp
-    gradle:
-      - yes
+    output: build/outputs/apk/release/RaccoonForLemmy-release-unsigned.apk
     rm:
       - iosApp
     prebuild: sed -i -e '/isEnable/s/true/false/' build.gradle.kts
+    build:
+      - mkdir upstream
+      - pushd upstream
+      - curl -L -o upstream.apk https://github.com/LiveFastEatTrashRaccoon/RaccoonForLemmy/releases/download/$$VERSION$$/RaccoonForLemmy-universal-release.apk
+      - unzip -q upstream.apk
+      - export upstreamhash=$(sha256sum assets/dexopt/baseline.prof|cut -d " " -f1)
+      - popd
+      - for i in {1..10}; do gradle clean assembleRelease; mkdir local; pushd local;
+        unzip -q ../build/outputs/apk/release/RaccoonForLemmy-release-unsigned.apk;
+        export localhash=$(sha256sum assets/dexopt/baseline.prof|cut -d " " -f1);
+        [[ $localhash == $upstreamhash ]] && break ; popd; rm -fr local; done
 
 AllowedAPKSigningKeys: 694761bc0a59476e4b6b7f39d27f75d030c2a9c0c2b1f68f5ff3985728fbdd7c
 
