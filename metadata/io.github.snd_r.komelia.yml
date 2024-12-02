@@ -56,9 +56,32 @@ Builds:
       - gradle buildWebui
     ndk: r26d
 
+  - versionName: 0.12.2
+    versionCode: 4
+    commit: 4ff4406736014a63ec61728fd46419c92491fc9b
+    subdir: komelia-app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y cmake ninja-build pkg-config nasm automake libtool gettext
+        texinfo make libltdl-dev npm
+      - apt-get install -y -t bookworm-backports meson
+    gradle:
+      - yes
+    scandelete:
+      - third_party/jbr-api
+      - third_party/secret-service
+    build:
+      - cd ..
+      - git apply ./patches/disable_self_updates.patch
+      - NDK_PATH=$$NDK$$ ./cmake/android-arm64-build.sh
+      - gradle android-arm64_copyJniLibs
+      - gradle buildWebui
+    ndk: r26d
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: komelia-app/build.gradle.kts|versionCode = (\d+)|gradle/libs.versions.toml|app-version
   = "(.+)"
-CurrentVersion: 0.12.1
-CurrentVersionCode: 3
+CurrentVersion: 0.12.2
+CurrentVersionCode: 4
