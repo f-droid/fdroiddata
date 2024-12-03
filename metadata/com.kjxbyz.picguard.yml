@@ -1,0 +1,77 @@
+AntiFeatures:
+  NonFreeNet:
+    en-US: Connects to Sentry servers
+  Tracking:
+    en-US: Sentry is enabled by default
+Categories:
+  - Graphics
+  - Multimedia
+License: GPL-3.0-only
+AuthorName: kjxbyz
+AuthorEmail: kjxbyz888@outlook.com
+AuthorWebSite: https://kjxbyz.com
+WebSite: https://picguard.app
+SourceCode: https://github.com/picguard/picguard
+IssueTracker: https://github.com/picguard/picguard/issues
+Translation: https://crowdin.com/project/picguard
+Changelog: https://github.com/picguard/picguard/blob/HEAD/CHANGELOG.md
+Donate: https://buymeacoffee.com/wangying
+
+AutoName: PicGuard
+
+RepoType: git
+Repo: https://github.com/picguard/picguard.git
+Binaries: https://github.com/picguard/picguard/releases/download/v%v+%c/PicGuard_%v+%c-free.apk
+
+Builds:
+  - versionName: 1.0.7
+    versionCode: 429
+    commit: cab034d98f76d47eca2f670cd4ebe4eb73a4ba17
+    sudo:
+      - mkdir -p /home/runner
+      - chown vagrant /home/runner
+    output: build/app/outputs/flutter-apk/app-freeproduction-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+      - macos
+      - linux
+      - windows
+      - web
+    prebuild:
+      - export repo=/home/runner/work/picguard
+      - mkdir -p $repo
+      - cd ..
+      - mv com.kjxbyz.picguard $repo/picguard
+      - pushd $repo/picguard
+      - version=$(sed -n -E "s/.*flutter-version:\ '(.*)'/\1/p" .github/workflows/release.yml
+        | head -n1)
+      - '[[ $version ]] || exit 1'
+      - git -C $$flutter$$ checkout -f $version
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter packages pub get
+      - popd
+      - mv $repo/picguard com.kjxbyz.picguard
+    scandelete:
+      - .pub-cache
+    build:
+      - export repo=/home/runner/work/picguard
+      - cd ..
+      - mv com.kjxbyz.picguard $repo/picguard
+      - pushd $repo/picguard
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --no-tree-shake-icons --target lib/main_free.dart
+        --dart-define SENTRY_DSN="https://ce37ccf14474a85b378d5c8b1ae80a67@o4507226640285696.ingest.us.sentry.io/4507226645397509"
+        --flavor freeProduction
+      - popd
+      - mv $repo/picguard com.kjxbyz.picguard
+
+AllowedAPKSigningKeys: cf8a3665f1baea4a93f656e1154622fd950be384f5d568047d82bd686bd9079c
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags .*[0-9]$
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 1.0.7
+CurrentVersionCode: 429
