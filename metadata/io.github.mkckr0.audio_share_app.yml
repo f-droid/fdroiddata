@@ -141,9 +141,31 @@ Builds:
     gradle:
       - yes
 
+  - versionName: 0.3.0
+    versionCode: 3000
+    commit: 1c42f612a3fe206105095eec5c039e79b1c7aab7
+    subdir: android-app/app
+    sudo:
+      - export CPUS_MAX=6
+      - export CPUS=$(getconf _NPROCESSORS_ONLN)
+      - for (( c=$CPUS_MAX; c<$CPUS; c++ )) ; do echo 0 > /sys/devices/system/cpu/cpu$c/online
+        ; done
+    output: build/outputs/apk/release/audio-share-app-*-release-unsigned.apk
+    build:
+      - mkdir upstream
+      - pushd upstream
+      - curl -L -o upstream.apk https://github.com/mkckr0/audio-share/releases/download/v$$VERSION$$/audio-share-app-$$VERSION$$-release.apk
+      - unzip -q upstream.apk
+      - export upstreamhash=$(sha256sum assets/dexopt/baseline.prof|cut -d " " -f1)
+      - popd
+      - for i in {1..10}; do gradle clean assembleRelease; mkdir local; pushd local;
+        unzip -q ../build/outputs/apk/release/audio-share-app-*-release-unsigned.apk;
+        export localhash=$(sha256sum assets/dexopt/baseline.prof|cut -d " " -f1);
+        [[ $localhash == $upstreamhash ]] && break ; popd; rm -fr local; done
+
 AllowedAPKSigningKeys: bdbf8e590127e380a28c328085231647912634b45ffaa20d9e70c96658cb7a40
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v[0-9.]*$
-CurrentVersion: 0.2.2
-CurrentVersionCode: 2002
+CurrentVersion: 0.3.0
+CurrentVersionCode: 3000
