@@ -1761,9 +1761,31 @@ Builds:
     scandelete:
       - node_modules/
 
+  - versionName: 2.20.0
+    versionCode: 415
+    commit: f1a692b76fcb93a4accd0ac9bb8950796872c441
+    subdir: android/app
+    sudo:
+      - sysctl fs.inotify.max_user_watches=524288
+      - curl -Lo node.tar.gz https://nodejs.org/dist/v20.18.0/node-v20.18.0-linux-x64.tar.gz
+      - echo "24a5d58a1d4c2903478f4b7c3cfd2eeb5cea2cae3baee11a4dc6a1fed25fec6c  node.tar.gz"
+        | sha256sum -c -
+      - tar xzf node.tar.gz --strip-components=1 -C /usr/local/
+    init:
+      - corepack enable
+      - pnpm install --frozen-lockfile
+      - CI_PLATFORM=android BUILD_FOSS_ONLY=true pnpm run build
+      - cd ../..
+      - npx cap sync android --deployment
+    gradle:
+      - yes
+    prebuild: sed -i -e '/google-services/d' ../build.gradle
+    scandelete:
+      - node_modules/
+
 AllowedAPKSigningKeys: 8b4d5cf69eaf147cd9a868c740d37d5fe1471a2f62c67d536038bcdbd9bc7ade
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 2.19.4
-CurrentVersionCode: 378
+CurrentVersion: 2.20.0
+CurrentVersionCode: 415
