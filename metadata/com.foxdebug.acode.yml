@@ -1149,8 +1149,39 @@ Builds:
       - node_modules/@cspell
     build: cordova compile android --release -- --packageType=apk
 
+  - versionName: 1.10.6
+    versionCode: 954
+    commit: 24fbfb21db1b974b4c3942a42fe61e6b47ce91f5
+    sudo:
+      - sysctl fs.inotify.max_user_watches=524288 || true
+      - chmod -R 777 /opt/android-sdk
+      - apt-get update
+      - apt-get install -y npm
+      - npm install -g cordova yarn
+    output: platforms/android/app/build/outputs/apk/release/app-release-unsigned.apk
+    rm:
+      - src/pages/donate
+      - src/plugins/iap
+    prebuild:
+      - sed -i -e '/iap/d' package.json
+      - sed -i -e '/iap.startConnection/,/Purchase error/c} catch (e) {' src/lib/main.js
+      - sed -i -e '/Donate/d' src/settings/mainSettings.js
+      - sed -i -e 's/acodefree/acode/' utils/config.js
+      - sed -i -e 's/build/prepare/' utils/scripts/build.sh
+      - sed -i -e '/core-google-shortcuts/d' src/plugins/system/plugin.xml
+      - yarn setup
+      - cordova prepare
+      - mkdir -p www/css/build www/js/build
+      - rm node_modules/cordova-android/framework/cordova-publish.gradle
+      - yarn build android free p
+      - sdkmanager 'build-tools;34.0.0'
+    scandelete:
+      - node_modules/jszip/.jekyll-metadata
+      - node_modules/@biomejs
+    build: cordova compile android --release -- --packageType=apk
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: config.xml|android-versionCode="(\d+)"|.|version="([\d.]+)"
-CurrentVersion: 1.10.5
-CurrentVersionCode: 953
+CurrentVersion: 1.10.6
+CurrentVersionCode: 954
