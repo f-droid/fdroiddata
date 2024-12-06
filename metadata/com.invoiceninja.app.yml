@@ -2119,11 +2119,55 @@ Builds:
       - $$flutter$$/bin/flutter build apk
     ndk: r20
 
+  - versionName: 5.0.172
+    versionCode: 172
+    commit: aec0ad6f598a6379f41cbf4404750dd988c9847f
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+      - linux
+      - macos
+      - samples
+      - snap
+      - test_driver
+      - web
+      - windows
+    prebuild:
+      - export version=$(grep "flutter\:\ " codemagic.yaml | tr -d ' ' | cut -d ":"
+        -f2)
+      - pushd $$flutter$$
+      - git checkout -f $version
+      - popd
+      - cp lib/.env.dart.example lib/.env.dart
+      - cp android/app/build.gradle.dev android/app/build.gradle
+      - cp android/build.gradle.foss android/build.gradle
+      - cp lib/utils/app_review.dart.foss lib/utils/app_review.dart
+      - cp lib/utils/oauth.dart.foss lib/utils/oauth.dart
+      - cp lib/ui/app/pinput.dart.foss lib/ui/app/pinput.dart
+      - cp lib/ui/app/upgrade_dialog.dart.foss lib/ui/app/upgrade_dialog.dart
+      - cp android/app/src/main/AndroidManifest.foss.xml android/app/src/main/AndroidManifest.xml
+      - cp pubspec.foss.yaml pubspec.yaml
+      - sed -i -e '/google_sign_in/d' -e '/in_app_review/d' -e '/in_app_purchase/d'
+        pubspec.yaml
+      - sed -i -e '/^  google_sign_in/,/version:/d' -e '/^  in_app_review/,/version:/d'
+        -e '/^  in_app_purchase/,/version:/d' pubspec.lock
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk
+    ndk: r20
+
 MaintainerNotes: server soft uses Elastic-2.0 license which is approved neither by
   OSI nor FSF, see https://invoiceninja.github.io/docs/legal/license/
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v.*$
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 5.0.171
-CurrentVersionCode: 171
+CurrentVersion: 5.0.172
+CurrentVersionCode: 172
