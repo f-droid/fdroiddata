@@ -147,9 +147,31 @@ Builds:
     scandelete:
       - node_modules
 
+  - versionName: 0.6.0
+    versionCode: 8
+    commit: 898ec3eb2bc4ebd91d5f66ad08d625afd1be8d7d
+    subdir: android/app
+    sudo:
+      - apt-get update
+      - sysctl fs.inotify.max_user_watches=524288 || true
+      - curl -Lo node.tar.gz https://nodejs.org/download/release/v22.11.0/node-v22.11.0-linux-x64.tar.gz
+      - echo "4f862bab52039835efbe613b532238b6e4dde98d139a34e6923193e073438b13 node.tar.gz"
+        | sha256sum -c -
+      - tar xzf node.tar.gz --strip-components=1 -C /usr/local/
+    init:
+      - cd ../..
+      - npm install
+      - npm run build
+      - npx cap sync android
+    gradle:
+      - yes
+    prebuild: sed -i -e '/gms/d' ../build.gradle
+    scandelete:
+      - node_modules
+
 AllowedAPKSigningKeys: f5f597716444fd6672f0a011ebe96b1356e37b28866489c664139c6027a8cc14
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 0.5.0
-CurrentVersionCode: 7
+CurrentVersion: 0.6.0
+CurrentVersionCode: 8
