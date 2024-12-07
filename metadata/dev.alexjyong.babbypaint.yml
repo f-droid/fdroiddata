@@ -69,10 +69,34 @@ Builds:
       - src/node_modules
       - src/plugins
 
+  - versionName: 0.0.6
+    versionCode: 6
+    commit: fc3a2716a441efcd4370426db1bcafd8e351ac74
+    subdir: src/platforms/android/app
+    sudo:
+      - apt-get update
+      - apt-get install -y npm jq
+      - npm install -g cordova@12.0.0
+    gradle:
+      - yes
+    prebuild:
+      - cd ../../..
+      - rm -rf platforms/android plugins
+      - cordova platform add android --verbose
+      - GRADLE_VERSION=$(jq -r '.GRADLE_VERSION' platforms/android/cdv-gradle-config.json)
+      - SDK_VERSION=$(jq -r '.SDK_VERSION' platforms/android/cdv-gradle-config.json)
+      - BUILD_TOOLS_VERSION=$(jq -r '.MIN_BUILD_TOOLS_VERSION' platforms/android/cdv-gradle-config.json)
+      - sed -i -e "s/cordovaConfig.GRADLE_VERSION/'$GRADLE_VERSION'/" platforms/android/app/build.gradle
+      - sdkmanager "platforms;android-$SDK_VERSION" "build-tools;$BUILD_TOOLS_VERSION"
+      - cordova plugin add cordova-plugin-screen-pinning
+      - cordova plugin add cordova-custom-config
+    scandelete:
+      - src/node_modules
+
 AllowedAPKSigningKeys: 702c567a286a1532800c78cb063be858c44fe9f5e8652827fd48bb4bba6c7ec3
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckName: Ignore
-CurrentVersion: 0.0.5
-CurrentVersionCode: 5
+CurrentVersion: 0.0.6
+CurrentVersionCode: 6
