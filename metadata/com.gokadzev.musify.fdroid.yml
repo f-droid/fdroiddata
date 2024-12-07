@@ -1489,10 +1489,48 @@ Builds:
       - popd
       - mv $HOME/work/Musify/Musify com.gokadzev.musify.fdroid
 
+  - versionName: 8.7.5
+    versionCode: 106
+    commit: 7e8aa0839a9f5a4b3c024b51ca4e9b7b9004e6d3
+    sudo:
+      - apt-get update
+      - apt-get install -y yq
+      - mkdir -p /home/runner/
+      - chown vagrant /home/runner/
+    output: build/app/outputs/flutter-apk/app-fdroid-release.apk
+    srclibs:
+      - flutter@stable
+    prebuild:
+      - mkdir -p /home/runner/work/Musify/
+      - cd ..
+      - mv com.gokadzev.musify.fdroid /home/runner/work/Musify/Musify
+      - export HOME=/home/runner
+      - pushd $HOME/work/Musify/Musify/
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export version="$(yq -r .environment.flutter pubspec.yaml | sed 's/\^//g')"
+      - pushd $$flutter$$
+      - git checkout -f $version
+      - popd
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+      - popd
+      - mv $HOME/work/Musify/Musify com.gokadzev.musify.fdroid
+    scandelete:
+      - .pub-cache
+    build:
+      - cd ..
+      - mv com.gokadzev.musify.fdroid /home/runner/work/Musify/Musify
+      - export HOME=/home/runner
+      - pushd $HOME/work/Musify/Musify/
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --flavor fdroid -t lib/main_fdroid.dart
+      - popd
+      - mv $HOME/work/Musify/Musify com.gokadzev.musify.fdroid
+
 AllowedAPKSigningKeys: a3fdd79dae938381b8582553b1382f96f1bc78a3b7028ffd07ec061c1842823a
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 8.7.4
-CurrentVersionCode: 105
+CurrentVersion: 8.7.5
+CurrentVersionCode: 106
