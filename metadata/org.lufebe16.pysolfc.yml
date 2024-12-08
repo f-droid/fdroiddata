@@ -446,8 +446,48 @@ Builds:
       - ./buildozer.run release 2>&1 | grep -E "INFO|ERROR|Error|Fail"
     ndk: r25b
 
+  - versionName: 3.1.2
+    versionCode: 102130102
+    commit: d18c857a765f3546f0d5874abcda2376da067e38
+    subdir: buildozer
+    sudo:
+      - apt-get update
+      - apt-get install -y g++ libc-dev make automake libltdl-dev libtool zlib1g-dev
+        libffi-dev libssl-dev cython3 python3-pip python3-pexpect python3-virtualenv
+        python3-sh python3-appdirs python3-colorama python3-jinja2 python3-build python3-toml
+        python3-packaging ant zip ccache gettext imagemagick python3-tk pipx
+      - rm /opt/android-sdk/tools/bin/sdkmanager
+      - ln -s $(which sdkmanager) /opt/android-sdk/tools/bin/sdkmanager
+      - ln -sf /usr/bin/cython3 /usr/bin/cython
+    output: bin/pysolfc-$$VERSION$$-arm64-v8a_armeabi-v7a-release-unsigned.apk
+    srclibs:
+      - python-for-android@v2023.09.16
+      - buildozer@1.5.0
+    prebuild:
+      - source helpers/setbuildvars
+      - sdkmanager "build-tools;$AAPI.0.0" "platforms;android-$AAPI"
+      - pushd $$python-for-android$$
+      - git checkout -q $VP4A
+      - sed -i -E 's:(.*)apis = get_available_apis.*:\1apis = [android_api]:' pythonforandroid/build.py
+      - popd
+      - pushd $$buildozer$$
+      - git checkout -q $VBUILDOZER
+      - sed -i -E 's:(.*)self._install_android_packages.*:\1pass:' buildozer/targets/android.py
+      - popd
+      - ./fdroid.init
+      - sed -i -e 's/log_level =.*/log_level = 2/' -e "/^\[app\]/aandroid.ndk_path
+        = $$NDK$$\nandroid.sdk_path = $$SDK$$\np4a.source_dir = $$python-for-android$$\nandroid.ant_path
+        = $HOME/.local" buildozer.spec
+    build:
+      - mkdir -p $HOME/.local/bin
+      - export PATH="$HOME/.local/bin:$PATH"
+      - cp -a $(which ant) $HOME/.local/bin/ant
+      - pipx install --system-site-packages $$buildozer$$
+      - ./buildozer.run release 2>&1 | grep -E "INFO|ERROR|Error|Fail"
+    ndk: r25b
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^android-.*$
 UpdateCheckData: buildozer/pubspec.json|versionCode[:"\s]+(\d+)|.|versionName[:"\s]+([\d.]+)
-CurrentVersion: 3.1.1
-CurrentVersionCode: 102130101
+CurrentVersion: 3.1.2
+CurrentVersionCode: 102130102
