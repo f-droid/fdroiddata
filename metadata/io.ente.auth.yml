@@ -2141,8 +2141,60 @@ Builds:
       - flutter/bin/flutter build apk --flavor fdroid -t lib/main.dart
     ndk: r21
 
+  - versionName: 4.1.6
+    versionCode: 416
+    commit: 92c476cb6f3cb2262673008ce5e2bfbc1c1279f6
+    subdir: auth
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y automake libtool make
+    output: build/app/outputs/flutter-apk/app-fdroid-release.apk
+    srclibs:
+      - libsodium@4a15ab7cd0a4b78a7356e5f488d5345b8d314549
+    rm:
+      - auth/ios
+      - auth/linux
+      - auth/macos
+      - auth/migration-guides
+      - auth/web
+      - auth/windows
+      - cli
+      - desktop
+      - docs
+      - infra
+      - mobile
+      - server
+      - web
+    prebuild:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - flutter/bin/flutter config --no-analytics
+      - flutter/bin/flutter pub get
+    scanignore:
+      - auth/flutter/bin/cache
+    scandelete:
+      - auth/flutter
+      - auth/.pub-cache
+      - auth/assets/simple-icons
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - pushd $$libsodium$$
+      - ./autogen.sh -s
+      - ./dist-build/android-armv7-a.sh
+      - ./dist-build/android-armv8-a.sh
+      - ./dist-build/android-x86.sh
+      - ./dist-build/android-x86_64.sh
+      - popd
+      - cp $$libsodium$$/libsodium-android-armv7-a/lib/libsodium.so $PUB_CACHE/hosted/pub.dev/sodium_libs-2.2.1+6/android/src/main/jniLibs/armeabi-v7a/
+      - cp $$libsodium$$/libsodium-android-westmere/lib/libsodium.so $PUB_CACHE/hosted/pub.dev/sodium_libs-2.2.1+6/android/src/main/jniLibs/x86_64/
+      - cp $$libsodium$$/libsodium-android-armv8-a+crypto/lib/libsodium.so $PUB_CACHE/hosted/pub.dev/sodium_libs-2.2.1+6/android/src/main/jniLibs/arm64-v8a/
+      - cp $$libsodium$$/libsodium-android-i686/lib/libsodium.so $PUB_CACHE/hosted/pub.dev/sodium_libs-2.2.1+6/android/src/main/jniLibs/x86/
+      - flutter/bin/flutter packages pub run flutter_launcher_icons:main -f fdroid_flutter_icons.yaml
+      - flutter/bin/flutter build apk --flavor fdroid -t lib/main.dart
+    ndk: r21
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^auth-v
 UpdateCheckData: auth/pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 4.1.5
-CurrentVersionCode: 415
+CurrentVersion: 4.1.6
+CurrentVersionCode: 416
