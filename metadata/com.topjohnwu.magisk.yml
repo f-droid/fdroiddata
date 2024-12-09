@@ -161,6 +161,28 @@ Builds:
     scanignore:
       - app/shared/src/main/java/com/topjohnwu/magisk/utils/DynamicClassLoader.java
 
+  - versionName: '1.0'
+    versionCode: 10
+    commit: 218327f92b572c183718e0fe722c2babf293535f
+    subdir: app/stub
+    sudo:
+      - echo "deb https://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
+      - apt-get update
+      - apt-get install -y -t trixie openjdk-21-jdk-headless
+      - update-alternatives --auto java
+    gradle:
+      - yes
+    rm:
+      - native
+      - tools
+    prebuild:
+      - echo -e 'version=28.1' > ../../config.prop
+      - sed -i -e 's|"https://.*"|"https://f-droid.org/repo/com.topjohnwu.magisk_${Config.versionCode}.apk"|'
+        -e '/versionCode/s/1/$$VERCODE$$/' build.gradle.kts
+      - cp -R ../../gradle ..
+    scanignore:
+      - app/shared/src/main/java/com/topjohnwu/magisk/utils/DynamicClassLoader.java
+
   - versionName: '22.0'
     versionCode: 22000
     commit: v22.0
@@ -717,6 +739,70 @@ Builds:
       - python3 ./build.py -rv native
       - python3 ./build.py -rv app
 
+  - versionName: '28.1'
+    versionCode: 28100
+    disable: build stub
+    commit: 218327f92b572c183718e0fe722c2babf293535f
+    timeout: 30000
+    submodules: true
+    sudo:
+      - echo "deb https://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
+      - apt-get update
+      - apt-get install -y -t trixie openjdk-21-jdk-headless clang-18 lld-18
+      - update-alternatives --auto java
+      - apt-get install -y g++ make pkg-config libssl-dev ninja-build cmake xz-utils
+        libflashrom-dev libnss3-dev zip libzstd-dev file binutils-dev bzip2
+    output: out/app-release.apk
+    srclibs:
+      - ondk@r27.4
+      - vboot@release-R110-15278.B
+      - ndk-box-kitchen@14d189ea3070a8167b3576bf83fe070d4a3441af
+      - Busybox@1_36_1
+      - SELinux-android@android-15.0.0_r8
+      - pcre@android-15.0.0_r8
+    prebuild:
+      - echo -e 'version=$$VERSION$$' > ./config.prop
+      - sed -i -e 's|https://.*download/{ndk_ver}|$$ondk$$/dist|' -e 's/urllib.request.urlopen(url)/open(url,"rb")/'
+        -e 's/ -Zthreads=.*/"/' build.py
+      - sed -i -e '/"src",/,/^]/c "src"]' $$ondk$$/config.toml
+      - sed -i -e '/Key.CHECK_UPDATES/s/true/false/' app/core/src/main/java/com/topjohnwu/magisk/core/Config.kt
+      - sed -i -e '/dependsOn(stubTask)/d' -e 's|from(stubApk)|from(rootProject.file("out/stub-release.apk"))|'
+        -e 's|URI(BUSYBOX_DOWNLOAD_URL)|URI("file://$$ndk-box-kitchen$$/busybox.zip")|'
+        buildSrc/src/main/java/Setup.kt
+    scanignore:
+      - app/shared/src/main/java/com/topjohnwu/magisk/utils/DynamicClassLoader.java
+    scandelete:
+      - native/src/external
+      - tools
+    build:
+      - mkdir out
+      - curl -Lo out/stub-release.apk https://f-droid.org/archive/com.topjohnwu.magisk_10.apk
+        || true
+      - ln -s $(which gradle) ./gradlew
+      - pushd $$vboot$$
+      - make ARCH=arm futil
+      - popd
+      - cp $$vboot$$/build/futility/futility tools
+      - pushd $$ondk$$
+      - ./build.sh
+      - popd
+      - python3 ./build.py -rv ndk
+      - pushd $$ndk-box-kitchen$$
+      - cp -r $$Busybox$$ busybox
+      - cp -r $$SELinux-android$$ jni/selinux
+      - cp -r $$pcre$$ jni/pcre
+      - pushd busybox
+      - git config user.email test@test.com
+      - git config user.name test
+      - popd
+      - ./run.sh patch
+      - ./run.sh generate
+      - $$SDK$$/ndk/magisk/ndk-build -j$(nproc)
+      - ./run.sh archive
+      - popd
+      - python3 ./build.py -rv native
+      - python3 ./build.py -rv app
+
 MaintainerNotes: |-
   22.1: https://github.com/topjohnwu/ndk-busybox/commit/31b2b5780bf9fe982e1f3d9df0bd4b1b44d6e394
   in submodule is removed for some unkonwn reasons. Re-add it to fix the multiple definition error.
@@ -730,5 +816,5 @@ MaintainerNotes: |-
 AutoUpdateMode: None
 UpdateCheckMode: HTTP
 UpdateCheckData: https://topjohnwu.github.io/magisk-files/stable.json|"versionCode":\s"(\d+)"|.|"version":\s"([\d.]+)"
-CurrentVersion: '27.0'
-CurrentVersionCode: 27000
+CurrentVersion: '28.1'
+CurrentVersionCode: 28100
