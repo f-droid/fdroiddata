@@ -24,10 +24,20 @@ Builds:
     versionCode: 52
     commit: a2895643bd67b2ed7ce05adba8f11efe660566f4
     subdir: app
-    gradle:
-      - yes
+    output: build/outputs/apk/release/app-release-unsigned.apk
     srclibs:
       - reproducible-apk-tools@v0.3.0
+    build:
+      - mkdir upstream
+      - pushd upstream
+      - curl -L -o upstream.apk https://github.com/isaakhanimann/psychonautwiki-journal-android/releases/download/v$$VERSION$$/psychonautwiki-journal_v$$VERSION$$.apk
+      - unzip -q upstream.apk
+      - export upstreamhash=2$(sha256sum assets/dexopt/baseline.prof|cut -d " " -f1)
+      - popd
+      - for i in {1..10}; do gradle clean assembleRelease; mkdir local; pushd local;
+        unzip -q ../build/outputs/apk/release/app-release-unsigned.apk; export localhash=$(sha256sum
+        assets/dexopt/baseline.prof|cut -d " " -f1); [[ $localhash == $upstreamhash
+        ]] && break ; popd; rm -fr local; done
     postbuild:
       - mv $$OUT$$ unaligned.apk
       - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
