@@ -683,7 +683,28 @@ Builds:
       - build-logic
       - core
 
+  - versionName: 3.1.1
+    versionCode: 58
+    commit: 1bfa8d48a2133102617e8f2f27cdad80eff9bb96
+    subdir: smartautoclicker
+    gradle:
+      - fDroid
+    rm:
+      - build-logic/convention/src/main/kotlin/com/buzbuz/gradle/convention/CrashlyticsConventionPlugin.kt
+    prebuild:
+      - sdkmanager 'cmake;3.22.1'
+      - sed -i -e '/googleFirebaseCrashlyticsGradle/d;/googleServices/d;/androidBillingClient/d;/googleFirebaseBom/d;/googleFirebaseCrashlytics/d;/googleUserMessaging/d;/googleGmsAds/d'
+        ../gradle/libs.versions.toml
+      - sed -i -e '/register("crashlytics/,/^        }/d' -e '/gms/d' -e '/firebase/d'
+        ../build-logic/convention/build.gradle.kts
+      - sed -i -e '/googleCrashlytics/d;/googleGms/d' ../build.gradle.kts
+      - sed -i -e '/val googleCrashlytics/,/^$/d' ../build-logic/convention/src/main/kotlin/com/buzbuz/gradle/convention/utils/LibsExt.kt
+      - sed -i -e '/playStoreImplementation/d' ../feature/revenue/build.gradle.kts
+    scandelete:
+      - build-logic
+      - core
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^[0-9.]*(|-RC[0-9])$
-CurrentVersion: 3.1.0
-CurrentVersionCode: 57
+CurrentVersion: 3.1.1
+CurrentVersionCode: 58
