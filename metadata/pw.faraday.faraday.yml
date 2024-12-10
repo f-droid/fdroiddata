@@ -1,0 +1,205 @@
+AntiFeatures:
+  NonFreeNet:
+    en-US: Integrate with megafile.sb
+  TetheredNet:
+    en-US: Intergrate with cryptodocs.pm and onlyoffice.com
+Categories:
+  - Connectivity
+  - Internet
+License: GPL-3.0-only
+AuthorName: FaradayApp
+AuthorEmail: interlinkapps.store@gmail.com
+AuthorWebSite: https://faraday.pw/
+SourceCode: https://github.com/FaradayApp/Faraday-android
+IssueTracker: https://github.com/FaradayApp/Faraday-android/issues
+
+RepoType: git
+Repo: https://github.com/FaradayApp/Faraday-android
+
+Builds:
+  - versionName: 1.1.1
+    versionCode: 401010501
+    commit: 94f2e3a3ff7b78bf23bdc35ba08537a223bf827e
+    subdir: vector-app
+    sudo:
+      - apt-get update
+      - apt-get install -y jq maven npm golang-go
+      - chown -R vagrant /usr/lib/go-1.19
+    gradle:
+      - fdroid
+    srclibs:
+      - jitsi-meet@android-sdk-6.2.2
+      - obfs4@b5a9f3c5d239b2b1d2d5877c043c5893635334a0
+    rm:
+      - vector/src/main/jniLibs/*/*.so
+    prebuild:
+      - sed -i -e 's/-XX:MaxPermSize\S*//' $$jitsi-meet$$/android/gradle.properties
+      - sed -i -e 's/def isCiBuild =.*/def isCiBuild = true/' ../tools/gradle/doctor.gradle
+      - sed -i -e '/firebaseAppDistribution {/,/            }/d' build.gradle
+      - sed -i -e '/universalApk/d' -e '/abiFilters/d' -e '/include/s/"armeabi-v7a".*/"armeabi-v7a"/'
+        build.gradle
+      - sed -i -e '/repositories {/a mavenLocal()' -e 's|https.*android-sdk-6.2.2|https://jitpack.io|'
+        ../build.gradle
+      - sed -i -e '/com.google.firebase/d' -e '/gms/d' {.,..}/build.gradle
+    build:
+      - cd ../vector
+      - pushd $$obfs4$$
+      - export PATH=$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
+      - export ARCH=arm
+      - CC=armv7a-linux-androideabi21-clang CXX=armv7a-linux-androideabi21-clang++
+        GOOS=android GOARCH=$ARCH go install std
+      - CGO_ENABLED=1 CC=armv7a-linux-androideabi21-clang CXX=armv7a-linux-androideabi21-clang++
+        GOOS=android GOARCH=$ARCH go build -v -o obfs4proxy/obfs4proxy.${ARCH}.so
+        ./obfs4proxy
+      - popd
+      - mv $$obfs4$$/obfs4proxy/obfs4proxy.arm.so src/main/jniLibs/armeabi-v7a/obfs4proxy.arm.so
+      - cd $$jitsi-meet$$
+      - export LIBRE_BUILD=true
+      - npm install --save false webpack-bundle-analyzer
+      - npm ci
+      - mkdir -p "$HOME/.m2"
+      - bash android/scripts/release-sdk.sh "$HOME/.m2/repository"
+      - mkdir -p "$HOME/.m2/repository/org/webkit"
+      - cp -r node_modules/jsc-android/dist/org/webkit/android-jsc "$HOME/.m2/repository/org/webkit"
+    ndk: r21d
+
+  - versionName: 1.1.1
+    versionCode: 401010502
+    commit: 94f2e3a3ff7b78bf23bdc35ba08537a223bf827e
+    subdir: vector-app
+    sudo:
+      - apt-get update
+      - apt-get install -y jq maven npm golang-go
+      - chown -R vagrant /usr/lib/go-1.19
+    gradle:
+      - fdroid
+    srclibs:
+      - jitsi-meet@android-sdk-6.2.2
+      - obfs4@b5a9f3c5d239b2b1d2d5877c043c5893635334a0
+    rm:
+      - vector/src/main/jniLibs/*/*.so
+    prebuild:
+      - sed -i -e 's/-XX:MaxPermSize\S*//' $$jitsi-meet$$/android/gradle.properties
+      - sed -i -e 's/def isCiBuild =.*/def isCiBuild = true/' ../tools/gradle/doctor.gradle
+      - sed -i -e '/firebaseAppDistribution {/,/            }/d' build.gradle
+      - sed -i -e '/universalApk/d' -e '/abiFilters/d' -e '/include/s/"armeabi-v7a".*/"arm64-v8a"/'
+        build.gradle
+      - sed -i -e '/repositories {/a mavenLocal()' -e 's|https.*android-sdk-6.2.2|https://jitpack.io|'
+        ../build.gradle
+      - sed -i -e '/com.google.firebase/d' -e '/gms/d' {.,..}/build.gradle
+    build:
+      - cd ../vector
+      - pushd $$obfs4$$
+      - export PATH=$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
+      - export ARCH=arm64
+      - CC=aarch64-linux-android21-clang CXX=aarch64-linux-android21-clang++ GOOS=android
+        GOARCH=$ARCH go install std
+      - CGO_ENABLED=1 CC=aarch64-linux-android21-clang CXX=aarch64-linux-android21-clang++
+        GOOS=android GOARCH=$ARCH go build -v -o obfs4proxy/obfs4proxy.${ARCH}.so
+        ./obfs4proxy
+      - popd
+      - mv $$obfs4$$/obfs4proxy/obfs4proxy.arm64.so src/main/jniLibs/arm64-v8a/obfs4proxy.arm64.so
+      - cd $$jitsi-meet$$
+      - export LIBRE_BUILD=true
+      - npm install --save false webpack-bundle-analyzer
+      - npm ci
+      - mkdir -p "$HOME/.m2"
+      - bash android/scripts/release-sdk.sh "$HOME/.m2/repository"
+      - mkdir -p "$HOME/.m2/repository/org/webkit"
+      - cp -r node_modules/jsc-android/dist/org/webkit/android-jsc "$HOME/.m2/repository/org/webkit"
+    ndk: r21d
+
+  - versionName: 1.1.1
+    versionCode: 401010503
+    commit: 94f2e3a3ff7b78bf23bdc35ba08537a223bf827e
+    subdir: vector-app
+    sudo:
+      - apt-get update
+      - apt-get install -y jq maven npm golang-go
+      - chown -R vagrant /usr/lib/go-1.19
+    gradle:
+      - fdroid
+    srclibs:
+      - jitsi-meet@android-sdk-6.2.2
+      - obfs4@b5a9f3c5d239b2b1d2d5877c043c5893635334a0
+    rm:
+      - vector/src/main/jniLibs/*/*.so
+    prebuild:
+      - sed -i -e 's/-XX:MaxPermSize\S*//' $$jitsi-meet$$/android/gradle.properties
+      - sed -i -e 's/def isCiBuild =.*/def isCiBuild = true/' ../tools/gradle/doctor.gradle
+      - sed -i -e '/firebaseAppDistribution {/,/            }/d' build.gradle
+      - sed -i -e '/universalApk/d' -e '/abiFilters/d' -e '/include/s/"armeabi-v7a".*/"x86"/'
+        build.gradle
+      - sed -i -e '/repositories {/a mavenLocal()' -e 's|https.*android-sdk-6.2.2|https://jitpack.io|'
+        ../build.gradle
+      - sed -i -e '/com.google.firebase/d' -e '/gms/d' {.,..}/build.gradle
+    build:
+      - cd ../vector
+      - pushd $$obfs4$$
+      - export PATH=$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
+      - export ARCH=386
+      - CC=i686-linux-android21-clang CXX=i686-linux-android21-clang++ GOOS=android
+        GOARCH=$ARCH go install std
+      - CGO_ENABLED=1 CC=i686-linux-android21-clang CXX=i686-linux-android21-clang++
+        GOOS=android GOARCH=$ARCH go build -v -o obfs4proxy/obfs4proxy.x86.so ./obfs4proxy
+      - popd
+      - mv $$obfs4$$/obfs4proxy/obfs4proxy.x86.so src/main/jniLibs/x86/obfs4proxy.x86.so
+      - cd $$jitsi-meet$$
+      - export LIBRE_BUILD=true
+      - npm install --save false webpack-bundle-analyzer
+      - npm ci
+      - mkdir -p "$HOME/.m2"
+      - bash android/scripts/release-sdk.sh "$HOME/.m2/repository"
+      - mkdir -p "$HOME/.m2/repository/org/webkit"
+      - cp -r node_modules/jsc-android/dist/org/webkit/android-jsc "$HOME/.m2/repository/org/webkit"
+    ndk: r21d
+
+  - versionName: 1.1.1
+    versionCode: 401010504
+    commit: 94f2e3a3ff7b78bf23bdc35ba08537a223bf827e
+    subdir: vector-app
+    sudo:
+      - apt-get update
+      - apt-get install -y jq maven npm golang-go
+      - chown -R vagrant /usr/lib/go-1.19
+    gradle:
+      - fdroid
+    srclibs:
+      - jitsi-meet@android-sdk-6.2.2
+      - obfs4@b5a9f3c5d239b2b1d2d5877c043c5893635334a0
+    rm:
+      - vector/src/main/jniLibs/*/*.so
+    prebuild:
+      - sed -i -e 's/-XX:MaxPermSize\S*//' $$jitsi-meet$$/android/gradle.properties
+      - sed -i -e 's/def isCiBuild =.*/def isCiBuild = true/' ../tools/gradle/doctor.gradle
+      - sed -i -e '/firebaseAppDistribution {/,/            }/d' build.gradle
+      - sed -i -e '/universalApk/d' -e '/abiFilters/d' -e '/include/s/"armeabi-v7a".*/"x86_64"/'
+        build.gradle
+      - sed -i -e '/repositories {/a mavenLocal()' -e 's|https.*android-sdk-6.2.2|https://jitpack.io|'
+        ../build.gradle
+      - sed -i -e '/com.google.firebase/d' -e '/gms/d' {.,..}/build.gradle
+    build:
+      - cd ../vector
+      - pushd $$obfs4$$
+      - export PATH=$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
+      - export ARCH=amd64
+      - CC=x86_64-linux-android21-clang CXX=x86_64-linux-android21-clang++ GOOS=android
+        GOARCH=$ARCH go install std
+      - CGO_ENABLED=1 CC=x86_64-linux-android21-clang CXX=x86_64-linux-android21-clang++
+        GOOS=android GOARCH=$ARCH go build -v -o obfs4proxy/obfs4proxy.x86_64.so ./obfs4proxy
+      - popd
+      - mv $$obfs4$$/obfs4proxy/obfs4proxy.x86_64.so src/main/jniLibs/x86_64/obfs4proxy.x86_64.so
+      - cd $$jitsi-meet$$
+      - export LIBRE_BUILD=true
+      - npm install --save false webpack-bundle-analyzer
+      - npm ci
+      - mkdir -p "$HOME/.m2"
+      - bash android/scripts/release-sdk.sh "$HOME/.m2/repository"
+      - mkdir -p "$HOME/.m2/repository/org/webkit"
+      - cp -r node_modules/jsc-android/dist/org/webkit/android-jsc "$HOME/.m2/repository/org/webkit"
+    ndk: r21d
+
+AutoUpdateMode: None
+UpdateCheckMode: None
+CurrentVersion: 1.1.1
+CurrentVersionCode: 401010504
