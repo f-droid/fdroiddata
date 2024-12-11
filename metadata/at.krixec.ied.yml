@@ -1,0 +1,63 @@
+Categories:
+  - Games
+License: MIT
+AuthorName: Krixec
+AuthorEmail: krixec@yandex.com
+SourceCode: https://codeberg.org/Krixec/IED-FDroid
+IssueTracker: https://codeberg.org/Krixec/IED-FDroid/issues
+
+AutoName: IED
+
+RepoType: git
+Repo: https://codeberg.org/Krixec/IED-FDroid.git
+
+Builds:
+  - versionName: Ni havas lingvojn
+    versionCode: 12
+    commit: 2a290a87d11c1a24fba0f97db4ebcabdc44e3afa
+    sudo:
+      - apt-get update
+      - apt-get install -y build-essential scons pkg-config libx11-dev libxcursor-dev
+        libxinerama-dev libgl1-mesa-dev libglu-dev libasound2-dev libpulse-dev libudev-dev
+        libxi-dev libxrandr-dev
+    output: IED.apk
+    srclibs:
+      - Godot@4.3-stable
+    build:
+      - export HOME=$PWD
+      - cp -R $$Godot$$ godot
+      - keytool -keyalg RSA -genkey -v -keystore debug.keystore -storepass android
+        -alias androiddebugkey -keypass android -dname "CN=Android Debug,O=Android,C=US"
+      - mkdir -p ./.config/godot/
+      - export ANDROID_SDK_ROOT=$$SDK$$
+      - export SDK_PATH="export/android/android_sdk_path = \"$$SDK$$\""
+      - export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+      - export JAVA_PATH="export/android/java_sdk_path = \"$JAVA_HOME\""
+      - export ANDROID_NDK_ROOT=$$NDK$$
+      - export DEBUG_KEYSTORE_PATH="export/android/debug_keystore = \"$PWD/debug.keystore\""
+      - echo '[gd_resource type="EditorSettings" format=3]' >> ./.config/godot/editor_settings-4.3.tres
+      - echo "[resource]"  >> ./.config/godot/editor_settings-4.3.tres
+      - echo $JAVA_PATH >> ./.config/godot/editor_settings-4.3.tres
+      - echo $SDK_PATH >> ./.config/godot/editor_settings-4.3.tres
+      - echo $DEBUG_KEYSTORE_PATH >> ./.config/godot/editor_settings-4.3.tres
+      - echo 'export/android/debug_keystore_user = "androiddebugkey"' >> ./.config/godot/editor_settings-4.3.tres
+      - echo 'export/android/debug_keystore_pass = "android"' >> ./.config/godot/editor_settings-4.3.tres
+      - cd godot
+      - scons -j `nproc` platform=linuxbsd target=editor
+      - scons -j `nproc` platform=android target=template_release arch=arm64
+      - pushd platform/android/java
+      - gradle generateGodotTemplates
+      - popd
+      - cd ..
+      - cp godot/bin/android_source.zip .
+      - mkdir android
+      - unzip android_source.zip -d android/build
+      - echo "4.3.stable" >> android/.build_version
+      - ./godot/bin/godot.* --headless --export-release Android IED.apk
+    ndk: 23.2.8568313
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: export_presets.cfg|version/code=(\d+)|.|version/name="([^"]*)"
+CurrentVersion: Ni havas lingvojn
+CurrentVersionCode: 12
