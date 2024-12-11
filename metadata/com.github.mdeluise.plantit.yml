@@ -441,10 +441,63 @@ Builds:
       - mv $workspaceBuild/* $repo
       - shopt -u dotglob
 
+  - versionName: 0.10.0
+    versionCode: 9
+    commit: 517fa4824ba0b3037f3a44733a76b6d6567e85d9
+    sudo:
+      - mkdir -p /home/runner/work/plant-it/plant-it
+      - chown vagrant /home/runner/work/plant-it/plant-it
+    output: frontend/build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - backend
+      - frontend/ios
+      - frontend/macos
+      - frontend/linux
+      - frontend/windows
+      - frontend/web
+    prebuild:
+      - export repo=com.github.mdeluise.plantit
+      - export workspaceBuild=/home/runner/work/plant-it/plant-it
+      - cd ..
+      - shopt -s dotglob
+      - mv $repo/* $workspaceBuild
+      - shopt -u dotglob
+      - pushd $workspaceBuild
+      - cd frontend
+      - flutterVersion=$(sed -n -E "s/.*FLUTTER_VERSION:\ (.*)/\1/p" ../.github/workflows/release.yml)
+      - '[[ $flutterVersion ]] || exit 1'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+      - popd
+      - shopt -s dotglob
+      - mv $workspaceBuild/* $repo
+      - shopt -u dotglob
+    scandelete:
+      - frontend/.pub-cache
+    build:
+      - export repo=com.github.mdeluise.plantit
+      - export workspaceBuild=/home/runner/work/plant-it/plant-it
+      - cd ..
+      - shopt -s dotglob
+      - mv $repo/* $workspaceBuild
+      - shopt -u dotglob
+      - pushd $workspaceBuild
+      - cd frontend
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release
+      - popd
+      - shopt -s dotglob
+      - mv $workspaceBuild/* $repo
+      - shopt -u dotglob
+
 AllowedAPKSigningKeys: 0eb87fb7f22b9ae04da2ff5817d3045244e591608aaf565161a86f5d254bbab7
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: frontend/pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 0.9.0
-CurrentVersionCode: 8
+CurrentVersion: 0.10.0
+CurrentVersionCode: 9
