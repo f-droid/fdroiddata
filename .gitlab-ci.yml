@@ -581,3 +581,32 @@ repo/index.html:
     - linkchecker repo/index.html || set_error
     - tidy repo/index.html || set_error
     - exit $EXITVALUE
+
+weblate merge conflict:
+  stage: test
+  needs: []
+  image: debian:bookworm-slim
+  rules:
+    - changes:
+        - .gitlab-ci.yml
+        - config/*/antiFeatures.yml
+        - config/*/categories.yml
+        - config/antiFeatures.yml
+        - config/categories.yml
+  script:
+    - apt-get update
+    - apt-get -qy upgrade
+    - apt-get -qy install --no-install-recommends ca-certificates git
+    - git config user.name "$CI_PIPELINE_ID/$CI_JOB_ID"
+    - git config user.email $CI_PROJECT_PATH@f-droid.org
+    - git fetch https://hosted.weblate.org/git/f-droid/anti-features/
+    - git checkout -B weblate FETCH_HEAD
+    - export EXITVALUE=0
+    - if ! git rebase $CI_COMMIT_SHA; then
+          export EXITVALUE=1;
+          set -x;
+          while git rebase --skip; do echo; done;
+          set +x;
+      fi
+    - git diff --exit-code
+    - exit $EXITVALUE
