@@ -88,10 +88,46 @@ Builds:
       - popd
       - mv $repo/bible_side com.bibleside.bibleside
 
+  - versionName: 0.2.0-alpha
+    versionCode: 9
+    commit: d87bf49b205989143b13159d1801b6161e64a39d
+    sudo:
+      - mkdir -p /home/noah
+      - chown vagrant /home/noah
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@stable
+    prebuild:
+      - export repo=/home/noah/Documents
+      - mkdir -p $repo
+      - cd ..
+      - mv com.bibleside.bibleside $repo/bible_side
+      - pushd $repo/bible_side
+      - export flutterVersion=$(cat flutter-version.txt)
+      - pushd $$flutter$$
+      - git checkout -f $flutterVersion
+      - popd
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter packages pub get
+      - popd
+      - mv $repo/bible_side com.bibleside.bibleside
+    scandelete:
+      - .pub-cache
+    build:
+      - export repo=/home/noah/Documents
+      - cd ..
+      - mv com.bibleside.bibleside $repo/bible_side
+      - pushd $repo/bible_side
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk
+      - popd
+      - mv $repo/bible_side com.bibleside.bibleside
+
 AllowedAPKSigningKeys: 693c169c1bef2dd42586b9da2350cbf77bb32d4d613d90f9e70344850b32c4f0
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 0.1.7-alpha
-CurrentVersionCode: 8
+CurrentVersion: 0.2.0-alpha
+CurrentVersionCode: 9
