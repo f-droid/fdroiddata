@@ -1,0 +1,47 @@
+AntiFeatures:
+  NonFreeNet:
+    en-US: Depends on OJ website to fetch the info.
+Categories:
+  - Internet
+License: GPL-3.0-only
+AuthorName: Kano07
+AuthorWebSite: https://kano07.icu
+SourceCode: https://github.com/2754LM/oj_helper
+IssueTracker: https://github.com/2754LM/oj_helper/issues
+
+AutoName: oj_helper
+
+RepoType: git
+Repo: https://github.com/2754LM/oj_helper
+
+Builds:
+  - versionName: 2.2.0
+    versionCode: 1
+    commit: 14da1e2a5c810e4076001cf4cc3c3509b85d6c6b
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+      - linux
+      - web
+      - macos
+      - windows
+    prebuild:
+      - flutterVersion=$(cat flutter_version)
+      - '[[ $flutterVersion ]] || exit 1'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 2.2.0
+CurrentVersionCode: 1
