@@ -3236,8 +3236,88 @@ Builds:
         en-US: Downloads assets (like ML models, release info and FAQs) from Ente's
           CDN
 
+  - versionName: 0.9.71
+    versionCode: 971
+    commit: 260a26d45ca12efdd0e397767d17b4ccf9ca0cea
+    subdir: mobile
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y gcc-multilib libc-dev make automake pkg-config libtool
+        nasm python3-jsonschema wget meson python3-jinja2 zip
+    output: build/app/outputs/flutter-apk/app-fdroid-release.apk
+    srclibs:
+      - libsodium@ee009287afd480b60a9a4d75b19afdc0f705e9d9
+      - transistor-background-fetch@ca8d2f7a9cf1880dfaf9bcb2c2176fab19e0b124
+      - media-kit-libmpv-android-video-build@v1.1.5
+      - mpv@056072bf958ffeaadd2f5a69e37f3079f18d4ead
+    rm:
+      - auth
+      - cli
+      - desktop
+      - docs
+      - infra
+      - mobile/ios
+      - server
+      - web
+    prebuild:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - thirdparty/flutter/bin/flutter config --no-analytics
+      - thirdparty/flutter/bin/flutter pub get
+      - export file=$(ls .pub-cache/hosted/pub.dev/media_kit_libs_android_video-*/android/build.gradle)
+      - export tag=$(sed -n -E 's|.*download/(v[0-9.]+)/.*|\1|p' $file | head -n 1)
+      - sed -i -e '/downloadDependencies/,/dependsOn/d' $file
+      - cd $$media-kit-libmpv-android-video-build$$
+      - git checkout -f $tag
+      - cd buildscripts
+      - sed -i -e '/debug-symbols-default/d' bundle_default.sh
+      - sed -i -e 's/sudo//g' -e 's|./gradlew|gradle|g' *.sh
+      - sed -i -e '/download-sdk/d' download.sh
+      - sed -i -e '/mkdir -p deps/a mv $$mpv$$ mpv' -e 's/single-branch --branch main/single-branch
+        --branch media_kit-v1.1.10/' include/download-deps.sh
+      - sed -i -e '/git reset --hard/d' patch.sh
+    scanignore:
+      - mobile/.pub-cache/hosted/pub.dev/background_fetch-*/android/build.gradle
+      - mobile/thirdparty/flutter/bin/cache
+    scandelete:
+      - mobile/thirdparty/flutter
+      - mobile/.pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export FLUTTER=$(pwd)/thirdparty/flutter/bin/
+      - pushd $$libsodium$$
+      - ./autogen.sh -s
+      - ./dist-build/android-armv7-a.sh
+      - ./dist-build/android-armv8-a.sh
+      - ./dist-build/android-x86.sh
+      - ./dist-build/android-x86_64.sh
+      - popd
+      - cp $$libsodium$$/libsodium-android-armv7-a/lib/libsodium.so $PUB_CACHE/hosted/pub.dev/flutter_sodium-0.2.0/android/src/main/jniLibs/armeabi-v7a/
+      - cp $$libsodium$$/libsodium-android-westmere/lib/libsodium.so $PUB_CACHE/hosted/pub.dev/flutter_sodium-0.2.0/android/src/main/jniLibs/x86_64/
+      - cp $$libsodium$$/libsodium-android-armv8-a+crypto/lib/libsodium.so $PUB_CACHE/hosted/pub.dev/flutter_sodium-0.2.0/android/src/main/jniLibs/arm64-v8a/
+      - cp $$libsodium$$/libsodium-android-i686/lib/libsodium.so $PUB_CACHE/hosted/pub.dev/flutter_sodium-0.2.0/android/src/main/jniLibs/x86/
+      - pushd $$transistor-background-fetch$$/android/tsbackgroundfetch/
+      - gradle assembleRelease
+      - gradle publishToMavenLocal
+      - popd
+      - mv $$transistor-background-fetch$$/android/tsbackgroundfetch/build/outputs/aar/tsbackgroundfetch-release.aar
+        $PUB_CACHE/hosted/pub.dev/background_fetch-1.3.7/android/libs/com/transistorsoft/tsbackgroundfetch/1.0.4/tsbackgroundfetch-1.0.4.aar
+      - pushd $$media-kit-libmpv-android-video-build$$/buildscripts
+      - mkdir sdk
+      - ln -s $$SDK$$ ./sdk/android-sdk-linux
+      - PATH=$FLUTTER:$PATH bash bundle_default.sh
+      - popd
+      - mkdir -p build/media_kit_libs_android_video/output
+      - cp $$media-kit-libmpv-android-video-build$$/output/default-*.jar build/media_kit_libs_android_video/output
+      - thirdparty/flutter/bin/flutter build apk --flavor fdroid -t lib/main.dart
+    ndk: 25.2.9519653
+    antifeatures:
+      NonFreeNet:
+        en-US: Downloads assets (like ML models, release info and FAQs) from Ente's
+          CDN
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^fdroid-
 UpdateCheckData: mobile/pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 0.9.66
-CurrentVersionCode: 966
+CurrentVersion: 0.9.71
+CurrentVersionCode: 971
