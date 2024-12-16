@@ -1,0 +1,64 @@
+AntiFeatures:
+  NonFreeNet:
+    en-US: Depends on openfoodfacts.org servers
+Categories:
+  - Sports & Health
+License: GPL-3.0-or-later
+AuthorName: Marco Groß (Marco Gross)
+AuthorEmail: mgross@sw-gross.de
+AuthorWebSite: https://sw-gross.de
+SourceCode: https://git.justquitstudios.de/marco/calorimeter
+
+AutoName: Calorimeter
+
+RepoType: git
+Repo: https://git.justquitstudios.de/marco/calorimeter.git
+Binaries: https://git.justquitstudios.de/marco/calorimeter/releases/download/v%v/app-release.apk
+
+Builds:
+  - versionName: 1.0.2
+    versionCode: 2
+    commit: v1.0.2
+    submodules: true
+    sudo:
+      - mkdir -p /home/m
+      - chown vagrant /home/m
+    output: build/app/outputs/flutter-apk/app-release.apk
+    rm:
+      - ios
+      - linux
+      - macos
+      - web
+      - windows
+    prebuild:
+      - export repo=/home/m/dev/projects
+      - mkdir -p $repo
+      - cd ..
+      - mv de.swgross.calorimeter $repo/calorimeter
+      - pushd $repo/calorimeter
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - .flutter/bin/flutter config --no-analytics
+      - .flutter/bin/flutter pub get
+      - popd
+      - mv $repo/calorimeter de.swgross.calorimeter
+    scanignore:
+      - .flutter/bin/cache
+    scandelete:
+      - .flutter
+      - .pub-cache
+    build:
+      - export repo=/home/m/dev/projects
+      - cd ..
+      - mv de.swgross.calorimeter $repo/calorimeter
+      - pushd $repo/calorimeter
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - .flutter/bin/flutter build apk --release
+      - popd
+      - mv $repo/calorimeter de.swgross.calorimeter
+
+AllowedAPKSigningKeys: 99379801b5b331cf29436dde1d592ec6831afe55def2beb04b4c61efb4d168a3
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: 1.0.2
+CurrentVersionCode: 2
