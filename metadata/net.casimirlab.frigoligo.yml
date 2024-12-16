@@ -303,10 +303,61 @@ Builds:
       - popd
       - mv $repo/frigoligo net.casimirlab.frigoligo
 
+  - versionName: 2.1.2
+    versionCode: 37
+    commit: 285a088de691bae82bdeebe14a1a023326998a3f
+    sudo:
+      - apt-get update
+      - apt-get install -y gcc-multilib libc-dev make
+      - mkdir -p /home/runner/
+      - chown vagrant /home/runner/
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@stable
+      - transistor-background-fetch@0dd1457588ba031f11e9452f125144aac8a9b75f
+    rm:
+      - .github
+      - appimage
+      - ios
+      - linux
+      - macos
+      - test
+      - test_driver
+      - tools
+      - web
+      - windows
+    prebuild:
+      - export repo=/home/runner/work/frigoligo
+      - mkdir -p $repo
+      - cd ..
+      - mv net.casimirlab.frigoligo $repo/frigoligo
+      - pushd $repo/frigoligo
+      - export FLUTTER_VERSION=$(cat .flutter-version)
+      - git -C $$flutter$$ checkout -f $FLUTTER_VERSION
+      - export PUB_CACHE=/home/runner/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter packages pub get
+      - sed -i -e '/maven {/,/^        }/cmavenLocal()' android/build.gradle $PUB_CACHE/hosted/pub.dev/background_fetch-*/android/build.gradle
+      - popd
+      - mv $repo/frigoligo net.casimirlab.frigoligo
+    build:
+      - export repo=/home/runner/work/frigoligo
+      - export PUB_CACHE=/home/runner/.pub-cache
+      - cd ..
+      - mv net.casimirlab.frigoligo $repo/frigoligo
+      - pushd $repo/frigoligo
+      - pushd $$transistor-background-fetch$$/android/tsbackgroundfetch/
+      - gradle assembleRelease
+      - gradle publishToMavenLocal
+      - popd
+      - $$flutter$$/bin/flutter build apk --release
+      - popd
+      - mv $repo/frigoligo net.casimirlab.frigoligo
+
 AllowedAPKSigningKeys: 5ac383c981bb53ea5a873cf6086d0a6a0a2f557420694ed5ae4c495677aafd5c
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v.*$
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 2.0.0
-CurrentVersionCode: 36
+CurrentVersion: 2.1.2
+CurrentVersionCode: 37
