@@ -537,7 +537,52 @@ Builds:
     gradleprops:
       - f_droid
 
+  - versionName: 1.18.1
+    versionCode: 118010000
+    commit: 0f50225f8e741c2f8a3a35cfd3b7d9dd0a16b34f
+    subdir: android
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install make yasm
+    gradle:
+      - normal
+    rm:
+      - dx9sdk
+      - pspautotests
+      - UWP
+      - Windows
+      - macOS
+      - ios
+    prebuild:
+      - sed -i -e 's/%-dirty%//' build.gradle
+      - cd ../ffmpeg
+      - sed -i -e 's/windows/linux/' android_*.sh
+      - sed -i -e 's/android-9/android-16/' -e '/^build_ARMv6/d' -e 's/--extra-cflags="/--extra-cflags="
+        -D__ANDROID_API__=16/' android_armeabi-v7a.sh
+      - sed -i -e 's/--extra-cflags="/--extra-cflags=" -D__ANDROID_API__=21/' android_arm64-v8a.sh
+        android_x86_64.sh
+    scandelete:
+      - android/libs
+      - ext/armips/Tests
+      - ext/vulkan
+      - ext/rapidjson/package.json
+      - ext/libchdr/deps/zstd-*/tests
+      - ext/zstd/tests
+      - ffmpeg
+      - libretro/libretro-common/samples
+      - source_assets
+      - SDL/macOS
+    build:
+      - cd ../ffmpeg
+      - ./android_arm64-v8a.sh
+      - ./android_armeabi-v7a.sh
+      - ./android_x86_64.sh
+    ndk: r21e
+    gradleprops:
+      - f_droid
+
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: 1.17.1
-CurrentVersionCode: 117010000
+CurrentVersion: 1.18.1
+CurrentVersionCode: 118010000
