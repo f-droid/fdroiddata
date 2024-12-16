@@ -463,14 +463,24 @@ Builds:
     versionCode: 161
     commit: 0af0ba8569f22a60bc8faffa15c9eb5f73acf4df
     subdir: app
-    gradle:
-      - foss
     output: build/outputs/apk/foss/release/image-toolbox-*-foss-universal-release-unsigned.apk
     prebuild:
       - sed -i -e '/gms/d' -e '/firebase/d' ../build.gradle.kts ../build-logic/convention/src/main/kotlin/ImageToolboxApplicationPlugin.kt
       - sed -i -e '/androidx.dev/,/^        }/d' ../settings.gradle.kts
+      - gradle clean
     scandelete:
       - build-logic/convention/build
+    build:
+      - mkdir upstream
+      - pushd upstream
+      - curl -L -o upstream.apk https://github.com/T8RIN/ImageToolbox/releases/download/$$VERSION$$/image-toolbox-$$VERSION$$-foss-universal.apk
+      - unzip -q upstream.apk
+      - export upstreamhash=$(sha256sum assets/dexopt/baseline.prof|cut -d " " -f1)
+      - popd
+      - for i in {1..10}; do gradle clean assembleFossRelease; mkdir local; pushd
+        local; unzip -q ../build/outputs/apk/foss/release/image-toolbox-*-foss-universal-release-unsigned.apk;
+        export localhash=$(sha256sum assets/dexopt/baseline.prof|cut -d " " -f1);
+        [[ $localhash == $upstreamhash ]] && break ; popd; rm -fr local; done
 
 AllowedAPKSigningKeys: 20d7689de0874f00015ea3e31fa067c15c03457d362d41d5e793db3a864fa534
 
