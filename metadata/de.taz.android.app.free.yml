@@ -684,9 +684,34 @@ Builds:
       - export VERSION_IGNORES_DIRTY_TREE=true
       - gradle assembleFreeTazProductionUnminifiedRelease
 
+  - versionName: 1.10.1
+    versionCode: 11001900
+    commit: 1.10.1
+    subdir: app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y make file
+    output: build/outputs/apk/freeTazProduction/unminifiedRelease/app-free-taz-production-unminifiedRelease-unsigned.apk
+    prebuild:
+      - pushd ../thirdparty/mupdf-jni
+      - git apply ../../scripts/mupdf-mavenlocal.patch
+      - touch "settings.gradle"
+      - sed -i -e "s/'-j4'/'-j`nproc`'/" build.gradle
+      - popd
+    scandelete:
+      - thirdparty/mupdf-jni/libmupdf/thirdparty
+    build:
+      - pushd ../thirdparty/mupdf-jni
+      - make -C libmupdf generate
+      - gradle assembleRelease publishReleasePublicationToMavenLocal
+      - popd
+      - export VERSION_IGNORES_DIRTY_TREE=true
+      - gradle assembleFreeTazProductionUnminifiedRelease
+
 MaintainerNotes: Dynamic versionName and version code, so no autoupdates possible.
 
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: 1.10.0
-CurrentVersionCode: 11000900
+CurrentVersion: 1.10.1
+CurrentVersionCode: 11001900
