@@ -395,9 +395,39 @@ Builds:
       - popd
       - gradle assembleRelease
 
+  - versionName: 0.6.535
+    versionCode: 535
+    commit: 314d8fff7810c994cb9f0cdf4dc8a691eb1623ee
+    subdir: apps/android/app
+    sudo:
+      - sysctl fs.inotify.max_user_watches=524288 || true
+      - apt-get update
+      - apt-get install npm
+    init:
+      - cd ../../..
+      - npm install --build-from-source
+    output: build/outputs/apk/release/app-release-unsigned.apk
+    rm:
+      - apps/apple
+      - apps/ios
+      - dist/*
+    prebuild:
+      - cd ../../..
+      - npx cap telemetry off
+    scanignore:
+      - node_modules/@capacitor/cli/assets/capacitor-cordova-android-plugins.tar.gz
+    scandelete:
+      - node_modules
+    build:
+      - pushd ../../..
+      - npm run build
+      - npm run sync
+      - popd
+      - gradle assembleRelease
+
 AllowedAPKSigningKeys: 4a066910f4a6544d117c078169428b70dcece086940ec3332d78119f679e6d4a
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 0.6.531
-CurrentVersionCode: 531
+CurrentVersion: 0.6.535
+CurrentVersionCode: 535
