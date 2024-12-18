@@ -23,9 +23,26 @@ Builds:
       - shopt -s globstar
       - sed -i -z -e 's/\n/\r\n/g' src/main/assets/**/*.{txt,html,css}
 
+  - versionName: 1.4.4
+    versionCode: 13
+    commit: 90f644b09cd0e1ace6b240ab8ff69d52eadf66c7
+    subdir: app
+    sudo:
+      - echo "deb https://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
+      - apt-get update
+      - apt-get install -y -t trixie openjdk-21-jdk-headless
+      - update-alternatives --auto java
+    gradle:
+      - yes
+    srclibs:
+      - reproducible-apk-tools@v0.3.0
+    prebuild: sed -i -z -e 's/\n/\r\n/g' src/main/assets/{documents/*/*.{html,css},words/en-US/standard/length-*/*.txt}
+    postbuild: $$reproducible-apk-tools$$/inplace-fix.py --zipalign fix-newlines $$OUT$$
+      'assets/words/en-US/standard/dictionary.txt'
+
 AllowedAPKSigningKeys: 8926b0e272f64cb214b37ba64a78a47e24a4857a48f27ddc131ff92df4907360
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 1.4.2
-CurrentVersionCode: 11
+CurrentVersion: 1.4.4
+CurrentVersionCode: 13
