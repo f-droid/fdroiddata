@@ -2261,11 +2261,37 @@ Builds:
       - export ANDROID_NDK_HOME=$$SDK$$/ndk/$ndkversion
       - gradle :syncthing:buildNative
 
+  - versionName: 1.28.1.1
+    versionCode: 1280101
+    commit: 2bca3b9604a8133becf30c8d08c9dc310a0ab0b2
+    subdir: app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y autogen automake autopoint bzip2 g++ libc-dev make gettext
+        libtool pkg-config rename shtool
+      - apt-get install -y -t bookworm-backports golang-go
+    gradle:
+      - yes
+    rm:
+      - syncthing/src/github.com/syncthing/syncthing/lib/model/testdata
+    prebuild:
+      - sed -i -e '/signingConfig/,+2d' build.gradle.kts
+      - sed -i -e 's/java.net.URI/uri/' ../settings.gradle.kts
+      - sed -i -e '/executable/s/python/python3/' build.gradle.kts
+      - echo -e "\norg.gradle.jvmargs=-Xmx4096m" >> ../gradle.properties
+    build:
+      - export ndkversion=$(grep "ndkVersionShared" ../build.gradle.kts | cut -d '"'
+        -f 4)
+      - sdkmanager "ndk;$ndkversion"
+      - export ANDROID_NDK_HOME=$$SDK$$/ndk/$ndkversion
+      - gradle :syncthing:buildNative
+
 MaintainerNotes: |-
   The submodule in syncthing/src/github.com/syncthing/syncthing must be
   pristine, as the version/release information is taken from git.
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v[a-z0-9.]*$
-CurrentVersion: 1.28.1.0
-CurrentVersionCode: 1280100
+CurrentVersion: 1.28.1.1
+CurrentVersionCode: 1280101
