@@ -1,0 +1,41 @@
+Categories:
+  - Reading
+License: GPL-3.0-only
+SourceCode: https://github.com/muslimpack/Al-Azkar
+IssueTracker: https://github.com/muslimpack/Al-Azkar/issues
+Changelog: https://github.com/muslimpack/Al-Azkar/releases
+
+AutoName: الأذكار النووية
+
+RepoType: git
+Repo: https://github.com/muslimpack/Al-Azkar.git
+
+Builds:
+  - versionName: 1.0.0
+    versionCode: 12
+    commit: 1627b06afe8f22681eaf44e936bd82ca8c00caa2
+    subdir: alazkar
+    output: build/app/outputs/apk/release/app-release-unsigned.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - dll
+      - alazkar/ios
+    prebuild:
+      - export flutterVersion=$(sed -n -E "s/.*flutter:\s\"([0-9.]+)\"/\1/p" pubspec.yaml)
+      - '[[ $flutterVersion ]] || exit 1'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter packages pub get
+    scandelete:
+      - alazkar/.pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: alazkar/pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 1.0.0
+CurrentVersionCode: 12
