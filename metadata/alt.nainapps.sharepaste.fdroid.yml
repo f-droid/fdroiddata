@@ -604,11 +604,60 @@ Builds:
       - gradle assembleSource-FdroidRelease
     ndk: 25.1.8937393
 
+  - versionName: 2024.12.20
+    versionCode: 1734722267
+    commit: 3921561bb8dee8e1af71935b6f95db6bd430592d
+    subdir: android/app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y make
+    output: build/outputs/apk/source-fdroid/release/sharepaste.oo-source-fdroid-armeabi-v7a-release-unsigned.apk
+    srclibs:
+      - rustup@1.25.2
+    prebuild:
+      - gradle clean
+      - sed -i -e "s/versionCode = .*/versionCode = $$VERCODE$$/" -e 's/include("armeabi-v7a",
+        "arm64-v8a")/include("armeabi-v7a")/' -e '/isUniversalApk/s/true/false/' build.gradle.kts
+      - sed -i -e 's/targets = \["arm64", "arm"\]/targets = \["arm"\]/g' -e 's|jniLibs/arm64-v8a|jniLibs/armeabi-v7a|'
+        ../rsnative/build.gradle
+    build:
+      - export ANDROID_NDK_ROOT=$$NDK$$
+      - $$rustup$$/rustup-init.sh -y --default-toolchain 1.77.1 --target armv7-linux-androideabi
+      - source $HOME/.cargo/env
+      - cargo install cargo-ndk@3.4.0 --locked
+      - gradle assembleSource-FdroidRelease
+    ndk: 25.1.8937393
+
+  - versionName: 2024.12.20
+    versionCode: 1734722268
+    commit: 3921561bb8dee8e1af71935b6f95db6bd430592d
+    subdir: android/app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y make
+    output: build/outputs/apk/source-fdroid/release/sharepaste.oo-source-fdroid-arm64-v8a-release-unsigned.apk
+    srclibs:
+      - rustup@1.25.2
+    prebuild:
+      - gradle clean
+      - sed -i -e "s/versionCode = .*/versionCode = $$VERCODE$$/" -e 's/include("armeabi-v7a",
+        "arm64-v8a")/include("arm64-v8a")/' -e '/isUniversalApk/s/true/false/' build.gradle.kts
+      - sed -i -e 's/targets = \["arm64", "arm"\]/targets = \["arm64"\]/g' ../rsnative/build.gradle
+    build:
+      - export ANDROID_NDK_ROOT=$$NDK$$
+      - $$rustup$$/rustup-init.sh -y --default-toolchain 1.77.1 --target aarch64-linux-android
+      - source $HOME/.cargo/env
+      - cargo install cargo-ndk@3.4.0 --locked
+      - gradle assembleSource-FdroidRelease
+    ndk: 25.1.8937393
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 VercodeOperation:
   - 267 + %c
   - 268 + %c
 UpdateCheckName: alt.nainapps.sharepaste
-CurrentVersion: 2024.11.16
-CurrentVersionCode: 1731762268
+CurrentVersion: 2024.12.20
+CurrentVersionCode: 1734722268
