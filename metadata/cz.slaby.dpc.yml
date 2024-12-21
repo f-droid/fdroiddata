@@ -353,8 +353,66 @@ Builds:
         android-arm64
     ndk: 26.0.10792818
 
+  - versionName: 1.6.2
+    versionCode: 10
+    commit: 76119d5be747f8d713dc1829c468daaeed053405
+    sudo:
+      - apt-get update
+      - apt-get install -y cmake make
+    init:
+      - git submodule update --init lib/libgit2
+      - cd lib/libgit2 && git submodule update --init openssl
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - linux
+      - macos
+      - web
+      - windows
+      - lib/libgit2/tests/resources
+      - lib/libgit2/fuzzers/corpora
+    prebuild:
+      - FLUTTER_VERSION=$(sed -n -E 's/.*"flutter":\ "(.*)"/\1/p' .fvmrc)
+      - '[[ $FLUTTER_VERSION ]] || exit 1'
+      - git -C $$flutter$$ checkout -f $FLUTTER_VERSION
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+    scandelete:
+      - .pub-cache
+      - lib/libgit2/openssl/test
+      - lib/libgit2/package.json
+    build:
+      - pushd lib/libgit2/openssl
+      - export PATH="$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH"
+      - ./Configure android-arm64 -D__ANDROID_API__=30
+      - make -s CFLAGS="-Wno-macro-redefined"
+      - mkdir -p out.jni/arm64-v8a
+      - cp *.so out.jni/arm64-v8a/
+      - popd
+      - mkdir lib/libgit2/build
+      - pushd lib/libgit2/build
+      - find .. -name 'CMakeLists.txt' -exec sed -i 's|C_STANDARD 90|C_STANDARD 99|'
+        {} \;
+      - cmake -DCMAKE_TOOLCHAIN_FILE="$$NDK$$/build/cmake/android.toolchain.cmake"
+        -DANDROID_NATIVE_API_LEVEL=30 -DANDROID_ABI=arm64-v8a -DANDROID_NDK="$$NDK$$"
+        -DOPENSSL_INCLUDE_DIR="$(realpath ../openssl/include)"  -DOPENSSL_SSL_LIBRARY="$(realpath
+        ../openssl/libssl.so)"  -DOPENSSL_CRYPTO_LIBRARY="$(realpath ../openssl/libcrypto.so)"
+        -DBUILD_TESTS=OFF -DBUILD_CLI=OFF -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_FLAGS="-Wno-int-conversion
+        -Wno-implicit-function-declaration" ..
+      - cmake --build .
+      - mkdir arm64-v8a
+      - mv ./libgit2.so arm64-v8a/
+      - popd
+      - echo 'const githubClientSecret = "b8518c465357eb2c1c3d95d038ae3f719993c324";'
+        > lib/secrets.dart
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --target-platform android-arm64
+    ndk: r26
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 1.5.0
-CurrentVersionCode: 6
+CurrentVersion: 1.6.2
+CurrentVersionCode: 10
