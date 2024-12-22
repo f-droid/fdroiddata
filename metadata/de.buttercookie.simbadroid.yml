@@ -37,9 +37,33 @@ Builds:
     postbuild: $$reproducible-apk-tools$$/inplace-fix.py --zipalign fix-newlines $$OUT$$
       'META-INF/services/*'
 
+  - versionName: '0.4'
+    versionCode: 5
+    commit: 39861fa9f2712235ec43b3b7c7b43560636e17ee
+    subdir: app
+    output: build/outputs/apk/release/de.buttercookie.simbadroid-*-release-unsigned.apk
+    srclibs:
+      - reproducible-apk-tools@v0.3.0
+    prebuild:
+      - sed -i -e '/release {/avcsInfo.include = false' build.gradle.kts
+      - gradle clean
+    build:
+      - mkdir upstream
+      - pushd upstream
+      - curl -L -o upstream.apk https://github.com/buttercookie42/SimbaDroid/releases/download/$$VERSION$$/de.buttercookie.simbadroid-$$VERSION$$.apk
+      - unzip -q upstream.apk
+      - export upstreamhash=$(sha256sum assets/dexopt/baseline.prof|cut -d " " -f1)
+      - popd
+      - for i in {1..10}; do gradle clean assembleRelease; mkdir local; pushd local;
+        unzip -q ../build/outputs/apk/release/de.buttercookie.simbadroid-*-release-unsigned.apk;
+        export localhash=$(sha256sum assets/dexopt/baseline.prof|cut -d " " -f1);
+        [[ $localhash == $upstreamhash ]] && break ; popd; rm -fr local; done
+    postbuild: $$reproducible-apk-tools$$/inplace-fix.py --zipalign fix-newlines $$OUT$$
+      'META-INF/services/*'
+
 AllowedAPKSigningKeys: 7baab2feb8ac7fe10fe5414e4d28aa901a525981b1201e2d583df5bb6d9b1b13
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 0.3.1
-CurrentVersionCode: 4
+CurrentVersion: '0.4'
+CurrentVersionCode: 5
