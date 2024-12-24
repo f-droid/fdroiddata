@@ -1,0 +1,155 @@
+From 14270c59bbc7f4d47d0dbbcb066657ca62bd403a Mon Sep 17 00:00:00 2001
+From: Kronos2308 <Kronos2308@gmail.com>
+Date: Tue, 12 Nov 2024 09:46:50 +0000
+Subject: [PATCH] webp support
+
+---
+ .../main/java/com/dar/nclientv2/api/SimpleGallery.java   | 9 ++++++++-
+ .../com/dar/nclientv2/api/components/GalleryData.java    | 1 +
+ .../main/java/com/dar/nclientv2/api/components/Page.java | 6 ++++++
+ .../main/java/com/dar/nclientv2/api/enums/ImageExt.java  | 2 +-
+ .../java/com/dar/nclientv2/api/local/LocalGallery.java   | 4 +++-
+ .../main/java/com/dar/nclientv2/files/GalleryFolder.java | 2 +-
+ app/src/main/java/com/dar/nclientv2/files/PageFile.java  | 4 ++--
+ 7 files changed, 22 insertions(+), 6 deletions(-)
+
+diff --git a/app/src/main/java/com/dar/nclientv2/api/SimpleGallery.java b/app/src/main/java/com/dar/nclientv2/api/SimpleGallery.java
+index 28c0f048..13ab18d4 100644
+--- a/app/src/main/java/com/dar/nclientv2/api/SimpleGallery.java
++++ b/app/src/main/java/com/dar/nclientv2/api/SimpleGallery.java
+@@ -80,7 +80,8 @@ public SimpleGallery(Context context, Element e) {
+         a = e.getElementsByTag("img").first();
+         temp = a.hasAttr("data-src") ? a.attr("data-src") : a.attr("src");
+         mediaId = Integer.parseInt(temp.substring(temp.indexOf("galleries") + 10, temp.lastIndexOf('/')));
+-        thumbnail = Page.charToExt(temp.charAt(temp.length() - 3));
++        String extension = temp.substring(temp.lastIndexOf('.') + 1);
++        thumbnail = Page.charToExt(extension.charAt(0));//thumbnail = Page.charToExt(temp.charAt(temp.length() - 3));
+         title = e.getElementsByTag("div").first().text();
+         if (context != null && id > Global.getMaxId()) Global.updateMaxId(context, id);
+     }
+@@ -93,6 +94,10 @@ public SimpleGallery(Gallery gallery) {
+     }
+ 
+     private static String extToString(ImageExt ext) {
++        //just in case
++        if (ext == null) {
++            return null;
++        }
+         switch (ext) {
+             case GIF:
+                 return "gif";
+@@ -100,6 +105,8 @@ private static String extToString(ImageExt ext) {
+                 return "png";
+             case JPG:
+                 return "jpg";
++            case WEBP:
++                return "webp";
+         }
+         return null;
+     }
+diff --git a/app/src/main/java/com/dar/nclientv2/api/components/GalleryData.java b/app/src/main/java/com/dar/nclientv2/api/components/GalleryData.java
+index f38fb6a5..15999215 100644
+--- a/app/src/main/java/com/dar/nclientv2/api/components/GalleryData.java
++++ b/app/src/main/java/com/dar/nclientv2/api/components/GalleryData.java
+@@ -315,6 +315,7 @@ private void readPagePath(String path) throws IOException {
+                 case 'p':
+                 case 'j':
+                 case 'g':
++                case 'w':
+                     if (specialImages) {
+                         cover = new Page(ImageType.COVER, Page.charToExt(actualChar));
+                         thumbnail = new Page(ImageType.THUMBNAIL, Page.charToExt(actualChar));
+diff --git a/app/src/main/java/com/dar/nclientv2/api/components/Page.java b/app/src/main/java/com/dar/nclientv2/api/components/Page.java
+index d7948dec..8f43af54 100644
+--- a/app/src/main/java/com/dar/nclientv2/api/components/Page.java
++++ b/app/src/main/java/com/dar/nclientv2/api/components/Page.java
+@@ -90,6 +90,8 @@ public static String extToString(ImageExt ext) {
+                 return "png";
+             case JPG:
+                 return "jpg";
++            case WEBP:
++                return "webp";
+         }
+         return null;
+     }
+@@ -102,6 +104,8 @@ public static char extToChar(ImageExt imageExt) {
+                 return 'p';
+             case JPG:
+                 return 'j';
++            case WEBP:
++                return 'w';
+         }
+         return '\0';
+     }
+@@ -114,6 +118,8 @@ public static ImageExt charToExt(int ext) {
+                 return ImageExt.PNG;
+             case 'j':
+                 return ImageExt.JPG;
++            case 'w':
++                return ImageExt.WEBP;
+         }
+         return null;
+     }
+diff --git a/app/src/main/java/com/dar/nclientv2/api/enums/ImageExt.java b/app/src/main/java/com/dar/nclientv2/api/enums/ImageExt.java
+index 6ea3a7fb..70712010 100644
+--- a/app/src/main/java/com/dar/nclientv2/api/enums/ImageExt.java
++++ b/app/src/main/java/com/dar/nclientv2/api/enums/ImageExt.java
+@@ -1,7 +1,7 @@
+ package com.dar.nclientv2.api.enums;
+ 
+ public enum ImageExt {
+-    JPG("jpg"), PNG("png"), GIF("gif");
++    JPG("jpg"), PNG("png"), GIF("gif"), WEBP("webp");
+ 
+     private final char firstLetter;
+     private final String name;
+diff --git a/app/src/main/java/com/dar/nclientv2/api/local/LocalGallery.java b/app/src/main/java/com/dar/nclientv2/api/local/LocalGallery.java
+index 642d387b..2a099ab2 100644
+--- a/app/src/main/java/com/dar/nclientv2/api/local/LocalGallery.java
++++ b/app/src/main/java/com/dar/nclientv2/api/local/LocalGallery.java
+@@ -34,7 +34,7 @@ public LocalGallery[] newArray(int size) {
+             return new LocalGallery[size];
+         }
+     };
+-    private static final Pattern FILE_PATTERN = Pattern.compile("^(\\d{1,9})\\.(gif|png|jpg)$", Pattern.CASE_INSENSITIVE);
++    private static final Pattern FILE_PATTERN = Pattern.compile("^(\\d{1,9})\\.(gif|png|jpg|webp)$", Pattern.CASE_INSENSITIVE);
+     private static final Pattern DUP_PATTERN = Pattern.compile("^(.*)\\.DUP\\d+$");
+     private static final Pattern IDFILE_PATTERN = Pattern.compile("^\\.\\d{1,6}$");
+     private final GalleryFolder folder;
+@@ -106,6 +106,8 @@ public static File getPage(File dir, int page) {
+         if (dir == null || !dir.exists()) return null;
+         String pag = String.format(Locale.US, "%03d.", page);
+         File x;
++        x = new File(dir, pag + "webp");
++        if (x.exists()) return x;
+         x = new File(dir, pag + "jpg");
+         if (x.exists()) return x;
+         x = new File(dir, pag + "png");
+diff --git a/app/src/main/java/com/dar/nclientv2/files/GalleryFolder.java b/app/src/main/java/com/dar/nclientv2/files/GalleryFolder.java
+index 9a172c38..d28867ed 100644
+--- a/app/src/main/java/com/dar/nclientv2/files/GalleryFolder.java
++++ b/app/src/main/java/com/dar/nclientv2/files/GalleryFolder.java
+@@ -32,7 +32,7 @@ public GalleryFolder[] newArray(int size) {
+             return new GalleryFolder[size];
+         }
+     };
+-    private static final Pattern FILE_PATTERN = Pattern.compile("^0*(\\d{1,9})\\.(gif|png|jpg)$", Pattern.CASE_INSENSITIVE);
++    private static final Pattern FILE_PATTERN = Pattern.compile("^0*(\\d{1,9})\\.(gif|png|jpg|webp)$", Pattern.CASE_INSENSITIVE);
+     private static final Pattern IDFILE_PATTERN = Pattern.compile("^\\.(\\d{1,6})$");
+     private static final String NOMEDIA_FILE = ".nomedia";
+     private final SparseArrayCompat<PageFile> pageArray = new SparseArrayCompat<>();
+diff --git a/app/src/main/java/com/dar/nclientv2/files/PageFile.java b/app/src/main/java/com/dar/nclientv2/files/PageFile.java
+index d36ea6ef..934a778e 100644
+--- a/app/src/main/java/com/dar/nclientv2/files/PageFile.java
++++ b/app/src/main/java/com/dar/nclientv2/files/PageFile.java
+@@ -28,8 +28,8 @@ public PageFile[] newArray(int size) {
+             return new PageFile[size];
+         }
+     };
+-    private static final Pattern DEFAULT_THUMBNAIL = Pattern.compile("^0*1\\.(gif|png|jpg)$", Pattern.CASE_INSENSITIVE);
+-    private static final Pattern VALID_PAGE = Pattern.compile("^0*(\\d+)\\.(gif|png|jpg)$", Pattern.CASE_INSENSITIVE);
++    private static final Pattern DEFAULT_THUMBNAIL = Pattern.compile("^0*1\\.(gif|png|jpg|webp)$", Pattern.CASE_INSENSITIVE);
++    private static final Pattern VALID_PAGE = Pattern.compile("^0*(\\d+)\\.(gif|png|jpg|webp)$", Pattern.CASE_INSENSITIVE);
+     private final ImageExt ext;
+     private final int page;
+ 
