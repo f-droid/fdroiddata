@@ -577,6 +577,28 @@ Builds:
       - app/src/main/cpp/libjamesdsp
     ndk: r27
 
+  - versionName: 1.6.13
+    versionCode: 50
+    commit: f00690d5c0d5e0c927eacb8048db78b4f683ea41
+    subdir: app
+    submodules: true
+    gradle:
+      - RootlessFdroid
+    output: build/outputs/apk/rootlessFdroid/release/JamesDSP-v$$VERSION$$-$$VERCODE$$-rootless-fdroid-release-unsigned.apk
+    prebuild:
+      - sdkmanager --install "cmake;3.18.1"
+      - sed -i 's/^.*classpath("com\.google\.gms:google-services.*$//' ../build.gradle.kts
+      - sed -i 's/^.*classpath("com\.google\.firebase:firebase-crashlytics-gradle.*$//'
+        ../build.gradle.kts
+      - sed -i 's/^.*id("com\.google\.gms\.google-services").*$//' build.gradle.kts
+      - sed -i 's/^.*id("com.google.firebase.crashlytics").*$//' build.gradle.kts
+      - sed -i 's/^.*import\ com\.google\.firebase.*$//' build.gradle.kts
+      - sed -i '/configure<CrashlyticsExtension>/,+3d' build.gradle.kts
+      - sed -i 's/isEnable = .*/isEnable = false/' build.gradle.kts
+    scandelete:
+      - app/src/main/cpp/libjamesdsp
+    ndk: r27
+
 MaintainerNotes: |-
   Scanner complains about app/src/main/cpp/libjamesdsp/Main/DSPManager/libs/android-support-v13.jar,
   however it's needed to build DSPManager for libjamesdsp, not libjamesdsp itself, so it's safe to
@@ -591,5 +613,5 @@ MaintainerNotes: |-
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: buildSrc/src/main/kotlin/AndroidConfig.kt|versionCode\s=\s(\d+)|.|versionName\s=\s"(.*)"
-CurrentVersion: 1.6.12
-CurrentVersionCode: 49
+CurrentVersion: 1.6.13
+CurrentVersionCode: 50
