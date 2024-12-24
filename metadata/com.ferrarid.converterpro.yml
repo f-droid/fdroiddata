@@ -287,8 +287,36 @@ Builds:
       - export PATH=$PUB_CACHE/bin/:$$flutter$$/bin/:$PATH
       - flutter build apk
 
+  - versionName: 4.2.4
+    versionCode: 45
+    commit: b46674a557e89740899e54aae0aebca81e967e1b
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@3.27.1
+    rm:
+      - .github
+      - linux
+      - snap
+      - web
+      - windows
+    prebuild:
+      - sed -i -e '/minifyEnabled/d' -e '/signingConfig /d' android/app/build.gradle
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export PATH=$PUB_CACHE/bin/:$$flutter$$/bin/:$PATH
+      - flutter config --no-analytics
+      - flutter doctor --verbose
+      - dart pub global activate melos
+      - dart pub global activate vector_graphics_compiler
+      - melos bootstrap
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export PATH=$PUB_CACHE/bin/:$$flutter$$/bin/:$PATH
+      - flutter build apk
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v.*$
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 4.2.3
-CurrentVersionCode: 44
+CurrentVersion: 4.2.4
+CurrentVersionCode: 45
