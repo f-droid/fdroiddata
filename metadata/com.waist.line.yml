@@ -833,8 +833,42 @@ Builds:
       - cp $AAR node_modules/phonegap-plugin-barcodescanner/src/android/barcodescanner-release-2.1.5.aar
       - cordova build android --release -- --packageType=apk
 
+  - versionName: 3.9.2
+    versionCode: 30902
+    commit: 70d5821de6c3462af1aac75f0e0f4e04a18d2472
+    sudo:
+      - sysctl fs.inotify.max_user_watches=524288 || true
+      - apt-get update
+      - apt-get install -y npm
+      - npm install -g cordova
+    output: platforms/android/app/build/outputs/apk/release/app-release-unsigned.apk
+    srclibs:
+      - BarcodeScanner@0fc1fd2ff00683d2a2803ba6da63320bcb29fd2c
+    prebuild:
+      - sdkmanager 'platforms;android-33' 'build-tools;33.0.2'
+      - npm install
+      - cordova platform add android
+      - cd $$BarcodeScanner$$
+      - rm -r local.properties gradle
+      - sed -i -e 's/3.0.1/7.2.0/' build.gradle
+      - sed -i -e 's/compile /implementation /g' barcodescanner/build.gradle
+      - gradle clean
+    scandelete:
+      - node_modules
+      - platforms
+      - plugins
+    build:
+      - pushd $$BarcodeScanner$$
+      - gradle assembleRelease
+      - popd
+      - AAR=$$BarcodeScanner$$/barcodescanner/build/outputs/aar/barcodescanner-release.aar
+      - cp $AAR platforms/android/app/libs/barcodescanner-release-2.1.5.aar
+      - cp $AAR plugins/phonegap-plugin-barcodescanner/src/android/barcodescanner-release-2.1.5.aar
+      - cp $AAR node_modules/phonegap-plugin-barcodescanner/src/android/barcodescanner-release-2.1.5.aar
+      - cordova build android --release -- --packageType=apk
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: config.xml|android:versionCode="(\d+)"|.|version="([\d.]*)"
-CurrentVersion: 3.9.1
-CurrentVersionCode: 30901
+CurrentVersion: 3.9.2
+CurrentVersionCode: 30902
