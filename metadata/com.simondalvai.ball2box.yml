@@ -651,8 +651,55 @@ Builds:
       - ./godot/bin/godot_server.* -v --path game --export Android Ball2Box.apk
     ndk: 23.2.8568313
 
+  - versionName: 4.1.6
+    versionCode: 66
+    commit: 92ade2f09de8f80cd10c00a92bb33e5690c29361
+    sudo:
+      - apt-get update
+      - apt-get install -y clang gettext pkg-config scons
+    output: game/Ball2Box.apk
+    srclibs:
+      - Godot@3.6-stable
+    prebuild:
+      - mv fdroid/export_presets.cfg game/export_presets.cfg
+      - sed -i 's/FDROID = false/FDROID = true/g' game/src/globals/Global.gd
+    build:
+      - export HOME=$PWD
+      - export JAVA_HOME=$(dirname $(dirname $(readlink -f $(which javac))))
+      - cp -R $$Godot$$ godot
+      - keytool -keyalg RSA -genkey -v -keystore debug.keystore -storepass android
+        -alias androiddebugkey -keypass android -dname "CN=Android Debug,O=Android,C=US"
+      - mkdir -p $HOME/.config/godot/
+      - export SDK_PATH="export/android/android_sdk_path = \"$$SDK$$\""
+      - export DEBUG_KEYSTORE_PATH="export/android/debug_keystore = \"$PWD/debug.keystore\""
+      - export JAVA_SDK_PATH="export/android/java_sdk_path = \"$JAVA_HOME\""
+      - echo '[gd_resource type="EditorSettings" format=2]' >> $HOME/.config/godot/editor_settings-3.tres
+      - echo "[resource]"  >> $HOME/.config/godot/editor_settings-3.tres
+      - echo $SDK_PATH >> $HOME/.config/godot/editor_settings-3.tres
+      - echo $JAVA_SDK_PATH  >> $HOME/.config/godot/editor_settings-3.tres
+      - echo $DEBUG_KEYSTORE_PATH >> $HOME/.config/godot/editor_settings-3.tres
+      - echo 'export/android/debug_keystore_user = "androiddebugkey"' >> $HOME/.config/godot/editor_settings-3.tres
+      - echo 'export/android/debug_keystore_pass = "android"' >> $HOME/.config/godot/editor_settings-3.tres
+      - cd godot
+      - scons -j `nproc` platform=server use_llvm=yes unix_global_settings_path=".."
+        profile=fdroid/godot-build-options.py
+      - export ANDROID_NDK_ROOT=$$NDK$$
+      - scons -j `nproc` use_llvm=yes p=android target=release  unix_global_settings_path=".."
+        android_arch=armv7 profile=fdroid/godot-build-options.py
+      - scons -j `nproc` use_llvm=yes p=android target=release  unix_global_settings_path=".."
+        android_arch=arm64v8 profile=fdroid/godot-build-options.py
+      - pushd platform/android/java/
+      - gradle generateGodotTemplates
+      - popd
+      - cd ..
+      - mkdir -p $HOME/.local/share/godot/templates/3.6.stable/
+      - echo "3.6.stable" >> $HOME/.local/share/godot/templates/3.6.stable/version.txt
+      - cp godot/bin/android_release.apk $HOME/.local/share/godot/templates/3.6.stable/
+      - ./godot/bin/godot_server.* -v --path game --export Android Ball2Box.apk
+    ndk: 23.2.8568313
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: fdroid/export_presets.cfg|version/code=(\d+)|.|version/name="([\d.]+)"
-CurrentVersion: 4.1.5
-CurrentVersionCode: 65
+CurrentVersion: 4.1.6
+CurrentVersionCode: 66
