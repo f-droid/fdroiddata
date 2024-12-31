@@ -1534,8 +1534,58 @@ Builds:
       - mv $$siyuan$$/kernel/kernel.aar libs
     ndk: r26d
 
+  - versionName: 3.1.18
+    versionCode: 257
+    commit: fc4a4003d8fbfa0755a31c4341d3c855f0a24400
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -t bookworm-backports -y golang-go
+      - apt-get install -y gcc libc-dev zip npm
+      - npm install -g pnpm@v8.14.1
+    gradle:
+      - official
+    srclibs:
+      - go@go1.23.0
+      - siyuan@v3.0.17
+    prebuild:
+      - sed -i -e '/aliyun/d' ../build.gradle
+      - sed -i -e '/signing/d' build.gradle
+      - sdkmanager "platforms;android-34" "build-tools;34.0.0"
+      - cd $$siyuan$$
+      - git checkout -f 'v$$VERSION$$'
+      - sed -i -e '/CheckUpdate/a return' kernel/model/updater.go
+      - sed -i -e '/GetRhyResult/a return nil, errors.New("rhy disabled for F-Droid")'
+        kernel/util/rhy.go
+      - sed -i -e '/return &System{/a DisableGoogleAnalytics:true,' -e '/DownloadInstallPkg/s/true/false/'
+        kernel/conf/system.go
+      - cd app
+      - pnpm install --no-frozen-lockfile
+    build:
+      - pushd $$go$$/src
+      - ./make.bash
+      - popd
+      - export GOPATH=$$go$$
+      - export PATH="$GOPATH/bin:$PATH"
+      - pushd $$siyuan$$/app
+      - pnpm run build:mobile
+      - zip -r app appearance guide stage changelogs
+      - popd
+      - mkdir -p src/main/assets/
+      - mv $$siyuan$$/app/app.zip src/main/assets/
+      - pushd $$siyuan$$/kernel
+      - go install golang.org/x/mobile/cmd/gomobile@v0.0.0-20240112133503-c713f31d574b
+      - go mod download
+      - gomobile init
+      - gomobile bind --tags fts5 -ldflags '-s -w' -v -o kernel.aar -target='android/arm64'
+        -androidapi 24 ./mobile/
+      - popd
+      - mkdir libs
+      - mv $$siyuan$$/kernel/kernel.aar libs
+    ndk: r26d
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: build.gradle|siyuanVersionCode = (\d+)|.|siyuanVersionName = "([\d.]+)"
-CurrentVersion: 3.1.17
-CurrentVersionCode: 256
+CurrentVersion: 3.1.18
+CurrentVersionCode: 257
