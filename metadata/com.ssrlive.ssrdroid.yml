@@ -1,0 +1,46 @@
+AntiFeatures:
+  NonFreeNet:
+    en-US: Connects to GitHub to check new version and sync ACL
+Categories:
+  - Connectivity
+  - Internet
+License: GPL-3.0-only
+AuthorName: ShadowsocksR live forever
+SourceCode: https://github.com/ShadowsocksR-Live/ssrDroid
+IssueTracker: https://github.com/ShadowsocksR-Live/ssrDroid/issues
+Translation: https://poeditor.com/join/project/u5VHO9vhSf
+Changelog: https://github.com/ShadowsocksR-Live/ssrDroid/releases
+
+AutoName: ssrDroid
+
+RepoType: git
+Repo: https://github.com/ShadowsocksR-Live/ssrDroid.git
+
+Builds:
+  - versionName: 5.3.7-nightly
+    versionCode: 537
+    commit: 93c235cf081d7b539493bd8c954b05027a05083e
+    subdir: mobile
+    submodules: true
+    gradle:
+      - yes
+    srclibs:
+      - rustup@1.27.1
+    rm:
+      - tv
+    prebuild:
+      - $$rustup$$/rustup-init.sh -y --default-toolchain $(sed -n -E 's/channel =
+        "(.*)"/\1/p' ../rust/rust-toolchain.toml) --target aarch64-linux-android armv7-linux-androideabi
+        i686-linux-android x86_64-linux-android
+      - source $HOME/.cargo/env
+      - sed -i -e "/cargo {/a cargoCommand = '$(which cargo)'\nrustcCommand = '$(which
+        rustc)'\npythonCommand = 'python3'" ../core/build.gradle
+    scandelete:
+      - core/src/main/jni/ssrNative/depends
+    ndk: r25b
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: build.gradle|versionCode\s=\s(\d+)|.|versionName\s=\s'(.+)'
+CurrentVersion: 5.3.7-nightly
+CurrentVersionCode: 537
