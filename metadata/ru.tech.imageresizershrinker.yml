@@ -482,10 +482,33 @@ Builds:
         export localhash=$(sha256sum assets/dexopt/baseline.prof|cut -d " " -f1);
         [[ $localhash == $upstreamhash ]] && break ; popd; rm -fr local; done
 
+  - versionName: 3.1.2
+    versionCode: 163
+    commit: 3651388d690d1fec69dc60b22d8aadfd1dc96d5d
+    subdir: app
+    output: build/outputs/apk/foss/release/image-toolbox-*-foss-universal-release-unsigned.apk
+    prebuild:
+      - sed -i -e '/gms/d' -e '/firebase/d' ../build.gradle.kts ../build-logic/convention/src/main/kotlin/ImageToolboxApplicationPlugin.kt
+      - sed -i -e '/androidx.dev/,/^        }/d' ../settings.gradle.kts
+      - gradle clean
+    scandelete:
+      - build-logic/convention/build
+    build:
+      - mkdir upstream
+      - pushd upstream
+      - curl -L -o upstream.apk https://github.com/T8RIN/ImageToolbox/releases/download/$$VERSION$$/image-toolbox-$$VERSION$$-foss-universal.apk
+      - unzip -q upstream.apk
+      - export upstreamhash=$(sha256sum assets/dexopt/baseline.prof|cut -d " " -f1)
+      - popd
+      - for i in {1..10}; do gradle clean assembleFossRelease; mkdir local; pushd
+        local; unzip -q ../build/outputs/apk/foss/release/image-toolbox-*-foss-universal-release-unsigned.apk;
+        export localhash=$(sha256sum assets/dexopt/baseline.prof|cut -d " " -f1);
+        [[ $localhash == $upstreamhash ]] && break ; popd; rm -fr local; done
+
 AllowedAPKSigningKeys: 20d7689de0874f00015ea3e31fa067c15c03457d362d41d5e793db3a864fa534
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: gradle/libs.versions.toml|versionCode = "(\d+)"|.|versionName = "([\d.]+)"
-CurrentVersion: 3.1.1
-CurrentVersionCode: 161
+CurrentVersion: 3.1.2
+CurrentVersionCode: 163
