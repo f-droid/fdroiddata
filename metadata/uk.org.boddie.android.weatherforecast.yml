@@ -235,37 +235,22 @@ Builds:
       - popd
     build: PYTHONPATH=$$duck-git$$ ./build.py output.apk
 
-  - versionName: 1.6.6
-    versionCode: 166
-    commit: 1.6.6
+  - versionName: 1.7.2
+    versionCode: 172
+    commit: 3947046aaabdfee50912879c93423cec367ac229
     sudo:
       - apt-get update
-      - apt-get install -y python3-crypto python3-pygments python3-markdown imagemagick
-        pngquant openssl
+      - apt-get install -y python3-pycryptodome python3-pygments python3-markdown
+        imagemagick pngquant openssl wget librsvg2-bin
     output: output.apk
     srclibs:
       - duck-git@1.0.7
     prebuild:
-      - pushd $$duck-git$$
-      - git reset --hard `cat ../../uk.org.boddie.android.weatherforecast/deps/DUCK`
-      - popd
-    build: PYTHONPATH=$$duck-git$$ ./build.py output.apk
-
-  - versionName: 1.7.0
-    versionCode: 170
-    disable: https://gitlab.com/dboddie/weather-forecast/-/issues/11
-    commit: ae8a547747fd3caca600e8a21165c4de812c2f80
-    sudo:
-      - apt-get update
-      - apt-get install -y python3-crypto python3-pygments python3-markdown imagemagick
-        pngquant openssl
-    output: output.apk
-    srclibs:
-      - duck-git@1.0.7
-    prebuild:
-      - pushd $$duck-git$$
-      - git reset --hard `cat ../../uk.org.boddie.android.weatherforecast/deps/DUCK`
-      - popd
+      - git -C $$duck-git$$ reset --hard `cat deps/DUCK | head -n1`
+      - cd data
+      - bash ./fetch.sh
+    scanignore:
+      - data/cities5000.zip
     build: PYTHONPATH=$$duck-git$$ ./build.py output.apk
 
 MaintainerNotes: |-
@@ -276,5 +261,5 @@ MaintainerNotes: |-
 AutoUpdateMode: None
 UpdateCheckMode: Tags
 UpdateCheckData: build.py|version_code = "(\d+)"|.|version = "(.*)"
-CurrentVersion: 1.7.1
-CurrentVersionCode: 171
+CurrentVersion: 1.7.2
+CurrentVersionCode: 172
