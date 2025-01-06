@@ -3136,6 +3136,294 @@ Builds:
     gradleprops:
       - reactNativeArchitectures=x86_64
 
+  - versionName: 2.3.0
+    versionCode: 397001
+    commit: 3e5721d69725186a78d683dd1aa06c08b00dea21
+    subdir: android/app
+    sudo:
+      - sysctl fs.inotify.max_user_watches=524288 || true
+      - apt-get update
+      - apt-get install -y make npm gcc libc-dev
+      - apt-get install -t bookworm-backports -y golang-go
+      - npm -g install yarn
+    init: npm install --build-from-source
+    gradle:
+      - yes
+    srclibs:
+      - go@go1.23.3
+      - BitBoxSwiss-gomobile@0cc14f92bb9c1f0672229aababacac30cfa08b97
+      - bitbox-wallet-app@9800ab44c997f6ec7f037271275cddfd28faf4b1
+    rm:
+      - android/app/libs/mobileserver.aar
+    prebuild:
+      - export COMMIT_REF=$(git rev-parse --short HEAD)
+      - git -C $$bitbox-wallet-app$$ checkout -f "$(cat libs/BITBOX_BRIDGE_COMMIT)"
+      - sed -i -e 's/PerCPUArchitecture = .*/PerCPUArchitecture = true/' build.gradle
+      - cd ../../
+      - sed -i -e '/installReferrerVersion/,+12d' node_modules/react-native-device-info/android/build.gradle
+      - sed -i -e '/media3-exoplayer-ima/d' node_modules/react-native-video/android/build.gradle
+      - npm remove react-native-vision-camera
+      - npm run bundle:android
+      - sdkmanager 'platforms;android-26'
+    scanignore:
+      - node_modules/react-native/sdks/hermesc/linux64-bin/hermesc
+      - node_modules/bcrypt-react-native/android/build.gradle
+      - node_modules/lottie-react-native/android/build.gradle
+      - node_modules/@react-native-async-storage/async-storage/android/build.gradle
+      - node_modules/react-native-bars/android/build.gradle
+      - node_modules/react-native-biometrics/android/build.gradle
+      - node_modules/react-native-bootsplash/android/build.gradle
+      - node_modules/react-native-device-info/android/build.gradle
+      - node_modules/react-native-encrypted-storage/android/build.gradle
+      - node_modules/react-native-fast-image/android/build.gradle
+      - node_modules/react-native-get-random-values/android/build.gradle
+      - node_modules/react-native-linear-gradient/android/build.gradle
+      - node_modules/react-native-nfc-manager/android/build.gradle
+      - node_modules/@react-native-picker/picker/android/build.gradle
+      - node_modules/react-native/ReactAndroid/publish.gradle
+      - node_modules/react-native-safe-area-context/android/build.gradle
+      - node_modules/react-native-securerandom/android/build.gradle
+      - node_modules/react-native-svg/android/build.gradle
+      - node_modules/react-native-text-size/android/build.gradle
+      - node_modules/react-native-video/android/build.gradle
+      - node_modules/react-native-webview/android/build.gradle
+    scandelete:
+      - node_modules
+    build:
+      - pushd $$go$$/src
+      - ./make.bash
+      - popd
+      - export GOPATH=$$go$$
+      - export PATH="$GOPATH/bin:$PATH"
+      - pushd $$BitBoxSwiss-gomobile$$/cmd/gomobile
+      - go install .
+      - popd
+      - pushd $$bitbox-wallet-app$$/backend/mobileserver
+      - gomobile init
+      - gomobile bind -x -a -glflags="-mod=readonly" -ldflags="-s -w" -target "android/arm"
+        -androidapi 26 .
+      - popd
+      - mv $$bitbox-wallet-app$$/backend/mobileserver/mobileserver.aar libs
+    ndk: 25.1.8937393
+    gradleprops:
+      - reactNativeArchitectures=armeabi-v7a
+
+  - versionName: 2.3.0
+    versionCode: 397002
+    commit: 3e5721d69725186a78d683dd1aa06c08b00dea21
+    subdir: android/app
+    sudo:
+      - sysctl fs.inotify.max_user_watches=524288 || true
+      - apt-get update
+      - apt-get install -y make npm gcc libc-dev
+      - apt-get install -t bookworm-backports -y golang-go
+      - npm -g install yarn
+    init: npm install --build-from-source
+    gradle:
+      - yes
+    srclibs:
+      - go@go1.23.3
+      - BitBoxSwiss-gomobile@0cc14f92bb9c1f0672229aababacac30cfa08b97
+      - bitbox-wallet-app@9800ab44c997f6ec7f037271275cddfd28faf4b1
+    rm:
+      - android/app/libs/mobileserver.aar
+    prebuild:
+      - export COMMIT_REF=$(git rev-parse --short HEAD)
+      - git -C $$bitbox-wallet-app$$ checkout -f "$(cat libs/BITBOX_BRIDGE_COMMIT)"
+      - sed -i -e 's/PerCPUArchitecture = .*/PerCPUArchitecture = true/' build.gradle
+      - cd ../../
+      - sed -i -e '/installReferrerVersion/,+12d' node_modules/react-native-device-info/android/build.gradle
+      - sed -i -e '/media3-exoplayer-ima/d' node_modules/react-native-video/android/build.gradle
+      - npm remove react-native-vision-camera
+      - npm run bundle:android
+      - sdkmanager 'platforms;android-26'
+    scanignore:
+      - node_modules/react-native/sdks/hermesc/linux64-bin/hermesc
+      - node_modules/bcrypt-react-native/android/build.gradle
+      - node_modules/lottie-react-native/android/build.gradle
+      - node_modules/@react-native-async-storage/async-storage/android/build.gradle
+      - node_modules/react-native-bars/android/build.gradle
+      - node_modules/react-native-biometrics/android/build.gradle
+      - node_modules/react-native-bootsplash/android/build.gradle
+      - node_modules/react-native-device-info/android/build.gradle
+      - node_modules/react-native-encrypted-storage/android/build.gradle
+      - node_modules/react-native-fast-image/android/build.gradle
+      - node_modules/react-native-get-random-values/android/build.gradle
+      - node_modules/react-native-linear-gradient/android/build.gradle
+      - node_modules/react-native-nfc-manager/android/build.gradle
+      - node_modules/@react-native-picker/picker/android/build.gradle
+      - node_modules/react-native/ReactAndroid/publish.gradle
+      - node_modules/react-native-safe-area-context/android/build.gradle
+      - node_modules/react-native-securerandom/android/build.gradle
+      - node_modules/react-native-svg/android/build.gradle
+      - node_modules/react-native-text-size/android/build.gradle
+      - node_modules/react-native-video/android/build.gradle
+      - node_modules/react-native-webview/android/build.gradle
+    scandelete:
+      - node_modules
+    build:
+      - pushd $$go$$/src
+      - ./make.bash
+      - popd
+      - export GOPATH=$$go$$
+      - export PATH="$GOPATH/bin:$PATH"
+      - pushd $$BitBoxSwiss-gomobile$$/cmd/gomobile
+      - go install .
+      - popd
+      - pushd $$bitbox-wallet-app$$/backend/mobileserver
+      - gomobile init
+      - gomobile bind -x -a -glflags="-mod=readonly" -ldflags="-s -w" -target "android/386"
+        -androidapi 26 .
+      - popd
+      - mv $$bitbox-wallet-app$$/backend/mobileserver/mobileserver.aar libs
+    ndk: 25.1.8937393
+    gradleprops:
+      - reactNativeArchitectures=x86
+
+  - versionName: 2.3.0
+    versionCode: 397003
+    commit: 3e5721d69725186a78d683dd1aa06c08b00dea21
+    subdir: android/app
+    sudo:
+      - sysctl fs.inotify.max_user_watches=524288 || true
+      - apt-get update
+      - apt-get install -y make npm gcc libc-dev
+      - apt-get install -t bookworm-backports -y golang-go
+      - npm -g install yarn
+    init: npm install --build-from-source
+    gradle:
+      - yes
+    srclibs:
+      - go@go1.23.3
+      - BitBoxSwiss-gomobile@0cc14f92bb9c1f0672229aababacac30cfa08b97
+      - bitbox-wallet-app@9800ab44c997f6ec7f037271275cddfd28faf4b1
+    rm:
+      - android/app/libs/mobileserver.aar
+    prebuild:
+      - export COMMIT_REF=$(git rev-parse --short HEAD)
+      - git -C $$bitbox-wallet-app$$ checkout -f "$(cat libs/BITBOX_BRIDGE_COMMIT)"
+      - sed -i -e 's/PerCPUArchitecture = .*/PerCPUArchitecture = true/' build.gradle
+      - cd ../../
+      - sed -i -e '/installReferrerVersion/,+12d' node_modules/react-native-device-info/android/build.gradle
+      - sed -i -e '/media3-exoplayer-ima/d' node_modules/react-native-video/android/build.gradle
+      - npm remove react-native-vision-camera
+      - npm run bundle:android
+      - sdkmanager 'platforms;android-26'
+    scanignore:
+      - node_modules/react-native/sdks/hermesc/linux64-bin/hermesc
+      - node_modules/bcrypt-react-native/android/build.gradle
+      - node_modules/lottie-react-native/android/build.gradle
+      - node_modules/@react-native-async-storage/async-storage/android/build.gradle
+      - node_modules/react-native-bars/android/build.gradle
+      - node_modules/react-native-biometrics/android/build.gradle
+      - node_modules/react-native-bootsplash/android/build.gradle
+      - node_modules/react-native-device-info/android/build.gradle
+      - node_modules/react-native-encrypted-storage/android/build.gradle
+      - node_modules/react-native-fast-image/android/build.gradle
+      - node_modules/react-native-get-random-values/android/build.gradle
+      - node_modules/react-native-linear-gradient/android/build.gradle
+      - node_modules/react-native-nfc-manager/android/build.gradle
+      - node_modules/@react-native-picker/picker/android/build.gradle
+      - node_modules/react-native/ReactAndroid/publish.gradle
+      - node_modules/react-native-safe-area-context/android/build.gradle
+      - node_modules/react-native-securerandom/android/build.gradle
+      - node_modules/react-native-svg/android/build.gradle
+      - node_modules/react-native-text-size/android/build.gradle
+      - node_modules/react-native-video/android/build.gradle
+      - node_modules/react-native-webview/android/build.gradle
+    scandelete:
+      - node_modules
+    build:
+      - pushd $$go$$/src
+      - ./make.bash
+      - popd
+      - export GOPATH=$$go$$
+      - export PATH="$GOPATH/bin:$PATH"
+      - pushd $$BitBoxSwiss-gomobile$$/cmd/gomobile
+      - go install .
+      - popd
+      - pushd $$bitbox-wallet-app$$/backend/mobileserver
+      - gomobile init
+      - gomobile bind -x -a -glflags="-mod=readonly" -ldflags="-s -w" -target "android/arm64"
+        -androidapi 26 .
+      - popd
+      - mv $$bitbox-wallet-app$$/backend/mobileserver/mobileserver.aar libs
+    ndk: 25.1.8937393
+    gradleprops:
+      - reactNativeArchitectures=arm64-v8a
+
+  - versionName: 2.3.0
+    versionCode: 397004
+    commit: 3e5721d69725186a78d683dd1aa06c08b00dea21
+    subdir: android/app
+    sudo:
+      - sysctl fs.inotify.max_user_watches=524288 || true
+      - apt-get update
+      - apt-get install -y make npm gcc libc-dev
+      - apt-get install -t bookworm-backports -y golang-go
+      - npm -g install yarn
+    init: npm install --build-from-source
+    gradle:
+      - yes
+    srclibs:
+      - go@go1.23.3
+      - BitBoxSwiss-gomobile@0cc14f92bb9c1f0672229aababacac30cfa08b97
+      - bitbox-wallet-app@9800ab44c997f6ec7f037271275cddfd28faf4b1
+    rm:
+      - android/app/libs/mobileserver.aar
+    prebuild:
+      - export COMMIT_REF=$(git rev-parse --short HEAD)
+      - git -C $$bitbox-wallet-app$$ checkout -f "$(cat libs/BITBOX_BRIDGE_COMMIT)"
+      - sed -i -e 's/PerCPUArchitecture = .*/PerCPUArchitecture = true/' build.gradle
+      - cd ../../
+      - sed -i -e '/installReferrerVersion/,+12d' node_modules/react-native-device-info/android/build.gradle
+      - sed -i -e '/media3-exoplayer-ima/d' node_modules/react-native-video/android/build.gradle
+      - npm remove react-native-vision-camera
+      - npm run bundle:android
+      - sdkmanager 'platforms;android-26'
+    scanignore:
+      - node_modules/react-native/sdks/hermesc/linux64-bin/hermesc
+      - node_modules/bcrypt-react-native/android/build.gradle
+      - node_modules/lottie-react-native/android/build.gradle
+      - node_modules/@react-native-async-storage/async-storage/android/build.gradle
+      - node_modules/react-native-bars/android/build.gradle
+      - node_modules/react-native-biometrics/android/build.gradle
+      - node_modules/react-native-bootsplash/android/build.gradle
+      - node_modules/react-native-device-info/android/build.gradle
+      - node_modules/react-native-encrypted-storage/android/build.gradle
+      - node_modules/react-native-fast-image/android/build.gradle
+      - node_modules/react-native-get-random-values/android/build.gradle
+      - node_modules/react-native-linear-gradient/android/build.gradle
+      - node_modules/react-native-nfc-manager/android/build.gradle
+      - node_modules/@react-native-picker/picker/android/build.gradle
+      - node_modules/react-native/ReactAndroid/publish.gradle
+      - node_modules/react-native-safe-area-context/android/build.gradle
+      - node_modules/react-native-securerandom/android/build.gradle
+      - node_modules/react-native-svg/android/build.gradle
+      - node_modules/react-native-text-size/android/build.gradle
+      - node_modules/react-native-video/android/build.gradle
+      - node_modules/react-native-webview/android/build.gradle
+    scandelete:
+      - node_modules
+    build:
+      - pushd $$go$$/src
+      - ./make.bash
+      - popd
+      - export GOPATH=$$go$$
+      - export PATH="$GOPATH/bin:$PATH"
+      - pushd $$BitBoxSwiss-gomobile$$/cmd/gomobile
+      - go install .
+      - popd
+      - pushd $$bitbox-wallet-app$$/backend/mobileserver
+      - gomobile init
+      - gomobile bind -x -a -glflags="-mod=readonly" -ldflags="-s -w" -target "android/amd64"
+        -androidapi 26 .
+      - popd
+      - mv $$bitbox-wallet-app$$/backend/mobileserver/mobileserver.aar libs
+    ndk: 25.1.8937393
+    gradleprops:
+      - reactNativeArchitectures=x86_64
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 VercodeOperation:
@@ -3144,5 +3432,5 @@ VercodeOperation:
   - 1000 * %c + 3
   - 1000 * %c + 4
 UpdateCheckData: .env|APP_BUILD_NUMBER=(\d+)|.|APP_VERSION=(.+)
-CurrentVersion: 2.2.9
-CurrentVersionCode: 396004
+CurrentVersion: 2.3.0
+CurrentVersionCode: 397004
