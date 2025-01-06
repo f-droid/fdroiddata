@@ -339,10 +339,32 @@ Builds:
         assets/dexopt/baseline.prof|cut -d " " -f1); [[ $localhash == $upstreamhash
         ]] && break ; popd; rm -fr local; done
 
+  - versionName: 1.6.4
+    versionCode: 66
+    commit: 3cced1e6119c235330d1f2acbdc6df4371c48d90
+    subdir: app
+    sudo:
+      - export CPUS_MAX=6
+      - export CPUS=$(getconf _NPROCESSORS_ONLN)
+      - for (( c=$CPUS_MAX; c<$CPUS; c++ )) ; do echo 0 > /sys/devices/system/cpu/cpu$c/online
+        ; done
+    output: build/outputs/apk/release/$$VERSION$$.apk
+    build:
+      - mkdir upstream
+      - pushd upstream
+      - curl -L -o upstream.apk https://github.com/w2sv/WiFi-Widget/releases/download/$$VERSION$$/$$VERSION$$.apk
+      - unzip -q upstream.apk
+      - export upstreamhash=$(sha256sum assets/dexopt/baseline.prof|cut -d " " -f1)
+      - popd
+      - for i in {1..10}; do gradle clean assembleRelease; mkdir local; pushd local;
+        unzip -q ../build/outputs/apk/release/*.apk; export localhash=$(sha256sum
+        assets/dexopt/baseline.prof|cut -d " " -f1); [[ $localhash == $upstreamhash
+        ]] && break ; popd; rm -fr local; done
+
 AllowedAPKSigningKeys: e22bed7909bce21fa5bc900a8c056eaa0773761f70774d1d808bbbafb3aa1958
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: gradle.properties|versionCode=(\d+)|.|version=([\d.]+)
-CurrentVersion: 1.6.3
-CurrentVersionCode: 65
+CurrentVersion: 1.6.4
+CurrentVersionCode: 66
