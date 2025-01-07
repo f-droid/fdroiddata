@@ -226,7 +226,45 @@ Builds:
       - media/libretrodb/metadat/mame/MAME 2015 XML.zip
     ndk: 22.0.7026061
 
+  - versionName: 1.20.0
+    versionCode: 1597175263
+    commit: 864ad02177e5e39c9951082e127efcc6a693b1e5
+    subdir: pkg/android/phoenix
+    sudo:
+      - apt-get update
+      - apt-get install -y file
+      - echo "deb https://deb.debian.org/debian bullseye main" > /etc/apt/sources.list.d/bullseye.list
+      - apt-get update
+      - apt-get install -y -t bullseye openjdk-11-jdk-headless
+      - update-java-alternatives --set java-1.11.0-openjdk-amd64
+    gradle:
+      - normal
+    rm:
+      - deps/bearssl-0.6/T0Comp.exe
+      - gfx/drivers_font_renderer/bitmap.bin
+      - pkg/apple
+      - pkg/ctr
+      - pkg/msvc-uwp
+      - vita
+      - wii
+      - wiiu
+    prebuild:
+      - curl -Lo assets.zip https://buildbot.libretro.com/assets/frontend/glui_minimal_assets.zip
+      - echo "8633eda1662d209a80ff7d0ab89f697bdba543042983d4587f632123e1ee4144  assets.zip"
+        | sha256sum -c -
+      - unzip assets.zip -d 'assets'
+      - rm assets.zip
+      - sed -i -e '/versionCode System/d' -e '/versionName "${/d' -e 's/4.1.0/4.2.0/'
+        build.gradle
+      - cd ../../../
+      - ./fetch-submodules.sh
+    scanignore:
+      - media/assets/rgui/font/*.bin
+      - media/libretrodb/metadat/mame/MAME 2015 XML.zip
+      - media/overlays/gamepads/neo-ds-portrait/neo-ds-portrait.zip
+    ndk: 22.0.7026061
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 1.19.1
-CurrentVersionCode: 1597175262
+CurrentVersion: 1.20.0
+CurrentVersionCode: 1597175263
