@@ -178,7 +178,30 @@ Builds:
       - mv $$ffmpeg-kit$$/prebuilt/bundle-android-aar/ffmpeg-kit/ffmpeg-kit.aar libs
     ndk: 25.1.8937393
 
+  - versionName: 2.1.5.foss
+    versionCode: 20105
+    commit: c47134f7b95f93258f96563400b9710126ba70a9
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y make automake pkg-config libtool nasm meson ninja-build
+        cmake
+    gradle:
+      - yes
+    srclibs:
+      - ffmpeg-kit@v6.0.LTS
+    rm:
+      - app/libs/*.aar
+    prebuild: sed -i -e '/isEnable = true/d'  build.gradle.kts
+    build:
+      - pushd $$ffmpeg-kit$$
+      - ANDROID_SDK_ROOT=$$SDK$$ ANDROID_NDK_ROOT=$$NDK$$ ./android.sh --disable-arm-v7a-neon
+        --enable-gpl --enable-libvpx --enable-dav1d --enable-x264 --enable-x265 --enable-android-media-codec
+      - popd
+      - mv $$ffmpeg-kit$$/prebuilt/bundle-android-aar/ffmpeg-kit/ffmpeg-kit.aar libs
+    ndk: 25.1.8937393
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 2.1.4.foss
-CurrentVersionCode: 20104
+CurrentVersion: 2.1.5.foss
+CurrentVersionCode: 20105
