@@ -556,10 +556,46 @@ Builds:
       - popd
       - mv $repo/kepler_app de.keplerchemnitz.kepler_app
 
+  - versionName: 2.9.2
+    versionCode: 75
+    commit: 4fea22e42882cfed08734828a31b4acd7147b41c
+    sudo:
+      - mkdir -p /home/runner
+      - chown vagrant /home/runner
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@stable
+    prebuild:
+      - export FLUTTER_VERSION=$(sed -n -E "s/.*flutter-version:\s'(.*)'/\1/p" .github/workflows/flutter.yml)
+      - pushd $$flutter$$
+      - git checkout -f $FLUTTER_VERSION
+      - popd
+      - export repo=/home/runner/work/kepler_app
+      - mkdir -p $repo
+      - cd ..
+      - mv de.keplerchemnitz.kepler_app $repo/kepler_app
+      - pushd $repo/kepler_app
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter packages pub get
+      - popd
+      - mv $repo/kepler_app de.keplerchemnitz.kepler_app
+    scandelete:
+      - .pub-cache
+    build:
+      - export repo=/home/runner/work/kepler_app
+      - cd ..
+      - mv de.keplerchemnitz.kepler_app $repo/kepler_app
+      - pushd $repo/kepler_app
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --dart-define=logup_host=logup.vlant.de
+      - popd
+      - mv $repo/kepler_app de.keplerchemnitz.kepler_app
+
 AllowedAPKSigningKeys: 59af83d00acacb4dab172a03e83ace09106be7f606b1b597839735880808fb5a
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 2.9.0
-CurrentVersionCode: 73
+CurrentVersion: 2.9.2
+CurrentVersionCode: 75
