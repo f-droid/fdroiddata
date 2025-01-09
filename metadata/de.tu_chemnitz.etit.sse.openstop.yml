@@ -299,10 +299,56 @@ Builds:
       - popd
       - mv $HOME/work/OpenStop/OpenStop de.tu_chemnitz.etit.sse.openstop
 
+  - versionName: 0.8.3
+    versionCode: 22
+    commit: 744150c433d0f66f38964699630f74fb8b65de39
+    sudo:
+      - apt-get update
+      - apt-get install -y jq python3-pip yq
+      - mkdir -p /home/runner/
+      - chown vagrant /home/runner/
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+      - web
+      - .github
+    prebuild:
+      - "$(yq -y -i '.dependency_overrides.geolocator_android.git = {\"url\": \"https://github.com/Zverik/flutter-geolocator.git\"\
+        , \"ref\": \"floss\", \"path\": \"geolocator_android\"}' pubspec.yaml)"
+      - mkdir -p /home/runner/work/OpenStop/
+      - cd ..
+      - mv de.tu_chemnitz.etit.sse.openstop /home/runner/work/OpenStop/OpenStop
+      - export HOME=/home/runner
+      - pushd $HOME/work/OpenStop/OpenStop/
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export version="$(yq -r .environment.flutter pubspec.yaml)"
+      - pushd $$flutter$$
+      - git checkout -f $version
+      - popd
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+      - popd
+      - mv $HOME/work/OpenStop/OpenStop de.tu_chemnitz.etit.sse.openstop
+    scandelete:
+      - .pub-cache
+    build:
+      - cd ..
+      - mv de.tu_chemnitz.etit.sse.openstop /home/runner/work/OpenStop/OpenStop
+      - export HOME=/home/runner
+      - pushd $HOME/work/OpenStop/OpenStop/
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter pub run build_runner build --delete-conflicting-outputs
+      - $$flutter$$/bin/flutter build apk --dart-define=THUNDERFOREST_API_KEY=4dcc69df496b49b9b90886ba0a8ee31c
+        --dart-define=IS_RELEASE=true
+      - popd
+      - mv $HOME/work/OpenStop/OpenStop de.tu_chemnitz.etit.sse.openstop
+
 AllowedAPKSigningKeys: 0442746b76b1e5fcf1ef6eaabc03ddf99ad756b622179b75b72e7cd78fc57de9
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 0.8.2
-CurrentVersionCode: 21
+CurrentVersion: 0.8.3
+CurrentVersionCode: 22
