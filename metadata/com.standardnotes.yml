@@ -993,10 +993,72 @@ Builds:
       - mv $$notifee$$/packages/react-native/android/libs ../../node_modules/@notifee/react-native/android/
     ndk: 26.1.10909125
 
+  - versionName: 3.195.22
+    versionCode: 3003128
+    commit: '@standardnotes/mobile@3.195.22'
+    subdir: packages/mobile/android/app
+    sudo:
+      - apt-get update
+      - apt-get install -y libsecret-1-dev make g++ libc-dev jq npm bzip2
+      - npm install -g yarn
+      - sysctl fs.inotify.max_user_watches=524288 || true
+    init:
+      - cd ../../../..
+      - sed -i -e 's/version:\ 7.8.0/version:\ 9.1.1/' -e 's/npm:7.8.0/npm:9.1.1/'
+        -e '/800233/d' yarn.lock
+      - yarn config set -H enableImmutableInstalls false
+      - tmpfile=$(mktemp) && cp packages/mobile/package.json "$tmpfile" && jq -r 'del
+        (.devDependencies["react-native-iap"]) | del (.dependencies["react-native-store-review"])'
+        "$tmpfile" > packages/mobile/package.json && rm "$tmpfile"
+      - npm_config_build_from_source=true yarn
+    patch:
+      - remove-IAP.3.146.2.patch
+      - disable-gms-u2f-support-3.160.17.patch
+      - remove-react-native-store-review.3.177.5.patch
+    gradle:
+      - prod
+    srclibs:
+      - notifee@@notifee/react-native@9.1.1
+    rm:
+      - packages/mobile/ios
+    prebuild:
+      - sed -i -e '/detox/Id' -e 's/versionName appVersionName/versionName "$$VERSION$$"/'
+        -e 's/versionCode appVersionCode/versionCode $$VERCODE$$/' -e '/universalApk/s/false/true/'
+        build.gradle
+      - pushd ../../node_modules/react-native-fingerprint-scanner/android
+      - sed -i -e '/FingerprintIdentify/d' build.gradle
+      - sed -i -e '/getFingerprintIdentify() {/,/^    }/d' -e '/resumeIdentify/,/^    }/c}'
+        -e '/legacyGetErrorMessage() {/,/^    }/d' -e 's/legacyGetErrorMessage()/"LegacyAndroid"/g'
+        -e '/FingerprintIdentify/Id' src/main/java/com/hieuvp/fingerprint/ReactNativeFingerprintScannerModule.java
+      - popd
+      - cd ../../../..
+      - yarn run build:mobile
+      - cd packages/mobile
+      - yarn run android:bundle
+    scanignore:
+      - packages/mobile/node_modules/jsc-android
+      - packages/mobile/node_modules/react-native
+      - packages/mobile/node_modules/@notifee/react-native/android/build.gradle
+      - packages/mobile/node_modules/detox/android/build.gradle
+      - packages/mobile/node_modules/@standardnotes/react-native-utils/android/build.gradle
+      - packages/mobile/node_modules/@react-native-async-storage/async-storage/android/build.gradle
+    scandelete:
+      - node_modules/
+      - packages/mobile/node_modules
+      - packages/desktop
+      - .yarn/
+    build:
+      - pushd $$notifee$$/android
+      - gradle publishAarPublicationToMavenRepository
+      - popd
+      - rm -rf ../../node_modules/@notifee/react-native/android/libs
+      - mv $$notifee$$/packages/react-native/android/libs ../../node_modules/@notifee/react-native/android/
+    ndk: 26.1.10909125
+
 AutoUpdateMode: Version @standardnotes/mobile@%v
 UpdateCheckMode: HTTP
 VercodeOperation:
   - 3002000 + %c
 UpdateCheckData: https://api.github.com/repos/standardnotes/app/actions/workflows/mobile.release.prod.yml/runs|"run_number":(\d+)|https://api.github.com/repos/standardnotes/app/releases|@standardnotes/mobile@([\d.]+)
-CurrentVersion: 3.195.17
-CurrentVersionCode: 3003123
+CurrentVersion: 3.195.22
+CurrentVersionCode: 3003128
