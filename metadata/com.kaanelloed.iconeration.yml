@@ -126,9 +126,27 @@ Builds:
         assets/dexopt/baseline.prof|cut -d " " -f1); [[ $localhash == $upstreamhash
         ]] && break ; popd; rm -fr local; done
 
+  - versionName: 2025.01.01
+    versionCode: 42
+    commit: 04a7c8a77ca9a04b86b81445bc0dec8c60f14030
+    subdir: app
+    submodules: true
+    output: build/outputs/apk/release/Alembicons-v*.apk
+    build:
+      - mkdir upstream
+      - pushd upstream
+      - curl -L -o upstream.apk https://codeberg.org/kaanelloed/Alembicons/releases/download/$$VERSION$$/Alembicons-v$$VERSION$$.apk
+      - unzip -q upstream.apk
+      - export upstreamhash=$(sha256sum assets/dexopt/baseline.prof|cut -d " " -f1)
+      - popd
+      - for i in {1..10}; do gradle clean assembleRelease; mkdir local; pushd local;
+        unzip -q ../build/outputs/apk/release/Alembicons-v*.apk; export localhash=$(sha256sum
+        assets/dexopt/baseline.prof|cut -d " " -f1); [[ $localhash == $upstreamhash
+        ]] && break ; popd; rm -fr local; done
+
 AllowedAPKSigningKeys: 5df208f4111ddb738f78e066d8d8d4d7fc42c4dc6c6490af0b131ab2786841fb
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 2025.01.00
-CurrentVersionCode: 41
+CurrentVersion: 2025.01.01
+CurrentVersionCode: 42
