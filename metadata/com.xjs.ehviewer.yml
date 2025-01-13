@@ -1,0 +1,47 @@
+AntiFeatures:
+  NonFreeNet:
+    en-US: Relies on E-Hentai.org and, relies on GitHub for downloading tag translations
+    zh-CN: 依赖于 E-Hentai.org 网站，同时依赖 GitHub 网站来下载标签翻译数据
+  NSFW:
+    en-US: E-Hentai.org
+Categories:
+  - Multimedia
+  - Reading
+License: Apache-2.0
+AuthorName: SXJ LonelyDog
+AuthorEmail: xiaojieonly@foxmail.com
+SourceCode: https://github.com/xiaojieonly/Ehviewer_CN_SXJ
+IssueTracker: https://github.com/xiaojieonly/Ehviewer_CN_SXJ/issues
+Changelog: https://github.com/xiaojieonly/Ehviewer_CN_SXJ/releases
+Donate: https://github.com/xiaojieonly/Ehviewer_CN_SXJ/blob/BiLi_PC_Gamer/feedauthor/support.md
+
+AutoName: EhViewer
+
+RepoType: git
+Repo: https://github.com/xiaojieonly/Ehviewer_CN_SXJ
+
+Builds:
+  - versionName: 1.9.9.7
+    versionCode: 111
+    commit: b866f9dc5054c65abc845a1f0c9df6d3f538ea61
+    subdir: app
+    sudo:
+      - echo "deb https://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
+      - apt-get update
+      - apt-get install -y -t trixie openjdk-21-jdk-headless
+      - update-alternatives --auto java
+    gradle:
+      - appCenter
+    prebuild:
+      - sed -i -e '/firebase/d' {..,.}/build.gradle
+      - find . -type f \( -name "*.java" -o -name "*.kt" \) -exec sed -i -e '/FirebaseCrashlytics/d'
+        -e '/FirebaseAnalytics/d' {} +
+      - sed -i -e '/analytics/d' -e '/isEnabled() {/a return false;' src/main/java/com/hippo/ehviewer/Analytics.java
+    scandelete:
+      - app/src/test
+    ndk: r27
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: 1.9.9.7
+CurrentVersionCode: 111
