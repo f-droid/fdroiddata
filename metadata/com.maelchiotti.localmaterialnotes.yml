@@ -663,6 +663,162 @@ Builds:
       - mv $HOME/work/LocalMaterialNotes/LocalMaterialNotes com.maelchiotti.localmaterialnotes
     ndk: r26d
 
+  - versionName: 1.12.0
+    versionCode: 251
+    commit: 3ed31dff70f63c8e4ce4dda0e56cee62321f5a2a
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y gcc-multilib libc-dev make
+      - mkdir -p /home/runner/
+      - chown vagrant /home/runner/
+    output: build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
+    binary: https://github.com/maelchiotti/LocalMaterialNotes/releases/download/v%v/localmaterialnotes_armeabi-v7a_v%v.apk
+    srclibs:
+      - flutter@stable
+      - rustup@1.27.1
+    prebuild:
+      - export version=$(grep flutter\:\  pubspec.yaml | cut -d ":" -f2)
+      - pushd $$flutter$$
+      - git checkout -f $version
+      - popd
+      - mkdir -p /home/runner/work/LocalMaterialNotes/
+      - cd ..
+      - mv com.maelchiotti.localmaterialnotes /home/runner/work/LocalMaterialNotes/LocalMaterialNotes
+      - export HOME=/home/runner
+      - pushd $HOME/work/LocalMaterialNotes/LocalMaterialNotes/
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+      - rustVersion=$(sed -n 's/channel = "\(.*\)"/\1/p' rust-toolchain.toml)
+      - $$rustup$$/rustup-init.sh -y --default-toolchain $rustVersion -t armv7-linux-androideabi
+      - cp .isar-cargo.lock .isar/Cargo.lock
+      - cp .mimir-cargo.lock .mimir/Cargo.lock
+      - popd
+      - mv $HOME/work/LocalMaterialNotes/LocalMaterialNotes com.maelchiotti.localmaterialnotes
+    scandelete:
+      - .pub-cache
+      - docs/external_imports/inputs
+    build:
+      - cd ..
+      - mv com.maelchiotti.localmaterialnotes /home/runner/work/LocalMaterialNotes/LocalMaterialNotes
+      - export HOME=/home/runner
+      - pushd $HOME/work/LocalMaterialNotes/LocalMaterialNotes/
+      - source $HOME/.cargo/env
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - bash ./scripts/isar/fdroid_build_isar.sh armv7
+      - bash ./scripts/mimir/fdroid_build_mimir.sh armv7
+      - $$flutter$$/bin/dart run build_runner build
+      - $$flutter$$/bin/flutter gen-l10n
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform="android-arm"
+      - popd
+      - mv $HOME/work/LocalMaterialNotes/LocalMaterialNotes com.maelchiotti.localmaterialnotes
+    ndk: r26d
+
+  - versionName: 1.12.0
+    versionCode: 252
+    commit: 3ed31dff70f63c8e4ce4dda0e56cee62321f5a2a
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y gcc-multilib libc-dev make
+      - mkdir -p /home/runner/
+      - chown vagrant /home/runner/
+    output: build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+    binary: https://github.com/maelchiotti/LocalMaterialNotes/releases/download/v%v/localmaterialnotes_arm64-v8a_v%v.apk
+    srclibs:
+      - flutter@stable
+      - rustup@1.27.1
+    prebuild:
+      - export version=$(grep flutter\:\  pubspec.yaml | cut -d ":" -f2)
+      - pushd $$flutter$$
+      - git checkout -f $version
+      - popd
+      - mkdir -p /home/runner/work/LocalMaterialNotes/
+      - cd ..
+      - mv com.maelchiotti.localmaterialnotes /home/runner/work/LocalMaterialNotes/LocalMaterialNotes
+      - export HOME=/home/runner
+      - pushd $HOME/work/LocalMaterialNotes/LocalMaterialNotes/
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+      - rustVersion=$(sed -n 's/channel = "\(.*\)"/\1/p' rust-toolchain.toml)
+      - $$rustup$$/rustup-init.sh -y --default-toolchain $rustVersion -t aarch64-linux-android
+      - cp .isar-cargo.lock .isar/Cargo.lock
+      - cp .mimir-cargo.lock .mimir/Cargo.lock
+      - popd
+      - mv $HOME/work/LocalMaterialNotes/LocalMaterialNotes com.maelchiotti.localmaterialnotes
+    scandelete:
+      - .pub-cache
+      - docs/external_imports/inputs
+    build:
+      - cd ..
+      - mv com.maelchiotti.localmaterialnotes /home/runner/work/LocalMaterialNotes/LocalMaterialNotes
+      - export HOME=/home/runner
+      - pushd $HOME/work/LocalMaterialNotes/LocalMaterialNotes/
+      - source $HOME/.cargo/env
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - bash ./scripts/isar/fdroid_build_isar.sh arm64
+      - bash ./scripts/mimir/fdroid_build_mimir.sh arm64
+      - $$flutter$$/bin/dart run build_runner build
+      - $$flutter$$/bin/flutter gen-l10n
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform="android-arm64"
+      - popd
+      - mv $HOME/work/LocalMaterialNotes/LocalMaterialNotes com.maelchiotti.localmaterialnotes
+    ndk: r26d
+
+  - versionName: 1.12.0
+    versionCode: 253
+    commit: 3ed31dff70f63c8e4ce4dda0e56cee62321f5a2a
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y gcc-multilib libc-dev make
+      - mkdir -p /home/runner/
+      - chown vagrant /home/runner/
+    output: build/app/outputs/flutter-apk/app-x86_64-release.apk
+    binary: https://github.com/maelchiotti/LocalMaterialNotes/releases/download/v%v/localmaterialnotes_x86_64_v%v.apk
+    srclibs:
+      - flutter@stable
+      - rustup@1.27.1
+    prebuild:
+      - export version=$(grep flutter\:\  pubspec.yaml | cut -d ":" -f2)
+      - pushd $$flutter$$
+      - git checkout -f $version
+      - popd
+      - mkdir -p /home/runner/work/LocalMaterialNotes/
+      - cd ..
+      - mv com.maelchiotti.localmaterialnotes /home/runner/work/LocalMaterialNotes/LocalMaterialNotes
+      - export HOME=/home/runner
+      - pushd $HOME/work/LocalMaterialNotes/LocalMaterialNotes/
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+      - rustVersion=$(sed -n 's/channel = "\(.*\)"/\1/p' rust-toolchain.toml)
+      - $$rustup$$/rustup-init.sh -y --default-toolchain $rustVersion -t x86_64-linux-android
+      - cp .isar-cargo.lock .isar/Cargo.lock
+      - cp .mimir-cargo.lock .mimir/Cargo.lock
+      - popd
+      - mv $HOME/work/LocalMaterialNotes/LocalMaterialNotes com.maelchiotti.localmaterialnotes
+    scandelete:
+      - .pub-cache
+      - docs/external_imports/inputs
+    build:
+      - cd ..
+      - mv com.maelchiotti.localmaterialnotes /home/runner/work/LocalMaterialNotes/LocalMaterialNotes
+      - export HOME=/home/runner
+      - pushd $HOME/work/LocalMaterialNotes/LocalMaterialNotes/
+      - source $HOME/.cargo/env
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - bash ./scripts/isar/fdroid_build_isar.sh x64
+      - bash ./scripts/mimir/fdroid_build_mimir.sh x64
+      - $$flutter$$/bin/dart run build_runner build
+      - $$flutter$$/bin/flutter gen-l10n
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform="android-x64"
+      - popd
+      - mv $HOME/work/LocalMaterialNotes/LocalMaterialNotes com.maelchiotti.localmaterialnotes
+    ndk: r26d
+
 AllowedAPKSigningKeys: 21ac3d89d9ab7a3483d9261ab7f8fdf688d3703abac11099ce09bf26094b4337
 
 AutoUpdateMode: Version
@@ -672,5 +828,5 @@ VercodeOperation:
   - '%c * 10 + 2'
   - '%c * 10 + 3'
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 1.11.0
-CurrentVersionCode: 243
+CurrentVersion: 1.12.0
+CurrentVersionCode: 253
