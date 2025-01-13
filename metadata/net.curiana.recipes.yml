@@ -52,7 +52,44 @@ Builds:
       - cargo tauri android build --apk
     ndk: 27.0.12077973
 
+  - versionName: 0.2.0
+    versionCode: 2
+    commit: 0.2.0
+    sudo:
+      - apt-get update
+      - apt-get install -y npm make gcc libc-dev libwebkit2gtk-4.1-dev libappindicator3-dev
+        librsvg2-dev patchelf
+      - npm install -g tailwindcss
+    output: src-tauri/gen/android/app/build/outputs/apk/universal/release/app-universal-release-unsigned.apk
+    srclibs:
+      - rustup@1.27.1
+    prebuild:
+      - export NDK_HOME=$$NDK$$
+      - $$rustup$$/rustup-init.sh -y --default-toolchain nightly-2025-01-11 --target
+        wasm32-unknown-unknown
+      - . "$HOME/.cargo/env"
+      - cargo install tauri-cli --version "^2.0.0" --locked
+      - cargo install trunk
+      - cargo tauri android init
+      - cargo tauri icon icon.png
+      - ./copy-android.sh
+    build:
+      - export NDK_HOME=$$NDK$$
+      - export TOOLCHAIN=$NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64
+      - export TARGET=aarch64-linux-android
+      - export API=33
+      - export AR=$TOOLCHAIN/bin/llvm-ar
+      - export CC=$TOOLCHAIN/bin/$TARGET$API-clang
+      - export AS=$CC
+      - export CXX=$TOOLCHAIN/bin/$TARGET$API-clang++
+      - export LD=$TOOLCHAIN/bin/ld
+      - export RANLIB=$TOOLCHAIN/bin/llvm-ranlib
+      - export STRIP=$TOOLCHAIN/bin/llvm-strip
+      - . "$HOME/.cargo/env"
+      - cargo tauri android build --apk
+    ndk: 27.0.12077973
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 0.1.1
-CurrentVersionCode: 1
+CurrentVersion: 0.2.0
+CurrentVersionCode: 2
