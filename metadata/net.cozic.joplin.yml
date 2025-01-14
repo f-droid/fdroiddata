@@ -4556,6 +4556,105 @@ Builds:
       - npm install --build-from-source
       - popd
 
+  - versionName: 3.2.7
+    versionCode: 2097763
+    commit: fc8ea6df0b11ee46bd6d57b92906ef10dc2d96ff
+    subdir: packages/app-mobile/android/app
+    sudo:
+      - sysctl fs.inotify.max_user_watches=524288
+      - apt-get update
+      - apt-get install -y make g++ libc-dev meson ninja-build pkg-config libglib2.0-dev
+        gobject-introspection libgirepository1.0-dev gtk-doc-tools libexif-dev libexpat1-dev
+        libgif-dev liblcms2-dev libpango1.0-dev libpng-dev libpoppler-glib-dev librsvg2-dev
+        libtiff5-dev libtool python-is-python3
+      - curl -Lo node.tar.gz https://nodejs.org/dist/v18.19.0/node-v18.19.0-linux-x64.tar.gz
+      - echo "153312ae9fe8684f345100e4d141a521dc542b36d8c1e09c31ac290eae98c62a  node.tar.gz"
+        | sha256sum -c -
+      - tar xzf node.tar.gz --strip-components=1 -C /usr/local/
+      - corepack enable
+    init:
+      - pushd ../../../..
+      - yarn --version
+      - YARN_ENABLE_IMMUTABLE_INSTALLS=false BUILD_SEQUENCIAL=1 yarn install
+      - yarn remove --all expo-camera
+      - rm packages/app-mobile/components/screens/Note/Note.js
+    patch:
+      - 0001-android-remove-legacy-support.patch
+    gradle:
+      - yes
+    srclibs:
+      - react-native-sharp@v0.33.1
+      - libvips@v8.15.0
+    rm:
+      - packages/tools/PortableAppsLauncher/
+      - packages/app-cli
+      - packages/plugin-repo-cli
+      - packages/app-desktop
+      - packages/app-clipper
+      - packages/server
+      - packages/app-mobile/components/CameraView
+    prebuild:
+      - pushd ../../../..
+      - sed -i -e '/camera/d' -e '/geolocation/d' packages/app-mobile/package.json
+      - sed -i -e '/CameraView /d' packages/app-mobile/components/screens/Note/Note.tsx
+      - YARN_ENABLE_IMMUTABLE_INSTALLS=false BUILD_SEQUENCIAL=1 yarn install
+      - sed -i -e '/installreferrer/,+11d' packages/app-mobile/node_modules/react-native-device-info/android/build.gradle
+      - pushd packages/app-mobile/node_modules/react-native-rsa-native/android
+      - sed -i -e 's|maven.fabric.io/public|jitpack.io|' build.gradle bin/build.gradle
+      - popd
+      - sed -i -e '/react-native-community\/geolocation/d' -e '/return new Promise/,/});/c
+        return this.currentPosition_testResponse();' packages/app-mobile/utils/geolocation-react.js
+      - popd
+      - sed -i -e 's|maven.aliyun.com/repository/jcenter|maven.google.com|' -e 's|maven.apache.org|repo1.maven.org/maven2|'
+        -e 's|"\$rootDir.*"|"https://maven.google.com"|' ../build.gradle
+      - sed -i -e '/android.permission.CAMERA/d' -e '/ACCESS_NETWORK_STATE/a <uses-permission
+        android:name="com.android.vending.CHECK_LICENSE" tools:node="remove" />' -e
+        's|xmlns:android|xmlns:tools="http://schemas.android.com/tools" xmlns:android|'
+        src/main/AndroidManifest.xml
+    scanignore:
+      - .yarn/install-state.gz
+      - .yarn/cache/*.zip
+      - packages/app-mobile/node_modules/jsc-android
+      - packages/app-mobile/node_modules/@react-native-community/netinfo/android/build.gradle
+      - packages/app-mobile/node_modules/@react-native-community/push-notification-ios/android/build.gradle
+      - packages/app-mobile/node_modules/expo-modules-autolinking/scripts/android/autolinking_implementation.gradle
+      - packages/app-mobile/node_modules/expo-modules-core/android/ExpoModulesCorePlugin.gradle
+      - packages/app-mobile/node_modules/react-native-device-info/android/build.gradle
+      - packages/app-mobile/node_modules/react-native-get-random-values/android/build.gradle
+      - packages/app-mobile/node_modules/react-native-image-picker/android/build.gradle
+      - packages/app-mobile/node_modules/react-native-localize/android/build.gradle
+      - packages/app-mobile/node_modules/react-native-rsa-native/android/bin/build.gradle
+      - packages/app-mobile/node_modules/react-native-rsa-native/android/build.gradle
+      - packages/app-mobile/node_modules/react-native-safe-area-context/android/build.gradle
+      - packages/app-mobile/node_modules/react-native/sdks/hermesc/linux64-bin/hermesc
+      - packages/app-mobile/node_modules/react-native-securerandom/android/build.gradle
+      - packages/app-mobile/node_modules/react-native-share/android/build.gradle
+      - packages/app-mobile/node_modules/react-native-vector-icons/android/build.gradle
+      - packages/app-mobile/node_modules/react-native-webview/android/build.gradle
+      - packages/react-native-alarm-notification/android/build.gradle
+      - packages/react-native-saf-x/android/build.gradle
+    scandelete:
+      - packages/app-mobile/node_modules
+      - packages/tools/node_modules
+      - packages/lib/node_modules
+      - packages/react-native-alarm-notification/node_modules
+      - packages/react-native-saf-x/node_modules
+      - packages/pdf-viewer/node_modules
+      - packages/onenote-converter/node_modules/binary-install/node_modules/.bin/wasm-pack
+      - node_modules
+    build:
+      - pushd $$libvips$$
+      - mkdir build
+      - meson setup build --prefix=$$libvips$$/build/
+      - cd build
+      - meson compile
+      - meson install
+      - popd
+      - pushd $$react-native-sharp$$
+      - export PKG_CONFIG_PATH=$$libvips$$/build/lib/pkgconfig/
+      - npm install --build-from-source
+      - popd
+
 MaintainerNotes: |-
   - "g++" is needed for a dependency built by "npm install".
   - "scanignore" of "build.gradle" are for local Maven repositories, the React Native folder
@@ -4564,5 +4663,5 @@ MaintainerNotes: |-
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags android-.*
-CurrentVersion: 3.2.5
-CurrentVersionCode: 2097761
+CurrentVersion: 3.2.7
+CurrentVersionCode: 2097763
