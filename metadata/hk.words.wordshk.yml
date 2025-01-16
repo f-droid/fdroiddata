@@ -254,8 +254,51 @@ Builds:
         --flavor foss
     ndk: r26b
 
+  - versionName: 3.5.0
+    versionCode: 35
+    commit: 1571375f5daceab45d0393ac5a1a72b6a47067c0
+    sudo:
+      - apt-get update
+      - apt-get install -y make libclang-dev llvm
+    output: build/app/outputs/flutter-apk/app-foss-release.apk
+    srclibs:
+      - flutter@3.27.2
+      - rustup@1.27.0
+    rm:
+      - ios
+      - test
+    prebuild:
+      - flutterVersion=$(sed -n -E 's/.*"flutter":\ "(.*)"/\1/p' .fvmrc)
+      - '[[ $flutterVersion ]] || exit 1'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - sed -i -e '/debug/s/true/false/' rust/Cargo.toml
+      - sed -i -e '/digital_ink_view_full/d' -e '/DigitalInkViewFull/,+3c return const
+        DigitalInkViewFoss();' lib/widgets/digital_ink_view.dart
+      - sed -i -e '/mlkit/d' pubspec.yaml
+      - sed -i -e '/mlkit/,/version/d' pubspec.lock
+      - sed -i -e 's/"rustup"/"echo"/' rust_builder/cargokit/build_tool/lib/src/builder.dart
+      - sed -i -e "s/sdkManager,/'sdkmanager',/" rust_builder/cargokit/build_tool/lib/src/android_environment.dart
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter packages pub get
+    scanignore:
+      - assets/dict.db.gz
+    scandelete:
+      - .pub-cache
+    build:
+      - $$rustup$$/rustup-init.sh -y --default-toolchain 1.84.1 -t aarch64-linux-android
+      - source $HOME/.cargo/env
+      - export FLUTTER_RUST_BRIDGE_VERSION=$(sed -n -e '/flutter_rust_bridge/,/version/s/.*version:\s"\(.*\)"/\1/p'
+        pubspec.lock)
+      - cargo install flutter_rust_bridge_codegen --version $FLUTTER_RUST_BRIDGE_VERSION
+        --locked
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - PATH=$$flutter$$/bin/:$PATH flutter_rust_bridge_codegen generate
+      - $$flutter$$/bin/flutter build apk --release --target-platform android-arm64
+        --flavor foss
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 3.4.0
-CurrentVersionCode: 33
+CurrentVersion: 3.4.1
+CurrentVersionCode: 34
