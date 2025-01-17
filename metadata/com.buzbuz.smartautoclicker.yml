@@ -757,7 +757,33 @@ Builds:
       - build-logic
       - core
 
+  - versionName: 3.2.2
+    versionCode: 61
+    commit: 49fc010039b87811eb5912308153b4daba7526ac
+    subdir: smartautoclicker
+    sudo:
+      - echo "deb https://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
+      - apt-get update
+      - apt-get install -y -t trixie openjdk-21-jdk-headless
+      - update-alternatives --auto java
+    gradle:
+      - fDroid
+    rm:
+      - build-logic/convention/src/main/kotlin/com/buzbuz/gradle/convention/CrashlyticsConventionPlugin.kt
+    prebuild:
+      - sdkmanager 'cmake;3.22.1'
+      - cd ..
+      - sed -i -e '/firebase/Id'  -e '/billing/d' -e '/ump/d' -e '/gms/Id' -e '/play/d'
+        gradle/libs.versions.toml
+      - sed -i -e '/register("crashlytics/,/^        }/d' -e '/gms/d' -e '/firebase/d'
+        build-logic/{convention,obfuscation}/build.gradle.kts
+      - sed -i -e '/googleCrashlytics/d;/googleGms/d' build.gradle.kts
+      - sed -i -e '/playStoreImplementation/d' feature/{review,revenue}/build.gradle.kts
+    scandelete:
+      - build-logic
+      - core
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^[0-9.]*(|-RC[0-9])$
-CurrentVersion: 3.2.1
-CurrentVersionCode: 60
+CurrentVersion: 3.2.2
+CurrentVersionCode: 61
