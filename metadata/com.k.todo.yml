@@ -1,0 +1,39 @@
+Categories:
+  - Writing
+License: GPL-3.0-only
+AuthorName: KERLOS
+SourceCode: https://github.com/KerlosGirgis/Todo
+IssueTracker: https://github.com/KerlosGirgis/Todo/issues
+
+AutoName: Todo
+
+RepoType: git
+Repo: https://github.com/KerlosGirgis/Todo.git
+
+Builds:
+  - versionName: 1.5.1
+    versionCode: 2003
+    commit: v1.5.1
+    output: build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+    srclibs:
+      - flutter@stable
+    prebuild:
+      - flutterVersion=$(sed -n -E "s/.*flutter-version:\ '(.*)'/\1/p" .github/workflows/release.yml)
+      - '[[ $flutterVersion ]] || exit 1'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform="android-arm64"
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+VercodeOperation:
+  - 2000 + %c
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 1.5.1
+CurrentVersionCode: 2003
