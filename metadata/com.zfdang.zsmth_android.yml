@@ -288,8 +288,34 @@ Builds:
         zsmth_android/PostListActivity.java
     ndk: r21e
 
+  - versionName: 24.12.27
+    versionCode: 1013
+    commit: 04eb9f63d43c7c6c4712492c5c09cae37ee9fd8e
+    subdir: app
+    gradle:
+      - yes
+    rm:
+      - docs
+      - app/libs
+      - app/MobSDK.gradle
+      - app/qqwry/SQLiteCompare.zip
+    prebuild:
+      - sed -i -e '/versionName/s/appVersion/"$$VERSION$$"/' build.gradle
+      - sed -i -e 's|"http.*"|"https://jitpack.io"|' -e '/MobSDK/d' -e '/ben-manes/d'
+        ../build.gradle
+      - sed -i -e '/MobSDK/d' ../gradle.properties
+      - sed -i -e '/MobSDK/d' -e '/umeng/d' -e "s|files('libs/wheelview.*')|'com.github.venshine:WheelView:ccf190e117'|"
+        -e "s/'com.jude:swipebackhelper:3.1.2'/'com.github.Jude95:SwipeBackHelper:master'/"
+        build.gradle
+      - cd src/main/java/com/zfdang
+      - sed -i -e '/MobSDK/d' -e '/UMConfigure/d' SMTHApplication.java
+      - sed -i -e '/MobSDK/d' -e '/MobclickAgent/d' zsmth_android/MainActivity.java
+      - sed -i -e '/void sharePost/,/^  }/d' -e '/sharePost(post)/d' -e '/sharesdk/d'
+        zsmth_android/PostListActivity.java
+    ndk: r21e
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: '|tag-(\d+)|docs/release.html|zSMTH-release-v([\d.]+).apk'
 CurrentVersion: 24.12.27
-CurrentVersionCode: 1012
+CurrentVersionCode: 1013
