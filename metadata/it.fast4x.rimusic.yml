@@ -844,9 +844,34 @@ Builds:
     postbuild: $$reproducible-apk-tools$$/inplace-fix.py --zipalign fix-newlines $$OUT$$
       'META-INF/services/*' 'res/m0.html' 'res/*.json' 'assets/composeResources/rimusic.composeapp.generated.resources/drawable/*.xml'
 
+  - versionName: 0.6.67
+    versionCode: 79
+    commit: 10191e01f7081b670be63535a78996fa4f7a193d
+    subdir: composeApp
+    sudo:
+      - echo "deb https://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
+      - apt-get update
+      - apt-get install -y -t trixie openjdk-21-jdk-headless
+      - update-alternatives --auto java
+      - export CPUS_MAX=6
+      - export CPUS=$(getconf _NPROCESSORS_ONLN)
+      - for (( c=$CPUS_MAX; c<$CPUS; c++ )) ; do echo 0 > /sys/devices/system/cpu/cpu$c/online
+        ; done
+    gradle:
+      - foss
+    binary: https://github.com/fast4x/RiMusic/releases/download/v%v/app-foss-release.apk
+    srclibs:
+      - reproducible-apk-tools@v0.2.8
+    rm:
+      - bundletool.jar
+    prebuild: sed -i -e '/jetbrains.space/d' -e '/androidx.dev/d' ../settings.gradle.kts
+      build.gradle.kts
+    postbuild: $$reproducible-apk-tools$$/inplace-fix.py --zipalign fix-newlines $$OUT$$
+      'META-INF/services/*' 'res/m0.html' 'res/*.json' 'assets/composeResources/rimusic.composeapp.generated.resources/drawable/*.xml'
+
 AllowedAPKSigningKeys: a1ba8bd74af8f92cb3719a072113a218cfaec02bce2b736a280e31d8cd11808c
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 0.6.66
-CurrentVersionCode: 78
+CurrentVersion: 0.6.67
+CurrentVersionCode: 79
