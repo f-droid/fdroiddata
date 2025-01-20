@@ -1180,8 +1180,69 @@ Builds:
       - gradle assembleRelease
     ndk: 23.1.7779620
 
+  - versionName: 2.0.0
+    versionCode: 36
+    commit: 7263bc8252520ffe8f80f05e3df1309488ce36b4
+    sudo:
+      - sysctl fs.inotify.max_user_watches=524288
+      - apt-get update
+      - apt-get install -y npm
+      - npm -g install yarn
+    init: yarn install
+    output: android/app/build/outputs/apk/release/app-release-unsigned.apk
+    prebuild:
+      - echo -e "\norg.gradle.jvmargs=-Xms1g -Xmx5g -XX:+UseParallelGC -Dfile.encoding=UTF-8
+        -XX:MaxMetaspaceSize=1g" >> gradle.properties
+      - sdkmanager 'cmake;3.22.1'
+      - yarn expo prebuild
+      - cp -r script/res/node_modules/* node_modules/
+      - cp script/res/android/app/src/main/res/values/styles.xml android/app/src/main/res/values/styles.xml
+      - cp script/res/android/app/src/main/res/values-night/colors.xml android/app/src/main/res/values-night/colors.xml
+      - rm -fr script/res ios
+      - sed -i -e '/signingConfig /d' android/app/build.gradle
+    scanignore:
+      - android/build.gradle
+      - node_modules/jsc-android
+      - node_modules/react-native/sdks/hermesc
+      - node_modules/expo/android/build.gradle
+      - node_modules/expo-application/android/build.gradle
+      - node_modules/expo-asset/node_modules/expo-file-system/android/build.gradle
+      - node_modules/expo-clipboard/android/build.gradle
+      - node_modules/expo-constants/android/build.gradle
+      - node_modules/expo-device/android/build.gradle
+      - node_modules/expo-file-system/android/build.gradle
+      - node_modules/expo-font/android/build.gradle
+      - node_modules/expo-image-loader/android/build.gradle
+      - node_modules/expo-image-manipulator/android/build.gradle
+      - node_modules/expo-image-picker/android/build.gradle
+      - node_modules/expo-keep-awake/android/build.gradle
+      - node_modules/expo-localization/android/build.gradle
+      - node_modules/expo-location/android/build.gradle
+      - node_modules/expo-media-library/android/build.gradle
+      - node_modules/expo-modules-core/android/build.gradle
+      - node_modules/expo-modules-autolinking/scripts/android/autolinking_implementation.gradle
+      - node_modules/expo-screen-orientation/android/build.gradle
+      - node_modules/expo-secure-store/android/build.gradle
+      - node_modules/expo-sharing/android/build.gradle
+      - node_modules/expo-splash-screen/android/build.gradle
+      - node_modules/expo-web-browser/android/build.gradle
+      - node_modules/@react-native-async-storage/async-storage/android/build.gradle
+      - node_modules/react-native-reanimated/android/build.gradle
+      - node_modules/react-native-file-access/android/build.gradle
+      - node_modules/react-native-pager-view/android/build.gradle
+      - node_modules/react-native-safe-area-context/android/build.gradle
+      - node_modules/react-native-screens/android/build.gradle
+      - node_modules/react-native-svg/android/build.gradle
+      - node_modules/react-native-vector-icons/android/build.gradle
+    scandelete:
+      - node_modules/
+    build:
+      - cd android/app
+      - gradle assembleRelease
+    ndk: r27c
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: app.json|"versionCode":\s(\d+)|.|"version":\s"([\d.]+)"
-CurrentVersion: 1.13.0
-CurrentVersionCode: 35
+CurrentVersion: 2.0.0
+CurrentVersionCode: 36
