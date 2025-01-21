@@ -2787,8 +2787,36 @@ Builds:
       - export PUB_CACHE=$(pwd)/.pub-cache
       - $$flutter$$/bin/flutter build apk --flavor nightly
 
+  - versionName: 2.3.0-beta.1
+    versionCode: 129
+    commit: 2da93b9ad0b99467509f56bce8417ac3b8f77ba5
+    subdir: app
+    output: build/app/outputs/flutter-apk/app-nightly-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - app/ios
+      - app/linux
+      - app/macos
+      - app/web
+      - app/windows
+    prebuild:
+      - sdkmanager 'ndk;23.1.7779620' 'ndk;26.1.10909125'
+      - export version=$(grep "^  flutter:" pubspec.yaml | cut -d ":" -f2|head -n1)
+      - pushd $$flutter$$
+      - git checkout -f $version
+      - popd
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+    scandelete:
+      - app/.pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --flavor nightly
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v.+$
 UpdateCheckData: app/pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 2.2.4
-CurrentVersionCode: 128
+CurrentVersion: 2.3.0-beta.1
+CurrentVersionCode: 129
