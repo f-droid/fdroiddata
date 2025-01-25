@@ -178,8 +178,49 @@ Builds:
         'Android' libre-memory-game.apk
     ndk: 26.2.11394342
 
+  - versionName: 1.1.0
+    versionCode: 8
+    commit: ca7196fec7e2d818536fe1e7b38fdb3b3a7aad5d
+    timeout: 14400
+    sudo:
+      - apt-get update
+      - apt-get install -y pkgconf clang scons
+    output: libre-memory-game.apk
+    srclibs:
+      - Godot@b09f793f564a6c95dc76acc654b390e68441bd01
+    prebuild:
+      - mkdir -p android
+      - pushd $$Godot$$
+      - scons --clean platform=linuxbsd target=editor use_llvm=yes tools=yes
+      - scons --clean platform=android arch=arm64v8 production=yes target=template_release
+      - scons --clean platform=android arch=armv7 production=yes target=template_release
+      - cd platform/android/java
+      - ./gradlew cleanGodotTemplates
+      - popd
+    build:
+      - export ANDROID_SDK_ROOT=$$SDK$$
+      - export ANDROID_NDK_ROOT=$$NDK$$
+      - export GODOT_CFG=~/.config/godot/editor_settings-4.tres
+      - export GODOT_TMPL=$$Godot$$/bin/android_release.apk
+      - pushd $$Godot$$
+      - scons -j `nproc` platform=linuxbsd target=editor use_llvm=yes tools=yes
+      - scons -j `nproc` platform=android arch=arm64v8 production=yes target=template_release
+      - scons -j `nproc` platform=android arch=armv7 production=yes target=template_release
+      - cd platform/android/java
+      - ./gradlew generateGodotTemplates
+      - popd
+      - $$Godot$$/bin/godot.linuxbsd.editor.x86_64.llvm --headless --check-only --quit
+        project.godot
+      - sed -i -e 's:\(^.*android_sdk_path\)\s*=.*$:\1 = "$$SDK$$":' $GODOT_CFG
+      - sed -i -e '/custom_template\/release/s|=.*|="$$Godot$$/bin/android_release.apk"|'
+        export_presets.cfg
+      - $$Godot$$/bin/godot.linuxbsd.editor.x86_64.llvm --headless --export-release
+      - $$Godot$$/bin/godot.linuxbsd.editor.x86_64.llvm --headless --export-release
+        'Android' libre-memory-game.apk
+    ndk: 26.2.11394342
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: export_presets.cfg|version/code=(\d+)|.|version/name="([\d.]+)"
-CurrentVersion: 1.0.6
-CurrentVersionCode: 7
+CurrentVersion: 1.1.0
+CurrentVersionCode: 8
