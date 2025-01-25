@@ -3,7 +3,7 @@ AntiFeatures:
     en-US: Depends on bilibili.com
 Categories:
   - Multimedia
-License: Apache-2.0
+License: AGPL-3.0-only
 AuthorName: lovegaoshi
 WebSite: https://azusa-player-mobile.vercel.app/
 SourceCode: https://github.com/lovegaoshi/azusa-player-mobile
@@ -2200,9 +2200,9 @@ Builds:
     gradleprops:
       - reactNativeArchitectures=x86_64
 
-  - versionName: 3.2.3
-    versionCode: 38201
-    commit: e2cb7f66ec09bc5b0edb6c8c526224cd7cebfac2
+  - versionName: 3.2.4
+    versionCode: 38601
+    commit: 41e2557de47aa468cb813040fc9bf7597bd103ac
     subdir: android/app
     submodules: true
     sudo:
@@ -2218,6 +2218,7 @@ Builds:
       - yes
     srclibs:
       - react-native-skia@v1.6.0
+      - notifee@@notifee/react-native@9.1.8
     rm:
       - ios
       - src/hooks/usePlayStore.ts
@@ -2232,7 +2233,7 @@ Builds:
         -e '/Purchases/d' src/hooks/useVIP.ts
       - sed -i -e '/installReferrerVersion/,+12d' node_modules/react-native-device-info/android/build.gradle
       - sed -i -e '/media3-exoplayer-ima/d' node_modules/react-native-video/android/build.gradle
-      - export skiaVersion=$(sed -n -E 's|.*"@shopify/react-native-skia":\ "npm:(.*)"|\1|p'
+      - export skiaVersion=$(sed -n -E 's|.*resolution:\ "@shopify/react-native-skia@npm:(.*)"|\1|p'
         yarn.lock)
       - '[[ $skiaVersion ]] || exit 1'
       - git -C $$react-native-skia$$ checkout -f "v$skiaVersion"
@@ -2240,6 +2241,10 @@ Builds:
         -e 's/for (const target of mapKeys(configuration.targets))/const target =
         "arm";/' -e 's/mapKeys,//' -e '/ban-ts-comment/,+1d' -e '/buildXCFrameworks()/d'
         -e '/buildXCFrameworks/,/^};/d' -e '/copyHeaders/d' $$react-native-skia$$/packages/skia/scripts/build-skia.ts
+      - export notifeeVersion=$(sed -n -E 's|.*resolution:\ "@notifee/react-native@npm:(.*)"|\1|p'
+        yarn.lock)
+      - '[[ $notifeeVersion ]] || exit 1'
+      - git -C $$notifee$$ checkout -f "@notifee/react-native@$notifeeVersion"
     scanignore:
       - node_modules/jsc-android
       - node_modules/react-native/sdks/hermesc/linux64-bin/hermesc
@@ -2266,6 +2271,7 @@ Builds:
       - node_modules/react-native-svg/android/build.gradle
       - node_modules/react-native-blob-util/android/build.gradle
       - node_modules/react-native-reanimated/android/build.gradle
+      - node_modules/@notifee/react-native/android/build.gradle
     scandelete:
       - .vs
       - .yarn/install-state.gz
@@ -2279,12 +2285,17 @@ Builds:
       - yarn ts-node ./scripts/build-skia.ts
       - popd
       - mv $$react-native-skia$$/packages/skia/libs/android ../../node_modules/@shopify/react-native-skia/libs/android
+      - pushd $$notifee$$/android
+      - gradle publishAarPublicationToMavenRepository
+      - popd
+      - rm -rf ../../node_modules/@notifee/react-native/android/libs
+      - mv $$notifee$$/packages/react-native/android/libs ../../node_modules/@notifee/react-native/android/
     gradleprops:
       - reactNativeArchitectures=armeabi-v7a
 
-  - versionName: 3.2.3
-    versionCode: 38202
-    commit: e2cb7f66ec09bc5b0edb6c8c526224cd7cebfac2
+  - versionName: 3.2.4
+    versionCode: 38602
+    commit: 41e2557de47aa468cb813040fc9bf7597bd103ac
     subdir: android/app
     submodules: true
     sudo:
@@ -2300,6 +2311,7 @@ Builds:
       - yes
     srclibs:
       - react-native-skia@v1.6.0
+      - notifee@@notifee/react-native@9.1.8
     rm:
       - ios
       - src/hooks/usePlayStore.ts
@@ -2314,7 +2326,7 @@ Builds:
         -e '/Purchases/d' src/hooks/useVIP.ts
       - sed -i -e '/installReferrerVersion/,+12d' node_modules/react-native-device-info/android/build.gradle
       - sed -i -e '/media3-exoplayer-ima/d' node_modules/react-native-video/android/build.gradle
-      - export skiaVersion=$(sed -n -E 's|.*"@shopify/react-native-skia":\ "npm:(.*)"|\1|p'
+      - export skiaVersion=$(sed -n -E 's|.*resolution:\ "@shopify/react-native-skia@npm:(.*)"|\1|p'
         yarn.lock)
       - '[[ $skiaVersion ]] || exit 1'
       - git -C $$react-native-skia$$ checkout -f "v$skiaVersion"
@@ -2322,6 +2334,10 @@ Builds:
         -e 's/for (const target of mapKeys(configuration.targets))/const target =
         "x86";/' -e 's/mapKeys,//' -e '/ban-ts-comment/,+1d' -e '/buildXCFrameworks()/d'
         -e '/buildXCFrameworks/,/^};/d' -e '/copyHeaders/d' $$react-native-skia$$/packages/skia/scripts/build-skia.ts
+      - export notifeeVersion=$(sed -n -E 's|.*resolution:\ "@notifee/react-native@npm:(.*)"|\1|p'
+        yarn.lock)
+      - '[[ $notifeeVersion ]] || exit 1'
+      - git -C $$notifee$$ checkout -f "@notifee/react-native@$notifeeVersion"
     scanignore:
       - node_modules/jsc-android
       - node_modules/react-native/sdks/hermesc/linux64-bin/hermesc
@@ -2348,6 +2364,7 @@ Builds:
       - node_modules/react-native-svg/android/build.gradle
       - node_modules/react-native-blob-util/android/build.gradle
       - node_modules/react-native-reanimated/android/build.gradle
+      - node_modules/@notifee/react-native/android/build.gradle
     scandelete:
       - .vs
       - .yarn/install-state.gz
@@ -2361,12 +2378,17 @@ Builds:
       - yarn ts-node ./scripts/build-skia.ts
       - popd
       - mv $$react-native-skia$$/packages/skia/libs/android ../../node_modules/@shopify/react-native-skia/libs/android
+      - pushd $$notifee$$/android
+      - gradle publishAarPublicationToMavenRepository
+      - popd
+      - rm -rf ../../node_modules/@notifee/react-native/android/libs
+      - mv $$notifee$$/packages/react-native/android/libs ../../node_modules/@notifee/react-native/android/
     gradleprops:
       - reactNativeArchitectures=x86
 
-  - versionName: 3.2.3
-    versionCode: 38203
-    commit: e2cb7f66ec09bc5b0edb6c8c526224cd7cebfac2
+  - versionName: 3.2.4
+    versionCode: 38603
+    commit: 41e2557de47aa468cb813040fc9bf7597bd103ac
     subdir: android/app
     submodules: true
     sudo:
@@ -2382,6 +2404,7 @@ Builds:
       - yes
     srclibs:
       - react-native-skia@v1.6.0
+      - notifee@@notifee/react-native@9.1.8
     rm:
       - ios
       - src/hooks/usePlayStore.ts
@@ -2396,7 +2419,7 @@ Builds:
         -e '/Purchases/d' src/hooks/useVIP.ts
       - sed -i -e '/installReferrerVersion/,+12d' node_modules/react-native-device-info/android/build.gradle
       - sed -i -e '/media3-exoplayer-ima/d' node_modules/react-native-video/android/build.gradle
-      - export skiaVersion=$(sed -n -E 's|.*"@shopify/react-native-skia":\ "npm:(.*)"|\1|p'
+      - export skiaVersion=$(sed -n -E 's|.*resolution:\ "@shopify/react-native-skia@npm:(.*)"|\1|p'
         yarn.lock)
       - '[[ $skiaVersion ]] || exit 1'
       - git -C $$react-native-skia$$ checkout -f "v$skiaVersion"
@@ -2404,6 +2427,10 @@ Builds:
         -e 's/for (const target of mapKeys(configuration.targets))/const target =
         "arm64";/' -e 's/mapKeys,//' -e '/ban-ts-comment/,+1d' -e '/buildXCFrameworks()/d'
         -e '/buildXCFrameworks/,/^};/d' -e '/copyHeaders/d' $$react-native-skia$$/packages/skia/scripts/build-skia.ts
+      - export notifeeVersion=$(sed -n -E 's|.*resolution:\ "@notifee/react-native@npm:(.*)"|\1|p'
+        yarn.lock)
+      - '[[ $notifeeVersion ]] || exit 1'
+      - git -C $$notifee$$ checkout -f "@notifee/react-native@$notifeeVersion"
     scanignore:
       - node_modules/jsc-android
       - node_modules/react-native/sdks/hermesc/linux64-bin/hermesc
@@ -2430,6 +2457,7 @@ Builds:
       - node_modules/react-native-svg/android/build.gradle
       - node_modules/react-native-blob-util/android/build.gradle
       - node_modules/react-native-reanimated/android/build.gradle
+      - node_modules/@notifee/react-native/android/build.gradle
     scandelete:
       - .vs
       - .yarn/install-state.gz
@@ -2443,12 +2471,17 @@ Builds:
       - yarn ts-node ./scripts/build-skia.ts
       - popd
       - mv $$react-native-skia$$/packages/skia/libs/android ../../node_modules/@shopify/react-native-skia/libs/android
+      - pushd $$notifee$$/android
+      - gradle publishAarPublicationToMavenRepository
+      - popd
+      - rm -rf ../../node_modules/@notifee/react-native/android/libs
+      - mv $$notifee$$/packages/react-native/android/libs ../../node_modules/@notifee/react-native/android/
     gradleprops:
       - reactNativeArchitectures=arm64-v8a
 
-  - versionName: 3.2.3
-    versionCode: 38204
-    commit: e2cb7f66ec09bc5b0edb6c8c526224cd7cebfac2
+  - versionName: 3.2.4
+    versionCode: 38604
+    commit: 41e2557de47aa468cb813040fc9bf7597bd103ac
     subdir: android/app
     submodules: true
     sudo:
@@ -2464,6 +2497,7 @@ Builds:
       - yes
     srclibs:
       - react-native-skia@v1.6.0
+      - notifee@@notifee/react-native@9.1.8
     rm:
       - ios
       - src/hooks/usePlayStore.ts
@@ -2478,7 +2512,7 @@ Builds:
         -e '/Purchases/d' src/hooks/useVIP.ts
       - sed -i -e '/installReferrerVersion/,+12d' node_modules/react-native-device-info/android/build.gradle
       - sed -i -e '/media3-exoplayer-ima/d' node_modules/react-native-video/android/build.gradle
-      - export skiaVersion=$(sed -n -E 's|.*"@shopify/react-native-skia":\ "npm:(.*)"|\1|p'
+      - export skiaVersion=$(sed -n -E 's|.*resolution:\ "@shopify/react-native-skia@npm:(.*)"|\1|p'
         yarn.lock)
       - '[[ $skiaVersion ]] || exit 1'
       - git -C $$react-native-skia$$ checkout -f "v$skiaVersion"
@@ -2486,6 +2520,10 @@ Builds:
         -e 's/for (const target of mapKeys(configuration.targets))/const target =
         "x64";/' -e 's/mapKeys,//' -e '/ban-ts-comment/,+1d' -e '/buildXCFrameworks()/d'
         -e '/buildXCFrameworks/,/^};/d' -e '/copyHeaders/d' $$react-native-skia$$/packages/skia/scripts/build-skia.ts
+      - export notifeeVersion=$(sed -n -E 's|.*resolution:\ "@notifee/react-native@npm:(.*)"|\1|p'
+        yarn.lock)
+      - '[[ $notifeeVersion ]] || exit 1'
+      - git -C $$notifee$$ checkout -f "@notifee/react-native@$notifeeVersion"
     scanignore:
       - node_modules/jsc-android
       - node_modules/react-native/sdks/hermesc/linux64-bin/hermesc
@@ -2512,6 +2550,7 @@ Builds:
       - node_modules/react-native-svg/android/build.gradle
       - node_modules/react-native-blob-util/android/build.gradle
       - node_modules/react-native-reanimated/android/build.gradle
+      - node_modules/@notifee/react-native/android/build.gradle
     scandelete:
       - .vs
       - .yarn/install-state.gz
@@ -2525,6 +2564,11 @@ Builds:
       - yarn ts-node ./scripts/build-skia.ts
       - popd
       - mv $$react-native-skia$$/packages/skia/libs/android ../../node_modules/@shopify/react-native-skia/libs/android
+      - pushd $$notifee$$/android
+      - gradle publishAarPublicationToMavenRepository
+      - popd
+      - rm -rf ../../node_modules/@notifee/react-native/android/libs
+      - mv $$notifee$$/packages/react-native/android/libs ../../node_modules/@notifee/react-native/android/
     gradleprops:
       - reactNativeArchitectures=x86_64
 
@@ -2537,5 +2581,5 @@ VercodeOperation:
   - 100 * %c + 2
   - 100 * %c + 3
   - 100 * %c + 4
-CurrentVersion: 3.2.3
-CurrentVersionCode: 38204
+CurrentVersion: 3.2.4
+CurrentVersionCode: 38604
