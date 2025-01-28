@@ -120,7 +120,59 @@ Builds:
       - gradle assembleRelease
     ndk: 25.1.8937393
 
+  - versionName: 2.4.1
+    versionCode: 31
+    commit: f4f5089d7f17b78dc34a0889849682c63fde6801
+    subdir: android/app
+    sudo:
+      - apt-get update
+      - apt-get install -y openjdk-17-jdk-headless ninja-build bzip2 xz-utils
+      - sysctl fs.inotify.max_user_watches=524288 || true
+      - curl -Lo node.tar.gz https://nodejs.org/dist/v20.11.1/node-v20.11.1-linux-x64.tar.gz
+      - echo "bf3a779bef19452da90fb88358ec2c57e0d2f882839b20dc6afc297b6aafc0d7 node.tar.gz"
+        | sha256sum -c -
+      - tar xzf node.tar.gz --strip-components=1 -C /usr/local/
+      - npm --global install yarn
+    init:
+      - cd ../..
+      - npm install --build-from-source
+    output: build/outputs/apk/release/app-release-unsigned.apk
+    srclibs:
+      - react-native-skia@v0.1.238-beta
+    rm:
+      - ios
+      - node_modules/@shopify/react-native-skia/libs/android
+    scanignore:
+      - node_modules/jsc-android
+      - node_modules/react-native/sdks/hermesc
+      - node_modules/react-native-reanimated/android/build.gradle
+      - node_modules/react-native-webview/android/build.gradle
+      - node_modules/react-native-safe-area-context/android/build.gradle
+      - node_modules/@react-native-community/netinfo/android/build.gradle
+      - node_modules/@react-native-community/blur/android/build.gradle
+      - node_modules/react-native-fast-image/android/build.gradle
+      - node_modules/react-native-track-player/android/build.gradle
+      - node_modules/react-native-screens/android/build.gradle
+      - node_modules/react-native-svg/android/build.gradle
+      - node_modules/@react-native-async-storage/async-storage/android/build.gradle
+      - node_modules/react-native-localize/android/build.gradle
+    scandelete:
+      - node_modules
+    build:
+      - pushd $$react-native-skia$$
+      - yarn
+      - yarn build-skia-android || yarn build-skia-android || yarn build-skia-android
+      - popd
+      - mv $$react-native-skia$$/package/libs/android ../../node_modules/@shopify/react-native-skia/libs/android
+      - export SENTRY_URL=https://sentry.lei.wtf
+      - export SENTRY_ORG=codified
+      - export SENTRY_PROJECT=fintunes
+      - export SENTRY_DSN=https://be8a0a843c1a44e09ff654714497482f@sentry.lei.wtf/2
+      - export SENTRY_DISABLE_AUTO_UPLOAD=true
+      - gradle assembleRelease
+    ndk: 26.1.10909125
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 2.3.3
-CurrentVersionCode: 29
+CurrentVersion: 2.4.1
+CurrentVersionCode: 31
