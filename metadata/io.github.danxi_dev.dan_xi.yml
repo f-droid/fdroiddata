@@ -238,8 +238,41 @@ Builds:
       - .flutter/bin/dart build_release.dart --target android --versionCode dummy
         --flutterPath .flutter/bin/flutter --dartPath .flutter/bin/dart
 
+  - versionName: 1.4.7
+    versionCode: 344
+    commit: a54d29ffe043537f2f355caf192ede47b40aff4c
+    submodules: true
+    output: build/app/outputs/flutter-apk/app-release.apk
+    rm:
+      - .github
+      - CI
+      - ios
+      - linux
+      - macos
+      - test
+      - web
+      - windows
+      - android/app/proguard-rules.pro
+    prebuild:
+      - sed -i -e '/minifyEnabled/,+2d' android/app/build.gradle
+      - sed -i -e '/JavaVersion/s/23/17/' -e '/jvmTarget/s/23/17/' android/build.gradle
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - .flutter/bin/flutter config --no-analytics
+      - .flutter/bin/flutter pub get
+    scanignore:
+      - .flutter/bin/cache
+    scandelete:
+      - .flutter
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - .flutter/bin/flutter pub global activate intl_utils
+      - .flutter/bin/flutter pub global run intl_utils:generate
+      - .flutter/bin/dart build_release.dart --target android --versionCode dummy
+        --flutterPath .flutter/bin/flutter --dartPath .flutter/bin/dart
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^foss-v
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 1.4.6
-CurrentVersionCode: 343
+CurrentVersion: 1.4.7
+CurrentVersionCode: 344
