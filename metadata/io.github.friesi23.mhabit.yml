@@ -1556,10 +1556,49 @@ Builds:
       - popd
       - mv $repo/mhabit io.github.friesi23.mhabit
 
+  - versionName: 1.15.4
+    versionCode: 62
+    commit: 9be9cacb85baf10643789d053e2dac12d602539b
+    submodules: true
+    sudo:
+      - mkdir -p /home/runner/
+      - chown vagrant /home/runner/
+    output: build/app/outputs/flutter-apk/app-release.apk
+    rm:
+      - .vscode
+      - demo
+      - ios
+    prebuild:
+      - sed -i -e '/signingConfig /d' android/app/build.gradle
+      - export repo=/home/runner/work/mhabit
+      - mkdir -p $repo
+      - cd ..
+      - mv io.github.friesi23.mhabit $repo/mhabit
+      - pushd $repo/mhabit
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - .flutter/bin/flutter config --no-analytics
+      - .flutter/bin/flutter pub get
+      - popd
+      - mv $repo/mhabit io.github.friesi23.mhabit
+    scanignore:
+      - .flutter/bin/cache
+    scandelete:
+      - .flutter
+      - .pub-cache
+    build:
+      - export repo=/home/runner/work/mhabit
+      - cd ..
+      - mv io.github.friesi23.mhabit $repo/mhabit
+      - pushd $repo/mhabit
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - .flutter/bin/flutter build apk
+      - popd
+      - mv $repo/mhabit io.github.friesi23.mhabit
+
 AllowedAPKSigningKeys: 4a31e799063f721d62135f0925f316c2f5e5ab08b462fc4b957673c9b40869b5
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v.*$
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 1.15.3
-CurrentVersionCode: 61
+CurrentVersion: 1.15.4
+CurrentVersionCode: 62
