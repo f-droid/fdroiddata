@@ -517,7 +517,33 @@ Builds:
       - ninja android/apk/mpd-aligned.apk
     ndk: r25c
 
+  - versionName: 0.23.17
+    versionCode: 75
+    commit: b080ca8627c2ae1e6d5fec158b3e1aaaff2791bd
+    sudo:
+      - apt-get update
+      - apt-get install -y ninja-build imagemagick g++ meson cmake quilt pkg-config
+        xz-utils make libtool m4 automake librsvg2-bin zip
+    output: output/android/android/apk/mpd-aligned.apk
+    rm:
+      - src/haiku/App_MusicPD
+    prebuild:
+      - mkdir -p output/android/android/classes/
+      - sed -i -e '/rm -rf/d' android/apk/make-unsigned-apk.sh
+      - sed -i -e 's|boostorg.jfrog.io/artifactory/main|archives.boost.io|' python/build/libs.py
+      - sdkmanager 'platforms;android-29' 'build-tools;29.0.3'
+    build:
+      - cd output/android/
+      - python3 ../../android/build.py $$SDK$$ $$NDK$$ armeabi-v7a --buildtype=debugoptimized
+        -Db_ndebug=true -Dwrap_mode=forcefallback
+      - ninja android/apk/mpd-unsigned.apk
+      - rm -rf lib*.* meson-*
+      - python3 ../../android/build.py $$SDK$$ $$NDK$$ arm64-v8a --buildtype=debugoptimized
+        -Db_ndebug=true -Dwrap_mode=forcefallback
+      - ninja android/apk/mpd-aligned.apk
+    ndk: r25c
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 0.23.16
-CurrentVersionCode: 74
+CurrentVersion: 0.23.17
+CurrentVersionCode: 75
