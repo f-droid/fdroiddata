@@ -1920,7 +1920,33 @@ Builds:
     scandelete:
       - node_modules/
 
+  - versionName: 1.56.0
+    versionCode: 15600
+    commit: a84de83cb7c7ef65b11d7bddf2894e0d0787973d
+    subdir: android/app
+    sudo:
+      - apt-get update
+      - apt-get install npm
+      - sysctl fs.inotify.max_user_watches=524288 || true
+    gradle:
+      - yes
+    prebuild:
+      - echo SUPABASE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJhYXVzZnd4ZWhjaGd0dGpjZmZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE2NjI4MDA2NzAsImV4cCI6MTk3ODM3NjY3MH0.10YASNXEVnPoCBv2S7772K5rsJZtlQIU1xhd1Pn2P9A
+        > ../../.env
+      - echo ADMOB_APP_ID="deadbeef" > ../local.properties
+      - sed -i -e '/google-services/d' ../build.gradle
+      - pushd ../..
+      - npm ci
+      - npm run build
+      - npx cap telemetry off
+      - npx cap update
+      - popd
+    scanignore:
+      - node_modules/@capacitor/cli/assets/capacitor-cordova-android-plugins.tar.gz
+    scandelete:
+      - node_modules/
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 1.55.0
-CurrentVersionCode: 15500
+CurrentVersion: 1.56.0
+CurrentVersionCode: 15600
