@@ -48,9 +48,26 @@ Builds:
         export localhash=$(sha256sum assets/dexopt/baseline.prof|cut -d " " -f1);
         [[ $localhash == $upstreamhash ]] && break ; popd; rm -fr local; done
 
+  - versionName: 12.5.3
+    versionCode: 474
+    commit: f9bfc868c9d9a4d36e8131ac24a8702c62f07ece
+    subdir: app
+    output: build/outputs/apk/foss/release/nfc_alarm_clock_*-foss-release-unsigned.apk
+    build:
+      - mkdir upstream
+      - pushd upstream
+      - curl -L -o upstream.apk https://github.com/gabeg805/NFC-Alarm-Clock/releases/download/v$$VERSION$$/nfc_alarm_clock_v$$VERSION$$-foss-release.apk
+      - unzip -q upstream.apk
+      - export upstreamhash=$(sha256sum assets/dexopt/baseline.prof|cut -d " " -f1)
+      - popd
+      - for i in {1..10}; do gradle clean assembleFossRelease; mkdir local; pushd
+        local; unzip -q ../build/outputs/apk/foss/release/nfc_alarm_clock_*-release-unsigned.apk;
+        export localhash=$(sha256sum assets/dexopt/baseline.prof|cut -d " " -f1);
+        [[ $localhash == $upstreamhash ]] && break ; popd; rm -fr local; done
+
 AllowedAPKSigningKeys: 541422f271375eccad5cf57cfb25792dc3b059839a1b11cc4886cc3b6c378fba
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 12.5.2
-CurrentVersionCode: 471
+CurrentVersion: 12.5.3
+CurrentVersionCode: 474
