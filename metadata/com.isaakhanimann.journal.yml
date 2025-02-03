@@ -158,9 +158,32 @@ Builds:
       - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
         --replace unaligned.apk $$OUT$$
 
+  - versionName: '11.8'
+    versionCode: 59
+    commit: 51cf56fd7e2a029b2cbd7393f35df028bc8ff8b1
+    subdir: app
+    output: build/outputs/apk/release/app-release-unsigned.apk
+    srclibs:
+      - reproducible-apk-tools@v0.3.0
+    build:
+      - mkdir upstream
+      - pushd upstream
+      - curl -L -o upstream.apk https://github.com/isaakhanimann/psychonautwiki-journal-android/releases/download/v$$VERSION$$/psychonautwiki-journal_v$$VERSION$$.apk
+      - unzip -q upstream.apk
+      - export upstreamhash=$(sha256sum assets/dexopt/baseline.prof|cut -d " " -f1)
+      - popd
+      - for i in {1..10}; do gradle clean assembleRelease; mkdir local; pushd local;
+        unzip -q ../build/outputs/apk/release/app-release-unsigned.apk; export localhash=$(sha256sum
+        assets/dexopt/baseline.prof|cut -d " " -f1); [[ $localhash == $upstreamhash
+        ]] && break ; popd; rm -fr local; done
+    postbuild:
+      - mv $$OUT$$ unaligned.apk
+      - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
+        --replace unaligned.apk $$OUT$$
+
 AllowedAPKSigningKeys: c6745260b179fb1baa8647d121f60250e7b05c973c3f9348ccd1179f6edd665a
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: '11.7'
-CurrentVersionCode: 58
+CurrentVersion: '11.8'
+CurrentVersionCode: 59
