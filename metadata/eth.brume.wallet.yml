@@ -455,9 +455,45 @@ Builds:
       - popd
       - gradle assembleRelease
 
+  - versionName: 0.7.537
+    versionCode: 537
+    commit: 60371a1f9be69556194bb09697be137e49439aab
+    subdir: apps/android/app
+    sudo:
+      - sysctl fs.inotify.max_user_watches=524288 || true
+      - echo "deb https://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
+      - apt-get update
+      - apt-get install -y -t trixie openjdk-21-jdk-headless
+      - update-alternatives --auto java
+      - curl -Lo node.tar.gz https://nodejs.org/dist/v20.18.2/node-v20.18.2-linux-x64.tar.gz
+      - echo "eb5b031bdd728871c3b9a82655dbfa533bc262c0b6da1d09a86842430cef07d4 node.tar.gz"
+        | sha256sum -c -
+      - tar xzf node.tar.gz --strip-components=1 -C /usr/local/
+    init:
+      - cd ../../..
+      - npm install --build-from-source
+    output: build/outputs/apk/release/app-release-unsigned.apk
+    rm:
+      - apps/apple
+      - apps/ios
+      - dist/*
+    prebuild:
+      - cd ../../..
+      - npx cap telemetry off
+    scanignore:
+      - node_modules/@capacitor/cli/assets/capacitor-cordova-android-plugins.tar.gz
+    scandelete:
+      - node_modules
+    build:
+      - pushd ../../..
+      - npm run build
+      - npm run sync
+      - popd
+      - gradle assembleRelease
+
 AllowedAPKSigningKeys: 4a066910f4a6544d117c078169428b70dcece086940ec3332d78119f679e6d4a
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 0.6.536
-CurrentVersionCode: 536
+CurrentVersion: 0.7.537
+CurrentVersionCode: 537
