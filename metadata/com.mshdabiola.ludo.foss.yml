@@ -1,0 +1,45 @@
+Categories:
+  - Games
+License: GPL-3.0-or-later
+AuthorName: Lawal Abiola
+AuthorEmail: mshdabiola@gmail.com
+AuthorWebSite: https://github.com/mshdabiola
+SourceCode: https://github.com/mshdabiola/NaijaLudo
+IssueTracker: https://github.com/mshdabiola/NaijaLudo/issues
+Changelog: https://github.com/mshdabiola/NaijaLudo/releases
+
+AutoName: NaijaLudo
+
+RepoType: git
+Repo: https://github.com/mshdabiola/NaijaLudo.git
+Binaries: https://github.com/mshdabiola/NaijaLudo/releases/download/%v/app-fossReliant-release-unsigned-signed.apk
+
+Builds:
+  - versionName: 3.1.6
+    versionCode: 316
+    commit: e37dfdacf911e2c75dc97bc73adde17090b48f18
+    subdir: app
+    sudo:
+      - echo "deb https://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
+      - apt-get update
+      - apt-get install -y -t trixie openjdk-21-jdk-headless
+      - update-alternatives --auto java
+    gradle:
+      - fossReliant
+    prebuild:
+      - sed -i -e '/maven(url = "https:\/\/maven.pkg.jetbrains.space/d' -e '/maven(url
+        = "https:\/\/androidx.dev\/storage\/compose-compiler/d' ../settings.gradle.kts
+      - sed -i -e '/alias(libs.plugins.firebase./d' ../build.gradle.kts
+      - sed -i -e '/with(target) {/,/^        }/d' -e '/CrashlyticsExtension/d' ../build-logic/convention/src/main/kotlin/AndroidApplicationFirebaseConventionPlugin.kt
+      - sed -i -e '/libs.firebase/d' ../build-logic/convention/build.gradle.kts
+      - gradle clean
+    scandelete:
+      - build-logic/convention/build
+
+AllowedAPKSigningKeys: 7966373797459065b77517aadbecc04b484abcf693d23ef1a6ccfb9556868750
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: gradle/libs.versions.toml|versionCode = "(\d+)"|.|versionName = "([\d.]+)"
+CurrentVersion: 3.1.6
+CurrentVersionCode: 316
