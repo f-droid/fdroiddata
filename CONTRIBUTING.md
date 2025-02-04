@@ -190,13 +190,10 @@ for the answer.
 - You may like to add [localization and screenshots], so users can have a glance
     at the app in pictures and in their preferred language.
 - You can advertise the download of your app in this app store using the
-    [official graphic][get-it-on-fdroid].
+    official badge. See the instructions at https://f-droid.org/docs/Badges/.
   
     <img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png" height="75">
 
-    ```
-    <img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png" height="75">
-    ```
 - You can add a badge of your apps F-Droid version from [shields.io].
   
     ![](https://img.shields.io/badge/f--droid-v1.0-blue.svg?logo=F-Droid)
