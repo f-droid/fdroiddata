@@ -286,10 +286,54 @@ Builds:
       - popd
       - mv $repo/fafarunner com.chenyifaer.fafarunner
 
+  - versionName: 1.0.9
+    versionCode: 375
+    commit: 64a4ff620614abd30019cc987cb8fea07e3aff6a
+    sudo:
+      - mkdir -p /home/runner
+      - chown vagrant /home/runner
+    output: build/app/outputs/flutter-apk/app-production-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+      - macos
+      - linux
+      - windows
+      - web
+    prebuild:
+      - export repo=/home/runner/work/fafarunner
+      - mkdir -p $repo
+      - cd ..
+      - mv com.chenyifaer.fafarunner $repo/fafarunner
+      - pushd $repo/fafarunner
+      - version=$(sed -n -E "s/.*flutter-version:\ '(.*)'/\1/p" .github/workflows/release.yml|head
+        -n1)
+      - '[[ $version ]] || exit 1'
+      - git -C $$flutter$$ checkout -f $version
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter packages pub get
+      - popd
+      - mv $repo/fafarunner com.chenyifaer.fafarunner
+    scandelete:
+      - .pub-cache
+    build:
+      - export repo=/home/runner/work/fafarunner
+      - cd ..
+      - mv com.chenyifaer.fafarunner $repo/fafarunner
+      - pushd $repo/fafarunner
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export PATH=$$flutter$$/bin/:$PATH
+      - $$flutter$$/bin/flutter build apk --no-tree-shake-icons --flavor production
+        --dart-define SENTRY_DSN="https://03bafb566d1295565089167dfb74410b@o4507254990897152.ingest.us.sentry.io/4507254994370560"
+      - popd
+      - mv $repo/fafarunner com.chenyifaer.fafarunner
+
 AllowedAPKSigningKeys: c770b97229e8fed099da09164fcd0e5437a62d604adda91cf4a23f16ede53724
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags .*[0-9]$
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 1.0.8
-CurrentVersionCode: 374
+CurrentVersion: 1.0.9
+CurrentVersionCode: 375
