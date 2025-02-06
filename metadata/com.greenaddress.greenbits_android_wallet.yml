@@ -2779,6 +2779,48 @@ Builds:
         ./prepare_gdk_clang.sh "armeabi-v7a arm64-v8a"
     ndk: r26b
 
+  - versionName: 4.1.5
+    versionCode: 22000444
+    commit: 71d8d7144aa5ff5ca118325c0d2a98885e7d69a8
+    subdir: green
+    sudo:
+      - apt-get update
+      - apt-get install -y automake clang cmake jq libffi-dev libtool make pkg-config
+        swig virtualenv xz-utils
+    gradle:
+      - production
+      - FDroid
+    srclibs:
+      - rustup@1.27.1
+      - gdk@release_0.74.2
+    rm:
+      - gradle/verification-metadata.xml
+      - gms
+    prebuild:
+      - sed -i -e '/mvn.breez/d;/zendesk/d;/jetbrains/d;/googleServices/d' ../build.gradle.kts
+      - sed -i -e '/libs.breez.sdk.kmp/d' -e '/jna/s|//||g' ../common/build.gradle.kts
+      - sed -i -e '/signingConfigs {/,+8d' -e '/signingConfigs.getByName/,+3d' -e
+        '/versionNameSuffix/d' -e '/googleServices/d' build.gradle.kts
+      - cd ../gdk
+      - gdkVersion=$(sed -n -E 's/.*TAGNAME="(.*)"/\1/p' prepare_gdk_clang.sh)
+      - '[[ $gdkVersion ]] || exit 1'
+      - git -C $$gdk$$ checkout $gdkVersion
+      - mv $$gdk$$ .
+      - $$rustup$$/rustup-init.sh -y --default-toolchain $(sed -n -E 's/.*RUST_VERSION=(.*)/\1/p'
+        gdk/docker/android/Dockerfile) --target aarch64-linux-android armv7-linux-androideabi
+      - sed -i -e 's|boostorg.jfrog.io/artifactory/main|archives.boost.io|' gdk/tools/builddeps.sh
+    scanignore:
+      - gdk/gdk/subprojects/gdk_rust/libgcc/libgcc.a
+    scandelete:
+      - gdk/gdk/subprojects/gdk_rust/gdk_electrum/test_data/store
+    build:
+      - source $HOME/.cargo/env
+      - cd ../gdk
+      - sed -i -e '1a set -x' prepare_gdk_clang.sh
+      - JAVA_HOME=$(readlink -f /usr/bin/javac | sed "s:/bin/javac::") PATH=$HOME/.local/bin:$PATH
+        ./prepare_gdk_clang.sh "armeabi-v7a arm64-v8a"
+    ndk: r26b
+
 MaintainerNotes: |-
   Watch prepare_gdk_clang.sh for changes on new builds.
 
@@ -2795,5 +2837,5 @@ UpdateCheckMode: Tags
 VercodeOperation:
   - 22000000 + %c
 UpdateCheckData: green/build.gradle.kts|versionCode\s=\s(\d+)|.|versionName\s=\s"([\d.]+)"
-CurrentVersion: 4.1.4
-CurrentVersionCode: 22000443
+CurrentVersion: 4.1.5
+CurrentVersionCode: 22000444
