@@ -139,9 +139,38 @@ Builds:
     scandelete:
       - node_modules/
 
-AutoUpdateMode: None
-UpdateCheckMode: HTTP
-UpdateCheckData: https://raw.githubusercontent.com/ShacharHarshuv/open-ear/refs/heads/master/android/app/build.gradle|versionCode
-  (\d+)|.|versionName "([\d.]+)"
-CurrentVersion: '1.9'
-CurrentVersionCode: 46
+  - versionName: 1.9.0
+    versionCode: 47
+    commit: 7259786759de937b6a066d232625b1d8b617ea01
+    subdir: android/app
+    sudo:
+      - sysctl fs.inotify.max_user_watches=524288
+      - apt-get update
+      - apt-get install -y npm
+      - apt-get install -y libvips-dev make g++
+      - npm -g install yarn
+      - npm -g install @ionic/cli
+    gradle:
+      - yes
+    prebuild:
+      - sed -i -e '/gms/d' {..,.}/build.gradle
+      - cd ../..
+      - yarn --verbose install | grep -vE '^verbose [^ ]+ (Performing|Creating|Copying)'
+      - sed -i -e 's/ && capacitor open android//' package.json
+      - sed -i '/com.google.android.gms:play-services-location/d' node_modules/@capacitor/android/capacitor/build.gradle
+      - sed -i '/com.google.firebase:firebase-messaging/d' node_modules/@capacitor/android/capacitor/build.gradle
+      - sed -i '/import com.getcapacitor.plugin.Geolocation;/d' node_modules/@capacitor/android/capacitor/src/main/java/com/getcapacitor/Bridge.java
+      - sed -i '/import com.getcapacitor.plugin.PushNotifications;/d' node_modules/@capacitor/android/capacitor/src/main/java/com/getcapacitor/Bridge.java
+      - sed -i '/this.registerPlugin(Geolocation.class);/d' node_modules/@capacitor/android/capacitor/src/main/java/com/getcapacitor/Bridge.java
+      - sed -i '/this.registerPlugin(PushNotifications.class);/d' node_modules/@capacitor/android/capacitor/src/main/java/com/getcapacitor/Bridge.java
+      - rm -rf node_modules/@capacitor/android/capacitor/src/main/java/com/getcapacitor/CapacitorFirebaseMessagingService.java
+      - rm -rf node_modules/@capacitor/android/capacitor/src/main/java/com/getcapacitor/plugin/PushNotifications.java
+      - rm -rf node_modules/@capacitor/android/capacitor/src/main/java/com/getcapacitor/plugin/Geolocation.java
+      - yarn --verbose build
+    scandelete:
+      - node_modules/
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: 1.9.0
+CurrentVersionCode: 47
