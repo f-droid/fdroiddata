@@ -262,9 +262,31 @@ Builds:
         assets/dexopt/baseline.prof|cut -d " " -f1); [[ $localhash == $upstreamhash
         ]] && break ; popd; rm -fr local; done
 
+  - versionName: 2.5.3
+    versionCode: 2530
+    commit: 34c32361f2c265af2034abf8a0e4e98877060dcb
+    subdir: app
+    sudo:
+      - export CPUS_MAX=6
+      - export CPUS=$(getconf _NPROCESSORS_ONLN)
+      - for (( c=$CPUS_MAX; c<$CPUS; c++ )) ; do echo 0 > /sys/devices/system/cpu/cpu$c/online
+        ; done
+    output: build/outputs/apk/release/app-release-unsigned.apk
+    build:
+      - mkdir upstream
+      - pushd upstream
+      - curl -L -o upstream.apk https://github.com/shub39/Rush/releases/download/$$VERSION$$/app-release.apk
+      - unzip -q upstream.apk
+      - export upstreamhash=$(sha256sum assets/dexopt/baseline.prof|cut -d " " -f1)
+      - popd
+      - for i in {1..10}; do gradle clean assembleRelease; mkdir local; pushd local;
+        unzip -q ../build/outputs/apk/release/app-release-unsigned.apk; export localhash=$(sha256sum
+        assets/dexopt/baseline.prof|cut -d " " -f1); [[ $localhash == $upstreamhash
+        ]] && break ; popd; rm -fr local; done
+
 AllowedAPKSigningKeys: 0fe1b9f44a4db97ec50948f5189f6b4300716cc6d4843f5698d614a2152e2188
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 2.5.2
-CurrentVersionCode: 2520
+CurrentVersion: 2.5.3
+CurrentVersionCode: 2530
