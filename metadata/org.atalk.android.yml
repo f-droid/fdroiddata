@@ -2857,10 +2857,38 @@ Builds:
       - ./build-jnilibs4atalk.sh
     ndk: 22.1.7171670
 
+  - versionName: 4.2.0
+    versionCode: 402000
+    commit: 5066365440f83cae44220c7422981117bd596f4f
+    subdir: aTalk
+    sudo:
+      - sdkmanager 'build-tools;33.0.2' 'build-tools;30.0.3'
+      - cp /opt/android-sdk/build-tools/30.0.3/lib/dx.jar /opt/android-sdk/build-tools/33.0.2/lib/dx.jar
+      - cp /opt/android-sdk/build-tools/30.0.3/dx /opt/android-sdk/build-tools/33.0.2/dx
+      - apt-get update
+      - apt-get install bzip2 file gcc make pkg-config wget
+    gradle:
+      - fdroid
+    rm:
+      - aTalk/lib/src_reference/
+      - aTalk/jni/ffmpeg/android/
+      - aTalk/jni/openssl/android/
+      - aTalk/jni/vpx/android/
+    prebuild:
+      - cd jni/static_library_built
+      - sed -i -e '/export ANDROID_NDK_HOME/d' openssl/_settings.sh
+      - sed -i -e '/export ANDROID_NDK/d' ffmpeg-x264/_settings.sh libvpx/_settings.sh
+    scandelete:
+      - aTalk/jni/static_library_built
+    build:
+      - cd jni/static_library_built
+      - ./build-jnilibs4atalk.sh
+    ndk: 22.1.7171670
+
 MaintainerNotes: scanignore is used to allow the local "third_party/m2" Gradle repository
   (which is populated by libraries we build).
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 4.1.1
-CurrentVersionCode: 401010
+CurrentVersion: 4.2.0
+CurrentVersionCode: 402000
