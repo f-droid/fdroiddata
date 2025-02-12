@@ -2572,6 +2572,418 @@ Builds:
     gradleprops:
       - reactNativeArchitectures=x86_64
 
+  - versionName: 3.2.5
+    versionCode: 39301
+    commit: 34910eb8614d4a005914a8267ffab3fcf729b1c1
+    subdir: android/app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y npm ninja-build bzip2 xz-utils make automake pkg-config
+        libtool nasm meson cmake
+      - npm install -g corepack
+    init:
+      - corepack enable
+      - yarn remove sp-react-native-in-app-updates @revenuecat/purchases-js react-native-purchases
+      - yarn install
+      - yarn postinstall
+    gradle:
+      - yes
+    srclibs:
+      - react-native-skia@v1.6.0
+      - notifee@@notifee/react-native@9.1.8
+      - ffmpeg-kit@v6.0.LTS
+    rm:
+      - ios
+      - src/hooks/usePlayStore.ts
+      - node_modules/@shopify/react-native-skia/libs/android
+    prebuild:
+      - sed -i -e '/signingConfigs/d' -e '/core-google-shortcuts/d' -e '/sentry/d'
+        build.gradle
+      - cd ../..
+      - python3 ./scripts/fixHTTP.py
+      - sed -i -e '/Version/d' -e '/PlayStore/d' src/hooks/useSetupPlayer.ts
+      - sed -i -e '/const getVIPStatus/,/^};/d' -e '/const purchaseVIP/,/^};/s/^  .*//g'
+        -e '/Purchases/d' src/hooks/useVIP.ts
+      - sed -i -e '/installReferrerVersion/,+12d' node_modules/react-native-device-info/android/build.gradle
+      - sed -i -e '/media3-exoplayer-ima/d' node_modules/react-native-video/android/build.gradle
+      - export skiaVersion=$(sed -n -E 's|.*resolution:\ "@shopify/react-native-skia@npm:(.*)"|\1|p'
+        yarn.lock)
+      - '[[ $skiaVersion ]] || exit 1'
+      - git -C $$react-native-skia$$ checkout -f "v$skiaVersion"
+      - sed -i -e 's/for (const key of mapKeys(configurations))/const key = "android";/'
+        -e 's/for (const target of mapKeys(configuration.targets))/const target =
+        "arm";/' -e 's/mapKeys,//' -e '/ban-ts-comment/,+1d' -e '/buildXCFrameworks()/d'
+        -e '/buildXCFrameworks/,/^};/d' -e '/copyHeaders/d' $$react-native-skia$$/packages/skia/scripts/build-skia.ts
+      - export notifeeVersion=$(sed -n -E 's|.*resolution:\ "@notifee/react-native@npm:(.*)"|\1|p'
+        yarn.lock)
+      - '[[ $notifeeVersion ]] || exit 1'
+      - git -C $$notifee$$ checkout -f "@notifee/react-native@$notifeeVersion"
+    scanignore:
+      - node_modules/jsc-android
+      - node_modules/react-native/sdks/hermesc/linux64-bin/hermesc
+      - node_modules/react-native-vector-icons/android/build.gradle
+      - node_modules/react-native-svga-player/android/build.gradle
+      - node_modules/@react-native-cookies/cookies/android/build.gradle
+      - node_modules/expo-modules-core/android/ExpoModulesCorePlugin.gradle
+      - node_modules/lottie-react-native/android/build.gradle
+      - node_modules/@react-native-async-storage/async-storage/android/build.gradle
+      - node_modules/react-native-track-player/android/build.gradle
+      - node_modules/expo-modules-autolinking/scripts/android/autolinking_implementation.gradle
+      - node_modules/react-native-video/android/build.gradle
+      - node_modules/react-native-get-random-values/android/build.gradle
+      - node_modules/react-native-device-info/android/build.gradle
+      - node_modules/react-native-safe-area-context/android/build.gradle
+      - node_modules/react-native-pager-view/android/build.gradle
+      - node_modules/@react-native-community/netinfo/android/build.gradle
+      - node_modules/react-native-image-colors/android/build.gradle
+      - node_modules/react-native-webview/android/build.gradle
+      - node_modules/ffmpeg-kit-react-native/android/build.gradle
+      - node_modules/react-native-screens/android/build.gradle
+      - node_modules/@react-native-masked-view/masked-view/android/build.gradle
+      - node_modules/react-native-app-auth/android/build.gradle
+      - node_modules/react-native-svg/android/build.gradle
+      - node_modules/react-native-blob-util/android/build.gradle
+      - node_modules/react-native-reanimated/android/build.gradle
+      - node_modules/@notifee/react-native/android/build.gradle
+    scandelete:
+      - .vs
+      - .yarn/install-state.gz
+      - android/ffmpeg-kit-binaries
+      - node_modules
+    build:
+      - sdkmanager 'ndk;25.1.8937393'
+      - pushd $$ffmpeg-kit$$
+      - ANDROID_SDK_ROOT=$$SDK$$ ANDROID_NDK_ROOT=$$SDK$$/ndk/25.1.8937393 ./android.sh
+        --disable-arm-v7a-neon --disable-arm64-v8a --disable-x86 --disable-x86-64
+        --enable-android-media-codec --enable-android-zlib
+      - popd
+      - mv $$ffmpeg-kit$$/prebuilt/bundle-android-aar/ffmpeg-kit/ffmpeg-kit.aar ../ffmpeg-kit-binaries/ffmpeg-kit-audio-6.0-2.aar
+      - ndkVersion=$(sed -n -E 's/.*ndkVersion = "(.*)"/\1/p' ../build.gradle)
+      - pushd $$react-native-skia$$
+      - yarn
+      - cd packages/skia
+      - export ANDROID_NDK=$$SDK$$/ndk/$ndkVersion
+      - yarn ts-node ./scripts/build-skia.ts
+      - popd
+      - mv $$react-native-skia$$/packages/skia/libs/android ../../node_modules/@shopify/react-native-skia/libs/android
+      - pushd $$notifee$$/android
+      - gradle publishAarPublicationToMavenRepository
+      - popd
+      - rm -rf ../../node_modules/@notifee/react-native/android/libs
+      - mv $$notifee$$/packages/react-native/android/libs ../../node_modules/@notifee/react-native/android/
+    gradleprops:
+      - reactNativeArchitectures=armeabi-v7a
+
+  - versionName: 3.2.5
+    versionCode: 39302
+    commit: 34910eb8614d4a005914a8267ffab3fcf729b1c1
+    subdir: android/app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y npm ninja-build bzip2 xz-utils make automake pkg-config
+        libtool nasm meson cmake
+      - npm install -g corepack
+    init:
+      - corepack enable
+      - yarn remove sp-react-native-in-app-updates @revenuecat/purchases-js react-native-purchases
+      - yarn install
+      - yarn postinstall
+    gradle:
+      - yes
+    srclibs:
+      - react-native-skia@v1.6.0
+      - notifee@@notifee/react-native@9.1.8
+      - ffmpeg-kit@v6.0.LTS
+    rm:
+      - ios
+      - src/hooks/usePlayStore.ts
+      - node_modules/@shopify/react-native-skia/libs/android
+    prebuild:
+      - sed -i -e '/signingConfigs/d' -e '/core-google-shortcuts/d' -e '/sentry/d'
+        build.gradle
+      - cd ../..
+      - python3 ./scripts/fixHTTP.py
+      - sed -i -e '/Version/d' -e '/PlayStore/d' src/hooks/useSetupPlayer.ts
+      - sed -i -e '/const getVIPStatus/,/^};/d' -e '/const purchaseVIP/,/^};/s/^  .*//g'
+        -e '/Purchases/d' src/hooks/useVIP.ts
+      - sed -i -e '/installReferrerVersion/,+12d' node_modules/react-native-device-info/android/build.gradle
+      - sed -i -e '/media3-exoplayer-ima/d' node_modules/react-native-video/android/build.gradle
+      - export skiaVersion=$(sed -n -E 's|.*resolution:\ "@shopify/react-native-skia@npm:(.*)"|\1|p'
+        yarn.lock)
+      - '[[ $skiaVersion ]] || exit 1'
+      - git -C $$react-native-skia$$ checkout -f "v$skiaVersion"
+      - sed -i -e 's/for (const key of mapKeys(configurations))/const key = "android";/'
+        -e 's/for (const target of mapKeys(configuration.targets))/const target =
+        "x86";/' -e 's/mapKeys,//' -e '/ban-ts-comment/,+1d' -e '/buildXCFrameworks()/d'
+        -e '/buildXCFrameworks/,/^};/d' -e '/copyHeaders/d' $$react-native-skia$$/packages/skia/scripts/build-skia.ts
+      - export notifeeVersion=$(sed -n -E 's|.*resolution:\ "@notifee/react-native@npm:(.*)"|\1|p'
+        yarn.lock)
+      - '[[ $notifeeVersion ]] || exit 1'
+      - git -C $$notifee$$ checkout -f "@notifee/react-native@$notifeeVersion"
+    scanignore:
+      - node_modules/jsc-android
+      - node_modules/react-native/sdks/hermesc/linux64-bin/hermesc
+      - node_modules/react-native-vector-icons/android/build.gradle
+      - node_modules/react-native-svga-player/android/build.gradle
+      - node_modules/@react-native-cookies/cookies/android/build.gradle
+      - node_modules/expo-modules-core/android/ExpoModulesCorePlugin.gradle
+      - node_modules/lottie-react-native/android/build.gradle
+      - node_modules/@react-native-async-storage/async-storage/android/build.gradle
+      - node_modules/react-native-track-player/android/build.gradle
+      - node_modules/expo-modules-autolinking/scripts/android/autolinking_implementation.gradle
+      - node_modules/react-native-video/android/build.gradle
+      - node_modules/react-native-get-random-values/android/build.gradle
+      - node_modules/react-native-device-info/android/build.gradle
+      - node_modules/react-native-safe-area-context/android/build.gradle
+      - node_modules/react-native-pager-view/android/build.gradle
+      - node_modules/@react-native-community/netinfo/android/build.gradle
+      - node_modules/react-native-image-colors/android/build.gradle
+      - node_modules/react-native-webview/android/build.gradle
+      - node_modules/ffmpeg-kit-react-native/android/build.gradle
+      - node_modules/react-native-screens/android/build.gradle
+      - node_modules/@react-native-masked-view/masked-view/android/build.gradle
+      - node_modules/react-native-app-auth/android/build.gradle
+      - node_modules/react-native-svg/android/build.gradle
+      - node_modules/react-native-blob-util/android/build.gradle
+      - node_modules/react-native-reanimated/android/build.gradle
+      - node_modules/@notifee/react-native/android/build.gradle
+    scandelete:
+      - .vs
+      - .yarn/install-state.gz
+      - android/ffmpeg-kit-binaries
+      - node_modules
+    build:
+      - sdkmanager 'ndk;25.1.8937393'
+      - pushd $$ffmpeg-kit$$
+      - ANDROID_SDK_ROOT=$$SDK$$ ANDROID_NDK_ROOT=$$SDK$$/ndk/25.1.8937393 ./android.sh
+        --disable-arm-v7a-neon --disable-arm-v7a --disable-arm64-v8a --disable-x86-64
+        --enable-android-media-codec --enable-android-zlib
+      - popd
+      - mv $$ffmpeg-kit$$/prebuilt/bundle-android-aar/ffmpeg-kit/ffmpeg-kit.aar ../ffmpeg-kit-binaries/ffmpeg-kit-audio-6.0-2.aar
+      - ndkVersion=$(sed -n -E 's/.*ndkVersion = "(.*)"/\1/p' ../build.gradle)
+      - pushd $$react-native-skia$$
+      - yarn
+      - cd packages/skia
+      - export ANDROID_NDK=$$SDK$$/ndk/$ndkVersion
+      - yarn ts-node ./scripts/build-skia.ts
+      - popd
+      - mv $$react-native-skia$$/packages/skia/libs/android ../../node_modules/@shopify/react-native-skia/libs/android
+      - pushd $$notifee$$/android
+      - gradle publishAarPublicationToMavenRepository
+      - popd
+      - rm -rf ../../node_modules/@notifee/react-native/android/libs
+      - mv $$notifee$$/packages/react-native/android/libs ../../node_modules/@notifee/react-native/android/
+    gradleprops:
+      - reactNativeArchitectures=x86
+
+  - versionName: 3.2.5
+    versionCode: 39303
+    commit: 34910eb8614d4a005914a8267ffab3fcf729b1c1
+    subdir: android/app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y npm ninja-build bzip2 xz-utils make automake pkg-config
+        libtool nasm meson cmake
+      - npm install -g corepack
+    init:
+      - corepack enable
+      - yarn remove sp-react-native-in-app-updates @revenuecat/purchases-js react-native-purchases
+      - yarn install
+      - yarn postinstall
+    gradle:
+      - yes
+    srclibs:
+      - react-native-skia@v1.6.0
+      - notifee@@notifee/react-native@9.1.8
+      - ffmpeg-kit@v6.0.LTS
+    rm:
+      - ios
+      - src/hooks/usePlayStore.ts
+      - node_modules/@shopify/react-native-skia/libs/android
+    prebuild:
+      - sed -i -e '/signingConfigs/d' -e '/core-google-shortcuts/d' -e '/sentry/d'
+        build.gradle
+      - cd ../..
+      - python3 ./scripts/fixHTTP.py
+      - sed -i -e '/Version/d' -e '/PlayStore/d' src/hooks/useSetupPlayer.ts
+      - sed -i -e '/const getVIPStatus/,/^};/d' -e '/const purchaseVIP/,/^};/s/^  .*//g'
+        -e '/Purchases/d' src/hooks/useVIP.ts
+      - sed -i -e '/installReferrerVersion/,+12d' node_modules/react-native-device-info/android/build.gradle
+      - sed -i -e '/media3-exoplayer-ima/d' node_modules/react-native-video/android/build.gradle
+      - export skiaVersion=$(sed -n -E 's|.*resolution:\ "@shopify/react-native-skia@npm:(.*)"|\1|p'
+        yarn.lock)
+      - '[[ $skiaVersion ]] || exit 1'
+      - git -C $$react-native-skia$$ checkout -f "v$skiaVersion"
+      - sed -i -e 's/for (const key of mapKeys(configurations))/const key = "android";/'
+        -e 's/for (const target of mapKeys(configuration.targets))/const target =
+        "arm64";/' -e 's/mapKeys,//' -e '/ban-ts-comment/,+1d' -e '/buildXCFrameworks()/d'
+        -e '/buildXCFrameworks/,/^};/d' -e '/copyHeaders/d' $$react-native-skia$$/packages/skia/scripts/build-skia.ts
+      - export notifeeVersion=$(sed -n -E 's|.*resolution:\ "@notifee/react-native@npm:(.*)"|\1|p'
+        yarn.lock)
+      - '[[ $notifeeVersion ]] || exit 1'
+      - git -C $$notifee$$ checkout -f "@notifee/react-native@$notifeeVersion"
+    scanignore:
+      - node_modules/jsc-android
+      - node_modules/react-native/sdks/hermesc/linux64-bin/hermesc
+      - node_modules/react-native-vector-icons/android/build.gradle
+      - node_modules/react-native-svga-player/android/build.gradle
+      - node_modules/@react-native-cookies/cookies/android/build.gradle
+      - node_modules/expo-modules-core/android/ExpoModulesCorePlugin.gradle
+      - node_modules/lottie-react-native/android/build.gradle
+      - node_modules/@react-native-async-storage/async-storage/android/build.gradle
+      - node_modules/react-native-track-player/android/build.gradle
+      - node_modules/expo-modules-autolinking/scripts/android/autolinking_implementation.gradle
+      - node_modules/react-native-video/android/build.gradle
+      - node_modules/react-native-get-random-values/android/build.gradle
+      - node_modules/react-native-device-info/android/build.gradle
+      - node_modules/react-native-safe-area-context/android/build.gradle
+      - node_modules/react-native-pager-view/android/build.gradle
+      - node_modules/@react-native-community/netinfo/android/build.gradle
+      - node_modules/react-native-image-colors/android/build.gradle
+      - node_modules/react-native-webview/android/build.gradle
+      - node_modules/ffmpeg-kit-react-native/android/build.gradle
+      - node_modules/react-native-screens/android/build.gradle
+      - node_modules/@react-native-masked-view/masked-view/android/build.gradle
+      - node_modules/react-native-app-auth/android/build.gradle
+      - node_modules/react-native-svg/android/build.gradle
+      - node_modules/react-native-blob-util/android/build.gradle
+      - node_modules/react-native-reanimated/android/build.gradle
+      - node_modules/@notifee/react-native/android/build.gradle
+    scandelete:
+      - .vs
+      - .yarn/install-state.gz
+      - android/ffmpeg-kit-binaries
+      - node_modules
+    build:
+      - sdkmanager 'ndk;25.1.8937393'
+      - pushd $$ffmpeg-kit$$
+      - ANDROID_SDK_ROOT=$$SDK$$ ANDROID_NDK_ROOT=$$SDK$$/ndk/25.1.8937393 ./android.sh
+        --disable-arm-v7a-neon --disable-arm-v7a --disable-x86 --disable-x86-64 --enable-android-media-codec
+        --enable-android-zlib
+      - popd
+      - mv $$ffmpeg-kit$$/prebuilt/bundle-android-aar/ffmpeg-kit/ffmpeg-kit.aar ../ffmpeg-kit-binaries/ffmpeg-kit-audio-6.0-2.aar
+      - ndkVersion=$(sed -n -E 's/.*ndkVersion = "(.*)"/\1/p' ../build.gradle)
+      - pushd $$react-native-skia$$
+      - yarn
+      - cd packages/skia
+      - export ANDROID_NDK=$$SDK$$/ndk/$ndkVersion
+      - yarn ts-node ./scripts/build-skia.ts
+      - popd
+      - mv $$react-native-skia$$/packages/skia/libs/android ../../node_modules/@shopify/react-native-skia/libs/android
+      - pushd $$notifee$$/android
+      - gradle publishAarPublicationToMavenRepository
+      - popd
+      - rm -rf ../../node_modules/@notifee/react-native/android/libs
+      - mv $$notifee$$/packages/react-native/android/libs ../../node_modules/@notifee/react-native/android/
+    gradleprops:
+      - reactNativeArchitectures=arm64-v8a
+
+  - versionName: 3.2.5
+    versionCode: 39304
+    commit: 34910eb8614d4a005914a8267ffab3fcf729b1c1
+    subdir: android/app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y npm ninja-build bzip2 xz-utils make automake pkg-config
+        libtool nasm meson cmake
+      - npm install -g corepack
+    init:
+      - corepack enable
+      - yarn remove sp-react-native-in-app-updates @revenuecat/purchases-js react-native-purchases
+      - yarn install
+      - yarn postinstall
+    gradle:
+      - yes
+    srclibs:
+      - react-native-skia@v1.6.0
+      - notifee@@notifee/react-native@9.1.8
+      - ffmpeg-kit@v6.0.LTS
+    rm:
+      - ios
+      - src/hooks/usePlayStore.ts
+      - node_modules/@shopify/react-native-skia/libs/android
+    prebuild:
+      - sed -i -e '/signingConfigs/d' -e '/core-google-shortcuts/d' -e '/sentry/d'
+        build.gradle
+      - cd ../..
+      - python3 ./scripts/fixHTTP.py
+      - sed -i -e '/Version/d' -e '/PlayStore/d' src/hooks/useSetupPlayer.ts
+      - sed -i -e '/const getVIPStatus/,/^};/d' -e '/const purchaseVIP/,/^};/s/^  .*//g'
+        -e '/Purchases/d' src/hooks/useVIP.ts
+      - sed -i -e '/installReferrerVersion/,+12d' node_modules/react-native-device-info/android/build.gradle
+      - sed -i -e '/media3-exoplayer-ima/d' node_modules/react-native-video/android/build.gradle
+      - export skiaVersion=$(sed -n -E 's|.*resolution:\ "@shopify/react-native-skia@npm:(.*)"|\1|p'
+        yarn.lock)
+      - '[[ $skiaVersion ]] || exit 1'
+      - git -C $$react-native-skia$$ checkout -f "v$skiaVersion"
+      - sed -i -e 's/for (const key of mapKeys(configurations))/const key = "android";/'
+        -e 's/for (const target of mapKeys(configuration.targets))/const target =
+        "x64";/' -e 's/mapKeys,//' -e '/ban-ts-comment/,+1d' -e '/buildXCFrameworks()/d'
+        -e '/buildXCFrameworks/,/^};/d' -e '/copyHeaders/d' $$react-native-skia$$/packages/skia/scripts/build-skia.ts
+      - export notifeeVersion=$(sed -n -E 's|.*resolution:\ "@notifee/react-native@npm:(.*)"|\1|p'
+        yarn.lock)
+      - '[[ $notifeeVersion ]] || exit 1'
+      - git -C $$notifee$$ checkout -f "@notifee/react-native@$notifeeVersion"
+    scanignore:
+      - node_modules/jsc-android
+      - node_modules/react-native/sdks/hermesc/linux64-bin/hermesc
+      - node_modules/react-native-vector-icons/android/build.gradle
+      - node_modules/react-native-svga-player/android/build.gradle
+      - node_modules/@react-native-cookies/cookies/android/build.gradle
+      - node_modules/expo-modules-core/android/ExpoModulesCorePlugin.gradle
+      - node_modules/lottie-react-native/android/build.gradle
+      - node_modules/@react-native-async-storage/async-storage/android/build.gradle
+      - node_modules/react-native-track-player/android/build.gradle
+      - node_modules/expo-modules-autolinking/scripts/android/autolinking_implementation.gradle
+      - node_modules/react-native-video/android/build.gradle
+      - node_modules/react-native-get-random-values/android/build.gradle
+      - node_modules/react-native-device-info/android/build.gradle
+      - node_modules/react-native-safe-area-context/android/build.gradle
+      - node_modules/react-native-pager-view/android/build.gradle
+      - node_modules/@react-native-community/netinfo/android/build.gradle
+      - node_modules/react-native-image-colors/android/build.gradle
+      - node_modules/react-native-webview/android/build.gradle
+      - node_modules/ffmpeg-kit-react-native/android/build.gradle
+      - node_modules/react-native-screens/android/build.gradle
+      - node_modules/@react-native-masked-view/masked-view/android/build.gradle
+      - node_modules/react-native-app-auth/android/build.gradle
+      - node_modules/react-native-svg/android/build.gradle
+      - node_modules/react-native-blob-util/android/build.gradle
+      - node_modules/react-native-reanimated/android/build.gradle
+      - node_modules/@notifee/react-native/android/build.gradle
+    scandelete:
+      - .vs
+      - .yarn/install-state.gz
+      - android/ffmpeg-kit-binaries
+      - node_modules
+    build:
+      - sdkmanager 'ndk;25.1.8937393'
+      - pushd $$ffmpeg-kit$$
+      - ANDROID_SDK_ROOT=$$SDK$$ ANDROID_NDK_ROOT=$$SDK$$/ndk/25.1.8937393 ./android.sh
+        --disable-arm-v7a-neon --disable-arm-v7a --disable-arm64-v8a --disable-x86
+        --enable-android-media-codec --enable-android-zlib
+      - popd
+      - mv $$ffmpeg-kit$$/prebuilt/bundle-android-aar/ffmpeg-kit/ffmpeg-kit.aar ../ffmpeg-kit-binaries/ffmpeg-kit-audio-6.0-2.aar
+      - ndkVersion=$(sed -n -E 's/.*ndkVersion = "(.*)"/\1/p' ../build.gradle)
+      - pushd $$react-native-skia$$
+      - yarn
+      - cd packages/skia
+      - export ANDROID_NDK=$$SDK$$/ndk/$ndkVersion
+      - yarn ts-node ./scripts/build-skia.ts
+      - popd
+      - mv $$react-native-skia$$/packages/skia/libs/android ../../node_modules/@shopify/react-native-skia/libs/android
+      - pushd $$notifee$$/android
+      - gradle publishAarPublicationToMavenRepository
+      - popd
+      - rm -rf ../../node_modules/@notifee/react-native/android/libs
+      - mv $$notifee$$/packages/react-native/android/libs ../../node_modules/@notifee/react-native/android/
+    gradleprops:
+      - reactNativeArchitectures=x86_64
+
 MaintainerNotes: com/google/ads/interactivemedia/v3/api/AdEvent stubs are from react-native-video
 
 AutoUpdateMode: Version
@@ -2581,5 +2993,5 @@ VercodeOperation:
   - 100 * %c + 2
   - 100 * %c + 3
   - 100 * %c + 4
-CurrentVersion: 3.2.4
-CurrentVersionCode: 38604
+CurrentVersion: 3.2.5
+CurrentVersionCode: 39304
