@@ -6,7 +6,7 @@ AuthorName: GNU Project
 WebSite: https://www.gnu.org/software/emacs/
 SourceCode: https://git.savannah.gnu.org/cgit/emacs.git/tree/
 IssueTracker: https://debbugs.gnu.org/
-Changelog: https://git.savannah.gnu.org/cgit/emacs.git/tree/ChangeLog.android?h=feature/android
+Changelog: https://git.savannah.gnu.org/cgit/emacs.git/tree/etc/NEWS?h=emacs-30
 Donate: https://my.fsf.org/donate/
 
 Description: |-
@@ -25,13 +25,16 @@ Description: |-
   * A wide range of functionality beyond text editing, including a project planner, mail and news reader, debugger interface, calendar, IRC client, and more;
   * A packaging system for downloading and installing extensions.
 
-  Android notes:
-  * System keyboard can be invoked by tapping on a non read-only buffer;
-  * Permissions are not granted by default, they must be explicitly enabled in system settings menu;
-  * Android version of emacs is built without GNUTLS support;
+  Notes regarding Android support:
+
+  * The on-screen keyboard is automatically invoked when a non read-only buffer is tapped, and the user option `touch-screen-display-keyboard' arranges for it always to be displayed.
+  * `modifier-bar-mode' may be enabled to display a panel of modifier keys beside the tool bar.
+  * Permissions are not granted by default, but must be explicitly enabled in system settings menu.
+  * External storage permissions may be granted by observing the instructions in the banner that is displayed on the splash screen if they are denied.
+  * Answers to other questions probably exist in the Android appendix to the bundled Emacs manual.  Read it!
 
 RepoType: git
-Repo: git://git.savannah.gnu.org/emacs.git
+Repo: https://git.savannah.gnu.org/git/emacs.git
 
 Builds:
   - versionName: 30.0.50
@@ -570,6 +573,146 @@ Builds:
       - make all
     ndk: r25c
 
+  - versionName: 30.0.93
+    versionCode: 300093010
+    commit: ea3a937176fbf038a6f6f5cc7b47fb8cecdd894a
+    timeout: 15000
+    sudo:
+      - apt-get update
+      - apt-get install -y make gcc m4 libncurses-dev autoconf texinfo g++ nasm
+    output: java/emacs-*.apk
+    prebuild:
+      - sdkmanager 'platforms;android-34' 'build-tools;34.0.0'
+      - sed -i 's/android:versionCode="[^"]*"/android:versionCode="$$VERCODE$$"/'
+        java/AndroidManifest.xml.in
+      - mkdir emacs_deps
+      - cd emacs_deps
+      - bash ../admin/download-android-deps.sh 32
+    scanignore:
+      - admin/charsets/glibc/*.gz
+      - build-aux/dir_top
+    scandelete:
+      - test
+      - etc/e
+      - emacs_deps
+    build:
+      - pushd etc/e
+      - tic -o ../ ./eterm-color.ti
+      - popd
+      - ./autogen.sh
+      - export deps=$(pwd)/emacs_deps
+      - ./configure --with-android=$$SDK$$/platforms/android-34/android.jar ANDROID_CC=$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin/i686-linux-android22-clang
+        SDK_BUILD_TOOLS=$$SDK$$/build-tools/34.0.0 --without-android-debug --with-ndk-path="$(cat
+        $deps/search-path.txt)" --with-gif --with-xml2 --with-jpeg --with-png --with-sqlite3
+        --with-webp --with-gnutls --with-tiff --with-selinux --with-tree-sitter --with-harfbuzz
+      - make all
+    ndk: r26d
+
+  - versionName: 30.0.93
+    versionCode: 300093011
+    commit: ea3a937176fbf038a6f6f5cc7b47fb8cecdd894a
+    timeout: 15000
+    sudo:
+      - apt-get update
+      - apt-get install -y make gcc m4 libncurses-dev autoconf texinfo g++
+    output: java/emacs-*.apk
+    prebuild:
+      - sdkmanager 'platforms;android-34' 'build-tools;34.0.0'
+      - sed -i 's/android:versionCode="[^"]*"/android:versionCode="$$VERCODE$$"/'
+        java/AndroidManifest.xml.in
+      - mkdir emacs_deps
+      - cd emacs_deps
+      - bash ../admin/download-android-deps.sh 32
+    scanignore:
+      - admin/charsets/glibc/*.gz
+      - build-aux/dir_top
+    scandelete:
+      - test
+      - etc/e
+      - emacs_deps
+    build:
+      - pushd etc/e
+      - tic -o ../ ./eterm-color.ti
+      - popd
+      - ./autogen.sh
+      - export deps=`pwd`/emacs_deps
+      - ./configure --with-android=$$SDK$$/platforms/android-34/android.jar ANDROID_CC=$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin/armv7a-linux-androideabi22-clang
+        SDK_BUILD_TOOLS=$$SDK$$/build-tools/34.0.0 --without-android-debug --with-ndk-path="$(cat
+        $deps/search-path.txt)" --with-gif --with-xml2 --with-jpeg --with-png --with-sqlite3
+        --with-webp --with-gnutls --with-tiff --with-selinux --with-tree-sitter --with-harfbuzz
+      - make all
+    ndk: r26d
+
+  - versionName: 30.0.93
+    versionCode: 300093012
+    commit: ea3a937176fbf038a6f6f5cc7b47fb8cecdd894a
+    timeout: 15000
+    sudo:
+      - apt-get update
+      - apt-get install -y make gcc m4 libncurses-dev autoconf texinfo g++ nasm
+    output: java/emacs-*.apk
+    prebuild:
+      - sdkmanager 'platforms;android-34' 'build-tools;34.0.0'
+      - sed -i 's/android:versionCode="[^"]*"/android:versionCode="$$VERCODE$$"/'
+        java/AndroidManifest.xml.in
+      - mkdir emacs_deps
+      - cd emacs_deps
+      - bash ../admin/download-android-deps.sh 64
+    scanignore:
+      - admin/charsets/glibc/*.gz
+      - build-aux/dir_top
+    scandelete:
+      - test
+      - etc/e
+      - emacs_deps
+    build:
+      - pushd etc/e
+      - tic -o ../ ./eterm-color.ti
+      - popd
+      - ./autogen.sh
+      - export deps=`pwd`/emacs_deps
+      - ./configure --with-android=$$SDK$$/platforms/android-34/android.jar ANDROID_CC=$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin/x86_64-linux-android22-clang
+        SDK_BUILD_TOOLS=$$SDK$$/build-tools/34.0.0 --without-android-debug --with-ndk-path="$(cat
+        $deps/search-path.txt)" --with-gif --with-xml2 --with-jpeg --with-png --with-sqlite3
+        --with-webp --with-gnutls --with-tiff --with-selinux --with-tree-sitter --with-harfbuzz
+      - make all
+    ndk: r26d
+
+  - versionName: 30.0.93
+    versionCode: 300093013
+    commit: ea3a937176fbf038a6f6f5cc7b47fb8cecdd894a
+    timeout: 15000
+    sudo:
+      - apt-get update
+      - apt-get install -y make gcc m4 libncurses-dev autoconf texinfo g++
+    output: java/emacs-*.apk
+    prebuild:
+      - sdkmanager 'platforms;android-34' 'build-tools;34.0.0'
+      - sed -i 's/android:versionCode="[^"]*"/android:versionCode="$$VERCODE$$"/'
+        java/AndroidManifest.xml.in
+      - mkdir emacs_deps
+      - cd emacs_deps
+      - bash ../admin/download-android-deps.sh 64
+    scanignore:
+      - admin/charsets/glibc/*.gz
+      - build-aux/dir_top
+    scandelete:
+      - test
+      - etc/e
+      - emacs_deps
+    build:
+      - pushd etc/e
+      - tic -o ../ ./eterm-color.ti
+      - popd
+      - ./autogen.sh
+      - export deps=`pwd`/emacs_deps
+      - ./configure --with-android=$$SDK$$/platforms/android-34/android.jar ANDROID_CC=$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android22-clang
+        SDK_BUILD_TOOLS=$$SDK$$/build-tools/34.0.0 --without-android-debug --with-ndk-path="$(cat
+        $deps/search-path.txt)" --with-gif --with-xml2 --with-jpeg --with-png --with-sqlite3
+        --with-webp --with-gnutls --with-tiff --with-selinux --with-tree-sitter --with-harfbuzz
+      - make all
+    ndk: r26d
+
 MaintainerNotes: |-
   Build instructions can be found at:
   https://git.savannah.gnu.org/cgit/emacs.git/tree/java/INSTALL
@@ -615,4 +758,4 @@ ArchivePolicy: 12
 AutoUpdateMode: None
 UpdateCheckMode: None
 CurrentVersion: 30.0.93
-CurrentVersionCode: 300093003
+CurrentVersionCode: 300093013
