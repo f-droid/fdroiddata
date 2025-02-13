@@ -739,11 +739,139 @@ Builds:
       - cp -r $strongswanLibsSrc $strongswanLibsDst
     ndk: r23c
 
+  - versionName: '3.81'
+    versionCode: 1617
+    commit: 574c0547b9d323d1fe957198553e2b5e979da5dc
+    subdir: mobile
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y automake bison flex gettext gperf libtool make pkg-config
+        swig jq curl zip unzip tar cmake git musl-dev cmake perl golang ninja-build
+    gradle:
+      - fdroid
+    srclibs:
+      - OpenSSL@OpenSSL_1_1_1t
+      - vcpkg@2025.01.13
+    rm:
+      - base/src/google/libs/in-app-purchasing-2.0.76.jar
+      - openvpn/src/main/cpp/mbedtls/tests
+      - openvpn/src/main/cpp/openvpn3/test/unittests
+      - openvpn/src/main/cpp/lz4/tmpsparse
+      - openvpn/src/main/cpp/lz4/tmp
+      - openvpn/src/main/cpp/mbedtls/programs/fuzz/corpuses/client
+      - openvpn/src/main/cpp/mbedtls/programs/fuzz/corpuses/dtlsclient
+      - openvpn/src/main/cpp/mbedtls/programs/fuzz/corpuses/server
+      - openvpn/src/main/cpp/mbedtls/programs/fuzz/corpuses/dtlsserver
+      - openvpn/src/main/cpp/mbedtls/tests/data_files/hash_file_1
+      - openvpn/src/main/cpp/mbedtls/tests/data_files/hash_file_2
+      - openvpn/src/main/cpp/mbedtls/tests/data_files/hash_file_3
+      - tv
+      - strongswan/libs
+      - strongswan-src/testing/hosts/alice/etc/raddb/certs/random
+      - wgtunnel/tools/wireguard-tools/contrib/external-tests
+      - wgtunnel/tools/elf-cleaner/tests
+      - wgtunnel/.cxx
+      - base/src/main/libs/wsnet.aar
+    prebuild:
+      - sed -i 's/23.0.7599858/23.2.8568313/g' ../openvpn/build.gradle.kts ../base/build.gradle
+        build.gradle
+      - sed -i 's/compileSdkVersion 33/compileSdkVersion 33\n    ndkVersion "23.2.8568313"/g'
+        build.gradle
+    build:
+      - pushd $$vcpkg$$
+      - export VCPKG_FEATURE_FLAGS=-binarycaching
+      - ./bootstrap-vcpkg.sh -disableMetrics
+      - popd
+      - export VCPKG_ROOT=$$vcpkg$$
+      - export ANDROID_NDK_HOME="$ANDROID_NDK"
+      - export PATH=$PATH:$ANDROID_SDK/tools:$ANDROID_SDK/platform-tools:$ANDROID_NDK_HOME
+      - export OpenSSL="$$OpenSSL$$"
+      - strongswanLibsSrc="$PWD/../strongswan-src/src/frontends/android/app/src/main/libs/*"
+      - strongswanLibsDst="$PWD/../strongswan/libs"
+      - export ANDROID_NDK=$(ls -d $ANDROID_SDK_ROOT/ndk/*/ | head -n 1)
+      - cd ..
+      - git apply hide_release_block.patch
+      - tools/build_wsnet.sh
+      - cd tools
+      - chmod +x build_strongswan.sh
+      - ./build_strongswan.sh
+      - cd ../strongswan-src/src/frontends/android/app
+      - sed -i 's/compileSdkVersion 33/compileSdkVersion 33\n    ndkVersion "23.2.8568313"/g'
+        build.gradle
+      - gradle assembleRelease
+      - cp -r $strongswanLibsSrc $strongswanLibsDst
+    ndk: r23c
+
+  - versionName: '3.81'
+    versionCode: 1618
+    commit: 574c0547b9d323d1fe957198553e2b5e979da5dc
+    subdir: tv
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y automake bison flex gettext gperf libtool make pkg-config
+        swig jq curl zip unzip tar cmake git musl-dev cmake perl golang ninja-build
+    gradle:
+      - fdroid
+    srclibs:
+      - OpenSSL@OpenSSL_1_1_1t
+      - vcpkg@2025.01.13
+    rm:
+      - base/src/google/libs/in-app-purchasing-2.0.76.jar
+      - openvpn/src/main/cpp/mbedtls/tests
+      - openvpn/src/main/cpp/openvpn3/test/unittests
+      - openvpn/src/main/cpp/lz4/tmpsparse
+      - openvpn/src/main/cpp/lz4/tmp
+      - openvpn/src/main/cpp/mbedtls/programs/fuzz/corpuses/client
+      - openvpn/src/main/cpp/mbedtls/programs/fuzz/corpuses/dtlsclient
+      - openvpn/src/main/cpp/mbedtls/programs/fuzz/corpuses/server
+      - openvpn/src/main/cpp/mbedtls/programs/fuzz/corpuses/dtlsserver
+      - openvpn/src/main/cpp/mbedtls/tests/data_files/hash_file_1
+      - openvpn/src/main/cpp/mbedtls/tests/data_files/hash_file_2
+      - openvpn/src/main/cpp/mbedtls/tests/data_files/hash_file_3
+      - mobile
+      - strongswan/libs
+      - strongswan-src/testing/hosts/alice/etc/raddb/certs/random
+      - wgtunnel/tools/wireguard-tools/contrib/external-tests
+      - wgtunnel/tools/elf-cleaner/tests
+      - wgtunnel/.cxx
+      - base/src/main/libs/wsnet.aar
+    prebuild:
+      - sed -i 's/23.0.7599858/23.2.8568313/g' ../openvpn/build.gradle.kts ../base/build.gradle
+        build.gradle
+      - sed -i 's/compileSdkVersion 33/compileSdkVersion 33\n    ndkVersion "23.2.8568313"/g'
+        build.gradle
+    build:
+      - pushd $$vcpkg$$
+      - export VCPKG_FEATURE_FLAGS=-binarycaching
+      - ./bootstrap-vcpkg.sh -disableMetrics
+      - popd
+      - export VCPKG_ROOT=$$vcpkg$$
+      - export ANDROID_NDK_HOME="$ANDROID_NDK"
+      - export PATH=$PATH:$ANDROID_SDK/tools:$ANDROID_SDK/platform-tools:$ANDROID_NDK_HOME
+      - export OpenSSL="$$OpenSSL$$"
+      - strongswanLibsSrc="$PWD/../strongswan-src/src/frontends/android/app/src/main/libs/*"
+      - strongswanLibsDst="$PWD/../strongswan/libs"
+      - export ANDROID_NDK=$(ls -d $ANDROID_SDK_ROOT/ndk/*/ | head -n 1)
+      - cd ..
+      - git apply hide_release_block.patch
+      - tools/build_wsnet.sh
+      - cd tools
+      - chmod +x build_strongswan.sh
+      - ./build_strongswan.sh
+      - cd ../strongswan-src/src/frontends/android/app
+      - sed -i 's/compileSdkVersion 33/compileSdkVersion 33\n    ndkVersion "23.2.8568313"/g'
+        build.gradle
+      - gradle assembleRelease
+      - cp -r $strongswanLibsSrc $strongswanLibsDst
+    ndk: r23c
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 VercodeOperation:
   - '%c'
   - '%c + 1'
-UpdateCheckData: mobile/build.gradle|versionCode (\d+)||v([\d.]+)
-CurrentVersion: '3.80'
-CurrentVersionCode: 1570
+UpdateCheckData: mobile/build.gradle|versionCode (\d+)||v?([\d.]+)
+CurrentVersion: '3.81'
+CurrentVersionCode: 1618
