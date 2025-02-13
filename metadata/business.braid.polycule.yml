@@ -1,0 +1,189 @@
+Categories:
+  - Internet
+  - Phone & SMS
+License: EUPL-1.2
+AuthorName: The one with the braid
+WebSite: https://gitlab.com/polycule_client
+SourceCode: https://gitlab.com/polycule_client/polycule
+IssueTracker: https://gitlab.com/polycule_client/polycule/-/issues
+Translation: https://hosted.weblate.org/projects/fluffychat/
+Changelog: https://gitlab.com/polycule_client/polycule/-/blob/HEAD/CHANGELOG.md
+Donate: https://buymeacoff.ee/braid
+
+AutoName: < polycule >
+
+RepoType: git
+Repo: https://gitlab.com/polycule_client/polycule.git
+
+Builds:
+  - versionName: 0.2.0
+    versionCode: 201
+    commit: dfa1bef2127bc5cefb9edb932d4f9ecf8db0004a
+    sudo:
+      - echo "deb https://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
+      - apt-get update
+      - apt-get install -y -t trixie openjdk-21-jdk-headless
+      - update-alternatives --auto java
+    output: build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
+    binary: https://gitlab.com/polycule_client/polycule/-/jobs/artifacts/v%v/raw/polycule-armeabi-v7a-v%v.apk?job=build%3Aapk%3Atag
+    srclibs:
+      - flutter@stable
+      - reproducible-apk-tools@v0.3.0
+    rm:
+      - ios
+      - linux
+      - macos
+      - web
+      - windows
+    prebuild:
+      - export FLUTTER_VERSION="$(cat flutter_version)"
+      - '[[ $FLUTTER_VERSION ]] || exit 1'
+      - git -C $$flutter$$ checkout -f $FLUTTER_VERSION
+      - cd ..
+      - mv business.braid.polycule /tmp/build
+      - pushd /tmp/build
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - sed -i -e '1a add_link_options("LINKER:--build-id=none")' $PUB_CACHE/hosted/pub.dev/{flutter_zxing,flutter_olm}-*/*/CMakeLists.txt
+      - popd
+      - mv /tmp/build business.braid.polycule
+    scandelete:
+      - .pub-cache
+    build:
+      - cd ..
+      - mv business.braid.polycule /tmp/build
+      - pushd /tmp/build
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export POLYCULE_VERSION="v$(cat pubspec.yaml | grep version | awk '{ print
+        $2 }' | cut -f1 -d "+")"
+      - $$flutter$$/bin/flutter gen-l10n
+      - $$flutter$$/bin/flutter build apk --dart-define=POLYCULE_IS_STABLE=true --dart-define=POLYCULE_VERSION=$POLYCULE_VERSION
+        --dart-define=no_default_http_client=true --dart-define=cronetHttpNoPlay=true
+        --release --split-per-abi --target-platform="android-arm"
+      - popd
+      - mv /tmp/build business.braid.polycule
+    ndk: r27
+    postbuild:
+      - mv $$OUT$$ unaligned.apk
+      - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
+        --replace unaligned.apk $$OUT$$
+
+  - versionName: 0.2.0
+    versionCode: 202
+    commit: dfa1bef2127bc5cefb9edb932d4f9ecf8db0004a
+    sudo:
+      - echo "deb https://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
+      - apt-get update
+      - apt-get install -y -t trixie openjdk-21-jdk-headless
+      - update-alternatives --auto java
+    output: build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+    binary: https://gitlab.com/polycule_client/polycule/-/jobs/artifacts/v%v/raw/polycule-arm64-v8a-v%v.apk?job=build%3Aapk%3Atag
+    srclibs:
+      - flutter@stable
+      - reproducible-apk-tools@v0.3.0
+    rm:
+      - ios
+      - linux
+      - macos
+      - web
+      - windows
+    prebuild:
+      - export FLUTTER_VERSION="$(cat flutter_version)"
+      - '[[ $FLUTTER_VERSION ]] || exit 1'
+      - git -C $$flutter$$ checkout -f $FLUTTER_VERSION
+      - cd ..
+      - mv business.braid.polycule /tmp/build
+      - pushd /tmp/build
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - sed -i -e '1a add_link_options("LINKER:--build-id=none")' $PUB_CACHE/hosted/pub.dev/{flutter_zxing,flutter_olm}-*/*/CMakeLists.txt
+      - popd
+      - mv /tmp/build business.braid.polycule
+    scandelete:
+      - .pub-cache
+    build:
+      - cd ..
+      - mv business.braid.polycule /tmp/build
+      - pushd /tmp/build
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export POLYCULE_VERSION="v$(cat pubspec.yaml | grep version | awk '{ print
+        $2 }' | cut -f1 -d "+")"
+      - $$flutter$$/bin/flutter gen-l10n
+      - $$flutter$$/bin/flutter build apk --dart-define=POLYCULE_IS_STABLE=true --dart-define=POLYCULE_VERSION=$POLYCULE_VERSION
+        --dart-define=no_default_http_client=true --dart-define=cronetHttpNoPlay=true
+        --release --split-per-abi --target-platform="android-arm64"
+      - popd
+      - mv /tmp/build business.braid.polycule
+    ndk: r27
+    postbuild:
+      - mv $$OUT$$ unaligned.apk
+      - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
+        --replace unaligned.apk $$OUT$$
+
+  - versionName: 0.2.0
+    versionCode: 204
+    commit: dfa1bef2127bc5cefb9edb932d4f9ecf8db0004a
+    sudo:
+      - echo "deb https://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
+      - apt-get update
+      - apt-get install -y -t trixie openjdk-21-jdk-headless
+      - update-alternatives --auto java
+    output: build/app/outputs/flutter-apk/app-x86_64-release.apk
+    binary: https://gitlab.com/polycule_client/polycule/-/jobs/artifacts/v%v/raw/polycule-x86_64-v%v.apk?job=build%3Aapk%3Atag
+    srclibs:
+      - flutter@stable
+      - reproducible-apk-tools@v0.3.0
+    rm:
+      - ios
+      - linux
+      - macos
+      - web
+      - windows
+    prebuild:
+      - export FLUTTER_VERSION="$(cat flutter_version)"
+      - '[[ $FLUTTER_VERSION ]] || exit 1'
+      - git -C $$flutter$$ checkout -f $FLUTTER_VERSION
+      - cd ..
+      - rm -rf /tmp/build
+      - mv business.braid.polycule /tmp/build
+      - pushd /tmp/build
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - sed -i -e '1a add_link_options("LINKER:--build-id=none")' $PUB_CACHE/hosted/pub.dev/{flutter_zxing,flutter_olm}-*/*/CMakeLists.txt
+      - popd
+      - mv /tmp/build business.braid.polycule
+    scandelete:
+      - .pub-cache
+    build:
+      - cd ..
+      - mv business.braid.polycule /tmp/build
+      - pushd /tmp/build
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export POLYCULE_VERSION="v$(cat pubspec.yaml | grep version | awk '{ print
+        $2 }' | cut -f1 -d "+")"
+      - $$flutter$$/bin/flutter gen-l10n
+      - $$flutter$$/bin/flutter build apk --dart-define=POLYCULE_IS_STABLE=true --dart-define=POLYCULE_VERSION=$POLYCULE_VERSION
+        --dart-define=no_default_http_client=true --dart-define=cronetHttpNoPlay=true
+        --release --split-per-abi --target-platform="android-x64"
+      - popd
+      - mv /tmp/build business.braid.polycule
+    ndk: r27
+    postbuild:
+      - mv $$OUT$$ unaligned.apk
+      - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
+        --replace unaligned.apk $$OUT$$
+
+AllowedAPKSigningKeys: 24115d02b3a7bd20dac718eb893955757ee165f0a3c27896fecaf08a80791c72
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+VercodeOperation:
+  - 10 * %c + 1
+  - 10 * %c + 2
+  - 10 * %c + 4
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 0.2.0
+CurrentVersionCode: 204
