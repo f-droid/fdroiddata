@@ -539,7 +539,30 @@ Builds:
       - popd
     ndk: r23c
 
+  - versionName: 2.56.0
+    versionCode: 2560000
+    commit: 8c533cbbfca3d53c69d13d01b74576ddb3a594ea
+    subdir: app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y bzip2 cmake g++ make
+    gradle:
+      - yes
+    rm:
+      - binary/jni/openssl/fuzz
+      - binary/jni/openssl/boringssl/fuzz
+    prebuild:
+      - sed -i -e 's/enable true/enable false/' build.gradle
+      - echo -e "\norg.gradle.jvmargs=-Xmx4096m" >> ../gradle.properties
+      - sed -i -e 's|boostorg.jfrog.io/artifactory/main|archives.boost.io|' ../binary/jni/boost/build-android.sh
+    build:
+      - pushd ../binary/jni
+      - ./build.sh -d
+      - popd
+    ndk: r23c
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 2.55.0
-CurrentVersionCode: 2550000
+CurrentVersion: 2.56.0
+CurrentVersionCode: 2560000
