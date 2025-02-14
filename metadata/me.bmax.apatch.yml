@@ -95,6 +95,87 @@ Builds:
       - mv $$KernelPatch$$/tools/kptools libs/arm64-v8a/libkptools.so
     ndk: r26d
 
+  - versionName: '11039'
+    versionCode: 11039
+    commit: 5fd71d6a70d404e9dcf91c490dac00796418e7de
+    timeout: 30000
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y make cmake gcc autoconf automake libtool wget flex bison
+        autogen texinfo gawk libncurses5-dev dejagnu xz-utils python-is-python3
+      - curl -Lo /usr/share/doc/git/contrib/workdir/git-new-workdir https://raw.githubusercontent.com/git/git/v2.39.2/contrib/workdir/git-new-workdir
+      - ln -s /usr/share/doc/git/contrib/workdir/git-new-workdir /usr/local/bin/
+      - chmod +x /usr/local/bin/git-new-workdir
+    init: git checkout 10763
+    gradle:
+      - yes
+    srclibs:
+      - rustup@1.26.0
+      - apatch-magisk@6122f80ecad5fc07df84bda6e07d4d477522288f
+      - KernelPatch@0.10.7
+      - abe@5ad3b2cc5bc1376c323a68af6022603c1b75c145
+    prebuild:
+      - mkdir gcc
+      - cd gcc
+      - $$abe$$/configure
+      - curl -Lo gcc-manifest.txt https://armkeil.blob.core.windows.net/developer/Files/downloads/gnu/12.2.rel1/manifest/arm-gnu-toolchain-aarch64-none-elf-abe-manifest.txt
+      - echo "8eaf20bf7f002ae98176974ceb77c2c6225585e6b62eec2a4870c1bd894393f8 gcc-manifest.txt"
+        | sha256sum -c -
+      - cd ..
+      - sed -i -e 's|ndk_path = .*|ndk_path = "$$NDK$$"|' -e "s|rust_bin = .*|rust_bin
+        = \"$HOME/.cargo/bin/\"|" -e '/sys.exit/d' -e 's/ -Zthreads=.*/"/' -e 's/archs
+        = .*/archs = ["arm64-v8a"]/' -e '/triples =/,+5c triples = ["aarch64-linux-android"]'
+        $$apatch-magisk$$/build.py
+      - sed -i -e 's/armeabi-v7a.*/arm64-v8a/' $$apatch-magisk$$/native/src/Application.mk
+      - kernelPatchVersion=$(sed -n -E 's/.*"kernelPatchVersion", "([0-9.]+)".*/\1/p'
+        ../build.gradle.kts)
+      - git -C $$KernelPatch$$ checkout -f $kernelPatchVersion
+      - sdkmanager 'platforms;android-33'
+      - $$rustup$$/rustup-init.sh -y --default-toolchain nightly-2024-02-04 -t aarch64-linux-android
+        -c rust-src
+      - source $HOME/.cargo/env
+      - sed -i -e '/"cargo"/a environment("ANDROID_NDK_HOME", "$$NDK$$")' -e "s|\"cargo\"|\"$(which
+        cargo)\"|" -e '/preBuild/,/^)/s/"download.*",//' -e '/jvmTarget/s/21/17/'
+        build.gradle.kts
+      - sed -i -e '/extra/s/getVersionCode()/$$VERCODE$$/' -e '/extra/s/getVersionName()/"$$VERSION$$"/'
+        -e '/JavaVersion/s/21/17/' ../build.gradle.kts
+      - sed -i -e '/androidx.dev/d' ../settings.gradle.kts
+      - sed -i -e '/prefs.getBoolean("check_update"/s/true/false/' src/main/java/me/bmax/apatch/ui/screen/Settings.kt
+    scandelete:
+      - app/libs/arm64-v8a
+    build:
+      - pushd $$apatch-magisk$$
+      - python3 ./build.py -rv binary target magiskboot magiskpolicy busybox resetprop
+      - popd
+      - for target in magiskboot magiskpolicy busybox resetprop; do mv $$apatch-magisk$$/native/out/arm64-v8a/$target
+        libs/arm64-v8a/lib${target}.so; done
+      - cd gcc
+      - $$abe$$/abe.sh --manifest gcc-manifest.txt --build all --disable make_docs
+        > /dev/null
+      - export TARGET_COMPILE=$(pwd)/builds/destdir/x86_64-pc-linux-gnu/bin/aarch64-none-elf-
+      - cd ..
+      - source $HOME/.cargo/env
+      - cargo install cargo-ndk --version 3.4.0 --locked
+      - pushd $$KernelPatch$$
+      - export ANDROID=1
+      - cd kernel
+      - make
+      - cd ../user
+      - cmake -DCMAKE_TOOLCHAIN_FILE=$$NDK$$/build/cmake/android.toolchain.cmake -DCMAKE_BUILD_TYPE=Release
+        -DANDROID_PLATFORM=android-33 -DANDROID_ABI=arm64-v8a .
+      - cmake --build .
+      - cd ../tools
+      - cmake -DCMAKE_TOOLCHAIN_FILE=$$NDK$$/build/cmake/android.toolchain.cmake -DCMAKE_BUILD_TYPE=Release
+        -DANDROID_PLATFORM=android-33 -DANDROID_ABI=arm64-v8a .
+      - cmake --build .
+      - popd
+      - mv $$KernelPatch$$/kernel/kpimg src/main/assets/kpimg
+      - mv $$KernelPatch$$/user/kpatch libs/arm64-v8a/libkpatch.so
+      - mv $$KernelPatch$$/user/libapjni.so libs/arm64-v8a/libapjni.so
+      - mv $$KernelPatch$$/tools/kptools libs/arm64-v8a/libkptools.so
+    ndk: r26d
+
 MaintainerNotes: |
   1. git-new-workdir needs to be downloaded because it's stripped.
   2. aarch64-none-elf gcc is required which is not available in Debian so it's built from source.
@@ -103,5 +184,5 @@ MaintainerNotes: |
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: '|(\d+)||(\d+)'
-CurrentVersion: '10763'
-CurrentVersionCode: 10763
+CurrentVersion: '11039'
+CurrentVersionCode: 11039
