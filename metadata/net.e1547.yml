@@ -276,10 +276,52 @@ Builds:
       - popd
       - mv $repo/e1547 net.e1547
 
+  - versionName: 20.0.0
+    versionCode: 95
+    commit: 8f23b0192398feefdbee9b05f5fd821e03106515
+    sudo:
+      - apt-get update
+      - mkdir -p /home/runner/
+      - chown vagrant /home/runner/
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+      - windows
+    prebuild:
+      - export FLUTTER_VERSION=$(./.github/workflows/get_flutter_version.sh)
+      - pushd $$flutter$$
+      - git checkout -f $FLUTTER_VERSION
+      - popd
+      - export repo=/home/runner/work/e1547
+      - mkdir -p $repo
+      - cd ..
+      - mv net.e1547 $repo/e1547
+      - pushd $repo/e1547
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+      - popd
+      - mv $repo/e1547 net.e1547
+      - cd net.e1547
+      - sed -i -e '/googleapis/d' .pub-cache/hosted/pub.dev/webview_cookie_manager-*/android/build.gradle
+    scandelete:
+      - .pub-cache
+    build:
+      - export repo=/home/runner/work/e1547
+      - cd ..
+      - mv net.e1547 $repo/e1547
+      - pushd $repo/e1547
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk
+      - popd
+      - mv $repo/e1547 net.e1547
+
 AllowedAPKSigningKeys: 8d324e434b975aa338a7a9c7f3077e1fc0dbf1303ec5d9b9634fe83e9ddb6380
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 19.1.0
-CurrentVersionCode: 94
+CurrentVersion: 20.0.0
+CurrentVersionCode: 95
