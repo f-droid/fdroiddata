@@ -498,7 +498,46 @@ Builds:
       - cp $$esbuild$$/esbuild ../../node_modules/vite/node_modules/@esbuild/linux-x64/bin/esbuild
     ndk: r25b
 
+  - versionName: 1.7.9
+    versionCode: 91
+    commit: 870c47e7ecab4a5daa7ec30b6dde5cf5747ae501
+    timeout: 20000
+    subdir: materialious/android/app
+    sudo:
+      - apt-get update
+      - apt-get install -y build-essential cmake golang-go gcc-multilib g++-multilib
+        make npm
+    gradle:
+      - yes
+    srclibs:
+      - esbuild@v0.24.0
+      - NodejsMobile@v18.17.3
+    prebuild:
+      - sed -i -e '/enable true/d' build.gradle
+      - sed -i -e '/gms/d' ../build.gradle
+      - sed -i -e 's/-Xmx1536m/-Xmx4096m/' ../gradle.properties
+      - cd ../..
+      - npm install --build-from-source
+      - pushd static/nodejs-android
+      - npm install
+      - popd
+      - npm run build
+      - npx cap sync
+    scandelete:
+      - materialious/node_modules
+    build:
+      - pushd $$NodejsMobile$$
+      - ./tools/android_build.sh $$NDK$$ 24
+      - popd
+      - cp -a $$NodejsMobile$$/out_android/* ../../node_modules/capacitor-nodejs/android/libnode/bin/
+      - pushd $$esbuild$$
+      - make esbuild
+      - popd
+      - cp $$esbuild$$/esbuild ../../node_modules/vite/node_modules/esbuild/bin/esbuild
+      - cp $$esbuild$$/esbuild ../../node_modules/vite/node_modules/@esbuild/linux-x64/bin/esbuild
+    ndk: r25b
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 1.7.8
-CurrentVersionCode: 90
+CurrentVersion: 1.7.9
+CurrentVersionCode: 91
