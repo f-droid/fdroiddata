@@ -156,8 +156,35 @@ Builds:
       - $$flutter$$/bin/flutter build apk --flavor fdroid
     ndk: r20
 
+  - versionName: 0.12.3
+    versionCode: 26
+    commit: b24cec86f0c3b16653b8b5ac82bbc90159dd2863
+    output: build/app/outputs/flutter-apk/app-fdroid-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+      - macos
+      - windows
+      - test
+    prebuild:
+      - export flutterVersion=$(grep RECOMMENDED pubspec.yaml|cut -d "=" -f2)
+      - pushd $$flutter$$
+      - git checkout -f $flutterVersion
+      - popd
+      - echo "flutter.sdk=$$flutter$$" >> ../local.properties
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter packages pub get
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --flavor fdroid
+    ndk: r20
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^[\d.]+$
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 0.12.2
-CurrentVersionCode: 25
+CurrentVersion: 0.12.3
+CurrentVersionCode: 26
