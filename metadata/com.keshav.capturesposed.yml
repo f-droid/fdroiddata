@@ -90,9 +90,35 @@ Builds:
     postbuild: $$reproducible-apk-tools$$/inplace-fix.py --page-size 16 fix-newlines
       $$OUT$$ 'META-INF/services/*'
 
+  - versionName: 1.0.7
+    versionCode: 8
+    commit: fc597823c1e62dc40bc5a6be22ba943107990747
+    subdir: app
+    submodules: true
+    sudo:
+      - echo "deb https://deb.debian.org/debian sid main" > /etc/apt/sources.list.d/sid.list
+      - apt-get update
+      - apt-get install -y -t sid openjdk-21-jdk-headless
+      - update-alternatives --auto java
+    gradle:
+      - yes
+    srclibs:
+      - reproducible-apk-tools@v0.3.0
+    prebuild: sed -i -e '/maven.pkg.github.com/d' ../libxposed/api/api/build.gradle.kts
+      ../libxposed/service/service/build.gradle.kts ../libxposed/service/interface/build.gradle.kts
+    build:
+      - pushd ../libxposed/api
+      - gradle publishToMavenLocal
+      - popd
+      - pushd ../libxposed/service
+      - gradle publishToMavenLocal
+      - popd
+    postbuild: $$reproducible-apk-tools$$/inplace-fix.py --page-size 16 fix-newlines
+      $$OUT$$ 'META-INF/services/*'
+
 AllowedAPKSigningKeys: 724069454af66f5b11d161eda22fc47da99c5a449ba63df06d2c4a336856930b
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 1.0.6
-CurrentVersionCode: 7
+CurrentVersion: 1.0.7
+CurrentVersionCode: 8
