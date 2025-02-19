@@ -237,10 +237,35 @@ Builds:
         export localhash=$(sha256sum assets/dexopt/baseline.prof|cut -d " " -f1);
         [[ $localhash == $upstreamhash ]] && break ; popd; rm -fr local; done
 
+  - versionName: 2.5.17
+    versionCode: 30517
+    commit: 2.5.17
+    subdir: app
+    submodules: true
+    sudo:
+      - export CPUS_MAX=6
+      - export CPUS=$(getconf _NPROCESSORS_ONLN)
+      - for (( c=$CPUS_MAX; c<$CPUS; c++ )) ; do echo 0 > /sys/devices/system/cpu/cpu$c/online
+        ; done
+    output: build/outputs/apk/fdroid/release/app-fdroid-release-unsigned.apk
+    prebuild: sed -i -e '/(useCrashlytics)/,+3d' -e '/firebase/d' -e '/gms/d' ../build.gradle
+      build.gradle
+    build:
+      - mkdir upstream
+      - pushd upstream
+      - curl -L -o upstream.apk https://github.com/meshtastic/Meshtastic-Android/releases/download/$$VERSION$$/fdroidRelease-$$VERSION$$.apk
+      - unzip -q upstream.apk
+      - export upstreamhash=$(sha256sum assets/dexopt/baseline.prof|cut -d " " -f1)
+      - popd
+      - for i in {1..10}; do gradle clean assembleFdroidRelease; mkdir local; pushd
+        local; unzip -q ../build/outputs/apk/fdroid/release/app-fdroid-release-unsigned.apk;
+        export localhash=$(sha256sum assets/dexopt/baseline.prof|cut -d " " -f1);
+        [[ $localhash == $upstreamhash ]] && break ; popd; rm -fr local; done
+
 AllowedAPKSigningKeys: a93b456568c175db0800a09f06777f892d812432adb8a3df73bc3e7f06c80c6d
 
 AutoUpdateMode: Version %v
 UpdateCheckMode: HTTP
 UpdateCheckData: https://github.com/meshtastic/Meshtastic-Android/releases/latest/download/version_info.txt|versionCode=(\d+)|.|versionName=(.+)
-CurrentVersion: 2.5.16
-CurrentVersionCode: 30516
+CurrentVersion: 2.5.17
+CurrentVersionCode: 30517
