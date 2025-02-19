@@ -1,0 +1,50 @@
+Categories:
+  - Games
+License: GPL-3.0-only
+AuthorName: Miguel Páez
+AuthorEmail: miguel.paez@laposte.net
+SourceCode: https://gitlab.com/miguelython/cascada
+IssueTracker: https://gitlab.com/miguelython/cascada/-/issues
+Donate: https://buymeacoffee.com/miguelython
+
+AutoName: Cascada
+
+RepoType: git
+Repo: https://gitlab.com/miguelython/cascada.git
+
+Builds:
+  - versionName: 1.0.1
+    versionCode: 8
+    commit: 18ddf3038a0a5ba38c359486e6dc51919bc117aa
+    timeout: 14400
+    sudo:
+      - apt-get update
+      - apt-get install -y pkgconf scons
+    output: Cascada.apk
+    srclibs:
+      - Godot@4.3-stable
+    build:
+      - export JAVA_HOME=$(dirname $(dirname $(readlink -f $(which javac))))
+      - export ANDROID_SDK_ROOT=$$SDK$$
+      - pushd $$Godot$$
+      - scons -j `nproc` platform=linuxbsd target=editor
+      - scons -j `nproc` platform=android target=template_release arch=arm64
+      - cd platform/android/java
+      - gradle generateGodotTemplates
+      - popd
+      - sed -i -e 's:\(^.*package/signed\)\s*=.*$:\1 = false:' export_presets.cfg
+      - sed -i -e '/custom_template\/release/s|=.*|="$$Godot$$/bin/android_release.apk"|'
+        export_presets.cfg
+      - $$Godot$$/bin/godot.linuxbsd.editor.x86_64 --headless --import
+      - export GODOT_CFG=$(ls ~/.config/godot/editor_settings-*.tres)
+      - sed -i -e "s:\(^.*java_sdk_path\)\s*=.*$:\1 = "$JAVA_HOME":" $GODOT_CFG
+      - sed -i -e 's:\(^.*android_sdk_path\)\s*=.*$:\1 = "$$SDK$$":' $GODOT_CFG
+      - $$Godot$$/bin/godot.linuxbsd.editor.x86_64 --headless --export-release 'Android'
+        Cascada.apk
+    ndk: 23.2.8568313
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: export_presets.cfg|version/code=(\d+)|.|version/name="([\d.]+)"
+CurrentVersion: 1.0.1
+CurrentVersionCode: 8
