@@ -64,11 +64,31 @@ Builds:
     build: make all
     ndk: r25c
 
+  - versionName: '6.09'
+    versionCode: 60900
+    commit: 466d74c9ca3492fdddfa442f40d7efb379c183e2
+    subdir: android
+    sudo:
+      - apt-get update
+      - apt-get install -y make automake perl imagemagick
+    output: xscreensaver/build/outputs/apk/release/*.apk
+    rm:
+      - OSX
+    prebuild:
+      - pushd ..
+      - ./configure || true
+      - popd
+      - make run_check
+      - sed -i -e 's|./gradlew|gradle|' Makefile
+      - sed -i -e 's/org.jwz.android.xscreensaver/org.jwz.xscreensaver/' xscreensaver/build.gradle
+    build: make all
+    ndk: 26.1.10909125
+
 MaintainerNotes: |
   `make all` already does the gradle build. Running gradle standalone doesn't work as is afterwards beause of undefined env variables.
   Disabling the preBuild tasks in the gradle file works around this issue.
 
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: '6.06'
-CurrentVersionCode: 60600
+CurrentVersion: '6.09'
+CurrentVersionCode: 60900
