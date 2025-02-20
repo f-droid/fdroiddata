@@ -12,20 +12,36 @@ Repo: https://github.com/janexner/JKBikeMechanicalDisasterPrevention.git
 Binaries: https://www.jan-exner.de/software/android/jkbikemdp/JK-Bike_Mechanical_Disaster_Prevention_release_%v_%c.apk
 
 Builds:
-  - versionName: 1.0.0
-    versionCode: 1
-    commit: d110cefaac5e5d9b54742a106edd4379bae4ad8a
+  - versionName: 1.1.1
+    versionCode: 3
+    commit: 22637f1c55699dea01631bd79e07d1c85a5a75c0
     subdir: app
-    gradle:
-      - yes
+    sudo:
+      - export CPUS_MAX=6
+      - export CPUS=$(getconf _NPROCESSORS_ONLN)
+      - for (( c=$CPUS_MAX; c<$CPUS; c++ )) ; do echo 0 > /sys/devices/system/cpu/cpu$c/online
+        ; done
+    output: build/outputs/apk/release/*.apk
     srclibs:
-      - reproducible-apk-tools@v0.2.7
+      - reproducible-apk-tools@v0.3.0
+    prebuild: gradle clean
+    build:
+      - mkdir upstream
+      - pushd upstream
+      - curl -L -o upstream.apk https://www.jan-exner.de/software/android/jkbikemdp/JK-Bike_Mechanical_Disaster_Prevention_release_$$VERSION$$_$$VERCODE$$.apk
+      - unzip -q upstream.apk
+      - export upstreamhash=$(sha256sum assets/dexopt/baseline.prof|cut -d " " -f1)
+      - popd
+      - for i in {1..10}; do gradle clean assembleRelease; mkdir local; pushd local;
+        unzip -q ../build/outputs/apk/release/*.apk; export localhash=$(sha256sum
+        assets/dexopt/baseline.prof|cut -d " " -f1); [[ $localhash == $upstreamhash
+        ]] && break ; popd; rm -fr local; done
     postbuild: $$reproducible-apk-tools$$/inplace-fix.py --page-size 16 fix-newlines
-      $$OUT$$ 'META-INF/services/*'
+      $$OUT$$ 'META-INF/services/*' 'assets/schemas/com.exner.tools.jkbikemechanicaldisasterprevention.database.KJsDatabase/2.json'
 
 AllowedAPKSigningKeys: 07a89b9b74e8d980673671912166ace204c2f73523cd631b933cb4f77ac4a2cf
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 1.0.0
-CurrentVersionCode: 1
+CurrentVersion: 1.1.1
+CurrentVersionCode: 3
