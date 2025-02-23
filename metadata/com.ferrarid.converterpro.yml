@@ -315,8 +315,37 @@ Builds:
       - export PATH=$PUB_CACHE/bin/:$$flutter$$/bin/:$PATH
       - flutter build apk
 
+  - versionName: 4.3.0
+    versionCode: 46
+    commit: 65869bdd2dd14c7c68a014bdc367bf8c885c8ed9
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@3.29.0
+    rm:
+      - .github
+      - linux
+      - snap
+      - web
+      - windows
+    prebuild:
+      - rm $$flutter$$/engine/src/.gn
+      - sed -i -e '/signingConfig /d' android/app/build.gradle.kts
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export PATH=$PUB_CACHE/bin/:$$flutter$$/bin/:$PATH
+      - flutter config --no-analytics
+      - flutter doctor --verbose
+      - dart pub global activate melos
+      - dart pub global activate vector_graphics_compiler
+      - melos bootstrap
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export PATH=$PUB_CACHE/bin/:$$flutter$$/bin/:$PATH
+      - flutter build apk
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v.*$
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 4.2.4
-CurrentVersionCode: 45
+CurrentVersion: 4.3.0
+CurrentVersionCode: 46
