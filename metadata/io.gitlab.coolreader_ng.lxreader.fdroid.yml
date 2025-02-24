@@ -136,7 +136,38 @@ Builds:
       - popd
     ndk: r21e
 
+  - versionName: 0.8.2 (fdroid)
+    versionCode: 80200
+    commit: a44efa9690d68562eadebf6b927ec76db7f4c138
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y xz-utils bzip2
+    gradle:
+      - fdroid
+    prebuild:
+      - sdkmanager 'cmake;3.22.1'
+      - find ../tools -iname *.sh -exec sed -i -e 's/VERBOSE=1//' -e 's/-xvjf/-xjf/'
+        {} +
+    build:
+      - echo ANDROID_HOME=$$SDK$$ >> ./make.conf
+      - echo ANDROID_NDK_HOST_TAG=linux-x86_64 >> ./make.conf
+      - echo ANDROID_NDK_ROOT=$$NDK$$ >> ./make.conf
+      - echo ANDROID_CMAKE=$$SDK$$/cmake/3.22.1 >> ./make.conf
+      - echo MAKEOPTS=-j`nproc` >> ./make.conf
+      - echo ANDROID_PAGE_SIZE_16K=OFF >> ./make.conf
+      - cp make.conf ../tools/thirdparty-bldtool/
+      - pushd ../tools/thirdparty-bldtool/
+      - echo -e 'CFLAGS="-fPIC -DPIC"\nCXXFLAGS="-fPIC -DPIC"' >> ./make.conf
+      - ./rebuild-all.sh
+      - popd
+      - cp make.conf ../tools/crengine-ng-build/
+      - pushd ../tools/crengine-ng-build/
+      - ./rebuild-all.sh release
+      - popd
+    ndk: r21e
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 0.8.1 (fdroid)
-CurrentVersionCode: 80100
+CurrentVersion: 0.8.2 (fdroid)
+CurrentVersionCode: 80200
