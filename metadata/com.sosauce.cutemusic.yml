@@ -26,8 +26,19 @@ Builds:
     versionCode: 25
     commit: d2b78edbdd337ca3e444535a770f6eb6d53e2135
     subdir: app
-    gradle:
-      - yes
+    output: build/outputs/apk/release/*.apk
+    prebuild: gradle clean
+    build:
+      - mkdir upstream
+      - pushd upstream
+      - curl -L -o upstream.apk https://github.com/sosauce/CuteMusic/releases/download/v$$VERSION$$/CM_$$VERSION$$.apk
+      - unzip -q upstream.apk
+      - export upstreamhash=$(sha256sum assets/dexopt/baseline.prof|cut -d " " -f1)
+      - popd
+      - for i in {1..10}; do gradle clean assembleRelease; mkdir local; pushd local;
+        unzip -q ../build/outputs/apk/release/*.apk; export localhash=$(sha256sum
+        assets/dexopt/baseline.prof|cut -d " " -f1); [[ $localhash == $upstreamhash
+        ]] && break ; popd; rm -fr local; done
 
 AllowedAPKSigningKeys: 7ad65abb70c3b33d0d301affcef8f1c5c22bcada53f770ffbe66df8d33058335
 
