@@ -176,6 +176,232 @@ Builds:
       - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
         --replace unaligned.apk $$OUT$$
 
+  - versionName: 0.2.3
+    versionCode: 231
+    commit: d1a4d33844b0e5255d80790456fcbca8e95e54c8
+    sudo:
+      - apt-get update
+      - apt-get install -y gcc-multilib libc-dev make automake pkg-config libtool
+        nasm python3-jsonschema wget python3-jinja2 zip
+      - apt-get install -t bookworm-backports meson
+      - echo "deb https://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
+      - apt-get update
+      - apt-get install -y -t trixie openjdk-21-jdk-headless
+      - update-alternatives --auto java
+    output: build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
+    binary: https://gitlab.com/polycule_client/polycule/-/jobs/artifacts/v%v/raw/polycule-armeabi-v7a-v%v.apk?job=build%3Aapk%3Atag
+    srclibs:
+      - flutter@stable
+      - reproducible-apk-tools@v0.3.0
+      - media-kit-libmpv-android-video-build-preddit@6a17c15353ead50a52bd8414c872e40e9178b3a4
+    rm:
+      - ios
+      - linux
+      - macos
+      - web
+      - windows
+    prebuild:
+      - export FLUTTER_VERSION="$(cat flutter_version)"
+      - '[[ $FLUTTER_VERSION ]] || exit 1'
+      - git -C $$flutter$$ checkout -f $FLUTTER_VERSION
+      - rm $$flutter$$/engine/src/.gn
+      - cd ..
+      - mv business.braid.polycule /tmp/build
+      - pushd /tmp/build
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - sed -i -e '1a add_link_options("LINKER:--build-id=none")' $PUB_CACHE/hosted/pub.dev/{flutter_zxing,flutter_olm}-*/*/CMakeLists.txt
+      - export file=$(ls .pub-cache/git/media-kit-*/libs/android/media_kit_libs_android_video/android/build.gradle)
+      - sed -i -e '/downloadDependencies/,/dependsOn/d' $file
+      - cd $$media-kit-libmpv-android-video-build-preddit$$/buildscripts
+      - sed -i -e '/download-sdk/d' download.sh
+      - sed -i -e '/git reset --hard/d' patch.sh
+      - sed -i -e 's/archs=(armv7l arm64 x86 x86_64)/archs=(armv7l)/' build.sh
+      - sed -i -e 's/sudo rm -r/echo/g' -e '/media-kit-android-helper/a sed -i -e
+        "/defaultConfig {/a ndk { abiFilters \\"armeabi-v7a\\"}" android/build.gradle'
+        bundle_default.sh
+      - sed -i -e 's/sudo//g' -e 's|./gradlew|gradle|g' *.sh
+      - popd
+      - mv /tmp/build business.braid.polycule
+      - sdkmanager 'ndk;r27c'
+    scandelete:
+      - .pub-cache
+    build:
+      - pushd $$media-kit-libmpv-android-video-build-preddit$$/buildscripts
+      - mkdir sdk
+      - ln -s $$SDK$$ ./sdk/android-sdk-linux
+      - bash bundle_default.sh
+      - popd
+      - mkdir -p build/media_kit_libs_android_video/output
+      - cp $$media-kit-libmpv-android-video-build-preddit$$/buildscripts/*.jar build/media_kit_libs_android_video/output
+      - cd ..
+      - mv business.braid.polycule /tmp/build
+      - pushd /tmp/build
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter gen-l10n
+      - $$flutter$$/bin/flutter build apk --dart-define=POLYCULE_IS_STABLE=true --dart-define=POLYCULE_VERSION=v$$VERSION$$
+        --dart-define=no_default_http_client=true --dart-define=cronetHttpNoPlay=true
+        --release --split-per-abi --target-platform="android-arm"
+      - popd
+      - mv /tmp/build business.braid.polycule
+    ndk: r27
+    postbuild:
+      - mv $$OUT$$ unaligned.apk
+      - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
+        --replace unaligned.apk $$OUT$$
+
+  - versionName: 0.2.3
+    versionCode: 232
+    commit: d1a4d33844b0e5255d80790456fcbca8e95e54c8
+    sudo:
+      - apt-get update
+      - apt-get install -y gcc-multilib libc-dev make automake pkg-config libtool
+        nasm python3-jsonschema wget python3-jinja2 zip
+      - apt-get install -t bookworm-backports meson
+      - echo "deb https://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
+      - apt-get update
+      - apt-get install -y -t trixie openjdk-21-jdk-headless
+      - update-alternatives --auto java
+    output: build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+    binary: https://gitlab.com/polycule_client/polycule/-/jobs/artifacts/v%v/raw/polycule-arm64-v8a-v%v.apk?job=build%3Aapk%3Atag
+    srclibs:
+      - flutter@stable
+      - reproducible-apk-tools@v0.3.0
+      - media-kit-libmpv-android-video-build-preddit@6a17c15353ead50a52bd8414c872e40e9178b3a4
+    rm:
+      - ios
+      - linux
+      - macos
+      - web
+      - windows
+    prebuild:
+      - export FLUTTER_VERSION="$(cat flutter_version)"
+      - '[[ $FLUTTER_VERSION ]] || exit 1'
+      - git -C $$flutter$$ checkout -f $FLUTTER_VERSION
+      - rm $$flutter$$/engine/src/.gn
+      - cd ..
+      - mv business.braid.polycule /tmp/build
+      - pushd /tmp/build
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - sed -i -e '1a add_link_options("LINKER:--build-id=none")' $PUB_CACHE/hosted/pub.dev/{flutter_zxing,flutter_olm}-*/*/CMakeLists.txt
+      - export file=$(ls .pub-cache/git/media-kit-*/libs/android/media_kit_libs_android_video/android/build.gradle)
+      - sed -i -e '/downloadDependencies/,/dependsOn/d' $file
+      - cd $$media-kit-libmpv-android-video-build-preddit$$/buildscripts
+      - sed -i -e '/download-sdk/d' download.sh
+      - sed -i -e '/git reset --hard/d' patch.sh
+      - sed -i -e 's/archs=(armv7l arm64 x86 x86_64)/archs=(arm64)/' build.sh
+      - sed -i -e 's/sudo rm -r/echo/g' -e '/media-kit-android-helper/a sed -i -e
+        "/defaultConfig {/a ndk { abiFilters \\"arm64-v8a\\"}" android/build.gradle'
+        bundle_default.sh
+      - sed -i -e 's/sudo//g' -e 's|./gradlew|gradle|g' *.sh
+      - popd
+      - mv /tmp/build business.braid.polycule
+      - sdkmanager 'ndk;r27c'
+    scandelete:
+      - .pub-cache
+    build:
+      - pushd $$media-kit-libmpv-android-video-build-preddit$$/buildscripts
+      - mkdir sdk
+      - ln -s $$SDK$$ ./sdk/android-sdk-linux
+      - bash bundle_default.sh
+      - popd
+      - mkdir -p build/media_kit_libs_android_video/output
+      - cp $$media-kit-libmpv-android-video-build-preddit$$/buildscripts/*.jar build/media_kit_libs_android_video/output
+      - cd ..
+      - mv business.braid.polycule /tmp/build
+      - pushd /tmp/build
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter gen-l10n
+      - $$flutter$$/bin/flutter build apk --dart-define=POLYCULE_IS_STABLE=true --dart-define=POLYCULE_VERSION=v$$VERSION$$
+        --dart-define=no_default_http_client=true --dart-define=cronetHttpNoPlay=true
+        --release --split-per-abi --target-platform="android-arm64"
+      - popd
+      - mv /tmp/build business.braid.polycule
+    ndk: r27
+    postbuild:
+      - mv $$OUT$$ unaligned.apk
+      - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
+        --replace unaligned.apk $$OUT$$
+
+  - versionName: 0.2.3
+    versionCode: 234
+    commit: d1a4d33844b0e5255d80790456fcbca8e95e54c8
+    sudo:
+      - apt-get update
+      - apt-get install -y gcc-multilib libc-dev make automake pkg-config libtool
+        nasm python3-jsonschema wget python3-jinja2 zip
+      - apt-get install -t bookworm-backports meson
+      - echo "deb https://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
+      - apt-get update
+      - apt-get install -y -t trixie openjdk-21-jdk-headless
+      - update-alternatives --auto java
+    output: build/app/outputs/flutter-apk/app-x86_64-release.apk
+    binary: https://gitlab.com/polycule_client/polycule/-/jobs/artifacts/v%v/raw/polycule-x86_64-v%v.apk?job=build%3Aapk%3Atag
+    srclibs:
+      - flutter@stable
+      - reproducible-apk-tools@v0.3.0
+      - media-kit-libmpv-android-video-build-preddit@6a17c15353ead50a52bd8414c872e40e9178b3a4
+    rm:
+      - ios
+      - linux
+      - macos
+      - web
+      - windows
+    prebuild:
+      - export FLUTTER_VERSION="$(cat flutter_version)"
+      - '[[ $FLUTTER_VERSION ]] || exit 1'
+      - git -C $$flutter$$ checkout -f $FLUTTER_VERSION
+      - rm $$flutter$$/engine/src/.gn
+      - cd ..
+      - rm -rf /tmp/build
+      - mv business.braid.polycule /tmp/build
+      - pushd /tmp/build
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - sed -i -e '1a add_link_options("LINKER:--build-id=none")' $PUB_CACHE/hosted/pub.dev/{flutter_zxing,flutter_olm}-*/*/CMakeLists.txt
+      - export file=$(ls .pub-cache/git/media-kit-*/libs/android/media_kit_libs_android_video/android/build.gradle)
+      - sed -i -e '/downloadDependencies/,/dependsOn/d' $file
+      - cd $$media-kit-libmpv-android-video-build-preddit$$/buildscripts
+      - sed -i -e '/download-sdk/d' download.sh
+      - sed -i -e '/git reset --hard/d' patch.sh
+      - sed -i -e 's/archs=(armv7l arm64 x86 x86_64)/archs=(x86_64)/' build.sh
+      - sed -i -e 's/sudo rm -r/echo/g' -e '/media-kit-android-helper/a sed -i -e
+        "/defaultConfig {/a ndk { abiFilters \\"x86_64\\"}" android/build.gradle'
+        bundle_default.sh
+      - sed -i -e 's/sudo//g' -e 's|./gradlew|gradle|g' *.sh
+      - popd
+      - mv /tmp/build business.braid.polycule
+      - sdkmanager 'ndk;r27c'
+    scandelete:
+      - .pub-cache
+    build:
+      - pushd $$media-kit-libmpv-android-video-build-preddit$$/buildscripts
+      - mkdir sdk
+      - ln -s $$SDK$$ ./sdk/android-sdk-linux
+      - bash bundle_default.sh
+      - popd
+      - mkdir -p build/media_kit_libs_android_video/output
+      - cp $$media-kit-libmpv-android-video-build-preddit$$/buildscripts/*.jar build/media_kit_libs_android_video/output
+      - cd ..
+      - mv business.braid.polycule /tmp/build
+      - pushd /tmp/build
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter gen-l10n
+      - $$flutter$$/bin/flutter build apk --dart-define=POLYCULE_IS_STABLE=true --dart-define=POLYCULE_VERSION=v$$VERSION$$
+        --dart-define=no_default_http_client=true --dart-define=cronetHttpNoPlay=true
+        --release --split-per-abi --target-platform="android-x64"
+      - popd
+      - mv /tmp/build business.braid.polycule
+    ndk: r27
+    postbuild:
+      - mv $$OUT$$ unaligned.apk
+      - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
+        --replace unaligned.apk $$OUT$$
+
 AllowedAPKSigningKeys: 24115d02b3a7bd20dac718eb893955757ee165f0a3c27896fecaf08a80791c72
 
 AutoUpdateMode: Version
@@ -185,5 +411,5 @@ VercodeOperation:
   - 10 * %c + 2
   - 10 * %c + 4
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 0.2.0
-CurrentVersionCode: 204
+CurrentVersion: 0.2.3
+CurrentVersionCode: 234
