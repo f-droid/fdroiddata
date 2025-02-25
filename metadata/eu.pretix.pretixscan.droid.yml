@@ -1029,7 +1029,71 @@ Builds:
       - popd
     ndk: 25.2.9519653
 
+  - versionName: 2.10.2
+    versionCode: 98
+    commit: 8acf51d465c35d99dcb5b6f27e152709bc58f674
+    subdir: pretixscan/app
+    submodules: true
+    sudo:
+      - echo "deb https://deb.debian.org/debian sid main" > /etc/apt/sources.list.d/sid.list
+      - echo "deb https://deb.debian.org/debian bullseye main" > /etc/apt/sources.list.d/bullseye.list
+      - apt-get update
+      - apt-get install -y file make maven
+      - apt-get install -y -t sid openjdk-8-jdk-headless
+      - apt-get install -y -t bullseye openjdk-11-jdk-headless
+    gradle:
+      - pretix
+    srclibs:
+      - eu-dcc-business-rules@v0.11.2-kotlin
+      - pretix-uvccamera@ad0ee922357254fddb9c92739de336df4f42dd9a
+      - saki4510t-libcommon@2.12.4
+    prebuild:
+      - sed -i -e '/repositories {/a mavenLocal()' ../build.gradle
+      - sed -i -e "s/ implementation(project(':android-libuvccamera',))/('com.github.raphaelm.UVCCamera:libuvccamera:ad0ee92235')
+        {exclude group:'com.serenegiant',module:'common'}/" -e "s/ implementation(project(':android-libusbcameracommon',))/('com.github.raphaelm.UVCCamera:usbCameraCommon:53d043fea2')
+        {exclude group:'com.serenegiant',module:'common'}/" -e '/repositories {/a
+        mavenLocal()' ../libpretixui-repo/libpretixui-android/build.gradle
+      - sed -i -e '/saki4510t/d' -e '/repositories {/a mavenLocal()' $$pretix-uvccamera$$/build.gradle
+      - cp ../../local.properties $$pretix-uvccamera$$/
+    scandelete:
+      - pretixscan/libpretixui-repo
+    build:
+      - export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+      - pushd $$saki4510t-libcommon$$/common
+      - gradle uploadArchives
+      - popd
+      - cp $$saki4510t-libcommon$$/common/build/outputs/aar/common-release.aar ../libpretixui-repo/android-libserenegiantcommon/common.aar
+      - mkdir -p ~/.m2/repository/com/serenegiant/common/2.12.4
+      - cp $$saki4510t-libcommon$$/common/build/intermediates/packaged-classes/release/classes.jar
+        ~/.m2/repository/com/serenegiant/common/2.12.4/common-2.12.4.jar
+      - cp $$saki4510t-libcommon$$/common/build/outputs/aar/common-release.aar ~/.m2/repository/com/serenegiant/common/2.12.4/common-2.12.4.aar
+      - cp $$saki4510t-libcommon$$/repository/com/serenegiant/common/2.12.4/common-2.12.4.pom
+        ~/.m2/repository/com/serenegiant/common/2.12.4/
+      - export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+      - pushd $$pretix-uvccamera$$
+      - cd libuvccamera
+      - gradle assembleRelease
+      - cd ../usbCameraCommon
+      - gradle assembleRelease
+      - popd
+      - cp $$pretix-uvccamera$$/libuvccamera/build/outputs/aar/libuvccamera-release.aar
+        ../libpretixui-repo/android-libuvccamera/libuvccamera.aar
+      - cp $$pretix-uvccamera$$/usbCameraCommon/build/outputs/aar/usbCameraCommon-release.aar
+        ../libpretixui-repo/android-libusbcameracommon/usbCameraCommon.aar
+      - pushd $$eu-dcc-business-rules$$/certlogic/certlogic-kotlin
+      - mvn clean install
+      - popd
+      - pushd ~/.m2/repository/eu/ehn/dcc/certlogic/certlogic-kotlin
+      - sed -i -e 's/latest/v0.11.2-kotlin/g' maven-metadata-local.xml
+      - mv latest v0.11.2-kotlin
+      - cd v0.11.2-kotlin
+      - sed -i -e 's/latest/v0.11.2-kotlin/g' certlogic-kotlin-latest.pom
+      - mv certlogic-kotlin-latest.pom certlogic-kotlin-v0.11.2-kotlin.pom
+      - mv certlogic-kotlin-latest.jar certlogic-kotlin-v0.11.2-kotlin.jar
+      - popd
+    ndk: 25.2.9519653
+
 AutoUpdateMode: None
 UpdateCheckMode: Tags
-CurrentVersion: 2.10.1
-CurrentVersionCode: 97
+CurrentVersion: 2.10.2
+CurrentVersionCode: 98
