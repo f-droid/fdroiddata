@@ -4,8 +4,8 @@ License: Apache-2.0
 AuthorName: Jigsaw
 AuthorEmail: jigsaw-code@google.com
 WebSite: https://getoutline.org
-SourceCode: https://github.com/Jigsaw-Code/outline-client
-IssueTracker: https://github.com/Jigsaw-Code/outline-client/issues
+SourceCode: https://github.com/Jigsaw-Code/outline-apps
+IssueTracker: https://github.com/Jigsaw-Code/outline-apps/issues
 
 AutoName: Outline
 Description: |-
@@ -14,7 +14,7 @@ Description: |-
   with any Shadowsocks server.
 
 RepoType: git
-Repo: https://github.com/Jigsaw-Code/outline-client.git
+Repo: https://github.com/Jigsaw-Code/outline-apps.git
 
 Builds:
   - versionName: 1.8.1
@@ -98,10 +98,175 @@ Builds:
       - npx cordova compile android --release -- --packageType=apk --gradleArg=--include-build=../../src/cordova/android/OutlineAndroidLib
     ndk: r23b
 
+  - versionName: 1.15.0
+    versionCode: 44
+    commit: 59a64ca38620263d3b004a3658fbea5502c9dd89
+    sudo:
+      - apt-get update
+      - apt-get install -y make npm
+      - apt-get install -y -t bookworm-backports golang-go
+      - sysctl fs.inotify.max_user_watches=524288 || true
+    output: client/platforms/android/app/build/outputs/apk/**/*.apk
+    rm:
+      - client/src/cordova/apple
+      - client/src/cordova/plugin/apple
+      - client/electron
+      - client/src/www/app/main.electron.ts
+      - client/src/www/app/outline_server_repository/vpn.electron.ts
+      - server_manager
+      - third_party
+    prebuild:
+      - sed -i -e '/"electron/d' -e '/puppeteer/d' -e '/engines/,/^  },/d' {.,client}/package.json
+      - sed -i -e '/copy_third_party/d' client/src/cordova/plugin/plugin.xml
+      - sed -i -z -E -e 's|<source-file[^>]+tun2socks[^>]+>||g' client/src/cordova/plugin/plugin.xml
+      - sed -i -e 's/buildNumber.*/buildNumber:\ $$VERCODE$$,/' client/build/get_build_parameters.mjs
+      - sed -i -e '/throw/d' client/src/www/build.action.mjs
+      - sed -i -e '/client\/go\/build/d' client/src/cordova/setup.action.mjs
+      - sed -i -e 's|-target=android|-target=android/arm|' client/go/Taskfile.yml
+      - npm install
+      - npm run action client/src/cordova/setup android -- --buildMode=release --versionName=$$VERSION$$
+      - sed -i -e 's/enable true/enable false/' -e '/defaultConfig {/a ndk { abiFilters
+        "armeabi-v7a" }' client/platforms/android/app/build.gradle
+    scandelete:
+      - node_modules
+    build:
+      - sdkmanager 'build-tools;32.0.0' 'platforms;android-32'
+      - npm run action client/go/build android
+      - cd client
+      - cp output/build/android/tun2socks.aar platforms/android/app/src/main/libs/tun2socks.aar
+      - mkdir -p plugins/cordova-plugin-outline/android/libs/tun2socks.aar
+      - cp output/build/android/tun2socks.aar plugins/cordova-plugin-outline/android/libs/tun2socks.aar
+      - npx cordova compile android --release -- --packageType=apk --gradleArg=--include-build=../../src/cordova/android/OutlineAndroidLib
+    ndk: r27c
+
+  - versionName: 1.15.0
+    versionCode: 45
+    commit: 59a64ca38620263d3b004a3658fbea5502c9dd89
+    sudo:
+      - apt-get update
+      - apt-get install -y make npm
+      - apt-get install -y -t bookworm-backports golang-go
+      - sysctl fs.inotify.max_user_watches=524288 || true
+    output: client/platforms/android/app/build/outputs/apk/**/*.apk
+    rm:
+      - client/src/cordova/apple
+      - client/src/cordova/plugin/apple
+      - client/electron
+      - client/src/www/app/main.electron.ts
+      - client/src/www/app/outline_server_repository/vpn.electron.ts
+      - server_manager
+      - third_party
+    prebuild:
+      - sed -i -e '/"electron/d' -e '/puppeteer/d' -e '/engines/,/^  },/d' {.,client}/package.json
+      - sed -i -e '/copy_third_party/d' client/src/cordova/plugin/plugin.xml
+      - sed -i -z -E -e 's|<source-file[^>]+tun2socks[^>]+>||g' client/src/cordova/plugin/plugin.xml
+      - sed -i -e 's/buildNumber.*/buildNumber:\ $$VERCODE$$,/' client/build/get_build_parameters.mjs
+      - sed -i -e '/throw/d' client/src/www/build.action.mjs
+      - sed -i -e '/client\/go\/build/d' client/src/cordova/setup.action.mjs
+      - sed -i -e 's|-target=android|-target=android/arm64|' client/go/Taskfile.yml
+      - npm install
+      - npm run action client/src/cordova/setup android -- --buildMode=release --versionName=$$VERSION$$
+      - sed -i -e 's/enable true/enable false/' -e '/defaultConfig {/a ndk { abiFilters
+        "arm64-v8a" }' client/platforms/android/app/build.gradle
+    scandelete:
+      - node_modules
+    build:
+      - sdkmanager 'build-tools;32.0.0' 'platforms;android-32'
+      - npm run action client/go/build android
+      - cd client
+      - cp output/build/android/tun2socks.aar platforms/android/app/src/main/libs/tun2socks.aar
+      - mkdir -p plugins/cordova-plugin-outline/android/libs/tun2socks.aar
+      - cp output/build/android/tun2socks.aar plugins/cordova-plugin-outline/android/libs/tun2socks.aar
+      - npx cordova compile android --release -- --packageType=apk --gradleArg=--include-build=../../src/cordova/android/OutlineAndroidLib
+    ndk: r27c
+
+  - versionName: 1.15.0
+    versionCode: 46
+    commit: 59a64ca38620263d3b004a3658fbea5502c9dd89
+    sudo:
+      - apt-get update
+      - apt-get install -y make npm
+      - apt-get install -y -t bookworm-backports golang-go
+      - sysctl fs.inotify.max_user_watches=524288 || true
+    output: client/platforms/android/app/build/outputs/apk/**/*.apk
+    rm:
+      - client/src/cordova/apple
+      - client/src/cordova/plugin/apple
+      - client/electron
+      - client/src/www/app/main.electron.ts
+      - client/src/www/app/outline_server_repository/vpn.electron.ts
+      - server_manager
+      - third_party
+    prebuild:
+      - sed -i -e '/"electron/d' -e '/puppeteer/d' -e '/engines/,/^  },/d' {.,client}/package.json
+      - sed -i -e '/copy_third_party/d' client/src/cordova/plugin/plugin.xml
+      - sed -i -z -E -e 's|<source-file[^>]+tun2socks[^>]+>||g' client/src/cordova/plugin/plugin.xml
+      - sed -i -e 's/buildNumber.*/buildNumber:\ $$VERCODE$$,/' client/build/get_build_parameters.mjs
+      - sed -i -e '/throw/d' client/src/www/build.action.mjs
+      - sed -i -e '/client\/go\/build/d' client/src/cordova/setup.action.mjs
+      - sed -i -e 's|-target=android|-target=android/386|' client/go/Taskfile.yml
+      - npm install
+      - npm run action client/src/cordova/setup android -- --buildMode=release --versionName=$$VERSION$$
+      - sed -i -e 's/enable true/enable false/' -e '/defaultConfig {/a ndk { abiFilters
+        "x86" }' client/platforms/android/app/build.gradle
+    scandelete:
+      - node_modules
+    build:
+      - sdkmanager 'build-tools;32.0.0' 'platforms;android-32'
+      - npm run action client/go/build android
+      - cd client
+      - cp output/build/android/tun2socks.aar platforms/android/app/src/main/libs/tun2socks.aar
+      - mkdir -p plugins/cordova-plugin-outline/android/libs/tun2socks.aar
+      - cp output/build/android/tun2socks.aar plugins/cordova-plugin-outline/android/libs/tun2socks.aar
+      - npx cordova compile android --release -- --packageType=apk --gradleArg=--include-build=../../src/cordova/android/OutlineAndroidLib
+    ndk: r27c
+
+  - versionName: 1.15.0
+    versionCode: 47
+    commit: 59a64ca38620263d3b004a3658fbea5502c9dd89
+    sudo:
+      - apt-get update
+      - apt-get install -y make npm
+      - apt-get install -y -t bookworm-backports golang-go
+      - sysctl fs.inotify.max_user_watches=524288 || true
+    output: client/platforms/android/app/build/outputs/apk/**/*.apk
+    rm:
+      - client/src/cordova/apple
+      - client/src/cordova/plugin/apple
+      - client/electron
+      - client/src/www/app/main.electron.ts
+      - client/src/www/app/outline_server_repository/vpn.electron.ts
+      - server_manager
+      - third_party
+    prebuild:
+      - sed -i -e '/"electron/d' -e '/puppeteer/d' -e '/engines/,/^  },/d' {.,client}/package.json
+      - sed -i -e '/copy_third_party/d' client/src/cordova/plugin/plugin.xml
+      - sed -i -z -E -e 's|<source-file[^>]+tun2socks[^>]+>||g' client/src/cordova/plugin/plugin.xml
+      - sed -i -e 's/buildNumber.*/buildNumber:\ $$VERCODE$$,/' client/build/get_build_parameters.mjs
+      - sed -i -e '/throw/d' client/src/www/build.action.mjs
+      - sed -i -e '/client\/go\/build/d' client/src/cordova/setup.action.mjs
+      - sed -i -e 's|-target=android|-target=android/amd64|' client/go/Taskfile.yml
+      - npm install
+      - npm run action client/src/cordova/setup android -- --buildMode=release --versionName=$$VERSION$$
+      - sed -i -e 's/enable true/enable false/' -e '/defaultConfig {/a ndk { abiFilters
+        "x86_64" }' client/platforms/android/app/build.gradle
+    scandelete:
+      - node_modules
+    build:
+      - sdkmanager 'build-tools;32.0.0' 'platforms;android-32'
+      - npm run action client/go/build android
+      - cd client
+      - cp output/build/android/tun2socks.aar platforms/android/app/src/main/libs/tun2socks.aar
+      - mkdir -p plugins/cordova-plugin-outline/android/libs/tun2socks.aar
+      - cp output/build/android/tun2socks.aar plugins/cordova-plugin-outline/android/libs/tun2socks.aar
+      - npx cordova compile android --release -- --packageType=apk --gradleArg=--include-build=../../src/cordova/android/OutlineAndroidLib
+    ndk: r27c
+
 MaintainerNotes: The upstream version code is generated based on the timestamp. We
   just increase it for every update.
 
+ArchivePolicy: 6
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: 1.12.1
-CurrentVersionCode: 43
+CurrentVersion: 1.15.0
+CurrentVersionCode: 47
