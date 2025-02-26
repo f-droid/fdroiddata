@@ -42,6 +42,25 @@ variables:
   - echo "locales locales/locales_to_be_generated multiselect en_US.UTF-8 UTF-8" | debconf-set-selections
   - apt-get install -qy --no-install-recommends fdroidserver apksigner mercurial git git-svn brz python3-launchpadlib locales curl
 
+.set_up_test_keystore: &set_up_test_keystore
+  - cp -a $fdroidserver/tests/gnupghome $fdroidserver/tests/keystore.jks $CI_PROJECT_DIR/
+  - grep '^key.*pass' $fdroidserver/tests/config.yml | sed 's,\x3a ,=,' > $CI_PROJECT_DIR/variables
+  - |
+    tee --append $CI_PROJECT_DIR/variables <<EOF
+        gpghome=$CI_PROJECT_DIR/gnupghome
+        keystore=$CI_PROJECT_DIR/keystore.jks
+        serverwebroot=/tmp
+        export gpghome keypass keystorepass keystore serverwebroot
+    EOF
+  - source $CI_PROJECT_DIR/variables
+  # silence warnings
+  - chmod 0600 config.yml config/*.yml config/*/*.yml
+  - chmod 0700 $gpghome
+  # make fake 'ciarang' index signing key
+  - keytool -keyclone -alias 4e7da5b7 -dest ciarang
+        -keypass:env keypass -new:env keypass -storepass:env keystorepass -keystore $keystore
+  - sed -i 's,^\(gpgkey\x3a\).*,\1 F9A6B8DF7566FCAB173AAB3516D6C4D3CE71F7FB,' config.yml
+
 .get_target_source_refs: &get_target_source_refs
   - |
     if [ "$CI_PROJECT_PATH" = "fdroid/fdroiddata" ] && [ "$CI_COMMIT_BRANCH" = "$CI_DEFAULT_BRANCH" ]; then
@@ -613,3 +632,62 @@ weblate merge conflict:
       fi
     - git diff --exit-code
     - exit $EXITVALUE
+
+
+PUBLISH:
+  image: debian:bullseye-backports
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        paths:
+          - .gitlab-ci.yml
+          - config.yml
+          - config/*.yml
+          - config/*/*.yml
+    # only check pushes to fdroids own repo
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_PROJECT_PATH == "fdroid/fdroiddata"
+      changes:
+        compare_to: 'refs/heads/master'
+        paths:
+          - .gitlab-ci.yml
+          - config.yml
+          - config/*.yml
+          - config/*/*.yml
+  script:
+    - apt-get update
+    - apt-get -qy upgrade
+    - apt-get -qy install --no-install-recommends -t bullseye-backports
+        androguard
+        apksigner
+        curl
+        default-jdk-headless
+        git
+        gpg
+        gpg-agent
+        python3-asn1crypto
+        python3-defusedxml
+        python3-git
+        python3-ruamel.yaml
+        python3-yaml
+        rsync
+    - export fdroidserver=$CI_PROJECT_DIR/fdroidserver
+    - export PATH=$fdroidserver:$PATH
+    - *install_fdroid_server
+
+    - mkdir -p $CI_PROJECT_DIR/archive
+    - mkdir -p $CI_PROJECT_DIR/unsigned
+    - *set_up_test_keystore
+    - cp $fdroidserver/tests/urzip-release-unsigned.apk
+        $CI_PROJECT_DIR/unsigned/info.guardianproject.urzip_100.apk
+    - cp $fdroidserver/tests/metadata/info.guardianproject.urzip.yml
+        $CI_PROJECT_DIR/metadata/
+
+    # run signpkg.sh
+    - fdroid publish --verbose
+    - fdroid gpgsign --verbose
+    - rsync --progress repo/* $serverwebroot/
+
+    # run signindex.sh
+    - fdroid gpgsign --verbose
+    - fdroid signindex --verbose
+    - rsync --stats repo/* $serverwebroot/
