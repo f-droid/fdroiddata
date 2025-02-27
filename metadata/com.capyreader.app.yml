@@ -478,9 +478,26 @@ Builds:
       - free
     prebuild: sed -i -e '/firebase/d' -e '/gms.google/d' build.gradle.kts ../build.gradle.kts
 
+  - versionName: 2025.02.1111
+    versionCode: 1111
+    commit: 9b3c16dfe2fa6fc4910605c11dd5c3bcde7b8497
+    subdir: app
+    sudo:
+      - echo "deb https://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
+      - apt-get update
+      - apt-get install -y -t trixie openjdk-21-jdk-headless
+      - update-alternatives --auto java
+      - export CPUS_MAX=6
+      - export CPUS=$(getconf _NPROCESSORS_ONLN)
+      - for (( c=$CPUS_MAX; c<$CPUS; c++ )) ; do echo 0 > /sys/devices/system/cpu/cpu$c/online
+        ; done
+    gradle:
+      - free
+    prebuild: sed -i -e '/firebase/d' -e '/gms.google/d' build.gradle.kts ../build.gradle.kts
+
 AllowedAPKSigningKeys: 67437375a161f420219ddff1f281df292ccb5f057aa0caf56568a782b2816465
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags .*[0-9]$
-CurrentVersion: 2025.02.1108
-CurrentVersionCode: 1108
+CurrentVersion: 2025.02.1111
+CurrentVersionCode: 1111
