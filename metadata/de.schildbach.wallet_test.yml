@@ -2107,6 +2107,30 @@ Builds:
     gradle:
       - dev
 
+  - versionName: '10.25'
+    versionCode: 102500
+    commit: v10.25
+    subdir: wallet
+    sudo:
+      - ln -fs /usr/share/zoneinfo/CET /etc/localtime
+      - dpkg-reconfigure -f noninteractive tzdata
+      - echo "deb https://deb.debian.org/debian bullseye main" > /etc/apt/sources.list.d/bullseye.list
+      - apt-get update
+      - apt-get install -y gradle disorderfs
+      - apt-get install -y -t bullseye openjdk-11-jdk-headless
+      - update-java-alternatives --set java-1.11.0-openjdk-amd64
+    init:
+      - rm /home/vagrant/fdroidserver/gradlew-fdroid
+      - ln -s /usr/bin/gradle /home/vagrant/fdroidserver/gradlew-fdroid
+      - cd ../..
+      - mv de.schildbach.wallet_test de.schildbach.wallet_test_underlying
+      - mkdir de.schildbach.wallet_test
+      - disorderfs --sort-dirents=yes --reverse-dirents=no de.schildbach.wallet_test_underlying
+        de.schildbach.wallet_test
+      - cd de.schildbach.wallet_test/wallet
+    gradle:
+      - dev
+
 AllowedAPKSigningKeys:
   - 939150041d8d943ad45d0e9bc390c3ea11ac0ac0685f2d774191fde29b6549ee
   - 58dcd8a0edf2a590683ba022d22a8dca5659aabf4728741a5c07af738d53db38
@@ -2118,5 +2142,5 @@ MaintainerNotes: |-
 
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: '10.24'
-CurrentVersionCode: 102400
+CurrentVersion: '10.25'
+CurrentVersionCode: 102500
