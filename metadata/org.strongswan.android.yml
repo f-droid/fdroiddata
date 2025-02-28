@@ -376,7 +376,70 @@ Builds:
       - ./configure --disable-defaults
       - make dist -j $(nproc)
 
+  - versionName: 2.5.4
+    versionCode: 88
+    commit: 0bce9839c9743f474d30332838dc5fe7f674b245
+    subdir: src/frontends/android/app
+    sudo:
+      - apt-get update
+      - apt-get install -y automake bison flex gettext gperf libtool make pkg-config
+    gradle:
+      - yes
+    srclibs:
+      - OpenSSL@OpenSSL_1_1_1t
+    prebuild:
+      - sed -i -e "/clean.dependsOn 'cleanNative'/d" build.gradle
+      - sdkmanager 'ndk;21.4.7075529' 'ndk;26.1.10909125'
+    scandelete:
+      - testing
+    build:
+      - lib="$PWD/src/main/jni/openssl"
+      - export ANDROID_NDK_HOME=/opt/android-sdk/ndk/21.4.7075529
+      - PATH=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
+      - pushd $$OpenSSL$$
+      - CC=armv7a-linux-androideabi16-clang ./Configure android-arm no-shared no-ssl3
+        no-engine no-dso no-asm no-hw no-comp no-stdio -fPIC -DOPENSSL_PIC -D__ANDROID_API__=16
+        -ffast-math -O3 -funroll-loops
+      - make -j $(nproc)
+      - mkdir -p "${lib}/armeabi-v7a"
+      - cp libcrypto.a ${lib}/armeabi-v7a/
+      - make distclean
+      - CC=aarch64-linux-android21-clang ./Configure android-arm64 no-shared no-ssl3
+        no-engine no-dso no-asm no-hw no-comp no-stdio -fPIC -DOPENSSL_PIC -D__ANDROID_API__=21
+        -ffast-math -O3 -funroll-loops
+      - make -j $(nproc)
+      - mkdir -p "${lib}/arm64-v8a"
+      - cp libcrypto.a ${lib}/arm64-v8a/
+      - make distclean
+      - CC=i686-linux-android16-clang ./Configure android-x86 no-shared no-ssl3 no-engine
+        no-dso no-asm no-hw no-comp no-stdio -fPIC -DOPENSSL_PIC -D__ANDROID_API__=16
+        -ffast-math -O3 -funroll-loops
+      - make -j $(nproc)
+      - mkdir -p "${lib}/x86"
+      - cp libcrypto.a ${lib}/x86/
+      - make distclean
+      - CC=x86_64-linux-android21-clang ./Configure android-x86_64 no-shared no-ssl3
+        no-engine no-dso no-asm no-hw no-comp no-stdio -fPIC -DOPENSSL_PIC -D__ANDROID_API__=21
+        -ffast-math -O3 -funroll-loops
+      - make -j $(nproc)
+      - mkdir -p "${lib}/x86_64"
+      - cp libcrypto.a ${lib}/x86_64/
+      - cp -R include/ ${lib}/
+      - make distclean
+      - popd
+      - export ANDROID_NDK_HOME=/opt/android-sdk/ndk/26.1.10909125
+      - echo "LOCAL_PATH := \$(call my-dir)" >"${lib}/Android.mk"
+      - echo "include \$(CLEAR_VARS)" >>"${lib}/Android.mk"
+      - echo "LOCAL_MODULE := libcrypto_static" >>"${lib}/Android.mk"
+      - echo "LOCAL_SRC_FILES := \$(TARGET_ARCH_ABI)/libcrypto.a" >>"${lib}/Android.mk"
+      - echo "LOCAL_EXPORT_C_INCLUDES := \$(LOCAL_PATH)/include" >>"${lib}/Android.mk"
+      - echo "include \$(PREBUILT_STATIC_LIBRARY)" >>"${lib}/Android.mk"
+      - cd ../../../../
+      - ./autogen.sh
+      - ./configure --disable-defaults
+      - make dist -j $(nproc)
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^android
-CurrentVersion: 2.5.3
-CurrentVersionCode: 87
+CurrentVersion: 2.5.4
+CurrentVersionCode: 88
