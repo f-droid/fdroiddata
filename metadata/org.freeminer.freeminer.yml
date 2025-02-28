@@ -7,20 +7,6 @@ IssueTracker: https://github.com/freeminer/freeminer/issues
 Changelog: https://github.com/freeminer/freeminer/blob/HEAD/CHANGELOG.md#changelog
 
 Name: freeminer
-Description: |-
-  Fork of https://f-droid.org/packages/net.minetest.minetest, a block sandbox game and a game engine
-  inspired by InfiniMiner, Minecraft and the like.
-
-  Features:
-
-  * Explore, dig and build in a voxel world, and craft stuff from raw materials to help you along the way.
-  * Play with your friends on public servers or self hosted servers
-  * Easy plugin based Modding API used to add blocks, tools and features to the game.
-  * Voxel based lighting with gameplay consequences (light caves and buildings with torches)
-  * Almost infinite world and several beautiful map generators.
-  * Runs natively on Windows, Linux, OS X, FreeBSD and Android
-  * Supports multiple languages, translated by the community.
-  * A constant development to add new functionalities for end-users
 
 RepoType: git
 Repo: https://github.com/freeminer/freeminer.git
@@ -170,8 +156,36 @@ Builds:
       - for n in 1 2 3; do make -j $(nproc || sysctl -n hw.ncpu || echo 2) TARGET_arm64=1
       - break; done
 
-ArchivePolicy: 0
+  - versionName: 5.10.0
+    versionCode: 5100000
+    commit: 1932c0582ed1253578d92426a572ff8705b86080
+    subdir: android/app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y cmake gcc-multilib gettext make wget xz-utils
+    gradle:
+      - yes
+    srclibs:
+      - minetest_android_deps@5.10.0
+    prebuild: sed -i -e 's/enable true/enable false/' -e '/preBuild.dependsOn getDeps/d'
+      -e 's/versionCode .*/versionCode $$VERCODE$$/' build.gradle ../native/build.gradle
+    scandelete:
+      - src/external/msgpack-c/fuzz
+    build:
+      - export ndkversion=$(grep "ndk_version = " ../build.gradle | cut -d "'" -f
+        2)
+      - sdkmanager "ndk;$ndkversion"
+      - export ANDROID_NDK=$$SDK$$/ndk/$ndkversion
+      - pushd $$minetest_android_deps$$
+      - ./build.sh --all armeabi-v7a
+      - ./build.sh --all arm64-v8a
+      - ./build.sh --all x86
+      - ./build.sh --all x86_64
+      - popd
+      - mv $$minetest_android_deps$$/deps ../native
+
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: 0.4.14.8.120
-CurrentVersionCode: 123
+CurrentVersion: 5.10.0
+CurrentVersionCode: 5100000
