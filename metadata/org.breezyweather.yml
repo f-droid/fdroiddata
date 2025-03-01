@@ -112,6 +112,21 @@ Builds:
     binary: https://github.com/breezy-weather/breezy-weather/releases/download/v5.4.2/breezy-weather-v%v.apk
     prebuild: sed -i -e '/isEnable/s/true/false/' build.gradle.kts
 
+  - versionName: 5.4.3_freenet
+    versionCode: 50403
+    commit: dfec91fc433eb66c9a24cdd1ced921980127bdf7
+    subdir: app
+    gradle:
+      - freenet
+    binary: https://github.com/breezy-weather/breezy-weather/releases/download/v5.4.3/breezy-weather-v%v.apk
+    srclibs:
+      - reproducible-apk-tools@v0.3.0
+    prebuild: sed -i -e '/isEnable/s/true/false/' build.gradle.kts
+    postbuild:
+      - mv $$OUT$$ unaligned.apk
+      - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
+        --replace unaligned.apk $$OUT$$
+
 AllowedAPKSigningKeys: 29d435f70aa9aec3c1faff7f7ffa6e15785088d87f06ecfcab9c3cc62dc269d8
 
 MaintainerNotes: Per flavor versionName suffix does not allow to template the Binaries
@@ -119,5 +134,5 @@ MaintainerNotes: Per flavor versionName suffix does not allow to template the Bi
 
 AutoUpdateMode: None
 UpdateCheckMode: Tags ^v[\d.]+$
-CurrentVersion: 5.4.2_freenet
-CurrentVersionCode: 50402
+CurrentVersion: 5.4.3_freenet
+CurrentVersionCode: 50403
