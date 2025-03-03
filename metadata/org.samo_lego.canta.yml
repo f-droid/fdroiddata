@@ -683,11 +683,22 @@ Builds:
     versionCode: 209
     commit: 798455cd206f0bb9b2b83614a7897a7ac82c391c
     subdir: app
-    gradle:
-      - yes
+    output: build/outputs/apk/release/*apk
     binary: https://github.com/samolego/Canta/releases/download/%v/app-release.apk
     rm:
       - docs
+    prebuild: gradle clean
+    build:
+      - mkdir upstream
+      - pushd upstream
+      - curl -L -o upstream.apk https://github.com/samolego/Canta/releases/download/$$VERSION$$/app-release.apk
+      - unzip -q upstream.apk
+      - export upstreamhash=$(sha256sum assets/dexopt/baseline.prof|cut -d " " -f1)
+      - popd
+      - for i in {1..10}; do gradle clean assembleRelease; mkdir local; pushd local;
+        unzip -q ../build/outputs/apk/release/*.apk; export localhash=$(sha256sum
+        assets/dexopt/baseline.prof|cut -d " " -f1); [[ $localhash == $upstreamhash
+        ]] && break ; popd; rm -fr local; done
 
 AllowedAPKSigningKeys: 0a2640317c43272188c3e13194c15460691f12c39ea19bba727dd67fb56289d4
 
