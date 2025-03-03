@@ -1,0 +1,39 @@
+Categories:
+  - Internet
+License: GPL-2.0-or-later
+AuthorName: Arthur K.
+AuthorEmail: me@wzray.com
+SourceCode: https://gitlab.com/openconnect/ics-openconnect
+IssueTracker: https://gitlab.com/openconnect/ics-openconnect/-/issues
+
+AutoName: OpenConnect
+
+RepoType: git
+Repo: https://gitlab.com/openconnect/ics-openconnect.git
+Binaries: https://gitlab.com/openconnect/ics-openconnect/-/releases/v%v/downloads/OpenConnect.apk
+
+Builds:
+  - versionName: '1.12'
+    versionCode: 1120
+    commit: v1.12
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y git autoconf automake libtool gettext make patch unzip
+        ant wget xz-utils pkg-config
+    gradle:
+      - yes
+    output: app/build/outputs/apk/release/*.apk
+    rm:
+      - external/openconnect/tests/softhsm/*
+    prebuild: sdkmanager "build-tools;34.0.0" "platforms;android-35"
+    build: make -j$(nproc) -C external NDK=$$NDK$$ CFLAGS="-ffile-prefix-map=$(pwd)/external=/build"
+      >/dev/null
+    ndk: r27c
+
+AllowedAPKSigningKeys: 4c965471abda2f1959722e0aa15adbe3d3189d98b590e1f0001ae6934ca191e3
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags v*
+CurrentVersion: '1.12'
+CurrentVersionCode: 1120
