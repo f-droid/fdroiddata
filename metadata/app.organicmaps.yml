@@ -2071,11 +2071,41 @@ Builds:
       - ./bootstrap.sh
       - ./b2 headers
 
+  - versionName: 2025.03.02-7-FDroid
+    versionCode: 25030207
+    commit: 41ea6bf4dfc9d1c0167841b4fc4eed94b14f2bf1
+    subdir: android/app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y g++ ninja-build
+    gradle:
+      - fdroid
+    rm:
+      - iphone
+      - qt
+      - tools/shaders_compiler
+      - xcode
+    prebuild:
+      - sdkmanager 'cmake;3.30.3'
+      - sed -i -e '/com.google.firebase/d; /gms.google-services/d; /android.gms:play-services/d'
+        build.gradle
+      - touch secure.properties
+    scanignore:
+      - data/*.bin
+    scandelete:
+      - 3party
+      - package.json
+    build:
+      - cd ../../3party/boost
+      - ./bootstrap.sh
+      - ./b2 headers
+
 MaintainerNotes: scanner might detect 'com/google/android/gms/location' and more from
   'org.microg.gms:play-services-location`
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags .*android$
 UpdateCheckData: android/app/src/fdroid/play/version.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 2025.02.17-3-FDroid
-CurrentVersionCode: 25021703
+CurrentVersion: 2025.03.02-7-FDroid
+CurrentVersionCode: 25030207
