@@ -530,7 +530,32 @@ Builds:
     scandelete:
       - node_modules
 
+  - versionName: 3.2.3
+    versionCode: 30203
+    commit: b75e29db4f94579923fed1e11a52e65349d5563e
+    subdir: android/app
+    sudo:
+      - sysctl fs.inotify.max_user_watches=524288 || true
+      - apt-get update
+      - apt-get install -y make npm
+    gradle:
+      - fdroid
+    rm:
+      - android/app/build_google.gradle
+    prebuild:
+      - sed -i -e '/gms/d' ../build.gradle
+      - sed -i -e '/geolocation/d' ../../package.json
+      - cd ../..
+      - echo R1BGX2tleT1GRHJvaWQtOWtwbHc4YW4K | base64 --decode > .env
+      - echo c2lnbmFsZW1lbnRfdXJsPWh0dHBzOi8vd3d3Lmdlb3BvcnRhaWwuZ291di5mci93cC1qc29uL3dwL3YyLwo=
+        | base64 --decode >> .env
+      - npm install --build-from-source
+      - npm run build
+      - npx cap sync
+    scandelete:
+      - node_modules
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 3.2.2
-CurrentVersionCode: 30202
+CurrentVersion: 3.2.3
+CurrentVersionCode: 30203
