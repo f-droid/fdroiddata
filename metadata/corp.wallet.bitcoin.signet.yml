@@ -1,0 +1,58 @@
+AntiFeatures:
+  TetheredNet:
+    en-US: Network fee rates from developer website.
+Categories:
+  - Money
+License: GPL-3.0-only
+SourceCode: https://gitlab.com/bitcoin-wallet/bitcoin-wallet
+IssueTracker: https://gitlab.com/bitcoin-wallet/bitcoin-wallet/issues
+Translation: https://explore.transifex.com/bitcoin-wallet/bitcoin-wallet/
+Changelog: https://gitlab.com/bitcoin-wallet/bitcoin-wallet/-/raw/main/wallet/CHANGES
+Bitcoin: bc1qglkj2svuu3xsktup5xla8u2wjzlu8mfzk6509r
+
+AutoName: Bitcoin Wallet [signet]
+Description: |-
+  A Bitcoin wallet, allowing you to store, send and receive Bitcoins on your
+  device, both via QR codes and NFC. This is a test version of
+  https://f-droid.org/packages/de.schildbach.wallet that uses the Signet network, not the real
+  Bitcoin network.
+
+RepoType: git
+Repo: https://gitlab.com/bitcoin-wallet/bitcoin-wallet.git
+
+Builds:
+  - versionName: '11.01'
+    versionCode: 110100
+    commit: v11.01
+    subdir: wallet
+    sudo:
+      - ln -fs /usr/share/zoneinfo/CET /etc/localtime
+      - dpkg-reconfigure -f noninteractive tzdata
+      - apt-get update
+      - apt-get install -y gradle disorderfs
+      - apt-get install -y openjdk-17-jdk-headless
+    init:
+      - rm /home/vagrant/fdroidserver/gradlew-fdroid
+      - ln -s /usr/bin/gradle /home/vagrant/fdroidserver/gradlew-fdroid
+      - cd ../..
+      - mv corp.wallet.bitcoin.signet corp.wallet.bitcoin.signet_underlying
+      - mkdir corp.wallet.bitcoin.signet
+      - disorderfs --sort-dirents=yes --reverse-dirents=no corp.wallet.bitcoin.signet_underlying
+        corp.wallet.bitcoin.signet
+      - cd corp.wallet.bitcoin.signet/wallet
+    gradle:
+      - signet
+
+AllowedAPKSigningKeys:
+  - 939150041d8d943ad45d0e9bc390c3ea11ac0ac0685f2d774191fde29b6549ee
+  - 58dcd8a0edf2a590683ba022d22a8dca5659aabf4728741a5c07af738d53db38
+
+MaintainerNotes: |-
+  When adding new versions, the build recipe must follow the reference build at
+  https://gitlab.com/bitcoin-wallet/bitcoin-wallet/blob/main/build.Containerfile
+  as closely as possible. Otherwise, reproducibility will likely break at some point.
+
+AutoUpdateMode: None
+UpdateCheckMode: None
+CurrentVersion: '11.01'
+CurrentVersionCode: 110100
