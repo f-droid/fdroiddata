@@ -143,8 +143,34 @@ Builds:
       - export PUB_CACHE=$(pwd)/.pub-cache
       - $$flutter$$/bin/flutter build apk
 
+  - versionName: 1.0.11
+    versionCode: 14
+    commit: bfad3f92f2b8fdd327c962807828ece3b585fe45
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@3.24.3
+    rm:
+      - ios
+      - linux
+      - macos
+      - web
+      - windows
+    prebuild:
+      - sed -i -e 's/minSdkVersion .*/minSdkVersion 21/' -e '/minifyEnabled/,+1d'
+        android/app/build.gradle
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter packages pub get
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - echo -e '-keep class org.joda.time.** { *; }\n-keep class org.joda.convert.**
+        { *; }\n-dontwarn org.joda.convert.**' > android/app/proguard-rules.pro
+      - $$flutter$$/bin/flutter build apk
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 1.0.9
-CurrentVersionCode: 12
+CurrentVersion: 1.0.11
+CurrentVersionCode: 14
