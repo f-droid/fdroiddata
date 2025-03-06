@@ -63,9 +63,30 @@ Builds:
       - yes
     prebuild: sed -i '/^        bundletool {/,/^        }/d' ./build.gradle.kts
 
+  - versionName: 1.1.6
+    versionCode: 40
+    commit: 1.1.6
+    subdir: app
+    gradle:
+      - yes
+    srclibs:
+      - rustup@1.28.0
+    prebuild:
+      - sed -i '/^        bundletool {/,/^        }/d' ./build.gradle.kts
+      - $$rustup$$/rustup-init.sh -y --default-toolchain $(sed -n -E 's/channel =
+        "(.*)"/\1/p' ../rust-toolchain.toml)
+      - source $HOME/.cargo/env
+      - rustup target add x86_64-linux-android i686-linux-android aarch64-linux-android
+        armv7-linux-androideabi
+      - echo -e "rust.rustcCommand=$(which rustc)\nrust.cargoCommand=$(which cargo)"
+        >> ../local.properties
+      - sed -i -e "s|\"cargo\",|\"$(which cargo)\",|" -e '/cargo {/a extraCargoBuildArguments
+        = remapCargo' build.gradle.kts
+    ndk: r28
+
 AllowedAPKSigningKeys: d76f6207d8182cdc1ee2dcbfe74db2edf37f36b82d084b017f79fe9f067121e4
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 1.0.19
-CurrentVersionCode: 33
+CurrentVersion: 1.1.6
+CurrentVersionCode: 40
