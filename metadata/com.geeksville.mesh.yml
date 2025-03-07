@@ -262,10 +262,24 @@ Builds:
         export localhash=$(sha256sum assets/dexopt/baseline.prof|cut -d " " -f1);
         [[ $localhash == $upstreamhash ]] && break ; popd; rm -fr local; done
 
+  - versionName: 2.5.19
+    versionCode: 30519
+    commit: e0cedc5e010a22e4def649575afc004a677e1a4d
+    subdir: app
+    submodules: true
+    sudo:
+      - export CPUS_MAX=16
+      - export CPUS=$(getconf _NPROCESSORS_ONLN)
+      - for (( c=$CPUS_MAX; c<$CPUS; c++ )) ; do echo 0 > /sys/devices/system/cpu/cpu$c/online
+        ; done
+    gradle:
+      - fdroid
+    prebuild: sed -i -e '/(useCrashlytics)/,+3d' -e '/firebase/d' -e '/gms/d' ../build.gradle
+      build.gradle
+
 AllowedAPKSigningKeys: a93b456568c175db0800a09f06777f892d812432adb8a3df73bc3e7f06c80c6d
 
-AutoUpdateMode: Version %v
-UpdateCheckMode: HTTP
-UpdateCheckData: https://github.com/meshtastic/Meshtastic-Android/releases/latest/download/version_info.txt|versionCode=(\d+)|.|versionName=(.+)
-CurrentVersion: 2.5.17
-CurrentVersionCode: 30517
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: 2.5.19
+CurrentVersionCode: 30519
