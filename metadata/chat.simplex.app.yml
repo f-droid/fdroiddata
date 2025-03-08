@@ -2129,11 +2129,67 @@ Builds:
       - ARCHES="aarch64" ./scripts/android/build-android.sh -gs || ARCHES="aarch64"
         ./scripts/android/build-android.sh -gs
 
+  - versionName: '6.3'
+    versionCode: 279
+    commit: 89dddab06082e5b43fb9f212de1c60a07307779f
+    timeout: 60000
+    sudo:
+      - apt-get update
+      - apt-get install -y xz-utils zipalign zip
+      - mkdir -m 0755 /nix
+      - chown vagrant /nix
+      - chown -R vagrant /tmp
+    init:
+      - TAG=$(git tag --points-at HEAD | head -n1) && export TAG=${TAG%%-*}
+      - git checkout ${TAG}-armv7a
+    output: ./simplex-chat-armeabi-v7a.apk
+    rm:
+      - blog
+      - docs
+      - images
+      - packages
+      - website
+    prebuild:
+      - cp -r ./apps/multiplatform/gradle .
+      - sed -i -e '/maven.pkg.jetbrains.space/d' ./apps/multiplatform/{build,settings}.gradle.kts
+      - sed -i -e 's/android.version_code=.*/android.version_code=$$VERCODE$$/' ./apps/multiplatform/gradle.properties
+    build:
+      - gradle -v
+      - export USER=vagrant
+      - ARCHES="armv7a" ./scripts/android/build-android.sh -gs
+
+  - versionName: '6.3'
+    versionCode: 280
+    commit: 89dddab06082e5b43fb9f212de1c60a07307779f
+    timeout: 60000
+    sudo:
+      - apt-get update
+      - apt-get install -y xz-utils zipalign zip
+      - mkdir -m 0755 /nix
+      - chown vagrant /nix
+      - chown -R vagrant /tmp
+    output: ./simplex-chat-arm64-v8a.apk
+    rm:
+      - blog
+      - docs
+      - images
+      - packages
+      - website
+    prebuild:
+      - cp -r ./apps/multiplatform/gradle .
+      - sed -i -e '/maven.pkg.jetbrains.space/d' ./apps/multiplatform/{build,settings}.gradle.kts
+      - sed -i -e 's/android.version_code=.*/android.version_code=$$VERCODE$$/' ./apps/multiplatform/gradle.properties
+    build:
+      - gradle -v
+      - export USER=vagrant
+      - ARCHES="aarch64" ./scripts/android/build-android.sh -gs || ARCHES="aarch64"
+        ./scripts/android/build-android.sh -gs
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v[\d.]+$
 VercodeOperation:
   - '%c'
   - '%c+1'
 UpdateCheckData: apps/multiplatform/gradle.properties|android\.version_code\s*=\s*(\d+)|apps/multiplatform/gradle.properties|android\.version_name\s*=\s*([\d.]+)
-CurrentVersion: 6.2.5
-CurrentVersionCode: 275
+CurrentVersion: '6.3'
+CurrentVersionCode: 280
