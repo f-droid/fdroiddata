@@ -4,9 +4,9 @@ License: Apache-2.0
 AuthorName: FOSSASIA
 AuthorEmail: fossasia@googlegroups.com
 AuthorWebSite: https://fossasia.org/
-SourceCode: https://github.com/fossasia/badge-magic-android
-IssueTracker: https://github.com/fossasia/badge-magic-android/issues
-Changelog: https://github.com/fossasia/badge-magic-android/releases
+SourceCode: https://github.com/fossasia/badgemagic-app
+IssueTracker: https://github.com/fossasia/badgemagic-app/issues
+Changelog: https://github.com/fossasia/badgemagic-app/releases
 
 AutoName: Badge Magic
 Description: The Badge Magic Android app lets you create scrolling symbols and text
@@ -15,7 +15,7 @@ Description: The Badge Magic Android app lets you create scrolling symbols and t
   to the LED badge we use Bluetooth. The project is based on the work of <a href="https://github.com/Nilhcem">Nilhcem</a>.
 
 RepoType: git
-Repo: https://github.com/fossasia/badge-magic-android
+Repo: https://github.com/fossasia/badgemagic-app
 
 Builds:
   - versionName: 1.0.1
@@ -81,7 +81,30 @@ Builds:
       - sed -i -e '/LOCAL_KEY/d' build.gradle
       - echo -e '\n' 'org.gradle.jvmargs=-Xmx1g' >> ../gradle.properties
 
-AutoUpdateMode: Version
-UpdateCheckMode: Tags
-CurrentVersion: 1.7.0
-CurrentVersionCode: 9
+  - versionName: 1.11.63
+    versionCode: 246
+    commit: v1.11.63
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@stable
+    prebuild:
+      - flutterVersion=$(sed -n -E "s/.*flutter:\ '(.*)'/\1/p" pubspec.yaml| head
+        -n1)
+      - '[[ $flutterVersion ]] || exit 1'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter packages pub get
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export PATH=$$flutter$$/bin/:$PATH
+      - $$flutter$$/bin/flutter build apk --build-name $$VERSION$$ --build-number
+        $$VERCODE$$
+
+AutoUpdateMode: Version v%v
+UpdateCheckMode: HTTP
+UpdateCheckData: https://github.com/fossasia/badgemagic-app/releases/latest/download/versionCode.txt|(\d+)|https://github.com/fossasia/badgemagic-app/releases/latest|releases/tag/v([\d.]+)
+CurrentVersion: 1.11.63
+CurrentVersionCode: 246
