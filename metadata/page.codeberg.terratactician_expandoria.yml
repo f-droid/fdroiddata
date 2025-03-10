@@ -42,9 +42,32 @@ Builds:
       - cp ../game/assets -r src/main
     ndk: 26.1.10909125
 
+  - versionName: 0.3.0
+    versionCode: 30
+    commit: v0.3.0
+    subdir: app
+    submodules: true
+    sudo:
+      - mkdir -p /usr/local/cargo/
+      - chown vagrant /usr/local/cargo/
+    gradle:
+      - yes
+    srclibs:
+      - rustup@1.27.1
+    build:
+      - export RUSTFLAGS="-C link-args=-Wl,--build-id=none"
+      - export CARGO_HOME=/usr/local/cargo/
+      - RUST_VERSION=$(sed -n -E 's/.*image:\s"rust:(.*)"/\1/p' ../.forgejo/workflows/build.yaml)
+      - $$rustup$$/rustup-init.sh -y --default-toolchain $RUST_VERSION --target aarch64-linux-android
+      - source $CARGO_HOME/env
+      - cargo install cargo-ndk@3.5.4 --locked
+      - sed -i -e "/executable/s|cargo|$(which cargo)|" -e "/exec {/a environment
+        'CARGO_HOME', '$CARGO_HOME'" build.gradle
+    ndk: 26.1.10909125
+
 AllowedAPKSigningKeys: 86a89198e0dba7c5ba1f59738783b5bc097145819571abea9d91c6213e56b3db
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 0.2.6
-CurrentVersionCode: 26
+CurrentVersion: 0.3.0
+CurrentVersionCode: 30
