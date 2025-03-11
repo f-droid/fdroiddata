@@ -47,10 +47,28 @@ Builds:
     postbuild: $$reproducible-apk-tools$$/inplace-fix.py --page-size 16 fix-newlines
       "$$OUT$$" 'META-INF/services/*'
 
+  - versionName: 1.0.2
+    versionCode: 3
+    commit: c58dce774478642dbe646d586d559d405b7d55a2
+    subdir: app
+    sudo:
+      - echo "deb https://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
+      - apt-get update
+      - apt-get install -y -t trixie openjdk-21-jdk-headless
+      - update-alternatives --auto java
+    gradle:
+      - yes
+    srclibs:
+      - reproducible-apk-tools@v0.3.0
+    postbuild:
+      - mv $$OUT$$ unaligned.apk
+      - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
+        --replace unaligned.apk $$OUT$$
+
 AllowedAPKSigningKeys: 2c101f5b78bdc497ad4e3c5d714a61a198d454ba6b04936cc315b1f2641abfa2
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckName: Ignore
-CurrentVersion: 1.0.1
-CurrentVersionCode: 2
+CurrentVersion: 1.0.2
+CurrentVersionCode: 3
