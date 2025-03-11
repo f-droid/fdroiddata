@@ -1,0 +1,44 @@
+AntiFeatures:
+  NonFreeNet:
+    en-US: Depends on song.link
+Categories:
+  - Multimedia
+License: GPL-3.0-only
+AuthorName: acszo
+SourceCode: http://github.com/acszo/Redomi
+IssueTracker: https://github.com/acszo/Redomi/issues
+Translation: https://crowdin.com/project/redomi
+Changelog: https://github.com/acszo/Redomi/releases
+Donate: https://ko-fi.com/acszo
+
+AutoName: Redomi
+
+RepoType: git
+Repo: https://github.com/acszo/Redomi
+Binaries: https://github.com/acszo/Redomi/releases/download/%v/redomi-release-no-updater.apk
+
+Builds:
+  - versionName: 1.3.5
+    versionCode: 10305
+    commit: 878ba3132a8522bbf60ca9eeee1619814eef4199
+    subdir: app
+    sudo:
+      - export CPUS_MAX=16
+      - export CPUS=$(getconf _NPROCESSORS_ONLN)
+      - for (( c=$CPUS_MAX; c<$CPUS; c++ )) ; do echo 0 > /sys/devices/system/cpu/cpu$c/online
+        ; done
+    gradle:
+      - repo
+    srclibs:
+      - reproducible-apk-tools@v0.3.0
+    prebuild: sed -i -e '/keystoreProperties/d' build.gradle
+    postbuild: $$reproducible-apk-tools$$/inplace-fix.py --zipalign --page-size 16
+      fix-newlines $$OUT$$ 'META-INF/services/*'
+
+AllowedAPKSigningKeys: d59a225e7165baa3e367ac43c6be052ab40ecd5aab2ae15e989b8d665a4f9b70
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckName: com.acszo.redomi
+CurrentVersion: 1.3.5
+CurrentVersionCode: 10305
