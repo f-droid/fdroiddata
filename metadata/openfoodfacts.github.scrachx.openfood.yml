@@ -820,8 +820,47 @@ Builds:
       - export PUB_CACHE=$(pwd)/.pub-cache
       - $$flutter$$/bin/flutter build apk -t lib/entrypoints/android/main_fdroid.dart
 
+  - versionName: 4.19.0
+    versionCode: 1461
+    commit: v4.19.0
+    subdir: packages/smooth_app
+    sudo:
+      - echo "deb https://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
+      - apt-get update
+      - apt-get install -y -t trixie openjdk-21-jdk-headless
+      - update-alternatives --auto java
+    output: build/app/outputs/apk/release/app-release-unsigned.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - packages/smooth_app/ios
+      - packages/scanner/ml_kit
+      - packages/app_store/google_play
+      - packages/app_store/apple_app_store
+    prebuild:
+      - git -C $$flutter$$ checkout -f $(cat ../../flutter-version.txt)
+      - sed -i -e '/ml_kit/d' -e '/apple_/d' -e '/google_play/d' -e 's/version:.*/version:\
+        $$VERSION$$+$$VERCODE$$/' pubspec.yaml
+      - sed -i -e 's|app_flutter/smoothie.db|smoothie.db|' android/app/src/main/res/xml/backup_scheme.xml
+      - pushd android
+      - grep -rli 'org.openfoodfacts.scanner' * | xargs -i@ sed -i 's/org.openfoodfacts.scanner/openfoodfacts.github.scrachx.openfood/g'
+        @
+      - popd
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+    scanignore:
+      - packages/app_store/uri_store/pubspec.yaml
+      - packages/app_store/shared/pubspec.yaml
+      - packages/scanner/shared/pubspec.yaml
+      - packages/scanner/zxing/pubspec.yaml
+    scandelete:
+      - packages/smooth_app/.pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk -t lib/entrypoints/android/main_fdroid.dart
+
 AutoUpdateMode: Version v%v
 UpdateCheckMode: HTTP
 UpdateCheckData: https://github.com/openfoodfacts/smooth-app/releases/latest/download/version-code.txt|(\d+)|https://github.com/openfoodfacts/smooth-app/releases/latest|releases/tag/v([\d.]+)
-CurrentVersion: 4.18.1
-CurrentVersionCode: 1434
+CurrentVersion: 4.19.0
+CurrentVersionCode: 1461
