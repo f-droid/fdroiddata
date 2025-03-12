@@ -821,6 +821,53 @@ Builds:
     ndk: r23b
 
   - versionName: 1.17.0
+    versionCode: 582
+    commit: 7f21d1f9082a43803e05c37f021912e012145aa5
+    subdir: app
+    submodules: true
+    output: build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
+    binary: https://github.com/localsend/localsend/releases/download/v%v/LocalSend-%v-android-arm32v7.apk
+    srclibs:
+      - rustup@1.27.1
+    rm:
+      - app/ios
+      - app/macos
+      - app/linux
+      - app/windows
+      - app/web
+    prebuild:
+      - cd ..
+      - scripts/remove_proprietary_dependencies.sh
+      - cd ..
+      - mv org.localsend.localsend_app /tmp/build
+      - pushd /tmp/build/app
+      - $$rustup$$/rustup-init.sh -y --default-toolchain 1.81.0 --target armv7-linux-androideabi
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - ../submodules/flutter/bin/flutter config --no-analytics
+      - ../submodules/flutter/bin/flutter pub get
+      - sed -i -e "s/'stable'/'1.81.0'/" .pub-cache/hosted/pub.dev/rhttp-*/cargokit/build_tool/lib/src/builder.dart
+      - popd
+      - mv /tmp/build org.localsend.localsend_app
+    scanignore:
+      - submodules/flutter/bin/cache
+    scandelete:
+      - app/.pub-cache
+      - submodules/flutter
+      - common/pubspec.yaml
+    build:
+      - cd ../..
+      - mv org.localsend.localsend_app /tmp/build
+      - pushd /tmp/build/app
+      - source $HOME/.cargo/env
+      - cargo install cargo-ndk@3.5.4 --locked
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - CARGO_ENCODED_RUSTFLAGS='--remap-path-prefix=/home/vagrant=/home/runner' ../submodules/flutter/bin/flutter
+        build apk --release --split-per-abi --target-platform="android-arm"
+      - popd
+      - mv /tmp/build org.localsend.localsend_app
+    ndk: r23b
+
+  - versionName: 1.17.0
     versionCode: 583
     commit: 7f21d1f9082a43803e05c37f021912e012145aa5
     subdir: app
@@ -873,6 +920,7 @@ AutoUpdateMode: Version
 UpdateCheckMode: Tags
 VercodeOperation:
   - 10*%c+1
+  - 10*%c+2
   - 10*%c+3
 UpdateCheckData: app/pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
 CurrentVersion: 1.17.0
