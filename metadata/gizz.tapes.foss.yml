@@ -1,0 +1,35 @@
+AntiFeatures:
+  NonFreeNet:
+    en-US: Depends on tapes.kglw.net server
+Categories:
+  - Multimedia
+License: Apache-2.0
+SourceCode: https://github.com/Ghost-Applications/gizz-tapes
+IssueTracker: https://github.com/Ghost-Applications/gizz-tapes/issues
+Changelog: https://raw.githubusercontent.com/Ghost-Applications/gizz-tapes/refs/heads/main/CHANGELOG.adoc
+
+AutoName: Gizz Tapes
+
+RepoType: git
+Repo: https://github.com/Ghost-Applications/gizz-tapes.git
+
+Builds:
+  - versionName: FishingForFishies
+    versionCode: 36
+    commit: de5c3b5d52acef5c64ae571d1543a24740a67ff1
+    subdir: mobile
+    gradle:
+      - foss
+    prebuild:
+      - sed -i -e '/firebase/d' -e '/gms/d' -e '/google.services/d' -e '/CrashlyticsExtension/,+2d'
+        -e '/GoogleServicesTask/,+2d' -e '/signingConfig =/d' mobile.gradle.kts
+      - sed -i -e '/buildFileName/d' ../{.,buildSrc}/settings.gradle.kts
+      - for d in buildSrc mobile networking networking-integration; do mv ../$d/$d.gradle.kts
+        ../$d/build.gradle.kts; done
+      - sed -i -e 's/-XX:MaxPermSize=256m//' ../gradle.properties
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: gradle.properties|defaultBuildNumber=(\d+)|.|versionName=(.+)
+CurrentVersion: FishingForFishies
+CurrentVersionCode: 36
