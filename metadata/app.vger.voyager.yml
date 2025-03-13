@@ -1965,9 +1965,33 @@ Builds:
     scandelete:
       - node_modules/
 
+  - versionName: 2.25.0
+    versionCode: 516
+    commit: 5eabec220712e495baf019e27d0c810ef45d2a92
+    subdir: android/app
+    sudo:
+      - sysctl fs.inotify.max_user_watches=524288
+      - echo "deb https://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
+      - apt-get update
+      - apt-get install -y -t trixie openjdk-21-jdk-headless
+      - update-alternatives --auto java
+      - apt-get install -y npm
+      - npm install -g corepack
+    init:
+      - corepack enable
+      - pnpm install --frozen-lockfile
+      - CI_PLATFORM=android BUILD_FOSS_ONLY=true pnpm run build
+      - cd ../..
+      - npx cap sync android --deployment
+    gradle:
+      - yes
+    prebuild: sed -i -e '/google-services/d' ../build.gradle
+    scandelete:
+      - node_modules/
+
 AllowedAPKSigningKeys: 8b4d5cf69eaf147cd9a868c740d37d5fe1471a2f62c67d536038bcdbd9bc7ade
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 2.24.3
-CurrentVersionCode: 499
+CurrentVersion: 2.25.0
+CurrentVersionCode: 516
