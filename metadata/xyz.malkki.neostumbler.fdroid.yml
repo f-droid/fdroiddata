@@ -190,10 +190,30 @@ Builds:
         export localhash=$(sha256sum assets/dexopt/baseline.prof|cut -d " " -f1);
         [[ $localhash == $upstreamhash ]] && break ; popd; rm -fr local; done
 
+  - versionName: 1.5.4
+    versionCode: 29
+    commit: acf056d53eb824e71b6f2c73203d1319ce8013ec
+    subdir: app
+    output: build/outputs/apk/fdroid/release/app-fdroid-release-unsigned.apk
+    prebuild: sed -i -e '/bundletool {/,/^}/d' build.gradle
+    scanignore:
+      - app/src/androidTest/assets/valid_reports.db.gz
+    build:
+      - mkdir upstream
+      - pushd upstream
+      - curl -L -o upstream.apk https://github.com/mjaakko/NeoStumbler/releases/download/$$VERSION$$/app-fdroid-release.apk
+      - unzip -q upstream.apk
+      - export upstreamhash=$(sha256sum assets/dexopt/baseline.prof|cut -d " " -f1)
+      - popd
+      - for i in {1..10}; do gradle clean assembleFdroidRelease; mkdir local; pushd
+        local; unzip -q ../build/outputs/apk/fdroid/release/app-fdroid-release-unsigned.apk;
+        export localhash=$(sha256sum assets/dexopt/baseline.prof|cut -d " " -f1);
+        [[ $localhash == $upstreamhash ]] && break ; popd; rm -fr local; done
+
 AllowedAPKSigningKeys: 7f839ac7afc4ff6f1c7fb1348ac10de2f17de8a78d0d812c1f43ae835a5111df
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^[\d.]+$
 UpdateCheckName: xyz.malkki.neostumbler
-CurrentVersion: 1.5.3
-CurrentVersionCode: 28
+CurrentVersion: 1.5.4
+CurrentVersionCode: 29
