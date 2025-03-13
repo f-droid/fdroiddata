@@ -526,48 +526,9 @@ Builds:
       - $$flutter$$/bin/flutter build apk --release
     ndk: r23c
 
-  - versionName: 5.0.0
-    versionCode: 98
-    disable: https://github.com/kubenav/kubenav/issues/694
-    commit: c14b496da38804200a4a9194bc66d844e6df4bda
-    sudo:
-      - apt-get update
-      - apt-get install -y -t bookworm-backports golang-go
-    output: build/app/outputs/flutter-apk/app-release.apk
-    srclibs:
-      - flutter@stable
-    rm:
-      - ios
-    prebuild:
-      - flutterVersion=$(sed -n -E "s/.*flutter-version:\s'([0-9.]+)'/\1/p" .github/workflows/continuous-delivery.yaml
-        | head -n 1)
-      - '[[ $flutterVersion ]] || exit 1'
-      - pushd $$flutter$$
-      - git checkout -f $flutterVersion
-      - popd
-      - sed -i -e '/gms/d' android/app/build.gradle
-      - export PUB_CACHE=$(pwd)/.pub-cache
-      - $$flutter$$/bin/flutter config --no-analytics
-      - $$flutter$$/bin/flutter pub get
-      - sed -i -e 's/android/iOS/' -e '/android/Id' .pub-cache/hosted/pub.dev/in_app_purchase-*/lib/in_app_purchase.dart
-      - rm -r .pub-cache/hosted/pub.dev/in_app_purchase_android-*
-    scandelete:
-      - .pub-cache
-    build:
-      - sdkmanager 'platforms;android-29'
-      - export GOPATH="$PWD/golang"
-      - export PATH="$GOPATH/bin:$PATH"
-      - go install golang.org/x/mobile/cmd/gomobile@v0.0.0-20231006135142-2b44d11868fe
-      - gomobile init
-      - mkdir -p android/app/src/libs
-      - gomobile bind -o android/app/src/libs/kubenav.aar -target=android/arm,android/arm64,android/amd64
-        github.com/kubenav/kubenav/cmd/mobile
-      - export PUB_CACHE=$(pwd)/.pub-cache
-      - $$flutter$$/bin/flutter build apk --release
-    ndk: r23c
-
+ArchivePolicy: 0
 AutoUpdateMode: None
-UpdateCheckMode: Tags
+UpdateCheckMode: None
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 5.2.0
-CurrentVersionCode: 109
+CurrentVersion: 4.2.3
+CurrentVersionCode: 89
