@@ -178,34 +178,32 @@ Builds:
 
   - versionName: 2.6.3
     versionCode: 23
-    disable: https://github.com/Infomaniak/android-infomaniak-meet/issues/8
     commit: 0866ac006e2fea7188d33526981a8c991115a1a8
     subdir: app
     sudo:
-      - echo "deb https://deb.debian.org/debian bullseye main" > /etc/apt/sources.list.d/bullseye.list
       - apt-get update
-      - apt-get install -y npm jq maven openjdk-17-jdk-headless
-      - apt-get install -y -t bullseye openjdk-11-jdk-headless
+      - apt-get install -y npm jq maven
       - sysctl fs.inotify.max_user_watches=524288
     gradle:
       - yes
     srclibs:
-      - jitsi-meet@android-sdk-9.2.1
+      - jitsi-meet@mobile-sdk-10.2.0
     prebuild:
       - sed -i -e '/jitsi-maven-repository/d' -e '/repositories {/a\        mavenLocal()'
         ../build.gradle
       - sed -i -e "/google.firebase/aexclude\ group\:\ 'com.google.android.gms'" build.gradle
-    build:
-      - export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
       - export jitsiVersion=$(grep jitsi-meet-sdk build.gradle|cut -d "'" -f2|cut
         -d ":" -f3)
+      - git -C $$jitsi-meet$$ checkout -f mobile-sdk-$jitsiVersion
+      - sed -i -e '/git/d' $$jitsi-meet$$/android/scripts/release-sdk.sh
+    build:
       - cd $$jitsi-meet$$
-      - git checkout -f android-sdk-$jitsiVersion
       - export LIBRE_BUILD=true
-      - npm install webpack-bundle-analyzer
-      - npm install
+      - npm install --save false webpack-bundle-analyzer
+      - npm ci
       - mkdir -p "$HOME/.m2"
-      - bash android/scripts/release-sdk.sh "$HOME/.m2/repository"
+      - JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64 bash android/scripts/release-sdk.sh
+        "$HOME/.m2/repository"
       - mkdir -p "$HOME/.m2/repository/org/webkit"
       - cp -r node_modules/jsc-android/dist/org/webkit/android-jsc "$HOME/.m2/repository/org/webkit"
 
