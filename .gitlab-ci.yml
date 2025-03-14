@@ -271,6 +271,40 @@ tools check scripts:
     reports:
       codequality: codequality.json
 
+
+# Use roundtrip parsing to check whether config file is in the
+# strictest subset of YAML 1.2 format, aka the JSON Schema.  YAML 1.2
+# supports truth values like True and TRUE under the "Core Schema".
+# All values in config files should match in the JSON schema to avoid
+# type confusion.
+#
+# https://yaml.org/spec/1.2.2/#example-json-tag-resolution
+#
+# yq does not preserve blank lines or comments, so those are removed
+# from the comparison.
+YAML 1.2:
+  stage: test
+  needs: []
+  image: debian:bookworm-slim
+  rules:
+    - changes:
+        paths:
+          - .gitlab-ci.yml
+          - config.yml
+          - config/*.yml
+          - config/*/*.yml
+  script:
+    - apt-get update
+    - apt-get -qy install --no-install-recommends yq
+    - |
+      for f in config.yml config/*.yml config/*/*.yml; do
+          echo $f
+          diff --unified --color \
+            <(sed -e 's,\s*#.*,,' -e '/^$/d' -e '/^---$/d' $f) \
+            <(yq --yaml-output-grammar-version 1.2 --yaml-roundtrip --width 512 . $f)
+      done
+
+
 schema validation:
   stage: test
   needs: []
