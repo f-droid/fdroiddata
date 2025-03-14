@@ -82,16 +82,20 @@ Builds:
     postbuild: $$reproducible-apk-tools$$/inplace-fix.py --zipalign fix-newlines '$$OUT$$'
       'META-INF/services/*'
 
-  - versionName: 7.5.1
-    versionCode: 7050100
-    disable: not for F-Droid
-    commit: 20e672f36f301b044b20f92b43aa6c17f5eac67b
+  - versionName: 7.6.1
+    versionCode: 7060100
+    commit: 4b2e0a01bf91fabdf4e6f1fa264f18bd3265cae6
     subdir: app
     gradle:
       - other
     srclibs:
-      - reproducible-apk-tools@v0.2.3
-    prebuild: sed -i -e '/firebase/d' ../flavor-google/build.gradle
+      - reproducible-apk-tools@v0.3.0
+    rm:
+      - flavor-google
+    prebuild:
+      - sed -i -e '/flavor-google/d' ../settings.gradle
+      - sed -i -e '/firebase/d' -e '/gms/d' {..,.}/build.gradle
+      - sed -i -e '/flavor-google/d' -e '/applicationVariants/,/^}/d' build.gradle
     postbuild: $$reproducible-apk-tools$$/inplace-fix.py --zipalign fix-newlines '$$OUT$$'
       'META-INF/services/*'
 
@@ -100,5 +104,5 @@ AllowedAPKSigningKeys: efa5cfcab9669ddc2535bb40c8470395db587e8bff5a7adfcddd8e226
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^[0-9\.]+$
 UpdateCheckData: gradle/libs.versions.toml|versionCode\s=\s"(\d+)"|.|versionName\s=\s"(.+)"
-CurrentVersion: 7.5.1
-CurrentVersionCode: 7050100
+CurrentVersion: 7.6.1
+CurrentVersionCode: 7060100
