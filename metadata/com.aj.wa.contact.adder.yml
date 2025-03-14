@@ -53,10 +53,45 @@ Builds:
       - popd
       - mv $repo/whatsapp_contact_adder com.aj.wa.contact.adder
 
+  - versionName: 1.0.1
+    versionCode: 2
+    commit: 011e98d8bd787e75dd2478248492983af4b0d160
+    sudo:
+      - mkdir -p /home/runner
+      - chown vagrant /home/runner
+    output: build/app/outputs/flutter-apk/app-fdroid-release.apk
+    srclibs:
+      - flutter@stable
+    prebuild:
+      - flutterVersion=$(sed -n -E "s/.*flutter:\ (.*)/\1/p" pubspec.yaml)
+      - '[[ $flutterVersion ]] || exit 1'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export repo=/home/runner/work/whatsapp_contact_adder
+      - mkdir -p $repo
+      - cd ..
+      - mv com.aj.wa.contact.adder $repo/whatsapp_contact_adder
+      - pushd $repo/whatsapp_contact_adder
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter packages pub get
+      - popd
+      - mv $repo/whatsapp_contact_adder com.aj.wa.contact.adder
+    scandelete:
+      - .pub-cache
+    build:
+      - export repo=/home/runner/work/whatsapp_contact_adder
+      - cd ..
+      - mv com.aj.wa.contact.adder $repo/whatsapp_contact_adder
+      - pushd $repo/whatsapp_contact_adder
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --flavor fdroid
+      - popd
+      - mv $repo/whatsapp_contact_adder com.aj.wa.contact.adder
+
 AllowedAPKSigningKeys: c7c3609b157427fd956830f0075e0f2c966c0373c305eea9899ca8d14821437e
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 1.0.0
-CurrentVersionCode: 1
+CurrentVersion: 1.0.1
+CurrentVersionCode: 2
