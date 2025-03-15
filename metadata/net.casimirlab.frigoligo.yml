@@ -507,10 +507,62 @@ Builds:
       - popd
       - mv $repo/frigoligo net.casimirlab.frigoligo
 
+  - versionName: 2.4.0
+    versionCode: 41
+    commit: eab2ae30c1b40864961dc3dca29669a199b5e3a5
+    sudo:
+      - apt-get update
+      - apt-get install -y gcc-multilib libc-dev make
+      - mkdir -p /home/runner/
+      - chown vagrant /home/runner/
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@stable
+      - transistor-background-fetch@0dd1457588ba031f11e9452f125144aac8a9b75f
+    rm:
+      - .github
+      - appimage
+      - ios
+      - linux
+      - macos
+      - test
+      - test_driver
+      - tools
+      - web
+      - windows
+    prebuild:
+      - export repo=/home/runner/work/frigoligo
+      - mkdir -p $repo
+      - cd ..
+      - mv net.casimirlab.frigoligo $repo/frigoligo
+      - pushd $repo/frigoligo
+      - flutterVersion=$(sed -n -E 's/.*"flutter":\ "(.*)"/\1/p' .fvmrc)
+      - '[[ $flutterVersion ]] || exit 1'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PUB_CACHE=/home/runner/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter packages pub get
+      - sed -i -e '/maven {/,/^        }/cmavenLocal()' android/build.gradle $PUB_CACHE/hosted/pub.dev/background_fetch-*/android/build.gradle
+      - popd
+      - mv $repo/frigoligo net.casimirlab.frigoligo
+    build:
+      - export repo=/home/runner/work/frigoligo
+      - export PUB_CACHE=/home/runner/.pub-cache
+      - cd ..
+      - mv net.casimirlab.frigoligo $repo/frigoligo
+      - pushd $repo/frigoligo
+      - pushd $$transistor-background-fetch$$/android/tsbackgroundfetch/
+      - gradle assembleRelease
+      - gradle publishToMavenLocal
+      - popd
+      - $$flutter$$/bin/flutter build apk --release
+      - popd
+      - mv $repo/frigoligo net.casimirlab.frigoligo
+
 AllowedAPKSigningKeys: 5ac383c981bb53ea5a873cf6086d0a6a0a2f557420694ed5ae4c495677aafd5c
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v.*$
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 2.3.1
-CurrentVersionCode: 40
+CurrentVersion: 2.4.0
+CurrentVersionCode: 41
