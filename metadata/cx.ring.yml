@@ -3710,7 +3710,33 @@ Builds:
       - cd ../../daemon/bin/jni
       - PACKAGEDIR=../../../jami-android/libjamiclient/src/main/java ./make-swig.sh
 
+  - versionName: 20250314-01
+    versionCode: 451
+    commit: 09d9b9ebf9855271c4b4f28a3fbdc7c7074ab3c7
+    timeout: 10800
+    subdir: jami-android/app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y automake autopoint bzip2 cmake g++ gettext libtool libyaml-cpp-dev
+        make pkg-config python-is-python3 yasm
+      - echo "deb https://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
+      - apt-get update
+      - apt-get install -y -t trixie swig
+    gradle:
+      - withUnifiedPush
+    prebuild:
+      - sed -i -e "/android {/a lint { abortOnError = false }" build.gradle.kts
+      - sed -i -e '/gms/d' ../build.gradle.kts
+      - sdkmanager 'cmake;3.30.5'
+    scandelete:
+      - daemon/contrib/src/*/package.json
+      - daemon/compat/msvc/package.json
+    build:
+      - cd ../../daemon/bin/jni
+      - PACKAGEDIR=../../../jami-android/libjamiclient/src/main/java ./make-swig.sh
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 20250310-01
-CurrentVersionCode: 450
+CurrentVersion: 20250314-01
+CurrentVersionCode: 451
