@@ -1229,8 +1229,60 @@ Builds:
       - flutter build apk --release --flavor stable
     ndk: r25b
 
+  - versionName: 4.0.1
+    versionCode: 40
+    commit: 723b6b1f386fe3f7e1289a6d746a5cfe4e1abf58
+    sudo:
+      - apt-get update
+      - apt-get install -y gcc libc-dev
+    output: build/app/outputs/flutter-apk/app-stable-release.apk
+    srclibs:
+      - flutter@stable
+      - rustup@1.27.1
+    rm:
+      - ios
+      - linux
+      - web
+      - windows
+      - macos
+      - scripts
+      - choco-struct
+      - aur-struct
+    prebuild:
+      - flutterVersion=$(sed -n -E 's/.*"flutterSdkVersion":\s"(.*)"/\1/p' .fvm/fvm_config.json)
+      - '[[ $flutterVersion ]] || exit 1'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - echo "SPOTIFY_SECRETS=$(echo ZTRkMjBiMDEzMDIyNDMzMjhkMzU4NTI0MWExYjJiMjU6M2RkMjE2MzUyNGM2NDY1YzkxNmNjNGQ2ZTZmZGE5NzcsZTM4NGRiYWQ2YzdmNDY5MmI2MjdkNGEwNmQ5MTgzY2Y6ZGNkNzY2OGI2ZjAzNDM2Yzk5OTIzNDMyOWVlYTYxNmYsZWVmZDBiYWU2NjRkNGY1ODhmMDg3NDFkOWU2ZjNlYmU6OGExOGQ4MjBkNWJkNDU1N2IzMGZlN2E0NTlmOGYzYWIsODFkMWRkYWM5YzVlNDY5NmE5ZjQ3YWRmZjg4ZGZhOTU6ZjU1ODllM2I3YzBmNGJlMWFjZmQ4Nzc5ZTI3ZjMxYWEsYWFjNmViZDcyODkwNDA4ZTk3YThkOTExZjhhMjAwODE6NTk4ODk2OWFiMWUwNGUxNDhmNWRkZDI4ZWE4OThlMzMsMDAwYWUwNzVjOGFhNDcxMTk0NTc5YmM3ZDhlYTY5Mjc6ZDcwYWVjOGY4YzdkNGU2NGE5YTA5MGE2NDdlMWQwZmIsYWY0ODhiNDA4ZDVjNDQwMmFkMTRmNzBjY2YzMDE3Zjg6MTNlOTAzOTlhMTIyNDMyMThjZTUwMTZiZmVlYjI1MDQsNjJiYjU1ZTZjZjYwNDA5NmFkNDY4MGJiMjU0ZjhmNTU6ZGM1NGIxMzhjODJkNGQ2OWJjZGQ0MDFlOWRjNmUwZTAsZGFlM2QzNjQ4ODhiNDhjN2JhOTQwYmU3OWYxNDBjMDU6YTM1NmYxMjQxOGIyNDgwZGFiZjg0ZDk4YTk1MWE5YmEsM2ZjNDlmYzY5MGMwNDVlYWEwZjBhMjQyNmRkNGE5MWU6MmJiN2RhNjVjNTA2NDhhZWE4YjdiYzA5ZDRlZjQwZmU=
+        | base64 --decode)" >> .env
+      - echo "SUPABASE_URL=https://egnloosvpullyovaxpbf.supabase.co" >> .env
+      - echo "SUPABASE_API_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVnbmxvb3N2cHVsbHlvdmF4cGJmIiwicm9sZSI6ImFub24iLCJpYXQiOjE2ODQyMTI4MDIsImV4cCI6MTk5OTc4ODgwMn0.dJWCP05v-Oqsx7r5GOSpq5g2QRKEUzNhPmYI4X79Pmw"
+        >> .env
+      - echo TEFTVEZNX0FQSV9LRVk9ZTQxZWZmMDFhMTgxYmFmZTY2YjMwZDk0MjlhYWJhN2EK | base64
+        --decode >> .env
+      - echo TEFTVEZNX0FQSV9TRUNSRVQ9ZGQzM2YyOTdiM2ExZTA4ZmEzOWEwNmIzZjcyMTBmYzAK
+        | base64 --decode >> .env
+      - echo "ENABLE_UPDATE_CHECK=0" >> .env
+      - echo "RELEASE_CHANNEL=stable" >> .env
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export PATH=$PUB_CACHE/bin/:$$flutter$$/bin/:$PATH
+      - flutter config --no-analytics
+      - flutter pub get
+      - flutter pub global activate melos
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export PATH=$PUB_CACHE/bin/:$$flutter$$/bin/:$PATH
+      - export ANDROID_NDK_ROOT=$$NDK$$
+      - $$rustup$$/rustup-init.sh -y --default-toolchain 1.80.0 --target aarch64-linux-android
+        armv7-linux-androideabi x86_64-linux-android i686-linux-android
+      - source $HOME/.cargo/env
+      - dart run build_runner build --delete-conflicting-outputs --enable-experiment=records,patterns
+      - flutter build apk --release --flavor stable
+    ndk: r25b
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 4.0.0
-CurrentVersionCode: 39
+CurrentVersion: 4.0.1
+CurrentVersionCode: 40
