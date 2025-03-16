@@ -898,8 +898,35 @@ Builds:
       - i2p.i2p
     ndk: r19c
 
+  - versionName: 2.8.0
+    versionCode: 4745291
+    commit: 6c83285e04fb5cb80902ec483eea835e17c6ecec
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y ant gettext maven
+    gradle:
+      - legacy
+    srclibs:
+      - I2P@i2p-2.6.0
+    rm:
+      - gradle/wrapper
+    prebuild:
+      - export i2pVersion=$(grep I2P_VERSION\= ../gradle.properties | cut -d '=' -f2-)
+      - '[[ $i2pVersion ]] || exit 1'
+      - git -C $$I2P$$ checkout -f i2p-$i2pVersion
+      - echo -e "i2psrc=$$I2P$$" >> ../lib/client/local.properties
+      - echo -e "sdk.dir=$$SDK$$\nndk.dir=$$NDK$$\ni2psrc=$$I2P$$" >> ../routerjars/local.properties
+      - cp -R $$I2P$$ ../i2p.i2p
+      - sed -i -e '/abortOnError/acheckReleaseBuilds false' build.gradle
+    scandelete:
+      - lib/client/src/main/jniLibs
+      - i2p.i2p
+    build: $$I2P$$/installer/resources/maven-dev-release.sh 1
+    ndk: r19c
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags i2p-android-
 UpdateCheckData: gradle.properties|I2P_ANDROID_VERSION_CODE=(\d+)|.|I2P_ANDROID_VERSION=([\d.]+)
-CurrentVersion: 2.7.1
-CurrentVersionCode: 4745289
+CurrentVersion: 2.8.0
+CurrentVersionCode: 4745291
