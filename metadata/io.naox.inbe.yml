@@ -876,10 +876,50 @@ Builds:
       - popd
       - mv $repo/inbreeze io.naox.inbe
 
+  - versionName: 1.4.0
+    versionCode: 38
+    commit: cbe0b09789c76fe62bafbbbcac3ac5df1f99bcfd
+    sudo:
+      - mkdir -p /home/runner/
+      - chown vagrant /home/runner/
+    output: build/app/outputs/flutter-apk/app-release.apk
+    binary: https://github.com/naoxio/inbreeze/releases/download/%v/InnerBreeze.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - linux
+      - web
+    prebuild:
+      - export version=$(grep flutter .fvmrc | cut -d ":" -f2 | cut -d "\"" -f2)
+      - pushd $$flutter$$
+      - git checkout -f $version
+      - popd
+      - export repo=/home/runner/work/inbreeze
+      - mkdir -p $repo
+      - cd ..
+      - mv io.naox.inbe $repo/inbreeze
+      - pushd $repo/inbreeze
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+      - popd
+      - mv $repo/inbreeze io.naox.inbe
+    scandelete:
+      - .pub-cache
+    build:
+      - export repo=/home/runner/work/inbreeze
+      - cd ..
+      - mv io.naox.inbe $repo/inbreeze
+      - pushd $repo/inbreeze
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release
+      - popd
+      - mv $repo/inbreeze io.naox.inbe
+
 AllowedAPKSigningKeys: e46142735e771143667aed150d5467a4e553165e45e0d4acfc21933e31b9e050
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 1.3.9
-CurrentVersionCode: 37
+CurrentVersion: 1.4.0
+CurrentVersionCode: 38
