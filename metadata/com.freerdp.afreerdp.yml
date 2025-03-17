@@ -236,7 +236,34 @@ Builds:
         $$SDK$$/ndk/15.2.4203891 --release
     ndk: r25c
 
+  - versionName: 3.14.0
+    versionCode: 3014000
+    commit: cd0a17f8607ec7ed310d39aa48ac9a5caf640592
+    subdir: client/Android/Studio/aFreeRDP
+    sudo:
+      - apt-get update
+      - apt-get install -y make pkg-config file libncurses5 nasm
+    gradle:
+      - yes
+    rm:
+      - client/Mac
+      - client/Wayland
+      - client/Windows
+      - client/X11
+      - client/iOS
+    prebuild:
+      - sed -i -e "/hasProperty('RELEASE/,+2d" -e '/println/d' ../build.gradle
+      - sed -i -e 's/versionCode =.*/versionCode = $$VERCODE$$/' -e 's/versionName
+        =.*/versionName = "$$VERSION$$"/' build.gradle
+      - sdkmanager 'cmake;3.22.1'
+    build:
+      - cd ../../../..
+      - sed -i -e 's/OPENSSL_TAG=.*/OPENSSL_TAG=OpenSSL_1_1_1w/' -e 's/OPENSSL_HASH=.*/OPENSSL_HASH=cf3098950cb4d853ad95c0841f1f9c6d3dc102dccfcacd521d93925208b76ac8/'
+        scripts/android-build-release.conf
+      - scripts/android-build-freerdp.sh --conf scripts/android-build-release.conf
+    ndk: 27.2.12479018
+
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: 3.5.1
-CurrentVersionCode: 3005001
+CurrentVersion: 3.14.0
+CurrentVersionCode: 3014000
