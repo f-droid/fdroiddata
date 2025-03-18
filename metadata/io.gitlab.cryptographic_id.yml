@@ -345,8 +345,35 @@ Builds:
       - bash fdroid/setup.sh
       - flutter build apk --release
 
+  - versionName: 0.5.2
+    versionCode: 18
+    commit: 1c18e46d1f4f25a62130bd7609432a2615ea8c6f
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y protobuf-compiler
+    output: build/app/outputs/flutter-apk/app-release.apk
+    prebuild:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export PATH=$PATH:$(pwd)/flutter/bin
+      - flutter config --no-analytics
+      - flutter pub global activate protoc_plugin
+      - flutter pub get
+    scanignore:
+      - flutter/bin/cache
+    scandelete:
+      - flutter
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export PATH=$PATH:$(pwd)/flutter/bin:${PUB_CACHE}/bin
+      - protoc --proto_path=lib/cryptographic-id-protocol --dart_out=lib/generated/protobuf
+        lib/cryptographic-id-protocol/cryptographic_id.proto
+      - bash fdroid/setup.sh
+      - flutter build apk --release
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 0.5.1
-CurrentVersionCode: 17
+CurrentVersion: 0.5.2
+CurrentVersionCode: 18
