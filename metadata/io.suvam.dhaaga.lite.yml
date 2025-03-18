@@ -1,0 +1,68 @@
+Categories:
+  - Internet
+License: Apache-2.0
+AuthorName: Debashish Patra
+AuthorEmail: hi@suvam.io
+AuthorWebSite: https://suvam.io/
+WebSite: https://suvam.io/dhaaga
+SourceCode: https://github.com/suvam0451/dhaaga
+IssueTracker: https://github.com/suvam0451/dhaaga/issues
+Changelog: https://github.com/suvam0451/dhaaga/releases
+Donate: https://suvam.io/sponsor
+
+AutoName: Dhaaga
+
+RepoType: git
+Repo: https://github.com/suvam0451/dhaaga.git
+
+Builds:
+  - versionName: 0.16.2
+    versionCode: 33
+    commit: edd8ac7bfceb409845d696ecc22f5cacf4a11e0e
+    subdir: apps/mobile
+    sudo:
+      - apt-get update
+      - apt-get install npm git-lfs
+      - npm install -g bun
+    init:
+      - cd ../..
+      - git lfs fetch
+      - git lfs pull
+      - bun install
+      - bun add -D @react-native-community/cli@15.1.3
+    output: android/app/build/outputs/apk/release/*.apk
+    rm:
+      - apps/desktop
+      - apps/proxy
+      - apps/push
+    prebuild:
+      - python3 lite.py
+      - npx react-native bundle --platform android --dev false --entry-file apps/mobile/index.js
+        --bundle-output apps/mobile/android/app/src/main/assets/index.android.bundle
+        --assets-dest apps/mobile/android/app/src/main/res
+    scanignore:
+      - apps/mobile/android/build.gradle
+      - node_modules/react-native/sdks/hermesc/linux64-bin/hermesc
+      - node_modules/react-native-reanimated/android/build.gradle
+      - node_modules/react-native-svg/android/build.gradle
+      - node_modules/react-native-screens/android/build.gradle
+      - node_modules/react-native-vector-icons/android/build.gradle
+      - node_modules/expo-modules-core/android/ExpoModulesCorePlugin.gradle
+      - node_modules/expo-dev-launcher/android/build.gradle
+      - node_modules/expo-modules-autolinking/scripts/android/autolinking_implementation.gradle
+      - node_modules/@react-native-masked-view/masked-view/android/build.gradle
+      - node_modules/react-native-safe-area-context/android/build.gradle
+      - node_modules/react-native-pager-view/android/build.gradle
+      - node_modules/expo-dev-menu/android/build.gradle
+      - node_modules/react-native-webview/android/build.gradle
+    scandelete:
+      - node_modules
+    build:
+      - cd android/app
+      - gradle assembleRelease
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: apps/mobile/app.config.ts|versionCode:\s(\d+),|.|version:\s'(.*)',
+CurrentVersion: 0.16.2
+CurrentVersionCode: 33
