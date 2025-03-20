@@ -611,6 +611,74 @@ Builds:
       - cd ..
       - sh "$(pwd)/space.celestia.mobilecelestia/app/run_gperf.sh" "$(pwd)/Celestia"
 
+  - versionName: 1.7.13
+    versionCode: 598
+    commit: f3b67e223867d78ed167f882d822de5b6a2d46db
+    timeout: 30000
+    subdir: app
+    sudo:
+      - echo "deb https://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
+      - apt-get update
+      - apt-get install -y -t trixie openjdk-21-jdk-headless
+      - update-alternatives --auto java
+      - apt-get install cmake tcsh gcc-multilib gettext gperf g++-multilib make meson
+        ncompress wget xz-utils zsh
+    gradle:
+      - unofficial
+    prebuild:
+      - export CELESTIA_HASH=$(sed -nr 's/^Celestia=(.*)$/\1/p' ../versions.txt)
+      - export CONTENT_HASH=$(sed -nr 's/^CelestiaContent=(.*)$/\1/p' ../versions.txt)
+      - export LOC_HASH=$(sed -nr 's/^CelestiaLocalization=(.*)$/\1/p' ../versions.txt)
+      - export DEP_HASH=$(sed -nr 's/^apple-android=(.*)$/\1/p' ../versions.txt)
+      - cd ../../ && mkdir deps && cd deps
+      - git clone https://dev.azure.com/CelestiaProject/Celestia/_git/apple-android
+      - git clone --recurse-submodules https://github.com/celestiamobile/Celestia
+      - git clone https://github.com/CelestiaProject/CelestiaContent
+      - git clone https://github.com/celestiamobile/CelestiaLocalization
+      - cd Celestia && git reset --hard $CELESTIA_HASH && cd -
+      - cd CelestiaContent && git reset --hard $CONTENT_HASH && cd -
+      - cd CelestiaLocalization && git reset --hard $LOC_HASH && cd -
+      - cd apple-android && git reset --hard $DEP_HASH
+      - chmod +x download.sh prepare_icu.sh build_android.sh
+      - mkdir tmp && cd tmp
+      - cp ../download.sh .
+      - cp ../versions.sh .
+      - ./download.sh
+      - mv json.hpp ../.
+      - mkdir targz tarxz tgz tz
+      - for i in $(ls | grep ".tar.gz"); do cd "targz"; tar -xzf "../${i}"; pwd; cd
+        ../; done
+      - for i in $(ls | grep ".tar.xz"); do  cd "tarxz"; tar -xJf "../${i}"; pwd;
+        cd ../; done
+      - for i in $(ls | grep ".tgz"); do cd "tgz"; tar -xzf "../${i}"; pwd; cd ../;
+        done
+      - for i in $(ls | grep ".tar.Z"); do cd "tz"; tar -xZf "../${i}"; pwd; cd ../;
+        done
+      - cd ../../../
+      - mv deps space.celestia.mobilecelestia/.
+    scandelete:
+      - deps
+    build:
+      - mv ../deps/* ../../.
+      - rm -d ../deps
+      - cd ../../apple-android/tmp
+      - cd targz; for i in $(ls); do tar -cvzf "../../${i}.tar.gz" "${i}"; done; cd
+        ..
+      - cd tarxz; for i in $(ls); do tar -cvJf "../../${i}.tar.xz" "${i}"; done; cd
+        ..
+      - cd tgz; for i in $(ls); do tar -cvzf "../../${i}.tgz" "${i}"; done; cd ..
+      - cd tz; for i in $(ls); do tar -cvZf "../../${i}.tar.Z" "${i}"; done; cd ../../
+      - rm -rf tmp
+      - ./prepare_icu.sh
+      - mkdir android
+      - export SDK_PATH="$$SDK$$/ndk/$(ls $$SDK$$/ndk/)"
+      - ./build_android.sh "$(pwd)/android" "$SDK_PATH"
+      - cd ../space.celestia.mobilecelestia
+      - mkdir dependencies
+      - mv ../apple-android/android/* dependencies/.
+      - cd ..
+      - sh "$(pwd)/space.celestia.mobilecelestia/app/run_gperf.sh" "$(pwd)/Celestia"
+
 MaintainerNotes: |-
   Celestia for android requires 4 more repositories to build:
     - Celestia;
@@ -639,5 +707,5 @@ MaintainerNotes: |-
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 1.7.12
-CurrentVersionCode: 593
+CurrentVersion: 1.7.13
+CurrentVersionCode: 598
