@@ -1,0 +1,58 @@
+Categories:
+  - Development
+  - Reading
+  - Science & Education
+License: GPL-3.0-only
+AuthorName: ali akrem barka
+SourceCode: https://github.com/AliAkrem/oopquiz
+IssueTracker: https://github.com/AliAkrem/oopquiz/issues
+
+AutoName: Java OOP Quiz
+
+RepoType: git
+Repo: https://github.com/AliAkrem/oopquiz.git
+Binaries: https://github.com/AliAkrem/oopquiz/releases/download/v%v/oopquiz.apk
+
+Builds:
+  - versionName: 1.0.0
+    versionCode: 1
+    commit: a99ec221788f0aec1f09545b7d689708e88345fa
+    sudo:
+      - mkdir -p /home/akrem
+      - chown vagrant /home/akrem
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@stable
+    prebuild:
+      - flutterVersion=$(sed -n -E 's/.*flutter:\ "(.*)"/\1/p' pubspec.yaml)
+      - '[[ $flutterVersion ]] || exit 1'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export repo=/home/akrem/flutter-projects
+      - mkdir -p $repo
+      - cd ..
+      - mv io.oopquizz.oopquiz $repo/oopquiz
+      - pushd $repo/oopquiz
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter packages pub get
+      - popd
+      - mv $repo/oopquiz io.oopquizz.oopquiz
+    scandelete:
+      - .pub-cache
+    build:
+      - export repo=/home/akrem/flutter-projects
+      - cd ..
+      - mv io.oopquizz.oopquiz $repo/oopquiz
+      - pushd $repo/oopquiz
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --no-shrink
+      - popd
+      - mv $repo/oopquiz io.oopquizz.oopquiz
+
+AllowedAPKSigningKeys: 68e9598b559a864113cfe075ef3ae4529a3eeb4867ea16b865e2ed093c59f187
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 1.0.0
+CurrentVersionCode: 1
