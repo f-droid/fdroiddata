@@ -44,7 +44,33 @@ Builds:
     scandelete:
       - node_modules
 
+  - versionName: '0.4'
+    versionCode: 4
+    commit: 19724d8d5bed5a27d217a3e502079cceb3859e7b
+    subdir: android
+    sudo:
+      - curl -Lo node.tar.gz https://nodejs.org/download/release/v22.14.0/node-v22.14.0-linux-x64.tar.gz
+      - echo "9d942932535988091034dc94cc5f42b6dc8784d6366df3a36c4c9ccb3996f0c2 node.tar.gz"
+        | sha256sum -c -
+      - tar xzf node.tar.gz --strip-components=1 -C /usr/local/
+      - apt-get update
+      - apt-get install -y build-essential
+      - echo "deb http://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
+      - apt-get update
+      - apt-get install -y -t trixie openjdk-21-jdk-headless
+      - update-java-alternatives -a
+    init:
+      - cd ..
+      - npm install --build-from-source
+      - npm run build-only
+      - npx cap sync
+    gradle:
+      - yes
+    output: app/build/outputs/apk/release/app-release-unsigned.apk
+    scandelete:
+      - node_modules
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: '0.3'
-CurrentVersionCode: 3
+CurrentVersion: '0.4'
+CurrentVersionCode: 4
