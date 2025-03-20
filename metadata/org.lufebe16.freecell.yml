@@ -94,8 +94,51 @@ Builds:
       - deactivate
     ndk: r25b
 
+  - versionName: '2.2'
+    versionCode: 1021202
+    commit: 4545ca58af1e350d1ead19d4369d840d8c59d199
+    sudo:
+      - apt-get update
+      - apt-get install -y g++ libc-dev make automake libltdl-dev libtool zlib1g-dev
+        libffi-dev libssl-dev cython3 python3-pip python3-pexpect python3-virtualenv
+        python3-sh python3-appdirs python3-colorama python3-jinja2 python3-build python3-toml
+        python3-packaging ant zip
+      - rm /opt/android-sdk/tools/bin/sdkmanager
+      - ln -s $(which sdkmanager) /opt/android-sdk/tools/bin/sdkmanager
+    output: bin/*.apk
+    srclibs:
+      - cython@07553a5
+      - python-for-android@develop
+      - buildozer@820a448
+    prebuild:
+      - source helpers/buildparams
+      - sdkmanager "platforms;android-$AAPI" "build-tools;$AAPI.0.0"
+      - pushd $$python-for-android$$
+      - git checkout -q $VP4A
+      - sed -i -E 's:(.*)apis = get_available_apis.*:\1apis = [android_api]:' pythonforandroid/build.py
+      - popd
+      - pushd $$buildozer$$
+      - git checkout -q $VBUILDOZER
+      - popd
+      - pushd $$cython$$
+      - git checkout -q $VCYTHON
+      - popd
+      - sed -i -e 's/log_level =.*/log_level = 1/' -e '/^\[app\]/aandroid.ndk_path
+        = $$NDK$$\nandroid.sdk_path = $$SDK$$\np4a.source_dir = $$python-for-android$$\nandroid.ant_path
+        = .' buildozer.spec
+    build:
+      - mkdir -p ./bin
+      - cp -a $(which ant) ./bin/ant
+      - virtualenv -p python3 ./ENV
+      - . ./ENV/bin/activate
+      - pip3 install $$cython$$
+      - pip3 install $$buildozer$$
+      - buildozer android release
+      - deactivate
+    ndk: r25b
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^va.*$
 UpdateCheckData: output-metadata.json|versionCode[:"\s]+(\d+)|.|versionName[:"\s]+([0-9.]+)
-CurrentVersion: '2.1'
-CurrentVersionCode: 1021201
+CurrentVersion: '2.2'
+CurrentVersionCode: 1021202
