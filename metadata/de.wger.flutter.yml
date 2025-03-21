@@ -336,10 +336,10 @@ Builds:
 
   - versionName: 1.7.9
     versionCode: 50
-    commit: 86b61916f49035ee8b58239c40fe4b472f920bc9
+    commit: e90f2a7ba124a06e79016b48eaf63228593d24a3
     output: build/app/outputs/flutter-apk/app-release.apk
     srclibs:
-      - flutter@3.29.1
+      - flutter@stable
     rm:
       - flatpak
       - ios
@@ -347,6 +347,9 @@ Builds:
       - macos
       - web
     prebuild:
+      - flutterVersion=$(sed -n -E "s/.*flutter-version:\ (.*)/\1/p" .github/workflows/build-release.yml)
+      - '[[ $flutterVersion ]] || exit 1'
+      - git -C $$flutter$$ checkout -f $flutterVersion
       - export PUB_CACHE=$(pwd)/.pub-cache
       - $$flutter$$/bin/flutter config --no-analytics
       - $$flutter$$/bin/flutter pub get
