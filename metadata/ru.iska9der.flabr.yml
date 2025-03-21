@@ -1,0 +1,141 @@
+AntiFeatures:
+  NonFreeNet:
+    en-US: Depends on habr.com server
+Categories:
+  - Internet
+  - Reading
+License: MIT
+AuthorName: Iskander Shamsudinov
+AuthorEmail: iskander94y@gmail.com
+SourceCode: https://github.com/iska9der/flabr
+IssueTracker: https://github.com/iska9der/flabr/issues
+Changelog: https://github.com/iska9der/flabr/releases
+
+AutoName: flabr
+
+RepoType: git
+Repo: https://github.com/iska9der/flabr
+
+Builds:
+  - versionName: 1.2.3
+    versionCode: 107001
+    commit: v1.2.3
+    sudo:
+      - apt-get update
+      - apt-get install -y yq
+      - mkdir -p /home/runner
+      - chown vagrant /home/runner
+    output: build/app/outputs/flutter-apk/app-x86_64-release.apk
+    binary: https://github.com/iska9der/flabr/releases/download/v%v/flabr_v%v_x86_64.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+    prebuild:
+      - export flversion="$(yq -r .environment.flutter pubspec.yaml | sed 's/\^//g')"
+      - git -C $$flutter$$ checkout -f $flversion
+      - export repo=/home/runner/work/flabr
+      - mkdir -p $repo
+      - cd ..
+      - mv ru.iska9der.flabr $repo/flabr
+      - pushd $repo/flabr
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter packages pub get
+      - $$flutter$$/bin/flutter pub run build_runner build
+      - popd
+      - mv $repo/flabr ru.iska9der.flabr
+    build:
+      - export repo=/home/runner/work/flabr
+      - cd ..
+      - mv ru.iska9der.flabr $repo/flabr
+      - pushd $repo/flabr
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform="android-x64"
+        --dart-define=CONTACT_TG=iska9der --dart-define=CONTACT_EMAIL=iskander94y@gmail.com
+      - popd
+      - mv $repo/flabr ru.iska9der.flabr
+
+  - versionName: 1.2.3
+    versionCode: 107002
+    commit: v1.2.3
+    sudo:
+      - apt-get update
+      - apt-get install -y yq
+      - mkdir -p /home/runner
+      - chown vagrant /home/runner
+    output: build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
+    binary: https://github.com/iska9der/flabr/releases/download/v%v/flabr_v%v_armeabi-v7a.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+    prebuild:
+      - export flversion="$(yq -r .environment.flutter pubspec.yaml | sed 's/\^//g')"
+      - git -C $$flutter$$ checkout -f $flversion
+      - export repo=/home/runner/work/flabr
+      - mkdir -p $repo
+      - cd ..
+      - mv ru.iska9der.flabr $repo/flabr
+      - pushd $repo/flabr
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter packages pub get
+      - $$flutter$$/bin/flutter pub run build_runner build
+      - popd
+      - mv $repo/flabr ru.iska9der.flabr
+    build:
+      - export repo=/home/runner/work/flabr
+      - cd ..
+      - mv ru.iska9der.flabr $repo/flabr
+      - pushd $repo/flabr
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform="android-arm"
+        --dart-define=CONTACT_TG=iska9der --dart-define=CONTACT_EMAIL=iskander94y@gmail.com
+      - popd
+      - mv $repo/flabr ru.iska9der.flabr
+
+  - versionName: 1.2.3
+    versionCode: 107003
+    commit: v1.2.3
+    sudo:
+      - apt-get update
+      - apt-get install -y yq
+      - mkdir -p /home/runner
+      - chown vagrant /home/runner
+    output: build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+    binary: https://github.com/iska9der/flabr/releases/download/v%v/flabr_v%v_arm64-v8a.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+    prebuild:
+      - export flversion="$(yq -r .environment.flutter pubspec.yaml | sed 's/\^//g')"
+      - git -C $$flutter$$ checkout -f $flversion
+      - export repo=/home/runner/work/flabr
+      - mkdir -p $repo
+      - cd ..
+      - mv ru.iska9der.flabr $repo/flabr
+      - pushd $repo/flabr
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter packages pub get
+      - $$flutter$$/bin/flutter pub run build_runner build
+      - popd
+      - mv $repo/flabr ru.iska9der.flabr
+    build:
+      - export repo=/home/runner/work/flabr
+      - cd ..
+      - mv ru.iska9der.flabr $repo/flabr
+      - pushd $repo/flabr
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform="android-arm64"
+        --dart-define=CONTACT_TG=iska9der --dart-define=CONTACT_EMAIL=iskander94y@gmail.com
+      - popd
+      - mv $repo/flabr ru.iska9der.flabr
+
+AllowedAPKSigningKeys: e3941815217a5ce858b48017a475ad4ffc863cbcb00ee7d9857dddbe3618bbad
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags v[\d.]+$
+VercodeOperation:
+  - 10 * %c + 1
+  - 10 * %c + 2
+  - 10 * %c + 3
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 1.2.3
+CurrentVersionCode: 107003
