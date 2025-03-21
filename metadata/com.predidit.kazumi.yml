@@ -484,6 +484,73 @@ Builds:
       - mv $repo/Kazumi com.predidit.kazumi
     ndk: r27c
 
+  - versionName: 1.6.2
+    versionCode: 106022
+    commit: 056c93d9f41bd69c4202007fef5201fe94a4747b
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y gcc-multilib libc-dev make automake pkg-config libtool
+        nasm python3-jsonschema wget python3-jinja2 zip
+      - apt-get install -t bookworm-backports meson
+      - mkdir -p /home/runner/
+      - chown vagrant /home/runner/
+    output: build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+    rm:
+      - ios
+      - linux
+      - macos
+      - web
+      - windows
+    prebuild:
+      - rm fastlane/.flutter/engine/src/.gn
+      - sed -i -e '/signingConfig /d' android/app/build.gradle
+      - export repo=/home/runner/work/Kazumi
+      - mkdir -p $repo
+      - cd ..
+      - mv com.predidit.kazumi $repo/Kazumi
+      - pushd $repo/Kazumi
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - fastlane/.flutter/bin/flutter config --no-analytics
+      - fastlane/.flutter/bin/flutter pub get
+      - export file=$(ls .pub-cache/git/media-kit-*/libs/android/media_kit_libs_android_video/android/build.gradle)
+      - sed -i -e '/downloadDependencies/,/dependsOn/d' $file
+      - cd fastlane/.libmpv-android-video-build/buildscripts
+      - sed -i -e '/download-sdk/d' download.sh
+      - sed -i -e '/git reset --hard/d' patch.sh
+      - sed -i -e 's/archs=(armv7l arm64 x86 x86_64)/archs=(arm64)/' build.sh
+      - sed -i -e 's/sudo rm -r/echo/g' -e '/media-kit-android-helper/a sed -i -e
+        "/defaultConfig {/a ndk { abiFilters \\"arm64-v8a\\"}" android/build.gradle'
+        bundle_default.sh
+      - sed -i -e 's/sudo//g' -e 's|./gradlew|gradle|g' *.sh
+      - popd
+      - mv $repo/Kazumi com.predidit.kazumi
+    scanignore:
+      - fastlane/.flutter/bin/cache
+    scandelete:
+      - fastlane/.flutter
+      - .pub-cache
+    build:
+      - pushd fastlane/.libmpv-android-video-build/buildscripts
+      - mkdir sdk
+      - ln -s $$SDK$$ ./sdk/android-sdk-linux
+      - bash bundle_default.sh
+      - popd
+      - export repo=/home/runner/work/Kazumi
+      - cd ..
+      - mv com.predidit.kazumi $repo/Kazumi
+      - pushd $repo/Kazumi
+      - mkdir -p build/media_kit_libs_android_video/output
+      - cp fastlane/.libmpv-android-video-build/buildscripts/*.jar build/media_kit_libs_android_video/output
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - sed -i "s/kvpx7qkqjh/qb998n8g3u/g" lib/utils/mortis.dart
+      - sed -i "s/rABUaBLqdz7aCSi3fe88ZDj2gwga9Vax/gRgWCMXfWBwbBcwLTFqWsQT8rm2sH82Y/g"
+        lib/utils/mortis.dart
+      - fastlane/.flutter/bin/flutter build apk --release --split-per-abi --target-platform="android-arm64"
+      - popd
+      - mv $repo/Kazumi com.predidit.kazumi
+    ndk: r27c
+
 AllowedAPKSigningKeys: f4633dcf19ca0ccac7e730c57124a7acca57ce52b87913f9620d6bb718551d98
 
 AutoUpdateMode: Version
@@ -491,5 +558,5 @@ UpdateCheckMode: Tags
 VercodeOperation:
   - 10 * %c + 2
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 1.6.1
-CurrentVersionCode: 106012
+CurrentVersion: 1.6.2
+CurrentVersionCode: 106022
