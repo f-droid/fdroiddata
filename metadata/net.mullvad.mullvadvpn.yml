@@ -831,8 +831,37 @@ Builds:
       - ../../build-apk.sh --fdroid
     ndk: r27c
 
+  - versionName: '2025.1'
+    versionCode: 25019000
+    commit: d2bfc6ade44d0f820198ed8eddf9d6a9a84ab306
+    timeout: 10800
+    subdir: android/app
+    sudo:
+      - apt-get update
+      - apt-get install -y build-essential protobuf-compiler libprotobuf-dev
+    init: NDK_PATH="$$NDK$$" ../fdroid-build/init.sh
+    output: build/outputs/apk/ossProd/fdroid/app-oss-prod-fdroid-unsigned.apk
+    rm:
+      - desktop
+      - graphics
+      - ios
+      - windows
+      - building/sigstore
+      - android/lib/billing
+    prebuild:
+      - git -C ../.. submodule update --init --recursive --depth=1 wireguard-go-rs
+      - sed -i -e 's|Repositories.GradlePlugins|"https://plugins.gradle.org/m2/"|'
+        ../build.gradle.kts
+      - sed -i '/\"desktop\//d' ../../Cargo.toml
+      - sed -i '/^android-billingclient/d' ../gradle/libs.versions.toml
+    build:
+      - NDK_PATH="$$NDK$$" source ../fdroid-build/env.sh
+      - cargo install --force cbindgen --version "0.26.0" --locked
+      - ../../build-apk.sh --fdroid
+    ndk: r27c
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^android/[0-9]{4}\.[0-9]+$
 UpdateCheckData: dist-assets/android-version-code.txt|(\d+)|dist-assets/android-version-name.txt|(.+)
-CurrentVersion: '2024.9'
-CurrentVersionCode: 24090099
+CurrentVersion: '2025.1'
+CurrentVersionCode: 25019000
