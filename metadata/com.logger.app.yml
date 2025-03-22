@@ -130,10 +130,45 @@ Builds:
       - popd
       - mv $repo/logger-linux-build com.logger.app
 
+  - versionName: 3.0.8
+    versionCode: 47
+    commit: e9d5135e0d1b64665e6458bdc70dfd1ad976d2a9
+    sudo:
+      - mkdir -p /mnt/d/sanmeet007
+      - chown vagrant /mnt/d/sanmeet007
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@stable
+    prebuild:
+      - export repo=/mnt/d/sanmeet007/dart
+      - mkdir -p $repo
+      - cd ..
+      - mv com.logger.app $repo/logger-linux-build
+      - pushd $repo/logger-linux-build
+      - export flutterVersion=$(sed -n -E "s/.*flutter:\s([0-9.]+)\r?/\1/p" pubspec.yaml)
+      - '[[ $flutterVersion ]] || exit 1'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter packages pub get
+      - popd
+      - mv $repo/logger-linux-build com.logger.app
+    scandelete:
+      - .pub-cache
+    build:
+      - export repo=/mnt/d/sanmeet007/dart
+      - cd ..
+      - mv com.logger.app $repo/logger-linux-build
+      - pushd $repo/logger-linux-build
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk
+      - popd
+      - mv $repo/logger-linux-build com.logger.app
+
 AllowedAPKSigningKeys: 114f6019fb5a6ac74843df902dbeb99e69d5e6099656a3c9f689cf27131400ab
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags v[\d.]+$
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 2.8.3
-CurrentVersionCode: 37
+CurrentVersion: 3.0.8
+CurrentVersionCode: 47
