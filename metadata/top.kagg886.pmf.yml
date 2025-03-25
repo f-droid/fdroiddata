@@ -1,0 +1,46 @@
+AntiFeatures:
+  NonFreeNet:
+    en-US: Depends on Pixiv and connects GitHub for update check.
+Categories:
+  - Graphics
+  - Internet
+  - Multimedia
+License: GPL-3.0-only
+AuthorName: kagg886
+WebSite: https://pmf.kagg886.top
+SourceCode: https://github.com/kagg886/Pixiv-MultiPlatform
+IssueTracker: https://github.com/kagg886/Pixiv-MultiPlatform/issues
+Changelog: https://github.com/kagg886/Pixiv-MultiPlatform/releases
+
+AutoName: Pixiv
+
+RepoType: git
+Repo: https://github.com/kagg886/Pixiv-MultiPlatform
+Binaries: https://github.com/kagg886/Pixiv-MultiPlatform/releases/download/v%v/android.apk
+
+Builds:
+  - versionName: 1.6.5
+    versionCode: 165
+    commit: 0a34e4e58da2a506e8e7d080badfdd91c94d504e
+    subdir: composeApp
+    gradle:
+      - yes
+    rm:
+      - iosApp
+      - plugin
+    prebuild:
+      - sed -i -e '/compose-desktop-build-windows/d' -e '/foojay/d' -e '/jogamp/d'
+        ../settings.gradle.kts
+      - sed -i -e '/signConfig/d' -e '/top.kagg886.compose.installer.windows/d' -e
+        '/configureComposeWindowsInstaller {/,/^}/d' build.gradle.kts
+      - echo -e '\nAPP_VERSION_NAME=v$$VERSION$$' >> ../gradle.properties
+      - gradle exportLibraryDefinitions -PaboutLibraries.exportVariant=release
+
+AllowedAPKSigningKeys: 0d0a5b77ee74694c0b63cb663f0639785603583610683da6f0aa2e73f7ff3bbc
+
+AutoUpdateMode: Version v%v
+UpdateCheckMode: HTTP
+UpdateCheckData: https://github.com/kagg886/Pixiv-MultiPlatform/releases/latest|>v[\d.]+
+  - (\d+)</h1>|.|>v([\d.]+) - \d+</h1>
+CurrentVersion: 1.6.5
+CurrentVersionCode: 165
