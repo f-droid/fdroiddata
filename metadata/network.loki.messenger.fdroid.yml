@@ -1491,10 +1491,46 @@ Builds:
       - libsession-util/libsession-util/external
     ndk: r26b
 
+  - versionName: 1.21.3
+    versionCode: 4015
+    commit: d8193c469e9beae5dea0017184c22fa9011cc955
+    subdir: app
+    submodules: true
+    gradle:
+      - website
+    output: build/outputs/apk/website/release/session-*-universal.apk
+    srclibs:
+      - session-lazysodium-android@5.1.1
+    rm:
+      - liblazysodium
+    prebuild:
+      - ln -s $$session-lazysodium-android$$/app ../liblazysodium
+      - ln -s $$session-lazysodium-android$$/session-lazysodium-java ..
+      - sed -i -e 's/classifier/archiveClassifier/' -e '/android {/a namespace "com.goterl.lazysodium"'
+        ../liblazysodium/build.gradle
+      - sed -i -e '/gms/d' -e 's/raw.github.com.*"/jitpack.io"/' -e 's|developer.huawei.com/repo/|jitpack.io|'
+        ../build.gradle
+      - sed -i -e '/gms/d' -e '/firebase-messaging/,/^    }/d' -e '/enable true/d'
+        -e '/circular-progress-button/s/1.1.3-S2/1.1.3/' -e '/defaultConfig/a applicationId
+        "network.loki.messenger.fdroid"' -e 's/ext.websiteUpdateUrl = ".*"/ext.websiteUpdateUrl
+        = "null"/g' build.gradle
+      - sed -i -E -e '/app_name/s/>(.+)</>\1 F-Droid</' src/main/res/*/strings.xml
+      - for uri in $(sed -n -E 's/android:authorities="network.loki.(.*)"/\1/p' src/main/AndroidManifest.xml);
+        do find src/main/java/org/thoughtcrime/securesms -type f -exec sed -i -e "s/network.loki.$uri/network.loki.fdroid.$uri/"
+        {} +; done
+      - sed -i -e '/READ_PHONE_STATE/d' -e '/c2dm/d' -e 's/ACCESS_SESSION_SECRETS/fdroid.ACCESS_SESSION_SECRETS/'
+        -e '/android:authorities/s/network.loki/network.loki.fdroid/' src/main/AndroidManifest.xml
+      - sdkmanager 'cmake;3.22.1'
+      - sed -i -e 's/-Xmx2048M -Dkotlin.daemon.jvm.options\="-Xmx4096M"/-Xmx4096M
+        -Dkotlin.daemon.jvm.options\="-Xmx4096M" -XX:MaxMetaspaceSize=512m/' ../gradle.properties
+    scandelete:
+      - libsession-util/libsession-util/external
+    ndk: r26b
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 VercodeOperation:
   - 10*%c + 5
 UpdateCheckData: app/build.gradle|canonicalVersionCode\s=\s(\d+)|.|canonicalVersionName\s=\s"([\d.]+)"
-CurrentVersion: 1.21.2
-CurrentVersionCode: 3985
+CurrentVersion: 1.21.3
+CurrentVersionCode: 4015
