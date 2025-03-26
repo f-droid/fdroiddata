@@ -172,8 +172,21 @@ Builds:
     versionCode: 31
     commit: 84a32be5d8cc01b3470266be51e7f01ada0b8c07
     subdir: app
+    sudo:
+      - export CPUS_MAX=16
+      - export CPUS=$(getconf _NPROCESSORS_ONLN)
+      - for (( c=$CPUS_MAX; c<$CPUS; c++ )) ; do echo 0 > /sys/devices/system/cpu/cpu$c/online
+        ; done
     gradle:
       - defaultFlavor
+    postbuild:
+      - curl -Lo upstream.apk https://github.com/quillpad/quillpad/releases/download/v$$VERSION$$/quillpad-$$VERSION$$.apk
+      - unzip -q upstream.apk -d apk
+      - export hash=$(sha256sum apk/assets/dexopt/baseline.prof)
+      - rm -rf apk upstream.apk
+      - for i in {1..10}; do unzip -q $$OUT$$ -d apk; sha256sum -c - <<< $hash &&
+        break; sha256sum apk/assets/dexopt/baseline.prof; rm -fr apk; gradle clean
+        assembleDefaultFlavorRelease; done
 
 AllowedAPKSigningKeys: 3c2b48eeceed98e70a33d21d3e9ff6193343a1dddcbb9cc076b859d36cdeae6a
 
