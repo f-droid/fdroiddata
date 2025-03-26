@@ -304,11 +304,71 @@ Builds:
     gradleprops:
       - buildDeps=false
 
+  - versionName: v1.3.2
+    versionCode: 13200
+    commit: 814c6f54e29ff16c89fb1280af21902415fbc23b
+    subdir: nym-vpn-android/app
+    sudo:
+      - apt-get update
+      - apt-get install -y libdbus-1-dev libmnl-dev libnftnl-dev protobuf-compiler
+        make libc-dev gcc
+      - apt-get install -t bookworm-backports -y golang-go
+      - export CPUS_MAX=16
+      - export CPUS=$(getconf _NPROCESSORS_ONLN)
+      - for (( c=$CPUS_MAX; c<$CPUS; c++ )) ; do echo 0 > /sys/devices/system/cpu/cpu$c/online
+        ; done
+    gradle:
+      - fdroid
+    srclibs:
+      - rustup@1.27.1
+      - go@go1.23.6
+    rm:
+      - nym-vpn-apple
+      - nym-vpn-app
+      - proto
+    prebuild: $$rustup$$/rustup-init.sh -y --default-toolchain 1.85.1 --target aarch64-linux-android
+    build:
+      - pushd $$go$$/src
+      - ./make.bash
+      - popd
+      - export GOPATH=$$go$$
+      - export PATH="$GOPATH/bin:$PATH"
+      - source "$HOME/.cargo/env"
+      - export NDK_TOOLCHAIN_DIR="$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin"
+      - PROJECT_ROOT="$(realpath $(pwd)/../..)"
+      - RUST_COMPILER_SYS_ROOT=$(rustc --print sysroot)
+      - IDEMPOTENT_RUSTFLAGS="-C link-args=-Wl,--build-id=none --remap-path-prefix
+        ${HOME}=~ --remap-path-prefix ${PROJECT_ROOT}=/buildroot --remap-path-prefix
+        ${RUST_COMPILER_SYS_ROOT}=/sysroot"
+      - export RUSTFLAGS=$IDEMPOTENT_RUSTFLAGS
+      - export SOURCE_DATE_EPOCH=0
+      - export VERGEN_IDEMPOTENT=1
+      - export VERGEN_GIT_BRANCH="VERGEN_IDEMPOTENT_OUTPUT"
+      - cd ../..
+      - bash wireguard/build-wireguard-go.sh --android
+      - pushd nym-vpn-core/crates/nym-vpn-lib
+      - source "$HOME/.cargo/env"
+      - cargo install cargo-ndk cargo-license --locked
+      - cargo ndk -t arm64-v8a -o ../../../nym-vpn-android/core/src/main/jniLibs build
+        --release
+      - popd
+      - pushd nym-vpn-core
+      - cargo run --bin uniffi-bindgen generate --library ./target/aarch64-linux-android/release/libnym_vpn_lib.so
+        --language kotlin --out-dir ../nym-vpn-android/core/src/main/java/net/nymtech/vpn
+        -n
+      - popd
+      - cargo license -j --avoid-dev-deps --current-dir nym-vpn-core/crates/nym-vpn-lib
+        --filter-platform aarch64-linux-android --avoid-build-deps > nym-vpn-android/core/src/main/assets/licenses_rust.json
+      - mv nym-vpn-android/app/build/extraJni/arm64-v8a/libwg.so nym-vpn-android/core/src/main/jniLibs/arm64-v8a/
+    ndk: r25c
+    gradleprops:
+      - buildDeps=false
+
 AllowedAPKSigningKeys: 3c98a016aa4f14a3ba185c764ed363415cf7ff3c3d328a87ffff2ff1b140ff06
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^nym-vpn-android-v[\d.]+$
 UpdateCheckData: nym-vpn-android/buildSrc/src/main/kotlin/Constants.kt|VERSION_CODE
   = (\d+)|.|VERSION_NAME = "(v[\d.]+)"
-CurrentVersion: v1.3.1
-CurrentVersionCode: 13100
+CurrentVersion: v1.3.2
+CurrentVersionCode: 13200
