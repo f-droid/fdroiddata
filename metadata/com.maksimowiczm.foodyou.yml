@@ -65,10 +65,30 @@ Builds:
         break; sha256sum apk/assets/dexopt/baseline.prof; rm -fr apk; gradle clean
         assembleRelease; done
 
+  - versionName: 1.3.0
+    versionCode: 5
+    commit: 072a6a145328bb6fd8b00c749063ef5eba590dcc
+    subdir: app
+    sudo:
+      - export CPUS_MAX=16
+      - export CPUS=$(getconf _NPROCESSORS_ONLN)
+      - for (( c=$CPUS_MAX; c<$CPUS; c++ )) ; do echo 0 > /sys/devices/system/cpu/cpu$c/online
+        ; done
+    gradle:
+      - yes
+    postbuild:
+      - curl -Lo upstream.apk https://github.com/maksimowiczm/FoodYou/releases/download/$$VERSION$$/food-you-$$VERSION$$.apk
+      - unzip -q upstream.apk -d apk
+      - export hash=$(sha256sum apk/assets/dexopt/baseline.prof)
+      - rm -rf apk upstream.apk
+      - for i in {1..10}; do unzip -q $$OUT$$ -d apk; sha256sum -c - <<< $hash &&
+        break; sha256sum apk/assets/dexopt/baseline.prof; rm -fr apk; gradle clean
+        assembleRelease; done
+
 AllowedAPKSigningKeys: cd74b0aedd8ead8184063a65909d639a8c885cf6465829690a9be83a8904bdea
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^[0-9.]+$
 UpdateCheckData: gradle/libs.versions.toml|android-versionCode\s=\s\"(\d+)\"|.|version-name\s=\s\"([\d.]+)\"
-CurrentVersion: 1.2.0
-CurrentVersionCode: 4
+CurrentVersion: 1.3.0
+CurrentVersionCode: 5
