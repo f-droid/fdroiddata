@@ -291,6 +291,14 @@ Builds:
       - fdroid
     prebuild: sed -i -e '/(useCrashlytics)/,+3d' -e '/firebase/d' -e '/gms/d' ../build.gradle
       build.gradle
+    postbuild:
+      - curl -Lo upstream.apk https://github.com/meshtastic/Meshtastic-Android/releases/download/$$VERSION$$/fdroidRelease-$$VERSION$$.apk
+      - unzip -q upstream.apk -d apk
+      - export hash=$(sha256sum apk/assets/dexopt/baseline.prof)
+      - rm -rf apk upstream.apk
+      - for i in {1..10}; do unzip -q $$OUT$$ -d apk; sha256sum -c - <<< $hash &&
+        break; sha256sum apk/assets/dexopt/baseline.prof; rm -fr apk; gradle clean
+        assembleFdroidRelease; done
 
 AllowedAPKSigningKeys: a93b456568c175db0800a09f06777f892d812432adb8a3df73bc3e7f06c80c6d
 
