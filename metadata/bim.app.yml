@@ -9,6 +9,7 @@ AuthorName: Julien Jorge
 AuthorEmail: bim-game@gmx.com
 SourceCode: https://github.com/j-jorge/bim/
 IssueTracker: https://github.com/j-jorge/bim/issues
+Donate: https://github.com/sponsors/j-jorge
 
 RepoType: git
 Repo: https://github.com/j-jorge/bim.git
@@ -40,9 +41,35 @@ Builds:
       - ./setup.sh --target-platform android --build-type release --build-steps dependencies
         configure build
 
+  - versionName: '6'
+    versionCode: 600
+    commit: v6
+    sudo:
+      - apt-get update
+      - apt-get install -y bzip2 ccache cmake file gettext gradle libjpeg-dev libpng-dev
+        make ninja-build pkg-config python3-venv
+      - echo "deb https://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
+      - apt-get update
+      - apt-get install -y -t trixie g++-14
+      - rm -rf /opt/android-sdk
+    output: build/android/release/android-project/app/build/outputs/apk/release/app-release-unsigned.apk
+    build:
+      - ci/initialize-android-keystore.sh --build-type debug --output-dir android/app
+      - sed '/signingConfig .\+/d' -i android/app/build.gradle.in
+      - export CC=gcc-14
+      - export CXX=g++-14
+      - unset ANDROID_HOME
+      - unset ANDROID_NDK
+      - unset ANDROID_NDK_HOME
+      - unset ANDROID_SDK
+      - unset ANDROID_SDK_ROOT
+      - ./setup.sh --target-platform android --build-type release --build-steps dependencies
+        configure build
+
 AllowedAPKSigningKeys: 3fd4e09dd9bd5aeb594337be38cb27cad8bde56e1d5ef8302d3dd5cadfbde93f
 
-AutoUpdateMode: None
-UpdateCheckMode: None
-CurrentVersion: '5'
-CurrentVersionCode: 501
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: CMakeLists.txt|set\(android_version_code\s+(\d+)\)|.|set\(project_version\s+(.+)\)
+CurrentVersion: '6'
+CurrentVersionCode: 600
