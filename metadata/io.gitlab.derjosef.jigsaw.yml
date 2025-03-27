@@ -71,7 +71,73 @@ Builds:
         Android jigsaw.apk
     ndk: 23.2.8568313
 
-AutoUpdateMode: None
-UpdateCheckMode: None
-CurrentVersion: 1.0.0
-CurrentVersionCode: 10002
+  - versionName: 1.1.0
+    versionCode: 10101
+    commit: v1.1.0
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y pkgconf clang scons
+    output: jigsaw.apk
+    scanignore:
+      - build_tools/godot/tests/
+      - build_tools/godot/modules/mono/
+      - build_tools/godot/platform/android/java/app/build.gradle
+    build:
+      - export ANDROID_SDK_ROOT="$$SDK$$"
+      - export ANDROID_NDK_ROOT="$$NDK$$"
+      - export JAVA_HOME="$(dirname $(which java))/.."
+      - pushd build_tools/godot
+      - scons -j `nproc` platform=linuxbsd target=editor
+      - scons -j `nproc` platform=android target=template_release arch=arm32 profile="../fdroid-config.py"
+      - export GODOT_BIN="$(pwd)/bin"
+      - cd platform/android/java
+      - gradle generateGodotTemplates
+      - popd
+      - sed -i -r ' s|(custom_template/release)=".*"|\1=\"'$GODOT_BIN/android_release.apk'\"|;
+        s|(architectures/armeabi-v7a)=.*|\1=true|; s|(architectures/arm64-v8a)=.*|\1=false|;
+        s|(version/code)=.*|\1=$$VERCODE$$|' export_presets.cfg
+      - touch $GODOT_BIN/_sc_
+      - $GODOT_BIN/godot.linuxbsd.editor.x86_64 --headless --verbose --export-release
+        F-Droid jigsaw.apk
+    ndk: 23.2.8568313
+
+  - versionName: 1.1.0
+    versionCode: 10102
+    commit: v1.1.0
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y pkgconf clang scons
+    output: jigsaw.apk
+    scanignore:
+      - build_tools/godot/tests/
+      - build_tools/godot/modules/mono/
+      - build_tools/godot/platform/android/java/app/build.gradle
+    build:
+      - export ANDROID_SDK_ROOT="$$SDK$$"
+      - export ANDROID_NDK_ROOT="$$NDK$$"
+      - export JAVA_HOME="$(dirname $(which java))/.."
+      - pushd build_tools/godot
+      - scons -j `nproc` platform=linuxbsd target=editor
+      - scons -j `nproc` platform=android target=template_release arch=arm64 profile="../fdroid-config.py"
+      - export GODOT_BIN="$(pwd)/bin"
+      - cd platform/android/java
+      - gradle generateGodotTemplates
+      - popd
+      - sed -i -r ' s|(custom_template/release)=".*"|\1=\"'$GODOT_BIN/android_release.apk'\"|;
+        s|(architectures/armeabi-v7a)=.*|\1=false|; s|(architectures/arm64-v8a)=.*|\1=true|;
+        s|(version/code)=.*|\1=$$VERCODE$$|' export_presets.cfg
+      - touch $GODOT_BIN/_sc_
+      - $GODOT_BIN/godot.linuxbsd.editor.x86_64 --headless --verbose --export-release
+        F-Droid jigsaw.apk
+    ndk: 23.2.8568313
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags .*[0-9]$
+VercodeOperation:
+  - '%c * 10 + 1'
+  - '%c * 10 + 2'
+UpdateCheckData: export_presets.cfg|version/code=(\d+)|.|version/name="(.*)"
+CurrentVersion: 1.1.0
+CurrentVersionCode: 10102
