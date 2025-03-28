@@ -767,10 +767,43 @@ Builds:
       - make lib_android
       - mv libbox.aar clients/android/app/libs
 
+  - versionName: 1.11.6
+    versionCode: 497
+    commit: a530e424e9efcf03cd29eca95b7a4d4acf258903
+    subdir: clients/android/app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -t bookworm-backports -y golang-go
+      - apt-get install -y gcc libc-dev make
+    gradle:
+      - other
+    srclibs:
+      - go@go1.23.5
+    prebuild:
+      - export NDK_VERSION=$(sed -n -E 's/ *ndkVersion "([0-9.]+)"/\1/p' build.gradle)
+      - sdkmanager "platforms;android-34" "build-tools;34.0.0" "cmdline-tools;latest"
+      - $$SDK$$/cmdline-tools/latest/bin/sdkmanager "ndk;$NDK_VERSION"
+      - sed -i -e 's/enable true/enable false/' build.gradle
+      - mkdir libs
+      - export GO_VERSION=$(sed -n -E "s/GO_VERSION=(go[0-9.]+)/\1/p" ../version.properties)
+      - cd $$go$$
+      - git checkout -f $GO_VERSION
+    build:
+      - pushd $$go$$/src
+      - ./make.bash
+      - popd
+      - export GOPATH=$$go$$
+      - export PATH="$GOPATH/bin:$PATH"
+      - cd ../../..
+      - make lib_install
+      - make lib_android
+      - mv libbox.aar clients/android/app/libs
+
 AllowedAPKSigningKeys: 32250a4b5f3a6733df57a3b9ec16c38d2c7fc5f2f693a9636f8f7b3be3549641
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v[\d.]+$
 UpdateCheckData: clients/android/version.properties|VERSION_CODE=(\d+)|.|VERSION_NAME=([\d.]+)
-CurrentVersion: 1.11.5
-CurrentVersionCode: 488
+CurrentVersion: 1.11.6
+CurrentVersionCode: 497
