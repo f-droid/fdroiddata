@@ -3969,8 +3969,101 @@ Builds:
         en-US: Downloads assets (like ML models, release info and FAQs) from Ente's
           CDN
 
+  - versionName: 1.0.1
+    versionCode: 1032
+    commit: 68c2fbfec62944c5cd32ba6ed4d16b7d850e5ddf
+    subdir: mobile
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y gcc-multilib libc-dev make automake pkg-config libtool
+        nasm python3-jsonschema wget meson python3-jinja2 zip
+    output: build/app/outputs/flutter-apk/app-fdroid-release.apk
+    srclibs:
+      - libsodium@ee009287afd480b60a9a4d75b19afdc0f705e9d9
+      - transistor-background-fetch@ca8d2f7a9cf1880dfaf9bcb2c2176fab19e0b124
+      - media-kit-libmpv-android-video-build@v1.1.5
+      - media-kit@media_kit-v1.1.10
+      - media-kit-android-helper@0574b11502ae0c5474e0629bb29c2991215e4751
+      - mpv@056072bf958ffeaadd2f5a69e37f3079f18d4ead
+      - libplacebo@76bb971847a5c7f5a40596edcb071de5ab8b7446
+      - fftools-ffi@10070acb2c090edda86dba431f6c281145ceb221
+    rm:
+      - auth
+      - cli
+      - desktop
+      - docs
+      - infra
+      - mobile/ios
+      - server
+      - web
+    prebuild:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - thirdparty/flutter/bin/flutter config --no-analytics
+      - thirdparty/flutter/bin/flutter pub get
+      - sed -i -e '/play-services-cronet/d' $PUB_CACHE/hosted/pub.dev/cronet_http-*/android/build.gradle
+      - export file=$(ls .pub-cache/hosted/pub.dev/media_kit_libs_android_video-*/android/build.gradle)
+      - export tag=$(sed -n -E 's|.*download/(v[0-9.]+)/.*|\1|p' $file | head -n 1)
+      - '[[ $tag == "v1.1.5" ]] || exit 1'
+      - sed -i -e '/downloadDependencies/,/dependsOn/d' $file
+      - cd $$media-kit-libmpv-android-video-build$$/buildscripts
+      - mkdir deps
+      - pushd deps
+      - cp -r $$mpv$$ mpv
+      - cp -r $$libplacebo$$ libplacebo
+      - cp -r $$media-kit$$ media_kit
+      - cp -r $$media-kit-android-helper$$ media-kit-android-helper
+      - cp -r $$fftools-ffi$$ fftools_ffi
+      - popd
+      - sed -i -e '/download-sdk/d' download.sh
+      - sed -i -e '/git reset --hard/d' patch.sh
+      - sed -i -e 's/sudo rm -r/echo/g' -e 's|app/build/outputs/apk/release/app-release.apk|app/build/outputs/apk/release/app-release-unsigned.apk|'
+        bundle_default.sh
+      - sed -i -e 's/sudo//g' -e 's|./gradlew|gradle|g' *.sh
+    scanignore:
+      - mobile/.pub-cache/hosted/pub.dev/background_fetch-*/android/build.gradle
+      - mobile/thirdparty/flutter/bin/cache
+    scandelete:
+      - mobile/thirdparty/flutter
+      - mobile/.pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export FLUTTER=$(pwd)/thirdparty/flutter/bin/
+      - pushd $$libsodium$$
+      - ./autogen.sh -s
+      - ./dist-build/android-armv7-a.sh
+      - ./dist-build/android-armv8-a.sh
+      - ./dist-build/android-x86.sh
+      - ./dist-build/android-x86_64.sh
+      - popd
+      - flutter_sodium=$(echo .pub-cache/git/flutter_sodium-*/android/src/main/jniLibs)
+      - cp $$libsodium$$/libsodium-android-armv7-a/lib/libsodium.so $flutter_sodium/armeabi-v7a/
+      - cp $$libsodium$$/libsodium-android-westmere/lib/libsodium.so $flutter_sodium/x86_64/
+      - cp $$libsodium$$/libsodium-android-armv8-a+crypto/lib/libsodium.so $flutter_sodium/arm64-v8a/
+      - cp $$libsodium$$/libsodium-android-i686/lib/libsodium.so $flutter_sodium/x86/
+      - pushd $$transistor-background-fetch$$/android/tsbackgroundfetch/
+      - gradle assembleRelease
+      - gradle publishToMavenLocal
+      - popd
+      - mv $$transistor-background-fetch$$/android/tsbackgroundfetch/build/outputs/aar/tsbackgroundfetch-release.aar
+        $PUB_CACHE/hosted/pub.dev/background_fetch-1.3.7/android/libs/com/transistorsoft/tsbackgroundfetch/1.0.4/tsbackgroundfetch-1.0.4.aar
+      - pushd $$media-kit-libmpv-android-video-build$$/buildscripts
+      - mkdir sdk
+      - ln -s $$SDK$$ ./sdk/android-sdk-linux
+      - PATH=$FLUTTER:$PATH bash bundle_default.sh
+      - popd
+      - mkdir -p build/media_kit_libs_android_video/output
+      - cp $$media-kit-libmpv-android-video-build$$/output/default-*.jar build/media_kit_libs_android_video/output
+      - thirdparty/flutter/bin/flutter build apk --flavor fdroid -t lib/main.dart
+        --dart-define=cronetHttpNoPlay=true
+    ndk: 25.2.9519653
+    antifeatures:
+      NonFreeNet:
+        en-US: Downloads assets (like ML models, release info and FAQs) from Ente's
+          CDN
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^fdroid-
 UpdateCheckData: mobile/pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 0.9.99
-CurrentVersionCode: 1013
+CurrentVersion: 1.0.1
+CurrentVersionCode: 1032
