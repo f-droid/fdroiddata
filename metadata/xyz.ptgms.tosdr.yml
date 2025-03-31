@@ -1,0 +1,44 @@
+Categories:
+  - Internet
+  - Navigation
+  - Reading
+  - Security
+License: MIT
+WebSite: https://tosdr.org/
+SourceCode: https://github.com/tosdr/tosdr-android
+IssueTracker: https://github.com/tosdr/tosdr-android/issues
+OpenCollective: tosdr
+Bitcoin: bc1qnjcxk6xllv3dnzzxd74843lhp59njwd94u6yza
+Litecoin: ltc1q0t89mvcxcuma04tm2z0r3gdzj7kpfy32q6gmm2
+
+Name: ToS;DR
+AutoName: ToS;DR
+
+RepoType: git
+Repo: https://github.com/tosdr/tosdr-android.git
+Binaries: https://github.com/tosdr/tosdr-android/releases/download/v%v/app-foss-release.apk
+
+Builds:
+  - versionName: 2.1.2
+    versionCode: 42
+    commit: f6898f7716fe0de914a634f6df742267a57db5ee
+    subdir: app
+    sudo:
+      - export CPUS_MAX=16
+      - export CPUS=$(getconf _NPROCESSORS_ONLN)
+      - for (( c=$CPUS_MAX; c<$CPUS; c++ )) ; do echo 0 > /sys/devices/system/cpu/cpu$c/online
+        ; done
+    gradle:
+      - foss
+    srclibs:
+      - reproducible-apk-tools@v0.3.0
+    postbuild: $$reproducible-apk-tools$$/inplace-fix.py --page-size 16 fix-newlines
+      $$OUT$$ 'META-INF/services/*'
+
+AllowedAPKSigningKeys: 1fdd27fe6bb77e2956369c36db266f4adaf10a2a80693e4bac55f7227f05b9f0
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^v[\d.]+$
+UpdateCheckData: app/build.gradle.kts|versionCode\s=\s(\d+)|.|versionName\s=\s"([\d.]+)"
+CurrentVersion: 2.1.2
+CurrentVersionCode: 42
