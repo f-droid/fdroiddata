@@ -116,7 +116,37 @@ Builds:
       - mv $$snapcast-deps$$/build/aar/*.aar libs
     ndk: r27c
 
+  - versionName: 0.29.0.2
+    versionCode: 2902
+    commit: 28529b546c48b7eeec5f0ae90b7ec330c4828dcb
+    subdir: Snapcast
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y automake bzip2 cmake gettext libtool-bin libvorbisidec-dev
+        make pkg-config zip
+    gradle:
+      - yes
+    srclibs:
+      - snapcast-deps@v0.29.0
+    rm:
+      - Snapcast/Ressources
+      - Snapcast/src/main/cpp/snapcast/doc/Audiowide.zip
+    prebuild: sed -i -e '/maven {/,/^    }/d' build.gradle
+    build:
+      - sdkmanager 'ndk;r25c'
+      - pushd $$snapcast-deps$$
+      - curl -LOs https://archives.boost.io/release/1.85.0/source/boost_1_85_0.tar.bz2
+      - echo '7009fe1faa1697476bdc7027703a2badb84e849b7b0baad5086b087b971f8617  boost_1_85_0.tar.bz2'
+        | sha256sum -c
+      - tar xjf boost_1_85_0.tar.bz2
+      - NDK_DIR=$$SDK$$/ndk/25.2.9519653 ./build_android.sh 2>&1 > deps.log
+      - tail -n 1000 deps.log
+      - popd
+      - mv $$snapcast-deps$$/build/aar/*.aar libs
+    ndk: r27c
+
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: 0.29.0.1
-CurrentVersionCode: 2901
+CurrentVersion: 0.29.0.2
+CurrentVersionCode: 2902
