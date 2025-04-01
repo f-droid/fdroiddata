@@ -679,6 +679,27 @@ Builds:
     build: make -C ../jni/libmupdf generate
     ndk: r26c
 
+  - versionName: 1.25.6a
+    versionCode: 166
+    commit: 848b8f226e31743b7395736fac14b0a9548a2b2b
+    subdir: app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y make
+    gradle:
+      - yes
+    prebuild:
+      - sed -i -e '/maven.ghostscript.com/d' -e '/user.home/d' -e '/url.*MAVEN_REPO/d'
+        ../build.gradle ../*/build.gradle
+      - sed -i -e 's/enable true/enable false/' build.gradle
+      - sed -i -e "s/'-j4'/'-j`nproc`'/" ../jni/build.gradle
+      - echo 'ABI_FILTERS=armeabi-v7a,arm64-v8a,x86' >> ../gradle.properties
+    scandelete:
+      - jni/libmupdf/thirdparty
+    build: make -C ../jni/libmupdf generate
+    ndk: r26c
+
 MaintainerNotes: |-
   Upstream builds separate APKs for all target architectures supported by NDK
   (5 as of r18). We build a universal APK with armeabi-v7a, arm64-v8a and x86
@@ -691,5 +712,5 @@ MaintainerNotes: |-
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 1.25.5a
-CurrentVersionCode: 165
+CurrentVersion: 1.25.6a
+CurrentVersionCode: 166
