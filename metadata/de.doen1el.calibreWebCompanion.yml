@@ -1,0 +1,66 @@
+Categories:
+  - Multimedia
+  - Reading
+License: GPL-3.0-only
+AuthorName: doen1el
+SourceCode: https://github.com/doen1el/calibre-web-companion
+IssueTracker: https://github.com/doen1el/calibre-web-companion/issues
+
+AutoName: Calibre Web Companion
+
+RepoType: git
+Repo: https://github.com/doen1el/calibre-web-companion.git
+Binaries: https://github.com/doen1el/calibre-web-companion/releases/download/v%v/app-release.apk
+
+Builds:
+  - versionName: 1.5.5
+    versionCode: 123
+    commit: f6e37f0149df6cffdc0f88620c9c9f46e5187cd5
+    sudo:
+      - mkdir -p /home/runner
+      - chown vagrant /home/runner
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - .vscode
+      - ios
+      - docs
+    prebuild:
+      - flutterVersion=$(sed -n -E 's/.*flutter-version:\ "(.*)"/\1/p' .github/workflows/main.yml)
+      - '[[ $flutterVersion ]] || exit 1'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - sed -i -e '/signingConfig /d' -e '/key.properties/d' android/app/build.gradle.kts
+      - export repo=/home/runner/work/calibre-web-companion
+      - mkdir -p $repo
+      - cd ..
+      - mv de.doen1el.calibreWebCompanion $repo/calibre-web-companion
+      - pushd $repo/calibre-web-companion
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter packages pub get
+      - popd
+      - mv $repo/calibre-web-companion de.doen1el.calibreWebCompanion
+    scandelete:
+      - .pub-cache
+    build:
+      - export repo=/home/runner/work/calibre-web-companion
+      - cd ..
+      - mv de.doen1el.calibreWebCompanion $repo/calibre-web-companion
+      - pushd $repo/calibre-web-companion
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter gen-l10n
+      - $$flutter$$/bin/flutter build apk --release --target-platform="android-arm64"
+        --no-tree-shake-icons --dart-define=ISSUE_TOKEN=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
+      - popd
+      - mv $repo/calibre-web-companion de.doen1el.calibreWebCompanion
+
+AllowedAPKSigningKeys: aafacf1ee48ca6cf34faa93d4db2384e8374f17626357a6f3bc04473cdb742ed
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^v.*$
+VercodeOperation:
+  - '%c * 10 + 3'
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 1.5.5
+CurrentVersionCode: 123
