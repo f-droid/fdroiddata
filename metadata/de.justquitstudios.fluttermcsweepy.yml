@@ -1,0 +1,62 @@
+Categories:
+  - Games
+License: GPL-3.0-or-later
+AuthorName: Linda Koine, Eric Schricker, Marco Groß
+AuthorEmail: apps@justquitstudios.de
+AuthorWebSite: https://justquitstudios.de
+SourceCode: https://git.justquitstudios.de/JustQuitStudios/minesweeper-flutter/
+
+AutoName: Flutter McSweepy
+
+RepoType: git
+Repo: https://git.justquitstudios.de/JustQuitStudios/minesweeper-flutter.git
+Binaries: https://git.justquitstudios.de/JustQuitStudios/minesweeper-flutter/releases/download/v%v/app-release.apk
+
+Builds:
+  - versionName: 1.0.2
+    versionCode: 3
+    commit: v1.0.2
+    submodules: true
+    sudo:
+      - mkdir -p /home/eric
+      - chown vagrant /home/eric
+    output: build/app/outputs/flutter-apk/app-release.apk
+    rm:
+      - ios
+      - linux
+      - macos
+      - web
+      - windows
+    prebuild:
+      - export repo=/home/eric/JQStudios
+      - mkdir -p $repo
+      - cd ..
+      - mv de.justquitstudios.fluttermcsweepy $repo/minesweeper-flutter
+      - pushd $repo/minesweeper-flutter
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - .flutter/bin/flutter config --no-analytics
+      - .flutter/bin/flutter pub get
+      - popd
+      - mv $repo/minesweeper-flutter de.justquitstudios.fluttermcsweepy
+    scanignore:
+      - .flutter/bin/cache
+    scandelete:
+      - .flutter
+      - .pub-cache
+    build:
+      - export repo=/home/eric/JQStudios
+      - cd ..
+      - mv de.justquitstudios.fluttermcsweepy $repo/minesweeper-flutter
+      - pushd $repo/minesweeper-flutter
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - .flutter/bin/flutter build apk --release
+      - popd
+      - mv $repo/minesweeper-flutter de.justquitstudios.fluttermcsweepy
+
+AllowedAPKSigningKeys: e43501a973d74c1a5c44bc26e69891eba08346b031f3c259e8585a43685f7eea
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 1.0.2
+CurrentVersionCode: 3
