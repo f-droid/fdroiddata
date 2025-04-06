@@ -843,8 +843,43 @@ Builds:
       - export PUB_CACHE=.pub-cache
       - $$flutter$$/bin/flutter build apk --flavor fdroid --release --obfuscate --split-debug-info=./build/debug-info
 
+  - versionName: 1.8.6
+    versionCode: 48
+    commit: 74b1c2a19733bcaca77fa4ba4dd90bfc8cd6013f
+    output: app/build/app/outputs/flutter-apk/app-fdroid-release.apk
+    srclibs:
+      - flutter@beta
+    rm:
+      - app/ios
+      - app/linux
+      - app/macos
+      - app/web
+      - app/windows
+      - app/test
+      - health_data_store/test
+      - docs
+    prebuild:
+      - export flutterVersion=$(sed -n -E "s/.*flutter:\s*'(.*)'/\1/p" app/pubspec.yaml)
+      - '[[ $flutterVersion ]] || exit 1'
+      - pushd $$flutter$$
+      - git checkout -f $flutterVersion
+      - popd
+      - pushd health_data_store
+      - $$flutter$$/bin/dart run build_runner build
+      - $$flutter$$/bin/dart pub get
+      - pushd ../app
+      - export PUB_CACHE=.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter packages pub get
+    scandelete:
+      - app/.pub-cache
+    build:
+      - pushd app
+      - export PUB_CACHE=.pub-cache
+      - $$flutter$$/bin/flutter build apk --flavor fdroid --release --obfuscate --split-debug-info=./build/debug-info
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: app/pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 1.8.5
-CurrentVersionCode: 47
+CurrentVersion: 1.8.6
+CurrentVersionCode: 48
