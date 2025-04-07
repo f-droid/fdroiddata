@@ -1,0 +1,55 @@
+AntiFeatures:
+  NonFreeNet:
+    en-US: Fetch an image from files.radio.co.
+Categories:
+  - Multimedia
+License: BSD-4-Clause
+AuthorName: Aditya R
+AuthorEmail: adeeteya@gmail.com
+SourceCode: https://github.com/adeeteya/Classipod
+IssueTracker: https://github.com/adeeteya/Classipod/issues
+Changelog: https://github.com/adeeteya/Classipod/blob/master/CHANGELOG.md
+Donate: https://buymeacoffee.com/adeeteya
+Liberapay: adeeteya
+OpenCollective: adeeteya
+
+AutoName: ClassiPod
+
+RepoType: git
+Repo: https://github.com/adeeteya/Classipod.git
+
+Builds:
+  - versionName: 1.8.0
+    versionCode: 18
+    commit: a1ea00f50bafd3b5d654e6b3e2204e01c8db5a26
+    output: build/app/outputs/flutter-apk/app-production-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+      - linux
+      - web
+      - windows
+      - macos
+      - scripts
+    prebuild:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export PATH=$PUB_CACHE/bin/:$$flutter$$/bin/:$PATH
+      - flutter config --no-analytics
+      - flutter pub get
+    scandelete:
+      - .pub-cache
+    build:
+      - flutterVersion=$(sed -n -E "s/^[[:space:]]*flutter:[[:space:]]*([0-9]+\.[0-9]+\.[0-9]+)/\1/p"
+        pubspec.yaml)
+      - '[[ $flutterVersion ]] || exit 1'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export PATH=$PUB_CACHE/bin/:$$flutter$$/bin/:$PATH
+      - flutter build apk --release --flavor production --obfuscate --split-debug-info=./build/app/outputs/symbols
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 1.8.0
+CurrentVersionCode: 18
