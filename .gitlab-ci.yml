@@ -215,7 +215,7 @@ lint:
   script:
     - apt-get -qy update
     - apt-get -qy dist-upgrade
-    - apt-get -qy install --no-install-recommends exiftool git python3 python3-yaml
+    - apt-get -qy install --no-install-recommends exiftool git jq python3 python3-yaml
     - export EXITVALUE=0
     - function set_error() { export EXITVALUE=1; printf "\x1b[31mERROR `history|tail -2|head -1|cut -b 6-500`\x1b[0m\n"; }
 
@@ -230,7 +230,13 @@ lint:
     - ./tools/check-for-unattached-signatures.py || set_error
     - ./tools/make-summary-translatable.py || set_error
 
+    # GitLab only supports one codequality report per job
+    - jq '[.[]|.[]]' --slurp *.json > codequality.json
+
     - exit $EXITVALUE
+  artifacts:
+    reports:
+      codequality: codequality.json
 
 schema validation:
   stage: test
