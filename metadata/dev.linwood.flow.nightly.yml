@@ -146,8 +146,33 @@ Builds:
       - export PUB_CACHE=$(pwd)/.pub-cache
       - $$flutter$$/bin/flutter build apk --flavor nightly
 
+  - versionName: 0.4.1
+    versionCode: 10
+    commit: 10eca122deb429352980275a56b7dc031bfb1c03
+    subdir: app
+    output: build/app/outputs/flutter-apk/app-nightly-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - app/ios
+      - app/linux
+      - app/macos
+      - app/web
+      - app/windows
+    prebuild:
+      - export version=$(grep "^  flutter:" pubspec.yaml | cut -d ":" -f2|head -n1)
+      - '[[ $version ]] || exit 1'
+      - git -C $$flutter$$ checkout -f $version
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+    scandelete:
+      - app/.pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --flavor nightly
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v.+$
 UpdateCheckData: app/pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 0.4.0
-CurrentVersionCode: 9
+CurrentVersion: 0.4.1
+CurrentVersionCode: 10
