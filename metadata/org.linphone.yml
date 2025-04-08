@@ -4450,6 +4450,114 @@ Builds:
     antifeatures:
       - UpstreamNonFree
 
+  - versionName: 6.0.3
+    versionCode: 6000031
+    commit: cfe82d0bec7732359bbb934bdd966bb8a8549a7e
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y build-essential cmake doxygen meson nasm pkgconf python3-pystache
+        yasm
+    gradle:
+      - yes
+    output: build/outputs/apk/release/linphone-android-release-*.apk
+    srclibs:
+      - linphone-sdk@5.2.37
+    rm:
+      - app/google-services.json
+    prebuild:
+      - date=$(git show --format=%ad --no-patch --no-notes)
+      - pushd $$linphone-sdk$$
+      - LINPHONE_SDK_VERSION=$(git log --tags --no-walk --before="$date" --pretty="format:%S"
+        | grep -P '^[\d.]+$' | head -n 1)
+      - echo "Using Linphone SDK" $LINPHONE_SDK_VERSION
+      - git checkout $LINPHONE_SDK_VERSION
+      - git submodule update --init --recursive
+      - rm -R liblinphone/wrappers/java/classes/org/linphone/core/tools/firebase
+      - sed -i -e '/import com.google.firebase.FirebaseApp/d' -e '/FirebaseApp.initializeApp/d'
+        liblinphone/wrappers/java/classes/org/linphone/core/tools/PushNotificationUtils.java
+      - popd
+      - sed -i -e '/FirebaseMessaging/,+6d' src/main/AndroidManifest.xml
+      - sed -i -e '/com.google.firebase/d' $$linphone-sdk$$/cmake/Android/gradle/build.gradle.cmake
+        build.gradle.kts
+      - sed -i -e '/googleGmsServices/d' -e '/crashlytics/d' ../build.gradle.kts
+      - sed -i -e '/keystore/d' -e '/GoogleServicesPlugin/d' -e '/configure<CrashlyticsExtension>/,/^                }/d'
+        -e '/if (crashlyticsAvailable) {/,/^            }/d' -e '/if (crashlyticsAvailable)
+        {/,/^}/d' -e '/project.tasks.preBuild.dependsOn("ktlintFormat")/d' -e '/libs.plugins.crashlytics/d'
+        -e '/google.firebase.bom/d' -e '/google.firebase.messaging/d' -e '/google.firebase.crashlytics/d'
+        -e 's/versionCode = .*/versionCode = $$VERCODE$$/' build.gradle.kts
+      - sed -i -e '/FirebaseCrashlytics/d' src/main/java/org/linphone/core/CoreContext.kt
+      - sed -i -e '/firebase/d' src/main/java/org/linphone/ui/main/help/viewmodel/HelpViewModel.kt
+      - sed -i -e '261,341d' src/main/res/layout/help_debug_fragment.xml
+      - sed -i -e 's|https://download.linphone.org/releases||' src/main/assets/linphonerc_default
+      - sed -i -e '37,44d' -e '/repositories {/a mavenLocal()' ../settings.gradle.kts
+    scanignore:
+      - settings.gradle.kts
+    build:
+      - cd $$linphone-sdk$$
+      - cmake --preset=android-sdk -B build-android -DLINPHONESDK_ANDROID_ARCHS=armv7
+        -DENABLE_GPL_THIRD_PARTIES=ON -DENABLE_G729=ON
+      - cmake --build build-android --parallel $(nproc)
+      - mkdir -p $HOME/.m2/repository
+      - cp -r build-android/maven_repository/* $HOME/.m2/repository/
+    ndk: r27
+    antifeatures:
+      - UpstreamNonFree
+
+  - versionName: 6.0.3
+    versionCode: 6000033
+    commit: cfe82d0bec7732359bbb934bdd966bb8a8549a7e
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y build-essential cmake doxygen meson nasm pkgconf python3-pystache
+        yasm
+    gradle:
+      - yes
+    output: build/outputs/apk/release/linphone-android-release-*.apk
+    srclibs:
+      - linphone-sdk@5.2.37
+    rm:
+      - app/google-services.json
+    prebuild:
+      - date=$(git show --format=%ad --no-patch --no-notes)
+      - pushd $$linphone-sdk$$
+      - LINPHONE_SDK_VERSION=$(git log --tags --no-walk --before="$date" --pretty="format:%S"
+        | grep -P '^[\d.]+$' | head -n 1)
+      - echo "Using Linphone SDK" $LINPHONE_SDK_VERSION
+      - git checkout $LINPHONE_SDK_VERSION
+      - git submodule update --init --recursive
+      - rm -R liblinphone/wrappers/java/classes/org/linphone/core/tools/firebase
+      - sed -i -e '/import com.google.firebase.FirebaseApp/d' -e '/FirebaseApp.initializeApp/d'
+        liblinphone/wrappers/java/classes/org/linphone/core/tools/PushNotificationUtils.java
+      - popd
+      - sed -i -e '/FirebaseMessaging/,+6d' src/main/AndroidManifest.xml
+      - sed -i -e '/com.google.firebase/d' $$linphone-sdk$$/cmake/Android/gradle/build.gradle.cmake
+        build.gradle.kts
+      - sed -i -e '/googleGmsServices/d' -e '/crashlytics/d' ../build.gradle.kts
+      - sed -i -e '/keystore/d' -e '/GoogleServicesPlugin/d' -e '/configure<CrashlyticsExtension>/,/^                }/d'
+        -e '/if (crashlyticsAvailable) {/,/^            }/d' -e '/if (crashlyticsAvailable)
+        {/,/^}/d' -e '/project.tasks.preBuild.dependsOn("ktlintFormat")/d' -e '/libs.plugins.crashlytics/d'
+        -e '/google.firebase.bom/d' -e '/google.firebase.messaging/d' -e '/google.firebase.crashlytics/d'
+        -e 's/versionCode = .*/versionCode = $$VERCODE$$/' build.gradle.kts
+      - sed -i -e '/FirebaseCrashlytics/d' src/main/java/org/linphone/core/CoreContext.kt
+      - sed -i -e '/firebase/d' src/main/java/org/linphone/ui/main/help/viewmodel/HelpViewModel.kt
+      - sed -i -e '261,341d' src/main/res/layout/help_debug_fragment.xml
+      - sed -i -e 's|https://download.linphone.org/releases||' src/main/assets/linphonerc_default
+      - sed -i -e '37,44d' -e '/repositories {/a mavenLocal()' ../settings.gradle.kts
+    scanignore:
+      - settings.gradle.kts
+    build:
+      - cd $$linphone-sdk$$
+      - cmake --preset=android-sdk -B build-android -DLINPHONESDK_ANDROID_ARCHS=arm64
+        -DENABLE_GPL_THIRD_PARTIES=ON -DENABLE_G729=ON
+      - cmake --build build-android --parallel $(nproc)
+      - mkdir -p $HOME/.m2/repository
+      - cp -r build-android/maven_repository/* $HOME/.m2/repository/
+    ndk: r27
+    antifeatures:
+      - UpstreamNonFree
+
 MaintainerNotes: |-
   We pull linphone-sdk at one random tag (since master is not allowed) and then checkout the latest tag available.
   We patch linphone-sdk to remove GMS and Firebase, thus UpstreamNonFree.
@@ -4458,8 +4566,6 @@ AutoUpdateMode: Version
 UpdateCheckMode: Tags .*[0-9]$
 VercodeOperation:
   - '%c * 10 + 1'
-  - '%c * 10 + 2'
   - '%c * 10 + 3'
-UpdateCheckData: app/build.gradle|appVersionCode = (\d+)|.|appVersionName = "(.*)"
-CurrentVersion: 5.2.5
-CurrentVersionCode: 520053
+CurrentVersion: 6.0.3
+CurrentVersionCode: 6000033
