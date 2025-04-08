@@ -1,0 +1,52 @@
+Categories:
+  - Connectivity
+  - Security
+License: MPL-2.0
+AuthorName: URnetwork
+AuthorEmail: support@ur.io
+WebSite: https://ur.io
+SourceCode: https://github.com/urnetwork/android
+IssueTracker: https://github.com/urnetwork/android/issues
+
+AutoName: URnetwork
+
+RepoType: git
+Repo: https://github.com/urnetwork/build
+Binaries: https://github.com/urnetwork/build/releases/download/v%v-%c/com.bringyour.network-%v-%c-github-release.apk
+
+Builds:
+  - versionName: 2025.4.7
+    versionCode: 59293657
+    commit: 5a5f470b8b1cb8686bf8f3a7cbcfe991943e3fdf
+    subdir: android/app/app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -t bookworm-backports -y golang-go
+      - apt-get install -y gcc libc-dev make
+      - echo "deb https://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
+      - apt-get update
+      - apt-get install -y -t trixie openjdk-23-jdk-headless
+      - update-alternatives --auto java
+    gradle:
+      - github
+    srclibs:
+      - go@go1.24.2
+    prebuild:
+      - sed -i -e 's|PATH="|PATH="$$go$$/bin:|' ../../../sdk/build/Makefile
+      - sdkmanager "ndk;$(sed -n -E "s/^\s*ndkVersion '(.*)'/\1/p" build.gradle)"
+        'platforms;android-35'
+      - sed -i -e '/dependsOn goclientBuild/d' build.gradle
+    build:
+      - cd $$go$$/src
+      - ./make.bash
+    preassemble:
+      - goclientBuild
+
+AllowedAPKSigningKeys: 77783877019447c1f16cea6fafd82746df57f4f482304e080f9cc608cfb2e097
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags .+-ungoogle$
+UpdateCheckData: android/app/local.properties|warp.version_code=(\d+)|.|warp.version=(.+)
+CurrentVersion: 2025.4.7
+CurrentVersionCode: 59293657
