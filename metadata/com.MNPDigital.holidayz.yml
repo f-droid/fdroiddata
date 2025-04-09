@@ -1,0 +1,41 @@
+Categories:
+  - Time
+License: GPL-3.0-only
+AuthorName: manip92
+AuthorEmail: learnioxdigital@gmail.com
+AuthorWebSite: https://github.com/PaskoZhelev
+SourceCode: https://github.com/PaskoZhelev/holidayz-app
+IssueTracker: https://github.com/PaskoZhelev/holidayz-app/issues
+Changelog: https://github.com/PaskoZhelev/holidayz-app/releases
+
+AutoName: Holidayz
+
+RepoType: git
+Repo: https://github.com/PaskoZhelev/holidayz-app.git
+
+Builds:
+  - versionName: 1.0.3
+    versionCode: 4
+    commit: d5cbd3f263ab653291e3d18d51f9ea9fd863e599
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@stable
+    prebuild:
+      - export FLUTTER_VERSION=$(sed -n -E "s/flutter:\s([0-9.]+)/\1/p" versions)
+      - pushd $$flutter$$
+      - git checkout -f $FLUTTER_VERSION
+      - popd
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 1.0.3
+CurrentVersionCode: 4
