@@ -1,20 +1,11 @@
 Categories:
   - Reading
 License: GPL-2.0-or-later
+AuthorName: LukeStoneHm
 SourceCode: https://github.com/LukeStonehm/LogicalDefence
 IssueTracker: https://github.com/LukeStonehm/LogicalDefence/issues
 
 AutoName: Logical Defence
-Description: |-
-  View a list of logical fallacies. Steel yourselves, and begin to defend your
-  mind from the language used against you by the sophists of the world.
-
-  Some features:
-
-  * Left drawer that houses categories.
-  * Share function -> Long press a fallacy to share it.
-  * Nice about screen.
-  * Language selection function.
 
 RepoType: git
 Repo: https://github.com/LukeStonehm/LogicalDefence
@@ -153,7 +144,32 @@ Builds:
     gradle:
       - yes
 
-AutoUpdateMode: None
-UpdateCheckMode: RepoManifest
-CurrentVersion: 1.5.1
-CurrentVersionCode: 22
+  - versionName: 2.0.1
+    versionCode: 25
+    commit: ad17b14c97c34bccbe3b3cc12f84cc009b21a468
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@3.24.3
+    rm:
+      - ios
+      - linux
+      - macos
+      - web
+      - windows
+    prebuild:
+      - sed -i -e '/rootProject/a subprojects { afterEvaluate { android { compileSdkVersion
+        34 } } }' android/build.gradle
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 2.0.1
+CurrentVersionCode: 25
