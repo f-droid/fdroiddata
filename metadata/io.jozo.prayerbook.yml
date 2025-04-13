@@ -257,9 +257,36 @@ Builds:
     scandelete:
       - node_modules
 
+  - versionName: 0.9.0
+    versionCode: 17
+    commit: 301d6fd38fe6be5d6a9cfbc89a96e6144be59a68
+    subdir: android/app
+    sudo:
+      - sysctl fs.inotify.max_user_watches=524288 || true
+      - curl -Lo node.tar.gz https://nodejs.org/download/release/v22.11.0/node-v22.11.0-linux-x64.tar.gz
+      - echo "4f862bab52039835efbe613b532238b6e4dde98d139a34e6923193e073438b13 node.tar.gz"
+        | sha256sum -c -
+      - tar xzf node.tar.gz --strip-components=1 -C /usr/local/
+    init:
+      - cd ../..
+      - npm install
+      - npm run build
+      - npx cap sync android
+    gradle:
+      - yes
+    srclibs:
+      - reproducible-apk-tools@v0.3.0
+    prebuild: sed -i -e '/gms/d' ../build.gradle
+    scandelete:
+      - node_modules
+    postbuild:
+      - mv $$OUT$$ unaligned.apk
+      - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
+        --replace unaligned.apk $$OUT$$
+
 AllowedAPKSigningKeys: f5f597716444fd6672f0a011ebe96b1356e37b28866489c664139c6027a8cc14
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 0.8.1
-CurrentVersionCode: 12
+CurrentVersion: 0.9.0
+CurrentVersionCode: 17
