@@ -1,0 +1,52 @@
+Categories:
+  - Connectivity
+  - Internet
+License: MIT
+WebSite: https://evcc.io
+SourceCode: https://github.com/evcc-io/app
+IssueTracker: https://github.com/evcc-io/app/issues
+Translation: https://hosted.weblate.org/projects/evcc
+Changelog: https://github.com/evcc-io/app/releases
+Donate: https://docs.evcc.io/en/docs/sponsorship
+
+RepoType: git
+Repo: https://github.com/evcc-io/app.git
+Binaries: https://github.com/evcc-io/app/releases/download/%v/evcc-%v.apk
+
+Builds:
+  - versionName: 1.0.3
+    versionCode: 27
+    commit: c22ddb1b81f3abd0e55804e7430137e13a0182b1
+    sudo:
+      - sysctl fs.inotify.max_user_watches=524288 || true
+      - apt-get update
+      - apt-get install npm
+    init: npm install --build-from-source
+    output: android/app/build/outputs/apk/release/*.apk
+    prebuild: npx expo prebuild --platform android --clean
+    scanignore:
+      - android/build.gradle
+      - node_modules/react-native-svg/android/build.gradle
+      - node_modules/@react-native-async-storage/async-storage/android/build.gradle
+      - node_modules/react-native-screens/android/build.gradle
+      - node_modules/react-native-webview/android/build.gradle
+      - node_modules/react-native-safe-area-context/android/build.gradle
+      - node_modules/expo-modules-core/android/ExpoModulesCorePlugin.gradle
+      - node_modules/react-native/sdks/hermesc/linux64-bin/hermesc
+      - node_modules/expo-modules-autolinking/scripts/android/autolinking_implementation.gradle
+      - node_modules/expo-dev-launcher/android/build.gradle
+      - node_modules/expo-dev-menu/android/build.gradle
+    scandelete:
+      - node_modules
+    build:
+      - cd android/app
+      - sed -i -e '/signingConfig /d' build.gradle
+      - gradle assembleRelease
+
+AllowedAPKSigningKeys: 39ba4e56e35e30d9fc2fec2b70c9d4b3a76879d3cc44f8abbe76320aefcb7a20
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: app.json|"versionCode":\s(\d+)|.|"version":\s"([\d.]+)"
+CurrentVersion: 1.0.3
+CurrentVersionCode: 27
