@@ -109,8 +109,35 @@ Builds:
       --dart-define=includeGooglePlayInAppPurchases=false --dart-define=includeSupportButtons=true
       --dart-define=includeSupportPage=true --dart-define=includePaypal=true --dart-define=includeGithubSponsor=true
 
+  - versionName: 1.3.2
+    versionCode: 15
+    commit: eb24e213f9b2b28e502fdb64447729d91d184d86
+    sudo:
+      - echo "deb https://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
+      - apt-get update
+      - apt-get install -y -t trixie openjdk-21-jdk-headless
+      - update-java-alternatives -a
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@3.29.2
+    rm:
+      - ios
+      - linux
+      - web
+      - test
+      - local_assets
+      - scripts
+    prebuild:
+      - echo "flutter.sdk=$$flutter$$" >> android/local.properties
+      - $$flutter$$/bin/flutter config --suppress-analytics --enable-android
+      - $$flutter$$/bin/flutter doctor --suppress-analytics
+      - $$flutter$$/bin/dart pub get
+      - $$flutter$$/bin/dart run build_runner build
+    build: $$flutter$$/bin/flutter build apk --no-obfuscate --release --dart-define=includeSupportButtons=true
+      --dart-define=includeSupportPage=true --dart-define=includePaypal=true --dart-define=includeGithubSponsor=true
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 1.3.1
-CurrentVersionCode: 12
+CurrentVersion: 1.3.2
+CurrentVersionCode: 15
