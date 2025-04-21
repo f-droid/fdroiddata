@@ -978,7 +978,69 @@ Builds:
       - ./buildall.sh
     ndk: r27c
 
+  - versionName: 2025-04-21-release
+    versionCode: 41
+    commit: 8acd758ef57a116e5032893043cd590700218fe4
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y make automake pkg-config libtool nasm python3-jsonschema
+        python3-jinja2
+      - apt-get install -t bookworm-backports meson
+    gradle:
+      - default
+    srclibs:
+      - mbedtls@v3.6.3
+      - dav1d@8d956180934f16244bdb58b39175824775125e55
+      - FFmpeg@9e1162bdf1454d7ae3737429bcc6bd66e5da303a
+      - freetype2@VER-2-13-3
+      - fribidi@v1.0.16
+      - harfbuzz@11.1.0
+      - libunibreak@libunibreak_6_1
+      - libass@695509365f152bd28720a0c0e036d46836ee9345
+      - libplacebo@2bd627f823ba1cedbc51a0ee6eb7a9fb433d912e
+      - mpv@3600c716ea240a78cd75bbff6765b78a88171ded
+    prebuild:
+      - sed -i -e '/enable true/d' -e '/universalBase/s/8000/0/' build.gradle
+      - cd ../buildscripts/
+      - mkdir -p sdk
+      - ln -s $$NDK$$ sdk/android-ndk-r28
+      - mkdir -p deps
+      - pushd deps/
+      - cp -r $$mbedtls$$ mbedtls
+      - cp -r $$dav1d$$ dav1d
+      - cp -r $$FFmpeg$$ ffmpeg
+      - cp -r $$freetype2$$ freetype2
+      - cp -r $$fribidi$$ fribidi
+      - cp -r $$harfbuzz$$ harfbuzz
+      - cp -r $$libunibreak$$ unibreak
+      - cp -r $$libass$$ libass
+      - cp -r $$libplacebo$$ libplacebo
+      - cp -r $$mpv$$ mpv
+      - mkdir lua
+      - curl -Lo lua.tar.gz https://www.lua.org/ftp/lua-5.2.4.tar.gz
+      - echo "b9e2e4aad6789b3b63a056d442f7b39f0ecfca3ae0f1fc0ae4e9614401b69f4b lua.tar.gz"
+        | sha256sum -c -
+      - tar -xz --strip-components=1 -C lua -f lua.tar.gz
+      - cd unibreak
+      - ./bootstrap
+      - popd
+      - sed -i -e '/gradlew/d' scripts/mpv-android.sh
+      - sed -i -e '/"$target" == "mpv-android"/,/ls -lh/d' buildall.sh
+    scandelete:
+      - buildscripts/deps/mbedtls/
+      - buildscripts/deps/lua.tar.gz
+      - buildscripts/deps/libplacebo/3rdparty/jinja/tests/res/package.zip
+      - buildscripts/deps/libplacebo/3rdparty/glad/
+      - buildscripts/deps/harfbuzz/src/wasm/
+    build:
+      - cd ../buildscripts/
+      - ./buildall.sh --arch arm64 mpv
+      - ./buildall.sh --arch x86_64 mpv
+      - ./buildall.sh
+    ndk: r28
+
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: 2024-11-16-release
-CurrentVersionCode: 40
+CurrentVersion: 2025-04-21-release
+CurrentVersionCode: 41
