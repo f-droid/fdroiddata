@@ -704,6 +704,27 @@ Builds:
       - sed -i -e '/firebase/d' -e '/google.services/d' ../build.gradle.kts
       - sed -i -e 's/, ":wear", ":automotive"//' ../settings.gradle.kts
 
+  - versionName: 2025.4.3-minimal
+    versionCode: 15918
+    commit: 2025.4.3
+    subdir: app
+    gradle:
+      - minimal
+    rm:
+      - automotive
+      - wear
+    prebuild:
+      - cp ../.github/mock-google-services.json google-services.json
+      - sed -i -e '/firebaseAppDistribution {/,/}/d' -e '/firebase/d' -e '/com.google.gms/d'
+        -e '/google.services/d' -e '/<GoogleServicesPluginConfig>/,/}/d' build.gradle.kts
+      - sed -i -e '/firebase/d' -e '/google.services/d' ../build.gradle.kts
+      - sed -i -e 's/, ":wear", ":automotive"//' ../settings.gradle.kts
+      - sed -i -e '/-minimal/d' ../build-logic/convention/src/main/kotlin/AndroidFullMinimalFlavorConventionPlugin.kt
+      - sed -i -e 's/project.version.toString()/"$$VERSION$$"/' -e 's/System.getenv("VERSION_CODE")/"$$VERCODE$$"/'
+        -e '/signingConfigs {/,+9d' -e '/signingConfigs/d' ../build-logic/convention/src/main/kotlin/AndroidApplicationConventionPlugin.kt
+    scandelete:
+      - build-logic
+
 MaintainerNotes: |-
   6 versions, due to the rapid release there may be a trailing error
   (which bothers only some users) and it takes time to fix.
@@ -712,5 +733,5 @@ ArchivePolicy: 6
 AutoUpdateMode: Version +-minimal %v
 UpdateCheckMode: HTTP
 UpdateCheckData: https://github.com/home-assistant/android/releases/latest/download/version_code.txt|(\d+)|https://github.com/home-assistant/android/releases/latest|tree/([\d.]+)"
-CurrentVersion: 2025.1.2
-CurrentVersionCode: 14946
+CurrentVersion: 2025.4.3
+CurrentVersionCode: 15918
