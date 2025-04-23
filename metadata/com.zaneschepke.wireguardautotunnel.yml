@@ -599,6 +599,11 @@ Builds:
     versionCode: 38300
     commit: d3d70ab2e7462877f2e700ac7fc52a2253030ac2
     subdir: app
+    sudo:
+      - export CPUS_MAX=16
+      - export CPUS=$(getconf _NPROCESSORS_ONLN)
+      - for (( c=$CPUS_MAX; c<$CPUS; c++ )) ; do echo 0 > /sys/devices/system/cpu/cpu$c/online
+        ; done
     gradle:
       - fdroid
     prebuild:
@@ -606,6 +611,14 @@ Builds:
         build.gradle.kts
       - sed -i -e '/libs.google.services/d' -e '/libs.firebase/d' ../build.gradle.kts
       - sed -i -e '/gitea.zaneschepke.com/d' ../settings.gradle.kts
+    postbuild:
+      - curl -Lo upstream.apk https://github.com/zaneschepke/wgtunnel/releases/download/$$VERSION$$/wgtunnel-fdroid-release-$$VERSION$$.apk
+      - unzip -q upstream.apk -d apk
+      - export hash=$(sha256sum apk/assets/dexopt/baseline.prof)
+      - rm -rf apk upstream.apk
+      - for i in {1..10}; do unzip -q $$OUT$$ -d apk; sha256sum -c - <<< $hash &&
+        break; sha256sum apk/assets/dexopt/baseline.prof; rm -fr apk; gradle clean
+        assembleFdroidRelease; done
 
 AllowedAPKSigningKeys: 5204d82e766e8aa14dcbb06dc70aebae2bdd812d4d6203cd521a8a685d7d3d80
 
