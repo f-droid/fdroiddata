@@ -1,0 +1,44 @@
+Categories:
+  - System
+License: BSD-3-Clause
+AuthorName: SoftcodingForYou
+AuthorEmail: softcodingforyou@davidb.addy.io
+AuthorWebSite: https://davidbaum.org
+SourceCode: https://github.com/SoftcodingForYou/touchtorch
+IssueTracker: https://github.com/SoftcodingForYou/touchtorch/issues
+Changelog: https://github.com/SoftcodingForYou/touchtorch/releases
+
+AutoName: Touch Torch
+
+RepoType: git
+Repo: https://github.com/SoftcodingForYou/touchtorch.git
+Binaries: https://github.com/SoftcodingForYou/touchtorch/releases/download/V%v/Touch_Torch_V%v+%c.apk
+
+Builds:
+  - versionName: 1.0.6
+    versionCode: 7
+    commit: 4cc090652b73203b44a5bf68893ac0534c56a089
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@stable
+    prebuild:
+      - flutterVersion=$(sed -n -E 's/  revision:\s"(.*)"/\1/p' .metadata)
+      - '[[ $flutterVersion ]] || exit 1'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - rm $$flutter$$/engine/src/.gn
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --no-tree-shake-icons
+    ndk: r26b
+
+AllowedAPKSigningKeys: 07b5786c894912159e290d7fe14cec472a4051ca61aeb809941a96c8a64a48ca
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: 1.0.6
+CurrentVersionCode: 7
