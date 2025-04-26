@@ -71,10 +71,38 @@ Builds:
     preassemble:
       - buildSdk
 
+  - versionName: 2025.4.25
+    versionCode: 60813431
+    commit: d08981d290f659bccd1a68e635cf3bf79c561b16
+    subdir: android/app/app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -t bookworm-backports -y golang-go
+      - apt-get install -y gcc libc-dev make
+      - echo "deb https://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
+      - apt-get update
+      - apt-get install -y -t trixie openjdk-22-jdk-headless
+      - update-alternatives --auto java
+    gradle:
+      - github
+    srclibs:
+      - go@go1.24.2
+    prebuild:
+      - sed -i -e 's|PATH="|PATH="$$go$$/bin:|' ../../../sdk/build/Makefile
+      - sdkmanager "ndk;$(sed -n -E "s/^\s*ndkVersion '(.*)'/\1/p" build.gradle)"
+        'platforms;android-35'
+      - sed -i -e '/dependsOn goclientBuild/d' build.gradle
+    build:
+      - cd $$go$$/src
+      - ./make.bash
+    preassemble:
+      - buildSdk
+
 AllowedAPKSigningKeys: 77783877019447c1f16cea6fafd82746df57f4f482304e080f9cc608cfb2e097
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags .+-fdroid$
 UpdateCheckData: android/app/local.properties|warp.version_code=(\d+)|.|warp.version=(.+)
-CurrentVersion: 2025.4.18
-CurrentVersionCode: 60236783
+CurrentVersion: 2025.4.25
+CurrentVersionCode: 60813431
