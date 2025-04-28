@@ -368,12 +368,11 @@ fdroid build:
           fdroid"
 
     # use fdroidserver test keystore as placeholder since `fdroid publish` requires it
-    - printf 'repo_keyalias\x3a sova\n' > config.yml
-    - printf 'keystorepass\x3a r9aquRHYoI8+dYz6jKrLntQ5/NJNASFBacJh7Jv2BlI=\n' >> config.yml
-    - printf 'keypass\x3a r9aquRHYoI8+dYz6jKrLntQ5/NJNASFBacJh7Jv2BlI=\n' >> config.yml
-    - printf 'keydname\x3a "CN=Birdman, OU=Cell, O=Alcatraz, L=Alcatraz, S=California, C=US"\n' >> config.yml
-    - keystore=$fdroidserver/tests/keystore.jks
-    - printf "keystore\x3a $keystore\n" >> config.yml
+    - export keystorepass='r9aquRHYoI8+dYz6jKrLntQ5/NJNASFBacJh7Jv2BlI='
+    - export keypass='r9aquRHYoI8+dYz6jKrLntQ5/NJNASFBacJh7Jv2BlI='
+    - export keystore=$fdroidserver/tests/keystore.jks
+    - keytool -changealias -alias sova -destalias ciarang
+        -keystore $keystore -storepass:env keystorepass -keypass:env keypass
 
     - APPS="$(./tools/find-changed-builds.py)"
     - for build in $APPS; do
