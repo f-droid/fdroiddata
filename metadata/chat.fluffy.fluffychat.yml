@@ -1041,8 +1041,49 @@ Builds:
       - $$flutter$$/bin/flutter build apk --release
     ndk: r21e
 
+  - versionName: 1.26.0
+    versionCode: 3538
+    commit: 9069c61b97b488e81199442b236f7d189ea22d88
+    sudo:
+      - apt-get update
+      - apt-get install -y ninja-build
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+      - linux
+      - macos
+      - test
+      - web
+      - windows
+      - winuwp
+    prebuild:
+      - sed -i -e '/shrinkResources/d' -e '/minifyEnabled/d' android/app/build.gradle
+      - source .github/workflows/versions.env
+      - '[[ $FLUTTER_VERSION ]] || exit 1'
+      - git -C $$flutter$$ checkout -f $FLUTTER_VERSION
+      - sdkmanager 'cmake;3.18.1'
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+      - sed -i -e '/core-google-shortcuts/d' .pub-cache/hosted/pub.dev/flutter_shortcuts_new-*/android/build.gradle
+      - cd .pub-cache/hosted/pub.dev/geolocator_android-*/android
+      - sed -i -e '/gms/d' build.gradle
+      - cd src/main/java/com/baseflow/geolocator/location
+      - rm FusedLocationClient.java
+      - sed -i -e '/if (forceAndroidLocationManager) {/,/^  }/c return new LocationManagerClient(context,
+        locationOptions);}' -e '/isGooglePlayServicesAvailable/,/^  }/d' -e '/gms/d'
+        GeolocationManager.java
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release
+    ndk: r21e
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags v\d+.\d+.\d+
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 1.24.0
-CurrentVersionCode: 3537
+CurrentVersion: 1.26.0
+CurrentVersionCode: 3538
