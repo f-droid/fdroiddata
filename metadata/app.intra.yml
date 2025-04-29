@@ -127,7 +127,33 @@ Builds:
       - ./make.bash
     ndk: r23c
 
+  - versionName: 1.4.1
+    versionCode: 72
+    commit: 246299fab4881af07306808ff45982e13fee8936
+    subdir: Android/app
+    sudo:
+      - apt-get update
+      - apt-get install -y -t bookworm-backports golang-go
+    gradle:
+      - yes
+    rm:
+      - Android/gradle/verification-metadata.xml
+    prebuild:
+      - sed -i -e '/dependencyLocking/,+3d' ../build.gradle
+      - sed -i -e '/repositories {/,/^}/d' -e '/firebaseCrashlytics {/,/^            }/d'
+        build.gradle
+      - sed -i -e '/gms/d' -e '/firebase/d' ../build.gradle build.gradle
+      - cd src/main/java/app/intra
+      - sed -i -e '/FirebaseAnalytics/d' -e '/analytics.logEvent/d' sys/firebase/AnalyticsWrapper.java
+      - sed -i -e '/FirebaseCrashlytics/d' sys/firebase/LogWrapper.java
+      - sed -i -e '/getExtraIPs/a return "";}' -e '/getChoirEnabled/a return false;}'
+        -e '/try {/,/^  }/d' -e '/FirebaseRemoteConfig/d' -e '/gms/d' -e '/update()/,/^  }/d'
+        sys/firebase/RemoteConfig.java
+      - sed -i -e '/RemoteConfig.update/d' ui/MainActivity.java sys/AutoStarter.java
+      - sed -i -e '/FirebasePerformance/d' -e '/HttpMetric/d' -e '/m.metric/d' net/go/GoIntraListener.java
+    ndk: r23c
+
 AutoUpdateMode: None
 UpdateCheckMode: RepoManifest
-CurrentVersion: 1.3.10
-CurrentVersionCode: 68
+CurrentVersion: 1.4.1
+CurrentVersionCode: 72
