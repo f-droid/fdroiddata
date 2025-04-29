@@ -264,7 +264,41 @@ Builds:
       - media/overlays/gamepads/neo-ds-portrait/neo-ds-portrait.zip
     ndk: 22.0.7026061
 
+  - versionName: 1.21.0
+    versionCode: 1597175264
+    commit: 54af661d95567a67d712cd976c111764423e0fc1
+    subdir: pkg/android/phoenix
+    sudo:
+      - apt-get update
+      - apt-get install -y file
+    gradle:
+      - normal
+    rm:
+      - deps/bearssl-0.6/T0Comp.exe
+      - gfx/drivers_font_renderer/bitmap.bin
+      - pkg/apple
+      - pkg/ctr
+      - pkg/msvc-uwp
+      - vita
+      - wii
+      - wiiu
+    prebuild:
+      - curl -Lo assets.zip https://buildbot.libretro.com/assets/frontend/glui_minimal_assets.zip
+      - echo "8633eda1662d209a80ff7d0ab89f697bdba543042983d4587f632123e1ee4144  assets.zip"
+        | sha256sum -c -
+      - unzip assets.zip -d 'assets'
+      - rm assets.zip
+      - sed -i -e 's/6.7.1/7.3.3/' gradle/wrapper/gradle-wrapper.properties
+      - sed -i -e '/versionCode System/d' -e '/versionName "${/d' -e 's/4.2.0/7.2.2/'
+        build.gradle
+      - cd ../../../
+      - ./fetch-submodules.sh
+    scanignore:
+      - media/assets/rgui/font/*.bin
+      - media/libretrodb/metadat/mame/MAME 2015 XML.zip
+    ndk: r22
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 1.20.0
-CurrentVersionCode: 1597175263
+CurrentVersion: 1.21.0
+CurrentVersionCode: 1597175264
