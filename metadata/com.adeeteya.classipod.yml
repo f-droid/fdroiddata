@@ -100,8 +100,35 @@ Builds:
       - $$flutter$$/bin/flutter build apk --release --flavor production --obfuscate
         --split-debug-info=./build/app/outputs/symbols
 
+  - versionName: 1.9.1
+    versionCode: 21
+    commit: cebf590b5489df8f01db51fc7e147aec6cd81260
+    output: build/app/outputs/flutter-apk/app-production-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+      - linux
+      - web
+      - windows
+      - macos
+      - scripts
+    prebuild:
+      - flutterVersion=$(sed -n -E "s/^\s+flutter:\s*([0-9.]+)/\1/p" pubspec.yaml)
+      - '[[ $flutterVersion ]] || exit 1'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --flavor production --obfuscate
+        --split-debug-info=./build/app/outputs/symbols
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 1.9.0
-CurrentVersionCode: 20
+CurrentVersion: 1.9.1
+CurrentVersionCode: 21
