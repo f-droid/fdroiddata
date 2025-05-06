@@ -1603,10 +1603,55 @@ Builds:
       - libsession-util/libsession-util/external
     ndk: r27
 
+  - versionName: 1.23.0
+    versionCode: 4065
+    commit: 8280cef98ec0111415d78cc314a40e1b05c291d9
+    subdir: app
+    submodules: true
+    gradle:
+      - website
+    output: build/outputs/apk/website/release/session-*-universal.apk
+    srclibs:
+      - session-lazysodium-android@5.1.1
+      - libsession-util-android@1.0.0
+    rm:
+      - liblazysodium
+    prebuild:
+      - ln -s $$session-lazysodium-android$$/app ../liblazysodium
+      - ln -s $$session-lazysodium-android$$/session-lazysodium-java ..
+      - sed -i -e 's/classifier/archiveClassifier/' -e '/android {/a namespace "com.goterl.lazysodium"'
+        ../liblazysodium/build.gradle
+      - sed -i -e '/gms/d' -e 's/raw.github.com.*"/jitpack.io"/' -e 's|developer.huawei.com/repo/|jitpack.io|'
+        -e 's/oxen.rocks.*"/jitpack.io"/' -e '/repositories {/a mavenLocal()' ../build.gradle
+      - sed -i -e '/gms/d' -e '/firebase-messaging/,/^    }/d' -e '/enable true/d'
+        -e '/circular-progress-button/s/1.1.3-S2/1.1.3/' -e '/defaultConfig/a applicationId
+        "network.loki.messenger.fdroid"' -e 's/ext.websiteUpdateUrl = ".*"/ext.websiteUpdateUrl
+        = "null"/g' build.gradle
+      - sed -i -E -e '/app_name/s/>(.+)</>\1 F-Droid</' src/main/res/*/strings.xml
+      - for uri in $(sed -n -E 's/android:authorities="network.loki.(.*)"/\1/p' src/main/AndroidManifest.xml);
+        do find src/main/java/org/thoughtcrime/securesms -type f -exec sed -i -e "s/network.loki.$uri/network.loki.fdroid.$uri/"
+        {} +; done
+      - sed -i -e '/READ_PHONE_STATE/d' -e '/c2dm/d' -e 's/ACCESS_SESSION_SECRETS/fdroid.ACCESS_SESSION_SECRETS/'
+        -e '/android:authorities/s/network.loki/network.loki.fdroid/' src/main/AndroidManifest.xml
+      - sdkmanager 'cmake;3.22.1'
+      - sed -i -e 's/-Xmx2048M -Dkotlin.daemon.jvm.options\="-Xmx4096M"/-Xmx4096M
+        -Dkotlin.daemon.jvm.options\="-Xmx4096M" -XX:MaxMetaspaceSize=512m/' ../gradle.properties
+      - sed -i -e '/com.goterl.lazysodium.BuildConfig/d' -e '/BuildConfig.DEBUG/,+2d'
+        ../libsession/src/main/java/org/session/libsession/messaging/messages/visible/VisibleMessage.kt
+    build:
+      - export VERSION=$(sed -n -E "s/.*libsession-util-android:(.*)'/\1/p" ../libsession/build.gradle)
+      - '[[ $VERSION ]] || exit 1'
+      - cd $$libsession-util-android$$
+      - git checkout -f $VERSION
+      - git submodule update --init --recursive
+      - gradle assembleRelease
+      - gradle publishToMavenLocal
+    ndk: r27
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 VercodeOperation:
   - 10*%c + 5
 UpdateCheckData: app/build.gradle|canonicalVersionCode\s=\s(\d+)|.|canonicalVersionName\s=\s"([\d.]+)"
-CurrentVersion: 1.22.1
-CurrentVersionCode: 4035
+CurrentVersion: 1.23.0
+CurrentVersionCode: 4065
