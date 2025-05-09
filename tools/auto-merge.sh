@@ -7,9 +7,9 @@ cd "$(dirname "$(dirname "${BASH_SOURCE[0]}")")"
 mr=$1
 glab="glab --repo fdroid/fdroiddata"
 function retry {
-  while output=$("$@"); [[ $? != 0 ]]; do
-    echo $output | grep -q "Source branch does not exist" && break
-    echo $output | grep -q "this merge request has already been merged" && break
+  while output=$("$@" 2>&1); [[ $? != 0 ]]; do
+    echo $output | grep -q "Source branch does not exist" && exit 0
+    echo $output | grep -q "this merge request has already been merged" && exit 0
     continue
   done
   echo $output
