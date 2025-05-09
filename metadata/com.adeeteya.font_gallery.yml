@@ -1,0 +1,52 @@
+AntiFeatures:
+  NonFreeNet:
+    en-US: Fetch fonts from https://fonts.google.com/
+Categories:
+  - Development
+License: MIT
+AuthorName: Aditya R
+AuthorEmail: adeeteya@gmail.com
+SourceCode: https://github.com/adeeteya/FontGallery
+IssueTracker: https://github.com/adeeteya/FontGallery/issues
+Changelog: https://github.com/adeeteya/FontGallery/blob/master/CHANGELOG.md
+Donate: https://buymeacoffee.com/adeeteya
+Liberapay: adeeteya
+OpenCollective: adeeteya
+
+AutoName: Font Gallery
+
+RepoType: git
+Repo: https://github.com/adeeteya/FontGallery.git
+
+Builds:
+  - versionName: 1.3.0
+    versionCode: 7
+    commit: 9ed0944786ff46aa84db5acb1b77186446dff422
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+      - linux
+      - web
+      - windows
+      - macos
+      - scripts
+    prebuild:
+      - flutterVersion=$(sed -n -E "s/^\s+flutter:\s*([0-9.]+)/\1/p" pubspec.yaml)
+      - '[[ $flutterVersion ]] || exit 1'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --obfuscate --split-debug-info=./build/app/outputs/symbols
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 1.3.0
+CurrentVersionCode: 7
