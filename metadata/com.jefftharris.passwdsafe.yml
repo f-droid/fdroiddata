@@ -345,7 +345,31 @@ Builds:
       - touch ../secrets.properties
     ndk: r28
 
+  - versionName: 6.25.1
+    versionCode: 6250100
+    commit: b377c731e44705b6f53f7e9d364307b053885e14
+    subdir: passwdsafe
+    gradle:
+      - yes
+    srclibs:
+      - yubikit-android@d1f58c0e9b7de5e8a9e8bed5411ee5e5654d655a
+    rm:
+      - passwdsafe/libs/*.jar
+      - sync
+    prebuild:
+      - sed -i -e '/fileTree/aimplementation "org.bouncycastle:bcprov-jdk15on:1.67"'
+        build.gradle
+      - sed -i -e 's|\${.*/maven-libs|https://jitpack.io|' ../build.gradle
+      - sed -i -e '/sync/d' ../settings.gradle
+      - touch ../secrets.properties
+    build:
+      - cd $$yubikit-android$$
+      - sed -i -e '/signing {/,/}/d' publish.gradle
+      - gradle build
+      - gradle publishToMavenLocal
+    ndk: r28
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 6.25.0
-CurrentVersionCode: 6250000
+CurrentVersion: 6.25.1
+CurrentVersionCode: 6250100
