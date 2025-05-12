@@ -57,8 +57,29 @@ Builds:
       - export PUB_CACHE=$(pwd)/.pub-cache
       - $$flutter$$/bin/flutter build apk --release
 
+  - versionName: 2024.9.1
+    versionCode: 96
+    commit: 9ab396a33de6289cba8aedccd48759574d672717
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@3.16.9
+    prebuild:
+      - export FLUTTER_VERSION=$(sed -n -E "s/flutter:\s([0-9.]+)/\1/p" versions)
+      - pushd $$flutter$$
+      - git checkout -f $FLUTTER_VERSION
+      - popd
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+    scandelete:
+      - .pub-cache
+      - android/app/.cxx
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release
+
 AutoUpdateMode: Version
-UpdateCheckMode: Tags
+UpdateCheckMode: Tags .*\+fdroid
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 2024.8.3
-CurrentVersionCode: 95
+CurrentVersion: 2024.9.1
+CurrentVersionCode: 96
