@@ -207,10 +207,41 @@ Builds:
       - mkdir -p "$HOME/.m2/repository/org/webkit"
       - cp -r node_modules/jsc-android/dist/org/webkit/android-jsc "$HOME/.m2/repository/org/webkit"
 
+  - versionName: 2.6.4
+    versionCode: 24
+    commit: 0148ff6dc8c64984d964d3249c0fa1fa85187175
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y npm jq maven
+      - sysctl fs.inotify.max_user_watches=524288
+    gradle:
+      - yes
+    srclibs:
+      - jitsi-meet@mobile-sdk-10.2.0
+    prebuild:
+      - sed -i -e '/jitsi-maven-repository/d' -e '/repositories {/a\        mavenLocal()'
+        ../build.gradle
+      - sed -i -e "/google.firebase/aexclude\ group\:\ 'com.google.android.gms'" build.gradle
+      - export jitsiVersion=$(grep jitsi-meet-sdk build.gradle|cut -d "'" -f2|cut
+        -d ":" -f3)
+      - git -C $$jitsi-meet$$ checkout -f mobile-sdk-$jitsiVersion
+      - sed -i -e '/git/d' $$jitsi-meet$$/android/scripts/release-sdk.sh
+    build:
+      - cd $$jitsi-meet$$
+      - export LIBRE_BUILD=true
+      - npm install --save false webpack-bundle-analyzer
+      - npm ci
+      - mkdir -p "$HOME/.m2"
+      - JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64 bash android/scripts/release-sdk.sh
+        "$HOME/.m2/repository"
+      - mkdir -p "$HOME/.m2/repository/org/webkit"
+      - cp -r node_modules/jsc-android/dist/org/webkit/android-jsc "$HOME/.m2/repository/org/webkit"
+
 MaintainerNotes: scanner might detect 'com/google/ads/interactivemedia/v3/api/AdEvent'
   stubs from react-native-video
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 2.6.3
-CurrentVersionCode: 23
+CurrentVersion: 2.6.4
+CurrentVersionCode: 24
