@@ -19,6 +19,11 @@ Builds:
     versionCode: 19
     commit: 0e36262fdaa6d78506bfeda72be3f3c191f22259
     subdir: app
+    sudo:
+      - export CPUS_MAX=16
+      - export CPUS=$(getconf _NPROCESSORS_ONLN)
+      - for (( c=$CPUS_MAX; c<$CPUS; c++ )) ; do echo 0 > /sys/devices/system/cpu/cpu$c/online
+        ; done
     gradle:
       - fdroid
     prebuild: sed -i -e '/googleServices/d' -e '/crashlytics/d' {..,.,../build-logic/convention}/build.gradle.kts
