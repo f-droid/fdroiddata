@@ -14,7 +14,7 @@ echo "HEAD at: $(git rev-parse HEAD)"
 changed_files=$(git diff --name-only --diff-filter=AM "$last_commit" HEAD)
 missing_builds=$(jq -r '.failedBuilds' <<< $update)
 failed_builds=$(jq -r '.failedBuilds' <<< $current_build)
-succuess_builds=$(jq -r '.successfulBuildIds' <<< $current_build)
+success_builds=$(jq -r '.successfulBuildIds' <<< $current_build)
 
 for file in $changed_files; do
   grep -q "AutoUpdateMode: None" $file && continue
@@ -28,7 +28,7 @@ for file in $changed_files; do
     new_versions=$(grep "+    versionCode: "  <<< "$diff" | sed -E -n "s/.*versionCode: ([0-9]+)/\1/p" | jq --slurp '.')
     missing_versions=$(jq -r ".\"$appid\" // []" <<< "$missing_builds")
     failed_versions=$(jq -r "map(select(.[0] == \"$appid\") | .[1])" <<< "$failed_builds")
-    success_versions=$(jq -r "map(select(.[0] == \"$appid\") | .[1])" <<< "$succuess_builds")
+    success_versions=$(jq -r "map(select(.[0] == \"$appid\") | .[1])" <<< "$success_builds")
 
     remove_versions=$(jq --slurp -r ".[0] + .[2] + .[3] - .[1] - .[4] | sort | unique | .[:-$keep_num][]" <(printf "$new_versions") <(printf "$removed_versions") <(printf "$missing_versions") <(printf "$failed_versions") <(printf "$success_versions"))
 
