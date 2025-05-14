@@ -115,10 +115,28 @@ Builds:
         assets/dexopt/baseline.prof|cut -d " " -f1); [[ $localhash == $upstreamhash
         ]] && break ; popd; rm -fr local; done
 
+  - versionName: 1.4.2
+    versionCode: 99
+    commit: 79fe2de9a8baff3979bf82f1934f6eee6ea78009
+    subdir: app
+    sudo:
+      - export CPUS_MAX=16
+      - export CPUS=$(getconf _NPROCESSORS_ONLN)
+      - for (( c=$CPUS_MAX; c<$CPUS; c++ )) ; do echo 0 > /sys/devices/system/cpu/cpu$c/online
+        ; done
+    gradle:
+      - foss
+    binary: https://github.com/axiel7/AniHyou-android/releases/download/%v/anihyou-%v-foss-universal-release.apk
+    rm:
+      - wearos
+    prebuild:
+      - sed -i -e '/wearos/d' ../settings.gradle.kts
+      - sed -i -e '/isEnable/s/true/false/' build.gradle.kts
+
 AllowedAPKSigningKeys: 996ce09e45e3c1439b2e82c786ab5f8a61b5ea29390a4ebfc9a46a10b8ec7db0
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: version.properties|code = (\d+)|.|name = (.+)
-CurrentVersion: 1.3.5
-CurrentVersionCode: 86
+CurrentVersion: 1.4.2
+CurrentVersionCode: 99
