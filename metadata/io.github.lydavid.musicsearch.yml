@@ -759,39 +759,6 @@ Builds:
     scandelete:
       - build-logic/convention/build
 
-  - versionName: 1.29.1
-    versionCode: 620
-    commit: b29a1f08e5ca64d9b1291886341a530ebafd7e76
-    subdir: android/app
-    sudo:
-      - echo "deb http://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
-      - apt-get update
-      - apt-get install -y openjdk-21-jdk-headless
-      - update-java-alternatives -a
-    output: build/outputs/apk/fDroid/release/*.apk
-    prebuild:
-      - cp -R ../../gradle ./
-      - echo "TVVTSUNCUkFJTlpfQ0xJRU5UX0lEPWtpbVpiWXlaYUVia2Ewb0Npb1ExNUdINWhlNFp4dGtXCg=="
-        | base64 -d > ../../not_so_secret.properties
-      - echo "TVVTSUNCUkFJTlpfQ0xJRU5UX1NFQ1JFVD00ZVlINmpqRzBVVm1GRGN1Yk1CSThrVVlxT18xVkxHRAo="
-        | base64 -d >> ../../not_so_secret.properties
-      - sed -i -e '/firebase/d' -e '/google.services/d' ../../build.gradle.kts
-      - sed -i -e 's/\.debug//' ../../shared/domain/src/commonMain/kotlin/ly/david/musicsearch/shared/domain/Constants.kt
-      - gradle clean
-    scandelete:
-      - build-logic/convention/build
-    build:
-      - mkdir upstream
-      - pushd upstream
-      - curl -L -o upstream.apk https://github.com/lydavid/MusicSearch/releases/download/v$$VERSION$$/app-fDroid-release.apk
-      - unzip -q upstream.apk
-      - export upstreamhash=$(sha256sum assets/dexopt/baseline.prof|cut -d " " -f1)
-      - popd
-      - for i in {1..10}; do taskset --cpu-list 0-6 gradle clean assembleFDroidRelease;
-        mkdir local; pushd local; unzip -q ../build/outputs/apk/fDroid/release/*.apk;
-        export localhash=$(sha256sum assets/dexopt/baseline.prof|cut -d " " -f1);
-        [[ $localhash == $upstreamhash ]] && break ; popd; rm -fr local; done
-
   - versionName: 1.29.2
     versionCode: 621
     commit: 0e0ead098f03e860e86f310553daabbd59d9de1c
