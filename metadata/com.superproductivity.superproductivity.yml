@@ -272,7 +272,29 @@ Builds:
       - node_modules
       - .swp
 
+  - versionName: 13.0.10
+    versionCode: 1300100000
+    commit: 05d9e2c2de02e39dafff46d7c27ce9684147ef9c
+    subdir: android/app
+    sudo:
+      - sysctl fs.inotify.max_user_watches=524288 || true
+      - echo "deb https://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
+      - apt-get update
+      - apt-get install -t trixie npm openjdk-21-jdk-headless
+      - update-alternatives --auto java
+    init:
+      - cd ../..
+      - npm install --build-from-source
+      - npm run build
+      - npx cap sync
+    gradle:
+      - fdroid
+    output: build/outputs/apk/fdroid/release/app-fdroid-release-unsigned.apk
+    scandelete:
+      - node_modules
+      - .swp
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v(?!11.0.3)[\d.]+$
-CurrentVersion: 13.0.7
-CurrentVersionCode: 1300070000
+CurrentVersion: 13.0.10
+CurrentVersionCode: 1300100000
