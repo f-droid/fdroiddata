@@ -824,7 +824,6 @@ Builds:
 
   - versionName: '29.0'
     versionCode: 29000
-    disable: build stub
     commit: 62b1310d97530597de874145182967144f0caed3
     timeout: 30000
     submodules: true
@@ -846,13 +845,14 @@ Builds:
       - pcre@android-15.0.0_r3
     prebuild:
       - echo -e 'version=$$VERSION$$' > ./config.prop
-      - sed -i -e 's|https://.*download/{ndk_ver}|$$ondk$$/dist|' -e 's/urllib.request.urlopen(url)/open(url,"rb")/'
-        -e 's/ -Zthreads=.*/"/' build.py
+      - sed -i -e 's|https://.*download/{ondk_version}|$$ondk$$/dist|' -e 's/urllib.request.urlopen(url)/open(url,"rb")/'
+        build.py
       - sed -i -e '/"src",/,/^]/c "src"]' $$ondk$$/config.toml
+      - sed -i -e 's/git config set/git config/' $$ondk$$/common.sh
       - sed -i -e '/Key.CHECK_UPDATES/s/true/false/' app/core/src/main/java/com/topjohnwu/magisk/core/Config.kt
-      - sed -i -e '/dependsOn(stubTask)/d' -e 's|from(stubApk)|from(rootProject.file("out/stub-release.apk"))|'
-        -e 's|URI(BUSYBOX_DOWNLOAD_URL)|URI("file://$$ndk-box-kitchen$$/busybox.zip")|'
-        buildSrc/src/main/java/Setup.kt
+      - sed -i -e '/dependsOn(stubTask)/d' -e 's|from(stubApk)|from(rootProject.file("../out/stub-release.apk"))|'
+        -e '/downloadFile/s|BUSYBOX_DOWNLOAD_URL|"file://$$ndk-box-kitchen$$/busybox.zip"|'
+        app/buildSrc/src/main/java/Setup.kt
     scanignore:
       - app/shared/src/main/java/com/topjohnwu/magisk/utils/DynamicClassLoader.java
     scandelete:
@@ -860,8 +860,7 @@ Builds:
       - tools
     build:
       - mkdir out
-      - curl -Lo out/stub-release.apk https://f-droid.org/archive/com.topjohnwu.magisk_11.apk
-      - ln -s $(which gradle) ./gradlew
+      - ln -s $(which gradle) ./app/gradlew
       - pushd $$vboot$$
       - make ARCH=arm futil
       - popd
@@ -883,7 +882,8 @@ Builds:
       - $$SDK$$/ndk/magisk/ndk-build -j$(nproc)
       - ./run.sh archive
       - popd
-      - python3 ./build.py -rv native
+      - PATH=$$SDK$$/ndk/magisk/toolchains/rust/bin/:$PATH python3 ./build.py -rv
+        native
       - python3 ./build.py -rv app
 
 MaintainerNotes: |-
