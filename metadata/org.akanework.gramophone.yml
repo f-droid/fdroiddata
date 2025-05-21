@@ -134,9 +134,31 @@ Builds:
     postbuild: $$reproducible-apk-tools$$/inplace-fix.py --zipalign --page-size 16
       fix-newlines $$OUT$$ 'res/M7.json'
 
+  - versionName: 1.0.17
+    versionCode: 20
+    commit: ea0e38cd64cd901495d17701d9405555baa30643
+    subdir: app
+    submodules: true
+    sudo:
+      - echo "deb https://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
+      - apt-get update
+      - apt-get install -y -t trixie openjdk-21-jdk-headless
+      - update-alternatives --auto java
+    gradle:
+      - yes
+    srclibs:
+      - reproducible-apk-tools@v0.3.0
+    prebuild:
+      - echo 'releaseType=Release' > ../package.properties
+      - sed -i -e '/afterEvaluate {/,$d' ../media3/publish.gradle
+    scandelete:
+      - media3
+    postbuild: $$reproducible-apk-tools$$/inplace-fix.py --zipalign --page-size 16
+      fix-newlines $$OUT$$ 'res/M7.json'
+
 AllowedAPKSigningKeys: f451197ad7b80bd1bc981ba38a2c49d471856fb38bcc333676d6e8f8f3ce5d6e
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 1.0.16.1
-CurrentVersionCode: 19
+CurrentVersion: 1.0.17
+CurrentVersionCode: 20
