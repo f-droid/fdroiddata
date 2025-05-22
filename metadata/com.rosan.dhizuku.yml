@@ -1,0 +1,40 @@
+Categories:
+  - System
+License: GPL-3.0-only
+SourceCode: https://github.com/iamr0s/Dhizuku
+IssueTracker: https://github.com/iamr0s/Dhizuku/issues
+Translation: https://hosted.weblate.org/engage/dhizuku/
+Changelog: https://github.com/iamr0s/Dhizuku/releases
+Donate: https://github.com/iamr0s/Dhizuku/blob/main/docs/DONATE.md
+
+AutoName: Dhizuku
+
+RepoType: git
+Repo: https://github.com/iamr0s/Dhizuku
+Binaries: https://github.com/iamr0s/Dhizuku/releases/download/v%v/Dhizuku_v%v.apk
+
+Builds:
+  - versionName: '2.10'
+    versionCode: 15
+    commit: d2c4bfd08117b9d58e71b0e7d22d679e938bd1d8
+    subdir: app
+    sudo:
+      - echo "deb https://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
+      - apt-get update
+      - apt-get install -y -t trixie openjdk-21-jdk-headless
+      - update-alternatives --auto java
+    gradle:
+      - yes
+    srclibs:
+      - reproducible-apk-tools@v0.3.0
+    prebuild: sed -i -e 's/Kotlin/kotlin/' build.gradle.kts
+    postbuild: $$reproducible-apk-tools$$/inplace-fix.py --zipalign fix-newlines $$OUT$$
+      'META-INF/services/*'
+
+AllowedAPKSigningKeys: 8934df3b402d650e0ec7b5d1e3a8cfcc1181b4378e1b8df257ea126d474c685a
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: version.properties|versionCode=(\d+)|.|versionName=(.*)
+CurrentVersion: '2.10'
+CurrentVersionCode: 15
