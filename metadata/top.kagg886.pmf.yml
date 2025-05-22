@@ -84,11 +84,34 @@ Builds:
       - $$rustup$$/rustup-init.sh -y --default-toolchain $RUST_VERSION --target aarch64-linux-android
         x86_64-linux-android
 
+  - versionName: 1.7.4
+    versionCode: 174
+    commit: v1.7.4
+    subdir: composeApp
+    gradle:
+      - yes
+    srclibs:
+      - rustup@1.27.1
+    rm:
+      - iosApp
+      - plugin
+    prebuild:
+      - sed -i -e '/compose-desktop-build-windows/d' -e '/foojay/d' -e '/jogamp/d'
+        ../settings.gradle.kts
+      - sed -i -e '/signConfig/d' -e '/top.kagg886.compose.installer.windows/d' -e
+        '/configureComposeWindowsInstaller {/,/^}/d' build.gradle.kts
+      - echo -e '\nAPP_VERSION_NAME=v$$VERSION$$' >> ../gradle.properties
+      - gradle exportLibraryDefinitions -PaboutLibraries.exportVariant=release
+      - RUST_VERSION=$(sed -n -E 's/channel = "([0-9.]+)"/\1/p' ../rust-toolchain.toml)
+      - '[[ $RUST_VERSION ]] || exit 1'
+      - $$rustup$$/rustup-init.sh -y --default-toolchain $RUST_VERSION --target aarch64-linux-android
+        x86_64-linux-android
+
 AllowedAPKSigningKeys: 0d0a5b77ee74694c0b63cb663f0639785603583610683da6f0aa2e73f7ff3bbc
 
 AutoUpdateMode: Version v%v
 UpdateCheckMode: HTTP
 UpdateCheckData: https://github.com/kagg886/Pixiv-MultiPlatform/releases/latest|>v[\d.]+
   - (\d+)</h1>|.|>v([\d.]+) - \d+</h1>
-CurrentVersion: 1.7.2
-CurrentVersionCode: 172
+CurrentVersion: 1.7.4
+CurrentVersionCode: 174
