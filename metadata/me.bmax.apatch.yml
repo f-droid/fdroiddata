@@ -97,8 +97,9 @@ Builds:
 
   - versionName: '11039'
     versionCode: 11039
+    disable: rebuild
     commit: 5fd71d6a70d404e9dcf91c490dac00796418e7de
-    timeout: 36000
+    timeout: 18000
     subdir: app
     sudo:
       - apt-get update
@@ -137,17 +138,18 @@ Builds:
       - kernelPatchVersion=$(sed -n -E 's/.*"kernelPatchVersion", "([0-9.]+)".*/\1/p'
         ../build.gradle.kts)
       - git -C $$KernelPatch$$ checkout -f $kernelPatchVersion
-      - sdkmanager 'platforms;android-33'
       - $$rustup$$/rustup-init.sh -y --default-toolchain 1.85.1 -t aarch64-linux-android
       - source $HOME/.cargo/env
       - sed -i -e '/"cargo"/a environment("ANDROID_NDK_HOME", "$$NDK$$")' -e "s|\"cargo\"|\"$(which
-        cargo)\"|" -e '/preBuild/,/^)/s/"download.*",//' -e '/jvmTarget/s/21/17/'
+        cargo)\"|" -e '/preBuild/,/^)/s/"download.*",//' -e 's/VERSION_22/VERSION_17/'
         build.gradle.kts
+      - sed -i -e '/foojay/d' ../settings.gradle.kts
       - sed -i -e '/extra/s/getVersionCode()/$$VERCODE$$/' -e '/extra/s/getVersionName()/"$$VERSION$$"/'
-        -e '/JavaVersion/s/21/17/' ../build.gradle.kts
-      - sed -i -e '/androidx.dev/d' ../settings.gradle.kts
+        ../build.gradle.kts
       - sed -i -e '/prefs.getBoolean("check_update"/s/true/false/' src/main/java/me/bmax/apatch/ui/screen/Settings.kt
-      - sdkmanager 'cmake;3.31.6'
+      - sed -i -e 's|verifyAppSignature(".*")|verifyAppSignature("/kptjCONPpskoErXuf2OuvMzTcbAu1EmsWLwypMa8rg=")|'
+        src/main/java/me/bmax/apatch/APatchApp.kt
+      - sdkmanager 'platforms;android-33' 'cmake;3.31.6'
     scandelete:
       - app/libs/arm64-v8a
     build:
@@ -205,6 +207,8 @@ MaintainerNotes: |
   1. git-new-workdir needs to be downloaded because it's stripped.
   2. aarch64-none-elf gcc is required which is not available in Debian so it's built from source.
   3. Upstream uses Java 21 but it's not necessary so Java 17 is used.
+  4. The signature hash base64 is generated with `echo fe4a6d8c238d3e9b24a04ad7b9fd8ebaf3334dc6c0bb5126b162f0ca931af2b8 | xxd -r -p | base64`
+    -> /kptjCONPpskoErXuf2OuvMzTcbAu1EmsWLwypMa8rg=
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
