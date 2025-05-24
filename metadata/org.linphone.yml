@@ -5067,6 +5067,10 @@ Builds:
       - app/google-services.json
     prebuild:
       - pushd $$linphone-sdk$$
+      - LINPHONE_SDK_VERSION=$(git log --tags --no-walk --before="$date" --pretty="format:%S"
+        | grep -P '^[\d.]+$' | head -n 1)
+      - echo "Using Linphone SDK" $LINPHONE_SDK_VERSION
+      - git checkout $LINPHONE_SDK_VERSION
       - git submodule update --init --recursive
       - rm -R liblinphone/wrappers/java/classes/org/linphone/core/tools/firebase
       - sed -i -e '/import com.google.firebase.FirebaseApp/d' -e '/FirebaseApp.initializeApp/d'
