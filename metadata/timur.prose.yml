@@ -195,36 +195,6 @@ Builds:
       - cd src/main/go
       - ./gobuild
 
-  - versionName: 1.3.4
-    versionCode: 10304
-    commit: a95184fed0ab5ab1e85ee9b74ad85a61b8cf3470
-    sudo:
-      - apt-get update
-      - apt-get install -t bookworm-backports -y golang-go
-      - apt-get install -y gcc libc-dev
-    gradle:
-      - yes
-    srclibs:
-      - go@go1.23.0
-    prebuild:
-      - export goVersion=$(grep go\  src/main/go/go.mod | cut -d " " -f2)
-      - '[[ $goVersion ]] || exit 1'
-      - git -C $$go$$ checkout -f go$goVersion
-      - ./proppatch.sh gradle.properties appVersionName "$$VERSION$$"
-      - ./proppatch.sh gradle.properties appVersionCode $$VERCODE$$
-      - ./proppatch.sh gradle.properties baseUrlRel "https://timur.mobi/prose/"
-      - ./proppatch.sh gradle.properties android.useAndroidX true
-      - ./proppatch.sh gradle.properties android.defaults.buildfeatures.buildconfig
-        true
-    build:
-      - pushd $$go$$/src
-      - ./make.bash
-      - popd
-      - export GOPATH=$$go$$
-      - export PATH="$GOPATH/bin:$PATH"
-      - cd src/main/go
-      - ./gobuild
-
   - versionName: 1.3.5
     versionCode: 10305
     commit: e70202c72ea856f9a144e8bd0d9faeb46530ea01
