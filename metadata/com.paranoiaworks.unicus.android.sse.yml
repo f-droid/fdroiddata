@@ -131,6 +131,35 @@ Builds:
       - gradle assembleRelease
     ndk: r25b
 
+  - versionName: 3.1.4
+    versionCode: 132
+    commit: a26f85f54a89cb71b35acc3ff35f22fc1c8e03c2
+    subdir: MainApp
+    sudo:
+      - export CPUS_MAX=1
+      - export CPUS=$(getconf _NPROCESSORS_ONLN)
+      - for (( c=$CPUS_MAX; c<$CPUS; c++ )) ; do echo 0 > /sys/devices/system/cpu/cpu$c/online
+        ; done
+      - apt-get update
+      - apt-get install -y gcc libc-dev
+    output: build/outputs/apk/release/MainApp-release-unsigned.apk
+    srclibs:
+      - rustup@1.27.1
+    build:
+      - $$rustup$$/rustup-init.sh -y --default-toolchain 1.86.0 --target armv7-linux-androideabi
+        aarch64-linux-android x86_64-linux-android
+      - source $HOME/.cargo/env
+      - export BUILD_FLAVOR=FDROID
+      - export ANDROID_NDK_ROOT=$$NDK$$
+      - pushd ../CryptoLibs/jni-Blake3mt/blake3jni
+      - chmod +x release.sh
+      - ./release.sh arm64-v8a
+      - ./release.sh armeabi-v7a
+      - ./release.sh x86_64
+      - popd
+      - gradle assembleRelease
+    ndk: r25b
+
 AllowedAPKSigningKeys: b9da156a44f97e91061920ae6de934446c349502756a04528fa7bec311a9543d
 
 MaintainerNotes: The app might not be reproducible in the CI as rust might embed compile
@@ -138,5 +167,5 @@ MaintainerNotes: The app might not be reproducible in the CI as rust might embed
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 3.1.3
-CurrentVersionCode: 131
+CurrentVersion: 3.1.4
+CurrentVersionCode: 132
