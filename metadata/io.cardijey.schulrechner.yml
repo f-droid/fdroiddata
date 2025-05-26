@@ -1,0 +1,48 @@
+Categories:
+  - Science & Education
+  - System
+License: GPL-3.0-only
+AuthorName: Joris Yidong Scholl
+AuthorEmail: joris.scholl@posteo.de
+WebSite: https://cardijey.github.io#schulrechner
+SourceCode: https://github.com/CardiJey/schulrechner
+IssueTracker: https://github.com/CardiJey/schulrechner/issues
+Liberapay: CardiJey
+
+AutoName: Schulrechner
+
+RepoType: git
+Repo: https://github.com/CardiJey/schulrechner.git
+
+Builds:
+  - versionName: 1.7.0
+    versionCode: 10700
+    commit: 16731b9e18727accdf6b9ca48ff85297de0cb4a5
+    submodules: true
+    sudo:
+      - sysctl fs.inotify.max_user_watches=524288 || true
+      - apt-get update
+      - apt-get install -y npm
+      - npm install -g cordova
+    output: platforms/android/app/build/outputs/apk/release/app-release-unsigned.apk
+    prebuild:
+      - sdkmanager 'platforms;android-35' 'build-tools;35.0.0'
+      - cordova platform add android
+      - npm install  --build-from-source
+      - cd mathjs
+      - npm install  --build-from-source
+    scandelete:
+      - node_modules
+    build:
+      - cd mathjs
+      - npm run build
+      - cd ..
+      - mv mathjs/lib/browser/math.js www/js/math.js
+      - npm run update_version
+      - cordova build android --release -- --packageType=apk
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags .*\.0$
+UpdateCheckData: package.json|"versionCode":\s(\d+),|.|"version":\s"([\d.]+)"
+CurrentVersion: 1.7.0
+CurrentVersionCode: 10700
