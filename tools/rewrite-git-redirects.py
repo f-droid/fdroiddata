@@ -6,6 +6,7 @@
 # other benefits, like a simplier security attack surface.
 
 import glob
+import json
 import os
 import re
 import subprocess
@@ -14,6 +15,8 @@ import yaml
 
 
 REPO_PATTERN = re.compile(r'Repo: .*')
+CODEQUALITY_REPORT = list()
+CHECK_NAME = os.path.basename(__file__)
 
 
 def is_git_redirect(url):
@@ -23,7 +26,11 @@ def is_git_redirect(url):
         [
             'git',
             '-c',
-            'url.https://git:nopw@{host}.insteadOf=https://{host}'.format(host=host),
+            'core.askpass=/bin/true',
+            '-c',
+            'credential.helper=/bin/true',
+            '-c',
+            'http.emptyAuth=true',
             '-c',
             'http.followRedirects=false',
             'ls-remote',
@@ -69,6 +76,23 @@ def scan_app_file(f, include_srclibs=True):
             break
 
     if new_url:
+        with open(f) as fp:
+            for num, line in enumerate(fp, 1):
+                if line.startswith('Repo:'):
+                    begin = num
+                    break
+        CODEQUALITY_REPORT.append(
+            {
+                "categories": ["Bug Risk"],
+                "check_name": CHECK_NAME,
+                "content": "`fdroid` is based on building a strong connection from source code to compiled binary.  Therefore, the whole path should be as explicit, visible and reproducible as possible. Additionally, `git://` and `http://` URLs in submodules could be abused to direct to malicious content.",
+                "description": '`Repo:` URLs should not use redirects.',
+                "fingerprint": f"""{CHECK_NAME}|{repo_url}""",
+                "location": {"path": f, "lines": {"begin": begin}},
+                "severity": "blocker",
+                "type": "issue",
+            }
+        )
         print("Repo:", data['Repo'], "\n -->  " + new_url + "'")
         with open(f) as fp:
             raw = fp.read()
@@ -88,6 +112,9 @@ def main():
 
     for f in files:
         scan_app_file(f, include_srclibs)
+
+    with open(f"codequality.json", "w") as fp:
+        json.dump(CODEQUALITY_REPORT, fp)
 
 if __name__ == "__main__":
     main()
