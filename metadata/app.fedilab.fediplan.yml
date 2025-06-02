@@ -1,0 +1,69 @@
+Categories:
+  - Internet
+License: GPL-3.0-only
+WebSite: https://fedilab.app/
+SourceCode: https://codeberg.org/tom79/FediplanApp
+IssueTracker: https://codeberg.org/tom79/FediplanApp/issues
+Translation: https://hosted.weblate.org/projects/fediplan/
+Changelog: https://codeberg.org/tom79/FediplanApp/tags
+Donate: https://www.paypal.com/paypalme/Mastalab
+Liberapay: tom79
+OpenCollective: fedilab
+Bitcoin: 3JDoJV7qf8fcmrUeYbT7hrH91PUQpg8HhS
+
+AutoName: FediPlan
+
+RepoType: git
+Repo: https://codeberg.org/tom79/FediplanApp.git
+
+Builds:
+  - versionName: 1.0.6
+    versionCode: 7
+    commit: 4d78ab57c133328e72a314b21c9f865dcdf8f508
+    sudo:
+      - apt-get update
+      - apt-get install -y nodejs npm build-essential cmake golang-go gcc-multilib
+        g++-multilib
+    output: android/app/build/outputs/apk/release/app-release-unsigned.apk
+    srclibs:
+      - esbuild@v0.24.0
+    rm:
+      - android
+      - ios
+    prebuild:
+      - npm install --build-from-source
+      - npx expo prebuild
+      - rm -fr ios
+      - sed -i -e '/signingConfig /d' android/app/build.gradle
+      - cd android/app
+      - gradle clean
+    scanignore:
+      - android/build.gradle
+      - node_modules/react-native/sdks/hermesc/linux64-bin/hermesc
+      - node_modules/expo-modules-autolinking/scripts/android/autolinking_implementation.gradle
+      - node_modules/expo-modules-core/android/ExpoModulesCorePlugin.gradle
+      - node_modules/react-native-reanimated/android/build.gradle
+      - node_modules/@react-native-async-storage/async-storage/android/build.gradle
+      - node_modules/react-native-safe-area-context/android/build.gradle
+      - node_modules/react-native-screens/android/build.gradle
+      - node_modules/react-native-vector-icons/android/build.gradle
+      - node_modules/react-native-edge-to-edge/android/build.gradle
+      - node_modules/react-native-webview/android/build.gradle
+    scandelete:
+      - node_modules
+    build:
+      - pushd $$esbuild$$
+      - make esbuild
+      - popd
+      - cp $$esbuild$$/esbuild node_modules/@esbuild/linux-x64/bin
+      - cp $$esbuild$$/esbuild node_modules/esbuild/bin/esbuild
+      - cp $$esbuild$$/esbuild node_modules/@esbuild-kit/core-utils/node_modules/esbuild/bin/
+      - cp $$esbuild$$/esbuild node_modules/@esbuild-kit/core-utils/node_modules/@esbuild/linux-x64/bin/
+      - cd android/app
+      - gradle assembleRelease
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: app.json|"versionCode":\s(\d+)|.|"version":\s"([\d.]+)"
+CurrentVersion: 1.0.6
+CurrentVersionCode: 7
