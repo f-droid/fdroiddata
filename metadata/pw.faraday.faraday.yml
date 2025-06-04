@@ -1165,10 +1165,220 @@ Builds:
       - cp -r node_modules/jsc-android/dist/org/webkit/android-jsc "$HOME/.m2/repository/org/webkit"
     ndk: r21d
 
+  - versionName: 1.2.4
+    versionCode: 401011601
+    commit: 2520ddf1b42a8cd61582c32134ccbcc39fce3a0f
+    subdir: vector-app
+    sudo:
+      - echo "deb https://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
+      - apt-get update
+      - apt-get install -y jq maven golang-go
+      - apt-get install -t trixie npm
+      - apt-get install -y -t trixie openjdk-21-jdk-headless
+      - update-alternatives --auto java
+      - chown -R vagrant /usr/lib/go-*
+    gradle:
+      - fdroid
+    srclibs:
+      - jitsi-meet@mobile-sdk-10.2.0
+      - obfs4@b5a9f3c5d239b2b1d2d5877c043c5893635334a0
+    rm:
+      - vector/src/main/jniLibs/*/*.so
+    prebuild:
+      - sed -i -e 's/Xmx4g/Xmx6g/' -e 's/UseParallelGC/UseG1GC/' ../gradle.properties
+      - sed -i -e 's/-XX:MaxPermSize\S*//' $$jitsi-meet$$/android/gradle.properties
+      - sed -i -e 's/def isCiBuild =.*/def isCiBuild = true/' ../tools/gradle/doctor.gradle
+      - sed -i -e '/firebaseAppDistribution {/,/            }/d' build.gradle
+      - sed -i -e '/universalApk/d' -e '/abiFilters/d' -e '/include/s/"armeabi-v7a".*/"armeabi-v7a"/'
+        build.gradle
+      - sed -i -e '/repositories {/a mavenLocal()' -e 's|https.*mobile-sdk-10.2.0|https://jitpack.io|'
+        ../build.gradle
+      - sed -i -e '/com.google.firebase/d' -e '/gms/d' {.,..}/build.gradle
+      - sed -i -e '/git/d' $$jitsi-meet$$/android/scripts/release-sdk.sh
+    build:
+      - cd ../vector
+      - pushd $$obfs4$$
+      - export PATH=$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
+      - export ARCH=arm
+      - CC=armv7a-linux-androideabi21-clang CXX=armv7a-linux-androideabi21-clang++
+        GOOS=android GOARCH=$ARCH go install std
+      - CGO_ENABLED=1 CC=armv7a-linux-androideabi21-clang CXX=armv7a-linux-androideabi21-clang++
+        GOOS=android GOARCH=$ARCH go build -v -o obfs4proxy/obfs4proxy.${ARCH}.so
+        ./obfs4proxy
+      - popd
+      - mv $$obfs4$$/obfs4proxy/obfs4proxy.arm.so src/main/jniLibs/armeabi-v7a/obfs4proxy.arm.so
+      - cd $$jitsi-meet$$
+      - export LIBRE_BUILD=true
+      - npm install --save false webpack-bundle-analyzer
+      - npm ci
+      - mkdir -p "$HOME/.m2"
+      - JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64 bash android/scripts/release-sdk.sh
+        "$HOME/.m2/repository"
+      - mkdir -p "$HOME/.m2/repository/org/webkit"
+      - cp -r node_modules/jsc-android/dist/org/webkit/android-jsc "$HOME/.m2/repository/org/webkit"
+    ndk: r21d
+
+  - versionName: 1.2.4
+    versionCode: 401011602
+    commit: 2520ddf1b42a8cd61582c32134ccbcc39fce3a0f
+    subdir: vector-app
+    sudo:
+      - echo "deb https://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
+      - apt-get update
+      - apt-get install -y jq maven golang-go
+      - apt-get install -t trixie npm
+      - apt-get install -y -t trixie openjdk-21-jdk-headless
+      - update-alternatives --auto java
+      - chown -R vagrant /usr/lib/go-*
+    gradle:
+      - fdroid
+    srclibs:
+      - jitsi-meet@mobile-sdk-10.2.0
+      - obfs4@b5a9f3c5d239b2b1d2d5877c043c5893635334a0
+    rm:
+      - vector/src/main/jniLibs/*/*.so
+    prebuild:
+      - sed -i -e 's/Xmx4g/Xmx6g/' -e 's/UseParallelGC/UseG1GC/' ../gradle.properties
+      - sed -i -e 's/-XX:MaxPermSize\S*//' $$jitsi-meet$$/android/gradle.properties
+      - sed -i -e 's/def isCiBuild =.*/def isCiBuild = true/' ../tools/gradle/doctor.gradle
+      - sed -i -e '/firebaseAppDistribution {/,/            }/d' build.gradle
+      - sed -i -e '/universalApk/d' -e '/abiFilters/d' -e '/include/s/"armeabi-v7a".*/"arm64-v8a"/'
+        build.gradle
+      - sed -i -e '/repositories {/a mavenLocal()' -e 's|https.*mobile-sdk-10.2.0|https://jitpack.io|'
+        ../build.gradle
+      - sed -i -e '/com.google.firebase/d' -e '/gms/d' {.,..}/build.gradle
+      - sed -i -e '/git/d' $$jitsi-meet$$/android/scripts/release-sdk.sh
+    build:
+      - cd ../vector
+      - pushd $$obfs4$$
+      - export PATH=$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
+      - export ARCH=arm64
+      - CC=aarch64-linux-android21-clang CXX=aarch64-linux-android21-clang++ GOOS=android
+        GOARCH=$ARCH go install std
+      - CGO_ENABLED=1 CC=aarch64-linux-android21-clang CXX=aarch64-linux-android21-clang++
+        GOOS=android GOARCH=$ARCH go build -v -o obfs4proxy/obfs4proxy.${ARCH}.so
+        ./obfs4proxy
+      - popd
+      - mv $$obfs4$$/obfs4proxy/obfs4proxy.arm64.so src/main/jniLibs/arm64-v8a/obfs4proxy.arm64.so
+      - cd $$jitsi-meet$$
+      - export LIBRE_BUILD=true
+      - npm install --save false webpack-bundle-analyzer
+      - npm ci
+      - mkdir -p "$HOME/.m2"
+      - JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64 bash android/scripts/release-sdk.sh
+        "$HOME/.m2/repository"
+      - mkdir -p "$HOME/.m2/repository/org/webkit"
+      - cp -r node_modules/jsc-android/dist/org/webkit/android-jsc "$HOME/.m2/repository/org/webkit"
+    ndk: r21d
+
+  - versionName: 1.2.4
+    versionCode: 401011603
+    commit: 2520ddf1b42a8cd61582c32134ccbcc39fce3a0f
+    subdir: vector-app
+    sudo:
+      - echo "deb https://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
+      - apt-get update
+      - apt-get install -y jq maven golang-go
+      - apt-get install -t trixie npm
+      - apt-get install -y -t trixie openjdk-21-jdk-headless
+      - update-alternatives --auto java
+      - chown -R vagrant /usr/lib/go-*
+    gradle:
+      - fdroid
+    srclibs:
+      - jitsi-meet@mobile-sdk-10.2.0
+      - obfs4@b5a9f3c5d239b2b1d2d5877c043c5893635334a0
+    rm:
+      - vector/src/main/jniLibs/*/*.so
+    prebuild:
+      - sed -i -e 's/Xmx4g/Xmx6g/' -e 's/UseParallelGC/UseG1GC/' ../gradle.properties
+      - sed -i -e 's/-XX:MaxPermSize\S*//' $$jitsi-meet$$/android/gradle.properties
+      - sed -i -e 's/def isCiBuild =.*/def isCiBuild = true/' ../tools/gradle/doctor.gradle
+      - sed -i -e '/firebaseAppDistribution {/,/            }/d' build.gradle
+      - sed -i -e '/universalApk/d' -e '/abiFilters/d' -e '/include/s/"armeabi-v7a".*/"x86"/'
+        build.gradle
+      - sed -i -e '/repositories {/a mavenLocal()' -e 's|https.*mobile-sdk-10.2.0|https://jitpack.io|'
+        ../build.gradle
+      - sed -i -e '/com.google.firebase/d' -e '/gms/d' {.,..}/build.gradle
+      - sed -i -e '/git/d' $$jitsi-meet$$/android/scripts/release-sdk.sh
+    build:
+      - cd ../vector
+      - pushd $$obfs4$$
+      - export PATH=$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
+      - export ARCH=386
+      - CC=i686-linux-android21-clang CXX=i686-linux-android21-clang++ GOOS=android
+        GOARCH=$ARCH go install std
+      - CGO_ENABLED=1 CC=i686-linux-android21-clang CXX=i686-linux-android21-clang++
+        GOOS=android GOARCH=$ARCH go build -v -o obfs4proxy/obfs4proxy.x86.so ./obfs4proxy
+      - popd
+      - mv $$obfs4$$/obfs4proxy/obfs4proxy.x86.so src/main/jniLibs/x86/obfs4proxy.x86.so
+      - cd $$jitsi-meet$$
+      - export LIBRE_BUILD=true
+      - npm install --save false webpack-bundle-analyzer
+      - npm ci
+      - mkdir -p "$HOME/.m2"
+      - JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64 bash android/scripts/release-sdk.sh
+        "$HOME/.m2/repository"
+      - mkdir -p "$HOME/.m2/repository/org/webkit"
+      - cp -r node_modules/jsc-android/dist/org/webkit/android-jsc "$HOME/.m2/repository/org/webkit"
+    ndk: r21d
+
+  - versionName: 1.2.4
+    versionCode: 401011604
+    commit: 2520ddf1b42a8cd61582c32134ccbcc39fce3a0f
+    subdir: vector-app
+    sudo:
+      - echo "deb https://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
+      - apt-get update
+      - apt-get install -y jq maven golang-go
+      - apt-get install -t trixie npm
+      - apt-get install -y -t trixie openjdk-21-jdk-headless
+      - update-alternatives --auto java
+      - chown -R vagrant /usr/lib/go-*
+    gradle:
+      - fdroid
+    srclibs:
+      - jitsi-meet@mobile-sdk-10.2.0
+      - obfs4@b5a9f3c5d239b2b1d2d5877c043c5893635334a0
+    rm:
+      - vector/src/main/jniLibs/*/*.so
+    prebuild:
+      - sed -i -e 's/Xmx4g/Xmx6g/' -e 's/UseParallelGC/UseG1GC/' ../gradle.properties
+      - sed -i -e 's/-XX:MaxPermSize\S*//' $$jitsi-meet$$/android/gradle.properties
+      - sed -i -e 's/def isCiBuild =.*/def isCiBuild = true/' ../tools/gradle/doctor.gradle
+      - sed -i -e '/firebaseAppDistribution {/,/            }/d' build.gradle
+      - sed -i -e '/universalApk/d' -e '/abiFilters/d' -e '/include/s/"armeabi-v7a".*/"x86_64"/'
+        build.gradle
+      - sed -i -e '/repositories {/a mavenLocal()' -e 's|https.*mobile-sdk-10.2.0|https://jitpack.io|'
+        ../build.gradle
+      - sed -i -e '/com.google.firebase/d' -e '/gms/d' {.,..}/build.gradle
+      - sed -i -e '/git/d' $$jitsi-meet$$/android/scripts/release-sdk.sh
+    build:
+      - cd ../vector
+      - pushd $$obfs4$$
+      - export PATH=$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
+      - export ARCH=amd64
+      - CC=x86_64-linux-android21-clang CXX=x86_64-linux-android21-clang++ GOOS=android
+        GOARCH=$ARCH go install std
+      - CGO_ENABLED=1 CC=x86_64-linux-android21-clang CXX=x86_64-linux-android21-clang++
+        GOOS=android GOARCH=$ARCH go build -v -o obfs4proxy/obfs4proxy.x86_64.so ./obfs4proxy
+      - popd
+      - mv $$obfs4$$/obfs4proxy/obfs4proxy.x86_64.so src/main/jniLibs/x86_64/obfs4proxy.x86_64.so
+      - cd $$jitsi-meet$$
+      - export LIBRE_BUILD=true
+      - npm install --save false webpack-bundle-analyzer
+      - npm ci
+      - mkdir -p "$HOME/.m2"
+      - JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64 bash android/scripts/release-sdk.sh
+        "$HOME/.m2/repository"
+      - mkdir -p "$HOME/.m2/repository/org/webkit"
+      - cp -r node_modules/jsc-android/dist/org/webkit/android-jsc "$HOME/.m2/repository/org/webkit"
+    ndk: r21d
+
 MaintainerNotes: scanner might detect 'com/google/ads/interactivemedia/v3/api/AdEvent'
   stubs from react-native-video
 
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: 1.2.3
-CurrentVersionCode: 401011504
+CurrentVersion: 1.2.4
+CurrentVersionCode: 401011604
