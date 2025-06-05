@@ -335,7 +335,32 @@ Builds:
 
   - versionName: 2.33.5
     versionCode: 2025041511
+    disable: buggy version
     commit: e161b2995a3dbf50e5d1a84dfd8a7280005831bf
+    timeout: 18000
+    sudo:
+      - apt-get update
+      - apt-get install -y make xz-utils
+      - sysctl fs.inotify.max_user_watches=524288
+      - mkdir -m 0755 /nix
+      - chown vagrant /nix
+      - chown -R vagrant /tmp
+    init: nix/scripts/setup.sh
+    output: result/app-release-unsigned.apk
+    prebuild: sed -i -e '/extra/d' nix/nix.conf
+    scanignore:
+      - android/build.gradle
+    scandelete:
+      - ios
+    build:
+      - ulimit -n 8192
+      - export STATUS_BUILD_TARGET=fdroid
+      - export STATUS_BUILD_APK_TYPE=universal-hermes-enabled
+      - make build-fdroid ORG_GRADLE_PROJECT_versionCode=$$VERCODE$$
+
+  - versionName: 2.33.6
+    versionCode: 2025060413
+    commit: 0c42d63b11316e29c66dca9109b56c5933652382
     timeout: 18000
     sudo:
       - apt-get update
@@ -365,5 +390,5 @@ MaintainerNotes: |-
 
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: 2.33.5
-CurrentVersionCode: 2025041511
+CurrentVersion: 2.33.6
+CurrentVersionCode: 2025060413
