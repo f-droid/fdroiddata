@@ -1,0 +1,56 @@
+AntiFeatures:
+  TetheredNet:
+    en-US: Map download service (cdn*.comaps.app), see https://codeberg.org/comaps/comaps/issues/41
+Categories:
+  - Navigation
+License: Apache-2.0
+WebSite: https://www.comaps.app/
+SourceCode: https://codeberg.org/comaps/comaps
+IssueTracker: https://codeberg.org/comaps/comaps/issues
+Translation: https://translate.codeberg.org/projects/comaps/
+Changelog: https://codeberg.org/comaps/comaps/releases
+Donate: https://www.comaps.app/donate/
+Liberapay: CoMaps
+OpenCollective: comaps
+
+RepoType: git
+Repo: https://codeberg.org/comaps/comaps.git
+
+Builds:
+  - versionName: 2025.06.01-6-FDroid
+    versionCode: 25060106
+    commit: 606a21ef83a0823bee280375b3337621271dd997
+    subdir: android/app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y g++ ninja-build build-essential cmake qt6-base-dev qt6-svg-dev
+        qt6-positioning-dev libicu-dev libfreetype-dev libharfbuzz-dev libxrandr-dev
+        libxinerama-dev libxcursor-dev libxi-dev optipng
+    gradle:
+      - fdroid
+    rm:
+      - iphone
+      - xcode
+    prebuild: sed -i -e "s/fdroid {/fdroid {\n      applicationIdSuffix '.fdroid'/"
+      build.gradle
+    scanignore:
+      - data/*.bin
+    scandelete:
+      - 3party
+      - package.json
+    build:
+      - cd ../../3party/boost
+      - ./bootstrap.sh
+      - ./b2 headers
+      - cd ../..
+      - ./tools/unix/generate_symbols.sh
+
+MaintainerNotes: scanner might detect 'com/google/android/gms/location' and more from
+  'org.microg.gms:play-services-location`
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags .*android$
+UpdateCheckData: android/app/src/fdroid/play/version.yaml|version:\s.+\+(\d+)|.|version:\s(.+\-\d+)\-\w+\+
+CurrentVersion: 2025.06.01-6-FDroid
+CurrentVersionCode: 25060106
