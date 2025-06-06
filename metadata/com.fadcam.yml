@@ -8,7 +8,7 @@ AutoName: FadCam
 
 RepoType: git
 Repo: https://github.com/anonfaded/FadCam.git
-Binaries: https://github.com/anonfaded/FadCam/releases/download/v%v/FadCam_v%v_universal.apk
+Binaries: https://github.com/anonfaded/FadCam/releases/download/v%v/FadCam-v%v-universal.apk
 
 Builds:
   - versionName: 1.1.3
@@ -18,10 +18,49 @@ Builds:
     gradle:
       - yes
     output: build/outputs/apk/release/app-universal-release-unsigned.apk
+    binary: https://github.com/anonfaded/FadCam/releases/download/v%v/FadCam_v%v_universal.apk
+
+  - versionName: 1.4.0
+    versionCode: 12
+    commit: 7465d801ecb09091c4ca71ea6fcda2be98956617
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y make autoconf automake libtool pkg-config curl doxygen
+        nasm cmake gcc gperf texinfo yasm bison autogen wget autopoint meson ninja-build
+        ragel groff gtk-doc-tools libtasn1-6-dev libtasn1-bin libgnutls28-dev libunistring-dev
+      - echo "deb https://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
+      - apt-get update
+      - apt-get install -t trixie openjdk-21-jdk-headless
+      - update-alternatives --auto java
+      - mkdir -p /home/faded/
+      - chown vagrant /home/faded/
+    gradle:
+      - yes
+    output: build/outputs/apk/release/app-universal-release-unsigned.apk
+    srclibs:
+      - anonfaded-ffmpeg-kit@21bd5bf2a54d71d551d653c7925975e47847fddc
+      - reproducible-apk-tools@v0.3.0
+    rm:
+      - app/libs/ffmpeg-kit-full-6.0-2.LTS.aar
+    build:
+      - mv $$anonfaded-ffmpeg-kit$$ /home/faded/ffmpeg-kit
+      - pushd /home/faded/ffmpeg-kit
+      - JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64 ANDROID_SDK_ROOT=$$SDK$$ ANDROID_NDK_ROOT=$$NDK$$
+        ./android.sh --disable-x86 --disable-x86-64 --disable-arm-v7a-neon --enable-openssl
+        --enable-freetype --enable-lame --enable-libiconv --enable-libtheora --enable-libvorbis
+        --enable-libvpx --enable-libwebp --enable-opus --enable-soxr --enable-libpng
+        --enable-jpeg --enable-zimg --enable-x264 --enable-gpl --enable-android-media-codec
+        --api-level=28
+      - popd
+      - mv /home/faded/ffmpeg-kit/prebuilt/bundle-android-aar/ffmpeg-kit/*.aar libs/ffmpeg-kit-full-6.0-2.LTS.aar
+    ndk: r25c
+    postbuild: $$reproducible-apk-tools$$/inplace-fix.py --page-size 16 fix-newlines
+      $$OUT$$ 'META-INF/services/*'
 
 AllowedAPKSigningKeys: 999e27d8ee66a67319db6827e0f8549c37624601b86f0108c6970413279ef1d4
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 1.1.3
-CurrentVersionCode: 6
+CurrentVersion: 1.4.0
+CurrentVersionCode: 12
