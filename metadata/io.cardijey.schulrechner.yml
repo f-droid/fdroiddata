@@ -41,8 +41,34 @@ Builds:
       - npm run update_version
       - cordova build android --release -- --packageType=apk
 
+  - versionName: 1.8.0
+    versionCode: 10800
+    commit: 9402d2d480f468d2445d6d6aec39482d23d22e10
+    submodules: true
+    sudo:
+      - sysctl fs.inotify.max_user_watches=524288 || true
+      - apt-get update
+      - apt-get install -y npm
+      - npm install -g cordova
+    output: platforms/android/app/build/outputs/apk/release/app-release-unsigned.apk
+    prebuild:
+      - sdkmanager 'platforms;android-35' 'build-tools;35.0.0'
+      - cordova platform add android
+      - npm install  --build-from-source
+      - cd mathjs
+      - npm install  --build-from-source
+    scandelete:
+      - node_modules
+    build:
+      - cd mathjs
+      - npm run build
+      - cd ..
+      - mv mathjs/lib/browser/math.js www/js/math.js
+      - npm run update_version
+      - cordova build android --release -- --packageType=apk
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags .*\.0$
 UpdateCheckData: package.json|"versionCode":\s(\d+),|.|"version":\s"([\d.]+)"
-CurrentVersion: 1.7.0
-CurrentVersionCode: 10700
+CurrentVersion: 1.8.0
+CurrentVersionCode: 10800
