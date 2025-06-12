@@ -25,13 +25,14 @@ for file in $changed_files; do
     [[ $keep_num == 0 ]] && keep_num=1
 
     new_versions=$(grep "+    versionCode: "  <<< "$diff" | sed -E -n "s/.*versionCode: ([0-9]+)/\1/p" | jq --slurp '.')
+    removed_versions=$(grep "\-    versionCode: "  <<< "$diff" | sed -E -n "s/.*versionCode: ([0-9]+)/\1/p" | jq --slurp '.')
     missing_versions=$(jq -r ".\"$appid\" // []" <<< "$missing_builds")
     failed_versions=$(jq -r "map(select(.[0] == \"$appid\") | .[1])" <<< "$failed_builds")
     success_versions=$(jq -r "map(select(.[0] == \"$appid\") | .[1])" <<< "$success_builds")
     all_versions=$(sed -E -n "s/.*versionCode: ([0-9]+)/\1/p" $file | jq --slurp '.')
 
-    remove_versions=$(jq --slurp -r ".[4] - (.[4] - (.[0] + .[1] + .[2] - .[3])) | sort | unique | .[:-$keep_num][]" \
-      <(printf "$new_versions") <(printf "$missing_versions") <(printf "$failed_versions") <(printf "$success_versions") <(printf "$all_versions"))
+    remove_versions=$(jq --slurp -r ".[5] - (.[5] - (.[0] - .[1] + .[2] + .[3] - .[4])) | sort | unique | .[:-$keep_num][]" \
+      <(printf "$new_versions") <(printf "$removed_versions") <(printf "$missing_versions") <(printf "$failed_versions") <(printf "$success_versions") <(printf "$all_versions"))
 
     if [[ -n $remove_versions ]]; then
       echo "Cleaning $appid: ${remove_versions//$'\n'/ }"
