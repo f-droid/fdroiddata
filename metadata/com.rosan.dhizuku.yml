@@ -31,10 +31,27 @@ Builds:
     postbuild: $$reproducible-apk-tools$$/inplace-fix.py --zipalign fix-newlines $$OUT$$
       'META-INF/services/*'
 
+  - versionName: 2.10.1
+    versionCode: 16
+    commit: 6129b7e2776f0056471c9b17bc22edcea2c6fd73
+    subdir: app
+    sudo:
+      - echo "deb https://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
+      - apt-get update
+      - apt-get install -y -t trixie openjdk-21-jdk-headless
+      - update-alternatives --auto java
+    gradle:
+      - yes
+    srclibs:
+      - reproducible-apk-tools@v0.3.0
+    prebuild: sed -i -e 's/Kotlin/kotlin/' build.gradle.kts
+    postbuild: $$reproducible-apk-tools$$/inplace-fix.py --zipalign fix-newlines $$OUT$$
+      'META-INF/services/*'
+
 AllowedAPKSigningKeys: 8934df3b402d650e0ec7b5d1e3a8cfcc1181b4378e1b8df257ea126d474c685a
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: version.properties|versionCode=(\d+)|.|versionName=(.*)
-CurrentVersion: '2.10'
-CurrentVersionCode: 15
+CurrentVersion: 2.10.1
+CurrentVersionCode: 16
