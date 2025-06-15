@@ -66,9 +66,38 @@ Builds:
       - mkdir -p ../nfcd/libs
       - mv $$XposedBridge$$/app/build/api/api.jar ../nfcd/libs
 
+  - versionName: 2.5.0
+    versionCode: 15
+    commit: d82fcb98fc7994ec2d096135c1c04c64b7a00edd
+    subdir: app
+    submodules: true
+    sudo:
+      - echo "deb http://deb.debian.org/debian sid main" > /etc/apt/sources.list.d/sid.list
+      - apt-get update
+      - apt-get install -y -t sid openjdk-8-jdk-headless
+    gradle:
+      - yes
+    srclibs:
+      - XposedBridge@v82
+    prebuild:
+      - sed -i -e 's/api.xposed.info/maven.google.com/' ../build.gradle
+      - sed -i -e "s|'de.robv.android.xposed:api:82'|files('libs/api.jar')|" ../nfcd/build.gradle
+      - cd $$XposedBridge$$
+      - sed -i -e 's/1.5.0/3.3.3/' -e '/repositories {/a google()' -e 's/jcenter/mavenCentral/g'
+        build.gradle
+      - sed -i -e 's/2.10/4.10.1/' gradle/wrapper/gradle-wrapper.properties
+      - sed -i -e '/sdkSources/d' -e 's/hiddenapi.assembleRelease/":hiddenapistubs:assembleRelease"/'
+        app/build.gradle
+    build:
+      - pushd $$XposedBridge$$
+      - JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 gradle :app:generateAPI
+      - popd
+      - mkdir -p ../nfcd/libs
+      - mv $$XposedBridge$$/app/build/api/api.jar ../nfcd/libs
+
 AllowedAPKSigningKeys: a47ca974d0e540265ffb8438b577936ccf0cbf1cbfc98916d1ddf004e77b2c3d
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 2.4.4
-CurrentVersionCode: 14
+CurrentVersion: 2.5.0
+CurrentVersionCode: 15
