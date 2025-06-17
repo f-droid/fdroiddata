@@ -1,23 +1,44 @@
 Categories:
   - System
-License: AGPL-3.0-or-later
+License: AGPL-3.0-only
+AuthorName: Miroslav Kravec
 SourceCode: https://github.com/archivekeep/archivekeep
+IssueTracker: https://github.com/archivekeep/archivekeep/issues
+Changelog: https://github.com/archivekeep/archivekeep/releases
+
+AutoName: ArchiveKeep
 
 RepoType: git
 Repo: https://github.com/archivekeep/archivekeep.git
-Binaries: https://github.com/archivekeep/archivekeep/releases/download/v0.4.2/archivekeep-0.4.2.apk
+Binaries: https://github.com/archivekeep/archivekeep/releases/download/v%v/archivekeep-%v.apk
 
 Builds:
   - versionName: 0.4.2
     versionCode: 42
-    commit: v0.4.2
+    commit: 632ec6e64dd1484476fcfb41c0112c90fd99737d
     subdir: modules/app-android
-    patch:
-      - fdroid-friendly-buildscript.patch
     gradle:
       - yes
+    prebuild:
+      - sed -i -e '/jetbrains/d' -e '/offline-repository/d' -e '/^\s\{20\}maven {/,/^\s\{20\}}/d'
+        ../../build.gradle.kts
+      - sed -i -e '/offline-repository/d' ../../settings.gradle.kts
+
+  - versionName: 0.4.3
+    versionCode: 43
+    commit: 4cba54c6b53ff3888a8f6d541f7cc89103683928
+    subdir: modules/app-android
+    gradle:
+      - yes
+    prebuild:
+      - sed -i -e '/jetbrains/d' -e '/offline-repository/d' -e '/^\s\{20\}maven {/,/^\s\{20\}}/d'
+        ../../build.gradle.kts
+      - sed -i -e '/offline-repository/d' ../../settings.gradle.kts
 
 AllowedAPKSigningKeys: 3d1eee1d389688155df900ad682532c50618f94fc5bf1780b8a5727bc96fa84e
 
-AutoUpdateMode: None
-UpdateCheckMode: None
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: gradle.properties|versionCode = (\d+)|.|version = (.+)
+CurrentVersion: 0.4.3
+CurrentVersionCode: 43
