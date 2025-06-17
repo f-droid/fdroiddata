@@ -11,12 +11,15 @@ Changelog: https://github.com/blockstream/green_android/releases
 
 AutoName: Green
 Description: |-
-  Blockstream Green is a simple and secure Bitcoin wallet that makes it easy to get started sending and receiving Bitcoin and Liquid-based assets such as Liquid Bitcoin (L-BTC) and Tether’s USDt.
+  The Blockstream app (formerly Green) is a simple and secure Bitcoin wallet that makes it easy to get started sending and receiving Bitcoin and Liquid-based assets such as Liquid Bitcoin (L-BTC) and Tether’s USDt.
 
-  Built by Blockstream, one of the most security-focused teams in the Bitcoin industry, Blockstream Green is supported across multiple platforms and is designed for Bitcoin beginners and power users alike.
+  Built by Blockstream, one of the most security-focused teams in the Bitcoin industry, the wallet is supported across multiple platforms and is designed for Bitcoin beginners and power users alike.
 
   EASY SETUP
   No registration or personal details are required to get started, just write down your recovery phrase and start making Bitcoin transactions right away.
+
+  BUY BITCOIN DIRECTLY TO SELF-CUSTODY
+  No intermediate self custody, buy bitcoin directly into your wallet (additional registration may be required).
 
   FASTER & CHEAPER BITCOIN TRANSACTIONS
   Smart fee estimation ensures your Bitcoin payments arrive on time without being charged excessive fees.
@@ -26,9 +29,6 @@ Description: |-
 
   BITCOIN LAYER-2 SUPPORT
   Send and receive Liquid Bitcoin L-BTC, Tether’s USDt, and any other Liquid-based assets with a Liquid account.
-
-  TWO-FACTOR MULTISIG SECURITY
-  Unique dual-key security with one key protected by two-factor authentication. Multiple authentication options are available including, Google Authenticator, SMS, and email.
 
   Bitcoin power users will feel right at home with a wide range of advanced features and industry-firsts:
 
@@ -45,7 +45,7 @@ Description: |-
   Keep an eye on your Bitcoin balances while on the go and receive payments from others without needing to grant payment permissions to your device.
 
   TESTNET SUPPORT
-  Easily make test transactions on Bitcoin testnet.
+  Easily make test transactions on Bitcoin testnet until you feel comfortable with how the wallet works.
 
   PRIVACY
   No documents, personal information, or KYC required. An email address is needed for wallet recovery purposes only. Connect via Tor at the tap of a button, no other apps needed.
@@ -2864,6 +2864,50 @@ Builds:
         ./prepare_gdk_clang.sh "armeabi-v7a arm64-v8a"
     ndk: r26b
 
+  - versionName: 5.0.3
+    versionCode: 22000503
+    commit: d7ce874bcac38c6fa8f4af8437be06082b20e059
+    subdir: androidApp
+    sudo:
+      - apt-get update
+      - apt-get install -y automake clang cmake jq libffi-dev libtool make pkg-config
+        swig virtualenv xz-utils
+    gradle:
+      - production
+      - FDroid
+    srclibs:
+      - rustup@1.27.1
+      - gdk@release_0.74.2
+    rm:
+      - gradle/verification-metadata.xml
+      - gms
+    prebuild:
+      - sed -i -e '/packages.jetbrains.team/d' ../settings.gradle.kts
+      - sed -i -e '/mvn.breez/d;/zendesk/d;/jetbrains/d;/googleServices/d' ../build.gradle.kts
+      - sed -i -e '/libs.breez.sdk.kmp/d' -e '/jna/s|//||g' ../common/build.gradle.kts
+      - sed -i -e '/signingConfigs {/,+8d' -e '/signingConfigs.getByName/,+3d' -e
+        '/versionNameSuffix/d' -e '/googleServices/d' build.gradle.kts
+      - cd ../gdk
+      - gdkVersion=$(sed -n -E 's/.*TAGNAME="(.*)"/\1/p' prepare_gdk_clang.sh)
+      - '[[ $gdkVersion ]] || exit 1'
+      - git -C $$gdk$$ checkout $gdkVersion
+      - mv $$gdk$$ .
+      - rustVersion=$(sed -n -E 's/.*RUST_VERSION=(.*)/\1/p' gdk/docker/android/Dockerfile)
+      - $$rustup$$/rustup-init.sh -y --default-toolchain $rustVersion --target aarch64-linux-android
+      - $$rustup$$/rustup-init.sh -y --default-toolchain $rustVersion --target armv7-linux-androideabi
+      - sed -i -e 's|boostorg.jfrog.io/artifactory/main|archives.boost.io|' gdk/tools/builddeps.sh
+    scanignore:
+      - gdk/gdk/subprojects/gdk_rust/libgcc/libgcc.a
+    scandelete:
+      - gdk/gdk/subprojects/gdk_rust/gdk_electrum/test_data/store
+    build:
+      - source $HOME/.cargo/env
+      - cd ../gdk
+      - sed -i -e '1a set -x' prepare_gdk_clang.sh
+      - JAVA_HOME=$(readlink -f /usr/bin/javac | sed "s:/bin/javac::") PATH=$HOME/.local/bin:$PATH
+        ./prepare_gdk_clang.sh "armeabi-v7a arm64-v8a"
+    ndk: r26b
+
 MaintainerNotes: |-
   Watch prepare_gdk_clang.sh for changes on new builds.
 
@@ -2879,6 +2923,6 @@ AutoUpdateMode: Version
 UpdateCheckMode: Tags
 VercodeOperation:
   - 22000000 + %c
-UpdateCheckData: green/build.gradle.kts|versionCode\s=\s(\d+)|.|versionName\s=\s"([\d.]+)"
-CurrentVersion: 4.1.8
-CurrentVersionCode: 22000445
+UpdateCheckName: Ignore
+CurrentVersion: 5.0.3
+CurrentVersionCode: 22000503
