@@ -414,8 +414,34 @@ Builds:
       - export PUB_CACHE=$(pwd)/.pub-cache
       - $$flutter$$/bin/flutter build apk
 
+  - versionName: 1.8.3
+    versionCode: 80
+    commit: 31246ed5bd2903518e46e18d5710a4ec7e2956b0
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - flatpak
+      - ios
+      - windows
+      - linux
+      - macos
+      - web
+    prebuild:
+      - flutterVersion=$(sed -n -E "s/.*flutter-version:\ (.*)/\1/p" .github/actions/flutter-common/action.yml)
+      - '[[ $flutterVersion ]] || exit 1'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 1.8.2
-CurrentVersionCode: 70
+CurrentVersion: 1.8.3
+CurrentVersionCode: 80
