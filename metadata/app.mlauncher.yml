@@ -387,11 +387,30 @@ Builds:
       - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
         --replace unaligned.apk $$OUT$$
 
+  - versionName: 1.10.7.5
+    versionCode: 1100705
+    commit: 33ccd757c44084d3a56d74a6ece4f6f59e10756b
+    subdir: app
+    sudo:
+      - export CPUS_MAX=16
+      - export CPUS=$(getconf _NPROCESSORS_ONLN)
+      - for (( c=$CPUS_MAX; c<$CPUS; c++ )) ; do echo 0 > /sys/devices/system/cpu/cpu$c/online
+        ; done
+    gradle:
+      - yes
+    binary: https://github.com/DroidWorksStudio/mLauncher/releases/download/%v/MultiLauncher-%v-Signed.apk
+    srclibs:
+      - reproducible-apk-tools@v0.3.0
+    postbuild:
+      - mv $$OUT$$ unaligned.apk
+      - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
+        --replace unaligned.apk $$OUT$$
+
 AllowedAPKSigningKeys: 88585139eac6d8d5922ce7af80a0f2acd9280371676014a114d5e3bf34904ae0
 
 AutoUpdateMode: Version %v
 UpdateCheckMode: HTTP
 UpdateCheckData: https://github.com/DroidWorksStudio/mLauncher/releases/latest|>(\d+)
   \([\d.]+\) - Multi Launcher|.|>\d+ \(([\d.]+)\) - Multi Launcher
-CurrentVersion: 1.10.7.2
-CurrentVersionCode: 1100702
+CurrentVersion: 1.10.7.5
+CurrentVersionCode: 1100705
