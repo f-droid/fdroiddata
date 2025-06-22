@@ -1,0 +1,65 @@
+AntiFeatures:
+  Tracking:
+    en-US: Telemetry is enabled by default.
+Categories:
+  - Multimedia
+  - System
+License: GPL-3.0-only
+AuthorName: Ansah Mohammad
+AuthorEmail: mohdansah10@gmail.com
+SourceCode: https://github.com/AnsahMohammad/shots-studio
+IssueTracker: https://github.com/AnsahMohammad/shots-studio/issues
+Changelog: https://github.com/AnsahMohammad/shots-studio/releases
+
+AutoName: Shots Studio
+
+RepoType: git
+Repo: https://github.com/AnsahMohammad/shots-studio
+Binaries: https://github.com/AnsahMohammad/shots-studio/releases/download/v%v/shots_studio-release-%v.apk
+
+Builds:
+  - versionName: 1.8.80
+    versionCode: 1
+    commit: v1.8.80
+    sudo:
+      - mkdir -p /home/ansah/Documents/Programming/Projects/shots-studio
+      - chown -R vagrant /home/ansah
+    output: shots_studio/build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - shots_studio/ios
+      - shots_studio/linux
+      - shots_studio/macos
+      - shots_studio/web
+      - shots_studio/windows
+    prebuild:
+      - git -C $$flutter$$ reset --hard $(cat shots_studio/flutter.version)
+      - export repo=/home/ansah/Documents/Programming/Projects/shots-studio/shots_studio
+      - mv shots_studio $repo
+      - pushd $repo
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export PATH="$$flutter$$/bin:$PATH"
+      - flutter config --no-analytics
+      - flutter pub get
+      - popd
+      - mv $repo .
+    scandelete:
+      - shots_studio/.pub-cache
+    build:
+      - export repo=/home/ansah/Documents/Programming/Projects/shots-studio/shots_studio
+      - mv shots_studio $repo
+      - pushd $repo
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export PATH="$$flutter$$/bin:$PATH"
+      - flutter build apk --release
+      - popd
+      - mv $repo .
+
+AllowedAPKSigningKeys: 4e93aa8564d719b7081e9e5ae59a86bcb3c2ae576a0d5d4e9172f3de7ac8b0a6
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: shots_studio/pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 1.8.80
+CurrentVersionCode: 1
