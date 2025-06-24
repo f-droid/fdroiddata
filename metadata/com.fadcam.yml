@@ -58,9 +58,47 @@ Builds:
     postbuild: $$reproducible-apk-tools$$/inplace-fix.py --page-size 16 fix-newlines
       $$OUT$$ 'META-INF/services/*'
 
+  - versionName: 1.5.0
+    versionCode: 16
+    commit: 999a12ca580181221bfe90129e54325d54c3a008
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y make autoconf automake libtool pkg-config curl doxygen
+        nasm cmake gcc gperf texinfo yasm bison autogen wget autopoint meson ninja-build
+        ragel groff gtk-doc-tools libtasn1-6-dev libtasn1-bin libgnutls28-dev libunistring-dev
+      - echo "deb https://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
+      - apt-get update
+      - apt-get install -t trixie openjdk-21-jdk-headless
+      - update-alternatives --auto java
+      - mkdir -p /home/faded/
+      - chown vagrant /home/faded/
+    gradle:
+      - yes
+    output: build/outputs/apk/release/app-universal-release-unsigned.apk
+    srclibs:
+      - anonfaded-ffmpeg-kit@21bd5bf2a54d71d551d653c7925975e47847fddc
+      - reproducible-apk-tools@v0.3.0
+    rm:
+      - app/libs/ffmpeg-kit-full-6.0-2.LTS.aar
+    build:
+      - mv $$anonfaded-ffmpeg-kit$$ /home/faded/ffmpeg-kit
+      - pushd /home/faded/ffmpeg-kit
+      - JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64 ANDROID_SDK_ROOT=$$SDK$$ ANDROID_NDK_ROOT=$$NDK$$
+        ./android.sh --disable-x86 --disable-x86-64 --disable-arm-v7a-neon --enable-openssl
+        --enable-freetype --enable-lame --enable-libiconv --enable-libtheora --enable-libvorbis
+        --enable-libvpx --enable-libwebp --enable-opus --enable-soxr --enable-libpng
+        --enable-jpeg --enable-zimg --enable-x264 --enable-gpl --enable-android-media-codec
+        --api-level=28
+      - popd
+      - mv /home/faded/ffmpeg-kit/prebuilt/bundle-android-aar/ffmpeg-kit/*.aar libs/ffmpeg-kit-full-6.0-2.LTS.aar
+    ndk: r25c
+    postbuild: $$reproducible-apk-tools$$/inplace-fix.py --page-size 16 fix-newlines
+      $$OUT$$ 'META-INF/services/*'
+
 AllowedAPKSigningKeys: 999e27d8ee66a67319db6827e0f8549c37624601b86f0108c6970413279ef1d4
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v[\d.]+$
-CurrentVersion: 1.4.0
-CurrentVersionCode: 12
+CurrentVersion: 1.5.0
+CurrentVersionCode: 16
