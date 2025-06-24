@@ -479,8 +479,41 @@ Builds:
       - export PUB_CACHE=$(pwd)/.pub-cache
       - $$flutter$$/bin/flutter build apk --release
 
+  - versionName: 30.0.259
+    versionCode: 259
+    commit: 870a2e5341f2af4b72b90ac9a438faaeceed226d
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+      - linux
+      - macos
+      - windows
+      - lib/firebase_options.dart
+    prebuild:
+      - flutterVersion=$(sed -n -E "s/.*flutter:.*# ([0-9a-f]{40})/\1/p" pubspec.yaml)
+      - '[[ $flutterVersion ]] || exit 1'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - sed -i -e '/firebase/d' pubspec.yaml
+      - sed -i -e '/firebase/,/version/d' pubspec.lock
+      - sed -i -e '/TargetPlatform.android/,/TargetPlatform.linux/s/^        .*//'
+        -e '/ _.*{$/,/^  }/d' -e '/firebase/d' lib/notifications/receive.dart
+      - sed -i -z -e "s/@pragma('vm:entry-point')\n\n//" lib/notifications/receive.dart
+      - sed -i -e '/firebase/d' lib/model/binding.dart
+      - sed -i -z -e 's/@override\s*}//g' lib/model/binding.dart
+      - sed -i -e '/signingConfig /,+1d' android/app/build.gradle
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 30.0.258
-CurrentVersionCode: 258
+CurrentVersion: 30.0.259
+CurrentVersionCode: 259
