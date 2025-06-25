@@ -700,10 +700,31 @@ Builds:
         assets/dexopt/baseline.prof|cut -d " " -f1); [[ $localhash == $upstreamhash
         ]] && break ; popd; rm -fr local; done
 
+  - versionName: 2.5.1
+    versionCode: 217
+    commit: 5376ee49d064ee41cefb28daed1a6e72bc431ea7
+    subdir: app
+    output: build/outputs/apk/release/*apk
+    binary: https://github.com/samolego/Canta/releases/download/%v/app-release.apk
+    rm:
+      - docs
+    prebuild: gradle clean
+    build:
+      - mkdir upstream
+      - pushd upstream
+      - curl -L -o upstream.apk https://github.com/samolego/Canta/releases/download/$$VERSION$$/app-release.apk
+      - unzip -q upstream.apk
+      - export upstreamhash=$(sha256sum assets/dexopt/baseline.prof|cut -d " " -f1)
+      - popd
+      - for i in {1..10}; do gradle clean assembleRelease; mkdir local; pushd local;
+        unzip -q ../build/outputs/apk/release/*.apk; export localhash=$(sha256sum
+        assets/dexopt/baseline.prof|cut -d " " -f1); [[ $localhash == $upstreamhash
+        ]] && break ; popd; rm -fr local; done
+
 AllowedAPKSigningKeys: 0a2640317c43272188c3e13194c15460691f12c39ea19bba727dd67fb56289d4
 
-AutoUpdateMode: Version
-UpdateCheckMode: Tags
+AutoUpdateMode: None
+UpdateCheckMode: None
 UpdateCheckData: app/gradle.properties|version_code=(\d+)|.|version_name=(.+)
-CurrentVersion: 2.5.0
-CurrentVersionCode: 209
+CurrentVersion: 2.5.1
+CurrentVersionCode: 217

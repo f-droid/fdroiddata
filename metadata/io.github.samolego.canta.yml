@@ -1,0 +1,42 @@
+AntiFeatures:
+  NonFreeDep:
+    en-US: Depends on Shizuku for functionality
+  NonFreeNet:
+    en-US: Connects to Github as app info data source
+Categories:
+  - System
+License: LGPL-3.0-or-later
+SourceCode: https://github.com/samolego/Canta
+IssueTracker: https://github.com/samolego/Canta/issues
+
+AutoName: Canta
+
+RepoType: git
+Repo: https://github.com/samolego/Canta.git
+
+Builds:
+  - versionName: 3.0.0
+    versionCode: 218
+    commit: b8b7c92579554c390dabcc11f81d342b655da992
+    subdir: app
+    gradle:
+      - yes
+    binary: https://github.com/samolego/Canta/releases/download/%v/app-release.apk
+    rm:
+      - docs
+    postbuild:
+      - curl -Lo upstream.apk https://github.com/samolego/Canta/releases/download/$$VERSION$$/app-release.apk
+      - unzip -q upstream.apk -d apk
+      - export hash=$(sha256sum apk/assets/dexopt/baseline.prof)
+      - rm -rf apk upstream.apk
+      - for i in {1..10}; do unzip -q $$OUT$$ -d apk; sha256sum -c - <<< $hash &&
+        break; sha256sum apk/assets/dexopt/baseline.prof; rm -fr apk; gradle clean
+        assembleRelease; done
+
+AllowedAPKSigningKeys: 0a2640317c43272188c3e13194c15460691f12c39ea19bba727dd67fb56289d4
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: app/gradle.properties|version_code=(\d+)|.|version_name=(.+)
+CurrentVersion: 3.0.0
+CurrentVersionCode: 218
