@@ -407,6 +407,114 @@ Builds:
       - submodules/flutter/bin/flutter build apk --release --split-per-abi --build-number=$$VERCODE$$
         --build-name=$$VERSION$$ --target-platform="android-arm64"
 
+  - versionName: 1.4.4
+    versionCode: 1101
+    commit: c5803fbd5e90b58b40c6502a29635ad9c1a63e89
+    submodules: true
+    sudo:
+      - export CPUS_MAX=16
+      - export CPUS=$(getconf _NPROCESSORS_ONLN)
+      - for (( c=$CPUS_MAX; c<$CPUS; c++ )) ; do echo 0 > /sys/devices/system/cpu/cpu$c/online
+        ; done
+    output: build/app/outputs/flutter-apk/app-x86_64-release.apk
+    srclibs:
+      - reproducible-apk-tools@v0.3.0
+    rm:
+      - meta
+      - ios
+      - linux
+      - web
+      - windows
+    prebuild:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - submodules/flutter/bin/flutter config --no-analytics
+      - submodules/flutter/bin/flutter pub get
+    scanignore:
+      - submodules/flutter/bin/cache
+    scandelete:
+      - submodules/flutter
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - submodules/flutter/bin/flutter build apk --release --split-per-abi --build-number=$$VERCODE$$
+        --build-name=$$VERSION$$ --target-platform="android-x64"
+    postbuild:
+      - mv $$OUT$$ unaligned.apk
+      - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
+        --replace unaligned.apk $$OUT$$
+
+  - versionName: 1.4.4
+    versionCode: 1102
+    commit: c5803fbd5e90b58b40c6502a29635ad9c1a63e89
+    submodules: true
+    sudo:
+      - export CPUS_MAX=16
+      - export CPUS=$(getconf _NPROCESSORS_ONLN)
+      - for (( c=$CPUS_MAX; c<$CPUS; c++ )) ; do echo 0 > /sys/devices/system/cpu/cpu$c/online
+        ; done
+    output: build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
+    srclibs:
+      - reproducible-apk-tools@v0.3.0
+    rm:
+      - meta
+      - ios
+      - linux
+      - web
+      - windows
+    prebuild:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - submodules/flutter/bin/flutter config --no-analytics
+      - submodules/flutter/bin/flutter pub get
+    scanignore:
+      - submodules/flutter/bin/cache
+    scandelete:
+      - submodules/flutter
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - submodules/flutter/bin/flutter build apk --release --split-per-abi --build-number=$$VERCODE$$
+        --build-name=$$VERSION$$ --target-platform="android-arm"
+    postbuild:
+      - mv $$OUT$$ unaligned.apk
+      - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
+        --replace unaligned.apk $$OUT$$
+
+  - versionName: 1.4.4
+    versionCode: 1103
+    commit: c5803fbd5e90b58b40c6502a29635ad9c1a63e89
+    submodules: true
+    sudo:
+      - export CPUS_MAX=16
+      - export CPUS=$(getconf _NPROCESSORS_ONLN)
+      - for (( c=$CPUS_MAX; c<$CPUS; c++ )) ; do echo 0 > /sys/devices/system/cpu/cpu$c/online
+        ; done
+    output: build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+    srclibs:
+      - reproducible-apk-tools@v0.3.0
+    rm:
+      - meta
+      - ios
+      - linux
+      - web
+      - windows
+    prebuild:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - submodules/flutter/bin/flutter config --no-analytics
+      - submodules/flutter/bin/flutter pub get
+    scanignore:
+      - submodules/flutter/bin/cache
+    scandelete:
+      - submodules/flutter
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - submodules/flutter/bin/flutter build apk --release --split-per-abi --build-number=$$VERCODE$$
+        --build-name=$$VERSION$$ --target-platform="android-arm64"
+    postbuild:
+      - mv $$OUT$$ unaligned.apk
+      - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
+        --replace unaligned.apk $$OUT$$
+
 AllowedAPKSigningKeys: 8fa634071b0fe0fe0832fcc159aa412224489f19fda3ecf899bbafa6a5e1d3aa
 
 MaintainerNotes: It will fail RB in the CI as upstream builds in the same path as
@@ -419,5 +527,5 @@ VercodeOperation:
   - '%c * 10 + 2'
   - '%c * 10 + 3'
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 1.4.2
-CurrentVersionCode: 903
+CurrentVersion: 1.4.4
+CurrentVersionCode: 1103
