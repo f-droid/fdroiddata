@@ -158,10 +158,46 @@ Builds:
       - popd
       - mv $repo/carvita com.wangjinli.carvita
 
+  - versionName: 1.0.1
+    versionCode: 6
+    commit: a2f1adf3207dbdb776e3944ad8e9dc38b3093796
+    sudo:
+      - mkdir -p /home/runner/
+      - chown vagrant /home/runner/
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@stable
+    prebuild:
+      - flutterVersion=$(sed -n -E "s/.*flutter-version:\ *([0-9]+\.[0-9]+\.[0-9]+)/\1/p"
+        .github/workflows/flutter.yml)
+      - '[[ $flutterVersion ]] || exit 1'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export repo=/home/runner/work/carvita
+      - mkdir -p $repo
+      - cd ..
+      - mv com.wangjinli.carvita $repo/carvita
+      - pushd $repo/carvita
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+      - popd
+      - mv $repo/carvita com.wangjinli.carvita
+    scandelete:
+      - .pub-cache
+    build:
+      - export repo=/home/runner/work/carvita
+      - cd ..
+      - mv com.wangjinli.carvita $repo/carvita
+      - pushd $repo/carvita
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk
+      - popd
+      - mv $repo/carvita com.wangjinli.carvita
+
 AllowedAPKSigningKeys: fa873f425f12eafff33632c533340263e41147a7c3302559f58c32dd96391ef8
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v.*$
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 1.0.0
-CurrentVersionCode: 5
+CurrentVersion: 1.0.1
+CurrentVersionCode: 6
