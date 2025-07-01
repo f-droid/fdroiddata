@@ -1,0 +1,43 @@
+Categories:
+  - Reading
+License: GPL-3.0-only
+AuthorName: Andrew Cook
+AuthorEmail: dizzib.dev@gmail.com
+SourceCode: https://github.com/dizzib/bible-feed
+IssueTracker: https://github.com/dizzib/bible-feed/issues
+
+AutoName: Bible Feed
+
+RepoType: git
+Repo: https://github.com/dizzib/bible-feed
+
+Builds:
+  - versionName: 1.3.0
+    versionCode: 11
+    commit: 1.3.0
+    output: build/app/outputs/flutter-apk/app-release.apk
+    binary: https://github.com/dizzib/bible-feed/releases/download/%v/bible_feed-v%v.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+    prebuild:
+      - flutterVersion=$(sed -n -E "s/^\s*flutter:\ (.*)/\1/p" pubspec.yaml)
+      - '[[ $flutterVersion ]] || exit 1'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter packages pub get
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release
+
+AllowedAPKSigningKeys: 8c806f3ae5bf9538622de512c59ff525a5de324bcc0573fb221ce66b33c77c19
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 1.3.0
+CurrentVersionCode: 11
