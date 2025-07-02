@@ -387,7 +387,33 @@ Builds:
       - src/assets/test-plugin.zip
       - .swp
 
+  - versionName: 14.0.2
+    versionCode: 1400020000
+    commit: 051eb52e4de90fe4ffa430f071ac6d2b9971c8a2
+    subdir: android/app
+    sudo:
+      - sysctl fs.inotify.max_user_watches=524288 || true
+      - echo "deb https://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
+      - apt-get update
+      - apt-get install -t trixie npm openjdk-21-jdk-headless
+      - update-alternatives --auto java
+    init:
+      - cd ../..
+      - npm install --build-from-source
+      - npm run buildFrontend:prodWeb
+      - npm run sync:android
+    gradle:
+      - fdroid
+    scanignore:
+      - android/app/src/main/assets/public/assets/test-plugin.zip
+    scandelete:
+      - node_modules
+      - packages/plugin-dev/node_modules
+      - dist/browser/assets/test-plugin.zip
+      - src/assets/test-plugin.zip
+      - .swp
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v(?!11.0.3)[\d.]+$
-CurrentVersion: 14.0.1
-CurrentVersionCode: 1400010000
+CurrentVersion: 14.0.2
+CurrentVersionCode: 1400020000
