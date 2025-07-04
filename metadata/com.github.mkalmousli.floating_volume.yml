@@ -1,0 +1,56 @@
+Categories:
+  - System
+License: GPL-3.0-only
+AuthorName: Mohamad Almousli
+AuthorWebSite: https://mkalmousli.github.io
+SourceCode: https://github.com/mkalmousli/FloatingVolume
+IssueTracker: https://github.com/mkalmousli/FloatingVolume/issues
+Changelog: https://github.com/mkalmousli/FloatingVolume/releases
+Donate: https://ko-fi.com/mkalmousli
+Liberapay: mkalmousli
+
+AutoName: Floating Volume
+
+RepoType: git
+Repo: https://github.com/mkalmousli/FloatingVolume
+Binaries: https://github.com/mkalmousli/FloatingVolume/releases/download/v%v/FloatingVolume.github.v%v.apk
+
+Builds:
+  - versionName: 0.0.1
+    versionCode: 1
+    commit: 5f7340ce28dbfeef5c7a622fe60e5dce47cb9c33
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@stable
+    prebuild:
+      - export version=$(grep flutter .fvmrc | cut -d ":" -f2|cut -d "\"" -f2)
+      - '[[ $version ]] || exit 1'
+      - git -C $$flutter$$ checkout -f $version
+      - export repo=/tmp/app
+      - rm -rf $repo
+      - cd ..
+      - mv com.github.mkalmousli.floating_volume $repo
+      - pushd $repo
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+      - popd
+      - mv $repo com.github.mkalmousli.floating_volume
+    scandelete:
+      - .pub-cache
+    build:
+      - export repo=/tmp/app
+      - cd ..
+      - mv com.github.mkalmousli.floating_volume $repo
+      - pushd $repo
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release
+      - popd
+      - mv $repo com.github.mkalmousli.floating_volume
+
+AllowedAPKSigningKeys: 2248c5fa900222741f2b94f0c9ed68c1590bdb27ae2ff5d72e3c5dc10601d9b9
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: 0.0.1
+CurrentVersionCode: 1
