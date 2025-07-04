@@ -350,6 +350,72 @@ Builds:
     preassemble:
       - buildSdk
 
+  - versionName: 2025.6.30
+    versionCode: 665515982
+    commit: e9e51f604144b318bf5a40c68d70056b92cdb4f3
+    subdir: android/app/app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -t bookworm-backports -y golang-go
+      - apt-get install -y gcc libc-dev make
+      - echo "deb https://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
+      - apt-get update
+      - apt-get install -y -t trixie openjdk-21-jdk-headless
+      - update-alternatives --auto java
+    gradle:
+      - github
+    output: build/outputs/apk/github/release/com.bringyour.network-*-github-armeabi-v7a-release-unsigned.apk
+    binary: https://github.com/urnetwork/build/releases/download/v%v-%c/com.bringyour.network-%v-%c-github-armeabi-v7a-release.apk
+    srclibs:
+      - go@go1.24.3
+    prebuild:
+      - export GO_VERSION=$(sed -n 's/.*go version \(go.*\)".*/\1/p' ../../../fdroid/build.sh)
+      - '[[ $GO_VERSION ]] || exit 1'
+      - git -C $$go$$ checkout -f $GO_VERSION
+      - sed -i -e '/foojay/d' ../settings.gradle
+      - sed -i -e 's|PATH="|PATH="$$go$$/bin:|' ../../../sdk/build/Makefile
+      - sdkmanager "ndk;$(sed -n -E "s/^\s*ndkVersion '(.*)'/\1/p" build.gradle)"
+        'platforms;android-36'
+    build:
+      - cd $$go$$/src
+      - ./make.bash
+    preassemble:
+      - buildSdk
+
+  - versionName: 2025.6.30
+    versionCode: 665515983
+    commit: e9e51f604144b318bf5a40c68d70056b92cdb4f3
+    subdir: android/app/app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -t bookworm-backports -y golang-go
+      - apt-get install -y gcc libc-dev make
+      - echo "deb https://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
+      - apt-get update
+      - apt-get install -y -t trixie openjdk-21-jdk-headless
+      - update-alternatives --auto java
+    gradle:
+      - github
+    output: build/outputs/apk/github/release/com.bringyour.network-*-github-arm64-v8a-release-unsigned.apk
+    binary: https://github.com/urnetwork/build/releases/download/v%v-%c/com.bringyour.network-%v-%c-github-arm64-v8a-release.apk
+    srclibs:
+      - go@go1.24.3
+    prebuild:
+      - export GO_VERSION=$(sed -n 's/.*go version \(go.*\)".*/\1/p' ../../../fdroid/build.sh)
+      - '[[ $GO_VERSION ]] || exit 1'
+      - git -C $$go$$ checkout -f $GO_VERSION
+      - sed -i -e '/foojay/d' ../settings.gradle
+      - sed -i -e 's|PATH="|PATH="$$go$$/bin:|' ../../../sdk/build/Makefile
+      - sdkmanager "ndk;$(sed -n -E "s/^\s*ndkVersion '(.*)'/\1/p" build.gradle)"
+        'platforms;android-36'
+    build:
+      - cd $$go$$/src
+      - ./make.bash
+    preassemble:
+      - buildSdk
+
 AllowedAPKSigningKeys: 77783877019447c1f16cea6fafd82746df57f4f482304e080f9cc608cfb2e097
 
 AutoUpdateMode: Version
@@ -358,5 +424,5 @@ VercodeOperation:
   - '%c + 2'
   - '%c + 3'
 UpdateCheckData: android/app/local.properties|warp.version_code=(\d+)|.|warp.version=(.+)
-CurrentVersion: 2025.6.29
-CurrentVersionCode: 663875403
+CurrentVersion: 2025.6.30
+CurrentVersionCode: 665515983
