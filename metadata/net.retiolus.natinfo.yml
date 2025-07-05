@@ -1382,6 +1382,156 @@ Builds:
       - mv $repo net.retiolus.natinfo
     ndk: r27
 
+  - versionName: 0.7.1
+    versionCode: 31001
+    commit: b01c6bc58ebb0163090e432a4ad08a8b58155f1f
+    sudo:
+      - mkdir -p /home/jenkins/agent/workspace
+      - chown -R vagrant /home/jenkins
+    output: build/app/outputs/flutter-apk/app-x86_64-release.apk
+    binary: https://codeberg.org/retiolus/natinfo_flutter/releases/download/v%v/net.retiolus.natinfo-x86_64-v%v.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+      - linux
+      - macos
+      - web
+      - windows
+    prebuild:
+      - export flutterVersion=$(sed -n -E "s/^\s*flutter-version:\s(.*)/\1/p" pubspec.yaml)
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter packages pub get
+      - cd "${PUB_CACHE}/hosted/pub.dev"
+      - plugin=$(ls -d geolocator_android-* | head -n 1)
+      - cd "$plugin/android"
+      - sed -i "/play-services-location/d" build.gradle
+      - cd src/main/java/com/baseflow/geolocator/location
+      - rm -f FusedLocationClient.java
+      - sed -i "/com\\.google\\.android\\.gms/d" GeolocationManager.java
+      - sed -i "/ConnectionResult/d" GeolocationManager.java
+      - sed -i "/GoogleApiAvailability/d" GeolocationManager.java
+      - sed -i "/public LocationClient createLocationClient/,/^  }/d" GeolocationManager.java
+      - sed -i "/private boolean isGooglePlayServicesAvailable/,/^  }/d" GeolocationManager.java
+      - sed -i "/implements .*ActivityResultListener {/a public LocationClient createLocationClient(Context
+        context, boolean forceAndroidLocationManager, @Nullable LocationOptions locationOptions)
+        { return new LocationManagerClient(context, locationOptions); }" GeolocationManager.java
+    scandelete:
+      - .pub-cache
+    build:
+      - export repo=/home/jenkins/agent/workspace/natinfo_flutter_v$$VERSION$$
+      - cd ..
+      - mv net.retiolus.natinfo $repo
+      - pushd $repo
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export PATH=$$flutter$$/bin/:$PATH
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform="android-x64"
+      - popd
+      - mv $repo net.retiolus.natinfo
+    ndk: r27
+
+  - versionName: 0.7.1
+    versionCode: 31002
+    commit: b01c6bc58ebb0163090e432a4ad08a8b58155f1f
+    sudo:
+      - mkdir -p /home/jenkins/agent/workspace
+      - chown -R vagrant /home/jenkins
+    output: build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
+    binary: https://codeberg.org/retiolus/natinfo_flutter/releases/download/v%v/net.retiolus.natinfo-armeabi-v%v.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+      - linux
+      - macos
+      - web
+      - windows
+    prebuild:
+      - export flutterVersion=$(sed -n -E "s/^\s*flutter-version:\s(.*)/\1/p" pubspec.yaml)
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter packages pub get
+      - cd "${PUB_CACHE}/hosted/pub.dev"
+      - plugin=$(ls -d geolocator_android-* | head -n 1)
+      - cd "$plugin/android"
+      - sed -i "/play-services-location/d" build.gradle
+      - cd src/main/java/com/baseflow/geolocator/location
+      - rm -f FusedLocationClient.java
+      - sed -i "/com\\.google\\.android\\.gms/d" GeolocationManager.java
+      - sed -i "/ConnectionResult/d" GeolocationManager.java
+      - sed -i "/GoogleApiAvailability/d" GeolocationManager.java
+      - sed -i "/public LocationClient createLocationClient/,/^  }/d" GeolocationManager.java
+      - sed -i "/private boolean isGooglePlayServicesAvailable/,/^  }/d" GeolocationManager.java
+      - sed -i "/implements .*ActivityResultListener {/a public LocationClient createLocationClient(Context
+        context, boolean forceAndroidLocationManager, @Nullable LocationOptions locationOptions)
+        { return new LocationManagerClient(context, locationOptions); }" GeolocationManager.java
+    scandelete:
+      - .pub-cache
+    build:
+      - export repo=/home/jenkins/agent/workspace/natinfo_flutter_v$$VERSION$$
+      - cd ..
+      - mv net.retiolus.natinfo $repo
+      - pushd $repo
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export PATH=$$flutter$$/bin/:$PATH
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform="android-arm"
+      - popd
+      - mv $repo net.retiolus.natinfo
+    ndk: r27
+
+  - versionName: 0.7.1
+    versionCode: 31003
+    commit: b01c6bc58ebb0163090e432a4ad08a8b58155f1f
+    sudo:
+      - mkdir -p /home/jenkins/agent/workspace
+      - chown -R vagrant /home/jenkins
+    output: build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+    binary: https://codeberg.org/retiolus/natinfo_flutter/releases/download/v%v/net.retiolus.natinfo-arm64-v%v.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+      - linux
+      - macos
+      - web
+      - windows
+    prebuild:
+      - export flutterVersion=$(sed -n -E "s/^\s*flutter-version:\s(.*)/\1/p" pubspec.yaml)
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter packages pub get
+      - cd "${PUB_CACHE}/hosted/pub.dev"
+      - plugin=$(ls -d geolocator_android-* | head -n 1)
+      - cd "$plugin/android"
+      - sed -i "/play-services-location/d" build.gradle
+      - cd src/main/java/com/baseflow/geolocator/location
+      - rm -f FusedLocationClient.java
+      - sed -i "/com\\.google\\.android\\.gms/d" GeolocationManager.java
+      - sed -i "/ConnectionResult/d" GeolocationManager.java
+      - sed -i "/GoogleApiAvailability/d" GeolocationManager.java
+      - sed -i "/public LocationClient createLocationClient/,/^  }/d" GeolocationManager.java
+      - sed -i "/private boolean isGooglePlayServicesAvailable/,/^  }/d" GeolocationManager.java
+      - sed -i "/implements .*ActivityResultListener {/a public LocationClient createLocationClient(Context
+        context, boolean forceAndroidLocationManager, @Nullable LocationOptions locationOptions)
+        { return new LocationManagerClient(context, locationOptions); }" GeolocationManager.java
+    scandelete:
+      - .pub-cache
+    build:
+      - export repo=/home/jenkins/agent/workspace/natinfo_flutter_v$$VERSION$$
+      - cd ..
+      - mv net.retiolus.natinfo $repo
+      - pushd $repo
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export PATH=$$flutter$$/bin/:$PATH
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform="android-arm64"
+      - popd
+      - mv $repo net.retiolus.natinfo
+    ndk: r27
+
 AllowedAPKSigningKeys: 85945c403df07dad135ac12acc5d1c31bdd88ec2809c81f72b9e63c488e0de54
 
 AutoUpdateMode: Version
@@ -1391,5 +1541,5 @@ VercodeOperation:
   - 1000 * %c + 2
   - 1000 * %c + 3
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 0.7.0
-CurrentVersionCode: 30003
+CurrentVersion: 0.7.1
+CurrentVersionCode: 31003
