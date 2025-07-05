@@ -1,0 +1,64 @@
+Categories:
+  - Games
+License: AGPL-3.0-or-later
+AuthorName: David García Garzón
+AuthorWebSite: https://github.com/vokimon
+WebSite: https://vokimon.itch.io/godot-dice-roller
+SourceCode: https://github.com/vokimon/godot-dice-roller
+IssueTracker: https://github.com/vokimon/godot-dice-roller/issues
+Changelog: https://github.com/vokimon/godot-dice-roller/blob/HEAD/CHANGES.md
+
+RepoType: git
+Repo: https://github.com/vokimon/godot-dice-roller
+
+Builds:
+  - versionName: 1.5.3
+    versionCode: 10503
+    commit: ed0fb2b0ba686a14da1a4926c0d956a0bae1d175
+    sudo:
+      - apt-get update
+      - apt-get install -y pkgconf clang scons imagemagick python3-pip python-is-python3
+    output: godot-dice-roller.apk
+    srclibs:
+      - Godot@4.4.1-stable
+    build:
+      - export PATH=~/.local/bin:$PATH
+      - mkdir -p ~/.cache/pip
+      - pip3 install --user --break-system-packages "godot-asset-library-client==0.5.3"
+      - python tools/android-metadata.py
+      - export JAVA_HOME=$(dirname $(dirname $(readlink -f $(which javac))))
+      - export ANDROID_SDK_ROOT=$$SDK$$
+      - pushd $$Godot$$
+      - scons -j `nproc` platform=linuxbsd target=editor
+      - scons -j `nproc` platform=android target=template_release arch=arm64 generate_apk=yes
+      - cd platform/android/java
+      - gradle generateGodotTemplates
+      - popd
+      - sed -i -e 's:\(^.*package/signed\)\s*=.*$:\1 = false:' export_presets.cfg
+      - sed -i -e '/custom_template\/release/s|=.*|="$$Godot$$/bin/android_release.apk"|'
+        export_presets.cfg
+      - sed -i -e '/architectures\/x86/s|=.*|=false|' -e '/architectures\/x86_64/s|=.*|=false|'
+        -e '/architectures\/armeabi-v7a/s|=.*|=false|' -e '/architectures\/arm64-v8a/s|=.*|=true|'
+        export_presets.cfg
+      - $$Godot$$/bin/godot.linuxbsd.editor.x86_64 --headless --import
+      - export GODOT_CFG=$(ls ~/.config/godot/editor_settings-*.tres)
+      - sed -i -e "s:\(^.*java_sdk_path\)\s*=.*$:\1 = "$JAVA_HOME":" $GODOT_CFG
+      - sed -i -e 's:\(^.*android_sdk_path\)\s*=.*$:\1 = "$$SDK$$":' $GODOT_CFG
+      - $$Godot$$/bin/godot.linuxbsd.editor.x86_64 --headless --export-release 'Android'
+        godot-dice-roller.apk
+    ndk: r23c
+
+MaintainerNotes: |-
+  Currently just arm64 is built.
+  The other architectures are disabled with 'echo disabled'.
+  You can add or remove architecture templates adding or removings
+  "echo disabled" to the scons line but
+
+  - The last enabled scons template line should be the only one with "generate_apk=yes" option
+  - Adjust accordingly to true/false the sed commands editing architectures in export_presets.cfg
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: export_presets.cfg|version/code="(\d+)"|.|version/name="([\d.]+)"
+CurrentVersion: 1.5.3
+CurrentVersionCode: 10503
