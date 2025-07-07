@@ -28,20 +28,29 @@ Builds:
     commit: 42e3d8fe3aa88743ef90348138f643f7b04a9237
     subdir: android
     sudo:
-      - echo "deb http://deb.debian.org/debian sid main" > /etc/apt/sources.list.d/sid.list
       - apt-get update
-      - apt-get remove openjdk-11-jdk-headless openjdk-11-jre-headless
-      - apt-get install -y -t sid openjdk-8-jdk-headless
       - apt-get install -y file
     output: glmark2.apk
     prebuild:
-      - sed -i -e 's#android-16/android.jar#android-26/android.jar#' -e '/jarsigner/d'
-        build.sh
-      - sed -i -e 's/versionCode=.*/versionCode="$$VERCODE$$"/' AndroidManifest.xml
-      - sed -i -e '/APP_BUILD_SCRIPT/aAPP_CPPFLAGS += -fexceptions' jni/Application.mk
+      - sdkmanager "platforms;android-26" "build-tools;35.0.0"
+      - sed -i -e 's/versionCode=.*/versionCode="$$VERCODE$$"/' -e '/targetSdkVersion/s/23/26/'
+        AndroidManifest.xml
+      - sed -i -e '/APP_BUILD_SCRIPT/a APP_CPPFLAGS += -fexceptions' jni/Application.mk
     build:
       - export JAVA_HOME=$(readlink -f /usr/bin/javac | sed "s:/bin/javac::")
-      - ./build.sh
+      - $$NDK$$/build/ndk-build -j$(nproc)
+      - mkdir -p bin/lib obj
+      - cp -r libs/* bin/lib
+      - cp -r ../data bin/assets
+      - ANDROID_JAR=$ANDROID_SDK/platforms/android-26/android.jar
+      - BUILD_TOOLS=$ANDROID_SDK/build-tools/35.0.0
+      - $BUILD_TOOLS/aapt package -f -m -S res -J src -M AndroidManifest.xml -I $ANDROID_JAR
+      - javac -d ./obj -source 17 -target 17 -classpath $JAVA_HOME/jre/lib/rt.jar
+        -classpath $ANDROID_JAR:obj -sourcepath src src/org/linaro/glmark2/*.java
+      - $BUILD_TOOLS/d8 --output bin obj/org/linaro/glmark2/*.class
+      - $BUILD_TOOLS/aapt package -f -M AndroidManifest.xml -S res -I $ANDROID_JAR
+        -F glmark2-unaligned.apk bin
+      - $BUILD_TOOLS/zipalign -f 4 glmark2-unaligned.apk glmark2.apk
     ndk: r23c
 
 AutoUpdateMode: Version
