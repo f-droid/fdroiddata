@@ -23,7 +23,28 @@ Builds:
       - ./build.sh
     ndk: r18b
 
+  - versionName: '2023.01'
+    versionCode: 2
+    commit: 42e3d8fe3aa88743ef90348138f643f7b04a9237
+    subdir: android
+    sudo:
+      - echo "deb http://deb.debian.org/debian sid main" > /etc/apt/sources.list.d/sid.list
+      - apt-get update
+      - apt-get remove openjdk-11-jdk-headless openjdk-11-jre-headless
+      - apt-get install -y -t sid openjdk-8-jdk-headless
+      - apt-get install -y file
+    output: glmark2.apk
+    prebuild:
+      - sed -i -e 's#android-16/android.jar#android-26/android.jar#' -e '/jarsigner/d'
+        build.sh
+      - sed -i -e 's/versionCode=.*/versionCode="$$VERCODE$$"/' AndroidManifest.xml
+      - sed -i -e '/APP_BUILD_SCRIPT/aAPP_CPPFLAGS += -fexceptions' jni/Application.mk
+    build:
+      - export JAVA_HOME=$(readlink -f /usr/bin/javac | sed "s:/bin/javac::")
+      - ./build.sh
+    ndk: r23c
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: '2020.04'
-CurrentVersionCode: 1
+CurrentVersion: '2023.01'
+CurrentVersionCode: 2
