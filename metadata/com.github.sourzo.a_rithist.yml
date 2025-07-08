@@ -1,0 +1,39 @@
+Categories:
+  - Science & Education
+License: AGPL-3.0-only
+AuthorName: Zoe
+AuthorEmail: IonnsaichSeo@gmail.com
+SourceCode: https://github.com/sourzo/arithist
+IssueTracker: https://github.com/sourzo/arithist/issues
+
+AutoName: a-rithist
+
+RepoType: git
+Repo: https://github.com/sourzo/arithist.git
+Binaries: https://github.com/sourzo/arithist/releases/download/v%v/arithist-v%v.apk
+
+Builds:
+  - versionName: 1.0.5
+    versionCode: 6
+    commit: 6dd812f1c392492ad5e6e48fdd61bcd412999a49
+    subdir: app
+    sudo:
+      - echo "deb https://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
+      - apt-get update
+      - apt-get install -y -t trixie openjdk-21-jdk-headless
+      - update-alternatives --auto java
+    gradle:
+      - yes
+    srclibs:
+      - reproducible-apk-tools@v0.3.0
+    postbuild:
+      - mv $$OUT$$ unaligned.apk
+      - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
+        --replace unaligned.apk $$OUT$$
+
+AllowedAPKSigningKeys: c3d339d4c0d6b822114540fd467d59a5b04be22bf0594aeda2f953162e55658e
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: 1.0.5
+CurrentVersionCode: 6
