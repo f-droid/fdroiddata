@@ -100,6 +100,56 @@ Builds:
     scandelete:
       - node_modules/
 
+  - versionName: 1.5.11
+    versionCode: 103579
+    commit: e7c7d1c0277308c00538f9534664f0acbb710320
+    sudo:
+      - apt-get update
+      - apt-get install npm
+      - npm -g install corepack
+    output: android/app/build/outputs/apk/release/*.apk
+    srclibs:
+      - firebase-stub@4ae5aec1bf1fc3f2dfbc8e545b00b83d8a15dab8
+    rm:
+      - src/lib/rateApp.ts
+    prebuild:
+      - sed -i -e '/googleServicesFile/d' app.config.ts
+      - sed -i -e '/rateApp/d' src/components/Sidebar/Sidebar.tsx
+      - yarn remove react-native-rate
+      - yarn
+      - sed -i -e '/installreferrer/,+12d' node_modules/react-native-device-info/android/build.gradle
+      - sed -i -e '/installreferrer/d' node_modules/expo-application/android/build.gradle
+      - sed -i -e '/com.android.installreferrer.api/d' -e '/StringBuilder()/,/^      })/d'
+        -e '/getInstallReferrerAsync/apromise.resolve("")' node_modules/expo-application/android/src/main/java/expo/modules/application/ApplicationModule.kt
+      - sed -i -e '/firebase/d' node_modules/expo-notifications/android/build.gradle
+      - cp -a $$firebase-stub$$/firebase-messaging/src node_modules/expo-notifications/android
+      - yarn expo prebuild -p android
+      - sed -i -e '/signingConfig /d' -e '/versionCode/s/1/$$VERCODE$$/' android/app/build.gradle
+    scanignore:
+      - node_modules/jsc-android
+      - node_modules/react-native/sdks/hermesc/linux64-bin/hermesc
+      - android/build.gradle
+      - node_modules/react-native-linear-gradient/android/build.gradle
+      - node_modules/@react-native-async-storage/async-storage/android/build.gradle
+      - node_modules/react-native-safe-area-context/android/build.gradle
+      - node_modules/expo-modules-autolinking/scripts/android/autolinking_implementation.gradle
+      - node_modules/react-native-svg/android/build.gradle
+      - node_modules/react-native-device-info/android/build.gradle
+      - node_modules/react-native-pdf/android/build.gradle
+      - node_modules/react-native-pager-view/android/build.gradle
+      - node_modules/expo-dev-launcher/android/build.gradle
+      - node_modules/react-native-sha256/android/build.gradle
+      - node_modules/react-native-reanimated/android/build.gradle
+      - node_modules/expo-modules-core/android/ExpoModulesCorePlugin.gradle
+      - node_modules/react-native-screens/android/build.gradle
+      - node_modules/expo-dev-menu/android/build.gradle
+      - node_modules/react-native-blob-util/android/build.gradle
+    scandelete:
+      - node_modules/
+    build:
+      - cd android/app
+      - gradle assembleRelease
+
 MaintainerNotes: |-
   sed is used to:
   * Remove push notifications (see <a href="https://github.com/wix/react-native-notifications/issues/207">this issue</a>)
@@ -111,5 +161,5 @@ MaintainerNotes: |-
 
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: 1.2.2
-CurrentVersionCode: 103578
+CurrentVersion: 1.5.11
+CurrentVersionCode: 103579
