@@ -1319,6 +1319,42 @@ Builds:
       - ./link_to_mupdf_1.23.7.sh
     ndk: r27c
 
+  - versionName: 9.0.1-fdroid
+    versionCode: 6278
+    commit: 3c13bae006f245754cbc31e8b6a1ccfb7c94cbfa
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y g++ libglu1-mesa-dev libxcursor-dev libxi-dev libxinerama-dev
+        libxrandr-dev make mesa-common-dev pkg-config xxd
+    gradle:
+      - fdroid
+    output: build/outputs/apk/fdroid/release/*-uni.apk
+    srclibs:
+      - MuPDF@1.23.7
+    rm:
+      - Builder/src/libs
+      - Builder/librara-chrome-extension.zip
+    prebuild:
+      - export MUPDF_VERSION=1.23.7
+      - sed -i -e '/^if.*Fdroid/,/^}/d' -e '/enable true/d' -e '/_appGdriveKey/d'
+        -e '/_admob/d' build.gradle
+      - mkdir src/main/jniLibs
+      - cd ../Builder
+      - sed -i -e '/^#!/a\set -e' -e '/git clone/d' -e 's/mkdir/mkdir -p/g' -e 's|".*ndk-build"|"$$NDK$$/ndk-build"|'
+        -e 's|^.*ndk-build$|$$NDK$$/ndk-build -j`nproc`|' link_to_mupdf_$MUPDF_VERSION.sh
+      - cp -r $$MuPDF$$ mupdf-$MUPDF_VERSION
+      - rm -rf mupdf-$MUPDF_VERSION/thirdparty/{harfbuzz/test,curl/tests,leptonica/prog/fuzzing}
+    scanignore:
+      - Builder/fonts/fonts.zip
+    scandelete:
+      - Builder/mupdf-*/platform/wasm/package.json
+      - docs
+    build:
+      - pushd ../Builder/
+      - ./link_to_mupdf_1.23.7.sh
+    ndk: r27c
+
 MaintainerNotes: |-
   * Upstream builds separate APKs for each architecture but we build an universal APK.
   * scanner will detect GMS (/com/google/android/gms) in these APKs; those are only stubs here, see https://gitlab.com/fdroid/fdroiddata/-/issues/2272#note_493741256
@@ -1328,5 +1364,5 @@ AutoUpdateMode: Version +-fdroid %v
 UpdateCheckMode: Tags
 UpdateCheckData: app/build.gradle|\s+FDroidCodeNumber = (\d+)|.|\s+FDroidVersionNumber
   = "([^\"]+)"
-CurrentVersion: 8.9.182
-CurrentVersionCode: 6202
+CurrentVersion: 9.0.1
+CurrentVersionCode: 6278
