@@ -1,0 +1,39 @@
+Categories:
+  - Connectivity
+  - Shopping List
+License: MIT
+AuthorName: Jaime González Fábregas
+AuthorEmail: jaimegonzalezfabregas@gmail.com
+SourceCode: https://github.com/jaimegonzalezfabregas/lista_de_la_compra
+IssueTracker: https://github.com/jaimegonzalezfabregas/lista_de_la_compra/issues
+
+AutoName: ShoppingList
+
+RepoType: git
+Repo: https://github.com/jaimegonzalezfabregas/lista_de_la_compra
+
+Builds:
+  - versionName: 1.0.0
+    versionCode: 1
+    commit: 4457b3c1777f7facc01a54af5ba26f37ddfea5af
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@stable
+    prebuild:
+      - flutterVersion=$(sed -n -E "s/.*flutter-version:\ '(.*)'/\1/p" .github/workflows/release.yml)
+      - '[[ $flutterVersion ]] || exit 1'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter packages pub get
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 1.0.0
+CurrentVersionCode: 1
