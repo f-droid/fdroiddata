@@ -407,8 +407,46 @@ Builds:
         ui/*/*.java ui/*.java; done
     ndk: 26.3.11579264
 
+  - versionName: '3.35'
+    versionCode: 189
+    commit: v3.35
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y cmake make ninja-build pipx
+      - PIPX_HOME=/opt/pipx PIPX_BIN_DIR=/usr/local/bin pipx install conan
+    gradle:
+      - pro
+    srclibs:
+      - conan-odr-index@455b0c03e031d0ae3e8fbfa7b8a6fb92ba491b34
+    prebuild:
+      - conan remote remove "*"
+      - conan remote add odr $$conan-odr-index$$
+      - conan remote add conancenter https://center2.conan.io
+      - conan profile detect
+      - sed -i -e '/gms/d' -e '/firebase/d' -e 's/build=missing/build=*/' {.,..}/build.gradle
+      - sed -i -e '/com.google.android.play/d' -e '/ump/d' -e '/pro"/d' build.gradle
+      - sed -i -e '/INTERNET/d' -e '/^        <meta-data/,+5d' -e '/property/,+4d'
+        src/main/AndroidManifest.xml
+      - cd src/main/java/at/tomtasche/reader
+      - sed -i -e '/gms/d' -e '/play.core/d' -e '/firebase/d' -e '/void initializeProprietaryLibraries/,/^    }/d'
+        -e '/initializeProprietaryLibraries/d' -e 's/billingManager.hasPurchased()/true/'
+        ui/activity/*.java background/FileLoader.java background/LoaderService.java
+      - sed -i -e '/private Uri doFirebaseConvert/,/^    }/d' -e 's/viewerUri = doFirebaseConvert(options)/return/'
+        -e '/gms/d' -e '/firebase/Id' -e '/Storage/d' -e '/auth /d' -e '/storage /d'
+        background/OnlineLoader.java
+      - sed -i -e '/getBooleanConfig("show_in_app_rating/,/});/d' -e '/void offerUpload/,/^    }/d'
+        -e '/offerUpload/d' -e '/void requestInAppRating/,/^    }/d' -e '/requestInAppRating/d'
+        ui/activity/DocumentFragment.java
+      - sed -i -e 's/configManager.getBooleanConfig(".*")/null/' background/CoreLoader.java
+      - for class in AdManager AnalyticsManager BillingManager ConfigManager CrashManager
+        HelpManager; do echo "package at.tomtasche.reader.nonfree; public class ${class}
+        {}" > nonfree/${class}.java; sed -i -e "/${class}\./Id" background/*.java
+        ui/*/*.java ui/*.java; done
+    ndk: 26.3.11579264
+
 AutoUpdateMode: Version v%v
 UpdateCheckMode: HTTP
 UpdateCheckData: https://raw.githubusercontent.com/opendocument-app/OpenDocument.droid/master/app/src/main/AndroidManifest.xml|versionCode="(\d+)|.|versionName="([\d.]+)
-CurrentVersion: '3.34'
-CurrentVersionCode: 188
+CurrentVersion: '3.35'
+CurrentVersionCode: 189
