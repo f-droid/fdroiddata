@@ -1,0 +1,47 @@
+Categories:
+  - Games
+License: CC0-1.0
+AuthorName: Mystic Jungle
+AuthorWebSite: https://mystic-jungle.itch.io/
+WebSite: https://mystic-jungle.itch.io/hoop-draw
+SourceCode: https://codeberg.org/MysticJungle/hoop-draw
+IssueTracker: https://codeberg.org/MysticJungle/hoop-draw/issues
+
+RepoType: git
+Repo: https://codeberg.org/MysticJungle/hoop-draw
+
+Builds:
+  - versionName: 1.0.0
+    versionCode: 1
+    commit: 71de091552b146a3be1b05658406633f1150aa1d
+    sudo:
+      - apt-get update
+      - apt-get install -y build-essential scons pkg-config libx11-dev libxcursor-dev
+        libxinerama-dev libgl1-mesa-dev libglu1-mesa-dev libasound2-dev libpulse-dev
+        libudev-dev libxi-dev libxrandr-dev libwayland-dev
+    output: bin/hoopdraw.apk
+    srclibs:
+      - Godot@4.4.1-stable
+    prebuild:
+      - mkdir -p bin
+      - mkdir -p android
+      - mkdir -p ~/.local/share/godot/export_templates/4.4.1.stable/
+    build:
+      - export ANDROID_SDK_ROOT=$$SDK$$
+      - export ANDROID_NDK_ROOT=$$NDK$$
+      - export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+      - pushd $$Godot$$
+      - scons -j `nproc` platform=linuxbsd target=editor
+      - scons -j `nproc` platform=android target=template_release arch=arm64
+      - cd platform/android/java
+      - gradle generateGodotTemplates
+      - popd
+      - cp $$Godot$$/bin/android_release.apk ~/.local/share/godot/export_templates/4.4.1.stable/
+      - $$Godot$$/bin/godot.linuxbsd.editor.x86_64 --headless --export-release 'Android
+        Unsigned' bin/hoopdraw.apk
+    ndk: 23.2.8568313
+
+AutoUpdateMode: None
+UpdateCheckMode: None
+CurrentVersion: 1.0.0
+CurrentVersionCode: 1
