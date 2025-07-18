@@ -87,7 +87,46 @@ Builds:
       - buildozer android release
     ndk: r25b
 
-AutoUpdateMode: None
-UpdateCheckMode: None
-CurrentVersion: 3.2.0
-CurrentVersionCode: 102130200
+  - versionName: 3.2.1
+    versionCode: 102130201
+    commit: ce3b531e99c7d4e729bc286ed061bbb15c38e7f5
+    subdir: tools/build
+    sudo:
+      - apt-get update
+      - apt-get install -y ant make autoconf automake build-essential ccache clang
+        cmake gettext libltdl-dev libtool libffi-dev libssl-dev openssl patch pkg-config
+        unzip zip zlib1g-dev cython3 python3-pip python3-venv python3-virtualenv python3-sh
+      - apt-get install -y -t bookworm-backports python3-appdirs python3-colorama
+        python3-jinja2 python3-build python3-toml python3-packaging
+      - rm /opt/android-sdk/tools/bin/sdkmanager
+      - ln -s $(which sdkmanager) /opt/android-sdk/tools/bin/sdkmanager
+      - echo -e '#!/usr/bin/sh\nls /opt/android-sdk/platforms | sed "s/android-/API
+        level:\ /g"' > /opt/android-sdk/tools/bin/avdmanager
+      - chmod +x /opt/android-sdk/tools/bin/avdmanager
+    output: bin/*.apk
+    srclibs:
+      - python-for-android@v2024.01.21
+      - buildozer@1.5.0
+    prebuild:
+      - sdkmanager 'platforms;android-31' 'build-tools;36.0.0'
+      - sed -r "s:#?android.sdk_path =.*:android.sdk_path = $$SDK$$:" -i buildozer.spec
+      - sed -r "s:#?android.ndk_path =.*:android.ndk_path = $$NDK$$:" -i buildozer.spec
+      - sed -r "s:#?android.ant_path =.*:android.ant_path = /usr:" -i buildozer.spec
+      - sed -r "s:#.*?android.skip_update =.*:android.skip_update = True:" -i buildozer.spec
+      - sed -r "s:#?p4a.source_dir =.*:p4a.source_dir = $$python-for-android$$:" -i
+        buildozer.spec
+      - sed -r "s:log_level =.*:log_level = 1:" -i buildozer.spec
+      - sed -r "s:warn_on_root =.*:warn_on_root = 0:" -i buildozer.spec
+      - cat buildozer.spec
+    build:
+      - python3 -m venv $HOME/venv
+      - source $HOME/venv/bin/activate
+      - pip3 install $$buildozer$$ cython==0.29.33
+      - buildozer android release
+    ndk: r25b
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: tools/build/buildozer.spec|android.numeric_version = (\d+)||([\d.]+)
+CurrentVersion: 3.2.1
+CurrentVersionCode: 102130201
