@@ -241,11 +241,34 @@ Builds:
         break; sha256sum apk/assets/dexopt/baseline.prof; rm -fr apk; taskset --cpu-list
         0-5 gradle clean assembleFreeRelease; done
 
+  - versionName: 2.0.3
+    versionCode: 25
+    commit: 9f7155c2a1ba5b1bc165e81e16292b8716a23223
+    subdir: composeApp
+    sudo:
+      - echo "deb https://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
+      - apt-get update
+      - apt-get install -y -t trixie openjdk-21-jdk-headless
+      - update-alternatives --auto java
+    gradle:
+      - free
+    prebuild:
+      - sed -i -e '/gms/d' -e '/firebase/d' ../build.gradle.kts
+      - sed -i '/foojay-resolver-convention/d' ../settings.gradle.kts
+    postbuild:
+      - curl -Lo upstream.apk https://github.com/Bartuzen/qBitController/releases/download/v$$VERSION$$/qbitcontroller-$$VERSION$$-android.apk
+      - unzip -q upstream.apk -d apk
+      - export hash=$(sha256sum apk/assets/dexopt/baseline.prof)
+      - rm -rf apk upstream.apk
+      - for i in {1..10}; do unzip -q $$OUT$$ -d apk; sha256sum -c - <<< $hash &&
+        break; sha256sum apk/assets/dexopt/baseline.prof; rm -fr apk; taskset --cpu-list
+        0-5 gradle clean assembleFreeRelease; done
+
 AllowedAPKSigningKeys: 366038e51ee41078a23a37fd9212238ebad03f1de073e81c738bb6f07b114339
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: buildSrc/src/main/java/dev/bartuzen/qbitcontroller/Versions.kt|AppVersionCode
   = (\d+)|.|AppVersion = "(.+)"
-CurrentVersion: 2.0.2
-CurrentVersionCode: 24
+CurrentVersion: 2.0.3
+CurrentVersionCode: 25
