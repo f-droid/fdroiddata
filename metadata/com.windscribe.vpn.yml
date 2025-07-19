@@ -1124,11 +1124,107 @@ Builds:
       - cp -r $strongswanLibsSrc $strongswanLibsDst
     ndk: r23c
 
+  - versionName: '3.90'
+    versionCode: 1737
+    commit: 746d505dc691381d27f1fafcca3b9fdbf08ec9f9
+    subdir: mobile
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y automake bison flex gettext gperf libtool make pkg-config
+        swig jq zip cmake musl-dev golang ninja-build
+    gradle:
+      - fdroid
+    srclibs:
+      - OpenSSL@OpenSSL_1_1_1t
+      - vcpkg@2025.01.13
+    rm:
+      - base/src/google/libs/in-app-purchasing-2.0.76.jar
+      - openvpn/src/main/cpp/mbedtls/tests
+      - openvpn/src/main/cpp/openvpn3/test/unittests
+      - openvpn/src/main/cpp/lz4/tmpsparse
+      - openvpn/src/main/cpp/lz4/tmp
+      - openvpn/src/main/cpp/mbedtls/programs/fuzz/corpuses/client
+      - openvpn/src/main/cpp/mbedtls/programs/fuzz/corpuses/dtlsclient
+      - openvpn/src/main/cpp/mbedtls/programs/fuzz/corpuses/server
+      - openvpn/src/main/cpp/mbedtls/programs/fuzz/corpuses/dtlsserver
+      - openvpn/src/main/cpp/mbedtls/tests/data_files/hash_file_1
+      - openvpn/src/main/cpp/mbedtls/tests/data_files/hash_file_2
+      - openvpn/src/main/cpp/mbedtls/tests/data_files/hash_file_3
+      - tv
+      - strongswan/libs
+      - strongswan-src/testing/hosts/alice/etc/raddb/certs/random
+      - wgtunnel/tools/wireguard-tools/contrib/external-tests
+      - wgtunnel/tools/elf-cleaner/tests
+      - wgtunnel/.cxx
+      - base/src/main/libs/wsnet.aar
+    build:
+      - pushd $$vcpkg$$
+      - export VCPKG_FEATURE_FLAGS=-binarycaching
+      - ./bootstrap-vcpkg.sh -disableMetrics
+      - popd
+      - export VCPKG_ROOT=$$vcpkg$$
+      - export PATH=$PATH:$$SDK$$/tools:$$SDK$$/platform-tools:$$NDK$$
+      - cd ..
+      - git apply hide_release_block.patch
+      - tools/build_wsnet.sh
+      - export ANDROID_NDK_ROOT=$$NDK$$
+      - bash ./tools/build_strongswan.sh $(pwd)/strongswan-src $$OpenSSL$$ $(pwd)/strongswan/libs
+    ndk: r27c
+
+  - versionName: '3.90'
+    versionCode: 1738
+    commit: 746d505dc691381d27f1fafcca3b9fdbf08ec9f9
+    subdir: tv
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y automake bison flex gettext gperf libtool make pkg-config
+        swig jq zip cmake musl-dev golang ninja-build
+    gradle:
+      - fdroid
+    srclibs:
+      - OpenSSL@OpenSSL_1_1_1t
+      - vcpkg@2025.01.13
+    rm:
+      - base/src/google/libs/in-app-purchasing-2.0.76.jar
+      - openvpn/src/main/cpp/mbedtls/tests
+      - openvpn/src/main/cpp/openvpn3/test/unittests
+      - openvpn/src/main/cpp/lz4/tmpsparse
+      - openvpn/src/main/cpp/lz4/tmp
+      - openvpn/src/main/cpp/mbedtls/programs/fuzz/corpuses/client
+      - openvpn/src/main/cpp/mbedtls/programs/fuzz/corpuses/dtlsclient
+      - openvpn/src/main/cpp/mbedtls/programs/fuzz/corpuses/server
+      - openvpn/src/main/cpp/mbedtls/programs/fuzz/corpuses/dtlsserver
+      - openvpn/src/main/cpp/mbedtls/tests/data_files/hash_file_1
+      - openvpn/src/main/cpp/mbedtls/tests/data_files/hash_file_2
+      - openvpn/src/main/cpp/mbedtls/tests/data_files/hash_file_3
+      - mobile
+      - strongswan/libs
+      - strongswan-src/testing/hosts/alice/etc/raddb/certs/random
+      - wgtunnel/tools/wireguard-tools/contrib/external-tests
+      - wgtunnel/tools/elf-cleaner/tests
+      - wgtunnel/.cxx
+      - base/src/main/libs/wsnet.aar
+    build:
+      - pushd $$vcpkg$$
+      - export VCPKG_FEATURE_FLAGS=-binarycaching
+      - ./bootstrap-vcpkg.sh -disableMetrics
+      - popd
+      - export VCPKG_ROOT=$$vcpkg$$
+      - export PATH=$PATH:$$SDK$$/tools:$$SDK$$/platform-tools:$$NDK$$
+      - cd ..
+      - git apply hide_release_block.patch
+      - tools/build_wsnet.sh
+      - export ANDROID_NDK_ROOT=$$NDK$$
+      - bash ./tools/build_strongswan.sh $(pwd)/strongswan-src $$OpenSSL$$ $(pwd)/strongswan/libs
+    ndk: r27c
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 VercodeOperation:
   - '%c'
   - '%c + 1'
 UpdateCheckData: mobile/build.gradle|versionCode (\d+)||v?([\d.]+)
-CurrentVersion: '3.82'
-CurrentVersionCode: 1648
+CurrentVersion: '3.90'
+CurrentVersionCode: 1738
