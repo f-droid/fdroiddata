@@ -1,0 +1,50 @@
+Categories:
+  - Games
+License: GPL-3.0-or-later
+AuthorName: Armin Leuprecht
+WebSite: https://gitlab.com/mir06/snakes
+SourceCode: https://gitlab.com/mir06/snakes
+IssueTracker: https://gitlab.com/mir06/snakes/-/issues
+
+RepoType: git
+Repo: https://gitlab.com/mir06/snakes.git
+
+Builds:
+  - versionName: 0.1.0
+    versionCode: 10
+    commit: v0.1.0
+    timeout: 10800
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y pkgconf clang scons
+    output: bin/red.drugi.snakes.apk
+    srclibs:
+      - Godot@4.3-stable
+    prebuild:
+      - mkdir -p bin
+      - mkdir -p android
+    build:
+      - export ANDROID_SDK_ROOT=$$SDK$$
+      - export ANDROID_NDK_ROOT=$$NDK$$
+      - export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+      - pushd $$Godot$$
+      - scons -j `nproc` platform=linuxbsd target=editor use_llvm=yes tools=yes
+      - scons -j `nproc` platform=android production=yes target=template_release arch=arm64
+      - cd platform/android/java
+      - ./gradlew generateGodotTemplates
+      - popd
+      - sed -i -e 's:\(^.*package/signed\)\s*=.*$:\1=false:' export_presets.cfg
+      - sed -i -e '/custom_template\/release/s|=.*|="$$Godot$$/bin/android_release.apk"|'
+        export_presets.cfg
+      - $$Godot$$/bin/godot.linuxbsd.editor.x86_64.llvm --headless --check-only --quit
+        project.godot
+      - $$Godot$$/bin/godot.linuxbsd.editor.x86_64.llvm --headless --export-release
+        Android bin/red.drugi.snakes.apk
+    ndk: 23.2.8568313
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: app/export_presets.cfg|version/code=(\d+)|.|version/name="([\d.]+)"
+CurrentVersion: 0.1.0
+CurrentVersionCode: 10
