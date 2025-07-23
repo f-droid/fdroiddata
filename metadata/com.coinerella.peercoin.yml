@@ -1685,10 +1685,44 @@ Builds:
       - $$flutter$$/bin/flutter packages pub run build_runner build --delete-conflicting-outputs
       - $$flutter$$/bin/flutter build apk
 
+  - versionName: 1.4.6
+    versionCode: 155
+    commit: fee35770b607a746fa06cf65b441ac3ff4810d34
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@3.32.0
+      - transistor-background-fetch@ca8d2f7a9cf1880dfaf9bcb2c2176fab19e0b124
+      - rustup@1.27.1
+    rm:
+      - ios
+      - test_driver
+    prebuild:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter packages pub get
+      - sed -i -e '/maven {/,/^        }/cmavenLocal()' android/build.gradle .pub-cache/hosted/pub.dev/background_fetch-*/android/build.gradle
+      - $$rustup$$/rustup-init.sh -y --default-toolchain 1.87.0 --target aarch64-linux-android
+        armv7-linux-androideabi x86_64-linux-android
+      - sed -i -e "s/'stable'/'1.87.0'/" .pub-cache/hosted/pub.dev/frosty_flutter-*/cargokit/build_tool/lib/src/builder.dart
+      - sed -i -e 's/Xmx1536M/Xmx4G/' android/gradle.properties
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - pushd $$transistor-background-fetch$$/android/tsbackgroundfetch/
+      - gradle assembleRelease
+      - gradle publishToMavenLocal
+      - popd
+      - source $HOME/.cargo/env
+      - $$flutter$$/bin/flutter pub run flutter_launcher_icons:main -f fdroid_flutter_launcher_icons.yaml
+      - $$flutter$$/bin/flutter pub run flutter_native_splash:create
+      - $$flutter$$/bin/flutter packages pub run build_runner build --delete-conflicting-outputs
+      - $$flutter$$/bin/flutter build apk
+
 MaintainerNotes: Ignore local maven repo for flutter_background_fetch.
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 1.4.5
-CurrentVersionCode: 154
+CurrentVersion: 1.4.6
+CurrentVersionCode: 155
