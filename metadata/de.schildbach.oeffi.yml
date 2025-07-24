@@ -1096,9 +1096,37 @@ Builds:
     gradle:
       - yes
 
+  - versionName: 13.0.12
+    versionCode: 130012
+    commit: c93705d0a5445e4e9f677ee3ea0314d37b24a6b3
+    subdir: oeffi
+    submodules: true
+    sudo:
+      - ln -fs /usr/share/zoneinfo/CET /etc/localtime
+      - dpkg-reconfigure -f noninteractive tzdata
+      - apt-get update
+      - apt-get install -y gradle disorderfs
+    init:
+      - rm /home/vagrant/fdroidserver/gradlew-fdroid
+      - ln -s /usr/bin/gradle /home/vagrant/fdroidserver/gradlew-fdroid
+      - cd ../..
+      - mv de.schildbach.oeffi de.schildbach.oeffi_underlying
+      - mkdir de.schildbach.oeffi
+      - disorderfs --sort-dirents=yes --reverse-dirents=no de.schildbach.oeffi_underlying
+        de.schildbach.oeffi
+      - cd de.schildbach.oeffi/oeffi
+    gradle:
+      - yes
+    srclibs:
+      - reproducible-apk-tools@v0.3.0
+    postbuild:
+      - mv $$OUT$$ unaligned.apk
+      - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
+        --replace unaligned.apk $$OUT$$
+
 AllowedAPKSigningKeys: ba61b88f0f4364006fa6db84b2b92fa61912a02771659b207c41272104c2e5c4
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v[0-9]+(\.[0-9]+)*$
-CurrentVersion: 13.0.11
-CurrentVersionCode: 130011
+CurrentVersion: 13.0.12
+CurrentVersionCode: 130012
