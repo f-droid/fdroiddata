@@ -1,0 +1,157 @@
+Categories:
+  - Writing
+License: GPL-3.0-only
+AuthorName: xiaoshihou
+AuthorEmail: xiaoshihou@tutamail.com
+AuthorWebSite: https://xiaoshihou514.github.io/
+SourceCode: https://github.com/xiaoshihou514/jiyi
+IssueTracker: https://github.com/xiaoshihou514/jiyi/issues
+Donate: https://github.com/sponsors/xiaoshihou514
+
+AutoName: 记忆
+
+RepoType: git
+Repo: https://github.com/xiaoshihou514/jiyi.git
+
+Builds:
+  - versionName: 1.0.0
+    versionCode: 111
+    commit: df0722f90671e279abf0538c9db8949ac211bc75
+    sudo:
+      - apt-get update
+      - apt-get install -y wget build-essential cmake g++ yq
+    output: build/app/outputs/flutter-apk/app-x86_64-release.apk
+    srclibs:
+      - flutter@stable
+      - sherpa_onnx@v1.12.1
+    rm:
+      - linux
+      - windows
+    prebuild:
+      - flutterVersion=$(sed -nE 's/\s*flutter:\s*"\^([0-9.]+)".*/\1/p' pubspec.yaml)
+      - '[[ $flutterVersion ]] || exit 1'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - git -C $$sherpa_onnx$$ checkout -f v$(yq -r '.packages.sherpa_onnx.version'
+        pubspec.lock)
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export PATH=$PATH:$$flutter$$/bin
+      - flutter config --no-analytics
+      - flutter pub get
+      - sed -i -e 's/ndkVersion .*/ndkVersion = "27.2.12479018"/' {android/app,$PUB_CACHE/hosted/pub.dev/{flutter_recorder-*,flutter_soloud-*,sherpa_onnx_android-*}/android}/build.gradle
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export PATH=$PATH:$$flutter$$/bin
+      - pushd $PUB_CACHE/hosted/pub.dev/flutter_soloud-*/xiph
+      - ./build_Android.sh
+      - cp -a android ..
+      - popd
+      - pushd $$sherpa_onnx$$
+      - export SHERPA_ONNX_ENABLE_JNI=OFF
+      - export SHERPA_ONNX_ENABLE_C_API=ON
+      - ./build-android-x86-64.sh
+      - cp build-android-x86-64/install/lib/lib*.so $PUB_CACHE/hosted/pub.dev/sherpa_onnx_android-*/android/src/main/jniLibs/x86_64/
+      - popd
+      - touch $(echo $PUB_CACHE/hosted/pub.dev/flutter_recorder-*)/web/libflutter_recorder_plugin.wasm
+      - touch $(echo $PUB_CACHE/hosted/pub.dev/flutter_soloud-*)/web/libflutter_soloud_plugin.wasm
+      - flutter build apk --split-per-abi --target-platform="android-x64"
+    ndk: r27c
+
+  - versionName: 1.0.0
+    versionCode: 112
+    commit: df0722f90671e279abf0538c9db8949ac211bc75
+    sudo:
+      - apt-get update
+      - apt-get install -y wget build-essential cmake g++ yq
+    output: build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
+    srclibs:
+      - flutter@stable
+      - sherpa_onnx@v1.12.1
+    rm:
+      - linux
+      - windows
+    prebuild:
+      - flutterVersion=$(sed -nE 's/\s*flutter:\s*"\^([0-9.]+)".*/\1/p' pubspec.yaml)
+      - '[[ $flutterVersion ]] || exit 1'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - git -C $$sherpa_onnx$$ checkout -f v$(yq -r '.packages.sherpa_onnx.version'
+        pubspec.lock)
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export PATH=$PATH:$$flutter$$/bin
+      - flutter config --no-analytics
+      - flutter pub get
+      - sed -i -e 's/ndkVersion .*/ndkVersion = "27.2.12479018"/' {android/app,$PUB_CACHE/hosted/pub.dev/{flutter_recorder-*,flutter_soloud-*,sherpa_onnx_android-*}/android}/build.gradle
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export PATH=$PATH:$$flutter$$/bin
+      - pushd $PUB_CACHE/hosted/pub.dev/flutter_soloud-*/xiph
+      - ./build_Android.sh
+      - cp -a android ..
+      - popd
+      - pushd $$sherpa_onnx$$
+      - export SHERPA_ONNX_ENABLE_JNI=OFF
+      - export SHERPA_ONNX_ENABLE_C_API=ON
+      - ./build-android-armv7-eabi.sh
+      - cp build-android-armv7-eabi/install/lib/lib*.so $PUB_CACHE/hosted/pub.dev/sherpa_onnx_android-*/android/src/main/jniLibs/armeabi-v7a/
+      - popd
+      - touch $(echo $PUB_CACHE/hosted/pub.dev/flutter_recorder-*)/web/libflutter_recorder_plugin.wasm
+      - touch $(echo $PUB_CACHE/hosted/pub.dev/flutter_soloud-*)/web/libflutter_soloud_plugin.wasm
+      - flutter build apk --split-per-abi --target-platform="android-arm"
+    ndk: r27c
+
+  - versionName: 1.0.0
+    versionCode: 113
+    commit: df0722f90671e279abf0538c9db8949ac211bc75
+    sudo:
+      - apt-get update
+      - apt-get install -y wget build-essential cmake g++ yq
+    output: build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+    srclibs:
+      - flutter@stable
+      - sherpa_onnx@v1.12.1
+    rm:
+      - linux
+      - windows
+    prebuild:
+      - flutterVersion=$(sed -nE 's/\s*flutter:\s*"\^([0-9.]+)".*/\1/p' pubspec.yaml)
+      - '[[ $flutterVersion ]] || exit 1'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - git -C $$sherpa_onnx$$ checkout -f v$(yq -r '.packages.sherpa_onnx.version'
+        pubspec.lock)
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export PATH=$PATH:$$flutter$$/bin
+      - flutter config --no-analytics
+      - flutter pub get
+      - sed -i -e 's/ndkVersion .*/ndkVersion = "27.2.12479018"/' {android/app,$PUB_CACHE/hosted/pub.dev/{flutter_recorder-*,flutter_soloud-*,sherpa_onnx_android-*}/android}/build.gradle
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export PATH=$PATH:$$flutter$$/bin
+      - pushd $PUB_CACHE/hosted/pub.dev/flutter_soloud-*/xiph
+      - ./build_Android.sh
+      - cp -a android ..
+      - popd
+      - pushd $$sherpa_onnx$$
+      - export SHERPA_ONNX_ENABLE_JNI=OFF
+      - export SHERPA_ONNX_ENABLE_C_API=ON
+      - ./build-android-arm64-v8a.sh
+      - cp build-android-arm64-v8a/install/lib/lib*.so $PUB_CACHE/hosted/pub.dev/sherpa_onnx_android-*/android/src/main/jniLibs/arm64-v8a/
+      - popd
+      - touch $(echo $PUB_CACHE/hosted/pub.dev/flutter_recorder-*)/web/libflutter_recorder_plugin.wasm
+      - touch $(echo $PUB_CACHE/hosted/pub.dev/flutter_soloud-*)/web/libflutter_soloud_plugin.wasm
+      - flutter build apk --split-per-abi --target-platform="android-arm64"
+    ndk: r27c
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+VercodeOperation:
+  - '%c * 10 + 1'
+  - '%c * 10 + 2'
+  - '%c * 10 + 3'
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 1.0.0
+CurrentVersionCode: 113
