@@ -2349,9 +2349,33 @@ Builds:
     scandelete:
       - node_modules/
 
+  - versionName: 2.39.2
+    versionCode: 751
+    commit: ee891b90ed522a218f91b23f31ef6dceacce4eed
+    subdir: android/app
+    sudo:
+      - sysctl fs.inotify.max_user_watches=524288
+      - echo "deb https://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
+      - apt-get update
+      - apt-get install -y -t trixie openjdk-21-jdk-headless
+      - update-alternatives --auto java
+      - apt-get install -y npm
+      - npm install -g corepack
+    init:
+      - corepack enable
+      - pnpm install --frozen-lockfile
+      - CI_PLATFORM=android BUILD_FOSS_ONLY=true pnpm run build
+      - cd ../..
+      - npx cap sync android --deployment
+    gradle:
+      - yes
+    prebuild: sed -i -e '/google-services/d' ../build.gradle
+    scandelete:
+      - node_modules/
+
 AllowedAPKSigningKeys: 8b4d5cf69eaf147cd9a868c740d37d5fe1471a2f62c67d536038bcdbd9bc7ade
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 2.39.1
-CurrentVersionCode: 748
+CurrentVersion: 2.39.2
+CurrentVersionCode: 751
