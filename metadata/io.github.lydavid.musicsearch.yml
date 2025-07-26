@@ -987,10 +987,36 @@ Builds:
     scandelete:
       - build-logic/convention/build
 
+  - versionName: 1.49.3
+    versionCode: 681
+    commit: f05fcbdfcc9a46a6b31d7f7a61f6e80577a71b41
+    subdir: android/app
+    sudo:
+      - echo "deb http://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
+      - apt-get update
+      - apt-get install -y openjdk-21-jdk-headless
+      - update-java-alternatives -a
+      - export CPUS_MAX=16
+      - export CPUS=$(getconf _NPROCESSORS_ONLN)
+      - for (( c=$CPUS_MAX; c<$CPUS; c++ )) ; do echo 0 > /sys/devices/system/cpu/cpu$c/online
+        ; done
+    gradle:
+      - fDroid
+    prebuild:
+      - echo "TVVTSUNCUkFJTlpfQ0xJRU5UX0lEPWtpbVpiWXlaYUVia2Ewb0Npb1ExNUdINWhlNFp4dGtXCg=="
+        | base64 -d > ../../not_so_secret.properties
+      - echo "TVVTSUNCUkFJTlpfQ0xJRU5UX1NFQ1JFVD00ZVlINmpqRzBVVm1GRGN1Yk1CSThrVVlxT18xVkxHRAo="
+        | base64 -d >> ../../not_so_secret.properties
+      - sed -i -e '/firebase/d' -e '/google.services/d' ../../build.gradle.kts
+      - sed -i -e 's/\.debug//' ../../shared/domain/src/commonMain/kotlin/ly/david/musicsearch/shared/domain/Constants.kt
+      - sed -i -e '/iosMain/,/^        }/d' ../../shared/build.gradle.kts ../../core/logging/implementation/build.gradle.kts
+    scandelete:
+      - build-logic/convention/build
+
 AllowedAPKSigningKeys: c9b37762445dfcab7eabea79195d7f5c32501180f7c31403cf5cb427fd6810fc
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: gradle.properties|VERSION_CODE=(\d+)|.|VERSION_NAME=(.*)
-CurrentVersion: 1.49.2
-CurrentVersionCode: 676
+CurrentVersion: 1.49.3
+CurrentVersionCode: 681
