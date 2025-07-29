@@ -326,8 +326,35 @@ Builds:
       - $$flutter$$/bin/flutter packages pub run build_runner build --delete-conflicting-outputs
       - $$flutter$$/bin/flutter build apk --release --no-tree-shake-icons
 
+  - versionName: 1.7.6
+    versionCode: 10706
+    commit: fe8a3250b97164befb43e2c487dabd8cc64badc9
+    submodules: true
+    sudo:
+      - echo "deb https://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
+      - apt-get update
+      - apt-get install -y -t trixie openjdk-21-jdk-headless
+      - update-alternatives --auto java
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@stable
+    prebuild:
+      - sed -i -e 's/Xmx1536M/Xmx4G/' android/gradle.properties
+      - export version="$(sed -E -n -e 's/^.*flutter:\ ([0-9.]+)/\1/p' pubspec.yaml)"
+      - '[[ $version ]]'
+      - git -C $$flutter$$ checkout -f $version
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter packages pub get
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter packages pub run build_runner build --delete-conflicting-outputs
+      - $$flutter$$/bin/flutter build apk --release --no-tree-shake-icons
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 1.7.5
-CurrentVersionCode: 10705
+CurrentVersion: 1.7.6
+CurrentVersionCode: 10706
