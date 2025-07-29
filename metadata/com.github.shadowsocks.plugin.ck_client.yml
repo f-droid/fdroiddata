@@ -44,9 +44,37 @@ Builds:
       - cd src
       - ANDROID_NDK_HOME=$$SDK$$/ndk/$(ls $$SDK$$/ndk/) ./build.sh
 
+  - versionName: 2.12.0
+    versionCode: 23
+    commit: c95e333aea5fe2e8d0a0a91e4b8a1dbfbf235a23
+    subdir: app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y -t bookworm-backports golang
+      - apt-get install -y gcc libc-dev make
+    gradle:
+      - yes
+    binary: https://github.com/cbeuw/Cloak-android/releases/download/v%v-1/ck-client-%v-signed.apk
+    srclibs:
+      - go@go1.22.4
+    prebuild:
+      - export NDK_VERSION=$(sed -n -E "s/.*ndk-version:\s(.*)/\1/p" ../.github/workflows/android.yml)
+      - sdkmanager "ndk;$NDK_VERSION"
+      - export GO_VERSION=$(sed -n -E "s/.*go-version:\s'([0-9.]+)'/\1/p" ../.github/workflows/android.yml)
+      - git -C $$go$$ checkout -f go$GO_VERSION
+    build:
+      - pushd $$go$$/src
+      - ./make.bash
+      - popd
+      - export GOPATH=$$go$$
+      - export PATH="$GOPATH/bin:$PATH"
+      - cd src
+      - ANDROID_NDK_HOME=$$SDK$$/ndk/$(ls $$SDK$$/ndk/) ./build.sh
+
 AllowedAPKSigningKeys: 670a8d4d3da302886858770e8067f5b381237274132f917e7822bd6914700f24
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 2.9.0
-CurrentVersionCode: 22
+CurrentVersion: 2.12.0
+CurrentVersionCode: 23
