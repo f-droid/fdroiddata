@@ -379,10 +379,130 @@ Builds:
       - gradle assembleRelease --parallel --build-cache --no-daemon -PreactNativeArchitectures=arm64-v8a
     ndk: 27.1.12297006
 
+  - versionName: 1.4.9
+    versionCode: 10040091
+    commit: e14374bbe19fab397fb78637552aaad52de96400
+    subdir: android/app/
+    sudo:
+      - sysctl fs.inotify.max_user_watches=524288 || true
+      - apt-get update
+      - apt-get install -y npm ninja-build bzip2 xz-utils
+      - npm install -g corepack
+    init:
+      - cd ../..
+      - npm install --build-from-source
+      - npm install lightningcss --save-dev
+      - npm uninstall expo-notifications
+    output: build/outputs/apk/release/*.apk
+    srclibs:
+      - react-native-skia@v2.0.0
+    rm:
+      - ios
+      - node_modules/@shopify/react-native-skia/libs/android
+      - node_modules/@shopify/react-native-skia/libs/apple
+    prebuild:
+      - export skiaVersion=$(sed -n -E 's|.*"@shopify/react-native-skia":\s"(.*)".*|\1|p'
+        ../../package.json)
+      - '[[ $skiaVersion ]] || exit 1'
+      - git -C $$react-native-skia$$ checkout -f "$skiaVersion"
+      - sed -i -e 's/\(.*expo.modules.updates.ENABLED.*\)android:value="true"/\1android:value="false"/'
+        src/main/AndroidManifest.xml
+      - sed -i -e 's/"buildFromSource".*/"buildFromSource":\[".*"\]/' ../../package.json
+      - sed -i -e 's/for (const key of mapKeys(configurations))/const key = "android";/'
+        -e 's/for (const target of mapKeys(configuration.targets))/const target =
+        "arm";/' -e 's/import { $, mapKeys, runAsync }/import { $, runAsync }/' -e
+        '/ban-ts-comment/,+1d' -e '/buildXCFrameworks()/d' -e '/buildXCFrameworks/,/^};/d'
+        -e '/copyHeaders/d' $$react-native-skia$$/packages/skia/scripts/build-skia.ts
+    scanignore:
+      - android/build.gradle
+      - node_modules/expo-modules-autolinking/scripts/android/autolinking_implementation.gradle
+      - node_modules/expo-modules-core/android/ExpoModulesCorePlugin.gradle
+      - node_modules/react-native-safe-area-context/android/build.gradle
+      - node_modules/react-native-pager-view/android/build.gradle
+      - node_modules/react-native-reanimated/android/build.gradle
+      - node_modules/react-native-screens/android/build.gradle
+      - node_modules/expo-dev-launcher/android/build.gradle
+      - node_modules/expo-dev-menu/android/build.gradle
+      - node_modules/react-native-edge-to-edge/android/build.gradle
+      - node_modules/react-native/sdks/hermesc/linux64-bin/hermesc
+      - node_modules/react-native/ReactAndroid/publish.gradle
+    scandelete:
+      - node_modules
+    build:
+      - pushd $$react-native-skia$$/packages/skia
+      - corepack enable
+      - yarn
+      - build="yarn build-skia android"
+      - $build || $build || $build
+      - popd
+      - mv $$react-native-skia$$/packages/skia/libs/android ../../node_modules/@shopify/react-native-skia/libs/android
+      - gradle assembleRelease --parallel --build-cache --no-daemon -PreactNativeArchitectures=armeabi-v7a
+    ndk: 27.1.12297006
+
+  - versionName: 1.4.9
+    versionCode: 10040092
+    commit: e14374bbe19fab397fb78637552aaad52de96400
+    subdir: android/app/
+    sudo:
+      - sysctl fs.inotify.max_user_watches=524288 || true
+      - apt-get update
+      - apt-get install -y npm ninja-build bzip2 xz-utils
+      - npm install -g corepack
+    init:
+      - cd ../..
+      - npm install --build-from-source
+      - npm install lightningcss --save-dev
+      - npm uninstall expo-notifications
+    output: build/outputs/apk/release/*.apk
+    srclibs:
+      - react-native-skia@v2.0.0
+    rm:
+      - ios
+      - node_modules/@shopify/react-native-skia/libs/android
+      - node_modules/@shopify/react-native-skia/libs/apple
+    prebuild:
+      - export skiaVersion=$(sed -n -E 's|.*"@shopify/react-native-skia":\s"(.*)".*|\1|p'
+        ../../package.json)
+      - '[[ $skiaVersion ]] || exit 1'
+      - git -C $$react-native-skia$$ checkout -f "$skiaVersion"
+      - sed -i -e 's/\(.*expo.modules.updates.ENABLED.*\)android:value="true"/\1android:value="false"/'
+        src/main/AndroidManifest.xml
+      - sed -i -e 's/"buildFromSource".*/"buildFromSource":\[".*"\]/' ../../package.json
+      - sed -i -e 's/for (const key of mapKeys(configurations))/const key = "android";/'
+        -e 's/for (const target of mapKeys(configuration.targets))/const target =
+        "arm64";/' -e 's/import { $, mapKeys, runAsync }/import { $, runAsync }/'
+        -e '/ban-ts-comment/,+1d' -e '/buildXCFrameworks()/d' -e '/buildXCFrameworks/,/^};/d'
+        -e '/copyHeaders/d' $$react-native-skia$$/packages/skia/scripts/build-skia.ts
+    scanignore:
+      - android/build.gradle
+      - node_modules/expo-modules-autolinking/scripts/android/autolinking_implementation.gradle
+      - node_modules/expo-modules-core/android/ExpoModulesCorePlugin.gradle
+      - node_modules/react-native-safe-area-context/android/build.gradle
+      - node_modules/react-native-pager-view/android/build.gradle
+      - node_modules/react-native-reanimated/android/build.gradle
+      - node_modules/react-native-screens/android/build.gradle
+      - node_modules/expo-dev-launcher/android/build.gradle
+      - node_modules/expo-dev-menu/android/build.gradle
+      - node_modules/react-native-edge-to-edge/android/build.gradle
+      - node_modules/react-native/sdks/hermesc/linux64-bin/hermesc
+      - node_modules/react-native/ReactAndroid/publish.gradle
+    scandelete:
+      - node_modules
+    build:
+      - pushd $$react-native-skia$$/packages/skia
+      - corepack enable
+      - yarn
+      - build="yarn build-skia android"
+      - $build || $build || $build
+      - popd
+      - mv $$react-native-skia$$/packages/skia/libs/android ../../node_modules/@shopify/react-native-skia/libs/android
+      - gradle assembleRelease --parallel --build-cache --no-daemon -PreactNativeArchitectures=arm64-v8a
+    ndk: 27.1.12297006
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 VercodeOperation:
   - 10 * %c + 1
   - 10 * %c + 2
-CurrentVersion: 1.4.8
-CurrentVersionCode: 10040082
+CurrentVersion: 1.4.9
+CurrentVersionCode: 10040092
