@@ -305,10 +305,63 @@ Builds:
       - mv $repo/Wispar app.wispar.wispar
     ndk: r27
 
+  - versionName: 0.7.0
+    versionCode: 27
+    commit: 2bbc38f1f6a3849da1d3ad2563325f416002947b
+    sudo:
+      - mkdir -p /home/runner
+      - chown vagrant /home/runner
+      - echo "deb https://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
+      - apt-get update
+      - apt-get install -y -t trixie openjdk-21-jdk-headless
+      - update-alternatives --auto java
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@stable
+      - transistor-background-fetch@0dd1457588ba031f11e9452f125144aac8a9b75f
+    rm:
+      - ios
+      - macos
+    prebuild:
+      - export flutterVersion=$(sed -n -E "s/^\s*flutter:\s*'?([0-9.]+)'?/\1/p" pubspec.yaml)
+      - '[[ $flutterVersion ]] || exit 1'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - rm $$flutter$$/engine/src/.gn
+      - export repo=/home/runner/work/Wispar
+      - mkdir -p $repo
+      - sed -i -e 's/maven {.*background_fetch.*/mavenLocal()/' android/app/build.gradle
+      - cd ..
+      - mv app.wispar.wispar $repo/Wispar
+      - pushd $repo/Wispar
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter packages pub get
+      - $$flutter$$/bin/dart run pdfrx:remove_wasm_modules
+      - sed -i -e '1a add_link_options("LINKER:--build-id=none")' $PUB_CACHE/hosted/pub.dev/pdfrx-*/android/CMakeLists.txt
+      - sed -i -e '/maven {/,/^        }/cmavenLocal()' $PUB_CACHE/hosted/pub.dev/background_fetch-*/android/build.gradle
+      - popd
+      - mv $repo/Wispar app.wispar.wispar
+    scandelete:
+      - .pub-cache
+    build:
+      - pushd $$transistor-background-fetch$$/android/tsbackgroundfetch/
+      - JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64 gradle assembleRelease
+      - JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64 gradle publishToMavenLocal
+      - popd
+      - export repo=/home/runner/work/Wispar
+      - cd ..
+      - mv app.wispar.wispar $repo/Wispar
+      - pushd $repo/Wispar
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release
+      - popd
+      - mv $repo/Wispar app.wispar.wispar
+    ndk: r27
+
 AllowedAPKSigningKeys: 136f15f8e739afa03c2e5cbc4a51983e87f38f48e956b42cff2bd4dc769af2ab
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 0.6.0
-CurrentVersionCode: 26
+CurrentVersion: 0.7.0
+CurrentVersionCode: 27
