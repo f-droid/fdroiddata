@@ -106,10 +106,56 @@ Builds:
       - popd
       - mv $$Xray-core$$/jniLibs src/main/
 
+  - versionName: 1.7.0
+    versionCode: 18
+    commit: fee0bbabfd1aca92583691b60c2f84e408a46f31
+    subdir: app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -t bookworm-backports -y golang-go
+      - apt-get install -y gcc libc-dev make
+    gradle:
+      - yes
+    srclibs:
+      - Xray-core@v25.6.8
+      - go@go1.24.4
+    prebuild:
+      - sed -i -e '/enable true/d' build.gradle
+      - source ../version.properties
+      - git -C $$Xray-core$$ checkout -f $XRAY_CORE_VERSION
+      - git -C $$go$$ checkout -f go$GO_VERSION
+    build:
+      - source ../version.properties
+      - curl -Lo src/main/assets/geoip.dat https://github.com/lhear/v2ray-rules-dat/releases/download/$GEOIP_VERSION/geoip.dat
+      - curl -Lo src/main/assets/geosite.dat https://github.com/lhear/v2ray-rules-dat/releases/download/$GEOSITE_VERSION/geosite.dat
+      - sdkmanager "ndk;$NDK_VERSION"
+      - pushd $$go$$/src
+      - ./make.bash
+      - popd
+      - export GOPATH=$$go$$
+      - export PATH="$GOPATH/bin:$PATH"
+      - pushd $$Xray-core$$
+      - mkdir -p jniLibs/{arm64-v8a,x86_64}
+      - COMMID=$(git rev-parse HEAD | cut -c 1-7)
+      - export GOOS=android CGO_ENABLED=1
+      - export GOARCH=arm64
+      - export CC=$$SDK$$/ndk/$NDK_VERSION/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android24-clang
+      - go build -o xray -trimpath -buildvcs=false -ldflags="-X github.com/xtls/xray-core/core.build=${COMMID}
+        -s -w -buildid=" -v ./main
+      - mv xray jniLibs/arm64-v8a/libxray.so
+      - export GOARCH=amd64
+      - export CC=$$SDK$$/ndk/$NDK_VERSION/toolchains/llvm/prebuilt/linux-x86_64/bin/x86_64-linux-android24-clang
+      - go build -o xray -trimpath -buildvcs=false -ldflags="-X github.com/xtls/xray-core/core.build=${COMMID}
+        -s -w -buildid=" -v ./main
+      - mv xray jniLibs/x86_64/libxray.so
+      - popd
+      - mv $$Xray-core$$/jniLibs src/main/
+
 AllowedAPKSigningKeys: 7b78dbf42ed7346f51c705569072d6cc5821e54872186177eb3f4b245573a27e
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: version.properties|APP_VERSION_CODE=(\d+)|.|APP_VERSION_NAME=([\d.]+)
-CurrentVersion: 1.6.5
-CurrentVersionCode: 17
+CurrentVersion: 1.7.0
+CurrentVersionCode: 18
