@@ -1358,8 +1358,41 @@ Builds:
       - flutter/bin/flutter build apk --dart-define=ORGRO_VERSION=$$VERSION$$
     ndk: 28.0.13004108
 
+  - versionName: 1.61.5
+    versionCode: 184
+    commit: 1dc43c913d5737d11deb7146f69fa65825184f80
+    submodules: true
+    sudo:
+      - echo "deb https://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
+      - apt update
+      - apt install -y -t trixie golang-go build-essential
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - openpgp-mobile@v1.13.0
+    prebuild:
+      - touch android/key.properties
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - flutter/bin/flutter config --no-analytics
+      - flutter/bin/flutter pub get
+    scanignore:
+      - flutter/packages/flutter_tools/gradle/aar_init_script.gradle
+      - flutter/bin/cache
+    scandelete:
+      - flutter
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - pushd $$openpgp-mobile$$
+      - make binding_android
+      - pushd output/binding/android
+      - openpgp_dir=($PUB_CACHE/hosted/pub.dev/openpgp-*) && find . -type f -name
+        '*.so' -print0 | xargs --null -I{} mv "{}" "$openpgp_dir/android/src/main/{}"
+      - popd && popd
+      - flutter/bin/flutter build apk --dart-define=ORGRO_VERSION=$$VERSION$$
+    ndk: 28.0.13004108
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v.*$
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 1.61.4
-CurrentVersionCode: 183
+CurrentVersion: 1.61.5
+CurrentVersionCode: 184
