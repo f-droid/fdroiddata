@@ -220,10 +220,51 @@ Builds:
       - popd
       - mv $repo me.ahmetcetinkaya.whph
 
+  - versionName: 0.12.0
+    versionCode: 50
+    commit: d6b8ae1b4a452867e584a49c44f5f8c1441fe715
+    sudo:
+      - mkdir -p /home/runner/work/whph
+      - chown -R vagrant /home/runner
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+      - linux
+      - macos
+      - web
+      - windows
+    prebuild:
+      - git submodule update --init lib/corePackages/acore
+      - git -C $$flutter$$ reset --hard $(bash scripts/get_flutter_version.sh)
+      - export repo=/home/runner/work/whph/whph
+      - cd ..
+      - mv me.ahmetcetinkaya.whph $repo
+      - pushd $repo
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export PATH="$$flutter$$/bin:$PATH"
+      - flutter config --no-analytics
+      - flutter pub get
+      - popd
+      - mv $repo me.ahmetcetinkaya.whph
+    scandelete:
+      - .pub-cache
+    build:
+      - export repo=/home/runner/work/whph/whph
+      - cd ..
+      - mv me.ahmetcetinkaya.whph $repo
+      - pushd $repo
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export PATH="$$flutter$$/bin:$PATH"
+      - flutter build apk --release
+      - popd
+      - mv $repo me.ahmetcetinkaya.whph
+
 AllowedAPKSigningKeys: 4b0de165375bb1179fbee37fbd70de03813284529e0b0c5d3ce5e794f03aa0ae
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 0.11.1
-CurrentVersionCode: 49
+CurrentVersion: 0.12.0
+CurrentVersionCode: 50
