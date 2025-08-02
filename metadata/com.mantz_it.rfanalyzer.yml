@@ -129,7 +129,34 @@ Builds:
       - HackRF@8d08475da63765fcf71903b64f21d1eeafdb0017
     prebuild: cp -fR $$HackRF$$/app ../hackrf_android
 
+  - versionName: 2.0.2
+    versionCode: 20014
+    commit: 23e9d349a5be4175ebf2ffcbe6c82cf07f3a1596
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install mkdocs mkdocs-material python3-pymdownx
+    gradle:
+      - yes
+    srclibs:
+      - HackRF@9d4fb78a4633d5a2b8022b4815515be627273739
+    prebuild:
+      - sed -i -e '/billing/d' build.gradle.kts
+      - cd src/main/java/com/mantz_it/rfanalyzer/database/
+      - sed -e '/BillingRepository(/,/^}/d' -e '/billingclient/d' BillingRepository.kt
+        > BillingRepositoryInterface.kt
+      - sed -e 's/MockedBillingRepository/BillingRepository/' MockedBillingRepository.kt
+        > BillingRepository.kt
+      - sdkmanager 'cmake;4.0.3'
+    scandelete:
+      - app/lib
+    build:
+      - pushd $$HackRF$$/app
+      - gradle assembleRelease
+      - popd
+      - mv $$HackRF$$/app/build/outputs/aar/*.aar lib/hackrf_android.aar
+
 AutoUpdateMode: None
 UpdateCheckMode: RepoManifest
-CurrentVersion: '1.13'
-CurrentVersionCode: 1303
+CurrentVersion: 2.0.2
+CurrentVersionCode: 20014
