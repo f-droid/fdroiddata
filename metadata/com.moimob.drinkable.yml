@@ -2002,7 +2002,35 @@ Builds:
     scandelete:
       - node_modules/
 
+  - versionName: 1.57.3
+    versionCode: 15703
+    commit: 25eafd0ed2b59da847be05f5b900561660a2b827
+    subdir: android/app
+    sudo:
+      - echo "deb https://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
+      - apt-get update
+      - apt-get install -t trixie npm openjdk-21-jdk-headless
+      - update-alternatives --auto java
+      - sysctl fs.inotify.max_user_watches=524288 || true
+    gradle:
+      - yes
+    prebuild:
+      - echo SUPABASE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJhYXVzZnd4ZWhjaGd0dGpjZmZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE2NjI4MDA2NzAsImV4cCI6MTk3ODM3NjY3MH0.10YASNXEVnPoCBv2S7772K5rsJZtlQIU1xhd1Pn2P9A
+        > ../../.env
+      - echo ADMOB_APP_ID="deadbeef" > ../local.properties
+      - sed -i -e '/google-services/d' ../build.gradle
+      - pushd ../..
+      - npm ci
+      - npm run build
+      - npx cap telemetry off
+      - npx cap update
+      - popd
+    scanignore:
+      - node_modules/@capacitor/cli/assets/capacitor-cordova-android-plugins.tar.gz
+    scandelete:
+      - node_modules/
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 1.57.1
-CurrentVersionCode: 15701
+CurrentVersion: 1.57.3
+CurrentVersionCode: 15703
