@@ -38,9 +38,24 @@ Builds:
         break; sha256sum apk/assets/dexopt/baseline.prof; rm -fr apk; taskset --cpu-list
         0-15 gradle clean assembleRelease; done
 
+  - versionName: 1.5.1
+    versionCode: 8
+    commit: 1bb2dff977ff130ae154e1213647d91a89b97887
+    subdir: app
+    gradle:
+      - yes
+    postbuild:
+      - curl -Lo upstream.apk https://github.com/PranavPurwar/AppLock/releases/download/v$$VERSION$$/app-release.apk
+      - unzip -q upstream.apk -d apk
+      - export hash=$(sha256sum apk/assets/dexopt/baseline.prof)
+      - rm -rf apk upstream.apk
+      - for i in {1..10}; do unzip -q $$OUT$$ -d apk; sha256sum -c - <<< $hash &&
+        break; sha256sum apk/assets/dexopt/baseline.prof; rm -fr apk; taskset --cpu-list
+        0-15 gradle clean assembleRelease; done
+
 AllowedAPKSigningKeys: af7f36023c6a7750847252e5d4d14a992b621364600705e1d8b0fe44d1ac8c81
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 1.4.1
-CurrentVersionCode: 6
+CurrentVersion: 1.5.1
+CurrentVersionCode: 8
