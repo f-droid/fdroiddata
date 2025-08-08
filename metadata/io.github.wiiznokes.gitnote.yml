@@ -134,7 +134,32 @@ Builds:
         CLEAN=1 ./build.sh
     ndk: r27c
 
+  - versionName: 25.08.1
+    versionCode: 9
+    commit: 49477f530d10bef5db64ba5e31399de724355e3f
+    subdir: app
+    sudo:
+      - echo "deb https://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
+      - apt-get update
+      - apt-get install make
+      - apt-get install -y -t trixie openjdk-21-jdk-headless
+      - update-alternatives --auto java
+    gradle:
+      - yes
+    srclibs:
+      - rustup@1.27.1
+    rm:
+      - app/src/main/rust/openssl-prebuild
+    prebuild: sed -i -e '/agp/s/8.12.0/8.11.1/' ../gradle/libs.versions.toml
+    build:
+      - cd src/main/rust
+      - $$rustup$$/rustup-init.sh -y --default-toolchain $(cat RUST_VERSION) --target
+        aarch64-linux-android x86_64-linux-android
+      - source $HOME/.cargo/env
+      - make NDK_PATH=$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin DEBUG=0 build_install
+    ndk: r27d
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: '25.07'
-CurrentVersionCode: 8
+CurrentVersion: 25.08.1
+CurrentVersionCode: 9
