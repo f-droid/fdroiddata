@@ -19,7 +19,7 @@ AutoName: FaFa Runner
 
 RepoType: git
 Repo: https://github.com/fafarunner/fafarunner.git
-Binaries: https://github.com/fafarunner/fafarunner/releases/download/v%v+%c/FaFaRunner-%v.%c.apk
+Binaries: https://github.com/fafarunner/fafarunner/releases/download/v%v/FaFaRunner-%v.apk
 
 Builds:
   - versionName: 1.0.4
@@ -482,6 +482,7 @@ Builds:
       - mkdir -p /home/runner
       - chown vagrant /home/runner
     output: build/app/outputs/flutter-apk/app-production-release.apk
+    binary: https://github.com/fafarunner/fafarunner/releases/download/v%v+%c/FaFaRunner-%v.%c.apk
     srclibs:
       - flutter@stable
     rm:
@@ -527,6 +528,7 @@ Builds:
       - mkdir -p /home/runner
       - chown vagrant /home/runner
     output: build/app/outputs/flutter-apk/app-production-release.apk
+    binary: https://github.com/fafarunner/fafarunner/releases/download/v%v+%c/FaFaRunner-%v.%c.apk
     srclibs:
       - flutter@stable
     rm:
@@ -572,6 +574,7 @@ Builds:
       - mkdir -p /home/runner
       - chown vagrant /home/runner
     output: build/app/outputs/flutter-apk/app-production-release.apk
+    binary: https://github.com/fafarunner/fafarunner/releases/download/v%v+%c/FaFaRunner-%v.%c.apk
     srclibs:
       - flutter@stable
     rm:
@@ -616,6 +619,7 @@ Builds:
       - mkdir -p /home/runner
       - chown vagrant /home/runner
     output: build/app/outputs/flutter-apk/app-production-release.apk
+    binary: https://github.com/fafarunner/fafarunner/releases/download/v%v+%c/FaFaRunner-%v.%c.apk
     srclibs:
       - flutter@stable
     rm:
@@ -656,6 +660,51 @@ Builds:
   - versionName: 2.5.4
     versionCode: 384
     commit: 9a4563538abbb1075a437df36812bf6ffe8a7a61
+    sudo:
+      - mkdir -p /home/runner/work/fafarunner
+      - chown -R vagrant /home/runner
+    output: build/app/outputs/flutter-apk/app-production-release.apk
+    binary: https://github.com/fafarunner/fafarunner/releases/download/v%v+%c/FaFaRunner-%v.%c.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+      - macos
+      - linux
+      - windows
+      - web
+    prebuild:
+      - export repo=/home/runner/work/fafarunner/fafarunner
+      - cd ..
+      - mv com.chenyifaer.fafarunner $repo
+      - pushd $repo
+      - version=$(sed -n -E "s/.*flutter-version:\ '(.*)'/\1/p" .github/workflows/release.yml
+        | head -n1)
+      - '[[ $version ]] || exit 1'
+      - git -C $$flutter$$ reset --hard $version
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter packages pub get
+      - sed -i -e 's/-Wl,/-Wl,--build-id=none,/' $PUB_CACHE/hosted/pub.dev/jni-*/src/CMakeLists.txt
+      - popd
+      - mv $repo com.chenyifaer.fafarunner
+    scandelete:
+      - .pub-cache
+    build:
+      - export repo=/home/runner/work/fafarunner/fafarunner
+      - cd ..
+      - mv com.chenyifaer.fafarunner $repo
+      - pushd $repo
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export PATH=$$flutter$$/bin/:$PATH
+      - $$flutter$$/bin/flutter build apk --no-tree-shake-icons --flavor production
+        --dart-define SENTRY_DSN="https://03bafb566d1295565089167dfb74410b@o4507254990897152.ingest.us.sentry.io/4507254994370560"
+      - popd
+      - mv $repo com.chenyifaer.fafarunner
+
+  - versionName: 2.5.5
+    versionCode: 385
+    commit: ce0dd20f3b02737e476dd042ba0b14135c4b6738
     sudo:
       - mkdir -p /home/runner/work/fafarunner
       - chown -R vagrant /home/runner
@@ -702,5 +751,5 @@ AllowedAPKSigningKeys: c770b97229e8fed099da09164fcd0e5437a62d604adda91cf4a23f16e
 AutoUpdateMode: Version
 UpdateCheckMode: Tags .*[0-9]$
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 2.5.4
-CurrentVersionCode: 384
+CurrentVersion: 2.5.5
+CurrentVersionCode: 385
