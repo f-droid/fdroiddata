@@ -47,10 +47,27 @@ Builds:
     scandelete:
       - build-logic
 
+  - versionName: 1.4.1
+    versionCode: 28
+    commit: 981ebb4e61b2c01df84c018dd0904d8b4250b168
+    subdir: app
+    sudo:
+      - export CPUS_MAX=16
+      - export CPUS=$(getconf _NPROCESSORS_ONLN)
+      - for (( c=$CPUS_MAX; c<$CPUS; c++ )) ; do echo 0 > /sys/devices/system/cpu/cpu$c/online
+        ; done
+    gradle:
+      - fdroid
+    prebuild:
+      - sed -i -e '/googleServices/d' -e '/crashlytics/d' {..,.,../build-logic/convention}/build.gradle.kts
+      - sed -i -e '/storeFile/d' -e '/signingConfig =/d' ../build-logic/convention/src/main/kotlin/AndroidApplicationConventionPlugin.kt
+    scandelete:
+      - build-logic
+
 AllowedAPKSigningKeys: 84efa82b2c2a84e0fc154a36c8b67f901a9a70d1018d75c11cd59662021105d4
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckName: com.grappim.hateitorrateit
-CurrentVersion: 1.3.8
-CurrentVersionCode: 26
+CurrentVersion: 1.4.1
+CurrentVersionCode: 28
