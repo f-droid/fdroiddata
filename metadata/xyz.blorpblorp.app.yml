@@ -1,0 +1,46 @@
+AntiFeatures:
+  NonFreeNet:
+    en-US: Depends on lemmyverse.net
+  TetheredNet:
+    en-US: Connects to lemmy.zip
+Categories:
+  - Internet
+  - Social Network
+License: GPL-3.0-only
+WebSite: https://blorpblorp.xyz
+SourceCode: https://github.com/christianjuth/blorp
+IssueTracker: https://github.com/christianjuth/blorp/issues
+Changelog: https://github.com/christianjuth/blorp/releases
+
+AutoName: Blorp
+
+RepoType: git
+Repo: https://github.com/christianjuth/blorp.git
+
+Builds:
+  - versionName: 1.9.10
+    versionCode: 27
+    commit: 000853dca58b1c721f6a7151ec23e0ce6c6ed82d
+    subdir: android/app
+    sudo:
+      - echo "deb https://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
+      - apt-get update
+      - apt-get install -y -t trixie openjdk-21-jdk-headless npm
+      - update-alternatives --auto java
+      - sysctl fs.inotify.max_user_watches=524288 || true
+      - corepack enable
+    init:
+      - yarn install --immutable
+      - CI_PLATFORM=android yarn build
+      - cd ../..
+      - npx cap sync android --deployment
+    gradle:
+      - yes
+    scandelete:
+      - node_modules/
+      - .yarn/install-state.gz
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: 1.9.10
+CurrentVersionCode: 27
