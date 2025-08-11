@@ -120,8 +120,34 @@ Builds:
       - npm run update_version
       - cordova build android --release -- --packageType=apk
 
+  - versionName: 1.11.0
+    versionCode: 11100
+    commit: 9d2eb9098e469194a00f32e695311955f03a7a8d
+    submodules: true
+    sudo:
+      - sysctl fs.inotify.max_user_watches=524288 || true
+      - apt-get update
+      - apt-get install -y npm
+      - npm install -g cordova
+    output: platforms/android/app/build/outputs/apk/release/app-release-unsigned.apk
+    prebuild:
+      - sdkmanager 'platforms;android-35' 'build-tools;35.0.0'
+      - cordova platform add android
+      - npm install  --build-from-source
+      - cd mathjs
+      - npm install  --build-from-source
+    scandelete:
+      - node_modules
+    build:
+      - cd mathjs
+      - npm run build
+      - cd ..
+      - mv mathjs/lib/browser/math.js www/js/math.js
+      - npm run update_version
+      - cordova build android --release -- --packageType=apk
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags .*\.0$
 UpdateCheckData: package.json|"versionCode":\s(\d+),|.|"version":\s"([\d.]+)"
-CurrentVersion: 1.10.0
-CurrentVersionCode: 11000
+CurrentVersion: 1.11.0
+CurrentVersionCode: 11100
