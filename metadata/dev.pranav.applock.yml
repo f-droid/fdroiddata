@@ -22,22 +22,6 @@ Builds:
       - yes
     binary: https://github.com/PranavPurwar/AppLock/releases/download/v1.3.0/app-release.apk
 
-  - versionName: 1.4.1
-    versionCode: 6
-    disable: https://github.com/PranavPurwar/AppLock/issues/28
-    commit: 2ae31212a61608f895a921c186ae4cc0ef62b2ee
-    subdir: app
-    gradle:
-      - yes
-    postbuild:
-      - curl -Lo upstream.apk https://github.com/PranavPurwar/AppLock/releases/download/v$$VERSION$$/app-release.apk
-      - unzip -q upstream.apk -d apk
-      - export hash=$(sha256sum apk/assets/dexopt/baseline.prof)
-      - rm -rf apk upstream.apk
-      - for i in {1..10}; do unzip -q $$OUT$$ -d apk; sha256sum -c - <<< $hash &&
-        break; sha256sum apk/assets/dexopt/baseline.prof; rm -fr apk; taskset --cpu-list
-        0-15 gradle clean assembleRelease; done
-
   - versionName: 1.5.1
     versionCode: 8
     disable: https://github.com/PranavPurwar/AppLock/issues/60
