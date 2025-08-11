@@ -1918,10 +1918,50 @@ Builds:
       - gradle publishToMavenLocal
     ndk: r27
 
+  - versionName: 1.27.0
+    versionCode: 4165
+    commit: 118bd065900abe9cd81e4c250e82f3955ea1e80c
+    subdir: app
+    submodules: true
+    sudo:
+      - echo "deb https://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
+      - apt-get update
+      - apt-get install -y -t trixie openjdk-21-jdk-headless
+      - update-alternatives --auto java
+    gradle:
+      - website
+    srclibs:
+      - libsession-util-android@1.0.0
+    prebuild:
+      - sed -i -e '/gms/d' -e 's/raw.github.com.*"/jitpack.io"/' -e 's|developer.huawei.com/repo/|jitpack.io|'
+        -e 's/oxen.rocks.*"/jitpack.io"/' -e '/repositories {/a mavenLocal()' ../build.gradle.kts
+      - sed -i -e '/google.services/d' -e '/isEnable/d' -e '/defaultConfig/a applicationId
+        = "network.loki.messenger.fdroid"' -e 's/ext["websiteUpdateUrl"] = ".*"/ext["websiteUpdateUrl"]
+        = "null"/g' build.gradle.kts
+      - sed -i -E -e '/app_name/s/>(.+)</>\1 F-Droid</' src/main/res/*/strings.xml
+      - for uri in $(sed -n -E 's/android:authorities="network.loki.(.*)"/\1/p' src/main/AndroidManifest.xml);
+        do find src/main/java/org/thoughtcrime/securesms -type f -exec sed -i -e "s/network.loki.$uri/network.loki.fdroid.$uri/"
+        {} +; done
+      - sed -i -e '/READ_PHONE_STATE/d' -e '/c2dm/d' -e 's/ACCESS_SESSION_SECRETS/fdroid.ACCESS_SESSION_SECRETS/'
+        -e '/android:authorities/s/network.loki/network.loki.fdroid/' src/main/AndroidManifest.xml
+      - sdkmanager 'cmake;3.22.1'
+    scandelete:
+      - build-logic/build
+    build:
+      - export VERSION=$(sed -n -E 's/.*libsessionUtilAndroidVersion = "(.*)"/\1/p'
+        ../gradle/libs.versions.toml)
+      - '[[ $VERSION ]] || exit 1'
+      - cd $$libsession-util-android$$
+      - git checkout -f $VERSION
+      - git submodule update --init --recursive
+      - gradle assembleRelease
+      - gradle publishToMavenLocal
+    ndk: r27
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 VercodeOperation:
   - 10*%c + 5
 UpdateCheckData: app/build.gradle.kts|canonicalVersionCode\s=\s(\d+)|.|canonicalVersionName\s=\s"([\d.]+)"
-CurrentVersion: 1.26.0
-CurrentVersionCode: 4155
+CurrentVersion: 1.27.0
+CurrentVersionCode: 4165
