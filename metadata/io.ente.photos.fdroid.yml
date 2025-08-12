@@ -4480,8 +4480,91 @@ Builds:
         en-US: Downloads assets (like ML models, release info and FAQs) from Ente's
           CDN
 
+  - versionName: 1.2.0
+    versionCode: 1203
+    commit: 5cff5f49b75e4b9d73d186eca62b7272c7485f3b
+    timeout: 10800
+    subdir: mobile/apps/photos/
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y gcc-multilib libc-dev make automake pkg-config libtool
+        nasm python3-jsonschema wget meson python3-jinja2 zip curl doxygen cmake gperf
+        texinfo yasm bison autogen wget autopoint ninja-build ragel groff gtk-doc-tools
+        libtasn1-6-dev libtasn1-bin libgnutls28-dev libunistring-dev gettext
+    output: build/app/outputs/flutter-apk/app-fdroid-release.apk
+    srclibs:
+      - libsodium@ee009287afd480b60a9a4d75b19afdc0f705e9d9
+      - media-kit-libmpv-android-video-build-preddit@6a17c15353ead50a52bd8414c872e40e9178b3a4
+    rm:
+      - mobile/apps/auth
+      - cli
+      - desktop
+      - docs
+      - infra
+      - mobile/apps/photos/ios
+      - server
+      - web
+    prebuild:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - ../../thirdparty/flutter/bin/flutter config --no-analytics
+      - ../../thirdparty/flutter/bin/flutter pub get
+      - pushd $PUB_CACHE/git/ffmpeg-kit-*
+      - sed -i -e '/BUILD_FULL/,+1s/61/34/' -e 's|./gradlew|gradle|' android.sh
+      - sed -i -e "/ffmpeg-kit-custom/c implementation files('ffmpeg-kit.aar')" -e
+        's|./libs|https://maven.google.com|' flutter/flutter/android/build.gradle
+      - popd
+      - sed -i -e '/play-services-cronet/d' $PUB_CACHE/hosted/pub.dev/cronet_http-*/android/build.gradle
+      - export file=$(ls .pub-cache/git/media-kit-*/libs/android/media_kit_libs_android_video/android/build.gradle)
+      - sed -i -e '/downloadDependencies/,/dependsOn/d' $file
+      - cd $$media-kit-libmpv-android-video-build-preddit$$/buildscripts
+      - sed -i -e '/download-sdk/d' download.sh
+      - sed -i -e '/git reset --hard/d' patch.sh
+      - sed -i -e 's/sudo rm -r/echo/g'        bundle_default.sh
+      - sed -i -e 's/sudo//g' -e 's|./gradlew|gradle|g' *.sh
+    scanignore:
+      - mobile/thirdparty/flutter/bin/cache
+    scandelete:
+      - mobile/thirdparty/flutter
+      - mobile/apps/photos/.pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - pushd $$libsodium$$
+      - ./autogen.sh -s
+      - ./dist-build/android-armv7-a.sh
+      - ./dist-build/android-armv8-a.sh
+      - ./dist-build/android-x86.sh
+      - ./dist-build/android-x86_64.sh
+      - popd
+      - flutter_sodium=$(echo .pub-cache/git/flutter_sodium-*/android/src/main/jniLibs)
+      - cp $$libsodium$$/libsodium-android-armv7-a/lib/libsodium.so $flutter_sodium/armeabi-v7a/
+      - cp $$libsodium$$/libsodium-android-westmere/lib/libsodium.so $flutter_sodium/x86_64/
+      - cp $$libsodium$$/libsodium-android-armv8-a+crypto/lib/libsodium.so $flutter_sodium/arm64-v8a/
+      - cp $$libsodium$$/libsodium-android-i686/lib/libsodium.so $flutter_sodium/x86/
+      - export FLUTTER=$(pwd)/../../thirdparty/flutter/bin/
+      - pushd $$media-kit-libmpv-android-video-build-preddit$$/buildscripts
+      - export PATH=$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
+      - mkdir sdk
+      - ln -s $$SDK$$ ./sdk/android-sdk-linux
+      - PATH=$FLUTTER:$PATH bash bundle_default.sh
+      - popd
+      - mkdir -p build/media_kit_libs_android_video/output
+      - cp $$media-kit-libmpv-android-video-build-preddit$$/buildscripts/*.jar build/media_kit_libs_android_video/output
+      - pushd $PUB_CACHE/git/ffmpeg-kit-*
+      - JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64 ANDROID_SDK_ROOT=$$SDK$$ ANDROID_NDK_ROOT=$$NDK$$
+        ./android.sh --enable-gpl --enable-android-zlib --enable-zimg --enable-x264
+      - mv prebuilt/bundle-android-aar/ffmpeg-kit/ffmpeg-kit.aar ./flutter/flutter/android/
+      - popd
+      - ../../thirdparty/flutter/bin/flutter build apk --flavor fdroid -t lib/main.dart
+        --dart-define=cronetHttpNoPlay=true
+    ndk: 25.1.8937393
+    antifeatures:
+      NonFreeNet:
+        en-US: Downloads assets (like ML models, release info and FAQs) from Ente's
+          CDN
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^fdroid-
-UpdateCheckData: mobile/pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 1.1.53
-CurrentVersionCode: 1083
+UpdateCheckData: mobile/apps/photos/pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 1.2.0
+CurrentVersionCode: 1203
