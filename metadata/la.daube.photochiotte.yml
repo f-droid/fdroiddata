@@ -1217,7 +1217,32 @@ Builds:
         .
     ndk: r28c
 
+  - versionName: '1.67'
+    versionCode: 68
+    commit: a36da6ec0fc09b80f07b4cc320e08a7d14e2b87c
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y meson ninja-build -t bookworm-backports
+      - apt-get install -y autoconf automake libtool make nasm pkg-config autopoint
+        cmake python3-markupsafe python3-jsonschema python3-jinja2 gperf
+    gradle:
+      - flavorA
+    prebuild:
+      - rm -vf ../*.bin
+      - echo "F-Droid uses AGP 8.11.1"
+      - sed -i -e 's/.com.android.tools.build:gradle:.*/"com.android.tools.build:gradle:8.11.1"/'
+        ../build.gradle
+    build:
+      - cd ..
+      - bash dlbuild.sh all
+      - cd app/src/main/cpp
+      - cmake -DANDROID_NATIVE_API_LEVEL=24 -DCMAKE_TOOLCHAIN_FILE=$$NDK$$/build/cmake/android.toolchain.cmake
+        -DANDROID_STL=c++_shared -DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON -DANDROID_TOOLCHAIN=clang
+        .
+    ndk: r28c
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: '1.66'
-CurrentVersionCode: 67
+CurrentVersion: '1.67'
+CurrentVersionCode: 68
