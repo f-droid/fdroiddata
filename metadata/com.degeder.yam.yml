@@ -1,0 +1,47 @@
+Categories:
+  - Multimedia
+  - Music Practice Tool
+License: GPL-3.0-only
+SourceCode: https://github.com/degD/yet_another_metronome
+IssueTracker: https://github.com/degD/yet_another_metronome/issues
+
+AutoName: Yet Another Tuner (Y.A.M.)
+
+RepoType: git
+Repo: https://github.com/degD/yet_another_metronome
+
+Builds:
+  - versionName: '1.0'
+    versionCode: 1
+    commit: 85903d0675a9e71eb04650292b8545b27b65dde4
+    subdir: android/app
+    sudo:
+      - echo "deb https://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
+      - apt-get update
+      - apt-get install -y -t trixie openjdk-21-jdk-headless
+      - update-alternatives --auto java
+      - apt-get install -y npm golang-go make
+    init:
+      - cd ../../
+      - npm ci
+      - npm run build
+      - npx cap telemetry off
+      - npx cap sync android --deployment
+    gradle:
+      - yes
+    srclibs:
+      - esbuild@v0.21.5
+    scanignore:
+      - node_modules/@capacitor/cli/assets/capacitor-cordova-android-plugins.tar.gz
+    scandelete:
+      - node_modules
+    build:
+      - pushd $$esbuild$$
+      - make esbuild
+      - popd
+      - mv $$esbuild$$/esbuild ../../node_modules/@esbuild/linux-x64/bin/esbuild
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: '1.0'
+CurrentVersionCode: 1
