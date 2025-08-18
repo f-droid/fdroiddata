@@ -187,9 +187,24 @@ Builds:
         break; sha256sum apk/assets/dexopt/baseline.prof; rm -fr apk; taskset --cpu-list
         0-15 gradle clean assembleRelease; done
 
+  - versionName: 0.1.52
+    versionCode: 52
+    commit: 7db4a78994884b97bd77eb45813b09a07b504b90
+    subdir: app
+    gradle:
+      - yes
+    postbuild:
+      - curl -Lo upstream.apk https://github.com/ZTFtrue/MonsterMusic/releases/download/$$VERSION$$/app-release.apk
+      - unzip -q upstream.apk -d apk
+      - export hash=$(sha256sum apk/assets/dexopt/baseline.prof)
+      - rm -rf apk upstream.apk
+      - for i in {1..10}; do unzip -q $$OUT$$ -d apk; sha256sum -c - <<< $hash &&
+        break; sha256sum apk/assets/dexopt/baseline.prof; rm -fr apk; taskset --cpu-list
+        0-15 gradle clean assembleRelease; done
+
 AllowedAPKSigningKeys: d71ec62f1bbbeae918ef9828fdc5184462acb2f1781d0ee649577cb96872495d
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 0.1.49
-CurrentVersionCode: 49
+CurrentVersion: 0.1.52
+CurrentVersionCode: 52
