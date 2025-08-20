@@ -66,10 +66,62 @@ Builds:
         > ~/tmp/build.log
     ndk: r26d
 
+  - versionName: 1.19.15
+    versionCode: 11915001
+    commit: 50e8f11b4688cd1693093f75a29835a81a7990ee
+    subdir: packaging/android/app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y autoconf pkg-config automake make cmake scons gcc libc-dev
+        xz-utils lbzip2 wget ninja-build gperf pipx
+      - PIPX_HOME=/opt/pipx PIPX_BIN_DIR=/usr/local/bin pipx install meson==1.8.2
+    gradle:
+      - yes
+    prebuild:
+      - sed -i -e 's/include .*/include "armeabi-v7a"/' build.gradle
+      - sed -i -e 's/wget/wget -q/' ../build-android-dependencies/build-android-deps.sh
+      - echo F-Droid > ../../../data/dist
+    scandelete:
+      - data/test/scenarios/cve_tests/bytecode.bin
+      - utils/mp-server
+    build:
+      - cd ..
+      - PREFIXDIR=$(pwd)/dependencies/prefix BUILDDIR_PREFIX=$(pwd)/dependencies ANDROID_NDK_ROOT=$$NDK$$
+        ANDROID_HOME=$$SDK$$ ARCHS='armeabi-v7a' gradle buildCppDepends buildCppSource
+        > ~/tmp/build.log
+    ndk: r26d
+
+  - versionName: 1.19.15
+    versionCode: 11915002
+    commit: 50e8f11b4688cd1693093f75a29835a81a7990ee
+    subdir: packaging/android/app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y autoconf pkg-config automake make cmake scons gcc libc-dev
+        xz-utils lbzip2 wget ninja-build gperf pipx
+      - PIPX_HOME=/opt/pipx PIPX_BIN_DIR=/usr/local/bin pipx install meson==1.8.2
+    gradle:
+      - yes
+    prebuild:
+      - sed -i -e 's/include .*/include "arm64-v8a"/' build.gradle
+      - sed -i -e 's/wget/wget -q/' ../build-android-dependencies/build-android-deps.sh
+      - echo F-Droid > ../../../data/dist
+    scandelete:
+      - data/test/scenarios/cve_tests/bytecode.bin
+      - utils/mp-server
+    build:
+      - cd ..
+      - PREFIXDIR=$(pwd)/dependencies/prefix BUILDDIR_PREFIX=$(pwd)/dependencies ANDROID_NDK_ROOT=$$NDK$$
+        ANDROID_HOME=$$SDK$$ ARCHS='arm64-v8a' gradle buildCppDepends buildCppSource
+        > ~/tmp/build.log
+    ndk: r26d
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 VercodeOperation:
   - 1000 * %c + 1
   - 1000 * %c + 2
-CurrentVersion: 1.19.14
-CurrentVersionCode: 11914002
+CurrentVersion: 1.19.15
+CurrentVersionCode: 11915002
