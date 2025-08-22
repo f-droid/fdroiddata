@@ -85,7 +85,29 @@ Builds:
       - node_modules/
       - .yarn/install-state.gz
 
+  - versionName: 1.9.16
+    versionCode: 33
+    commit: b7fccefb0ff1a3b0da0b73cfeedb1a4711fe5958
+    subdir: android/app
+    sudo:
+      - echo "deb https://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
+      - apt-get update
+      - apt-get install -y -t trixie openjdk-21-jdk-headless npm
+      - update-alternatives --auto java
+      - sysctl fs.inotify.max_user_watches=524288 || true
+      - corepack enable
+    init:
+      - yarn install --immutable
+      - CI_PLATFORM=android yarn build
+      - cd ../..
+      - npx cap sync android --deployment
+    gradle:
+      - yes
+    scandelete:
+      - node_modules/
+      - .yarn/install-state.gz
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 1.9.12
-CurrentVersionCode: 29
+CurrentVersion: 1.9.16
+CurrentVersionCode: 33
