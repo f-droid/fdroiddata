@@ -1035,7 +1035,30 @@ Builds:
         | grep -F app-foss-release-unsigned.apk | cut -c-64 | tr -cd '0-9a-f' )"
       - sha256sum -c <<< "$sha256sum  $$OUT$$"
 
+  - versionName: 2.39.1
+    versionCode: 154
+    commit: f777491dcd75f35b621fc0cd5a95bd855639d8ff
+    subdir: app
+    sudo:
+      - echo "deb https://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
+      - apt-get update
+      - apt-get install -y -t trixie openjdk-21-jdk-headless
+      - update-alternatives --auto java
+    gradle:
+      - foss
+    prebuild: echo -e "\norg.gradle.project.android.aapt2FromMavenOverride=$(pwd)/aapt2"
+      >> ../gradle.properties
+    scanignore:
+      - build.gradle.kts
+    postbuild:
+      - curl -Lo aapt2.jar https://dl.google.com/android/maven2/com/android/tools/build/aapt2/8.11.2-12782657/aapt2-8.11.2-12782657-linux.jar
+      - sha256sum -c <<< "dc44dab4b02f1135c4f97aadabac8dddfa1f08ff9f030a7b1aa044b44fdd8a2d  aapt2.jar"
+      - unzip aapt2.jar aapt2
+      - sha256sum="$( curl -L https://github.com/CatimaLoyalty/Android/releases/download/v$$VERSION$$/SHA256SUMS
+        | grep -F app-foss-release-unsigned.apk | cut -c-64 | tr -cd '0-9a-f' )"
+      - sha256sum -c <<< "$sha256sum  $$OUT$$"
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 2.36.0
-CurrentVersionCode: 150
+CurrentVersion: 2.39.1
+CurrentVersionCode: 154
