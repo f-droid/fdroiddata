@@ -4,7 +4,7 @@ Categories:
 License: AGPL-3.0-or-later
 AuthorName: Artifex Software LLC
 WebSite: https://mupdf.com/
-SourceCode: https://cgit.ghostscript.com/cgi-bin/cgit.cgi/mupdf-android-viewer-mini.git
+SourceCode: https://github.com/ArtifexSoftware/mupdf-android-viewer-mini
 IssueTracker: https://bugs.ghostscript.com/
 
 AutoName: MuPDF mini
@@ -36,7 +36,7 @@ Description: |-
   the document.
 
 RepoType: git
-Repo: https://cgit.ghostscript.com/cgi-bin/cgit.cgi/mupdf-android-viewer-mini.git
+Repo: https://github.com/ArtifexSoftware/mupdf-android-viewer-mini.git
 
 Builds:
   - versionName: 1.13.0
@@ -805,6 +805,30 @@ Builds:
     build: make -C ../jni/libmupdf generate
     ndk: r28c
 
+  - versionName: 1.26.7a
+    versionCode: 166
+    commit: 3b237470a9f56a7f3e21030960884e86f1ee303d
+    subdir: app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y make pkg-config
+    gradle:
+      - yes
+    prebuild:
+      - sed -i -e '/maven.ghostscript.com/d' -e '/user.home/d' -e '/url.*MAVEN_REPO/d'
+        ../build.gradle ../*/build.gradle
+      - sed -i -e 's/enable true/enable false/' -e '/android {/a ndkVersion "28.2.13676358"'
+        build.gradle
+      - sed -i -e "s/'-j4'/'-j`nproc`'/" ../jni/build.gradle
+      - echo -e 'ABI_FILTERS=armeabi-v7a,arm64-v8a,x86\norg.gradle.jvmargs=-Xmx4g'
+        >> ../gradle.properties
+    scandelete:
+      - jni/libmupdf/thirdparty
+      - jni/libmupdf/platform/wasm
+    build: make -C ../jni/libmupdf generate
+    ndk: r28c
+
 MaintainerNotes: |-
   Upstream builds separate APKs for all target architectures supported by NDK
   (7 as of r16). We build universal APK with armeabi-v7a, arm64-v8a and x86
@@ -812,5 +836,5 @@ MaintainerNotes: |-
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 1.26.5a
-CurrentVersionCode: 164
+CurrentVersion: 1.26.7a
+CurrentVersionCode: 166
