@@ -1,0 +1,41 @@
+AntiFeatures:
+  NonFreeNet:
+    en-US: Depends on the following services - Steam (by Valve), IsThereAnyDeal.com
+      and SteamCharts.com
+Categories:
+  - Games
+  - Internet
+License: GPL-3.0-only
+AuthorName: Mohammad Shoaib Khan
+AuthorEmail: shoaib.khan20@outlook.com
+SourceCode: https://github.com/khanshoaib3/nerd-steam
+IssueTracker: https://github.com/khanshoaib3/nerd-steam/issues
+
+AutoName: NerdSteam
+
+RepoType: git
+Repo: https://github.com/khanshoaib3/nerd-steam
+Binaries: https://github.com/khanshoaib3/nerd-steam/releases/download/v%v/nerd-steam-v%v-release.apk
+
+Builds:
+  - versionName: 1.0.4
+    versionCode: 1000004
+    commit: c213e15e2fcf365000bd5d61b17d01e66edff5ea
+    subdir: app
+    gradle:
+      - yes
+    srclibs:
+      - reproducible-apk-tools@v0.3.0
+    prebuild: echo 'IS_THERE_ANY_DEAL_API_KEY="9c1a54187a6d3259c0656813155465fc3bfed500"'
+      > ../secret.properties
+    postbuild:
+      - mv $$OUT$$ unaligned.apk
+      - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
+        --replace unaligned.apk $$OUT$$
+
+AllowedAPKSigningKeys: 048b204da88e353be1429d12b30572a95512774c87ea55b0a771e962c9c0a80d
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: 1.0.4
+CurrentVersionCode: 1000004
