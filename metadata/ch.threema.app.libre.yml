@@ -476,10 +476,45 @@ Builds:
       - mv jna/jni/* libs
     ndk: r25c
 
+  - versionName: 6.1.2l
+    versionCode: 1086
+    commit: 78daf05ac6a5c3a1eb85b6cf604e4510490f4968
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y protobuf-compiler unzip
+    gradle:
+      - libre
+    srclibs:
+      - rustup@1.27.1
+    rm:
+      - app/src/main/java/ch/threema/app/libs
+      - app/libs/*
+    prebuild:
+      - sed -i -e '/exclusiveContent {/,/^        }/d' -e '/agconnect/d' ../build.gradle.kts
+      - $$rustup$$/rustup-init.sh -y --default-toolchain $(sed -n -E 's/channel =
+        "(.*)"/\1/p' ../domain/libthreema/rust-toolchain.toml) --target armv7-linux-androideabi
+        aarch64-linux-android i686-linux-android x86_64-linux-android
+      - source $HOME/.cargo/env
+      - sed -i -e '/maven {/,+14d' -e "/commandLine(\"cargo\"/a environment(\"RUSTFLAGS\",
+        \"--remap-path-prefix=$HOME/.cargo=/rust/cargo\")" -e "s|\"cargo\"|\"$(which
+        cargo)\"|g" ../domain/build.gradle.kts
+      - sed -i -e '/isEnable/d' -e "/cargo {/a cargoCommand = \"$(which cargo)\"\nrustcCommand
+        = \"$(which rustc)\"" -e "s|extraCargoBuildArguments = listOf(|extraCargoBuildArguments
+        = listOf(\"--config\", \"build.rustflags = [ '--remap-path-prefix=$HOME/.cargo=/rust/cargo'
+        ]\",|" build.gradle.kts
+    build:
+      - curl -LO https://repo1.maven.org/maven2/net/java/dev/jna/jna/5.13.0/jna-5.13.0.aar
+      - echo "3a03daf5a7212201c3a9b44f734dfc9babb3addcb5cbfa639f9f535e887925c0  jna-5.13.0.aar"
+        | sha256sum -c -
+      - unzip jna-5.13.0.aar -d jna jni/{arm64-v8a,armeabi-v7a,x86_64,x86}/libjnidispatch.so
+      - mv jna/jni/* libs
+    ndk: r25c
+
 AllowedAPKSigningKeys: 0508b53ff102b538919c834e9e6b6afba046edf67e17ca4d1ce7a4b9c3823741
 
 AutoUpdateMode: Version +l %v
 UpdateCheckMode: Tags
 UpdateCheckData: app/build.gradle.kts|defaultVersionCode = (\d+)|.|appVersion = "([\d.]+)"
-CurrentVersion: 6.1.1
-CurrentVersionCode: 1084
+CurrentVersion: 6.1.2
+CurrentVersionCode: 1086
