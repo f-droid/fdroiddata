@@ -123,10 +123,45 @@ Builds:
       - popd
       - mv $repo/better-stundenplan in.eike.better_stundenplan
 
+  - versionName: 1.2.4
+    versionCode: 5
+    commit: c6252d50605c63a3aa618e4905e9b33c8a6c1848
+    sudo:
+      - mkdir -p /home/runner/
+      - chown vagrant /home/runner/
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@stable
+    prebuild:
+      - flutterVersion=$(sed -n -E "s/^\s+flutter:\s*([0-9.]+)/\1/p" pubspec.yaml)
+      - '[[ $flutterVersion ]] || exit 1'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export repo=/home/runner/work/better-stundenplan
+      - mkdir -p $repo
+      - cd ..
+      - mv in.eike.better_stundenplan $repo/better-stundenplan
+      - pushd $repo/better-stundenplan
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter packages pub get
+      - popd
+      - mv $repo/better-stundenplan in.eike.better_stundenplan
+    scandelete:
+      - .pub-cache
+    build:
+      - export repo=/home/runner/work/better-stundenplan
+      - cd ..
+      - mv in.eike.better_stundenplan $repo/better-stundenplan
+      - pushd $repo/better-stundenplan
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk
+      - popd
+      - mv $repo/better-stundenplan in.eike.better_stundenplan
+
 AllowedAPKSigningKeys: 7c273479c24cc77dd7e9512907b63e111b18707e2ca2ab59366e881272c747a1
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 1.2.3
-CurrentVersionCode: 4
+CurrentVersion: 1.2.4
+CurrentVersionCode: 5
