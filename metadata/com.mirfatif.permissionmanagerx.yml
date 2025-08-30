@@ -199,8 +199,25 @@ Builds:
       - sed -i -e '/pref_settings_check_for_updates_default/s/true/false/' src/main/res/values/pref_keys.xml
     ndk: r25b
 
-AutoUpdateMode: Version +-fd %v
+  - versionName: v1.30-foss
+    versionCode: 130
+    commit: d7c5f1f15230297c1e70ea536b45fe2ebdafed3b
+    subdir: app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y make gcc libc-dev
+    gradle:
+      - yes
+    prebuild:
+      - sed -i -e '/maven-repo/d' ../buildSrc/build.gradle.kts ../settings.gradle.kts
+      - sed -i -e "s|createJarFromApk(apk, jar)|createJarFromApk('../'+apk, '../'+jar)|"
+        build.gradle
+      - sed -i -e '/pref_settings_check_for_updates_default/s/true/false/' src/main/res/values/pref_keys_foss.xml
+    ndk: r28c
+
+AutoUpdateMode: Version +-foss %v
 UpdateCheckMode: Tags
 UpdateCheckData: gradle/libs.versions.toml|app-code = "(\d+)"|.|app-name = "(.+)"
-CurrentVersion: v1.27
-CurrentVersionCode: 127
+CurrentVersion: v1.30
+CurrentVersionCode: 130
