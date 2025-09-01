@@ -99,7 +99,31 @@ Builds:
     prebuild: sed -i -e '/firebase/d' -e '/gms/d' {..,.}/build.gradle
     ndk: r21
 
+  - versionName: '3.0'
+    versionCode: 18
+    commit: 395b3bed3edc03f1406883e4971d99b90b43a0c5
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y ninja-build bzip2 xz-utils make automake pkg-config libtool
+        nasm meson cmake
+    gradle:
+      - yes
+    srclibs:
+      - ffmpeg-kit@v6.0.LTS
+    prebuild: sed -i -e '/firebase/d' -e '/gms/d' {..,.}/build.gradle.kts
+    scandelete:
+      - app/libs/ffmpeg-kit-full-6.0-2.aar
+    build:
+      - pushd $$ffmpeg-kit$$
+      - ANDROID_SDK_ROOT=$$SDK$$ ANDROID_NDK_ROOT=$$NDK$$ ./android.sh --disable-arm-v7a-neon
+        --disable-arm-v7a --disable-arm64-v8a --disable-x86 --enable-android-media-codec
+        --enable-android-zlib
+      - popd
+      - mv $$ffmpeg-kit$$/prebuilt/bundle-android-aar/ffmpeg-kit/ffmpeg-kit.aar libs/ffmpeg-kit-full-6.0-2.aar
+    ndk: r25c
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: '2.2'
-CurrentVersionCode: 16
+CurrentVersion: '3.0'
+CurrentVersionCode: 18
