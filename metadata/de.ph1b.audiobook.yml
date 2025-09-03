@@ -1368,8 +1368,32 @@ Builds:
       - remoteconfig/firebase
       - plugins/build
 
+  - versionName: 8.7.0
+    versionCode: 3603050
+    commit: 82186d49ec8ded7f14a71fc1b47f98bd45d0ec97
+    subdir: app
+    gradle:
+      - github
+    prebuild:
+      - sed -i -e '/crashlytics/d' -e '/googleServices/d' -e '/firebase/d' -e '/playPublish/d'
+        -e '/play {/,/^}/d' -e '/= createSigningConfig/d' build.gradle.kts
+      - sed -i -e '/review/d' ../features/review/play/build.gradle.kts
+      - sed -i -e '/crashlytics/d' ../core/logging/crashlytics/build.gradle.kts
+      - echo -e "\norg.gradle.jvmargs=-XX:MaxHeapSize=2048m" >> ../gradle.properties
+      - echo -e "\norg.gradle.unsafe.configuration-cache=false" >> ../gradle.properties
+      - sed -i -e '/includeProprietaryLibraries/s/true/false/' ../gradle.properties
+      - sed -i -e '/foojay/d' ../{.,plugins}/settings.gradle.kts
+      - sed -i -e 's/8.13.0/8.11.1/' ../settings.gradle.kts
+    scanignore:
+      - plugins/build
+    scandelete:
+      - core/remoteconfig/firebase
+
+MaintainerNotes: Scanignore the plugin built in the useless but can't disabled gradle
+  clean so we don't need to fight against fdroidserver.
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^[0-9.]+$
 UpdateCheckData: gradle/libs.versions.toml|versionCode\s*=\s*"([0-9]+)"|.|versionName\s*=\s*"(.+)"
-CurrentVersion: 8.6.2
-CurrentVersionCode: 3603049
+CurrentVersion: 8.7.0
+CurrentVersionCode: 3603050
