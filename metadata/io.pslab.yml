@@ -4,14 +4,14 @@ License: Apache-2.0
 AuthorName: FOSSASIA
 AuthorEmail: dev@fossasia.org
 WebSite: https://pslab.io/
-SourceCode: https://github.com/fossasia/pslab-android
-IssueTracker: https://github.com/fossasia/pslab-android/issues
-Changelog: https://github.com/fossasia/pslab-android/releases
+SourceCode: https://github.com/fossasia/pslab-app
+IssueTracker: https://github.com/fossasia/pslab-app/issues
+Changelog: https://github.com/fossasia/pslab-app/releases
 
 AutoName: PSLab
 
 RepoType: git
-Repo: https://github.com/fossasia/pslab-android
+Repo: https://github.com/fossasia/pslab-app
 
 Builds:
   - versionName: 2.1.0
@@ -55,8 +55,32 @@ Builds:
     prebuild: sed -i -e 's/versionCode =.*/versionCode = $$VERCODE$$/' -e 's/versionName
       =.*/versionName = "$$VERSION$$"/' build.gradle.kts
 
+  - versionName: 4.0.1
+    versionCode: 310
+    commit: v4.0.1
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@stable
+    prebuild:
+      - sed -i -e 's/8.12.2/8.11.1/' android/settings.gradle
+      - sed -i -e '/LOCAL_KEY_PRESENT/d' android/app/build.gradle
+      - flutterVersion=$(sed -n -E "s/.*flutter:\ '(.*)'/\1/p" pubspec.yaml| head
+        -n1)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter packages pub get
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export PATH=$$flutter$$/bin/:$PATH
+      - $$flutter$$/bin/flutter build apk --build-name $$VERSION$$ --build-number
+        $$VERCODE$$
+
 AutoUpdateMode: Version v%v
 UpdateCheckMode: HTTP
-UpdateCheckData: https://github.com/fossasia/pslab-android/releases/latest/download/versionCode.txt|(\d+)|https://github.com/fossasia/pslab-android/releases/latest|releases/tag/v([\d.]+)
-CurrentVersion: 3.2.17
-CurrentVersionCode: 166
+UpdateCheckData: https://github.com/fossasia/pslab-app/releases/latest/download/versionCode.txt|(\d+)|https://github.com/fossasia/pslab-app/releases/latest|releases/tag/v([\d.]+)
+CurrentVersion: 4.0.1
+CurrentVersionCode: 310
