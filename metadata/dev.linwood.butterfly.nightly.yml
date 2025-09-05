@@ -3251,8 +3251,37 @@ Builds:
       - export PUB_CACHE=$(pwd)/.pub-cache
       - $$flutter$$/bin/flutter build apk --flavor nightly
 
+  - versionName: 2.4.0-rc.0
+    versionCode: 146
+    commit: 4850d976e944cb23bcbdffc9eb2e31cb66640a78
+    subdir: app
+    output: build/app/outputs/flutter-apk/app-nightly-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - app/ios
+      - app/linux
+      - app/macos
+      - app/web
+      - app/windows
+    prebuild:
+      - sed -i -e '/signingConfig =/,+4d' android/app/build.gradle.kts
+      - flutterVersion=$(sed -n -E "s/^  flutter:\ (.*)/\1/p" pubspec.yaml)
+      - '[[ $flutterVersion ]] || exit 1'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+      - sed -i -e 's/8.12.2/8.11.1/' android/settings.gradle.kts
+      - sed -i -e 's/8.12.1/8.11.1/' .pub-cache/hosted/pub.dev/{{file_selector,path_provider,shared_preferences,url_launcher}_android,camera_android_camerax,flutter_plugin_android_lifecycle}-*/android/build.gradle
+    scandelete:
+      - app/.pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --flavor nightly
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v.+$
 UpdateCheckData: app/pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 2.4.0-beta.3
-CurrentVersionCode: 145
+CurrentVersion: 2.4.0-rc.0
+CurrentVersionCode: 146
