@@ -1001,8 +1001,42 @@ Builds:
       - ../build.sh --fdroid
     ndk: 27.3.13750724
 
+  - versionName: '2025.9'
+    versionCode: 25099000
+    commit: 6c49c5c51700df55809f7fdf813ac92274f5179a
+    timeout: 10800
+    subdir: android/app
+    sudo:
+      - apt-get update
+      - apt-get install -y build-essential protobuf-compiler libprotobuf-dev
+    init: NDK_PATH="$$NDK$$" ../fdroid-build/init.sh
+    output: build/outputs/apk/ossProd/fdroid/app-oss-prod-fdroid-unsigned.apk
+    rm:
+      - desktop
+      - graphics
+      - ios
+      - windows
+      - building/sigstore
+      - android/lib/billing
+    prebuild:
+      - git -C ../.. submodule update --init --recursive --depth=1 wireguard-go-rs
+        android/rust-android-gradle-plugin
+      - sed -i -e 's|Repositories.GradlePlugins|"https://plugins.gradle.org/m2/"|'
+        ../build.gradle.kts
+      - sed -i -e '/foojay/d' ../rust-android-gradle-plugin/settings.gradle.kts
+      - sed -i -e '/jvmToolchain/s/11/17/' ../rust-android-gradle-plugin/plugin/build.gradle.kts
+      - sed -i -e '/billing/d' ../settings.gradle.kts
+      - sed -i -e '/projects.lib.billing/d' build.gradle.kts
+      - sed -i '/\"desktop\//d' ../../Cargo.toml
+    scanignore:
+      - android/rust-android-gradle-plugin/plugin/build.gradle.kts
+    build:
+      - NDK_PATH="$$NDK$$" source ../fdroid-build/env.sh
+      - ../build.sh --fdroid
+    ndk: r27d
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^android/[0-9]{4}\.[0-9]+$
 UpdateCheckData: dist-assets/android-version-code.txt|(\d+)|dist-assets/android-version-name.txt|(.+)
-CurrentVersion: '2025.6'
-CurrentVersionCode: 25069000
+CurrentVersion: '2025.9'
+CurrentVersionCode: 25099000
