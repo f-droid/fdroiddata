@@ -586,7 +586,33 @@ Builds:
       - popd
     ndk: r23c
 
+  - versionName: 2.58.0
+    versionCode: 2580000
+    commit: 93943823495a6a6cea14938161735a4560223cfb
+    subdir: app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y bzip2 cmake g++ make
+    gradle:
+      - yes
+    rm:
+      - binary/jni/openssl/fuzz/corpora
+      - binary/jni/openssl/cloudflare-quiche/quiche/deps/boringssl/src/fuzz
+      - binary/jni/openssl/cloudflare-quiche/fuzz
+    prebuild:
+      - sed -i -e 's/enable true/enable false/' build.gradle
+      - echo -e "\norg.gradle.jvmargs=-Xmx4096m" >> ../gradle.properties
+      - sed -i -e 's|boostorg.jfrog.io/artifactory/main|archives.boost.io|' ../binary/jni/boost/build-android.sh
+    scandelete:
+      - binary/jni/openssl
+    build:
+      - pushd ../binary/jni
+      - ./build.sh -d
+      - popd
+    ndk: r23c
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 2.57.0
-CurrentVersionCode: 2570000
+CurrentVersion: 2.58.0
+CurrentVersionCode: 2580000
