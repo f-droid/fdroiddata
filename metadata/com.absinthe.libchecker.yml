@@ -282,8 +282,32 @@ Builds:
     scandelete:
       - build-logic/build
 
+  - versionName: 2.5.2
+    versionCode: 2441
+    commit: 2.5.2
+    subdir: app
+    sudo:
+      - echo "deb https://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
+      - apt-get update
+      - apt-get install -y -t trixie openjdk-21-jdk-headless
+      - update-alternatives --auto java
+    gradle:
+      - foss
+    rm:
+      - app/ohos
+    prebuild:
+      - sed -i -e '/versionName =/s/verName/"$$VERSION$$"/' ../build-logic/src/main/kotlin/Projects.kt
+      - sed -i -e '/configure<CrashlyticsExtension> {/,+2d' build.gradle.kts
+      - sed -i -e '/gms/d' -e '/crashlytics/d' {..,.}/build.gradle.kts
+      - sed -i -e '/foojay/d' ../settings.gradle.kts
+      - sed -i -e '/agp/s/8.13.0/8.11.1/' ../gradle/libs.versions.toml
+    scanignore:
+      - app/src/main/assets/anim/*.json.zip
+    scandelete:
+      - build-logic/build
+
 AutoUpdateMode: Version %v
 UpdateCheckMode: HTTP
 UpdateCheckData: https://github.com/LibChecker/LibChecker/releases/latest/download/version_code.txt|versionCode=(\d+)|.|versionName=([\d.]+)\..+
-CurrentVersion: 2.5.1
-CurrentVersionCode: 2343
+CurrentVersion: 2.5.2
+CurrentVersionCode: 2441
