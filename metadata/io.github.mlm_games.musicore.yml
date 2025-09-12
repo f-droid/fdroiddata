@@ -1,0 +1,67 @@
+Categories:
+  - Multimedia
+License: MIT
+AuthorName: MLM Games
+AuthorEmail: mlm.gamestudio@gmail.com
+AuthorWebSite: https://ragebreaker.itch.io/
+SourceCode: https://github.com/mlm-games/musicore-libre
+IssueTracker: https://github.com/mlm-games/musicore-libre/issues
+Changelog: https://github.com/mlm-games/musicore-libre/blob/HEAD/CHANGELOG.md
+Donate: https://github.com/sponsors/mlm-games
+Liberapay: mlm-games
+
+AutoName: Musicore
+
+RepoType: git
+Repo: https://github.com/mlm-games/musicore-libre.git
+Binaries: https://github.com/mlm-games/musicore-libre/releases/download/v%v/musicore-%v-android-universal.apk
+
+Builds:
+  - versionName: 1.4.3
+    versionCode: 25
+    commit: aa1ba778a99805f44459328c6d2c0c71bb3e9241
+    submodules: true
+    sudo:
+      - mkdir -p /home/runner/work/musicore-libre
+      - chown -R vagrant /home/runner
+    output: build/app/outputs/flutter-apk/app-release.apk
+    rm:
+      - ios
+      - macos
+      - linux
+      - windows
+      - web
+    prebuild:
+      - export repo=/home/runner/work/musicore-libre/musicore-libre
+      - cd ..
+      - mv io.github.mlm_games.musicore $repo
+      - pushd $repo
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export SOURCE_DATE_EPOCH=$(git log -1 --format=%ct)
+      - submodules/flutter/bin/flutter config --no-analytics
+      - submodules/flutter/bin/flutter pub get --enforce-lockfile
+      - popd
+      - mv $repo io.github.mlm_games.musicore
+    scanignore:
+      - submodules/flutter/bin/cache
+    scandelete:
+      - submodules/flutter
+      - .pub-cache
+    build:
+      - export repo=/home/runner/work/musicore-libre/musicore-libre
+      - cd ..
+      - mv io.github.mlm_games.musicore $repo
+      - pushd $repo
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - submodules/flutter/bin/flutter build apk --release
+      - popd
+      - mv $repo io.github.mlm_games.musicore
+    ndk: r27
+
+AllowedAPKSigningKeys: 4aed2f691df64a7b0fea25a6b8c80183c6dc520e049dac0178defa1d6472228f
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 1.4.3
+CurrentVersionCode: 25
