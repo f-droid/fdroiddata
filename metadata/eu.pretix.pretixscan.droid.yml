@@ -1188,53 +1188,6 @@ Builds:
         ../libpretixui-repo/android-libusbcameracommon/usbCameraCommon.aar
     ndk: r25c
 
-  - versionName: 3.0.0-beta2
-    versionCode: 101
-    commit: a9911f1ec0178f6ecaa9559e6da4f365b6bfa265
-    subdir: pretixscan/app
-    submodules: true
-    sudo:
-      - apt-get update
-      - apt-get install -y file make maven
-    gradle:
-      - pretix
-    srclibs:
-      - pretix-uvccamera@ad0ee922357254fddb9c92739de336df4f42dd9a
-      - saki4510t-libcommon@2.12.4
-    prebuild:
-      - sed -i -e '/foojay/d' ../settings.gradle
-      - sed -i -e '/repositories {/a mavenLocal()' ../build.gradle
-      - sed -i -e '/languageVersion/d' ../libpretixsync-repo/libpretixsync/build.gradle
-      - sed -i -e '/repositories {/a mavenLocal()' ../libpretixui-repo/libpretixui-android/build.gradle
-      - sed -i -e '/saki4510t/d' -e '/repositories {/a mavenLocal()' $$pretix-uvccamera$$/build.gradle
-      - sed -i -e '/dependencies {/a implementation "androidx.appcompat:appcompat:1.7.1"'
-        $$pretix-uvccamera$$/libuvccamera/build.gradle
-      - cp ../../local.properties $$pretix-uvccamera$$/
-      - sed -i -e 's/-XX:MaxPermSize=512m//' $$saki4510t-libcommon$$/gradle.properties
-      - sed -i -e 's/4.4/7.3.3/' $$saki4510t-libcommon$$/gradle/wrapper/gradle-wrapper.properties
-      - sed -i -e 's/3.1.4/7.2.2/' $$saki4510t-libcommon$$/build.gradle
-      - sed -i -e "/'maven'/,\$c apply plugin:'maven-publish'\nafterEvaluate {publishing
-        {publications {release(MavenPublication) {groupId = 'com.serenegiant'\nartifactId
-        = 'common'\nversion = '2.12.4'\nfrom components.release}}}}" $$saki4510t-libcommon$$/common/build.gradle
-    scandelete:
-      - pretixscan/libpretixui-repo
-    build:
-      - pushd $$saki4510t-libcommon$$/common
-      - gradle assembleRelease
-      - gradle publishToMavenLocal
-      - popd
-      - cp $$saki4510t-libcommon$$/common/build/outputs/aar/common-release.aar ../libpretixui-repo/android-libserenegiantcommon/common.aar
-      - pushd $$pretix-uvccamera$$/libuvccamera
-      - gradle assembleRelease
-      - cd ../usbCameraCommon
-      - gradle assembleRelease
-      - popd
-      - cp $$pretix-uvccamera$$/libuvccamera/build/outputs/aar/libuvccamera-release.aar
-        ../libpretixui-repo/android-libuvccamera/libuvccamera.aar
-      - cp $$pretix-uvccamera$$/usbCameraCommon/build/outputs/aar/usbCameraCommon-release.aar
-        ../libpretixui-repo/android-libusbcameracommon/usbCameraCommon.aar
-    ndk: r25c
-
   - versionName: 3.0.0-beta4
     versionCode: 103
     commit: ccc3b8d498e9f41e4d641616a378a6c29bde6ed8
