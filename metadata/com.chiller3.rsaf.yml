@@ -46,10 +46,44 @@ Builds:
       - gradle rcbridge
     ndk: r28b
 
+  - versionName: '3.16'
+    versionCode: 200704
+    commit: 86c6481e601c5c4d87b429c69815d0de101307ff
+    subdir: app
+    sudo:
+      - echo "deb https://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
+      - apt-get update
+      - apt-get install -t bookworm-backports -y golang-go
+      - apt-get install -y -t trixie openjdk-21-jdk-headless
+      - update-alternatives --auto java
+    gradle:
+      - yes
+    srclibs:
+      - go@go1.25.1
+    prebuild:
+      - sdkmanager "platforms;android-35" "build-tools;35.0.0"
+      - export GO_VERSION=$(sed -n 's/toolchain \(go.*\)/\1/p' ../rcbridge/go.mod)
+      - '[[ $GO_VERSION ]]'
+      - git -C $$go$$ checkout -f $GO_VERSION
+      - sed -i -e 's|-target=android|-target=android/arm64|' -e 's/include(.*)/include("arm64-v8a")/'
+        -e '/GOTOOLCHAIN/d' build.gradle.kts
+    scanignore:
+      - build.gradle.kts
+      - app/build.gradle.kts
+    build:
+      - pushd $$go$$/src
+      - ./make.bash
+      - popd
+      - export GOROOT=$$go$$
+      - export GOPATH="$HOME/go"
+      - export PATH="$GOROOT/bin:$GOPATH/bin:$PATH"
+      - gradle rcbridge
+    ndk: 28.2.13676358
+
 AllowedAPKSigningKeys: b2506499bea1c5a6e658f07be6773fe486999dc124204c6522af7407503ac9f9
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: metadata/version.txt|(\d+)||
-CurrentVersion: '3.15'
-CurrentVersionCode: 200448
+CurrentVersion: '3.16'
+CurrentVersionCode: 200704
