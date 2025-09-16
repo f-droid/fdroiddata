@@ -12,42 +12,9 @@ Repo: https://github.com/chenxiaolong/RSAF.git
 Binaries: https://github.com/chenxiaolong/RSAF/releases/download/v%v/RSAF-%v-arm64-v8a-release.apk
 
 Builds:
-  - versionName: '3.15'
-    versionCode: 200448
-    commit: 2bc1e1f453a5c78156791e34f75ea67ad2a9a6c6
-    subdir: app
-    sudo:
-      - echo "deb https://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
-      - apt-get update
-      - apt-get install -t bookworm-backports -y golang-go
-      - apt-get install -y -t trixie openjdk-21-jdk-headless
-      - update-alternatives --auto java
-    gradle:
-      - yes
-    srclibs:
-      - go@go1.25.1
-    prebuild:
-      - sdkmanager "platforms;android-35" "build-tools;35.0.0"
-      - export GO_VERSION=$(sed -n 's/toolchain \(go.*\)/\1/p' ../rcbridge/go.mod)
-      - '[[ $GO_VERSION ]]'
-      - git -C $$go$$ checkout -f $GO_VERSION
-      - sed -i -e 's|-target=android|-target=android/arm64|' -e 's/include(.*)/include("arm64-v8a")/'
-        -e '/GOTOOLCHAIN/d' build.gradle.kts
-    scanignore:
-      - build.gradle.kts
-      - app/build.gradle.kts
-    build:
-      - pushd $$go$$/src
-      - ./make.bash
-      - popd
-      - export GOROOT=$$go$$
-      - export GOPATH="$HOME/go"
-      - export PATH="$GOROOT/bin:$GOPATH/bin:$PATH"
-      - gradle rcbridge
-    ndk: r28b
-
   - versionName: '3.16'
     versionCode: 200704
+    disable: https://github.com/chenxiaolong/RSAF/issues/50
     commit: 86c6481e601c5c4d87b429c69815d0de101307ff
     subdir: app
     sudo:
