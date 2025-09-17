@@ -8,8 +8,8 @@ IssueTracker: https://github.com/fbarthelery/geekttrss/issues
 
 AutoName: Geekttrss
 
-RepoType: hg
-Repo: https://hg.elyzion.net/geekttrss/geekttrss
+RepoType: git
+Repo: https://github.com/fbarthelery/geekttrss.git
 Binaries: https://github.com/fbarthelery/geekttrss/releases/download/%v/geekttrss-%v-free-release.apk
 
 Builds:
@@ -45,10 +45,27 @@ Builds:
     prebuild: gradle clean
     build: gradle packageFreeReleaseUniversalApk
 
+  - versionName: 1.6.9
+    versionCode: 1070379
+    commit: b235abf993a6b7d68982ce35870a2ef3a9921043
+    subdir: app
+    output: build/outputs/apk_from_bundle/freeRelease/app-free-release-universal-unsigned.apk
+    prebuild:
+      - sed -i -e '/gms/d' -e '/foojay/d' ../settings.gradle.kts
+      - sed -i -e '/firebase/d' -e '/gms/d' ../build.gradle.kts
+      - sed -i -e '/firebase/d' -e '/android.play/d' -e '/android.gms/d' -e '/google-services/d'
+        -e '/CrashlyticsPlugin/,+4d' -e '/apply {/,/^}/d' build.gradle.kts
+      - sed -i -e "s/unknown/hg:$(sed -n -E 's/(.*) $$VERSION$$/\1/p' ../.hgtags)/"
+        ../buildSrc/src/main/kotlin/RepositoryChangeset.kt
+      - sed -i -e 's/$versionCode/$$VERCODE$$/' ../buildSrc/src/main/kotlin/RepositoryChangeset.kt
+      - rm -fr ../.git
+      - gradle clean
+    build: gradle packageFreeReleaseUniversalApk
+
 AllowedAPKSigningKeys: 3ee607c1a61b33402027589a6270bb5f6617950d1530826d1c3d1f5031394320
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: versions/version_codes.json|"(\d+)"||
-CurrentVersion: 1.6.7
-CurrentVersionCode: 1068249
+CurrentVersion: 1.6.9
+CurrentVersionCode: 1070379
