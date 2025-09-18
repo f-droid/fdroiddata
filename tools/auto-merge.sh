@@ -15,11 +15,24 @@ function retry {
   echo $output
 }
 
-echo "Rebasing..."
-retry $glab mr rebase $mr --skip-ci
-
 echo "Merging..."
-retry $glab mr merge $mr --auto-merge=false --rebase --yes
+while status=$(glab api projects/:id/merge_requests/$mr | jq -r '.detailed_merge_status'); do
+  if [[ $status = "approvals_syncing" || $status = "checking" ]]; then
+    continue
+  elif [[ $status = "need_rebase" ]]; then
+    echo "Rebasing..."
+    retry $glab mr rebase $mr --skip-ci
+  elif [[ $status = "mergeable" ]]; then
+    glab api --method PUT projects/:id/merge_requests/$mr/merge 2>&1 > /dev/null
+    if [[ $? = 0 ]]; then
+      break
+    fi
+  else
+    echo "Failed to merge $mr: $status"
+    exit 0
+  fi
+done
+
 echo "Canceling pipelines..."
 merged_commit=$(retry $glab mr view $mr -F json | jq -r 'if .squash then .squash_commit_sha else .sha end')
 head_pipelines=$(retry $glab ci list -F json | jq -r 'map(select(.sha == "'$merged_commit'" and (.source == "push" or .source == "merge_request_event")) | .id)[]')
