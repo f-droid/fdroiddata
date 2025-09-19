@@ -71,10 +71,70 @@ Builds:
       - flutter build apk --release --no-tree-shake-icons --split-per-abi --target-platform="android-arm64"
     ndk: 28.1.13356709
 
+  - versionName: 0.9.24
+    versionCode: 283
+    commit: v0.9.24
+    timeout: 36000
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y cmake make m4 pkg-config python-is-python3 python3-venv
+        tcl gyp ninja-build bzip2 libffi-dev libsqlite3-dev binutils-dev clang-16
+        lld-16 libssl-dev npm
+    output: build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+    srclibs:
+      - MozFennec@FIREFOX-ANDROID_143_0_RELEASE
+      - MozAppServices@v143.0
+      - MozGlean@v64.5.5
+      - MozGleanAS@v64.5.4
+      - gmscore@v0.3.9.250932
+      - rustup@1.28.2
+      - wasi-sdk@wasi-sdk-20
+      - llvm@3b5e7c83a6e226d5bd7ed2e9b67449b64812074c
+      - llvm_android@4de061b7b428ebac7a6f71abe1cf2d03ebb00ee5
+      - toolchain-utils@dd1ee45a84cb07337f9d5d0a6769d9b865c6e620
+      - MozFennecComponents@ff72d5aadb6fe7d34c3b4e586a2422e19fa1c268
+      - flutter@stable
+      - transistor-background-fetch@ca8d2f7a9cf1880dfaf9bcb2c2176fab19e0b124
+    prebuild:
+      - $$MozFennecComponents$$/prebuild.sh arm64-v8a
+      - sed -i -e 's/maven {.*background_fetch.*/mavenLocal()/' android/build.gradle
+      - sed -i 's/maven { name "Mozilla"; url "https:\/\/maven\.mozilla\.org\/maven2"
+        }/mavenLocal()/' ../packages/flutter_mozilla_components/android/build.gradle
+      - flutterVersion=$(sed -n -E "s/.*flutter-version:\ '?([^']*)'?/\1/p" ../.github/workflows/build.yml)
+      - '[[ $flutterVersion ]] || exit 1'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export PATH=$PUB_CACHE/bin/:$$flutter$$/bin/:$PATH
+      - flutter config --no-analytics
+      - flutter pub global activate melos
+      - melos bootstrap
+      - sed -i -e '/maven {/,/^        }/cmavenLocal()' $PUB_CACHE/hosted/pub.dev/background_fetch-*/android/build.gradle
+    scandelete:
+      - app/.pub-cache
+    build:
+      - pushd ../packages/flutter_mozilla_components/javascript/container_proxy
+      - npm ci
+      - npx webpack
+      - popd
+      - $$MozFennecComponents$$/build.sh
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export PATH=$PUB_CACHE/bin/:$$flutter$$/bin/:$PATH
+      - pushd $$transistor-background-fetch$$/android/tsbackgroundfetch/
+      - gradle assembleRelease
+      - gradle publishToMavenLocal
+      - popd
+      - flutter config --no-analytics
+      - flutter build apk --release --no-tree-shake-icons --split-per-abi --target-platform="android-arm64"
+    ndk: 28.2.13676358
+
+MaintainerNotes: Scanner detects 'com/google/android/gms/...' from microG libs for
+  webauth
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 VercodeOperation:
   - 10 * %c + 3
 UpdateCheckData: app/pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 0.9.17
-CurrentVersionCode: 233
+CurrentVersion: 0.9.24
+CurrentVersionCode: 283
