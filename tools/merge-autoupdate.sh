@@ -13,7 +13,7 @@ function retry {
 }
 
 echo "Fecthing MR list..."
-mr_list=$(retry $glab mr list --author checkupdates-bot --per-page 100 -F json | jq -r 'map(.iid)[]')
+mr_list=$(retry $glab mr list --author checkupdates-bot --per-page 100 -F json | jq -r 'map(select(.labels | map(. != "waiting-for-upstream") | all) | .iid)[]')
 for mr in $mr_list; do
   mr_stat=$(retry $glab mr view $mr -F json)
   if [[ $(echo $mr_stat | jq -r '.labels | map(. == "fdroid-bot") | any') == "false" ]]; then
