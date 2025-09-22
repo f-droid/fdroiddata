@@ -62,7 +62,7 @@ Please read the [General Recommendations](#general-recommendations) before you s
 1. Clone your fork.
 1. Create and checkout a new branch.
    Naming it like the app name or, much better, the app id makes it easier to keep track of your contributions.
-1. Create a new file in the the `metadata` directory named after the following schema: `<application_id>.yml`.
+1. Create a new file in the `metadata` directory named after the following schema: `<application_id>.yml`.
    So an example would be _"com.app.example.yml"_.
 1. Write down the metadata in that file. The [Build Metadata Reference](https://f-droid.org/en/docs/Build_Metadata_Reference)
    as well as the [templates](./templates/README.md)
