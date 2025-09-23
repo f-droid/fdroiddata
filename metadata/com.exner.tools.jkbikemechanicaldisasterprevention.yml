@@ -313,9 +313,25 @@ Builds:
         'assets/schemas/com.exner.tools.jkbikemechanicaldisasterprevention.database.KJsDatabase/12.json'
         'assets/schemas/com.exner.tools.jkbikemechanicaldisasterprevention.database.KJsDatabase/13.json'
 
+  - versionName: 3.4.0
+    versionCode: 19
+    commit: 4d3111c7253812f41f09a7d8492ee051265f27b3
+    subdir: app
+    sudo:
+      - export CPUS_MAX=4
+      - export CPUS=$(getconf _NPROCESSORS_ONLN)
+      - for (( c=$CPUS_MAX; c<$CPUS; c++ )) ; do echo 0 > /sys/devices/system/cpu/cpu$c/online
+        ; done
+    gradle:
+      - yes
+    srclibs:
+      - reproducible-apk-tools@v0.3.0
+    postbuild: $$reproducible-apk-tools$$/inplace-fix.py --page-size 16 fix-newlines
+      $$OUT$$ 'META-INF/services/*' 'assets/schemas/com.exner.tools.jkbikemechanicaldisasterprevention.database.KJsDatabase/*.json'
+
 AllowedAPKSigningKeys: 07a89b9b74e8d980673671912166ace204c2f73523cd631b933cb4f77ac4a2cf
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 3.3.1
-CurrentVersionCode: 18
+CurrentVersion: 3.4.0
+CurrentVersionCode: 19
