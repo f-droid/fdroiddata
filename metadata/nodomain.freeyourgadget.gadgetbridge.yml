@@ -2141,6 +2141,8 @@ Builds:
       - update-alternatives --auto java
     gradle:
       - mainline
+    srclibs:
+      - reproducible-apk-tools@v0.3.0
     rm:
       - external/jerryscript/tools/babel/package.json
     scanignore:
@@ -2153,8 +2155,16 @@ Builds:
     build:
       - cd ../external
       - ./build_fossil_hr_gbapps.sh
+    postbuild:
+      - mv $$OUT$$ unaligned.apk
+      - $$reproducible-apk-tools$$/zipalign.py --page-size 4 --pad-like-apksigner
+        --replace unaligned.apk $$OUT$$
 
-AutoUpdateMode: Version
+AllowedAPKSigningKeys:
+  - 01cce9316fcb77ea02c6dea81fde9f3176469202c0cea0514c0e03cb969bc7be
+  - a2c2222dbefbb55158dab7fd7cd6da83a009e3ae1bc1e371c1f865c5455652f0
+
+AutoUpdateMode: None
 UpdateCheckMode: Tags
 CurrentVersion: 0.87.1
 CurrentVersionCode: 242
