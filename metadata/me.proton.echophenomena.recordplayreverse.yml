@@ -1,0 +1,49 @@
+Categories:
+  - Multimedia
+License: GPL-3.0-only
+AuthorName: Echo
+SourceCode: https://github.com/echo-lalia/recordplayreverse
+IssueTracker: https://github.com/echo-lalia/recordplayreverse/issues
+Donate: https://ko-fi.com/echo_lalia
+
+RepoType: git
+Repo: https://github.com/echo-lalia/recordplayreverse.git
+
+Builds:
+  - versionName: '1.2'
+    versionCode: 2
+    commit: ebbeae83676f1bd2fb8cbd51b51562aed2a4b58d
+    sudo:
+      - apt-get update
+      - apt-get install -y clang gettext pkg-config scons
+    output: app/recordPlayReverse.apk
+    srclibs:
+      - Godot@3c7f9b937214068bc892be0d2bd9a8a7026edae1
+    build:
+      - export JAVA_HOME=$(dirname $(dirname $(readlink -f $(which javac))))
+      - export ANDROID_SDK_ROOT=$$SDK$$
+      - pushd $$Godot$$
+      - scons -j `nproc` platform=linuxbsd use_llvm=yes target=editor profile=fdroid/godot-build-options.py
+      - scons -j `nproc` platform=android use_llvm=yes target=template_release arch=arm32
+        profile=fdroid/godot-build-options.py
+      - scons -j `nproc` platform=android use_llvm=yes target=template_release arch=arm64
+        profile=fdroid/godot-build-options.py
+      - cd platform/android/java
+      - gradle generateGodotTemplates
+      - popd
+      - sed -i -e 's:\(^.*package/signed\)\s*=.*$:\1 = false:' app/export_presets.cfg
+      - sed -i -e '/custom_template\/release/s|=.*|="$$Godot$$/bin/android_release.apk"|'
+        app/export_presets.cfg
+      - $$Godot$$/bin/godot.linuxbsd.* --path app --headless --import
+      - export GODOT_CFG=$(ls ~/.config/godot/editor_settings-*.tres)
+      - sed -i -e "s:\(^.*java_sdk_path\)\s*=.*$:\1 = "$JAVA_HOME":" $GODOT_CFG
+      - sed -i -e 's:\(^.*android_sdk_path\)\s*=.*$:\1 = "$$SDK$$":' $GODOT_CFG
+      - $$Godot$$/bin/godot.linuxbsd.* -v --path app --headless --export-release Android
+        recordPlayReverse.apk
+    ndk: r28b
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: app/export_presets.cfg|version/code=(\d+)|app/project.godot|config/version="([\d.]+)"
+CurrentVersion: '1.2'
+CurrentVersionCode: 2
