@@ -1,0 +1,54 @@
+Categories:
+  - Sports & Health
+License: GPL-3.0-or-later
+WebSite: https://therapiefinder.org
+SourceCode: https://codeberg.org/Therapiefinder/Therapiefinder
+IssueTracker: https://codeberg.org/Therapiefinder/Therapiefinder/issues
+
+RepoType: git
+Repo: https://codeberg.org/Therapiefinder/Therapiefinder.git
+
+Builds:
+  - versionName: '0.5'
+    versionCode: 5
+    commit: 1f0ddf47921cf4fe6f49b134001204b3f46a6505
+    sudo:
+      - apt-get update
+      - apt-get install -y npm
+    init:
+      - sed -i -e '1a "expo":{"autolinking":{"android":{"buildFromSource":[".*"]}}},'
+        package.json
+      - npm install --build-from-source
+    output: android/app/build/outputs/apk/release/app-release.apk
+    srclibs:
+      - notifee@@notifee/react-native@9.1.8
+    prebuild:
+      - npx expo prebuild --platform android --clean
+      - echo 'android { dependenciesInfo { includeInApk = false; includeInBundle =
+        false } }' >> android/app/build.gradle
+    scanignore:
+      - android/build.gradle
+      - node_modules/react-native/sdks/hermesc/linux64-bin/hermesc
+      - node_modules/@notifee/react-native/android/build.gradle
+      - node_modules/@react-native-picker/picker/android/build.gradle
+      - node_modules/react-native-reanimated/android/build.gradle
+      - node_modules/react-native-safe-area-context/android/build.gradle
+      - node_modules/@react-native-async-storage/async-storage/android/build.gradle
+      - node_modules/react-native-edge-to-edge/android/build.gradle
+      - node_modules/react-native-screens/android/build.gradle
+    scandelete:
+      - node_modules
+    build:
+      - pushd $$notifee$$/android
+      - gradle publishAarPublicationToMavenRepository
+      - popd
+      - rm -rf node_modules/@notifee/react-native/android/libs
+      - mv $$notifee$$/packages/react-native/android/libs node_modules/@notifee/react-native/android/
+      - cd android
+      - gradle assembleRelease
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: app.json|"versionCode":\s(\d+)|.|"version":\s"([\d.]+)"
+CurrentVersion: '0.5'
+CurrentVersionCode: 5
