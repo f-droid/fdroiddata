@@ -51,10 +51,28 @@ Builds:
         break; sha256sum apk/assets/dexopt/baseline.prof; rm -fr apk; taskset -c 0-5
         gradle clean assembleRelease; done
 
+  - versionName: 3.0.2
+    versionCode: 220
+    commit: 7a8133c459686f045bf6dc86e8fcb80c698c5d24
+    subdir: app
+    gradle:
+      - yes
+    binary: https://github.com/samolego/Canta/releases/download/%v/app-release.apk
+    rm:
+      - docs
+    postbuild:
+      - curl -Lo upstream.apk https://github.com/samolego/Canta/releases/download/$$VERSION$$/app-release.apk
+      - unzip -q upstream.apk -d apk
+      - export hash=$(sha256sum apk/assets/dexopt/baseline.prof)
+      - rm -rf apk upstream.apk
+      - for i in {1..10}; do unzip -q $$OUT$$ -d apk; sha256sum -c - <<< $hash &&
+        break; sha256sum apk/assets/dexopt/baseline.prof; rm -fr apk; taskset -c 0-5
+        gradle clean assembleRelease; done
+
 AllowedAPKSigningKeys: 0a2640317c43272188c3e13194c15460691f12c39ea19bba727dd67fb56289d4
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: app/gradle.properties|version_code=(\d+)|.|version_name=(.+)
-CurrentVersion: 3.0.1
-CurrentVersionCode: 219
+CurrentVersion: 3.0.2
+CurrentVersionCode: 220
