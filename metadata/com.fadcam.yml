@@ -96,9 +96,53 @@ Builds:
     postbuild: $$reproducible-apk-tools$$/inplace-fix.py --page-size 16 fix-newlines
       $$OUT$$ 'META-INF/services/*'
 
+  - versionName: 3.0.1
+    versionCode: 31
+    commit: 920fd6804e5f0628e430980e6b79bb4713ba81ec
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y make autoconf automake libtool pkg-config curl doxygen
+        nasm cmake gcc gperf texinfo yasm bison autogen wget autopoint meson ninja-build
+        ragel groff gtk-doc-tools libtasn1-6-dev libtasn1-bin libgnutls28-dev libunistring-dev
+      - echo "deb https://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
+      - apt-get update
+      - apt-get install -t trixie openjdk-21-jdk-headless
+      - update-alternatives --auto java
+      - mkdir -p /home/faded/Documents/Documents/repos
+      - chown -R vagrant /home/faded/
+    gradle:
+      - default
+    output: build/outputs/apk/default/release/app-default-universal-release-unsigned.apk
+    srclibs:
+      - anonfaded-ffmpeg-kit-16KB@d633c47ca4b47acfc07542e9566b04dfe061af82
+      - anonfaded-media3-patched@5a2877edf1ea0db9bc35dfd8b286a8d38539b06f
+    rm:
+      - app/libs/ffmpeg-kit-full-6.0-2.LTS.aar
+      - design-assets
+    prebuild:
+      - sed -i -e '/signingConfigs.getByName/d' -e '/releaseSigningConfigValid/,+1d'
+        build.gradle.kts
+      - sed -i -e 's|/tmp/media3-patched|$$anonfaded-media3-patched$$|' ../settings.gradle.kts
+      - sdkmanager "ndk;27.3.13750724"
+      - rm $$SDK$$/ndk/27.3.13750724/toolchains/llvm/prebuilt/linux-x86_64/lib/*.a
+    build:
+      - export repo=/home/faded/Documents/Documents/repos/ffmpeg-kit-16KB
+      - mv $$anonfaded-ffmpeg-kit-16KB$$ $repo
+      - pushd $repo
+      - JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64 ANDROID_SDK_ROOT=$$SDK$$ ANDROID_NDK_ROOT=$$SDK$$/ndk/27.3.13750724
+        ./android.sh --disable-x86 --disable-x86-64 --disable-arm-v7a-neon --enable-openssl
+        --enable-freetype --enable-lame --enable-libiconv --enable-libtheora --enable-libvorbis
+        --enable-libvpx --enable-libwebp --enable-opus --enable-soxr --enable-libpng
+        --enable-jpeg --enable-zimg --enable-x264 --enable-gpl --enable-android-media-codec
+        --api-level=28
+      - popd
+      - mv $repo/prebuilt/bundle-android-aar/ffmpeg-kit/*.aar libs/ffmpeg-kit-full-6.0-2.LTS.aar
+    ndk: r27
+
 AllowedAPKSigningKeys: 999e27d8ee66a67319db6827e0f8549c37624601b86f0108c6970413279ef1d4
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v[\d.]+$
-CurrentVersion: 1.5.0
-CurrentVersionCode: 16
+CurrentVersion: 3.0.1
+CurrentVersionCode: 31
