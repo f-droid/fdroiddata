@@ -1,0 +1,73 @@
+AntiFeatures:
+  NonFreeNet:
+    en-US: Rely on inmet.gov.br, antennativa.com.br and tidesandcurrents.noaa.gov
+      for some features.
+Categories:
+  - Internet
+  - Science & Education
+License: MIT
+AuthorName: Vinícius Vieira
+SourceCode: https://github.com/V1n1v131r4/prepapp
+IssueTracker: https://github.com/V1n1v131r4/prepapp/issues
+Changelog: https://github.com/V1n1v131r4/prepapp/releases
+
+AutoName: PrepApp
+
+RepoType: git
+Repo: https://github.com/V1n1v131r4/prepapp.git
+Binaries: https://github.com/V1n1v131r4/prepapp/releases/download/%v/prepapp-%v-release-signed.apk
+
+Builds:
+  - versionName: 1.0.6-fdroid
+    versionCode: 1000006
+    commit: 7eb9959e6a763eee552268ef4d0d5abe2cbf53a1
+    sudo:
+      - mkdir -p /Users/vinicius.vieira/development
+      - chown -R vagrant /Users
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@stable
+      - reproducible-apk-tools@v0.3.0
+    rm:
+      - ios
+      - linux
+      - macos
+      - web
+      - windows
+    prebuild:
+      - export repo=/Users/vinicius.vieira/development/prepapp_fdroid
+      - cd ..
+      - mv com.bunqr.prepapp.fdroid $repo
+      - pushd $repo
+      - flutterVersion=$(sed -n -E 's/^[[:space:]]*flutter:[[:space:]]*"([^"]+)".*$/\1/p'
+        pubspec.yaml | head -n1)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f "$flutterVersion"
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+      - popd
+      - mv $repo com.bunqr.prepapp.fdroid
+    scandelete:
+      - .pub-cache
+    build:
+      - export repo=/Users/vinicius.vieira/development/prepapp_fdroid
+      - cd ..
+      - mv com.bunqr.prepapp.fdroid $repo
+      - pushd $repo
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release
+      - popd
+      - mv $repo com.bunqr.prepapp.fdroid
+    postbuild:
+      - mv $$OUT$$ unaligned.apk
+      - $$reproducible-apk-tools$$/zipalign.py --page-size 4 --pad-like-apksigner
+        --replace unaligned.apk $$OUT$$
+
+AllowedAPKSigningKeys: 9aaadac43a9dc8003e0e20bcbee4f18dd670ec79ce232834a11805c1e7fe1425
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: pubspec.yaml|version:\s.*\+(\d+)|.|version:\s(.*)\+
+CurrentVersion: 1.0.6-fdroid
+CurrentVersionCode: 1000006
