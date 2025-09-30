@@ -603,6 +603,10 @@ repo/index.html:
     - apt-get -qy install --no-install-recommends linkchecker tidy
     - export EXITVALUE=0
     - function set_error() { export EXITVALUE=1; printf "\x1b[31mERROR `history|tail -2|head -1|cut -b 6-500`\x1b[0m\n"; }
+    # include fake APK for linkchecker
+    - for f in $(grep -Eo '[^"]+/org\.fdroid\.fdroid_[0-9]+\.apk' repo/index.html | sort -u); do
+          (cd repo; mkdir -p $(dirname $f); touch $f ${f}.asc);
+      done
     - linkchecker repo/index.html || set_error
     - tidy repo/index.html || set_error
     - exit $EXITVALUE
