@@ -2893,6 +2893,266 @@ Builds:
       - cp -f $$matrix-olm$$/javascript/olm.wasm ../../node_modules/@matrix-org/olm/
     ndk: 27.1.12297006
 
+  - versionName: 25.5.1
+    versionCode: 25050101
+    commit: 1013f4a01b84721adeafacb8834b7f20769243b5
+    subdir: android/app
+    sudo:
+      - apt-get update
+      - apt-get install -y cmake emscripten esbuild make npm
+      - sysctl fs.inotify.max_user_watches=524288
+    gradle:
+      - yes
+    srclibs:
+      - matrix-olm@3.2.3
+    prebuild:
+      - sdkmanager 'ndk;27.1.12297006' 'ndk;26.1.10909125'
+      - sed -i -e '/if (googleServicesEnabled) {/,+2d' -e '/firebase/d' -e '/gms/d'
+        ../build.gradle build.gradle
+      - sed -i -e '/targetSdkVersion/auseExoplayerIMA = false' -e '/targetSdkVersion/aRNVUseExoplayerIMA
+        = false' ../build.gradle
+      - sed -i -e 's/libreBuild =.*$/libreBuild = true/g' ../build.gradle
+      - sed -i -e 's/vcode =.*$/vcode = $$VERCODE$$/g' -e '/play-services-auth/d'
+        build.gradle
+      - export LIBRE_BUILD=true
+      - npm install --build-from-source
+      - sed -i -e '/play-services/d' ../../node_modules/react-native-device-info/android/build.gradle
+      - sed -i -e '/installReferrerVersion/,+11d' ../../node_modules/react-native-device-info/android/build.gradle
+      - sed -i -e "/leakcanary/a implementation(project(':react-native-device-info'))
+        { exclude group\x3a 'com.google.firebase'\\ exclude group\x3a 'com.google.android.gms'\\
+        exclude group\x3a 'com.android.installreferrer'\\ }" -e "s/'armeabi-v7a',
+        'arm64-v8a', 'x86', 'x86_64'/'armeabi-v7a'/" build.gradle
+      - sed -E -i 's/^.*google.*play.*services.*$//g' ../../node_modules/@react-native-google-signin/google-signin/android/build.gradle
+      - sed -i -e '/extension-ima/d' ../../node_modules/react-native-video/android/build.gradle
+      - sed -i -e '/amplitude/d' -e '/giphy/d' -e '/google-signin/d' ../settings.gradle
+      - export olmVersion=$(grep "matrix-org/olm" ../../package.json | cut -d "-"
+        -f6 | cut -d "." -f1-3)
+      - cd $$matrix-olm$$
+      - git checkout $olmVersion
+      - sed -i -e 's/Wno-error=closure//' -e 's/--closure 1//' Makefile
+    scanignore:
+      - android/build.gradle
+      - android/app/build.gradle
+      - android/sdk/build.gradle
+      - node_modules/jsc-android
+      - node_modules/react-native/sdks/hermesc/linux64-bin/hermesc
+      - node_modules/@react-native-async-storage/async-storage/android/build.gradle
+      - node_modules/@react-native-community/netinfo/android/build.gradle
+      - node_modules/react-native-device-info/android/build.gradle
+      - node_modules/react-native-get-random-values/android/build.gradle
+      - node_modules/react-native-pager-view/android/build.gradle
+      - node_modules/react-native-performance/android/build.gradle
+      - node_modules/react-native-safe-area-context/android/build.gradle
+      - node_modules/react-native-screens/android/build.gradle
+      - node_modules/react-native-svg/android/build.gradle
+      - node_modules/react-native-video/android/build.gradle
+      - node_modules/react-native-webview/android/build.gradle
+      - node_modules/@sayem314/react-native-keep-awake/android/build.gradle
+      - react-native-sdk/android/build.gradle
+    scandelete:
+      - node_modules/
+      - react
+    build:
+      - pushd $$matrix-olm$$
+      - make -j$(nproc) js
+      - popd
+      - cp -f $$matrix-olm$$/javascript/olm.wasm ../../node_modules/@matrix-org/olm/
+
+  - versionName: 25.5.1
+    versionCode: 25050102
+    commit: 1013f4a01b84721adeafacb8834b7f20769243b5
+    subdir: android/app
+    sudo:
+      - apt-get update
+      - apt-get install -y cmake emscripten esbuild make npm
+      - sysctl fs.inotify.max_user_watches=524288
+    gradle:
+      - yes
+    srclibs:
+      - matrix-olm@3.2.3
+    prebuild:
+      - sdkmanager 'ndk;27.1.12297006' 'ndk;26.1.10909125'
+      - sed -i -e '/if (googleServicesEnabled) {/,+2d' -e '/firebase/d' -e '/gms/d'
+        ../build.gradle build.gradle
+      - sed -i -e '/targetSdkVersion/auseExoplayerIMA = false' -e '/targetSdkVersion/aRNVUseExoplayerIMA
+        = false' ../build.gradle
+      - sed -i -e 's/libreBuild =.*$/libreBuild = true/g' ../build.gradle
+      - sed -i -e 's/vcode =.*$/vcode = $$VERCODE$$/g' -e '/play-services-auth/d'
+        build.gradle
+      - export LIBRE_BUILD=true
+      - npm install --build-from-source
+      - sed -i -e '/play-services/d' ../../node_modules/react-native-device-info/android/build.gradle
+      - sed -i -e '/installReferrerVersion/,+11d' ../../node_modules/react-native-device-info/android/build.gradle
+      - sed -i -e "/leakcanary/a implementation(project(':react-native-device-info'))
+        { exclude group\x3a 'com.google.firebase'\\ exclude group\x3a 'com.google.android.gms'\\
+        exclude group\x3a 'com.android.installreferrer'\\ }" -e "s/'armeabi-v7a',
+        'arm64-v8a', 'x86', 'x86_64'/'arm64-v8a'/" build.gradle
+      - sed -E -i 's/^.*google.*play.*services.*$//g' ../../node_modules/@react-native-google-signin/google-signin/android/build.gradle
+      - sed -i -e '/extension-ima/d' ../../node_modules/react-native-video/android/build.gradle
+      - sed -i -e '/amplitude/d' -e '/giphy/d' -e '/google-signin/d' ../settings.gradle
+      - export olmVersion=$(grep "matrix-org/olm" ../../package.json | cut -d "-"
+        -f6 | cut -d "." -f1-3)
+      - cd $$matrix-olm$$
+      - git checkout $olmVersion
+      - sed -i -e 's/Wno-error=closure//' -e 's/--closure 1//' Makefile
+    scanignore:
+      - android/build.gradle
+      - android/app/build.gradle
+      - android/sdk/build.gradle
+      - node_modules/jsc-android
+      - node_modules/react-native/sdks/hermesc/linux64-bin/hermesc
+      - node_modules/@react-native-async-storage/async-storage/android/build.gradle
+      - node_modules/@react-native-community/netinfo/android/build.gradle
+      - node_modules/react-native-device-info/android/build.gradle
+      - node_modules/react-native-get-random-values/android/build.gradle
+      - node_modules/react-native-pager-view/android/build.gradle
+      - node_modules/react-native-performance/android/build.gradle
+      - node_modules/react-native-safe-area-context/android/build.gradle
+      - node_modules/react-native-screens/android/build.gradle
+      - node_modules/react-native-svg/android/build.gradle
+      - node_modules/react-native-video/android/build.gradle
+      - node_modules/react-native-webview/android/build.gradle
+      - node_modules/@sayem314/react-native-keep-awake/android/build.gradle
+      - react-native-sdk/android/build.gradle
+    scandelete:
+      - node_modules/
+      - react
+    build:
+      - pushd $$matrix-olm$$
+      - make -j$(nproc) js
+      - popd
+      - cp -f $$matrix-olm$$/javascript/olm.wasm ../../node_modules/@matrix-org/olm/
+
+  - versionName: 25.5.1
+    versionCode: 25050103
+    commit: 1013f4a01b84721adeafacb8834b7f20769243b5
+    subdir: android/app
+    sudo:
+      - apt-get update
+      - apt-get install -y cmake emscripten esbuild make npm
+      - sysctl fs.inotify.max_user_watches=524288
+    gradle:
+      - yes
+    srclibs:
+      - matrix-olm@3.2.3
+    prebuild:
+      - sdkmanager 'ndk;27.1.12297006' 'ndk;26.1.10909125'
+      - sed -i -e '/if (googleServicesEnabled) {/,+2d' -e '/firebase/d' -e '/gms/d'
+        ../build.gradle build.gradle
+      - sed -i -e '/targetSdkVersion/auseExoplayerIMA = false' -e '/targetSdkVersion/aRNVUseExoplayerIMA
+        = false' ../build.gradle
+      - sed -i -e 's/libreBuild =.*$/libreBuild = true/g' ../build.gradle
+      - sed -i -e 's/vcode =.*$/vcode = $$VERCODE$$/g' -e '/play-services-auth/d'
+        build.gradle
+      - export LIBRE_BUILD=true
+      - npm install --build-from-source
+      - sed -i -e '/play-services/d' ../../node_modules/react-native-device-info/android/build.gradle
+      - sed -i -e '/installReferrerVersion/,+11d' ../../node_modules/react-native-device-info/android/build.gradle
+      - sed -i -e "/leakcanary/a implementation(project(':react-native-device-info'))
+        { exclude group\x3a 'com.google.firebase'\\ exclude group\x3a 'com.google.android.gms'\\
+        exclude group\x3a 'com.android.installreferrer'\\ }" -e "s/'armeabi-v7a',
+        'arm64-v8a', 'x86', 'x86_64'/'x86'/" build.gradle
+      - sed -E -i 's/^.*google.*play.*services.*$//g' ../../node_modules/@react-native-google-signin/google-signin/android/build.gradle
+      - sed -i -e '/extension-ima/d' ../../node_modules/react-native-video/android/build.gradle
+      - sed -i -e '/amplitude/d' -e '/giphy/d' -e '/google-signin/d' ../settings.gradle
+      - export olmVersion=$(grep "matrix-org/olm" ../../package.json | cut -d "-"
+        -f6 | cut -d "." -f1-3)
+      - cd $$matrix-olm$$
+      - git checkout $olmVersion
+      - sed -i -e 's/Wno-error=closure//' -e 's/--closure 1//' Makefile
+    scanignore:
+      - android/build.gradle
+      - android/app/build.gradle
+      - android/sdk/build.gradle
+      - node_modules/jsc-android
+      - node_modules/react-native/sdks/hermesc/linux64-bin/hermesc
+      - node_modules/@react-native-async-storage/async-storage/android/build.gradle
+      - node_modules/@react-native-community/netinfo/android/build.gradle
+      - node_modules/react-native-device-info/android/build.gradle
+      - node_modules/react-native-get-random-values/android/build.gradle
+      - node_modules/react-native-pager-view/android/build.gradle
+      - node_modules/react-native-performance/android/build.gradle
+      - node_modules/react-native-safe-area-context/android/build.gradle
+      - node_modules/react-native-screens/android/build.gradle
+      - node_modules/react-native-svg/android/build.gradle
+      - node_modules/react-native-video/android/build.gradle
+      - node_modules/react-native-webview/android/build.gradle
+      - node_modules/@sayem314/react-native-keep-awake/android/build.gradle
+      - react-native-sdk/android/build.gradle
+    scandelete:
+      - node_modules/
+      - react
+    build:
+      - pushd $$matrix-olm$$
+      - make -j$(nproc) js
+      - popd
+      - cp -f $$matrix-olm$$/javascript/olm.wasm ../../node_modules/@matrix-org/olm/
+
+  - versionName: 25.5.1
+    versionCode: 25050104
+    commit: 1013f4a01b84721adeafacb8834b7f20769243b5
+    subdir: android/app
+    sudo:
+      - apt-get update
+      - apt-get install -y cmake emscripten esbuild make npm
+      - sysctl fs.inotify.max_user_watches=524288
+    gradle:
+      - yes
+    srclibs:
+      - matrix-olm@3.2.3
+    prebuild:
+      - sdkmanager 'ndk;27.1.12297006' 'ndk;26.1.10909125'
+      - sed -i -e '/if (googleServicesEnabled) {/,+2d' -e '/firebase/d' -e '/gms/d'
+        ../build.gradle build.gradle
+      - sed -i -e '/targetSdkVersion/auseExoplayerIMA = false' -e '/targetSdkVersion/aRNVUseExoplayerIMA
+        = false' ../build.gradle
+      - sed -i -e 's/libreBuild =.*$/libreBuild = true/g' ../build.gradle
+      - sed -i -e 's/vcode =.*$/vcode = $$VERCODE$$/g' -e '/play-services-auth/d'
+        build.gradle
+      - export LIBRE_BUILD=true
+      - npm install --build-from-source
+      - sed -i -e '/play-services/d' ../../node_modules/react-native-device-info/android/build.gradle
+      - sed -i -e '/installReferrerVersion/,+11d' ../../node_modules/react-native-device-info/android/build.gradle
+      - sed -i -e "/leakcanary/a implementation(project(':react-native-device-info'))
+        { exclude group\x3a 'com.google.firebase'\\ exclude group\x3a 'com.google.android.gms'\\
+        exclude group\x3a 'com.android.installreferrer'\\ }" -e "s/'armeabi-v7a',
+        'arm64-v8a', 'x86', 'x86_64'/'x86_64'/" build.gradle
+      - sed -E -i 's/^.*google.*play.*services.*$//g' ../../node_modules/@react-native-google-signin/google-signin/android/build.gradle
+      - sed -i -e '/extension-ima/d' ../../node_modules/react-native-video/android/build.gradle
+      - sed -i -e '/amplitude/d' -e '/giphy/d' -e '/google-signin/d' ../settings.gradle
+      - export olmVersion=$(grep "matrix-org/olm" ../../package.json | cut -d "-"
+        -f6 | cut -d "." -f1-3)
+      - cd $$matrix-olm$$
+      - git checkout $olmVersion
+      - sed -i -e 's/Wno-error=closure//' -e 's/--closure 1//' Makefile
+    scanignore:
+      - android/build.gradle
+      - android/app/build.gradle
+      - android/sdk/build.gradle
+      - node_modules/jsc-android
+      - node_modules/react-native/sdks/hermesc/linux64-bin/hermesc
+      - node_modules/@react-native-async-storage/async-storage/android/build.gradle
+      - node_modules/@react-native-community/netinfo/android/build.gradle
+      - node_modules/react-native-device-info/android/build.gradle
+      - node_modules/react-native-get-random-values/android/build.gradle
+      - node_modules/react-native-pager-view/android/build.gradle
+      - node_modules/react-native-performance/android/build.gradle
+      - node_modules/react-native-safe-area-context/android/build.gradle
+      - node_modules/react-native-screens/android/build.gradle
+      - node_modules/react-native-svg/android/build.gradle
+      - node_modules/react-native-video/android/build.gradle
+      - node_modules/react-native-webview/android/build.gradle
+      - node_modules/@sayem314/react-native-keep-awake/android/build.gradle
+      - react-native-sdk/android/build.gradle
+    scandelete:
+      - node_modules/
+      - react
+    build:
+      - pushd $$matrix-olm$$
+      - make -j$(nproc) js
+      - popd
+      - cp -f $$matrix-olm$$/javascript/olm.wasm ../../node_modules/@matrix-org/olm/
+
 MaintainerNotes: |-
   3 directories are currently (scan)ignored as they contain binaries which are currently deemed acceptable for inclusion
     - React Native
@@ -2906,5 +3166,5 @@ MaintainerNotes: |-
 ArchivePolicy: 12
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: 25.4.0
-CurrentVersionCode: 25040004
+CurrentVersion: 25.5.1
+CurrentVersionCode: 25050104
