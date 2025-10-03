@@ -97,8 +97,26 @@ Builds:
       - export PUB_CACHE=$(pwd)/.pub-cache
       - $$flutter$$/bin/flutter build apk --release
 
+  - versionName: 2.1.0
+    versionCode: 12
+    commit: 40bf7b31626d4f7298f219f3ee1f33f1a10b311d
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@3.35.3
+    prebuild:
+      - sed -i -e '/keystorePropertiesFile/d' android/app/build.gradle.kts
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+      - sed -i -e 's/8.12.1/8.11.1/' .pub-cache/hosted/pub.dev/{package_info_plus,{path_provider,shared_preferences,sqflite}_android,flutter_plugin_android_lifecycle}-*/android/build.gradle
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 2.0.0
-CurrentVersionCode: 11
+CurrentVersion: 2.1.0
+CurrentVersionCode: 12
