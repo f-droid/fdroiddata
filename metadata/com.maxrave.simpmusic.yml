@@ -262,49 +262,33 @@ Builds:
         ../ffmpeg-kit/ffmpeg-kit-release.aar
     ndk: r22b
 
-  - versionName: 0.2.20
-    versionCode: 39
-    disable: https://github.com/maxrave-dev/SimpMusic/issues/1267
-    commit: e04496222b5fec4339aafe7114b3cb93cf60c1ca
-    subdir: app
+  - versionName: 1.0.1-hf
+    versionCode: 43
+    commit: 371e73f2b78e197fcd1c93327dae5eaf47459814
+    subdir: composeApp
     submodules: true
     sudo:
+      - echo "deb https://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
+      - apt-get update
+      - apt-get install -y -t trixie openjdk-21-jdk-headless
+      - update-alternatives --auto java
       - export CPUS_MAX=16
       - export CPUS=$(getconf _NPROCESSORS_ONLN)
       - for (( c=$CPUS_MAX; c<$CPUS; c++ )) ; do echo 0 > /sys/devices/system/cpu/cpu$c/online
         ; done
-      - apt-get update
-      - apt-get install -y make autoconf automake libtool pkg-config curl doxygen
-        nasm cmake gcc gperf texinfo yasm bison autogen wget autopoint meson ninja-build
-        ragel groff gtk-doc-tools libtasn1-6-dev libtasn1-bin libgnutls28-dev libunistring-dev
-      - mkdir -p /home/runner/work/ffmpeg-kit
-      - chown vagrant /home/runner/work/ffmpeg-kit
     gradle:
-      - foss
-    output: build/outputs/apk/foss/release/app-foss-universal-release-unsigned.apk
+      - yes
     binary: https://github.com/maxrave-dev/SimpMusic/releases/download/v%v/SimpMusic-foss-universal-release.apk
-    srclibs:
-      - maxrave-dev-ffmpeg-kit@9b487fccce5dad5772d4d2ed22d3be37b6ff2321
+    prebuild:
+      - sed -i -e '/jogamp/d' -e '/foojay/d' ../settings.gradle.kts
+      - sed -i -e '/isEnable/d' build.gradle.kts
     scandelete:
-      - ffmpeg-kit
       - MediaServiceCore/SharedModules
-    build:
-      - mv $$maxrave-dev-ffmpeg-kit$$ /home/runner/work/ffmpeg-kit/ffmpeg-kit
-      - pushd /home/runner/work/ffmpeg-kit/ffmpeg-kit
-      - JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64 ANDROID_SDK_ROOT=$$SDK$$ ANDROID_NDK_ROOT=$$NDK$$
-        ./android.sh -l --enable-gpl --enable-lame --enable-libilbc --enable-libvorbis
-        --enable-opencore-amr --enable-opus --enable-shine --enable-soxr --enable-speex
-        --enable-twolame --enable-vo-amrwbenc --enable-android-media-codec --enable-android-zlib
-        --disable-arm-v7a --disable-x86
-      - popd
-      - mv /home/runner/work/ffmpeg-kit/ffmpeg-kit/prebuilt/bundle-android-aar-lts/ffmpeg-kit/*.aar
-        ../ffmpeg-kit/ffmpeg-kit-release.aar
-    ndk: r22b
 
 AllowedAPKSigningKeys: 76c53bd813ae8f1ce2778f7814b515785719bf9a82c6bee03b8b2dfd706055a1
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: gradle/libs.versions.toml|version-code="(\d+)"|.|version-name="(.*)"
-CurrentVersion: 0.2.20
-CurrentVersionCode: 39
+CurrentVersion: 1.0.1-hf
+CurrentVersionCode: 43
