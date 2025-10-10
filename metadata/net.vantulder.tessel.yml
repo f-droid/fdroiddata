@@ -1,0 +1,48 @@
+Categories:
+  - Games
+License: GPL-3.0-or-later
+AuthorName: Gijs van Tulder
+AuthorWebSite: https://www.vantulder.net/
+WebSite: https://tessel.vantulder.net/
+SourceCode: https://github.com/gvtulder/tessel
+IssueTracker: https://github.com/gvtulder/tessel/issues
+Changelog: https://github.com/gvtulder/tessel/releases
+
+AutoName: Tessel
+
+RepoType: git
+Repo: https://github.com/gvtulder/tessel.git
+Binaries: https://github.com/gvtulder/tessel/releases/download/v%v/tessel-v%v.apk
+
+Builds:
+  - versionName: 0.9.1
+    versionCode: 901
+    commit: v0.9.1
+    subdir: android/app
+    sudo:
+      - curl -Lo node.tar.gz https://nodejs.org/download/release/v22.20.0/node-v22.20.0-linux-x64.tar.gz
+      - echo "eeaccb0378b79406f2208e8b37a62479c70595e20be6b659125eb77dd1ab2a29 node.tar.gz"
+        | sha256sum -c -
+      - tar xzf node.tar.gz --strip-components=1 -C /usr/local/
+      - echo "deb https://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
+      - apt-get update
+      - apt-get install -y -t trixie openjdk-21-jdk-headless
+      - update-alternatives --auto java
+    gradle:
+      - yes
+    prebuild:
+      - cd ../..
+      - npm ci
+      - npm run build-cap-html
+      - npx cap telemetry off
+      - npx cap sync
+    scandelete:
+      - node_modules
+      - .parcel-cache/
+
+AllowedAPKSigningKeys: e505799c9beec31b95a9ff1c3d650b0812260cc1401c7b260ac5f37cd8a9abe4
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: 0.9.1
+CurrentVersionCode: 901
