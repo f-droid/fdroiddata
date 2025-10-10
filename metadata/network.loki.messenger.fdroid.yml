@@ -2024,10 +2024,42 @@ Builds:
       - gradle publishToMavenLocal
     ndk: r27
 
+  - versionName: 1.28.1
+    versionCode: 4265
+    commit: 3f11fd39b948ec01f69871985934e817f9423898
+    subdir: app
+    submodules: true
+    sudo:
+      - echo "deb https://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
+      - apt-get update
+      - apt-get install -y -t trixie openjdk-21-jdk-headless
+      - update-alternatives --auto java
+    gradle:
+      - website
+    srclibs:
+      - libsession-util-android@0a27299d3754ad1c07b88616b810bbe4eee61204
+    prebuild:
+      - sed -i -e '/gms/d' -e 's/raw.github.com.*"/jitpack.io"/' -e 's|developer.huawei.com/repo/|jitpack.io|'
+        -e 's/oxen.rocks.*"/jitpack.io"/' -e '/repositories {/a mavenLocal()' ../build.gradle.kts
+      - sed -i -e '/google.services/d' -e '/isEnable/d' -e '/defaultConfig/a applicationIdSuffix
+        = ".fdroid"' -e '/setAlternativeAppName/s/null/"Session F-Droid"/' -e '/setAuthorityPostfix/s/""/".fdroid"/'
+        build.gradle.kts
+      - sed -i -e '/c2dm/d' src/main/AndroidManifest.xml
+      - sdkmanager 'cmake;3.22.1'
+      - sed -i -e 's/8.13.0/8.11.1/' ../gradle/libs.versions.toml
+    scandelete:
+      - build-logic/build
+    build:
+      - sed -i -e 's/1.0.8-1-g27817b4/dev-snapshot/' ../gradle/libs.versions.toml
+      - cd $$libsession-util-android$$
+      - gradle assembleRelease
+      - gradle publishToMavenLocal
+    ndk: r27
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 VercodeOperation:
   - 10*%c + 5
 UpdateCheckData: app/build.gradle.kts|canonicalVersionCode\s=\s(\d+)|.|canonicalVersionName\s=\s"([\d.]+)"
-CurrentVersion: 1.28.0
-CurrentVersionCode: 4215
+CurrentVersion: 1.28.1
+CurrentVersionCode: 4265
