@@ -115,8 +115,26 @@ Builds:
       - export PUB_CACHE=$(pwd)/.pub-cache
       - $$flutter$$/bin/flutter build apk --release
 
+  - versionName: 2.2.0
+    versionCode: 13
+    commit: 1b99304d036e8fde5d42d17b03e900eeb711eaf7
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@3.35.3
+    prebuild:
+      - sed -i -e '/keystorePropertiesFile/d' android/app/build.gradle.kts
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+      - sed -i -e 's/8.12.1/8.11.1/' .pub-cache/hosted/pub.dev/{package_info_plus,{path_provider,shared_preferences,sqflite}_android,flutter_plugin_android_lifecycle}-*/android/build.gradle
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 2.1.0
-CurrentVersionCode: 12
+CurrentVersion: 2.2.0
+CurrentVersionCode: 13
