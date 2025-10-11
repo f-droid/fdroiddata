@@ -1,0 +1,82 @@
+Categories:
+  - Gallery
+  - Local Media Player
+  - Online Media Player
+License: GPL-3.0-only
+WebSite: https://fedilab.app/
+SourceCode: https://codeberg.org/tom79/CastLab
+IssueTracker: https://codeberg.org/tom79/CastLab/issues
+Translation: https://hosted.weblate.org/projects/castlab/
+Changelog: https://codeberg.org/tom79/CastLab/tags
+Donate: https://www.paypal.com/paypalme/Mastalab
+Liberapay: tom79
+Bitcoin: 3JDoJV7qf8fcmrUeYbT7hrH91PUQpg8HhS
+
+AutoName: CastLab
+
+RepoType: git
+Repo: https://codeberg.org/tom79/CastLab.git
+
+Builds:
+  - versionName: 1.0.7
+    versionCode: 7
+    commit: 5d0c5a716bc4f3be38ad629731d32bba25edbb42
+    sudo:
+      - apt-get update
+      - apt-get install -y nodejs npm build-essential cmake golang-go gcc-multilib
+        g++-multilib
+    output: android/app/build/outputs/apk/release/app-release-unsigned.apk
+    srclibs:
+      - esbuild@v0.24.0
+      - firebase-stub@4ae5aec1bf1fc3f2dfbc8e545b00b83d8a15dab8
+    prebuild:
+      - npm install --legacy-peer-deps
+      - sed -i -e '1a "expo":{"autolinking":{"android":{"buildFromSource":[".*"]}}},'
+        package.json
+      - sed -i -e '/installreferrer/d' node_modules/expo-application/android/build.gradle
+      - sed -i -e '/com.android.installreferrer.api/d' -e '/StringBuilder()/,/^      })/d'
+        -e '/getInstallReferrerAsync/apromise.resolve("")' node_modules/expo-application/android/src/main/java/expo/modules/application/ApplicationModule.kt
+      - sed -i -e '/firebase/d' node_modules/expo-notifications/android/build.gradle
+      - cp -a $$firebase-stub$$/firebase-messaging/src node_modules/expo-notifications/android
+      - npx expo prebuild --platform android --clean
+      - rm -fr ios
+      - sed -i -e 's/react-android:0\.76\.[0-9]/react-android:0.79.5/g' android/app/build.gradle
+      - sed -i -e 's/react-android:0\.76\.[0-9]/react-android:0.79.5/g' android/build.gradle
+      - sed -i -e '/signingConfig /d' android/app/build.gradle
+      - cd android
+      - gradle clean
+    scanignore:
+      - android/build.gradle
+      - node_modules/react-native/sdks/hermesc/linux64-bin/hermesc
+      - node_modules/expo-modules-autolinking/scripts/android/autolinking_implementation.gradle
+      - node_modules/expo-modules-core/android/ExpoModulesCorePlugin.gradle
+      - node_modules/@react-native-async-storage/async-storage/android/build.gradle
+      - node_modules/react-native-safe-area-context/android/build.gradle
+      - node_modules/@react-native-community/netinfo/android/build.gradle
+      - node_modules/react-native-permissions/android/build.gradle
+      - node_modules/react-native-udp/android/build.gradle
+      - node_modules/react-native-screens/android/build.gradle
+      - node_modules/react-native-vector-icons/android/build.gradle
+      - node_modules/react-native-edge-to-edge/android/build.gradle
+      - node_modules/react-native-svg/android/build.gradle
+    scandelete:
+      - node_modules
+    build:
+      - pushd $$esbuild$$
+      - make esbuild
+      - popd
+      - cp $$esbuild$$/esbuild node_modules/@esbuild/linux-x64/bin
+      - cp $$esbuild$$/esbuild node_modules/esbuild/bin/esbuild
+      - cp $$esbuild$$/esbuild node_modules/@esbuild-kit/core-utils/node_modules/esbuild/bin/
+      - cp $$esbuild$$/esbuild node_modules/@esbuild-kit/core-utils/node_modules/@esbuild/linux-x64/bin/
+      - cd android
+      - gradle assembleRelease
+
+MaintainerNotes: Binary scanner detects `com/google/firebase` classes from firebase-stub
+  srclib.
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: app.json|"versionCode":\s(\d+)|.|"version":\s"([\d.]+)"
+CurrentVersion: 1.0.7
+CurrentVersionCode: 7
