@@ -1086,10 +1086,52 @@ Builds:
       - $$flutter$$/bin/flutter build apk --flavor beta
     ndk: r25c
 
+  - versionName: 7.10.0
+    versionCode: 4194479
+    commit: 610a20d442ada3caa59e5e03d95f094bdf1c8a51
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y -t bookworm-backports golang-go
+    output: build/app/outputs/flutter-apk/app-beta-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+      - test
+      - .idea
+      - .reuse
+      - .vscode
+    prebuild:
+      - sed -i -e 's/8.13.0/8.11.1/' android/settings.gradle
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export version=$(grep "^FLUTTER_VERSION" ci_scripts/install_flutter.sh | cut
+        -d "\"" -f2)
+      - pushd $$flutter$$
+      - git checkout -f $version
+      - popd
+      - sdkmanager 'platforms;android-34' 'build-tools;34.0.0'
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+      - sed -i -e 's/8.12.1/8.11.1/' .pub-cache/hosted/pub.dev/{package_info_plus,{url_launcher,path_provider,shared_preferences}_android}-*/android/build.gradle
+      - sed -i -e 's/8.13.0/8.11.1/' .pub-cache/git/flutter_native_device_orientation-*/android/build.gradle
+    scandelete:
+      - .pub-cache
+    build:
+      - export GOPATH="$PWD/golang"
+      - export PATH="$GOPATH/bin:$PATH"
+      - go install golang.org/x/mobile/cmd/gomobile@latest
+      - gomobile init
+      - gomobile bind -target android -androidapi 19 -o android/irmagobridge/irmagobridge.aar
+        github.com/privacybydesign/irmamobile/irmagobridge
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --flavor beta
+    ndk: r25c
+
 MaintainerNotes: uses Sentry.io configured as opt-in
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v.*$
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 7.9.0
-CurrentVersionCode: 4194478
+CurrentVersion: 7.10.0
+CurrentVersionCode: 4194479
