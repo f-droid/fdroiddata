@@ -48,9 +48,42 @@ Builds:
       - popd
       - mv $repo com.github.mkalmousli.floating_volume
 
+  - versionName: 0.0.3
+    versionCode: 3
+    commit: c458fa757daf17ceaf141b2324903ad02865254c
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@stable
+    prebuild:
+      - export version=$(grep flutter .fvmrc | cut -d ":" -f2|cut -d "\"" -f2)
+      - '[[ $version ]] || exit 1'
+      - git -C $$flutter$$ checkout -f $version
+      - export repo=/tmp/app
+      - rm -rf $repo
+      - cd ..
+      - mv com.github.mkalmousli.floating_volume $repo
+      - pushd $repo
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+      - sed -i -e 's/8.12.1/8.11.1/' .pub-cache/hosted/pub.dev/shared_preferences_android-*/android/build.gradle
+      - popd
+      - mv $repo com.github.mkalmousli.floating_volume
+    scandelete:
+      - .pub-cache
+    build:
+      - export repo=/tmp/app
+      - cd ..
+      - mv com.github.mkalmousli.floating_volume $repo
+      - pushd $repo
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release
+      - popd
+      - mv $repo com.github.mkalmousli.floating_volume
+
 AllowedAPKSigningKeys: 2248c5fa900222741f2b94f0c9ed68c1590bdb27ae2ff5d72e3c5dc10601d9b9
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 0.0.1
-CurrentVersionCode: 1
+CurrentVersion: 0.0.3
+CurrentVersionCode: 3
