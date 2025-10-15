@@ -1046,14 +1046,14 @@ Builds:
       - update-alternatives --auto java
     gradle:
       - foss
-    prebuild: echo -e "\norg.gradle.project.android.aapt2FromMavenOverride=$(pwd)/aapt2"
-      >> ../gradle.properties
+    prebuild: echo -e "\nandroid.aapt2FromMavenOverride=$(pwd)/aapt2" >> ../gradle.properties
     scanignore:
       - build.gradle.kts
-    postbuild:
+    build:
       - curl -Lo aapt2.jar https://dl.google.com/android/maven2/com/android/tools/build/aapt2/8.11.2-12782657/aapt2-8.11.2-12782657-linux.jar
       - sha256sum -c <<< "dc44dab4b02f1135c4f97aadabac8dddfa1f08ff9f030a7b1aa044b44fdd8a2d  aapt2.jar"
       - unzip aapt2.jar aapt2
+    postbuild:
       - sha256sum="$( curl -L https://github.com/CatimaLoyalty/Android/releases/download/v$$VERSION$$/SHA256SUMS
         | grep -F app-foss-release-unsigned.apk | cut -c-64 | tr -cd '0-9a-f' )"
       - sha256sum -c <<< "$sha256sum  $$OUT$$"
