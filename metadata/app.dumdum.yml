@@ -1,0 +1,50 @@
+Categories:
+  - Connectivity
+  - Internet
+  - VPN & Proxy
+License: GPL-3.0-only
+AuthorName: Project Mandarin
+WebSite: https://dumdum.dev
+SourceCode: https://github.com/Project-Mandarin/DumDum
+IssueTracker: https://github.com/Project-Mandarin/DumDum/issues
+Changelog: https://github.com/Project-Mandarin/DumDum/releases
+Donate: https://github.com/Project-Mandarin/DumDum/wiki/Support-Us
+
+RepoType: git
+Repo: https://github.com/Project-Mandarin/DumDum
+
+Builds:
+  - versionName: 1.1.4
+    versionCode: 13
+    commit: 1.1.4
+    subdir: app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -t bookworm-backports -y golang-go
+      - apt-get install -y gcc libc-dev make
+    gradle:
+      - github
+    output: build/outputs/apk/github/release/DumDum-*-unsigned.apk
+    binary: https://github.com/Project-Mandarin/DumDum/releases/download/%v/DumDum-%v.apk
+    srclibs:
+      - go@go1.24.2
+    build:
+      - sdkmanager "platforms;android-35" "build-tools;35.0.1"
+      - pushd $$go$$/src
+      - ./make.bash
+      - popd
+      - export GOPATH=$$go$$
+      - export PATH="$GOPATH/bin:$PATH"
+      - bash -x ../libcore/scripts/build.sh
+      - mkdir ./libs
+      - mv ../libcore/libcore.aar ./libs/
+    ndk: r25c
+
+AllowedAPKSigningKeys: abad1c0ed026bb9840de7bb2534b4180a2d0bf513b7067e6fb7a13421243ed05
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^\d+\.\d+\.\d+$
+UpdateCheckData: dumdum.properties|VERSION_CODE=(\d+)|.|VERSION_NAME=(\d+\.\d+\.\d+)
+CurrentVersion: 1.1.4
+CurrentVersionCode: 13
