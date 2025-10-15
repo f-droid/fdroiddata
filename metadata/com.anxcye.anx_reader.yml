@@ -1,0 +1,58 @@
+Categories:
+  - Ebook Reader
+License: MIT
+AuthorName: Anxcye
+AuthorEmail: anxcye@outlook.com
+AuthorWebSite: https://anxcye.com/
+WebSite: https://anx.anxcye.com/
+SourceCode: https://github.com/Anxcye/anx-reader
+IssueTracker: https://github.com/Anxcye/anx-reader/issues
+Changelog: https://github.com/Anxcye/anx-reader/releases
+
+AutoName: Anx Reader
+
+RepoType: git
+Repo: https://github.com/Anxcye/anx-reader
+
+Builds:
+  - versionName: 1.8.1
+    versionCode: 6213
+    commit: 255ea44c5a3ccdee23fb398f2bbe3938b3b0824d
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+      - linux
+      - macos
+      - web
+      - windows
+      - lib/page/iap_page.dart
+      - lib/service/iap_service.dart
+    prebuild:
+      - sed -i -e '/in_app_purchase/d' pubspec.yaml
+      - sed -i -e '/in_app_purchase/,/version:/d' pubspec.lock
+      - sed -i -z -E -e 's/\n( +)if \(EnvVar.isAppStore\)( \{)?(\n\1 [^\n]*)*\n\1[)}][^\n]*//'
+        -e 's/[^\n]*iap_[^\n]*//g' lib/page/home_page/settings_page.dart lib/page/home_page.dart
+        lib/service/book.dart lib/page/settings_page/sync.dart
+      - sed -i -e '/isAppStore/,/ ),/d' lib/page/home_page/settings_page.dart
+      - sed -i -e '/checkUpdate/d' lib/page/home_page.dart
+      - flutterVersion=$(sed -n -E "s/^\s*FLUTTER_VERSION=(.*)/\1/p" .github/workflows/setup.yaml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+      - $$flutter$$/bin/flutter gen-l10n
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/dart run build_runner build --delete-conflicting-outputs
+      - $$flutter$$/bin/flutter build apk --release
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^v[\d.]+$
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 1.8.1
+CurrentVersionCode: 6213
