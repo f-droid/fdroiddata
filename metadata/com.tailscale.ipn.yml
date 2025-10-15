@@ -1608,9 +1608,42 @@ Builds:
       - make -C .. libtailscale
     ndk: r23b
 
+  - versionName: 1.88.4-tc18ddfa3d-g4a3522527
+    versionCode: 468
+    commit: 4a352252707c4c143de716b416c1105b875d181a
+    subdir: android
+    sudo:
+      - apt-get update
+      - apt-get install -y -t bookworm-backports golang-go
+      - apt-get install -y gcc libc-dev make zip
+    gradle:
+      - yes
+    srclibs:
+      - tailscale-go@bf15628b759344c6fc7763795a405ba65b8be5d7
+    prebuild:
+      - echo -e "\norg.gradle.jvmargs=-Xmx4096m" >> gradle.properties
+      - sdkmanager 'platforms;android-31' 'platform-tools' 'build-tools;33.0.2'
+      - sed -i -e 's|$(ANDROID_HOME)/cmdline-tools/latest/bin/sdkmanager|sdkmanager|g'
+        -e 's/list_installed/list/' ../Makefile
+      - sed -i -e 's/getVersionProperty("VERSION_LONG")/"$$VERSION$$"/' build.gradle
+    build:
+      - export TOOLCHAINREV=$(cat ../go.toolchain.rev)
+      - export TOOLCHAINDIR=$$tailscale-go$$
+      - export ANDROID_NDK_ROOT=$$NDK$$
+      - export PATH=$TOOLCHAINDIR/bin:$PATH
+      - pushd $$tailscale-go$$
+      - git checkout $TOOLCHAINREV
+      - cd src
+      - sed -i "s/TAILSCALE_GIT_REV_TO_BE_REPLACED_AT_BUILD_TIME/$TOOLCHAINREV/" runtime/debug/mod.go
+      - ./make.bash
+      - popd
+      - make -C .. env
+      - make -C .. libtailscale
+    ndk: r23b
+
 MaintainerNotes: Tracking reported at https://gitlab.com/fdroid/fdroiddata/-/issues/2601
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^\d\.\d+[02468]\.\d+-t.*$
-CurrentVersion: 1.82.4-tb45366c80-gce6fa05d5
-CurrentVersionCode: 395
+CurrentVersion: 1.88.4-tc18ddfa3d-g4a3522527
+CurrentVersionCode: 468
