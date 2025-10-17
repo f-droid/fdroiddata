@@ -72,8 +72,30 @@ Builds:
       - export PUB_CACHE=$(pwd)/.pub-cache
       - $$flutter$$/bin/flutter build apk --release
 
+  - versionName: 1.6.01
+    versionCode: 9
+    commit: a52cb0208b96948bdb98ee6fcbdb4cc57b5262e3
+    subdir: qadaa
+    output: build/app/outputs/flutter-apk/app-prod-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - qadaa/ios
+    prebuild:
+      - flutterVersion=$(sed -n -E 's/.*"flutter":\ "(.*)"/\1/p' .fvmrc)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+    scandelete:
+      - qadaa/.pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --flavor prod
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: qadaa/pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 1.6.0
-CurrentVersionCode: 8
+CurrentVersion: 1.6.01
+CurrentVersionCode: 9
