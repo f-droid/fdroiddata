@@ -36,9 +36,28 @@ Builds:
       - $$reproducible-apk-tools$$/inplace-fix.py --page-size 16 fix-newlines "$$OUT$$"
         'META-INF/services/*' 'res/iq.json'
 
+  - versionName: 1.2.1
+    versionCode: 21
+    commit: c11d8ad3f9bfe4635f5033d6d8364a835bdced80
+    subdir: app
+    gradle:
+      - yes
+    srclibs:
+      - reproducible-apk-tools@v0.3.0
+    postbuild:
+      - curl -Lo upstream.apk https://github.com/Dev-Aditya-More/PokeVerse/releases/download/v$$VERSION$$/app-release.apk
+      - unzip -q upstream.apk -d apk
+      - export hash=$(sha256sum apk/assets/dexopt/baseline.prof)
+      - rm -rf apk upstream.apk
+      - for i in {1..10}; do unzip -q $$OUT$$ -d apk; sha256sum -c - <<< $hash &&
+        break; sha256sum apk/assets/dexopt/baseline.prof; rm -fr apk; gradle clean
+        assembleRelease; done
+      - $$reproducible-apk-tools$$/inplace-fix.py --page-size 16 fix-newlines "$$OUT$$"
+        'META-INF/services/*' 'res/iq.json'
+
 AllowedAPKSigningKeys: 5ece4e9ee39f0147e9a9cd567f57a1264fb36f1ef392e07fc100a4185e81484b
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 1.2.0
-CurrentVersionCode: 20
+CurrentVersion: 1.2.1
+CurrentVersionCode: 21
