@@ -161,9 +161,36 @@ Builds:
       - gradle buildWebui
     ndk: r26d
 
+  - versionName: 0.17.0
+    versionCode: 10
+    commit: a9d8a2da0f13ddba5714a68619d9e5394684b3a4
+    subdir: komelia-app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y ninja-build pkg-config nasm automake autopoint libtool
+        gettext texinfo make libltdl-dev npm
+      - apt-get install -y -t bookworm-backports meson cmake
+    gradle:
+      - yes
+    prebuild:
+      - sed -i -e '/REQUEST_INSTALL_PACKAGES/d' src/androidMain/AndroidManifest.xml
+      - sed -i -e 's/appUpdater = appUpdater,/appUpdater = null,/' -e '/val appUpdater/d'
+        src/androidMain/kotlin/snd/komelia/Dependencies.kt
+    scandelete:
+      - third_party/jbr-api
+      - third_party/secret-service
+    build:
+      - cd ..
+      - ANDROID_NDK_PATH=$$NDK$$ ANDROID_SDK_PATH=$$SDK$$ ./cmake/android-build.sh
+        aarch64
+      - gradle android-arm64_copyJniLibs
+      - gradle buildWebui
+    ndk: r28c
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: komelia-app/build.gradle.kts|versionCode = (\d+)|gradle/libs.versions.toml|app-version
   = "(.+)"
-CurrentVersion: 0.16.0
-CurrentVersionCode: 9
+CurrentVersion: 0.17.0
+CurrentVersionCode: 10
