@@ -1,0 +1,51 @@
+Categories:
+  - Multimedia
+License: GPL-3.0-only
+AuthorName: Craig Drummond
+WebSite: https://lyrion.org/players-and-controllers/squeezelite/
+SourceCode: https://github.com/CDrummond/squeezelite
+IssueTracker: https://github.com/CDrummond/squeezelite/issues
+Changelog: https://github.com/CDrummond/squeezelite/releases
+Donate: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=2X2CTDUH27V9L&source=url
+
+AutoName: Squeezelite
+
+RepoType: git
+Repo: https://github.com/CDrummond/squeezelite
+Binaries: https://github.com/CDrummond/squeezelite/releases/download/%v/squeezelite-%v.apk
+
+Builds:
+  - versionName: 0.6.0
+    versionCode: 600
+    commit: 0.6.0
+    subdir: android/app
+    sudo:
+      - apt-get update
+      - apt-get install cmake lbzip2 libtool make meson ninja-build pkg-config xz-utils
+      - apt-get install --target-release=bookworm-backports meson
+      - mkdir -p /home/craig/Development
+      - chown -R vagrant /home/craig
+    output: build/outputs/apk/release/app-release-unsigned.apk
+    prebuild:
+      - export repo=/home/craig/Development/squeezelite
+      - cd ../../..
+      - mv org.lyrion.squeezelite $repo
+      - pushd $repo/android/app
+      - gradle clean
+      - popd
+      - mv $repo org.lyrion.squeezelite
+    build:
+      - export repo=/home/craig/Development/squeezelite
+      - cd ../../..
+      - mv org.lyrion.squeezelite $repo
+      - pushd $repo/android/app
+      - gradle assembleRelease
+      - popd
+      - mv $repo org.lyrion.squeezelite
+
+AllowedAPKSigningKeys: 6a67609cd05c37fa1e86eed06eecfb6de7b069e4210005baaba43803fe608533
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: 0.6.0
+CurrentVersionCode: 600
