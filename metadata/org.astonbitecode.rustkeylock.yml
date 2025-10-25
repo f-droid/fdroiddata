@@ -282,7 +282,54 @@ Builds:
       - cp $ANDROID_RUST_KEYLOCK_LIB_ARMV7 $ANDROID_JAVA_NATIVE_ARMV7
     ndk: r25c
 
+  - versionName: 0.16.1
+    versionCode: 1600
+    commit: 99b970ea6e7f34c2bca374c95096797037a26e69
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get -y install build-essential
+    gradle:
+      - yes
+    srclibs:
+      - rustup@1.26.0
+    target: android-34
+    build:
+      - cd ..
+      - $$rustup$$/rustup-init.sh -y --default-toolchain 1.76.0 -t aarch64-linux-android
+        armv7-linux-androideabi
+      - source $HOME/.cargo/env
+      - BASEDIR=$(pwd)
+      - export ANDROID_NDK_HOME=${ANDROID_NDK}
+      - export ANDROID_TOOLCHAIN_DIR="$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64"
+      - cd $HOME
+      - mkdir -p .cargo
+      - cd .cargo
+      - printf "[target]\n [target.armv7-linux-androideabi]\n linker = \"${ANDROID_TOOLCHAIN_DIR}/bin/armv7a-linux-androideabi24-clang\"\n
+        [target.aarch64-linux-android]\n linker = \"${ANDROID_TOOLCHAIN_DIR}/bin/aarch64-linux-android24-clang\""
+        > config
+      - export ANDROID_TOOLCHAIN=$ANDROID_TOOLCHAIN_DIR/bin
+      - export ANDROID_NDK_ROOT=${ANDROID_NDK}
+      - export ANDROID_RUST="$BASEDIR/rust"
+      - export ANDROID_RUST_KEYLOCK_LIB_AARCH64="$ANDROID_RUST/target/aarch64-linux-android/release/librustkeylockandroid.so"
+      - export ANDROID_RUST_KEYLOCK_LIB_ARMV7="$ANDROID_RUST/target/armv7-linux-androideabi/release/librustkeylockandroid.so"
+      - export ANDROID_JAVA_NATIVE_AARCH64="$BASEDIR/app/src/main/jniLibs/arm64-v8a/"
+      - export ANDROID_JAVA_NATIVE_ARMV7="$BASEDIR/app/src/main/jniLibs/armeabi-v7a/"
+      - mkdir -p $ANDROID_JAVA_NATIVE_AARCH64
+      - mkdir -p $ANDROID_JAVA_NATIVE_ARMV7
+      - . $BASEDIR/rust-build/setenv-android.sh
+      - cd $ANDROID_RUST
+      - export RANLIB=${ANDROID_TOOLCHAIN_DIR}/bin/llvm-ranlib
+      - export AR=${ANDROID_TOOLCHAIN_DIR}/bin/llvm-ar
+      - export CC=${ANDROID_TOOLCHAIN_DIR}/bin/armv7a-linux-androideabi24-clang
+      - cargo build --target=armv7-linux-androideabi --release
+      - export CC=${ANDROID_TOOLCHAIN_DIR}/bin/aarch64-linux-android24-clang
+      - cargo build --target=aarch64-linux-android --release
+      - cp $ANDROID_RUST_KEYLOCK_LIB_AARCH64 $ANDROID_JAVA_NATIVE_AARCH64
+      - cp $ANDROID_RUST_KEYLOCK_LIB_ARMV7 $ANDROID_JAVA_NATIVE_ARMV7
+    ndk: r25c
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 0.15.0
-CurrentVersionCode: 1500
+CurrentVersion: 0.16.1
+CurrentVersionCode: 1600
