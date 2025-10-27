@@ -1478,11 +1478,33 @@ Builds:
     scandelete:
       - core/remoteconfig/firebase
 
+  - versionName: 25.10.5
+    versionCode: 5310005
+    commit: 1fa11cc8de2fe3d2cd514e5b797ec4ff4cb80801
+    subdir: app
+    gradle:
+      - github
+    prebuild:
+      - sed -i -e '/crashlytics/d' -e '/googleServices/d' -e '/firebase/d' -e '/playPublish/d'
+        -e '/play {/,/^}/d' -e '/= createSigningConfig/d' -e 's/versionName = .*/versionName
+        = "$$VERSION$$"/' -e 's/versionCode = .*/versionCode = $$VERCODE$$/' build.gradle.kts
+      - sed -i -e '/review/d' ../features/review/play/build.gradle.kts
+      - sed -i -e '/crashlytics/d' ../core/logging/crashlytics/build.gradle.kts
+      - echo -e "\norg.gradle.jvmargs=-XX:MaxHeapSize=2048m" >> ../gradle.properties
+      - echo -e "\norg.gradle.unsafe.configuration-cache=false" >> ../gradle.properties
+      - sed -i -e '/includeProprietaryLibraries/s/true/false/' ../gradle.properties
+      - sed -i -e '/foojay/d' ../{.,plugins}/settings.gradle.kts
+    scanignore:
+      - plugins/build
+    scandelete:
+      - core/analytics/firebase
+      - core/remoteconfig/firebase
+
 MaintainerNotes: Scanignore the plugin built in the useless but can't disabled gradle
   clean so we don't need to fight against fdroidserver.
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^[\d.]+-\d+$
 UpdateCheckData: '|-(\d+)||(.*)-'
-CurrentVersion: 25.10.4
-CurrentVersionCode: 5310004
+CurrentVersion: 25.10.5
+CurrentVersionCode: 5310005
