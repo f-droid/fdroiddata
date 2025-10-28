@@ -1302,8 +1302,48 @@ Builds:
       - gradle assembleRelease
     ndk: r27c
 
+  - versionName: 2.2.5
+    versionCode: 43
+    commit: 11068c298d34b0c60975e2e7e7c6ec5a83d9e910
+    sudo:
+      - sysctl fs.inotify.max_user_watches=524288
+      - apt-get update
+      - apt-get install -y npm
+      - npm -g install yarn
+    init: yarn install
+    output: android/app/build/outputs/apk/release/app-release-unsigned.apk
+    prebuild:
+      - echo -e "\norg.gradle.jvmargs=-Xms1g -Xmx5g -XX:+UseParallelGC -Dfile.encoding=UTF-8
+        -XX:MaxMetaspaceSize=1g" >> gradle.properties
+      - sdkmanager 'cmake;3.22.1'
+      - yarn f-droid
+      - rm -fr script/res ios
+      - sed -i -e '/signingConfig /d' android/app/build.gradle
+    scanignore:
+      - android/build.gradle
+      - node_modules/jsc-android
+      - node_modules/react-native/sdks/hermesc
+      - node_modules/clipboardy/fallbacks/windows
+      - node_modules/clipboardy/fallbacks/linux
+      - node_modules/react-native/React/I18n
+      - node_modules/@react-native-async-storage/async-storage/android/build.gradle
+      - node_modules/react-native-reanimated/android/build.gradle
+      - node_modules/react-native-safe-area-context/android/build.gradle
+      - node_modules/react-native-screens/android/build.gradle
+      - node_modules/react-native-svg/android/build.gradle
+      - node_modules/react-native-vector-icons/android/build.gradle
+      - node_modules/react-native/ReactAndroid/publish.gradle
+      - node_modules/expo-dev-menu/android/build.gradle
+      - node_modules/expo-dev-launcher/android/build.gradle
+      - node_modules/expo-modules-autolinking/scripts/android/autolinking_implementation.gradle
+      - node_modules/expo-modules-core/android/ExpoModulesCorePlugin.gradle
+    build:
+      - cd android/app
+      - gradle assembleRelease
+    ndk: r27c
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-UpdateCheckData: app.json|"versionCode":\s(\d+)|.|"version":\s"([\d.]+)"
-CurrentVersion: 2.0.0
-CurrentVersionCode: 37
+UpdateCheckData: app.config.js|"versionCode":\s(\d+)|.|"version":\s"([\d.]+)"
+CurrentVersion: 2.2.5
+CurrentVersionCode: 43
