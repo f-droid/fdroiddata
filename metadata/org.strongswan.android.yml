@@ -655,7 +655,32 @@ Builds:
       - make dist -j $(nproc)
     ndk: r27d
 
+  - versionName: 2.6.2
+    versionCode: 96
+    commit: 5e410617d4c9d06cff5b860a26f51ee91aa73228
+    subdir: src/frontends/android/app
+    sudo:
+      - apt-get update
+      - apt-get install -y automake bison flex gettext gperf libtool make pkg-config
+        jq
+    gradle:
+      - yes
+    srclibs:
+      - OpenSSL@openssl-3.5.4
+    prebuild:
+      - sed -i -e "/clean.dependsOn 'cleanNative'/d" build.gradle
+      - sed -i -e 's/8.13.0/8.11.1/' ../build.gradle
+    scandelete:
+      - testing
+    build:
+      - NO_DOCKER=1 ANDROID_NDK_ROOT=$$NDK$$ OPENSSL_SRC=$$OpenSSL$$ $PWD/../openssl/build.sh
+      - cd ../../../../
+      - ./autogen.sh
+      - ./configure --disable-defaults
+      - make dist -j $(nproc)
+    ndk: r27d
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^android
-CurrentVersion: 2.6.1
-CurrentVersionCode: 95
+CurrentVersion: 2.6.2
+CurrentVersionCode: 96
