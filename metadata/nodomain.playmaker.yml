@@ -195,8 +195,38 @@ Builds:
         Unsigned' bin/playmaker.apk
     ndk: 23.2.8568313
 
+  - versionName: 1.13.1
+    versionCode: 17
+    commit: d8f1320bbf4c9f6ab688d8672c72c9690a26f438
+    sudo:
+      - apt-get update
+      - apt-get install -y gcc make libc-dev scons pkg-config libx11-dev libxcursor-dev
+        libxinerama-dev libgl1-mesa-dev libglu1-mesa-dev libasound2-dev libpulse-dev
+        libudev-dev libxi-dev libxrandr-dev libwayland-dev git-lfs
+    output: bin/playmaker.apk
+    srclibs:
+      - Godot@4.4.1-stable
+    prebuild:
+      - mkdir -p bin
+      - mkdir -p android
+      - mkdir -p ~/.local/share/godot/export_templates/4.4.1.stable/
+    build:
+      - export ANDROID_SDK_ROOT=$$SDK$$
+      - export ANDROID_NDK_ROOT=$$NDK$$
+      - export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+      - pushd $$Godot$$
+      - scons -j `nproc` platform=linuxbsd target=editor
+      - scons -j `nproc` platform=android target=template_release arch=arm64
+      - cd platform/android/java
+      - gradle generateGodotTemplates
+      - popd
+      - cp $$Godot$$/bin/android_release.apk ~/.local/share/godot/export_templates/4.4.1.stable/
+      - $$Godot$$/bin/godot.linuxbsd.editor.x86_64 --headless --export-release 'Android
+        Unsigned' bin/playmaker.apk
+    ndk: 23.2.8568313
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: export_presets.cfg|version/code=(\d+)|project.godot|config/version="(.+)"
-CurrentVersion: 1.11.0
-CurrentVersionCode: 14
+CurrentVersion: 1.13.1
+CurrentVersionCode: 17
