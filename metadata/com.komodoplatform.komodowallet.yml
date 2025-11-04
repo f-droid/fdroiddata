@@ -1,0 +1,67 @@
+AntiFeatures:
+  NonFreeNet:
+    en-US: "The app relies on several non-free network services:\n\n- Binance API\
+      \ (api.binance.com) - for cryptocurrency price data and server time synchronization\n\
+      - CoinGecko API (api.coingecko.com) - for cryptocurrency price data (fallback)\n\
+      - Banxa / Ramp (via proxy) - fiat-to-crypto exchange service\n- Bitrefill (embed.bitrefill.com)\
+      \ - gift card and mobile top-up service (disabled by default)\n- Trello API\
+      \ (api.trello.com) - optional feedback submission service\n- Cloudflare - optional\
+      \ feedback submission service\n\nThese services are used for price data, fiat\
+      \ currency purchases, and optional feedback functionality."
+Categories:
+  - Money
+  - Wallet
+License: GPL-3.0-only
+AuthorName: KomodoPlatform
+AuthorEmail: hello@komodoplatform.com
+AuthorWebSite: https://komodoplatform.com
+WebSite: https://app.komodoplatform.com
+SourceCode: https://github.com/KomodoPlatform/komodo-wallet
+IssueTracker: https://github.com/KomodoPlatform/komodo-wallet/issues
+Changelog: https://github.com/KomodoPlatform/komodo-wallet/blob/HEAD/CHANGELOG.md
+
+AutoName: Komodo Wallet
+
+RepoType: git
+Repo: https://github.com/KomodoPlatform/komodo-wallet
+
+Builds:
+  - versionName: 0.9.2
+    versionCode: 1
+    commit: 749038e467729e68d320badfb179d137063759e9
+    sudo:
+      - apt-get update
+      - apt-get install -y jq yq
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios/build
+    prebuild:
+      - flutterVersion=$(sed -n -E "s/\s\sflutter:\s\^(.*)/\1/p" pubspec.yaml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - echo "flutter.sdk=$$flutter$$" >> ../local.properties
+      - rm -f android/app/google-services.json
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter packages pub get
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/dart run komodo_wallet_build_transformer:komodo_wallet_build_transformer
+        --artifact_output_package=komodo_defi_framework --config_output_path=app_build/build_config.json
+        --fetch_defi_api --fetch_coin_assets --copy_platform_assets --input=/dev/null
+        --output=build/last_run.txt || true
+      - $$flutter$$/bin/flutter build apk --release --dart-define=COMMIT_HASH=$(git
+        rev-parse --short=7 HEAD) --dart-define=FEEDBACK_API_KEY=A53jTQWm1sRQ0JOp0uktruvdDwuMtNH7
+        --dart-define=FEEDBACK_PRODUCTION_URL=https://komodo-wallet-feedback.komodoplatform.com
+        --dart-define=TRELLO_BOARD_ID=67dad3b529da1f9e3634e63d --dart-define=TRELLO_LIST_ID=67dad3b5d33ea936f13dd26b
+    ndk: r27c
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 0.9.2
+CurrentVersionCode: 1
