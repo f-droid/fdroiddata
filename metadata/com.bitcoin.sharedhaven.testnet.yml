@@ -9,7 +9,7 @@ License: GPL-3.0-or-later
 SourceCode: https://github.com/cortezhanny124/shared_haven
 IssueTracker: https://github.com/cortezhanny124/shared_haven/issues
 
-AutoName: SharedHavenTN4
+AutoName: SharedHaven
 
 RepoType: git
 Repo: https://github.com/cortezhanny124/shared_haven.git
@@ -69,8 +69,38 @@ Builds:
       - export PUB_CACHE=$(pwd)/.pub-cache
       - $$flutter$$/bin/flutter build apk --release --flavor bitcoin_testnet
 
+  - versionName: 1.6.6
+    versionCode: 3
+    commit: 423e08f1c7875871f3d96edcb813e994b051cc0a
+    output: build/app/outputs/flutter-apk/*-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+      - linux
+      - macos
+      - web
+      - windows
+    prebuild:
+      - sed -i -e '/googleapis/d' android/build.gradle android/settings.gradle
+      - sed -i -e '/def keystorePropsFile/,/keystoreProps.load/d' -e '/signingConfig
+        /d' android/app/build.gradle
+      - flutterVersion=$(sed -n -E 's/.*Flutter version:\ (.*)/\1/p' pubspec.yaml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+      - sed -i -e 's/8.12.1/8.11.1/' .pub-cache/hosted/pub.dev/{{path_provider,shared_preferences,url_launcher}_android,flutter_plugin_android_lifecycle}-*/android/build.gradle
+    scandelete:
+      - .pub-cache
+      - android/app/.cxx
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release
+
 AutoUpdateMode: Version +-testnet %v
 UpdateCheckMode: Tags
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 1.6.5
-CurrentVersionCode: 2
+CurrentVersion: 1.6.6
+CurrentVersionCode: 3
