@@ -7,15 +7,15 @@ Categories:
   - Multimedia
 License: Apache-2.0
 AuthorName: Darrious Liu
-SourceCode: https://github.com/master-lzh/PiPixiv
-IssueTracker: https://github.com/master-lzh/PiPixiv/issues
-Changelog: https://github.com/master-lzh/PiPixiv/releases
+SourceCode: https://github.com/darriousliu/PiPixiv
+IssueTracker: https://github.com/darriousliu/PiPixiv/issues
+Changelog: https://github.com/darriousliu/PiPixiv/releases
 
 AutoName: PiPixiv
 
 RepoType: git
-Repo: https://github.com/master-lzh/PiPixiv
-Binaries: https://github.com/master-lzh/PiPixiv/releases/download/v%v/PiPixiv-v%v-foss-release.apk
+Repo: https://github.com/darriousliu/PiPixiv
+Binaries: https://github.com/darriousliu/PiPixiv/releases/download/v%v-fdroid/PiPixiv-v%v-foss-release.apk
 
 Builds:
   - versionName: 1.0.13
@@ -30,9 +30,28 @@ Builds:
     gradleprops:
       - applyFirebasePlugins=false
 
+  - versionName: 1.2.0
+    versionCode: 10200
+    commit: v1.2.0-fdroid
+    subdir: app
+    sudo:
+      - echo "deb https://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
+      - apt-get update
+      - apt-get install -y -t trixie openjdk-21-jdk-headless
+      - update-alternatives --auto java
+    gradle:
+      - foss
+    prebuild:
+      - sed -i -e '40,53d' -e '/androidx.dev/d' ../settings.gradle.kts
+      - sed -i -e '/firebase/d' -e '/google.services/d' {..,.}/build.gradle.kts
+    scandelete:
+      - build-logic
+    gradleprops:
+      - applyFirebasePlugins=false
+
 AllowedAPKSigningKeys: 2ed0f436b521566f9a86be5b5776fff90ff6dce57355a76a3181233aa434c722
 
 AutoUpdateMode: Version
-UpdateCheckMode: Tags
-CurrentVersion: 1.0.13
-CurrentVersionCode: 10013
+UpdateCheckMode: Tags ^v[0-9.]+-fdroid$
+CurrentVersion: 1.2.0
+CurrentVersionCode: 10200
