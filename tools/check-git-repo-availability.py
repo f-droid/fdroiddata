@@ -3,6 +3,7 @@
 import glob
 import os
 import re
+import requests
 import subprocess
 import sys
 
@@ -54,6 +55,8 @@ for f in files:
         'core.sshCommand=/bin/false',
         '-c',
         'url.https://.insteadOf=ssh://',
+        '-c',
+        'http.lowSpeedTime=5',
     ]
     for domain in ('bitbucket.org', 'github.com', 'gitlab.com'):
         git_config.append('-c')
@@ -87,6 +90,18 @@ for f in files:
         print('\n' + f + ':')
         print('%s%s%s' % (Fore.RED, p.stderr.decode(), Style.RESET_ALL))
         errors[f] = p.stderr
+
+        # only rewrite files with a clear 404 Not Found, e.g. not 302, 500, etc.
+        if url.startswith('https://'):
+            try:
+                weburl = url[:-4] if url.endswith('.git') else url
+                r = requests.head(weburl, timeout=10)
+            except requests.exceptions.RequestException as e:
+                print('%s%s%s' % (Fore.RED, str(e), Style.RESET_ALL))
+                continue
+            if r.status_code != 404:
+                print('%s%d: %s%s' % (Fore.RED, r.status_code, r.reason, Style.RESET_ALL))
+                continue
 
         if not f.startswith('metadata/'):
             continue
