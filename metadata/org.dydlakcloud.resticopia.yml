@@ -1,0 +1,53 @@
+Categories:
+  - Cloud Storage & File Sync
+  - System
+License: GPL-2.0-only
+AuthorName: dawdyd
+SourceCode: https://codeberg.org/dawdyd/resticopia
+IssueTracker: https://codeberg.org/dawdyd/resticopia/issues
+Changelog: https://codeberg.org/dawdyd/resticopia/releases
+
+AutoName: Resticopia
+
+RepoType: git
+Repo: https://codeberg.org/dawdyd/resticopia.git
+Binaries: https://codeberg.org/dawdyd/resticopia/releases/download/%v/resticopia-%v-arm64-v8a-release.apk
+
+Builds:
+  - versionName: 0.7.6
+    versionCode: 11
+    commit: dcebdf6db94f646bf61b3821120b50f5418b90bc
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y gcc libc-dev make autoconf automake libtool pkg-config
+        wget file gawk libarchive-dev uthash-dev swig xsltproc strace
+      - apt-get install -y -t bookworm-backports golang-go
+    gradle:
+      - yes
+    build:
+      - cd ..
+      - export ANDROID_NDK_ROOT=$$NDK$$
+      - export GOPATH="$HOME/go"
+      - export PATH="$GOPATH/bin:$PATH"
+      - export CGO_ENABLED=1
+      - export TZ=UTC
+      - export SOURCE_DATE_EPOCH=$(git log -1 --format=%ct HEAD)
+      - export VERSION=v0.15_release
+      - export GOFLAGS="-buildvcs=false -trimpath -ldflags=-buildid="
+      - export CGO_CFLAGS="-g0 -O2 -Wno-unused-command-line-argument"
+      - export CGO_LDFLAGS="-s -w"
+      - export CFLAGS="$CGO_CFLAGS -fdebug-prefix-map=/build= -ffile-prefix-map=/build="
+      - export CXXFLAGS=$CFLAGS
+      - export LDFLAGS=$CGO_LDFLAGS
+      - chmod +x build-go-binaries.sh build-native-binaries.sh
+      - ./build-go-binaries.sh
+    ndk: r26b
+
+AllowedAPKSigningKeys: d0450607a6356d31603d2204888b5326aaf018338199a807cc7f81a1eb7629bf
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: gradle.properties|VERSION_CODE=(\d+)|.|VERSION_NAME=(.*)
+CurrentVersion: 0.7.6
+CurrentVersionCode: 11
