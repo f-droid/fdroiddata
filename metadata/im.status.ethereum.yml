@@ -408,6 +408,31 @@ Builds:
       - export STATUS_BUILD_APK_TYPE=universal-hermes-enabled
       - make build-fdroid ORG_GRADLE_PROJECT_versionCode=$$VERCODE$$
 
+  - versionName: 2.34.4
+    versionCode: 2025102415
+    commit: 2de761c349089c4470fa5371a2166200caaddc16
+    timeout: 18000
+    sudo:
+      - apt-get update
+      - apt-get install -y make xz-utils
+      - sysctl fs.inotify.max_user_watches=524288
+      - mkdir -m 0755 /nix
+      - chown vagrant /nix
+      - chown -R vagrant /tmp
+    init: nix/scripts/setup.sh
+    output: result/app-release-unsigned.apk
+    prebuild: sed -i -e '/extra/d' nix/nix.conf
+    scanignore:
+      - android/build.gradle
+      - android/app/googleServices.gradle
+    scandelete:
+      - ios
+    build:
+      - ulimit -n 8192
+      - export STATUS_BUILD_TARGET=fdroid
+      - export STATUS_BUILD_APK_TYPE=universal-hermes-enabled
+      - make build-fdroid ORG_GRADLE_PROJECT_versionCode=$$VERCODE$$
+
 MaintainerNotes: |-
   Status.im mobile app is built in a deterministic way using Nix package manager.
   Because of this we disable Gradle builds via F-Droid and run `make release-android`.
@@ -416,5 +441,5 @@ MaintainerNotes: |-
 
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: 2.34.0
-CurrentVersionCode: 2025061917
+CurrentVersion: 2.34.4
+CurrentVersionCode: 2025102415
