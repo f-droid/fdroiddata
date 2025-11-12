@@ -553,10 +553,39 @@ Builds:
         break; sha256sum apk/assets/dexopt/baseline.prof; rm -fr apk; taskset --cpu-list
         0-3 gradle clean assembleFdroidRelease; done
 
+  - versionName: 2.7.5 (29319286) fdroid
+    versionCode: 29319286
+    commit: 8287203db4b737b217efe3b5624f4003fba44f70
+    subdir: app
+    submodules: true
+    sudo:
+      - echo "deb http://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
+      - apt-get update
+      - apt-get install -y openjdk-21-jdk-headless
+      - update-java-alternatives -a
+    gradle:
+      - fdroid
+    binary: https://github.com/meshtastic/Meshtastic-Android/releases/download/v2.7.5/app-fdroid-release.apk
+    prebuild:
+      - sed -i -e '/foojay-resolver/d' -e '81,90d' ../settings.gradle.kts
+      - sed -i -e '/firebase/d' {..,.,../build-logic/convention}/build.gradle.kts
+    scandelete:
+      - build-logic/convention/build
+      - core/proto/src/main/proto/packages/ts/package.json
+    postbuild:
+      - curl -Lo upstream.apk https://github.com/meshtastic/Meshtastic-Android/releases/download/v2.7.5/app-fdroid-release.apk
+      - unzip -q upstream.apk -d apk
+      - export hash=$(sha256sum apk/assets/dexopt/baseline.prof)
+      - rm -rf apk upstream.apk
+      - for i in {1..10}; do unzip -q $$OUT$$ -d apk; sha256sum -c - <<< $hash &&
+        break; sha256sum apk/assets/dexopt/baseline.prof; rm -fr apk; taskset --cpu-list
+        0-3 gradle clean assembleFdroidRelease; done
+
 AllowedAPKSigningKeys: a93b456568c175db0800a09f06777f892d812432adb8a3df73bc3e7f06c80c6d
 
-AutoUpdateMode: Version
-UpdateCheckMode: Tags
-UpdateCheckData: buildSrc/src/main/kotlin/Configs.kt|VERSION_CODE\s=\s(\d+)|.|VERSION_NAME\s=\s"(.*)"
-CurrentVersion: 2.6.30
-CurrentVersionCode: 30630
+AutoUpdateMode: Version v%v
+UpdateCheckMode: HTTP
+UpdateCheckData: https://github.com/meshtastic/Meshtastic-Android/releases/latest|>v[\d.]+
+  \((\d+)\)<|.|>v([\d.]+ \(\d+\))<
+CurrentVersion: 2.7.5
+CurrentVersionCode: 29319286
