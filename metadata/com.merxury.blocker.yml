@@ -233,7 +233,30 @@ Builds:
     scandelete:
       - build-logic
 
+  - versionName: 2.0.5839
+    versionCode: 5839
+    commit: 8065a06ee22ff993201832db602b5020c1a42ea4
+    subdir: app-compose
+    submodules: true
+    sudo:
+      - echo "deb https://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
+      - apt-get update
+      - apt-get install -y -t trixie openjdk-21-jdk-headless
+      - update-alternatives --auto java
+    gradle:
+      - foss
+    rm:
+      - build-logic/convention/src/main/kotlin/AndroidApplicationFirebaseConventionPlugin.kt
+    prebuild:
+      - sed -i -e '/signingConfig =/,+9d' build.gradle.kts
+      - sed -i -e '/firebase/d' -e '/gms/d' {..,.}/build.gradle.kts
+      - sed -i -e '/foojay/d' ../settings.gradle.kts
+      - sed -i -e '/libs.firebase/d' -e '/register("firebase")/,+3d' ../build-logic/convention/build.gradle.kts
+    scandelete:
+      - build-logic
+
 AutoUpdateMode: Version
-UpdateCheckMode: Tags v[\d.]+-fdroid$
-CurrentVersion: 2.0.4839-fdroid
-CurrentVersionCode: 4839
+UpdateCheckMode: Tags
+UpdateCheckData: '|v2.0.(\d+)||v(.+)'
+CurrentVersion: 2.0.5839
+CurrentVersionCode: 5839
