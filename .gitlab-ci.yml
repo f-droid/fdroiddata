@@ -359,6 +359,11 @@ fdroid build:
     - ln -s $CI_PROJECT_DIR/tmp $home_vagrant/tmp
     - ln -s $CI_PROJECT_DIR/srclibs $home_vagrant/srclibs
 
+    # Some builds need to track a lot of files, so this needs to be
+    # set for them to succeed.  Some runners do not support setting
+    # sysctl, so it cannot be required.
+    - sysctl fs.inotify.max_user_watches=524288 || true
+
     - export GRADLE_USER_HOME=$home_vagrant/.gradle
     # each `fdroid build --on-server` run expects sudo, then uninstalls it
     - export fdroid="sudo --preserve-env --user vagrant
