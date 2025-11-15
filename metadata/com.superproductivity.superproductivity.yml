@@ -1087,7 +1087,36 @@ Builds:
       - src/assets/test-plugin.zip
       - .swp
 
+  - versionName: 16.3.5
+    versionCode: 1603050000
+    commit: 96f73ccfc77dd229b0cd9afe1fdeeaa9d53b5473
+    subdir: android/app
+    sudo:
+      - sysctl fs.inotify.max_user_watches=524288 || true
+      - echo "deb https://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
+      - apt-get update
+      - apt-get install -t trixie npm openjdk-21-jdk-headless
+      - update-alternatives --auto java
+    gradle:
+      - fdroid
+    prebuild:
+      - cd ../..
+      - sed -i -e "s/getEnv('UNSPLASH_KEY')/''/" src/app/core/unsplash/unsplash.service.ts
+      - npm install --build-from-source
+      - npm run buildFrontend:prodWeb
+      - npm run sync:android
+    scanignore:
+      - android/app/src/main/assets/public/assets/test-plugin.zip
+    scandelete:
+      - node_modules
+      - packages/plugin-dev/node_modules
+      - packages/plugin-dev/ai-productivity-prompts/node_modules
+      - packages/plugin-dev/sync-md/node_modules
+      - dist/browser/assets/test-plugin.zip
+      - src/assets/test-plugin.zip
+      - .swp
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v(?!11.0.3)[\d.]+$
-CurrentVersion: 16.3.3
-CurrentVersionCode: 1603030000
+CurrentVersion: 16.3.5
+CurrentVersionCode: 1603050000
