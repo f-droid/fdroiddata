@@ -11,6 +11,8 @@ SourceCode: https://github.com/1250422131/bilibilias
 IssueTracker: https://github.com/1250422131/bilibilias/issues
 Changelog: https://github.com/1250422131/bilibilias/releases
 
+AutoName: BILIBILIAS
+
 RepoType: git
 Repo: https://github.com/1250422131/bilibilias
 
@@ -100,7 +102,42 @@ Builds:
     scandelete:
       - build-logic/convention
 
+  - versionName: 3.1.0
+    versionCode: 314
+    commit: 2a3c69164c2ed8b42f6a52cb4bb03a0690d2a837
+    subdir: app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y libc-dev make pkg-config nasm binutils gcc ninja-build
+        meson
+    gradle:
+      - official
+    srclibs:
+      - FFmpeg@n8.0
+    rm:
+      - app/src/main/java/com/imcys/bilibilias/common/utils/FirebaseExt.kt
+      - app/src/main/java/com/imcys/bilibilias/common/update/GooglePlayAppUpdateManage.kt
+    prebuild:
+      - sed -i -e '/baidu.jar/d' -e '/baiduJar.isEmpty/,/^    }/d' -e '/googlePlayLibs.forEach/,/^    }/d'
+        -e '/DependencyHandlerScope.firebaseDependencies/,/^}/d' -e '/firebaseDependencies/d'
+        build.gradle.kts
+      - sed -i -e '/firebase/d' {..,.}/build.gradle.kts
+      - sed -i -e '/private fun GooglePlayAppUpdateManage/,/^    }/d' -e '/private
+        fun initUpdateCheck/,/^    }/d' -e '/initUpdateCheck/d' -e '/GooglePlayAppUpdateManage/d'
+        -e '/private fun initFirebase/,/^    }/d' -e '/Firebase/d' src/main/java/com/imcys/bilibilias/MainActivity.kt
+      - find .. -name *.kt -exec sed -i -e '/StatService/d' -e '/com.google.firebase/d'
+        -e '/FirebaseExt/d' -e '/Firebase/,+1d' {} \;
+      - sed -i -e 's|NDK_DIR=".*"|NDK_DIR="$$NDK$$"|' -e 's|FFMPEG_DIR=".*"|FFMPEG_DIR="$$FFmpeg$$"|'
+        ../ecology/bilibilias-ffmpeg/build-tools/build-ffmpeg-android.sh
+    scandelete:
+      - build-logic/convention
+    build:
+      - SKIP_DEP_INSTALL=1 bash ../ecology/bilibilias-ffmpeg/build-tools/build-ffmpeg-android.sh
+      - cp -r ../ecology/bilibilias-ffmpeg/output/ffmpeg ../core/ffmpeg/src/main/cpp
+    ndk: r27
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 2.1.5
-CurrentVersionCode: 215
+CurrentVersion: 3.1.0
+CurrentVersionCode: 314
