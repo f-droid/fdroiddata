@@ -1,0 +1,48 @@
+Categories:
+  - Connectivity
+  - System
+License: Apache-2.0
+AuthorName: MLM Games
+AuthorWebSite: https://ragebreaker.itch.io
+WebSite: https://github.com/mlm-games/wifi-exporter
+SourceCode: https://github.com/mlm-games/wifi-exporter
+IssueTracker: https://github.com/mlm-games/wifi-exporter/issues
+Changelog: https://github.com/mlm-games/wifi-exporter/blob/HEAD/CHANGELOG.md
+
+AutoName: Wifi Exporter
+
+RepoType: git
+Repo: https://github.com/mlm-games/wifi-exporter.git
+Binaries: https://github.com/mlm-games/wifi-exporter/releases/download/v%v/wifi-exporter-%v-arm64-v8a.apk
+
+Builds:
+  - versionName: 0.2.12
+    versionCode: 16777740
+    commit: 99fbd3192dd587c26e468e92be162708d4ab4932
+    output: target/release/apk/wifi_exporter.apk
+    srclibs:
+      - rustup@1.28.2
+      - reproducible-apk-tools@v0.3.0
+    prebuild:
+      - sdkmanager "platforms;android-35" "build-tools;35.0.0"
+      - $$rustup$$/rustup-init.sh -y --default-toolchain 1.90.0 --target aarch64-linux-android
+      - source "$HOME/.cargo/env"
+      - cargo install --git https://github.com/mlm-games/cargo-rapk.git --tag v0.13.2
+        cargo-rapk --locked
+    build:
+      - source "$HOME/.cargo/env"
+      - export SOURCE_DATE_EPOCH="$(git log -1 --format=%ct)"
+      - cargo rapk build --release --deterministic --unsigned --target aarch64-linux-android
+    ndk: 28.2.13676358
+    postbuild:
+      - mv $$OUT$$ unaligned.apk
+      - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
+        --replace unaligned.apk $$OUT$$
+
+AllowedAPKSigningKeys: 4aed2f691df64a7b0fea25a6b8c80183c6dc520e049dac0178defa1d6472228f
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: Cargo.toml|version_code\s*=\s*([0-9]+)|Cargo.toml|version\s*=\s*"([^"]+)"
+CurrentVersion: 0.2.12
+CurrentVersionCode: 16777740
