@@ -198,37 +198,6 @@ Builds:
       - gradle rcbridge
     ndk: r28c
 
-  - versionName: '3.23'
-    versionCode: 202496
-    commit: 0798ff95204d8dafd6d15de5a983a4033aafe863
-    subdir: app
-    sudo:
-      - echo "deb https://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
-      - apt-get update
-      - apt-get install -t bookworm-backports -y golang-go
-      - apt-get install -y -t trixie openjdk-21-jdk-headless
-      - update-alternatives --auto java
-    gradle:
-      - yes
-    srclibs:
-      - go@go1.25.1
-    prebuild:
-      - sdkmanager "platforms;android-35" "build-tools;35.0.0"
-      - export GO_VERSION=$(sed -n 's/toolchain \(go.*\)/\1/p' ../rcbridge/go.mod)
-      - '[[ $GO_VERSION ]]'
-      - git -C $$go$$ checkout -f $GO_VERSION
-      - sed -i -e 's|-target=android|-target=android/arm64|' -e 's/include(.*)/include("arm64-v8a")/'
-        -e '/GOTOOLCHAIN/d' build.gradle.kts
-    build:
-      - pushd $$go$$/src
-      - ./make.bash
-      - popd
-      - export GOROOT=$$go$$
-      - export GOPATH="$HOME/go"
-      - export PATH="$GOROOT/bin:$GOPATH/bin:$PATH"
-      - gradle rcbridge
-    ndk: 29.0.14206865
-
   - versionName: '3.24'
     versionCode: 202752
     commit: 7219fd0068b1172bf203e8f7969fc0fd4399d504
