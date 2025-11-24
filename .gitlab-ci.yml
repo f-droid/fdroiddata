@@ -150,6 +150,7 @@ git redirect:
           exit 1;
       }
 
+
 fdroid lint:
   stage: test
   needs: []
@@ -162,20 +163,34 @@ fdroid lint:
   script:
     - chown -R $(whoami) .
     - *get_changed_apps
-    - export EXITVALUE=0
-    - function set_error() { export EXITVALUE=1; printf "\x1b[31mERROR `history|tail -2|head -1|cut -b 6-500`\x1b[0m\n"; }
+    - test -n "$CHANGED" || exit 0
+    - echo $CHANGED
+    - fdroid lint $CHANGED
+
+
+fdroid rewritemeta:
+  stage: test
+  needs: []
+  image: debian:bookworm-slim
+  rules: *app_verification_rules
+  before_script:
+    - *install_fdroid_server_deb
+    - export fdroidserver=$PWD/fdroidserver
+    - *install_fdroid_server
+  script:
+    - chown -R $(whoami) .
+    - *get_changed_apps
     - |
       if [ -n "$CHANGED" ]; then
           fdroid rewritemeta $CHANGED;
           git diff --exit-code > /dev/null || {
-              set_error;
-              printf "\nThese files have lint issues:\n";
+              printf "\nThese files need rewritemeta:\n";
               git diff --name-only;
               printf "\nThese are the formatting issues:\n";
               printf "$(git --no-pager diff --color=always --ws-error-highlight=all | sed -e 's/\r/^M/' -e 's/%/%%/g')";
+              exit 1
           }
       fi
-    - exit $EXITVALUE
 
 
 fdroid lint config:
@@ -225,7 +240,7 @@ fdroid lint config:
     - python3 -c "import os; exit(os.path.exists('config/en/'))"
 
 
-lint:
+tools check scripts:
   stage: test
   needs: []
   image: debian:bookworm-slim
