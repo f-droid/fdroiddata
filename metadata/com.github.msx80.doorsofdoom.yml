@@ -9,7 +9,7 @@ Donate: https://www.paypal.com/paypalme/msx80
 AutoName: DoorsOfDoom
 
 RepoType: git
-Repo: https://github.com/msx80/DoorsOfDoomOmicron
+Repo: https://github.com/msx80/DoorsOfDoomOmicron.git
 
 Builds:
   - versionName: 0.0.4
@@ -59,8 +59,28 @@ Builds:
       - mvn -f android-mvn/pom.xml -Dcartridge.artifactId=doorsofdoom -Dcartridge.groupId=com.github.msx80.omicron
         -Dcartridge.version=$$VERSION$$ clean install android:apk
 
+  - versionName: 0.0.7
+    versionCode: 7
+    commit: 44b070a05c2c96b5508391e1aa82055350085cea
+    subdir: Omicron/wrappers/android-wrapper/app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y maven
+    gradle:
+      - yes
+    prebuild:
+      - sdkmanager "build-tools;33.0.2" "platforms;android-26" "platforms;android-34"
+      - echo -e "\ncartridge.version=$$VERSION$$" >> ../gradle.properties
+      - cd ../../../..
+      - mvn -f doorsofdoom/pom.xml install
+    gradleprops:
+      - cartridge.artifactId=doorsofdoom
+      - cartridge.groupId=com.github.msx80.omicron
+      - omicron.version=0.0.12
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-UpdateCheckData: doorsofdoom/src/main/resources/omicron.properties|omicron.versionCode=(\d+)||([\d.]+)
-CurrentVersion: 0.0.6
-CurrentVersionCode: 3
+UpdateCheckData: doorsofdoom/pom.xml|<version>\d+\.\d+\.(\d+)<\/version>||([\d.]+)
+CurrentVersion: 0.0.7
+CurrentVersionCode: 7
