@@ -1440,8 +1440,40 @@ Builds:
       - node_modules/@biomejs
     build: cordova compile android --release -- --packageType=apk
 
+  - versionName: 1.11.7
+    versionCode: 966
+    commit: 1a0d5eada6c840b209f8f9ea163d0e8af1a00a7d
+    sudo:
+      - sysctl fs.inotify.max_user_watches=524288 || true
+      - chmod -R 777 /opt/android-sdk
+      - apt-get update
+      - apt-get install -y npm
+      - npm install -g cordova
+    output: platforms/android/app/build/outputs/apk/release/app-release-unsigned.apk
+    rm:
+      - src/plugins/iap
+      - src/plugins/proot
+    prebuild:
+      - sdkmanager 'build-tools;35.0.0'
+      - sed -i -e '/iap/d' -e '/proot/d' -e '/com.foxdebug.acode.rk.exec.terminal/s/{},/{}/'
+        package.json
+      - sed -i -e '/iap.startConnection/,/Purchase error/c} catch (e) {' src/main.js
+      - sed -i -e '/Donate/d' src/settings/mainSettings.js
+      - sed -i -e 's/acodefree/acode/' utils/config.js
+      - sed -i -e 's/build/prepare/' utils/scripts/build.sh
+      - sed -i -e '/core-google-shortcuts/d' src/plugins/system/plugin.xml
+      - mkdir -p www/css/build www/js/build
+      - npm install
+    scandelete:
+      - node_modules/cordova-android/framework/cordova-publish.gradle
+      - node_modules/jszip/.jekyll-metadata
+      - node_modules/@biomejs
+    build:
+      - npm run setup
+      - cordova build android --release -- --packageType=apk
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: config.xml|android-versionCode="(\d+)"|.|version="([\d.]+)"
-CurrentVersion: 1.11.6
-CurrentVersionCode: 965
+CurrentVersion: 1.11.7
+CurrentVersionCode: 966
