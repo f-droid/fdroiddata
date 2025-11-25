@@ -12,7 +12,6 @@ stages:
   - prepare
   - build
   - test
-  - report
   - deploy
 
 variables:
@@ -323,7 +322,6 @@ fdroid build:
       - .gradle
   variables:
     ANDROID_HOME: /opt/android-sdk
-    ANDROID_SDK_ROOT: ${ANDROID_HOME}
   script:
     - chown -R $(whoami) .
     - test -d build || mkdir build
@@ -395,10 +393,8 @@ fdroid build:
           ln -s $CI_PROJECT_DIR/../.gitconfig $home_vagrant/.gitconfig;
           $fdroid fetchsrclibs $build --verbose;
           rm $home_vagrant/fdroiddata $home_vagrant/.gitconfig;
-          (unset CI; $fdroid build --verbose --test --refresh-scanner --scan-binary --on-server --no-tarball $build);
+          (unset CI; $fdroid build --verbose --test --refresh-scanner --on-server --no-tarball $build);
           apt-get install sudo;
-          apk="tmp/binaries/${build/:/_}.binary.apk";
-          [[ -e $apk ]] && $fdroid scanner --verbose --exit-code $apk;
           popd;
           rm -rf $home_vagrant/build || true;
           rm -rf $ANDROID_HOME/ndk || true;
@@ -409,6 +405,76 @@ fdroid build:
       done
 
     - ./tools/audit-gradle.py $CHANGED;
+
+
+check apk:
+  stage: test
+  dependencies:
+    - fdroid build
+  image: debian:trixie-slim
+  rules: *app_verification_rules
+  variables:
+    ANDROID_HOME: /opt/android-sdk
+  before_script:
+    - apt-get update
+    - apt-get install -qy --no-install-recommends fdroidserver curl
+    - export fdroidserver=$PWD/fdroidserver
+    - *install_fdroid_server
+    - sdkmanager "build-tools;36.0.0"
+  script:
+    - set -o pipefail
+    - chown -R $(whoami) .
+    - export EXITVALUE=0
+    - |
+      function generate_report() {
+        echo "{\"location\": { \
+          \"path\": \"metadata/$1.yml\", \
+          \"lines\": {\"begin\": $2}}, \
+          \"description\": \"$3\", \
+          \"check_name\": \"$4\", \
+          \"fingerprint\": \"$5\", \
+          \"severity\": \"$6\"},";
+      }
+    - echo '[' > codequality.json
+    - |
+      for apk in tmp/*.apk; do
+        appid=$(echo $apk | sed -n 's|tmp/\(.*\)_[0-9]\+\.apk$|\1|p');
+        vercode=$(echo $apk | sed -n 's|tmp/.*_\([0-9]\+\)\.apk$|\1|p');
+        location=$(($(grep -n "^    versionCode: $vercode$" metadata/$appid.yml | cut -f1 -d:) - 1));
+        binary=$(echo $apk | sed -e 's|tmp/|tmp/binaries/|' -e 's/\.apk$/.binary.apk/');
+        if [[ -e $binary ]]; then
+          file=$binary;
+        else
+          file=$apk;
+        fi
+
+        fdroid scanner --verbose --exit-code $file 2>&1 | tee result || {
+          export EXITVALUE=1;
+          for class in $(sed -n "s/.*DEBUG: Problem: found class '\(.*\)'/\1/p" result); do
+            printf "\x1b[31mERROR Found $class in $file\x1b[0m\n";
+            generate_report $appid $location "Found class $class" "class" "$file $class" "critical" >> codequality.json;
+          done
+          grep 'Dependency metadata' result && {
+            printf "\x1b[31mERROR Found extra signing block 'Dependency metadata' in $file\x1b[0m\n";
+            generate_report $appid $location "Found Dependency metadata" "signing_block" "$file Dependency metadata" "minor" >> codequality.json;
+          };
+        };
+        androguard axml $file -o AndroidManifest.xml
+        for permission in $(sed -n 's|.*<uses-permission android:name="\([^"]\+\)".*|\1|p' AndroidManifest.xml); do
+            generate_report $appid $location "Permission $permission" "permission" "$file $permission" "info" >> codequality.json;
+        done
+        grep 'android:usesCleartextTraffic="true"' AndroidManifest.xml && \
+          generate_report $appid $location "Cleartext Traffic Permitted" "application_attribution" "$file cleartextTrafficPermitted" "major" >> codequality.json;
+        grep 'android:debuggable="true"' AndroidManifest.xml && \
+          generate_report $appid $location "Debuggable APK" "application_attribution" "$file debuggable" "critical" >> codequality.json;
+        grep 'android:testOnly="true"' AndroidManifest.xml && \
+          generate_report $appid $location "Testing APK" "application_attribution" "$file testOnly" "critical" >> codequality.json;
+      done
+    - sed -i -e '$s/,$/]/' codequality.json
+    - exit $EXITVALUE
+  artifacts:
+    reports:
+      codequality: codequality.json
 
 
 # issuebot needs secrets to run, so it has to run under the 'fdroid'
