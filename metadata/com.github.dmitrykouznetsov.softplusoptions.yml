@@ -1,0 +1,61 @@
+Categories:
+  - Finance Manager
+  - Money
+License: GPL-3.0-only
+AuthorName: Dmitry Kouznetsov
+AuthorEmail: dmitry.kouznetsov@protonmail.com
+SourceCode: https://github.com/dmitrykouznetsov/SoftPlusOptions
+IssueTracker: https://github.com/dmitrykouznetsov/SoftPlusOptions/issues
+Changelog: https://github.com/dmitrykouznetsov/SoftPlusOptions/releases
+
+AutoName: SoftPlus Options
+
+RepoType: git
+Repo: https://github.com/dmitrykouznetsov/SoftPlusOptions.git
+
+Builds:
+  - versionName: 0.5.1
+    versionCode: 6002
+    commit: 8d95e106e2d41306456cb04f376afaeae77b60c1
+    submodules: true
+    sudo:
+      - mkdir -p /home/fox/Documents
+      - chown -R vagrant /home/fox
+    output: build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+    binary: https://github.com/dmitrykouznetsov/SoftPlusOptions/releases/download/%v/SoftPlus-v%v-arm64-v8a-release.apk
+    rm:
+      - linux
+    prebuild:
+      - export repo=/home/fox/Documents/SoftPlusOptions
+      - cd ..
+      - mv com.github.dmitrykouznetsov.softplusoptions $repo
+      - pushd $repo
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - submodules/flutter/bin/flutter config --no-analytics
+      - submodules/flutter/bin/flutter pub get
+      - popd
+      - mv $repo com.github.dmitrykouznetsov.softplusoptions
+    scanignore:
+      - submodules/flutter/bin/cache
+    scandelete:
+      - submodules/flutter
+      - .pub-cache
+    build:
+      - export repo=/home/fox/Documents/SoftPlusOptions
+      - cd ..
+      - mv com.github.dmitrykouznetsov.softplusoptions $repo
+      - pushd $repo
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - submodules/flutter/bin/flutter build apk --release --split-per-abi --target-platform="android-arm64"
+      - popd
+      - mv $repo com.github.dmitrykouznetsov.softplusoptions
+
+AllowedAPKSigningKeys: 0d18312c067a38d3d550db219170bdcde00e5b59ece2d5f9978ad84ed7e9c4da
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+VercodeOperation:
+  - '%c * 1000 + 2'
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 0.5.1
+CurrentVersionCode: 6002
