@@ -1,0 +1,44 @@
+Categories:
+  - Board Game
+License: GPL-3.0-or-later
+AuthorName: Anders Sildnes (andsild)
+SourceCode: https://gitlab.com/andsild/collective-club-maze
+IssueTracker: https://gitlab.com/andsild/collective-club-maze/issues
+
+RepoType: git
+Repo: https://gitlab.com/andsild/collective-club-maze.git
+
+Builds:
+  - versionName: first
+    versionCode: 5
+    commit: b109afb741a07f32b8ae2236a789acd1a41c82cc
+    sudo:
+      - apt-get update
+      - apt-get install -y pkgconf scons clang
+    output: collectiveclubmaze.apk
+    srclibs:
+      - Godot@4.6.3-stable
+    prebuild: sed -i -e '/custom_template\/release/s|""|"$$Godot$$/bin/android_release.apk"|'
+      -e '/custom_template\/debug/s|""|"$$Godot$$/bin/android_release.apk"|' -e '/signed/s/true/false/'
+      src/export_presets.cfg
+    build:
+      - export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+      - export ANDROID_NDK_ROOT=$$NDK$$
+      - export ANDROID_HOME=$$SDK$$
+      - pushd $$Godot$$
+      - python3 misc/scripts/install_swappy_android.py
+      - scons -j `nproc` platform=linuxbsd target=editor use_llvm=yes engine_update_check=no
+      - scons -j `nproc` platform=android swappy=yes target=template_release arch=arm64
+        generate_apk=yes disable_3d=yes
+      - popd
+      - pushd src
+      - $$Godot$$/bin/godot.linuxbsd.editor.x86_64.llvm --headless --export-release
+        'Android' ../collectiveclubmaze.apk
+    ndk: r29
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: 'src/Constants.gd|const VERSION_CODE : int = (\d+)|.|const VERSION
+  : String = "([\d.]+)"'
+CurrentVersion: '1.0'
+CurrentVersionCode: 5
