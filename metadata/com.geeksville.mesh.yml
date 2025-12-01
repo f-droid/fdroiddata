@@ -637,11 +637,35 @@ Builds:
         break; sha256sum apk/assets/dexopt/baseline.prof; rm -fr apk; taskset --cpu-list
         0-3 gradle clean assembleFdroidRelease; done
 
+  - versionName: 2.7.8 (29319501) fdroid
+    versionCode: 29319501
+    commit: 89e82ede593bf159c4ef59cc8f2956e0a3085e35
+    subdir: app
+    submodules: true
+    sudo:
+      - echo "deb http://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
+      - apt-get update
+      - apt-get install -y openjdk-21-jdk-headless
+      - update-java-alternatives -a
+      - export CPUS_MAX=4
+      - export CPUS=$(getconf _NPROCESSORS_ONLN)
+      - for (( c=$CPUS_MAX; c<$CPUS; c++ )) ; do echo 0 > /sys/devices/system/cpu/cpu$c/online
+        ; done
+    gradle:
+      - fdroid
+    binary: https://github.com/meshtastic/Meshtastic-Android/releases/download/v2.7.8/app-fdroid-release.apk
+    prebuild:
+      - sed -i -e '/foojay-resolver/d' -e '82,91d' ../settings.gradle.kts
+      - sed -i -e '/firebase/d' {..,.,../build-logic/convention}/build.gradle.kts
+    scandelete:
+      - build-logic/convention/build
+      - core/proto/src/main/proto/packages/ts/package.json
+
 AllowedAPKSigningKeys: a93b456568c175db0800a09f06777f892d812432adb8a3df73bc3e7f06c80c6d
 
 AutoUpdateMode: Version v%v
 UpdateCheckMode: HTTP
 UpdateCheckData: https://github.com/meshtastic/Meshtastic-Android/releases/latest|>v[\d.]+
   \((\d+)\)<|.|>v([\d.]+ \(\d+\))<
-CurrentVersion: 2.7.7 (29319424)
-CurrentVersionCode: 29319424
+CurrentVersion: 2.7.8 (29319501) fdroid
+CurrentVersionCode: 29319501
