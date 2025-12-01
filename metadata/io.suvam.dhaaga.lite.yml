@@ -61,8 +61,48 @@ Builds:
       - cd android/app
       - gradle assembleRelease
 
+  - versionName: 0.17.0
+    versionCode: 34
+    commit: 09972b7403b90d8cab66f2b2db74ed78032a8bdf
+    subdir: apps/mobile
+    sudo:
+      - apt-get update
+      - apt-get install npm git-lfs
+    init:
+      - cd ../..
+      - git lfs fetch
+      - git lfs pull
+      - sed -i -e '1a "expo":{"autolinking":{"android":{"buildFromSource":[".*"]}}},'
+        -e '/expo-dev-client/d' apps/mobile/package.json
+      - npm install
+      - npm run build-deps
+    output: android/app/build/outputs/apk/release/*.apk
+    rm:
+      - apps/proxy
+    prebuild:
+      - node lite.js
+      - npx expo prebuild --platform android --clean
+      - sed -i -e '/signingConfig /d' android/app/build.gradle
+    scanignore:
+      - node_modules/react-native/sdks/hermesc/linux64-bin/hermesc
+      - node_modules/react-native-svg/android/build.gradle
+      - node_modules/react-native-screens/android/build.gradle
+      - node_modules/react-native-vector-icons/android/build.gradle
+      - node_modules/expo-modules-core/android/ExpoModulesCorePlugin.gradle
+      - node_modules/expo-modules-autolinking/scripts/android/autolinking_implementation.gradle
+      - node_modules/@react-native-masked-view/masked-view/android/build.gradle
+      - node_modules/react-native-safe-area-context/android/build.gradle
+      - node_modules/react-native-pager-view/android/build.gradle
+      - node_modules/react-native-webview/android/build.gradle
+      - node_modules/react-native-keyboard-controller/android/build.gradle
+    scandelete:
+      - node_modules
+    build:
+      - cd android/app
+      - gradle assembleRelease
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: apps/mobile/app.config.ts|versionCode:\s(\d+),|.|version:\s'(.*)',
-CurrentVersion: 0.16.2
-CurrentVersionCode: 33
+CurrentVersion: 0.17.0
+CurrentVersionCode: 34
