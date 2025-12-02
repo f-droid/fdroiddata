@@ -910,7 +910,6 @@ Builds:
 
   - versionName: '30.6'
     versionCode: 30600
-    disable: build stub
     commit: ccb264f33aa245aba26a9b2508a54c40041eb46e
     timeout: 14400
     submodules: true
@@ -919,9 +918,9 @@ Builds:
       - apt-get update
       - apt-get install -y -t trixie openjdk-21-jdk-headless
       - update-alternatives --auto java
-      - apt-get install -y clang-19 lld-19 g++ make pkg-config libssl-dev ninja-build
-        cmake xz-utils libflashrom-dev libnss3-dev zip libzstd-dev file binutils-dev
-        bzip2
+      - apt-get install -y clang-19 lld-19 libc++-19-dev g++ make pkg-config libssl-dev
+        ninja-build cmake xz-utils libflashrom-dev libnss3-dev zip libzstd-dev file
+        binutils-dev bzip2
     output: out/app-release.apk
     srclibs:
       - ondk@r29.3
@@ -934,7 +933,7 @@ Builds:
       - echo -e 'version=$$VERSION$$' > ./config.prop
       - sed -i -e 's|https://.*download/{ondk_version}|$$ondk$$/dist|' -e 's/urllib.request.urlopen(url)/open(url,"rb")/'
         -e 's|f"{rust_sysroot / "bin"}{os.pathsep}{env\["PATH"\]}"|f"""{rust_sysroot
-        / "bin"}{os.pathsep}{env["PATH"]}"""|' $$apatch-magisk$$/build.py
+        / "bin"}{os.pathsep}{env["PATH"]}"""|' build.py
       - sed -i -e '/"src",/,/^]/c "src"]' $$ondk$$/bootstrap.toml
       - sed -i -e 's/git config set/git config/' $$ondk$$/common.sh
       - sed -i -e '/clang/s/-20/-19/' $$ondk$$/{bootstrap.toml,build.sh}
