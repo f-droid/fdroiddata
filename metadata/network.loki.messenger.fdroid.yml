@@ -2244,10 +2244,47 @@ Builds:
       - gradle publishToMavenLocal
     ndk: r27
 
+  - versionName: 1.30.1
+    versionCode: 4345
+    commit: 5f8f6038ea5ec3f223f197b1453f5094b0c11d8c
+    subdir: app
+    submodules: true
+    sudo:
+      - echo "deb https://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
+      - apt-get update
+      - apt-get install -y -t trixie openjdk-21-jdk-headless
+      - update-alternatives --auto java
+    gradle:
+      - website
+    srclibs:
+      - libsession-util-android@b029430533bb11644539290e8ec6a163c8f65d97
+    prebuild:
+      - sed -i -e '/gms/d' -e 's/raw.github.com.*"/jitpack.io"/' -e 's|developer.huawei.com/repo/|jitpack.io|'
+        -e 's/oxen.rocks.*"/jitpack.io"/' -e '/repositories {/a mavenLocal()' ../build.gradle.kts
+      - sed -i -e '/google.services/d' -e '/isEnable/d' -e '/defaultConfig/a applicationIdSuffix
+        = ".fdroid"' -e '/setAlternativeAppName/s/null/"Session F-Droid"/' -e '/setAuthorityPostfix/s/""/".fdroid"/'
+        build.gradle.kts
+      - sed -i -e '/c2dm/d' src/main/AndroidManifest.xml
+      - sdkmanager 'cmake;3.22.1'
+    scandelete:
+      - build-logic/build
+    build:
+      - sed -i -e 's/1.0.9-7-g7866645/dev-snapshot/' ../gradle/libs.versions.toml
+      - cd $$libsession-util-android$$
+      - git cherry-pick -n 94e6f06e6972b11db5576f7c7db600cca8c60bd5
+      - gradle assembleRelease
+      - gradle publishToMavenLocal
+    ndk: r27
+
+MaintainerNotes: The libsession-util-android srclib should match the version of libsessionUtilAndroidVersion
+  in https://github.com/session-foundation/session-android/blob/master/gradle/libs.versions.toml.
+  The commit in the version is usually not the one in the repo because it's built
+  from the PR. The version in the sed script also needs to be updated.
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 VercodeOperation:
   - 10*%c + 5
 UpdateCheckData: app/build.gradle.kts|canonicalVersionCode\s=\s(\d+)|.|canonicalVersionName\s=\s"([\d.]+)"
-CurrentVersion: 1.30.0
-CurrentVersionCode: 4335
+CurrentVersion: 1.30.1
+CurrentVersionCode: 4345
