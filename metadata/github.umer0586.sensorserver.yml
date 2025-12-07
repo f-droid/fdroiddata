@@ -6,7 +6,7 @@ SourceCode: https://github.com/umer0586/SensorServer
 IssueTracker: https://github.com/umer0586/SensorServer/issues
 Changelog: https://github.com/umer0586/SensorServer/releases
 
-AutoName: Sensor Server
+AutoName: SensorServer
 
 RepoType: git
 Repo: https://github.com/umer0586/SensorServer.git
@@ -188,7 +188,30 @@ Builds:
       - export PUB_CACHE=$(pwd)/.pub-cache
       - PATH=$$flutter$$/bin/:$PATH python3 deploy_web_app.py
 
+  - versionName: 7.0.0
+    versionCode: 35
+    commit: 08b92756209b0b3c53c781e201a0b8f2d5666267
+    subdir: app
+    gradle:
+      - yes
+    srclibs:
+      - flutter@stable
+    prebuild:
+      - flutterVersion=$(sed -n -E "s/.*flutter-version:\ '(.*)'/\1/p" ../.github/workflows/release-draft.yml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - cd ../sensors_dashboard
+      - export PUB_CACHE=$(pwd)/../.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+    scandelete:
+      - .pub-cache
+    build:
+      - cd ..
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - PATH=$$flutter$$/bin/:$PATH python3 deploy_web_app.py
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 6.4.0
-CurrentVersionCode: 34
+CurrentVersion: 7.0.0
+CurrentVersionCode: 35
