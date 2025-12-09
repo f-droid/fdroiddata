@@ -1,0 +1,60 @@
+Categories:
+  - System
+License: MIT
+AuthorName: Biplob Kumar Sutradhar
+AuthorEmail: biplobsd11@gmail.com
+WebSite: https://biplobsd.github.io/apps/view/rsm.md
+SourceCode: https://github.com/biplobsd/running_services_monitor
+IssueTracker: https://github.com/biplobsd/running_services_monitor/issues
+
+AutoName: Running Services Monitor
+
+RepoType: git
+Repo: https://github.com/biplobsd/running_services_monitor.git
+Binaries: https://github.com/biplobsd/running_services_monitor/releases/download/v%v+%c/rsm_v%v+%c.apk
+
+Builds:
+  - versionName: 1.0.10
+    versionCode: 9
+    commit: 512213e68ada62c54a543cb4920164752a2bfbf3
+    sudo:
+      - mkdir -p /home/runner/work/running_services_monitor
+      - chown -R vagrant /home/runner/
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@stable
+    prebuild:
+      - flutterVersion=$(sed -n -E "s/^\s+flutter-version:\ '([0-9.]+)'/\1/p" .github/workflows/release.yml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export repo=/home/runner/work/running_services_monitor/running_services_monitor
+      - cd ..
+      - mv me.biplobsd.rsm $repo
+      - pushd $repo
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter packages pub get
+      - popd
+      - mv $repo me.biplobsd.rsm
+    scandelete:
+      - .pub-cache
+    build:
+      - export repo=/home/runner/work/running_services_monitor/running_services_monitor
+      - cd ..
+      - mv me.biplobsd.rsm $repo
+      - pushd $repo
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter pub get
+      - $$flutter$$/bin/dart run build_runner build --delete-conflicting-outputs
+      - $$flutter$$/bin/flutter gen-l10n
+      - $$flutter$$/bin/flutter build apk
+      - popd
+      - mv $repo me.biplobsd.rsm
+
+AllowedAPKSigningKeys: 1eb447280255c3b807fb8176556f31757a484619e8a989f29024a26e0fac3274
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 1.0.10
+CurrentVersionCode: 9
