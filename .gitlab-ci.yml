@@ -459,6 +459,29 @@ fdroid build:
     - ./tools/audit-gradle.py $CHANGED;
 
 
+check source code:
+  stage: test
+  needs: []
+  image: debian:bookworm-slim
+  rules: *app_verification_rules
+  before_script:
+    - *install_fdroid_server_deb
+    - export fdroidserver=../fdroidserver
+    - *install_fdroid_server
+  script:
+    - |
+      set -xe
+    - chown -R $(whoami) .
+    - *get_changed_builds
+    - |
+      if [ -n "$CHANGED" ]; then
+        ./tools/check-fastlane.py $CHANGED > codequality.json
+      fi
+  artifacts:
+    reports:
+      codequality: codequality.json
+
+
 check apk:
   stage: test
   dependencies:
