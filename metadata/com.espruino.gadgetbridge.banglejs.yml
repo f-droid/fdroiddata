@@ -463,6 +463,39 @@ Builds:
       - $$reproducible-apk-tools$$/zipalign.py --page-size 4 --pad-like-apksigner
         --replace unaligned.apk $$OUT$$
 
+  - versionName: 0.88.0-banglejs
+    versionCode: 243
+    commit: f765c70971169f7ee6e20a4235fc7d78954d08ab
+    subdir: app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y cmake gcc gcc-multilib make python3-crc32c
+      - echo "deb https://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
+      - apt-get update
+      - apt-get install -y -t trixie openjdk-21-jdk-headless
+      - update-alternatives --auto java
+    gradle:
+      - banglejs
+    srclibs:
+      - reproducible-apk-tools@v0.3.0
+    rm:
+      - external/jerryscript/tools/babel/package.json
+    scanignore:
+      - external/fossil-hr-gbapps/navigationApp/build/files/icons/icLock
+      - external/fossil-hr-gbapps/navigationApp/build/files/icons/icHome
+      - external/fossil-hr-gbapps/navigationApp/build/files/icons/!preview
+    scandelete:
+      - app/src/main/assets/fossil_hr
+      - external/fossil-hr-gbapps/watchface/build/files/icons
+    build:
+      - cd ../external
+      - ./build_fossil_hr_gbapps.sh
+    postbuild:
+      - mv $$OUT$$ unaligned.apk
+      - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
+        --replace unaligned.apk $$OUT$$
+
 AllowedAPKSigningKeys:
   - 01cce9316fcb77ea02c6dea81fde9f3176469202c0cea0514c0e03cb969bc7be
   - c8ce4e29c4d8509f2509c9ce4b5a6f644c3bb9dda042aa88c25313f777a0a81f
@@ -470,5 +503,5 @@ AllowedAPKSigningKeys:
 AutoUpdateMode: None
 UpdateCheckMode: Tags
 UpdateCheckName: nodomain.freeyourgadget.gadgetbridge
-CurrentVersion: 0.87.1-banglejs
-CurrentVersionCode: 242
+CurrentVersion: 0.88.0-banglejs
+CurrentVersionCode: 243
