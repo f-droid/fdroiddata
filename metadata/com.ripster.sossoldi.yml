@@ -1,0 +1,67 @@
+Categories:
+  - Finance Manager
+License: MIT
+AuthorName: RIPsters
+WebSite: https://sossoldi.com/
+SourceCode: https://github.com/RIP-Comm/sossoldi
+IssueTracker: https://github.com/RIP-Comm/sossoldi/issues
+
+AutoName: Sossoldi
+
+RepoType: git
+Repo: https://github.com/RIP-Comm/sossoldi
+Binaries: https://github.com/RIP-Comm/sossoldi/releases/download/%v/sossoldi-%v-arm64.apk
+
+Builds:
+  - versionName: 0.2.2
+    versionCode: 1004
+    commit: 52670c7e3812fee1658ad9d3268ec556ecafaacf
+    sudo:
+      - apt-get update
+      - mkdir -p /home/runner/work/sossoldi
+      - chown -R vagrant /home/runner/
+    output: build/app/outputs/flutter-apk/app-arm64-v8a-fdroid-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+      - linux
+      - macos
+      - web
+      - windows
+    prebuild:
+      - flutterVersion=$(sed -n -E 's/.*"flutter":\ "(.*)"/\1/p' .fvmrc)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export repo=/home/runner/work/sossoldi/sossoldi
+      - cd ..
+      - mv com.ripster.sossoldi $repo
+      - pushd $repo
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+      - popd
+      - mv $repo com.ripster.sossoldi
+    scandelete:
+      - .pub-cache
+    build:
+      - export repo=/home/runner/work/sossoldi/sossoldi
+      - cd ..
+      - mv com.ripster.sossoldi $repo
+      - pushd $repo
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --flavor fdroid --split-per-abi
+        --target-platform="android-arm64"
+      - popd
+      - mv $repo com.ripster.sossoldi
+    ndk: r28
+
+AllowedAPKSigningKeys: 1bc94d702fab45ea64077e518a5fd567d8bbfd78f7574f257a0c5dca21d0da3d
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+VercodeOperation:
+  - '%c * 10 + 4'
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 0.2.2
+CurrentVersionCode: 1004
