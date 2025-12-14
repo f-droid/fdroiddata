@@ -261,7 +261,29 @@ Builds:
       - node_modules/
       - .yarn/install-state.gz
 
+  - versionName: 1.10.1
+    versionCode: 46
+    commit: 9007cffcafd325d23021e7bd1e643a620c51b26b
+    subdir: android/app
+    sudo:
+      - echo "deb https://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
+      - apt-get update
+      - apt-get install -y -t trixie openjdk-21-jdk-headless npm
+      - update-alternatives --auto java
+      - sysctl fs.inotify.max_user_watches=524288 || true
+      - corepack enable
+    init:
+      - yarn install --immutable
+      - CI_PLATFORM=android yarn build
+      - cd ../..
+      - npx cap sync android --deployment
+    gradle:
+      - yes
+    scandelete:
+      - node_modules/
+      - .yarn/install-state.gz
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 1.10.0
-CurrentVersionCode: 45
+CurrentVersion: 1.10.1
+CurrentVersionCode: 46
