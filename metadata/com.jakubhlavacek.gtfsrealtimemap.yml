@@ -1,0 +1,44 @@
+Categories:
+  - Navigation
+  - Public Transport
+License: GPL-3.0-only
+AuthorName: Jakub Hlaváček
+AuthorWebSite: https://jakubhlavacek.com/
+SourceCode: https://github.com/TriLinder/FindMyBus
+IssueTracker: https://github.com/TriLinder/FindMyBus/issues
+
+AutoName: FindMyBus
+
+RepoType: git
+Repo: https://github.com/TriLinder/FindMyBus
+
+Builds:
+  - versionName: 1.0.0
+    versionCode: 1
+    commit: 1fb321c697c2596728660a59bbcf2c1ac48f50e8
+    subdir: android/app
+    sudo:
+      - sysctl fs.inotify.max_user_watches=524288 || true
+      - curl -Lo node.tar.gz https://nodejs.org/download/release/v22.16.0/node-v22.16.0-linux-x64.tar.gz
+      - echo "fb870226119d47378fa9c92c4535389c72dae14fcc7b47e6fdcc82c43de5a547 node.tar.gz"
+        | sha256sum -c -
+      - tar xzf node.tar.gz --strip-components=1 -C /usr/local/
+      - echo "deb https://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
+      - apt-get update
+      - apt-get install -y make g++
+      - apt-get install -y -t trixie openjdk-21-jdk-headless
+      - update-alternatives --auto java
+    gradle:
+      - yes
+    prebuild:
+      - cd ../..
+      - npm install --build-from-source
+      - npm run build
+      - npx cap sync
+    scandelete:
+      - node_modules
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: 1.0.0
+CurrentVersionCode: 1
