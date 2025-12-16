@@ -1,0 +1,42 @@
+Categories:
+  - Habit Tracker
+  - Note
+  - Sports & Health
+License: MIT
+AuthorName: Raynard Gerraldo
+AuthorEmail: raynardgerraldo@gmail.com
+SourceCode: https://github.com/RaynardGerraldo/Streak
+IssueTracker: https://github.com/RaynardGerraldo/Streak/issues
+
+RepoType: git
+Repo: https://github.com/RaynardGerraldo/Streak
+Binaries: https://github.com/RaynardGerraldo/Streak/releases/download/v%v/Streak.apk
+
+Builds:
+  - versionName: 1.4.0
+    versionCode: 12
+    commit: fbb58dab1ecdb39a59c5cec38168e7d9588f5261
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y make zip gettext-base
+    output: Streak.apk
+    srclibs:
+      - reproducible-apk-tools@v0.3.0
+    build:
+      - sdkmanager "platforms;android-33" "build-tools;36.1.0-rc1"
+      - cp $$SDK$$/platforms/android-33/android.jar build/android-33.jar
+      - make -C build KEYSTOREFILE=
+    ndk: r27
+    postbuild:
+      - mv $$OUT$$ unaligned.apk
+      - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
+        --replace unaligned.apk $$OUT$$
+
+AllowedAPKSigningKeys: 7979555883676dc54a9a22b13c70c70c3c4aa3a7585afa618faebd3c9a04cd8b
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: build/AndroidManifest.xml.template|android:versionCode="(\d+)"|.|
+CurrentVersion: 1.4.0
+CurrentVersionCode: 12
