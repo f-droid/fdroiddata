@@ -134,10 +134,40 @@ Builds:
       - ./build-go-binaries.sh
     ndk: r26b
 
+  - versionName: 0.8.0
+    versionCode: 15
+    commit: 847d28b72797981fc54d84a1c328f8e7d21c4766
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y gcc libc-dev make autoconf automake libtool pkg-config
+        wget file gawk libarchive-dev uthash-dev swig xsltproc strace
+      - apt-get install -y -t bookworm-backports golang-go
+    gradle:
+      - yes
+    build:
+      - cd ..
+      - export ANDROID_NDK_ROOT=$$NDK$$
+      - export GOPATH="$HOME/go"
+      - export PATH="$GOPATH/bin:$PATH"
+      - export CGO_ENABLED=1
+      - export TZ=UTC
+      - export SOURCE_DATE_EPOCH=$(git log -1 --format=%ct HEAD)
+      - export VERSION=v0.15_release
+      - export GOFLAGS="-buildvcs=false -trimpath -ldflags=-buildid="
+      - export CGO_CFLAGS="-g0 -O2 -Wno-unused-command-line-argument"
+      - export CGO_LDFLAGS="-s -w"
+      - export CFLAGS="$CGO_CFLAGS -fdebug-prefix-map=/build= -ffile-prefix-map=/build="
+      - export CXXFLAGS=$CFLAGS
+      - export LDFLAGS=$CGO_LDFLAGS
+      - chmod +x build-go-binaries.sh build-native-binaries.sh
+      - ./build-go-binaries.sh
+    ndk: r26b
+
 AllowedAPKSigningKeys: d0450607a6356d31603d2204888b5326aaf018338199a807cc7f81a1eb7629bf
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: gradle.properties|VERSION_CODE=(\d+)|.|VERSION_NAME=(.*)
-CurrentVersion: 0.7.9
-CurrentVersionCode: 14
+CurrentVersion: 0.8.0
+CurrentVersionCode: 15
