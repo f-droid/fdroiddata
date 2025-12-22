@@ -4,7 +4,7 @@
 
 **Please read [the guide](https://gitlab.com/fdroid/fdroiddata/-/blob/master/CONTRIBUTING.md) first if this is your first contribution. Please make sure your metadata follows the best practice in [our templates](https://gitlab.com/fdroid/fdroiddata/tree/master/templates).**
 
-**Please try your best to make sure all pipelines passed before open a merge request. If a test pipeline fails please check the log. Please check that the build pipeline does build your app. If the build pipeline succeeds but there is no APK files produced then you may have a mistake. Please check if you disable the build. Do not submit a metadata generated with `fdroid import` directly, please remove the disable line at least. Please check if the metadata file is in the correct path. It must be put in `metadata/<appid>.yml`.**
+**Please try your best to make sure all pipelines passed before open a merge request. If a test pipeline fails please check the log. Please check that the build pipeline does build your app. If the build pipeline succeeds but there is no APK files produced then you may have a mistake. Please check if you disable the build. Do not submit a metadata generated with `fdroid import` directly, please remove the disable line at least. Please check if the metadata file is in the correct path. It must be put in `metadata/<applicationId>.yml`.**
 
 **After all pipelines pass you can trigger the issue bot manually but do not trigger it too much which bloats the merge request.**
 
