@@ -522,6 +522,7 @@ check apk:
           file=$apk;
         fi
 
+        # binary scanner
         fdroid scanner --verbose --exit-code $file 2>&1 | tee result || {
           export EXITVALUE=1;
           for class in $(sed -n "s/.*DEBUG: Problem: found class '\(.*\)'/\1/p" result); do
@@ -533,6 +534,8 @@ check apk:
             generate_report $appid $location "Found Dependency metadata" "signing_block" "$file Dependency metadata" "minor" >> codequality.json;
           };
         };
+
+        # manifest
         androguard axml $file -o AndroidManifest.xml
         for permission in $(sed -n 's|.*<uses-permission android:name="\([^"]\+\)".*|\1|p' AndroidManifest.xml); do
             generate_report $appid $location "Permission $permission" "permission" "$file $permission" "info" >> codequality.json;
@@ -543,6 +546,18 @@ check apk:
           generate_report $appid $location "Debuggable APK" "application_attribution" "$file debuggable" "critical" >> codequality.json;
         grep 'android:testOnly="true"' AndroidManifest.xml && \
           generate_report $appid $location "Testing APK" "application_attribution" "$file testOnly" "critical" >> codequality.json;
+
+        # signing key
+        if [[ -e $binary ]]; then
+          dn=$(apksigner verify --print-certs $binary | sed -n -E 's/.*certificate DN: (.*)/\1/p')
+          if [[ $dn = "C=US, O=Android, CN=Android Debug" ]]; then
+            severity="critical"
+            export EXITVALUE=1;
+          else
+            severity="info"
+          fi
+          generate_report $appid $location "Signing Key: $dn" "signing_key" "$file Signing Key" $severity >> codequality.json;
+        fi
       done
     - sed -i -e '$s/,$/]/' codequality.json
     - exit $EXITVALUE
