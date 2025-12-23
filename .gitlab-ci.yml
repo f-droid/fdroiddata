@@ -343,6 +343,8 @@ fdroid build:
       - tmp/
     when: always
     expire_in: 1 month
+    reports:
+      codequality: codequality.json
   rules: *app_verification_rules
   cache:
     key: "$CI_JOB_NAME"
@@ -368,6 +370,9 @@ fdroid build:
     - *install_fdroid_server
 
     - git -C $home_vagrant/gradlew-fdroid pull
+
+    - export CODEQUALITY_DIR=$HOME/codequality
+    - mkdir -p $CODEQUALITY_DIR
 
     # Set up git config something like the production buildserver. The
     # difference is that in production, this is installed on the
@@ -408,7 +413,8 @@ fdroid build:
         -keystore $keystore -storepass:env keystorepass -keypass:env keypass
 
     - APPS="$(./tools/find-changed-builds.py)"
-    - for build in $APPS; do
+    - |
+      for build in $APPS; do
           set -x;
           apt-get install sudo;
           cp -R $CI_PROJECT_DIR/build $home_vagrant/build;
@@ -424,6 +430,13 @@ fdroid build:
           (unset CI; $fdroid build --verbose --test --refresh-scanner --on-server --no-tarball $build);
           apt-get install sudo;
           popd;
+          vercode=${build#*:};
+          location=$(($(grep -n "^    versionCode:\ $vercode$" metadata/$appid.yml | cut -f1 -d:) - 1));
+          for file in "${appid}_${vercode}.apk" "binaries/${appid}_${vercode}.binary.apk"; do
+            if [[ -e "$CI_PROJECT_DIR/tmp/$file" ]]; then
+              echo '[{"location":{"path":"metadata/'$appid'.yml","lines":{"begin":'$vercode'}},"description":"Built APK: '$CI_PROJECT_URL'/-/jobs/'$CI_JOB_ID'/artifacts/raw/tmp/'$file'","check_name":"built_apk","fingerprint":"'$file'","severity":"info"}]' > "$CODEQUALITY_DIR/${file#*/}.json";
+            fi
+          done;
           rm -rf $home_vagrant/build || true;
           rm -rf $ANDROID_HOME/ndk || true;
           apt-get install -y openjdk-17-jdk-headless;
@@ -433,6 +446,9 @@ fdroid build:
       done
 
     - ./tools/audit-gradle.py $CHANGED;
+
+    - apt-get install jq
+    - jq '[.[]|.[]]' --slurp $CODEQUALITY_DIR/*.json > codequality.json
 
 
 check source code:
@@ -479,13 +495,13 @@ check apk:
     - export EXITVALUE=0
     - |
       function generate_report() {
-        echo "{\"location\": { \
-          \"path\": \"metadata/$1.yml\", \
-          \"lines\": {\"begin\": $2}}, \
-          \"description\": \"$3\", \
-          \"check_name\": \"$4\", \
-          \"fingerprint\": \"$5\", \
-          \"severity\": \"$6\"},";
+        echo '{"location": {
+          "path": "metadata/'$1'.yml",
+          "lines": {"begin": '$2'}},
+          "description": "'$3'",
+          "check_name": "'$4'",
+          "fingerprint": "'$5'",
+          "severity": "'$6'"},";'
       }
     - echo '[' > codequality.json
     - |
