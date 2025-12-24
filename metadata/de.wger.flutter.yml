@@ -574,8 +574,34 @@ Builds:
       - export PUB_CACHE=$(pwd)/.pub-cache
       - $$flutter$$/bin/flutter build apk
 
+  - versionName: 1.9.4
+    versionCode: 140
+    commit: ed5ab7613be81e02fbaf94139e2d9c5f8c3a3c1a
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - flatpak
+      - ios
+      - windows
+      - linux
+      - macos
+      - web
+    prebuild:
+      - flutterVersion=$(sed -n -E "s/.*flutter-version:\ (.*)/\1/p" .github/actions/flutter-common/action.yml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 1.9.3
-CurrentVersionCode: 130
+CurrentVersion: 1.9.4
+CurrentVersionCode: 140
