@@ -1,0 +1,40 @@
+Categories:
+  - System
+License: GPL-3.0-only
+AuthorName: hxreborn
+SourceCode: https://github.com/hxreborn/remember-my-sort
+IssueTracker: https://github.com/hxreborn/remember-my-sort/issues
+
+AutoName: Remember My Sort
+
+RepoType: git
+Repo: https://github.com/hxreborn/remember-my-sort.git
+Binaries: https://github.com/hxreborn/remember-my-sort/releases/download/v%v/app-release.apk
+
+Builds:
+  - versionName: 1.2.3
+    versionCode: 123
+    commit: 8b98a23ffdb7eb2c22dd5fe9c5c6e6bbae8fd182
+    subdir: app
+    submodules: true
+    sudo:
+      - echo "deb https://deb.debian.org/debian sid main" > /etc/apt/sources.list.d/sid.list
+      - apt-get update
+      - apt-get install -y -t sid openjdk-21-jdk-headless
+      - update-alternatives --auto java
+    gradle:
+      - yes
+    prebuild:
+      - sed -i -e '/maven.pkg.github.com/d' ../libxposed/api/api/build.gradle.kts
+      - sed -i -e '/signingConfigs/,/takeIf/d' build.gradle.kts
+    build:
+      - pushd ../libxposed/api
+      - gradle :api:publishApiPublicationToMavenLocal -x :checks:compileKotlin
+      - popd
+
+AllowedAPKSigningKeys: 32b98dc709a7ee15fae073493a1aeca5d428316cc0d8b8f878eed64ba37f3297
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: 1.2.3
+CurrentVersionCode: 123
