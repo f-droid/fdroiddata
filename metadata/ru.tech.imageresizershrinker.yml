@@ -759,10 +759,29 @@ Builds:
         export localhash=$(sha256sum assets/dexopt/baseline.prof|cut -d " " -f1);
         [[ $localhash == $upstreamhash ]] && break ; popd; rm -fr local; done
 
+  - versionName: 3.5.2
+    versionCode: 196
+    commit: 5354c91896b9e0f6800dd4299449c66d665576ac
+    subdir: app
+    gradle:
+      - foss
+    output: build/outputs/apk/foss/release/image-toolbox-*-foss-universal-release-unsigned.apk
+    srclibs:
+      - reproducible-apk-tools@v0.3.0
+    prebuild:
+      - sed -i -e '/gms/d' -e '/firebase/d' ../build.gradle.kts ../build-logic/convention/src/main/kotlin/ImageToolboxApplicationPlugin.kt
+      - sed -i -e '/androidx.dev/,/^        }/d' ../settings.gradle.kts
+    scandelete:
+      - build-logic/convention/build
+    postbuild:
+      - mv $$OUT$$ unaligned.apk
+      - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
+        --replace unaligned.apk $$OUT$$
+
 AllowedAPKSigningKeys: 20d7689de0874f00015ea3e31fa067c15c03457d362d41d5e793db3a864fa534
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: gradle/libs.versions.toml|versionCode = "(\d+)"|.|versionName = "([\d.]+)"
-CurrentVersion: 3.4.0
-CurrentVersionCode: 191
+CurrentVersion: 3.5.2
+CurrentVersionCode: 196
