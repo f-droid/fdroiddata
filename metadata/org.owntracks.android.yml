@@ -58,9 +58,27 @@ Builds:
       - "sed -i -r 's/(val packageVersionCode: Int =.* ?: )[0-9]+/\\1$$VERCODE$$/'\
         \ build.gradle.kts"
 
+  - versionName: 2.5.5
+    versionCode: 420505020
+    commit: 6237c1eb6c30594817d00e48d77b09d08c0e977c
+    subdir: project/app
+    sudo:
+      - echo "deb https://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
+      - apt-get update
+      - apt-get install -y -t trixie openjdk-21-jdk-headless npm
+      - update-alternatives --auto java
+    gradle:
+      - oss
+    prebuild:
+      - sed -i -e 's/storage.*"/jitpack.io"/' ../build.gradle.kts
+      - echo "org.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=512m -XX:+HeapDumpOnOutOfMemoryError"
+        > $HOME/.gradle/gradle.properties
+      - "sed -i -r 's/(val packageVersionCode: Int =.* ?: )[0-9]+/\\1$$VERCODE$$/'\
+        \ build.gradle.kts"
+
 AutoUpdateMode: Version v%v
 UpdateCheckMode: HTTP
 UpdateCheckData: 'https://raw.githubusercontent.com/owntracks/android/master/latest-version.yaml|versionCode:
   (\d+)|.|versionName: (\d+.\d+.\d+)'
-CurrentVersion: 2.5.4
-CurrentVersionCode: 420504022
+CurrentVersion: 2.5.5
+CurrentVersionCode: 420505020
