@@ -202,9 +202,30 @@ Builds:
     postbuild: $$reproducible-apk-tools$$/inplace-fix.py --page-size 16 fix-newlines
       $$OUT$$ 'META-INF/services/*'
 
+  - versionName: 2.0.10
+    versionCode: 124
+    commit: 386c6ffba1f728939cc430f05b3c7dbb37ad7195
+    subdir: app
+    sudo:
+      - echo "deb https://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
+      - apt-get update
+      - apt-get install -y -t trixie openjdk-21-jdk-headless
+      - update-alternatives --auto java
+      - export CPUS_MAX=8
+      - export CPUS=$(getconf _NPROCESSORS_ONLN)
+      - for (( c=$CPUS_MAX; c<$CPUS; c++ )) ; do echo 0 > /sys/devices/system/cpu/cpu$c/online
+        ; done
+    gradle:
+      - yes
+    srclibs:
+      - reproducible-apk-tools@v0.3.0
+    prebuild: sed -i -e '/foojay/d' ../settings.gradle.kts
+    postbuild: $$reproducible-apk-tools$$/inplace-fix.py --page-size 16 fix-newlines
+      $$OUT$$ 'META-INF/services/*'
+
 AllowedAPKSigningKeys: 78397d01d7241d54ae3bbd35a14c70053f2cf0c69066114184a77559c7df50e7
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 2.0.9
-CurrentVersionCode: 123
+CurrentVersion: 2.0.10
+CurrentVersionCode: 124
