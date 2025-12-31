@@ -33,7 +33,11 @@ def check_fastlane(app: metadata.App) -> list[dict[str, str]]:
         return reports
 
     localized = app["localized"]
-    if not localized.get("en-US") or not localized["en-US"].get("summary"):
+    if (
+        not localized.get("en-US")
+        or not localized["en-US"].get("summary")
+        or not localized["en-US"].get("description")
+    ):
         reports.append(
             {
                 "description": "Fastlane/Triple-T for en-US not found or incomplete",
