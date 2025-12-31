@@ -6,6 +6,7 @@ import sys
 from pathlib import Path
 
 import ruamel.yaml
+import markdown_it
 from fdroidserver import common, metadata, update
 
 BCP47_LOCALE_TAG_PATTERN = re.compile(r"[a-z]{2,3}(-([A-Z][a-zA-Z]+|\d+|[a-z]+))*")
@@ -45,6 +46,20 @@ def check_fastlane(app: metadata.App) -> list[dict[str, str]]:
                 "severity": "critical",
             }
         )
+
+    # Don't escape html so that we can compare the output with the original text
+    markdown_it.renderer.escapeHtml = lambda x: x
+    md = (
+        markdown_it.MarkdownIt("commonmark")
+        .disable("list")  # The markdown list can also be used as plain text list
+        .disable("normalize")
+        .disable("escape")
+        .disable("entity")
+    )
+
+    def normalize_html(text: str) -> str:
+        return text.replace("<p>", "").replace("</p>", "").replace("\n", "")
+
     for locale, v in localized.items():
         if not BCP47_LOCALE_TAG_PATTERN.fullmatch(locale):
             for replace in (("_", "-"), ("-r", "-"), ("_r", "-")):
@@ -91,6 +106,17 @@ def check_fastlane(app: metadata.App) -> list[dict[str, str]]:
                 "severity": "info",
             }
         )
+
+        if v.get("description") and normalize_html(v["description"]) != normalize_html(
+            md.render(v["description"])
+        ):
+            reports.append(
+                {
+                    "description": f"Fastlane/Triple-T in {locale} uses Markdown in description",
+                    "fingerprint": f"fastlane {locale} markdown",
+                    "severity": "minor",
+                }
+            )
 
     return reports
 
