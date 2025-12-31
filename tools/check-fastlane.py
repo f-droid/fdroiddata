@@ -91,7 +91,7 @@ def check_fastlane(app: metadata.App) -> list[dict[str, str]]:
                     }
                 )
 
-        items = list(v.keys())
+        items = [f"{k} ({v[k][:80]})" for k in v.keys()]
         if (repo_dir := Path("repo") / app.id / locale).is_dir():
             for child in repo_dir.iterdir():
                 if child.is_file():
