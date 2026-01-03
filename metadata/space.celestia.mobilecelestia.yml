@@ -1165,19 +1165,63 @@ Builds:
       - cd ..
       - sh "$(pwd)/space.celestia.mobilecelestia/app/run_gperf.sh" "$(pwd)/Celestia"
 
+  - versionName: 1.9.3
+    versionCode: 649
+    commit: e34fe9ce424ac44a0762c2dcbd9a3e494d916b23
+    timeout: 10800
+    subdir: app
+    sudo:
+      - echo "deb https://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
+      - apt-get update
+      - apt-get install -y -t trixie openjdk-21-jdk-headless
+      - update-alternatives --auto java
+      - apt-get install cmake tcsh gcc-multilib g++-multilib gettext gperf make meson
+        ncompress wget xz-utils imagemagick
+    gradle:
+      - unofficial
+    srclibs:
+      - celestia-apple-android-dependencies@1.0.22
+      - Celestia@1_9_3_rc1
+      - CelestiaContent@b6d3daa2260cdbd251336264eb62334a4d6e62c6
+      - CelestiaLocalization@81d90fd8254763516000edfff0dace9975187358
+    prebuild:
+      - ln -s $$Celestia$$ ../..
+      - ln -s $$CelestiaContent$$ ../..
+      - ln -s $$CelestiaLocalization$$ ../..
+      - mv $$celestia-apple-android-dependencies$$ ../dependencies
+      - cd ../dependencies
+      - sed -i -e 's/wget/wget -q/' download.sh build_android.sh
+      - sed -i -e 's/$HOST_CC/"$HOST_CC"/' build_android.sh
+      - bash download.sh
+      - mkdir targz tarxz tgz
+      - for i in *.tar.gz; do tar -xzf $i -C targz; done
+      - for i in *.tar.xz; do tar -xJf $i -C tarxz; done
+      - for i in *.tgz; do tar -xzf $i -C tgz; done
+    scandelete:
+      - dependencies
+    build:
+      - bash downsize_textures.sh
+      - bash run_gperf.sh $$Celestia$$
+      - cd ../dependencies
+      - for i in $(ls targz); do tar -czf $i.tar.gz -C targz $i; done
+      - for i in $(ls tarxz); do tar -cJf $i.tar.xz -C tarxz $i; done
+      - for i in $(ls tgz); do tar -czf $i.tgz -C tgz $i; done
+      - bash prepare_icu.sh
+      - bash build_android.sh $(pwd) $$SDK$$/ndk/*
+
 MaintainerNotes: |-
   Celestia for android requires 4 more repositories to build:
     - Celestia;
     - CelestiaContent;
     - CelestiaLocalization;
-    - apple-android (contains build scripts for dependencies).
+    - apple-android-dependencies (contains build scripts for dependencies).
   These repositories need to be present in parent directory of AndroidCelestia.
   Commit hashes for these repositories are located upstream in 'versions.txt'
   file. We parse this file to get the correct hashes for dependencies.
 
   During the prebuild they are temporarily moved into AndroidCelestia directory
   to allow f-droid scanner to scan it. Third party dependencies are downloaded
-  with './prebuild.sh' during prebuilt stage, however they are compressed
+  with './download.sh' during prebuilt stage, however they are compressed
   and only unpacked during the build stage with './prepare_icu.sh' and './build_android.sh'
   scripts. Because of that, we unpack these archives during the prebuild stage
   to allow F-Droid scanner to scan them, and then pack it back so build scripts
@@ -1193,5 +1237,5 @@ MaintainerNotes: |-
 
 AutoUpdateMode: None
 UpdateCheckMode: Tags
-CurrentVersion: 1.9.2
-CurrentVersionCode: 643
+CurrentVersion: 1.9.3
+CurrentVersionCode: 649
