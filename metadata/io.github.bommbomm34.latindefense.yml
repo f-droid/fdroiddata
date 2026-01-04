@@ -1,0 +1,44 @@
+Categories:
+  - Games
+License: MIT
+AuthorName: bommbomm34
+AuthorEmail: bommbomm34@perhof.org
+AuthorWebSite: https://bommbomm34.perhof.org
+WebSite: https://bommbomm34.itch.io/latin-defense
+SourceCode: https://github.com/bommbomm34/latindefense
+IssueTracker: https://github.com/bommbomm34/latindefense/issues
+
+Name: Latin Defense
+
+RepoType: git
+Repo: https://github.com/bommbomm34/latindefense.git
+
+Builds:
+  - versionName: 1.2.0
+    versionCode: 7
+    commit: 03b9b8d38e773aba817c7467b7ebee4d32ba2f8d
+    sudo:
+      - apt-get update
+      - apt-get install scons wget clang gettext pkg-config -y
+    output: output.apk
+    srclibs:
+      - Godot@4.5.1-stable
+    build:
+      - pushd $$Godot$$
+      - export ANDROID_NDK_ROOT=$$NDK$$
+      - export ANDROID_HOME=$$SDK$$
+      - export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+      - scons -j `nproc` platform=linuxbsd use_llvm=yes target=editor
+      - scons -j `nproc` platform=android use_llvm=yes target=template_release arch=arm64
+        generate_apk=yes
+      - popd
+      - mv $$Godot$$/bin/android_release.apk android-release.apk
+      - $$Godot$$/bin/godot.linuxbsd.editor.x86_64.llvm --headless --export-release
+        "Android F-Droid" output.apk
+    ndk: 28.1.13356709
+
+AutoUpdateMode: Version v%v
+UpdateCheckMode: HTTP
+UpdateCheckData: https://bommbomm34.perhof.org/versions/latin-defense|^(\d+),|.|,(.+)$
+CurrentVersion: 1.2.0
+CurrentVersionCode: 7
