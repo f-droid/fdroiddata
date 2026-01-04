@@ -1,0 +1,54 @@
+AntiFeatures:
+  NonFreeAssets:
+    en-US: Some graphics used are CC BY-NC-SA and thus not libre.
+  TetheredNet:
+    en-US: Relies on lidraughts.org
+Categories:
+  - Games
+License: GPL-3.0-or-later
+AuthorName: vovagorodok
+SourceCode: https://github.com/vovagorodok/blidraughts/
+IssueTracker: https://github.com/vovagorodok/blidraughts/issues
+Translation: https://crowdin.com/project/lidraughts
+Changelog: https://github.com/vovagorodok/blidraughts/releases
+Donate: https://lidraughts.org/patron
+
+AutoName: Blidraughts
+
+RepoType: git
+Repo: https://github.com/vovagorodok/blidraughts
+
+Builds:
+  - versionName: 2.3.0+ble2.4.0
+    versionCode: 1
+    commit: 61f22e37dcce6445e1cc2b0802d6995033bb22b7
+    subdir: android/app
+    sudo:
+      - apt-get update
+      - apt-get install -y g++ make
+      - echo "deb https://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
+      - apt-get update
+      - apt-get install -y -t trixie openjdk-21-jdk-headless npm
+      - update-alternatives --auto java
+    init:
+      - pushd ../..
+      - npm install
+      - touch www/index.html
+      - npx cap update android
+      - sed 's/lidraughts\.dev/lidraughts.org/g' appconfig.dev.json > appconfig.prod.json
+    gradle:
+      - yes
+    rm:
+      - ios/
+    scanignore:
+      - res/scan
+    scandelete:
+      - node_modules/
+    build:
+      - pushd ../..
+      - APP_MODE=release APP_CONFIG=prod npm run build
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: 2.3.0+ble2.4.0
+CurrentVersionCode: 1
