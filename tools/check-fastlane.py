@@ -5,8 +5,8 @@ import re
 import sys
 from pathlib import Path
 
-import ruamel.yaml
 import markdown_it
+import ruamel.yaml
 from fdroidserver import common, metadata, update
 
 BCP47_LOCALE_TAG_PATTERN = re.compile(r"[a-z]{2,3}(-([A-Z][a-zA-Z]+|\d+|[a-z]+))*")
@@ -52,9 +52,11 @@ def check_fastlane(app: metadata.App) -> list[dict[str, str]]:
     md = (
         markdown_it.MarkdownIt("commonmark")
         .disable("list")  # The markdown list can also be used as plain text list
+        .disable("code")  # The markdown code can also be used as plain text indent
         .disable("normalize")
         .disable("escape")
         .disable("entity")
+        .disable("newline")
     )
 
     def normalize_html(text: str) -> str:
