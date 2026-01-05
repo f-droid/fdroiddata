@@ -215,6 +215,27 @@ Builds:
     scandelete:
       - build-plugin
 
+  - versionName: '15.0'
+    versionCode: 18
+    commit: fc0fa029eea8593fae4ecc7ac2faec4f1a622bea
+    subdir: app-thunderbird
+    sudo:
+      - echo "deb https://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
+      - apt-get update
+      - apt-get install -y -t trixie openjdk-21-jdk-headless
+      - update-alternatives --auto java
+    gradle:
+      - foss
+    rm:
+      - app-k9mail
+      - feature/funding/googleplay
+    prebuild:
+      - sed -i -e 's|maven.mozilla.org/maven2|jitpack.io|' -e '/glean/d' -e '/googleplay/d'
+        -e '/:app-k9mail/d' -e '/foojay/d' ../settings.gradle.kts
+      - sed -i -e 's/feature.funding.googleplay/feature.funding.link/' build.gradle.kts
+    scandelete:
+      - build-plugin
+
 AllowedAPKSigningKeys: b6524779b3dbbc5ac17a5ac271ddb29dcfbf723578c238e03c3c217811356dd1
 
 MaintainerNotes: |-
@@ -236,5 +257,5 @@ MaintainerNotes: |-
 
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: '14.0'
-CurrentVersionCode: 17
+CurrentVersion: '15.0'
+CurrentVersionCode: 18

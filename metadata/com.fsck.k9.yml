@@ -1693,6 +1693,27 @@ Builds:
     scandelete:
       - build-plugin
 
+  - versionName: '15.0'
+    versionCode: 39031
+    commit: 2a4eedc490722867667d7121bb19ad9bfa7fd26a
+    subdir: app-k9mail
+    sudo:
+      - echo "deb https://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
+      - apt-get update
+      - apt-get install -y -t trixie openjdk-21-jdk-headless
+      - update-alternatives --auto java
+    gradle:
+      - foss
+    rm:
+      - app-thunderbird
+      - feature/funding/googleplay
+    prebuild:
+      - sed -i -e 's|maven.mozilla.org/maven2|jitpack.io|' -e '/glean/d' -e '/googleplay/d'
+        -e '/:app-thunderbird/d' -e '/foojay/d' ../settings.gradle.kts
+      - sed -i -e 's/feature.funding.googleplay/feature.funding.link/' build.gradle.kts
+    scandelete:
+      - build-plugin
+
 MaintainerNotes: |-
   Use output instead of subdir to make gradlew-fdroid correctly determine the gradle version to be used.
   It doesn't work when using subdir because we are two levels deep into the directory structure.
@@ -1700,5 +1721,5 @@ MaintainerNotes: |-
 
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: '14.0'
-CurrentVersionCode: 39030
+CurrentVersion: '15.0'
+CurrentVersionCode: 39031
