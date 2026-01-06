@@ -248,7 +248,33 @@ Builds:
       - mv $$ffmpeg-kit$$/prebuilt/bundle-android-aar/ffmpeg-kit/ffmpeg-kit.aar libs
     ndk: 25.1.8937393
 
+  - versionName: 2.3.0.foss
+    versionCode: 20300
+    commit: a0a004dffe2a79ade468ee579e75692dff856272
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y make automake pkg-config libtool nasm meson ninja-build
+      - apt-get install -y -t bookworm-backports cmake
+    gradle:
+      - yes
+    srclibs:
+      - ffmpeg-kit@v6.0.LTS
+    rm:
+      - app/libs/*.aar
+      - app/src/main/cpp/thirdparty/libqrencode/tests
+    prebuild: sed -i -e '/isEnable = true/d'  build.gradle.kts
+    build:
+      - sdkmanager 'ndk;25.2.9519653' 'cmake;3.31.0'
+      - pushd $$ffmpeg-kit$$
+      - ANDROID_SDK_ROOT=$$SDK$$ ANDROID_NDK_ROOT=$$SDK$$/ndk/25.2.9519653 ./android.sh
+        --disable-arm-v7a-neon --enable-gpl --enable-libvpx --enable-dav1d --enable-x264
+        --enable-x265 --enable-android-media-codec
+      - popd
+      - mv $$ffmpeg-kit$$/prebuilt/bundle-android-aar/ffmpeg-kit/ffmpeg-kit.aar libs
+    ndk: r28b
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 2.2.2.foss
-CurrentVersionCode: 20202
+CurrentVersion: 2.3.0.foss
+CurrentVersionCode: 20300
