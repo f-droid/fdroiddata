@@ -39,10 +39,39 @@ Builds:
       - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
         --replace unaligned.apk $$OUT$$
 
+  - versionName: 0.3.2
+    versionCode: 16777986
+    commit: 7251013deb67617f1b7d95a48866eb33f0ef4dc9
+    output: target/release/apk/wifi_exporter.apk
+    srclibs:
+      - rustup@1.28.2
+      - reproducible-apk-tools@v0.3.0
+    prebuild:
+      - export ANDROID_API=$(sed -E -n 's/.*ANDROID_API.*"(.*)".*/\1/p' .github/workflows/android-release.yml)
+      - export BUILD_TOOLS=$(sed -E -n 's/.*ANDROID_BUILD_TOOLS.*"(.*)".*/\1/p' .github/workflows/android-release.yml)
+      - sdkmanager "platforms;android-$ANDROID_API" "build-tools;$BUILD_TOOLS"
+      - export RUST_VERSION=$(sed -E -n 's/.*RUST_TOOLCHAIN.*"(.*)".*/\1/p' .github/workflows/android-release.yml)
+      - $$rustup$$/rustup-init.sh -y --default-toolchain $RUST_VERSION --target aarch64-linux-android
+      - source "$HOME/.cargo/env"
+      - export CARGO_RAPK_TAG=$(sed -E -n 's/.*cargo-rapk.*--tag\s+([v0-9.]+).*/\1/p'
+        .github/workflows/android-release.yml)
+      - cargo install --git https://github.com/mlm-games/cargo-rapk.git --tag $CARGO_RAPK_TAG
+        cargo-rapk --locked
+    build:
+      - source "$HOME/.cargo/env"
+      - cargo rapk build --release --deterministic --unsigned --target aarch64-linux-android
+    ndk: 28.2.13676358
+    postbuild:
+      - mv $$OUT$$ unaligned.apk
+      - export PAGE_SIZE=$(sed -E -n 's/.*CARGO_RAPK_PAGE_SIZE_KB=([0-9]+).*/\1/p'
+        .github/workflows/android-release.yml)
+      - $$reproducible-apk-tools$$/zipalign.py --page-size $PAGE_SIZE --pad-like-apksigner
+        --replace unaligned.apk $$OUT$$
+
 AllowedAPKSigningKeys: 4aed2f691df64a7b0fea25a6b8c80183c6dc520e049dac0178defa1d6472228f
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: Cargo.toml|version_code\s*=\s*([0-9]+)|Cargo.toml|version\s*=\s*"([^"]+)"
-CurrentVersion: 0.2.12
-CurrentVersionCode: 16777740
+CurrentVersion: 0.3.2
+CurrentVersionCode: 16777986
