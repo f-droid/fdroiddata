@@ -60,6 +60,8 @@ def check_fastlane(app: metadata.App) -> list[dict[str, str]]:
     )
 
     def normalize_html(text: str) -> str:
+        text = re.sub(r"\s+$", "", text, flags=re.M)
+        text = re.sub(r"^\s+", "", text, flags=re.M)
         return text.replace("<p>", "").replace("</p>", "").replace("\n", "")
 
     for locale, v in localized.items():
