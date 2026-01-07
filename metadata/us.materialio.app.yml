@@ -2091,6 +2091,54 @@ Builds:
       - cp $$esbuild$$/esbuild ../../node_modules/vite/node_modules/@esbuild/linux-x64/bin/esbuild
     ndk: 27.0.12077973
 
+  - versionName: 1.13.1
+    versionCode: 185
+    commit: 5620e50317d24f287dc80a5530558a3c2d077f9b
+    timeout: 20000
+    subdir: materialious/android/app
+    sudo:
+      - apt-get update
+      - apt-get install -y build-essential cmake golang-go gcc-multilib g++-multilib
+        make
+      - echo "deb https://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
+      - apt-get update
+      - apt-get install -y -t trixie openjdk-21-jdk-headless
+      - update-alternatives --auto java
+      - curl -Lo node.tar.gz https://nodejs.org/download/release/v22.21.1/node-v22.21.1-linux-x64.tar.gz
+      - echo "219a152ea859861d75adea578bdec3dce8143853c13c5187f40c40e77b0143b2 node.tar.gz"
+        | sha256sum -c -
+      - tar xzf node.tar.gz --strip-components=1 -C /usr/local/
+      - npm install -g npm@latest
+    gradle:
+      - yes
+    srclibs:
+      - esbuild@v0.27.2
+      - NodejsMobile@v18.20.4
+    prebuild:
+      - sed -i -e '/enable true/d' build.gradle
+      - sed -i -e '/gms/d' ../build.gradle
+      - sed -i -e 's/-Xmx1536m/-Xmx4096m/' ../gradle.properties
+      - cd ../..
+      - npm install
+      - pushd static/nodejs-android
+      - npm install
+      - popd
+      - npm run build
+      - npx cap sync
+    scandelete:
+      - materialious/node_modules
+    build:
+      - pushd $$NodejsMobile$$
+      - ./tools/android_build.sh $$NDK$$ 24
+      - popd
+      - cp -a $$NodejsMobile$$/out_android/* ../../node_modules/capacitor-nodejs/android/libnode/bin/
+      - pushd $$esbuild$$
+      - make esbuild
+      - popd
+      - cp $$esbuild$$/esbuild ../../node_modules/esbuild/bin/esbuild
+      - cp $$esbuild$$/esbuild ../../node_modules/@esbuild/linux-x64/bin/esbuild
+    ndk: 27.0.12077973
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 CurrentVersion: 1.13.1
