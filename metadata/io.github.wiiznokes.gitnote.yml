@@ -281,7 +281,31 @@ Builds:
       - make NDK_PATH=$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin DEBUG=0 build_install
     ndk: r27d
 
+  - versionName: 26.01.1
+    versionCode: 15
+    commit: 2eb40fb09de56dfa6060429e4bebab425ecd0c42
+    subdir: app
+    sudo:
+      - echo "deb https://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
+      - apt-get update
+      - apt-get install make
+      - apt-get install -y -t trixie openjdk-21-jdk-headless
+      - update-alternatives --auto java
+    gradle:
+      - yes
+    srclibs:
+      - rustup@1.27.1
+    rm:
+      - app/src/main/rust/openssl-prebuild
+    build:
+      - cd src/main/rust
+      - $$rustup$$/rustup-init.sh -y --default-toolchain $(cat RUST_VERSION) --target
+        aarch64-linux-android x86_64-linux-android
+      - source $HOME/.cargo/env
+      - make NDK_PATH=$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin DEBUG=0 build_install
+    ndk: r27d
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: '26.01'
-CurrentVersionCode: 14
+CurrentVersion: 26.01.1
+CurrentVersionCode: 15
