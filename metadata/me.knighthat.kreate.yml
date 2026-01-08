@@ -1,7 +1,6 @@
 AntiFeatures:
   NonFreeNet:
-    en-US: Depends on Youtube, connects to Github for Piped & Invidious instances
-      lists
+    en-US: Depends on Youtube; Uses Bush translator, which depends on Google Translator
 Categories:
   - Internet
   - Multimedia
@@ -418,7 +417,25 @@ Builds:
       - fdroid
     prebuild: cp ../fastlane/metadata/android/en-US/changelogs/$$VERCODE$$.txt src/androidMain/res/raw/release_notes.txt
 
+  - versionName: 1.9.2-fdroid
+    versionCode: 128
+    commit: d2e948776d5cc39e7bd2f9a5500c932cf030bb44
+    subdir: composeApp
+    submodules: true
+    sudo:
+      - echo "deb https://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
+      - apt-get update
+      - apt-get install -y -t trixie openjdk-21-jdk-headless
+      - update-alternatives --auto java
+    gradle:
+      - fdroid
+      - universal
+      - prod
+    prebuild: sed -i -e '/signingConfigs/d' -e '/isOfficialBuildEnv/d' build.gradle.kts
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v.*$
-CurrentVersion: 1.8.4-fdroid
-CurrentVersionCode: 124
+UpdateCheckData: composeApp/build.gradle.kts|VERSION_CODE = (\d+)|.|versionName =
+  "(.+)"
+CurrentVersion: 1.9.2-fdroid
+CurrentVersionCode: 128
