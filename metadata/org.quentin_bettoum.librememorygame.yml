@@ -219,8 +219,41 @@ Builds:
         'Android' libre-memory-game.apk
     ndk: 26.2.11394342
 
+  - versionName: 1.2.0
+    versionCode: 9
+    commit: b0e2a3ab59371b7a0675237d0313a64b622835a8
+    timeout: 14400
+    sudo:
+      - apt-get update
+      - apt-get install -y pkgconf clang scons
+    output: libre-memory-game.apk
+    srclibs:
+      - Godot@4.5.1-stable
+    build:
+      - export ANDROID_NDK_ROOT=$$NDK$$
+      - export ANDROID_SDK_ROOT=$$SDK$$
+      - export ANDROID_HOME=$$SDK$$
+      - export GODOT_CFG=~/.config/godot/editor_settings-4.5.tres
+      - export GODOT_TMPL=$$Godot$$/bin/android_release.apk
+      - export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+      - pushd $$Godot$$
+      - scons -j `nproc` platform=linuxbsd use_llvm=yes target=editor tools=yes
+      - scons -j `nproc` platform=android use_llvm=yes target=template_release arch=armv7
+      - scons -j `nproc` platform=android use_llvm=yes target=template_release arch=arm64v8
+        generate_android_binaries=yes
+      - popd
+      - $$Godot$$/bin/godot.linuxbsd.editor.x86_64.llvm --headless --check-only --quit
+        project.godot
+      - sed -i -e 's:\(^.*android_sdk_path\)\s*=.*$:\1="$$SDK$$":' $GODOT_CFG
+      - sed -i -e 's:\(^.*package/signed\)\s*=.*$:\1=false:' export_presets.cfg
+      - sed -i -e '/custom_template\/release/s|=.*|="$$Godot$$/bin/android_release.apk"|'
+        export_presets.cfg
+      - $$Godot$$/bin/godot.linuxbsd.editor.x86_64.llvm --headless --export-release
+        'Android' libre-memory-game.apk
+    ndk: 28.1.13356709
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: export_presets.cfg|version/code=(\d+)|.|version/name="([\d.]+)"
-CurrentVersion: 1.1.0
-CurrentVersionCode: 8
+CurrentVersion: 1.2.0
+CurrentVersionCode: 9
