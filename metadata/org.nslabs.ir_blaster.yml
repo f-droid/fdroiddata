@@ -1,0 +1,47 @@
+Categories:
+  - Multimedia
+  - System
+License: GPL-3.0-only
+AuthorName: Samy Younsi (KaijinLab/NSLabs)
+WebSite: https://neroteam.com
+SourceCode: https://github.com/iodn/android-ir-blaster
+IssueTracker: https://github.com/iodn/android-ir-blaster/issues
+Changelog: https://github.com/iodn/android-ir-blaster/releases
+
+AutoName: IR Blaster
+
+RepoType: git
+Repo: https://github.com/iodn/android-ir-blaster.git
+
+Builds:
+  - versionName: 2.0.0
+    versionCode: 15
+    commit: cffbe0c9b0c5da166b3c865ac2e23063cf270721
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+      - linux
+      - macos
+      - web
+      - windows
+    prebuild:
+      - export PATH=$$flutter$$/bin:$PATH
+      - flutter config --no-analytics
+    build:
+      - export PATH=$$flutter$$/bin:$PATH
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - flutter pub get
+      - mkdir -p assets/db
+      - python3 tools/build_ir_db.py
+      - flutter build apk --release --target-platform=android-arm64
+
+MaintainerNotes: |
+  The IR database is generated during the build by tools/build_ir_db.py.
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 2.0.0
+CurrentVersionCode: 15
