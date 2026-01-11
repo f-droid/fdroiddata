@@ -1,0 +1,43 @@
+Categories:
+  - System
+License: MIT
+AuthorName: hxreborn
+SourceCode: https://github.com/hxreborn/biometric-bypass
+IssueTracker: https://github.com/hxreborn/biometric-bypass/issues
+
+AutoName: Biometric Bypass
+
+RepoType: git
+Repo: https://github.com/hxreborn/biometric-bypass.git
+Binaries: https://github.com/hxreborn/biometric-bypass/releases/download/v%v/app-release.apk
+
+Builds:
+  - versionName: 1.0.2
+    versionCode: 102
+    commit: 5aa9b81007694a528045699763e45c502b06f865
+    subdir: app
+    submodules: true
+    sudo:
+      - echo "deb https://deb.debian.org/debian sid main" > /etc/apt/sources.list.d/sid.list
+      - apt-get update
+      - apt-get install -y -t sid openjdk-21-jdk-headless
+      - update-alternatives --auto java
+    gradle:
+      - yes
+    prebuild:
+      - sed -i -e '/maven.pkg.github.com/d' ../libxposed/{api/api,service/interface,service/service}/build.gradle.kts
+      - sed -i -e '/signingConfig = /d' build.gradle.kts
+    build:
+      - pushd ../libxposed/api
+      - gradle :api:publishApiPublicationToMavenLocal -x :checks:compileKotlin
+      - popd
+      - pushd ../libxposed/service
+      - gradle :interface:publishInterfacePublicationToMavenLocal :service:publishServicePublicationToMavenLocal
+      - popd
+
+AllowedAPKSigningKeys: 32b98dc709a7ee15fae073493a1aeca5d428316cc0d8b8f878eed64ba37f3297
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: 1.0.2
+CurrentVersionCode: 102
