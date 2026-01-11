@@ -37,8 +37,33 @@ Builds:
       - export PUB_CACHE="$(pwd)/.pub-cache"
       - $$flutter$$/bin/flutter build apk --release --no-tree-shake-icons
 
+  - versionName: 0.2.11
+    versionCode: 12
+    commit: bbc1b910a158cd94afcc3f5c2d990b2ef678bb09
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+      - linux
+      - macos
+      - web
+      - windows
+    prebuild:
+      - flutterVersion=$(sed -n -E "s/.*flutter-version:\ '(.*)'/\1/p" .github/workflows/release.yml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PUB_CACHE="$(pwd)/.pub-cache"
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE="$(pwd)/.pub-cache"
+      - $$flutter$$/bin/flutter build apk --release --no-tree-shake-icons
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v[0-9]+\.[0-9]+\.[0-9]+$
 UpdateCheckData: pubspec.yaml|version:\s.*\+(\d+)|.|version:\s(.*)\+
-CurrentVersion: 0.2.9
-CurrentVersionCode: 10
+CurrentVersion: 0.2.11
+CurrentVersionCode: 12
