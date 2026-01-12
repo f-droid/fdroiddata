@@ -2833,10 +2833,124 @@ Builds:
       - gradle assembleRelease --parallel --build-cache --no-daemon -PreactNativeArchitectures=arm64-v8a
     ndk: r27b
 
+  - versionName: 1.9.12
+    versionCode: 10090121
+    commit: 0f5ed42f3d346df0b2afec4f97bf985431d9d7b5
+    subdir: android/app/
+    sudo:
+      - sysctl fs.inotify.max_user_watches=524288 || true
+      - apt-get update
+      - apt-get install -y npm ninja-build bzip2 xz-utils
+      - npm install -g corepack
+    init:
+      - cd ../..
+      - corepack enable
+      - pnpm config set node-linker=hoisted
+      - pnpm install
+      - pnpm install lightningcss --save-dev
+      - pnpm uninstall expo-notifications expo-dev-client
+    output: build/outputs/apk/release/*.apk
+    srclibs:
+      - react-native-skia@v2.0.0
+    rm:
+      - ios
+      - node_modules/@shopify/react-native-skia/libs/android
+      - node_modules/@shopify/react-native-skia/libs/apple
+    prebuild:
+      - export skiaVersion=$(sed -n -E 's|.*"@shopify/react-native-skia":\s"(.*)".*|\1|p'
+        ../../package.json)
+      - '[[ $skiaVersion ]]'
+      - git -C $$react-native-skia$$ checkout -f "v$skiaVersion"
+      - git -C $$react-native-skia$$ submodule update --init --recursive
+      - sed -i -e 's/"buildFromSource".*/"buildFromSource":\[".*"\]/' ../../package.json
+    scanignore:
+      - android/build.gradle
+      - node_modules/expo-modules-autolinking/scripts/android/autolinking_implementation.gradle
+      - node_modules/expo-modules-core/android/ExpoModulesCorePlugin.gradle
+      - node_modules/react-native-safe-area-context/android/build.gradle
+      - node_modules/react-native-pager-view/android/build.gradle
+      - node_modules/react-native-screens/android/build.gradle
+      - node_modules/react-native/sdks/hermesc/linux64-bin/hermesc
+      - node_modules/react-native/ReactAndroid/publish.gradle
+      - node_modules/@react-native-community/netinfo/android/build.gradle
+      - node_modules/react-native-keyboard-controller/android/build.gradle
+    scandelete:
+      - node_modules
+    build:
+      - pushd $$react-native-skia$$
+      - corepack enable
+      - yarn
+      - pushd ./externals/depot_tools
+      - ./update_depot_tools
+      - popd
+      - cd packages/skia
+      - yarn build-skia android-arm
+      - popd
+      - mv $$react-native-skia$$/packages/skia/libs/android ../../node_modules/@shopify/react-native-skia/libs/android
+      - gradle assembleRelease --parallel --build-cache --no-daemon -PreactNativeArchitectures=armeabi-v7a
+    ndk: r27b
+
+  - versionName: 1.9.12
+    versionCode: 10090122
+    commit: 0f5ed42f3d346df0b2afec4f97bf985431d9d7b5
+    subdir: android/app/
+    sudo:
+      - sysctl fs.inotify.max_user_watches=524288 || true
+      - apt-get update
+      - apt-get install -y npm ninja-build bzip2 xz-utils
+      - npm install -g corepack
+    init:
+      - cd ../..
+      - corepack enable
+      - pnpm config set node-linker=hoisted
+      - pnpm install
+      - pnpm install lightningcss --save-dev
+      - pnpm uninstall expo-notifications expo-dev-client
+    output: build/outputs/apk/release/*.apk
+    srclibs:
+      - react-native-skia@v2.0.0
+    rm:
+      - ios
+      - node_modules/@shopify/react-native-skia/libs/android
+      - node_modules/@shopify/react-native-skia/libs/apple
+    prebuild:
+      - export skiaVersion=$(sed -n -E 's|.*"@shopify/react-native-skia":\s"(.*)".*|\1|p'
+        ../../package.json)
+      - '[[ $skiaVersion ]]'
+      - git -C $$react-native-skia$$ checkout -f "v$skiaVersion"
+      - git -C $$react-native-skia$$ submodule update --init --recursive
+      - sed -i -e 's/"buildFromSource".*/"buildFromSource":\[".*"\]/' ../../package.json
+    scanignore:
+      - android/build.gradle
+      - node_modules/expo-modules-autolinking/scripts/android/autolinking_implementation.gradle
+      - node_modules/expo-modules-core/android/ExpoModulesCorePlugin.gradle
+      - node_modules/react-native-safe-area-context/android/build.gradle
+      - node_modules/react-native-pager-view/android/build.gradle
+      - node_modules/react-native-screens/android/build.gradle
+      - node_modules/react-native/sdks/hermesc/linux64-bin/hermesc
+      - node_modules/react-native/ReactAndroid/publish.gradle
+      - node_modules/@react-native-community/netinfo/android/build.gradle
+      - node_modules/react-native-keyboard-controller/android/build.gradle
+    scandelete:
+      - node_modules
+    build:
+      - pushd $$react-native-skia$$
+      - corepack enable
+      - yarn
+      - pushd ./externals/depot_tools
+      - ./update_depot_tools
+      - popd
+      - cd packages/skia
+      - yarn build-skia android-arm64
+      - popd
+      - mv $$react-native-skia$$/packages/skia/libs/android ../../node_modules/@shopify/react-native-skia/libs/android
+      - gradle assembleRelease --parallel --build-cache --no-daemon -PreactNativeArchitectures=arm64-v8a
+    ndk: r27b
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 VercodeOperation:
   - 10 * %c + 1
   - 10 * %c + 2
-CurrentVersion: 1.9.11
-CurrentVersionCode: 10090112
+CurrentVersion: 1.9.12
+CurrentVersionCode: 10090122
