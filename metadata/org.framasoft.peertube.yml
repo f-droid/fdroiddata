@@ -264,10 +264,53 @@ Builds:
       - popd
       - mv $repo org.framasoft.peertube
 
+  - versionName: 2.0.2
+    versionCode: 29
+    commit: v2.0.2
+    submodules: true
+    sudo:
+      - mkdir -p /builds/framasoft/peertube
+      - chown -R vagrant /builds
+    output: build/app/outputs/flutter-apk/app-stable-release.apk
+    rm:
+      - ios
+    prebuild:
+      - pushd submodules/flutter
+      - flutterCommit=$(git rev-parse HEAD)
+      - git checkout stable
+      - git reset --hard $flutterCommit
+      - popd
+      - export repo=/builds/framasoft/peertube/mobile-application
+      - cd ..
+      - mv org.framasoft.peertube $repo
+      - pushd $repo
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - submodules/flutter/bin/flutter config --no-analytics
+      - submodules/flutter/bin/flutter pub get
+      - sed -i -e 's/-Wl,/-Wl,--build-id=none,/' .pub-cache/hosted/pub.dev/jni-*/src/CMakeLists.txt
+      - submodules/flutter/bin/flutter pub run build_runner build --delete-conflicting-outputs
+      - popd
+      - mv $repo org.framasoft.peertube
+    scanignore:
+      - submodules/flutter/bin/cache
+    scandelete:
+      - submodules/flutter
+      - .pub-cache
+    build:
+      - export repo=/builds/framasoft/peertube/mobile-application
+      - cd ..
+      - mv org.framasoft.peertube $repo
+      - pushd $repo
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - submodules/flutter/bin/flutter build apk --release --dart-define-from-file=env-stable.json
+        --flavor=stable --dart-define=buildType=fdroid
+      - popd
+      - mv $repo org.framasoft.peertube
+
 AllowedAPKSigningKeys: c3c605c9387aa2d6fd0170fbe39636dc83845ac4e655b4e822fdbd349b0293db
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 2.0.1
-CurrentVersionCode: 28
+CurrentVersion: 2.0.2
+CurrentVersionCode: 29
