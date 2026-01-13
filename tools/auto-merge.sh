@@ -18,7 +18,7 @@ function retry {
 
 echo "Merging..."
 while status=$(retry "" glab api projects/:id/merge_requests/$mr | jq -r '.detailed_merge_status'); do
-  if [[ $status = "approvals_syncing" || $status = "checking" || $statue = "preparing" ]]; then
+  if [[ $status = "approvals_syncing" || $status = "checking" || $status = "preparing" || $status = "conflict" ]]; then
     continue
   elif [[ $status = "need_rebase" ]]; then
     echo "Rebasing..."
