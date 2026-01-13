@@ -389,8 +389,30 @@ Builds:
     gradleprops:
       - isFDroidRelease=true
 
+  - versionName: 4.18.0
+    versionCode: 100163889
+    commit: f2e22f6e7b4c4a441cb7053485a2e6eab339c67a
+    timeout: 14400
+    subdir: app
+    submodules: true
+    gradle:
+      - fdroid
+    prebuild:
+      - cd ..
+      - sed -i -e '/googleGms/d' build.gradle.kts
+      - sed -i -e '/githubusercontent/d' build.gradle.kts kalium/{settings,build}.gradle.kts
+      - 'printf "VersionCode: $$VERCODE$$\nVersionName: $$VERSION$$\n" > app/version.txt'
+      - sed -i -e '/foojay/d' kalium/settings.gradle.kts
+      - sed -i -e '/useVersion("3.0.1-fix")/d' kalium/settings.gradle.kts
+      - sed -i -e 's/signingConfigs.getByName("debug")/null/' buildSrc/src/main/kotlin/scripts/variants.gradle.kts
+    scandelete:
+      - build-logic/plugins/build
+    ndk: r25b
+    gradleprops:
+      - isFDroidRelease=true
+
 AutoUpdateMode: Version v%v
 UpdateCheckMode: HTTP
 UpdateCheckData: https://github.com/wireapp/wire-android/releases/latest/download/version.txt|VersionCode:\s(\d+)|.|VersionName:\s(.*)
-CurrentVersion: 4.17.2
-CurrentVersionCode: 100156346
+CurrentVersion: 4.18.0
+CurrentVersionCode: 100163889
