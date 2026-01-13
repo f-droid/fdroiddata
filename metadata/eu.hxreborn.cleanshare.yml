@@ -32,9 +32,29 @@ Builds:
       - gradle :api:publishApiPublicationToMavenLocal -x :checks:compileKotlin
       - popd
 
+  - versionName: 1.1.0
+    versionCode: 110
+    commit: 708a0202132b156a91a3876900c709b2ce20e703
+    subdir: app
+    submodules: true
+    sudo:
+      - echo "deb https://deb.debian.org/debian sid main" > /etc/apt/sources.list.d/sid.list
+      - apt-get update
+      - apt-get install -y -t sid openjdk-21-jdk-headless
+      - update-alternatives --auto java
+    gradle:
+      - yes
+    prebuild:
+      - sed -i -e '/maven.pkg.github.com/d' ../libxposed/api/api/build.gradle.kts
+      - sed -i -e '/signingConfigs/,/takeIf/d' build.gradle.kts
+    build:
+      - pushd ../libxposed/api
+      - gradle :api:publishApiPublicationToMavenLocal -x :checks:compileKotlin
+      - popd
+
 AllowedAPKSigningKeys: 32b98dc709a7ee15fae073493a1aeca5d428316cc0d8b8f878eed64ba37f3297
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 1.0.2
-CurrentVersionCode: 102
+CurrentVersion: 1.1.0
+CurrentVersionCode: 110
