@@ -73,10 +73,39 @@ Builds:
         -o android/app/src/main/jniLibs build --release --lib --features mobile
     ndk: r27d
 
+  - versionName: 0.4.7
+    versionCode: 407
+    commit: f42f162ee89feb7fbca1ccbb214b2a3f4ab79d85
+    subdir: android/app
+    sudo:
+      - apt-get update
+      - apt-get install -y build-essential pkg-config libssl-dev cmake nasm libclang-dev
+        make
+      - echo "deb https://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
+      - apt-get update
+      - apt-get install -y -t trixie openjdk-21-jdk-headless
+      - update-alternatives --auto java
+    gradle:
+      - yes
+    srclibs:
+      - rustup@1.28.2
+    build:
+      - export RUST_VERSION=$(sed -n 's/channel = "\(.*\)"/\1/p' ../../rust-toolchain.toml)
+      - $$rustup$$/rustup-init.sh -y --default-toolchain $RUST_VERSION --target aarch64-linux-android
+        --target armv7-linux-androideabi --target x86_64-linux-android
+      - source $HOME/.cargo/env
+      - cargo install --locked cargo-ndk@4.1.2
+      - cd ../..
+      - export RUSTFLAGS="--remap-path-prefix $(pwd)=/c --remap-path-prefix $HOME/.cargo=/cargo
+        -C link-arg=-Wl,--build-id=none"
+      - cargo ndk -t aarch64-linux-android -t armv7-linux-androideabi -t x86_64-linux-android
+        -o android/app/src/main/jniLibs build --release --lib --features mobile
+    ndk: r27d
+
 AllowedAPKSigningKeys: 6679a06eec4933fe2933f5be32db3b3e716d42e93c7f230358e779587bab1ac0
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: Cargo.toml|version_code = (\d+)|.|version = "([\d.]+)"
-CurrentVersion: 0.4.6
-CurrentVersionCode: 406
+CurrentVersion: 0.4.7
+CurrentVersionCode: 407
