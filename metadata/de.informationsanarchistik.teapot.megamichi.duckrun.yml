@@ -62,8 +62,57 @@ Builds:
         "Android" DuckRun.apk
     ndk: r28b
 
+  - versionName: 3.0.3
+    versionCode: 14
+    commit: 413f39535b274f600fada25c52f6f474d0028dad
+    timeout: 10800
+    sudo:
+      - apt-get update
+      - apt-get install -y build-essential scons pkg-config libx11-dev libxcursor-dev
+        libxinerama-dev libgl1-mesa-dev libglu-dev libasound2-dev libpulse-dev libudev-dev
+        libxi-dev libxrandr-dev clang gettext
+    output: DuckRun.apk
+    srclibs:
+      - Godot@4.5.1-stable
+    scandelete:
+      - addons
+    build:
+      - export HOME=$PWD
+      - export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+      - export ANDROID_NDK_ROOT=$$NDK$$
+      - mv $$Godot$$ godot
+      - scons -C godot platform=linuxbsd target=editor tools=yes precision=single
+        module_mono=no optimize=speed production=yes -j$(nproc)
+      - scons -C godot platform=android target=template_release arch=arm64 production=yes
+        swappy=no -j$(nproc)
+      - scons -C godot platform=android target=template_release arch=arm32 production=yes
+        swappy=no -j$(nproc)
+      - pushd godot/platform/android/java
+      - sed -i 's/url repoUrl//' app/build.gradle
+      - sed -i 's/versionCode\ generateVersionCode()/versionCode $$VERCODE$$/' editor/build.gradle
+      - sed -i -e 's!sdkmanager =.*!sdkmanager = "/usr/bin/sdkmanager"!' ../detect.py
+      - gradle generateGodotTemplates
+      - popd
+      - mkdir -p .local/share/godot/export_templates/4.5.1.stable/
+      - cp godot/bin/android_source.zip .local/share/godot/export_templates/4.5.1.stable/android_source.zip
+      - cp godot/bin/android_release.apk .local/share/godot/export_templates/4.5.1.stable/android_release.apk
+      - echo "4.5.1.stable" > .local/share/godot/export_templates/4.5.1.stable/version.txt
+      - mkdir -p android/build/
+      - echo "4.5.1.stable" > android/.build_version
+      - unzip -o godot/bin/android_source.zip -d android/build/
+      - pushd android/build
+      - gradle assembleRelease
+      - popd
+      - touch godot/.gdignore
+      - touch android/.gdignore
+      - sed -i -e '/package\/signed/s/true/false/' -e '/architectures\/armeabi-v7a/s/false/true/'
+        -e '/architectures\/arm64-v8a/s/false/true/' export_presets.cfg
+      - ./godot/bin/godot.linuxbsd.editor.x86_64 --headless --path . --export-release
+        "Android" DuckRun.apk
+    ndk: r28b
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: export_presets.cfg|version/code\s*=\s*(\d+)|TAG|
-CurrentVersion: 3.0.2
-CurrentVersionCode: 13
+CurrentVersion: 3.0.3
+CurrentVersionCode: 14
