@@ -532,8 +532,50 @@ Builds:
         ui/*/*.java ui/*.java; done
     ndk: r28b
 
+  - versionName: '4.3'
+    versionCode: 199
+    commit: 1450cedfa69f0aecacba792c47a626d750d2409a
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y cmake make ninja-build pipx
+      - PIPX_HOME=/opt/pipx PIPX_BIN_DIR=/usr/local/bin pipx install conan
+    gradle:
+      - pro
+    srclibs:
+      - conan-odr-index@8ec140a221791147797063e2112376de58bd01ac
+    prebuild:
+      - date=$(git show --format=%ad --no-patch --no-notes)
+      - pushd $$conan-odr-index$$
+      - git fetch origin
+      - git checkout $(git rev-list -1 --before="$date" origin/main)
+      - popd
+      - conan remote remove "*"
+      - conan remote add odr $$conan-odr-index$$
+      - conan remote add conancenter https://center2.conan.io
+      - conan profile detect
+      - sed -i -e '/gms/d' -e '/firebase/d' -e 's/build=missing/build=*/' {.,..}/build.gradle
+      - sed -i -e '/com.google.android.play/d' -e '/ump/d' -e '/pro"/d' build.gradle
+      - sed -i -e '/^        <meta-data/,+5d' -e '/property/,+4d' src/main/AndroidManifest.xml
+      - cd src/main/java/at/tomtasche/reader
+      - sed -i -e '/gms/d' -e '/play.core/d' -e '/firebase/d' -e '/void initializeProprietaryLibraries/,/^    }/d'
+        -e '/initializeProprietaryLibraries/d' -e 's/billingManager.hasPurchased()/true/'
+        ui/activity/*.java background/FileLoader.java background/LoaderService.java
+      - sed -i -e '/private Uri doFirebaseConvert/,/^    }/d' -e 's/viewerUri = doFirebaseConvert(options)/return/'
+        -e '/gms/d' -e '/firebase/Id' -e '/Storage/d' -e '/auth /d' -e '/storage /d'
+        background/OnlineLoader.java
+      - sed -i -e '/getBooleanConfig("show_in_app_rating/,/});/d' -e '/void offerUpload/,/^    }/d'
+        -e '/offerUpload/d' -e '/void requestInAppRating/,/^    }/d' -e '/requestInAppRating/d'
+        ui/activity/DocumentFragment.java
+      - sed -i -e 's/configManager.getBooleanConfig(".*")/null/' background/CoreLoader.java
+      - for class in AdManager AnalyticsManager BillingManager ConfigManager CrashManager
+        HelpManager; do echo "package at.tomtasche.reader.nonfree; public class ${class}
+        {}" > nonfree/${class}.java; sed -i -e "/${class}\./Id" background/*.java
+        ui/*/*.java ui/*.java; done
+    ndk: r28b
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: app/src/main/AndroidManifest.xml|versionCode="(\d+)|.|versionName="([\d.]+)
-CurrentVersion: '4.2'
-CurrentVersionCode: 198
+CurrentVersion: '4.3'
+CurrentVersionCode: 199
