@@ -1717,6 +1717,47 @@ Builds:
       - ./link_to_mupdf_1.23.7.sh
     ndk: r29
 
+  - versionName: 9.3.10-fdroid
+    versionCode: 6798
+    commit: ce1024fa70c4d1afeed8862e3a8d30491f4a42d9
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y g++ libglu1-mesa-dev libxcursor-dev libxi-dev libxinerama-dev
+        libxrandr-dev make mesa-common-dev pkg-config xxd
+    gradle:
+      - fdroid
+    srclibs:
+      - MuPDF@1.23.7
+    rm:
+      - Builder/src/libs
+      - Builder/librara-chrome-extension.zip
+      - appCompose
+      - appLibDrive
+      - libDepFree
+      - libDepPro
+    prebuild:
+      - export MUPDF_VERSION=1.23.7
+      - sed -i -e '/appCompose/d' -e '/appLibDrive/d' -e '/libDepFree/d' -e '/libDepPro/d'
+        ../settings.gradle.kts
+      - sed -i -e '/enable = true/d' -e '/_appGdriveKey/d' -e '/_admob/d' -e '/googleServices/d'
+        -e '/dep_/d' build.gradle
+      - mkdir src/main/jniLibs
+      - cd ../Builder
+      - sed -i -e '1a set -e' -e '/git clone/d' -e 's/mkdir/mkdir -p/g' -e 's|"$PATH1/$NDK_VERSION/ndk-build"|"$$NDK$$/ndk-build"|'
+        -e 's/$NDK /$NDK -j$(nproc) /' link_to_mupdf_$MUPDF_VERSION.sh
+      - cp -r $$MuPDF$$ mupdf-$MUPDF_VERSION
+      - rm -rf mupdf-$MUPDF_VERSION/thirdparty/{harfbuzz/test,curl/tests,leptonica/prog/fuzzing}
+    scanignore:
+      - Builder/fonts/fonts.zip
+    scandelete:
+      - Builder/mupdf-*/platform/wasm/package.json
+      - docs
+    build:
+      - pushd ../Builder/
+      - ./link_to_mupdf_1.23.7.sh
+    ndk: r29
+
 MaintainerNotes: |-
   * Upstream builds separate APKs for each architecture but we build an universal APK.
   * scanner will detect GMS (/com/google/android/gms) in these APKs; those are only stubs here, see https://gitlab.com/fdroid/fdroiddata/-/issues/2272#note_493741256
@@ -1726,5 +1767,5 @@ AutoUpdateMode: Version +-fdroid %v
 UpdateCheckMode: Tags
 UpdateCheckData: app/build.gradle|\s+FDroidCodeNumber = (\d+)|.|\s+FDroidVersionNumber
   = "([^\"]+)"
-CurrentVersion: 9.3.1
-CurrentVersionCode: 6762
+CurrentVersion: 9.3.10
+CurrentVersionCode: 6798
