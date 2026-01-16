@@ -111,7 +111,7 @@ variables:
 checkupdates:
   stage: test
   needs: []
-  image: debian:bookworm-slim
+  image: debian:trixie-slim
   rules: *app_verification_rules
   before_script:
     - *install_fdroid_server_deb
@@ -153,7 +153,7 @@ git redirect:
 fdroid lint:
   stage: test
   needs: []
-  image: debian:bookworm-slim
+  image: debian:trixie-slim
   rules: *app_verification_rules
   before_script:
     - *install_fdroid_server_deb
@@ -170,7 +170,7 @@ fdroid lint:
 fdroid rewritemeta:
   stage: test
   needs: []
-  image: debian:bookworm-slim
+  image: debian:trixie-slim
   rules: *app_verification_rules
   before_script:
     - *install_fdroid_server_deb
@@ -195,7 +195,7 @@ fdroid rewritemeta:
 fdroid lint config:
   stage: test
   needs: []
-  image: debian:bookworm-slim
+  image: debian:trixie-slim
   before_script:
     - apt-get -qy update
     - apt-get -qy dist-upgrade
@@ -242,7 +242,7 @@ fdroid lint config:
 tools check scripts:
   stage: test
   needs: []
-  image: debian:bookworm-slim
+  image: debian:trixie-slim
   rules: *app_verification_rules
   script:
     - apt-get -qy update
@@ -281,7 +281,7 @@ tools check scripts:
 YAML 1.2:
   stage: test
   needs: []
-  image: debian:bookworm-slim
+  image: debian:trixie-slim
   rules:
     - changes:
         paths:
@@ -334,7 +334,7 @@ fdroid build:
     - saas-linux-medium-amd64
   # Some env vars are setup in https://gitlab.com/fdroid/fdroidserver/-/blob/master/buildserver/setup-env-vars
   # home_vagrant=/home/vagrant
-  image: registry.gitlab.com/fdroid/fdroidserver:buildserver-bookworm
+  image: registry.gitlab.com/fdroid/fdroidserver:buildserver-trixie
   artifacts:
     name: "${CI_PROJECT_PATH}_${CI_JOB_STAGE}_${CI_COMMIT_REF_NAME}_${CI_COMMIT_SHA}"
     paths:
@@ -418,8 +418,8 @@ fdroid build:
       for build in $APPS; do
           set -x;
           apt-get install sudo;
-          apt-get install -y openjdk-17-jdk-headless;
-          update-alternatives --set java /usr/lib/jvm/java-17-openjdk-amd64/bin/java;
+          apt-get install -y openjdk-21-jdk-headless;
+          update-alternatives --set java /usr/lib/jvm/java-21-openjdk-amd64/bin/java;
           cp -R $CI_PROJECT_DIR/build $home_vagrant/build;
           appid=${build%:*};
           [ -d metadata/$appid ] && cp -R metadata/$appid $home_vagrant/metadata;
@@ -563,7 +563,7 @@ check apk:
 
 
 check_git_repos:
-  image: debian:bookworm-slim
+  image: debian:trixie-slim
   stage: test
   needs: []
   only:
@@ -589,7 +589,7 @@ check_git_repos:
 # checkupdates should only be allowed to modify app metadata files,
 # e.g. metadata/*.yml.  Anything else should throw an error here.
 checkupdates_filter:
-  image: debian:bookworm-slim
+  image: debian:trixie-slim
   stage: test
   needs: []
   rules:
@@ -611,7 +611,7 @@ checkupdates_filter:
 strip EXIF:
   stage: test
   needs: []
-  image: debian:bookworm-slim
+  image: debian:trixie-slim
   rules:
     - changes:
         paths:
@@ -676,7 +676,7 @@ strip EXIF:
 repo/index.html:
   stage: test
   needs: []
-  image: debian:bookworm-slim
+  image: debian:trixie-slim
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       changes:
@@ -706,7 +706,7 @@ repo/index.html:
 weblate merge conflict:
   stage: test
   needs: []
-  image: debian:bookworm-slim
+  image: debian:trixie-slim
   rules:
     - changes:
         - .gitlab-ci.yml
