@@ -167,8 +167,34 @@ Builds:
       - $$flutter$$/bin/flutter clean
       - $$flutter$$/bin/flutter build apk
 
+  - versionName: 1.4.1
+    versionCode: 10401
+    commit: 3e0f0f35a24414966c4704367dc567e37a74c2b6
+    submodules: true
+    sudo:
+      - echo "deb https://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
+      - apt-get update
+      - apt-get install -y -t trixie openjdk-21-jdk-headless
+      - update-alternatives --auto java
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@3.35.7
+    prebuild:
+      - sed -i -e 's/Xmx1536M/Xmx4G/' android/gradle.properties
+      - sdkmanager 'cmake;3.10.2.4988404'
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter packages pub get
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter packages pub run build_runner build --delete-conflicting-outputs
+      - $$flutter$$/bin/flutter clean
+      - $$flutter$$/bin/flutter build apk
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 1.4.0
-CurrentVersionCode: 10400
+CurrentVersion: 1.4.1
+CurrentVersionCode: 10401
