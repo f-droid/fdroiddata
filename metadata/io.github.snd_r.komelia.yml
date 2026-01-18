@@ -217,9 +217,38 @@ Builds:
     gradleprops:
       - snd.android.variant=fdroid
 
+  - versionName: 0.18.2
+    versionCode: 16
+    commit: 891583fa9c4e51c75029e9109dcf6b9fbc32ebd5
+    subdir: komelia-app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y ninja-build pkg-config nasm automake autopoint libtool
+        gettext texinfo make libltdl-dev
+      - apt-get install -y -t bookworm-backports meson cmake
+      - curl -Lo node.tar.gz https://nodejs.org/download/release/v22.21.1/node-v22.21.1-linux-x64.tar.gz
+      - echo "219a152ea859861d75adea578bdec3dce8143853c13c5187f40c40e77b0143b2 node.tar.gz"
+        | sha256sum -c -
+      - tar xzf node.tar.gz --strip-components=1 -C /usr/local/
+      - npm install -g npm@latest
+    gradle:
+      - yes
+    scandelete:
+      - third_party/secret-service
+    build:
+      - cd ..
+      - ANDROID_NDK_PATH=$$NDK$$ ANDROID_SDK_PATH=$$SDK$$ ./cmake/android-build.sh
+        aarch64
+      - gradle android-aarch64_copyJniLibs
+      - gradle buildWebui
+    ndk: r28c
+    gradleprops:
+      - snd.android.variant=fdroid
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: komelia-app/build.gradle.kts|versionCode = (\d+)|gradle/libs.versions.toml|app-version
   = "(.+)"
-CurrentVersion: 0.18.1
-CurrentVersionCode: 15
+CurrentVersion: 0.18.2
+CurrentVersionCode: 16
