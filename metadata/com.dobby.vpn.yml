@@ -625,10 +625,71 @@ Builds:
       - :outline:build
       - :outline:copyOutlineAar
 
+  - versionName: 1.1.0
+    versionCode: 1001000
+    commit: c0072923818edfd4eca275b98e1b577c0ad01927
+    subdir: kmp_client/app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -t bookworm-backports -y golang-go
+    gradle:
+      - yes
+    srclibs:
+      - go@go1.24.3
+    rm:
+      - kmp_client/iosApp
+      - kmp_client/tap-device
+    build:
+      - pushd $$go$$/src
+      - ./make.bash
+      - popd
+      - export GOROOT=$$go$$
+      - export GOPATH="$HOME/go"
+      - export PATH="$GOROOT/bin:$GOPATH/bin:$PATH"
+      - cd ../..
+      - mkdir -p go_client/modules/Cloak
+      - cp -r Cloak/internal go_client/modules/Cloak/
+      - pushd go_client
+      - go mod tidy
+      - go mod download
+      - sdkmanager "platforms;android-36" "build-tools;36.0.0" "ndk;27.0.11718014"
+      - export ANDROID_SDK_ROOT="$$SDK$$"
+      - export ANDROID_NDK_HOME="$$SDK$$/ndk/27.0.11718014"
+      - export PATH="$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH"
+      - export DEBUG_PREFIX_FLAGS="-fdebug-prefix-map=$ANDROID_SDK_ROOT=/android-sdk
+        -fdebug-prefix-map=$ANDROID_NDK_HOME=/android-ndk"
+      - export CC=aarch64-linux-android21-clang
+      - export CXX=aarch64-linux-android21-clang++
+      - export CGO_ENABLED=1
+      - export GOOS=android
+      - export GOARCH=arm64
+      - export CGO_CFLAGS="$DEBUG_PREFIX_FLAGS ${CGO_CFLAGS:-}"
+      - export CGO_LDFLAGS="$DEBUG_PREFIX_FLAGS ${CGO_LDFLAGS:-}"
+      - go build -v -trimpath -ldflags="-buildid=" -buildvcs=false -buildmode=c-shared
+        -o liboutline.so ./kotlin_exports/...
+      - popd
+      - mkdir -p kmp_client/outline/src/main/cpp/include
+      - mkdir -p kmp_client/outline/src/main/jniLibs/arm64-v8a
+      - mkdir -p kmp_client/outline/src/main/cpp/include/arm64-v8a
+      - cp go_client/liboutline.h kmp_client/outline/src/main/cpp/include/arm64-v8a/liboutline.h
+      - cp go_client/liboutline.h kmp_client/outline/src/main/cpp/include/liboutline.h
+      - cp go_client/liboutline.so kmp_client/outline/src/main/jniLibs/arm64-v8a/liboutline.so
+      - cd kmp_client
+      - sed -i -e "s/^versionCode=.*/versionCode=$$VERCODE$$/" -e "s/^versionName=.*/versionName=$$VERSION$$/"
+        gradle.properties
+      - export COMMIT=$(git rev-parse HEAD)
+      - printf "\nprojectRepositoryCommit=$COMMIT\nprojectRepositoryCommitLink=https://github.com/DobbyVPN/DobbyVPN/tree/$COMMIT\n"
+        >> gradle.properties
+      - printf "\ngoBinaryPath=$$go$$/bin/go\n" >> gradle.properties
+    preassemble:
+      - :outline:build
+      - :outline:copyOutlineAar
+
 AllowedAPKSigningKeys: c3f0414a74012060d7c6aa3a3d9dac0aa13c1bd23b7512eefd860fb865e67933
 
 AutoUpdateMode: Version v%v
 UpdateCheckMode: HTTP
 UpdateCheckData: https://github.com/DobbyVPN/DobbyVPN/releases/latest/download/version.txt|versionCode=(\d+)|.|versionName=([\d.]+)
-CurrentVersion: 1.0.28
-CurrentVersionCode: 1000028
+CurrentVersion: 1.1.0
+CurrentVersionCode: 1001000
