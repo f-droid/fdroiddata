@@ -84,7 +84,39 @@ Builds:
       - gradle bundleRelease
     ndk: r28c
 
+  - versionName: 0.1.22
+    versionCode: 122001
+    commit: c9db7ec2b5c00a4ea72188f7c61ef0e4908c5d07
+    subdir: vault-android/app
+    gradle:
+      - yes
+    srclibs:
+      - PhotoView@565505d5cb84f5977771b5d2ccb7726338e77224
+      - rustup@1.27.0
+    rm:
+      - vault-android/app/libs
+    prebuild:
+      - sed '/sdk.dir/d' ../local.properties.example > ../local.properties
+      - sed -i -e '/maven {/,+2d' -e '/repositories {/a mavenLocal()' ../settings.gradle.kts
+      - sed -i -e 's/6.8/7.3.3/' $$PhotoView$$/gradle/wrapper/gradle-wrapper.properties
+      - sed -i -e 's/4.1.2/7.2.2/' $$PhotoView$$/build.gradle
+      - sed -i -e '/agp/s/8.12.2/8.11.1/' ../gradle/libs.versions.toml
+    build:
+      - pushd $$PhotoView$$
+      - sed -i "s/version = '2.3.0'/version = '565505d5cb'/" photoview/build.gradle
+      - gradle publishToMavenLocal
+      - popd
+      - export GRADLE_CARGO_PROFILE=release
+      - export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+      - $$rustup$$/rustup-init.sh -y --default-toolchain 1.89.0 --target aarch64-linux-android
+        armv7-linux-androideabi x86_64-linux-android i686-linux-android
+      - source $HOME/.cargo/env
+      - gradle generateUniFFIBindings
+      - gradle cargoBuild
+      - gradle bundleRelease
+    ndk: r28c
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 0.1.20
-CurrentVersionCode: 120001
+CurrentVersion: 0.1.22
+CurrentVersionCode: 122001
