@@ -506,10 +506,39 @@ Builds:
       - popd
       - mv $$minetest_android_deps$$/deps ../native
 
+  - versionName: 5.15.0
+    versionCode: 5150000
+    commit: 62d077a00658320300bad8237d577ea11180fa8c
+    subdir: android/app
+    sudo:
+      - apt-get update
+      - apt-get install -y cmake gcc-multilib gettext lbzip2 make wget xz-utils
+    gradle:
+      - yes
+    srclibs:
+      - minetest_android_deps@5.15.0
+    prebuild:
+      - sed -i -e 's/enable true/enable false/' -e '/preBuild.dependsOn getDeps/d'
+        -e 's/versionCode .*/versionCode $$VERCODE$$/' build.gradle ../native/build.gradle
+      - sed -i -e '/cmake_minimum_required/aadd_link_options("LINKER:--build-id=none")'
+        ../../CMakeLists.txt
+    build:
+      - export ndkversion=$(grep "ndk_version = " ../build.gradle | cut -d "'" -f
+        2)
+      - sdkmanager "ndk;$ndkversion"
+      - export ANDROID_NDK=$$SDK$$/ndk/$ndkversion
+      - pushd $$minetest_android_deps$$
+      - ./build.sh --all armeabi-v7a
+      - ./build.sh --all arm64-v8a
+      - ./build.sh --all x86
+      - ./build.sh --all x86_64
+      - popd
+      - mv $$minetest_android_deps$$/deps ../native
+
 MaintainerNotes: No AUM as the deps repo does not get tagged on app release, also
   dynamic versions.
 
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: 5.14.0
-CurrentVersionCode: 5140000
+CurrentVersion: 5.15.0
+CurrentVersionCode: 5150000
