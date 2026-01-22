@@ -4950,10 +4950,32 @@ Builds:
       - make all
     ndk: 29.0.14206865
 
+  - versionName: 76.3.0
+    versionCode: 474
+    commit: 6602e38c62e6bd9639ba5d6e845e62c5c2b02460
+    subdir: app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y automake cmake libre-dev libtool make pkg-config wget
+    gradle:
+      - yes
+    prebuild:
+      - sed -i -e '/jvmToolchain/s/17/21/' -e 's/VERSION_17/VERSION_21/g' build.gradle.kts
+      - sed -i -e 's|/opt/Android/ndk/.*|$$NDK$$|' -e 's|/usr/src/baresip-studio|..|'
+        ../libbaresip-android/Makefile
+      - sed -i -e '/foojay/d' ../settings.gradle.kts
+      - sdkmanager 'cmake;3.31.6'
+    build:
+      - cd ../libbaresip-android
+      - make download-sources
+      - make all
+    ndk: 29.0.14206865
+
 MaintainerNotes: make download-sources checks out master branches of several libraries;
   this can cause build failures.
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^[0-9.]+$
-CurrentVersion: 76.2.0
-CurrentVersionCode: 473
+CurrentVersion: 76.3.0
+CurrentVersionCode: 474
