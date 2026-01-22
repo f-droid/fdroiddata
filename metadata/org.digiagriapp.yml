@@ -369,8 +369,39 @@ Builds:
       - export PUB_CACHE=$(pwd)/.pub-cache
       - flutter/bin/flutter build apk
 
+  - versionName: 0.4.5
+    versionCode: 19
+    commit: 10cc91bbd886a49f70ea0e518ab097663479d1ce
+    submodules: true
+    output: build/app/outputs/flutter-apk/app-release.apk
+    rm:
+      - ios
+      - macos
+      - linux
+      - web
+    prebuild:
+      - sed -i -e '/shrinkResources/d' -e '/minifyEnabled/d' -e'/gms/d' android/app/build.gradle
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - flutter/bin/flutter config --no-analytics
+      - flutter/bin/flutter packages pub get
+      - cd $PUB_CACHE/hosted/pub.dev/geolocator_android-*/android
+      - sed -i -e '/gms/d' build.gradle
+      - cd src/main/java/com/baseflow/geolocator/location
+      - rm FusedLocationClient.java
+      - sed -i -e '/if (forceAndroidLocationManager) {/,/^  }/c return new LocationManagerClient(context,
+        locationOptions);}' -e '/isGooglePlayServicesAvailable/,/^  }/d' -e '/gms/d'
+        GeolocationManager.java
+    scanignore:
+      - flutter/bin/cache
+    scandelete:
+      - .pub-cache
+      - flutter
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - flutter/bin/flutter build apk
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v[\d.]+$
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 0.4.4
-CurrentVersionCode: 18
+CurrentVersion: 0.4.5
+CurrentVersionCode: 19
