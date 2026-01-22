@@ -3398,8 +3398,43 @@ Builds:
     gradleprops:
       - buildUniversalApk
 
+  - versionName: 5.15.5.2
+    versionCode: 605150502
+    commit: aaa3fc7715b0bd2f0b6d73d83cc7c6358022d52b
+    timeout: 7200
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y --no-install-recommends make libgmp-dev autoconf automake
+        libtool pkg-config autogen gettext libssl-dev libsqlite3-dev libpam0g-dev
+        libldap2-dev gperf bison bzip2 flex swig cmake
+    gradle:
+      - prod
+      - vanilla
+      - openSource
+    output: build/outputs/apk/productionVanillaOpenSource/release/*.apk
+    rm:
+      - openvpn/src/main/cpp/mbedtls/tests
+      - openvpn/src/main/cpp/openvpn3/test/unittests
+      - openvpn/src/main/cpp/mbedtls/programs/fuzz/corpuses/*
+    prebuild:
+      - sed -i -e '/triple/d' -e '/^play\ {/,/^}/d' build.gradle
+      - sed -i -e '/uri(mavenCachePkgUrl)/d' -e 's/java.net.URI/uri/' ../settings.gradle.kts
+      - sed -i -e '/MAVEN_CACHE_PKG_URL/,+2d' {..,.}/build.gradle
+      - sdkmanager 'cmake;3.18.1'
+    scandelete:
+      - openvpn/src/main/cpp/lz4/tests
+    build:
+      - pushd ../openvpn
+      - gradle assembleRelease
+      - rm -fr build/intermediates build/kotlin build/tmp .cxx
+      - popd
+    ndk: r28b
+    gradleprops:
+      - buildUniversalApk
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: metadata/version_fdroid.txt|versionCode=(\d+)|.|versionName=(.*)
-CurrentVersion: 5.14.76.0
-CurrentVersionCode: 605147600
+CurrentVersion: 5.15.5.2
+CurrentVersionCode: 605150502
