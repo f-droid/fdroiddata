@@ -246,9 +246,35 @@ Builds:
     gradleprops:
       - snd.android.variant=fdroid
 
+  - versionName: 0.18.4
+    versionCode: 18
+    commit: 57f9702e163e4554e46a90eee87f90ad16ea69fd
+    subdir: komelia-app
+    submodules: true
+    sudo:
+      - echo "deb https://deb.debian.org/debian forky main" > /etc/apt/sources.list.d/forky.list
+      - apt-get update
+      - apt-get install -y -t forky npm
+      - apt-get install -y ninja-build pkg-config nasm automake autopoint libtool
+        gettext texinfo make libltdl-dev meson cmake
+    gradle:
+      - yes
+    prebuild: sed -i -e '/jvmToolchain/d' ../{*,*/*,*/*/*}/build.gradle.kts
+    scandelete:
+      - third_party/secret-service
+    build:
+      - cd ..
+      - ANDROID_NDK_PATH=$$NDK$$ ANDROID_SDK_PATH=$$SDK$$ ./cmake/android-build.sh
+        aarch64
+      - gradle android-aarch64_copyJniLibs
+      - gradle buildWebui
+    ndk: r28c
+    gradleprops:
+      - snd.android.variant=fdroid
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: komelia-app/build.gradle.kts|versionCode = (\d+)|gradle/libs.versions.toml|app-version
   = "(.+)"
-CurrentVersion: 0.18.2
-CurrentVersionCode: 16
+CurrentVersion: 0.18.4
+CurrentVersionCode: 18
