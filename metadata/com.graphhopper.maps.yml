@@ -508,7 +508,35 @@ Builds:
       - node_modules/
       - graphhopper-maps/node_modules/
 
+  - versionName: 2.5.0
+    versionCode: 23
+    commit: f539ef198b03c92cca5117d01a55e8ba9acbb137
+    subdir: android/app
+    submodules: true
+    sudo:
+      - echo "deb https://deb.debian.org/debian forky main" > /etc/apt/sources.list.d/forky.list
+      - apt-get update
+      - apt-get install -y -t forky npm
+    init:
+      - cd ../..
+      - cp config.js graphhopper-maps/
+      - cd graphhopper-maps
+      - rm -rf node_modules
+      - npm install
+      - npm run fdroid
+      - mv dist/bundle.*.js dist/bundle.js
+      - cd ..
+      - npm install
+      - npm run build
+      - cp config.js dist/
+      - npx cap sync
+    gradle:
+      - yes
+    scandelete:
+      - node_modules/
+      - graphhopper-maps/node_modules/
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 2.3.0
-CurrentVersionCode: 21
+CurrentVersion: 2.5.0
+CurrentVersionCode: 23
