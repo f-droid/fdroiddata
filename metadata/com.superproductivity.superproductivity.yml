@@ -1511,7 +1511,34 @@ Builds:
       - src/assets/test-plugin.zip
       - .swp
 
+  - versionName: 17.0.0
+    versionCode: 1700009000
+    commit: 044495999b77a14d3bbfba130ee4b3889839fcae
+    subdir: android/app
+    sudo:
+      - echo "deb https://deb.debian.org/debian forky main" > /etc/apt/sources.list.d/forky.list
+      - apt-get update
+      - apt-get install -y -t forky npm
+      - apt-get install -y g++ make libc-dev libvips-dev
+    gradle:
+      - fdroid
+    prebuild:
+      - cd ../..
+      - sed -i -e "s/getEnv('UNSPLASH_KEY')/''/" src/app/core/unsplash/unsplash.service.ts
+      - npm install --build-from-source
+      - npm run buildFrontend:prodWeb
+      - npm run sync:android
+    scanignore:
+      - android/app/src/main/assets/public/assets/test-plugin.zip
+    scandelete:
+      - node_modules
+      - packages/plugin-dev/node_modules
+      - packages/plugin-dev/*/node_modules
+      - dist/browser/assets/test-plugin.zip
+      - src/assets/test-plugin.zip
+      - .swp
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v(?!11.0.3)[\d.]+$
-CurrentVersion: 16.9.4
-CurrentVersionCode: 1609040000
+CurrentVersion: 17.0.0
+CurrentVersionCode: 1700009000
