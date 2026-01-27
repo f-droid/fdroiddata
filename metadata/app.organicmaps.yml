@@ -2770,11 +2770,46 @@ Builds:
         en-US: Compiled binary data files (including but not limited to `.mwm` map
           files) under a non-FOSS license
 
+  - versionName: 2026.01.26-11-FDroid
+    versionCode: 26012611
+    commit: 6296f3d67c65d2359afbe8d35d8545bb69d4ce62
+    subdir: android/app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y g++ ninja-build
+    gradle:
+      - fdroid
+    rm:
+      - iphone
+      - qt
+      - tools/shaders_compiler
+      - tools/python/twine
+      - xcode
+    prebuild:
+      - sdkmanager 'cmake;3.30.3'
+      - sed -i -e '/com.google.firebase/d; /gms.google-services/d; /android.gms:play-services/d'
+        build.gradle
+      - touch secure.properties
+    scanignore:
+      - data/*.bin
+    scandelete:
+      - 3party
+      - package.json
+    build:
+      - cd ../../3party/boost
+      - ./bootstrap.sh
+      - ./b2 headers
+    antifeatures:
+      NonFreeAssets:
+        en-US: Compiled binary data files (including but not limited to `.mwm` map
+          files) under a non-FOSS license
+
 MaintainerNotes: scanner might detect 'com/google/android/gms/location' and more from
   'org.microg.gms:play-services-location`
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags .*android$
 UpdateCheckData: android/app/src/fdroid/play/version.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 2026.01.16-8-FDroid
-CurrentVersionCode: 26011608
+CurrentVersion: 2026.01.26-11-FDroid
+CurrentVersionCode: 26012611
