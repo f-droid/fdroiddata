@@ -7,7 +7,7 @@ WebSite: https://opensurge2d.org
 SourceCode: https://github.com/alemart/opensurge
 IssueTracker: https://github.com/alemart/opensurge/issues
 Translation: https://opensurge2d.org/appdata/translate.html
-Changelog: https://github.com/alemart/opensurge/blob/HEAD/CHANGES.md
+Changelog: https://opensurge2d.org/appdata/changelog.html
 Donate: https://opensurge2d.org/contribute
 
 AutoName: Surge Engine
@@ -116,8 +116,28 @@ Builds:
         COMPILE_SDK_VERSION=33 BUILD_TOOLS_VERSION=33.0.2 ANDROID_HOME=$$SDK$$ ANDROID_NDK_ROOT=$$NDK$$
     ndk: 25.2.9519653
 
+  - versionName: 6.1.3.0-fdroid
+    versionCode: 30650
+    commit: 53f1cd6b65ea92bfa6b7a4df49c3e11207445ed9
+    sudo:
+      - echo "deb https://deb.debian.org/debian bookworm main" > /etc/apt/sources.list.d/bookworm.list
+      - apt-get update
+      - apt-get install -y build-essential cmake wget
+      - apt-get install -y -t bookworm openjdk-17-jdk-headless
+      - update-java-alternatives --set java-1.17.0-openjdk-amd64
+    output: build/opensurge.apk
+    prebuild:
+      - sdkmanager "platforms;android-36" "build-tools;36.0.0"
+      - make clean
+    build:
+      - export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+      - VERSION_SUFFIX=$(echo "$$VERSION$$" | sed 's/^[0-9\.]\+-\?//')
+      - make apk GAME_APPLICATION_ID=org.opensurge2d.surgeengine GAME_VERSION_SUFFIX=$VERSION_SUFFIX
+        COMPILE_SDK_VERSION=36 BUILD_TOOLS_VERSION=36.0.0 ANDROID_HOME=$$SDK$$ ANDROID_NDK_ROOT=$$NDK$$
+    ndk: 29.0.14206865
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: etc/fdroid.yaml|CurrentVersionCode:\s+(\d+)|.|CurrentVersion:\s+(.+)
-CurrentVersion: 6.1.2.1-fdroid
-CurrentVersionCode: 30601
+CurrentVersion: 6.1.3.0-fdroid
+CurrentVersionCode: 30650
