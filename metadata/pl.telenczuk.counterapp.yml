@@ -47,9 +47,38 @@ Builds:
       - node_modules
     ndk: 27.1.12297006
 
+  - versionName: '1.1'
+    versionCode: 11
+    commit: f7bcf9e778792e301710096543382b6f26f7c1c9
+    subdir: android/app/
+    sudo:
+      - sysctl fs.inotify.max_user_watches=524288 || true
+      - echo "deb https://deb.debian.org/debian forky main" > /etc/apt/sources.list.d/forky.list
+      - apt-get update
+      - apt-get install -y -t forky npm
+    init:
+      - cd ../..
+      - npm cache clean --force
+      - npm ci
+    gradle:
+      - yes
+    prebuild: sed -i '/implementation "com\.google\.android\.gms:play-services-location/d'
+      ../../node_modules/@maplibre/maplibre-react-native/android/build.gradle
+    scanignore:
+      - node_modules/@react-native-async-storage/async-storage/android/build.gradle
+      - node_modules/@react-native-community/geolocation/android/build.gradle
+      - node_modules/react-native-safe-area-context/android/build.gradle
+      - node_modules/react-native-screens/android/build.gradle
+      - node_modules/react-native-sqlite-2/android/build.gradle
+      - node_modules/react-native-vector-icons/android/build.gradle
+      - node_modules/react-native/sdks/hermesc/linux64-bin/hermesc
+    scandelete:
+      - node_modules
+    ndk: 27.1.12297006
+
 AllowedAPKSigningKeys: 98bc88e2914a33a2953aee267e0850b4e877f7b8f8cc5af086b19d8783acb2ad
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: '1.0'
-CurrentVersionCode: 1
+CurrentVersion: '1.1'
+CurrentVersionCode: 11
