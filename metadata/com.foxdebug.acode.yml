@@ -1474,8 +1474,41 @@ Builds:
       - webpack --progress --mode production
       - cordova build android --release -- --packageType=apk
 
+  - versionName: 1.11.8
+    versionCode: 967
+    commit: e2acb9b4b94ef46cfd08e01517cf3cd9df6fe7ad
+    sudo:
+      - sysctl fs.inotify.max_user_watches=524288 || true
+      - chmod -R 777 /opt/android-sdk
+      - apt-get update
+      - apt-get install -y npm
+      - npm install -g cordova
+    output: platforms/android/app/build/outputs/apk/release/app-release-unsigned.apk
+    rm:
+      - src/plugins/iap
+      - src/plugins/proot
+    prebuild:
+      - sdkmanager 'build-tools;35.0.0'
+      - sed -i -e '/iap/d' -e '/proot/d' package.json
+      - sed -i -e '/iap.startConnection/,/Purchase error/c} catch (e) {' src/main.js
+      - sed -i -e '/Donate/d' src/settings/mainSettings.js
+      - sed -i -e 's/acodefree/acode/' utils/config.js
+      - sed -i -e 's/build/prepare/' utils/scripts/build.sh
+      - sed -i -e '/core-google-shortcuts/d' src/plugins/system/plugin.xml
+      - mkdir -p www/css/build www/js/build
+      - npm install
+    scandelete:
+      - node_modules/cordova-android/framework/cordova-publish.gradle
+      - node_modules/jszip/.jekyll-metadata
+      - node_modules/@biomejs
+    build:
+      - npm run setup
+      - node ./utils/config.js prod paid
+      - webpack --progress --mode production
+      - cordova build android --release -- --packageType=apk
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: config.xml|android-versionCode="(\d+)"|.|version="([\d.]+)"
-CurrentVersion: 1.11.7
-CurrentVersionCode: 966
+CurrentVersion: 1.11.8
+CurrentVersionCode: 967
