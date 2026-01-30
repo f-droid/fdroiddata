@@ -276,10 +276,48 @@ Builds:
       - popd
       - mv $repo me.biplobsd.rsm
 
+  - versionName: 1.0.21
+    versionCode: 20
+    commit: 1e8a808456fcb8e1079947a00d7c8e4f3c4d65a2
+    sudo:
+      - mkdir -p /home/runner/work/running_services_monitor
+      - chown -R vagrant /home/runner/
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@stable
+    prebuild:
+      - flutterVersion=$(sed -n -E "s/^\s+flutter-version:\ '([0-9.]+)'/\1/p" .github/workflows/release.yml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export repo=/home/runner/work/running_services_monitor/running_services_monitor
+      - cd ..
+      - mv me.biplobsd.rsm $repo
+      - pushd $repo
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter packages pub get
+      - popd
+      - mv $repo me.biplobsd.rsm
+    scandelete:
+      - .pub-cache
+    build:
+      - export repo=/home/runner/work/running_services_monitor/running_services_monitor
+      - cd ..
+      - mv me.biplobsd.rsm $repo
+      - pushd $repo
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter pub get
+      - $$flutter$$/bin/dart run build_runner build --delete-conflicting-outputs
+      - $$flutter$$/bin/flutter gen-l10n
+      - $$flutter$$/bin/flutter build apk
+      - popd
+      - mv $repo me.biplobsd.rsm
+    ndk: r28
+
 AllowedAPKSigningKeys: 1eb447280255c3b807fb8176556f31757a484619e8a989f29024a26e0fac3274
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 1.0.20
-CurrentVersionCode: 19
+CurrentVersion: 1.0.21
+CurrentVersionCode: 20
