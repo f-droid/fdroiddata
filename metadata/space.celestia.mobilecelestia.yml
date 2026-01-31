@@ -1209,6 +1209,45 @@ Builds:
       - bash prepare_icu.sh
       - bash build_android.sh $(pwd) $$SDK$$/ndk/*
 
+  - versionName: 1.9.6
+    versionCode: 670
+    commit: 821ee6e5072005d48fb9b813cd65017d453128c3
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install cmake tcsh gcc-multilib g++-multilib gettext gperf make meson
+        ncompress wget xz-utils imagemagick
+    gradle:
+      - unofficial
+    srclibs:
+      - celestia-apple-android-dependencies@1.0.36
+      - Celestia@1_9_4_rc1
+      - CelestiaContent@7c1a1f7f9189b5c207d0ef185e880077136716a3
+      - CelestiaLocalization@a93bcf2e40561136e2d9d66a54bff5f5336ae723
+    prebuild:
+      - ln -s $$Celestia$$ ../..
+      - ln -s $$CelestiaContent$$ ../..
+      - ln -s $$CelestiaLocalization$$ ../..
+      - mv $$celestia-apple-android-dependencies$$ ../dependencies
+      - cd ../dependencies
+      - sed -i -e 's/wget/wget -q/' download.sh build_android.sh
+      - bash download.sh
+      - mkdir targz tarxz tgz
+      - for i in *.tar.gz; do tar -xzf $i -C targz; done
+      - for i in *.tar.xz; do tar -xJf $i -C tarxz; done
+      - for i in *.tgz; do tar -xzf $i -C tgz; done
+    scandelete:
+      - dependencies
+    build:
+      - bash downsize_textures.sh
+      - bash run_gperf.sh $$Celestia$$
+      - cd ../dependencies
+      - for i in $(ls targz); do tar -czf $i.tar.gz -C targz $i; done
+      - for i in $(ls tarxz); do tar -cJf $i.tar.xz -C tarxz $i; done
+      - for i in $(ls tgz); do tar -czf $i.tgz -C tgz $i; done
+      - bash prepare_icu.sh
+      - bash build_android.sh $(pwd) $$SDK$$/ndk/*
+
 MaintainerNotes: |-
   Celestia for android requires 4 more repositories to build:
     - Celestia;
@@ -1237,5 +1276,5 @@ MaintainerNotes: |-
 
 AutoUpdateMode: None
 UpdateCheckMode: Tags
-CurrentVersion: 1.9.3
-CurrentVersionCode: 649
+CurrentVersion: 1.9.6
+CurrentVersionCode: 670
