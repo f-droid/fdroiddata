@@ -345,10 +345,52 @@ Builds:
       - mkdir -p "$HOME/.m2/repository/org/webkit"
       - cp -r node_modules/jsc-android/dist/org/webkit/android-jsc "$HOME/.m2/repository/org/webkit"
 
+  - versionName: 2.6.8
+    versionCode: 28
+    commit: 347753e6056abf9fe268cb73b8122174ef977d5b
+    subdir: app
+    submodules: true
+    sudo:
+      - echo "deb https://deb.debian.org/debian forky main" > /etc/apt/sources.list.d/forky.list
+      - apt-get update
+      - apt-get install -y -t forky npm
+      - apt-get install -y jq maven
+    gradle:
+      - fdroid
+    srclibs:
+      - jitsi-meet@mobile-sdk-11.6.1
+    rm:
+      - Core/InAppReview
+      - Core/Notifications/Registration
+    prebuild:
+      - sed -i -e '/jitsi-maven-repository/d' -e '/repositories {/a\        mavenLocal()'
+        ../settings.gradle.kts
+      - sed -i -e '/google.firebase/a exclude(group = "com.google.android.gms")' -e
+        '/JavaVersion/s/17/21/' build.gradle.kts
+      - export jitsiVersion=$(sed -n -E 's/jitsiMeetSdk = "(.+)"/\1/p' ../gradle/libs.versions.toml)
+      - '[[ $jitsiVersion ]]'
+      - git -C $$jitsi-meet$$ checkout -f mobile-sdk-$jitsiVersion
+      - sed -i -e '/git/d' $$jitsi-meet$$/android/scripts/release-sdk.sh
+      - sed -i -e '/javaVersion/s/17/21/' -e '/jvm/s/17/21/' $$jitsi-meet$$/android/build.gradle
+      - sed -i -e '/if (!rootProject.ext.libreBuild) {/,/^    }/d' $$jitsi-meet$$/android/sdk/build.gradle
+      - sed -i -e '/react-native-amplitude/d' -e '/react-native-giphy/d' -e '/react-native-google-signin/d'
+        $$jitsi-meet$$/android/settings.gradle
+    build:
+      - cd $$jitsi-meet$$
+      - export LIBRE_BUILD=true
+      - npm install --save false webpack-bundle-analyzer
+      - npm ci
+      - mkdir -p "$HOME/.m2"
+      - JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64 bash android/scripts/release-sdk.sh
+        "$HOME/.m2/repository"
+      - mkdir -p "$HOME/.m2/repository/org/webkit"
+      - cp -r node_modules/jsc-android/dist/org/webkit/android-jsc "$HOME/.m2/repository/org/webkit"
+    ndk: r27
+
 MaintainerNotes: scanner might detect 'com/google/ads/interactivemedia/v3/api/AdEvent'
   stubs from react-native-video
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 2.6.7
-CurrentVersionCode: 27
+CurrentVersion: 2.6.8
+CurrentVersionCode: 28
