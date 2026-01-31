@@ -1244,10 +1244,49 @@ Builds:
       - $$flutter$$/bin/flutter build apk --flavor beta
     ndk: r25c
 
+  - versionName: 7.13.1
+    versionCode: 4194499
+    commit: 75da915005619ceed75d64923b5e2028e78fc4e7
+    subdir: yivi_fdroid
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y golang-go
+    output: build/app/outputs/flutter-apk/app-beta-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - yivi_app
+      - .vscode
+    prebuild:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export version=$(grep "^FLUTTER_VERSION" ../ci_scripts/install_flutter.sh
+        | cut -d "\"" -f2)
+      - '[[ $version ]]'
+      - git -C $$flutter$$ checkout -f $version
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+      - sdkmanager 'platforms;android-36' 'build-tools;36.1.0'
+    scandelete:
+      - yivi_fdroid/.pub-cache
+    build:
+      - export GOPATH="$PWD/golang"
+      - export PATH="$GOPATH/bin:$PATH"
+      - pushd ../yivi_core
+      - go install golang.org/x/mobile/cmd/gomobile@latest
+      - gomobile init
+      - gomobile bind -target android -androidapi 26 -o android/irmagobridge/irmagobridge.aar
+        github.com/privacybydesign/irmamobile/irmagobridge
+      - ln -s "../../../../../irma_configuration" "./android/src/main/assets/irma_configuration"
+      - popd
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --flavor beta
+    ndk: r25c
+
 MaintainerNotes: uses Sentry.io configured as opt-in
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v.*$
 UpdateCheckData: yivi_fdroid/pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 7.12.1
-CurrentVersionCode: 4194495
+CurrentVersion: 7.13.1
+CurrentVersionCode: 4194499
