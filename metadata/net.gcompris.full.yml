@@ -2314,7 +2314,189 @@ Builds:
       - make apk_release
     ndk: 25.2.9519653
 
+  - versionName: '26.0'
+    versionCode: 260000
+    commit: V26.0
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y cmake g++ gettext libarchive13 libgl1-mesa-dev libclang-17-dev
+        clang-17 llvm-17-dev llvm-17 ninja-build make python-is-python3 docbook-xsl
+        build-essential 7zip zlib1g-dev libjpeg-dev libpcre2-dev libharfbuzz-dev libfreetype-dev
+        libpng-dev libopenxr-dev
+    output: 
+      android-build/android-build/GCompris-Android-release-armeabi-v7a-dl-$$VERSION$$.apk
+    srclibs:
+      - OpenSSL@openssl-3.0.15
+      - Qt5@v6.10.1
+    prebuild:
+      - mkdir android-build/
+      - cd $$Qt5$$
+      - ./init-repository -f 
+        --module-subset=qtbase,qtdeclarative,qtimageformats,qtmultimedia,qtsensors,qtshadertools,qtsvg,qttools,qttranslations,qtgraphs,qtquick3d
+    build:
+      - sdkmanager 'platforms;android-36'
+      - export ABI=armeabi-v7a
+      - export ANDROID_NDK=$$NDK$$
+      - export ANDROID_NDK_ROOT=$$NDK$$
+      - export ANDROID_SDK_ROOT=$$SDK$$
+      - export ANDROID_API_VERSION=android-28
+      - export BUILD_DIR=$(readlink -f ${PWD})/android-build
+      - export OPENSSL_INSTALL_DIR=$(readlink -f ${PWD})/openssl
+      - export QT_HOST_BUILD=$(readlink -f ${PWD}/../srclib)/build-host-qt
+      - export QT_HOST_PREFIX=$(readlink -f ${PWD}/../srclib)/qt/6.10.1/gcc_64
+      - export QT_BUILD=$(readlink -f ${PWD}/../srclib)/build-qt
+      - export QTPREFIX=$(readlink -f ${PWD}/../srclib)/qt/6.10.1/android_armv7
+      - rm -rf $QT_HOST_PREFIX $QT_HOST_BUILD $QTPREFIX $QT_BUILD
+      - mkdir -p $BUILD_DIR $QT_HOST_PREFIX $QT_HOST_BUILD $QTPREFIX $QT_BUILD
+      - pushd $$OpenSSL$$
+      - PATH=$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH ./Configure shared
+        android-arm --prefix=$OPENSSL_INSTALL_DIR
+      - PATH=$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH make SHLIB_VERSION_NUMBER=
+        SHLIB_EXT= build_libs install_dev -j$(nproc)
+      - popd
+      - pushd ${QT_HOST_BUILD}
+      - $$Qt5$$/configure -opensource -confirm-license -prefix $QT_HOST_PREFIX -release
+        -submodules qtbase,qttools,qtquick3d -nomake tests -nomake examples -no-sql-mysql
+        -no-dbus -no-openssl -no-glib -no-icu -no-cups -no-fontconfig -no-gtk -no-egl
+        -skip qttestlib,qtwebengine,qtgamepad,qtwebchannel -skip qtwebview,qtwebsockets,qtwebglplugin,qtserialport,qtnetworkauth,qtsensors
+        -skip qtwayland,qtxmlpatterns,qtscxml,qtscript,qtconnectivity,qtimageformats
+        -skip qtlanguageserver,qtquicktimeline,qt5compat,qtactiveqt,qtcharts -skip
+        qtcoap,qtdatavis3d,qthttpserver,qtpositioning,qtdoc,qtgrpc,qtlocation,qtlottie
+        -skip qtmqtt,qtopcua,qtquick3dphysics,qtquickeffectmaker,qtremoteobjects,qtserialbus
+        -skip qtspeech,qtvirtualkeyboard -no-opengl -no-feature-debug -no-feature-itemmodeltester
+        -no-feature-testlib -system-pcre -system-harfbuzz -system-libpng -system-libjpeg
+        -no-feature-quickcontrols2-fusion -no-feature-quickcontrols2-imagine -no-feature-quickcontrols2-material
+        -no-feature-quickcontrols2-universal -no-feature-quickcontrols2-fluentwinui3
+        -no-feature-quickcontrols2-macos -no-feature-quickcontrols2-ios -no-feature-quickcontrols2-windows
+        -no-feature-qml-debug -no-feature-quick-designer -no-feature-localserver -no-feature-qml-profiler
+        -no-feature-qml-preview -system-openxr -no-feature-quick3d-assimp -system-freetype
+        -- -DCMAKE_INSTALL_MESSAGE=NEVER
+      - sed -i "/setInitialCapsMode(initialCapsMode);/i imeOptions |= android.view.inputmethod.EditorInfo.IME_FLAG_NO_FULLSCREEN;"
+        $$Qt5$$/qtbase/src/android/jar/src/org/qtproject/qt/android/QtEditText.java
+      - cmake --build . --parallel
+      - cmake --install .
+      - popd
+      - pushd ${QT_BUILD}
+      - $$Qt5$$/configure -platform android-clang --disable-rpath -opensource -confirm-license
+        -silent -prefix $QTPREFIX -release -nomake tests -nomake examples -no-sql-mysql
+        -no-dbus -no-use-gold-linker -sysconfdir /etc/xdg -opengl es2 -android-sdk
+        $$SDK$$ -android-ndk $$NDK$$ -android-arch ${ABI} -android-ndk-platform android-28
+        -skip qtwebengine,qtgamepad,qtwebchannel,qtwebview,qtwebsockets,qtwebglplugin
+        -skip qtserialport,qtnetworkauth,qt3d,qtwayland,qtxmlpatterns,qtscxml -skip
+        qtscript,qtconnectivity,qtlanguageserver,qtquicktimeline,qt5compat -skip qtactiveqt,qtcoap,qtdatavis3d,qthttpserver,qtpositioning,qtdoc,qtgrpc
+        -skip qtlocation,qtlottie,qtmqtt,qtopcua,qtquick3dphysics,qtquickeffectmaker
+        -skip qtremoteobjects,qtserialbus,qtspeech,qtvirtualkeyboard -no-feature-debug
+        -no-feature-itemmodeltester -qt-host-path $QT_HOST_PREFIX -openssl-runtime
+        -no-feature-quickcontrols2-fusion -no-feature-quickcontrols2-imagine -no-feature-quickcontrols2-material
+        -no-feature-quickcontrols2-universal -no-feature-quickcontrols2-fluentwinui3
+        -no-feature-quickcontrols2-macos -no-feature-quickcontrols2-ios -no-feature-quickcontrols2-windows
+        -no-feature-qml-debug -no-feature-quick-designer -no-feature-localserver -no-feature-quick3d-assimp
+        -- -DOPENSSL_ROOT_DIR=${OPENSSL_INSTALL_DIR} -DANDROID_ABI=${ABI} -DCMAKE_INSTALL_MESSAGE=NEVER
+      - cmake --build . --parallel
+      - cmake --install .
+      - popd
+      - export CMAKE_QT_LIB=${QTPREFIX}/lib/cmake/
+      - pushd android-build
+      - cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_ANDROID_API=28 -DCMAKE_TOOLCHAIN_FILE=$$NDK$$/build/cmake/android.toolchain.cmake
+        -DANDROID_ABI=${ABI} -DCMAKE_PREFIX_PATH=${CMAKE_QT_LIB}/Qt6/ -DCMAKE_FIND_ROOT_PATH=${QTPREFIX}/lib/
+        -Wno-dev ../
+      - cmake --build . --parallel
+      - make apk_release
+    ndk: 27.2.12479018
+
+  - versionName: '26.0'
+    versionCode: 260001
+    commit: V26.0
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y cmake g++ gettext libarchive13 libgl1-mesa-dev libclang-17-dev
+        clang-17 llvm-17-dev llvm-17 ninja-build make python-is-python3 docbook-xsl
+        build-essential 7zip zlib1g-dev libjpeg-dev libpcre2-dev libharfbuzz-dev libfreetype-dev
+        libpng-dev libopenxr-dev
+    output: 
+      android-build/android-build/GCompris-Android-release-arm64-v8a-dl-$$VERSION$$.apk
+    srclibs:
+      - OpenSSL@openssl-3.0.15
+      - Qt5@v6.10.1
+    prebuild:
+      - mkdir android-build/
+      - cd $$Qt5$$
+      - ./init-repository -f 
+        --module-subset=qtbase,qtdeclarative,qtimageformats,qtmultimedia,qtsensors,qtshadertools,qtsvg,qttools,qttranslations,qtgraphs,qtquick3d
+    build:
+      - sdkmanager 'platforms;android-36'
+      - export ABI=arm64-v8a
+      - export ANDROID_NDK=$$NDK$$
+      - export ANDROID_NDK_ROOT=$$NDK$$
+      - export ANDROID_SDK_ROOT=$$SDK$$
+      - export ANDROID_API_VERSION=android-28
+      - export BUILD_DIR=$(readlink -f ${PWD})/android-build
+      - export OPENSSL_INSTALL_DIR=$(readlink -f ${PWD})/openssl
+      - export QT_HOST_BUILD=$(readlink -f ${PWD}/../srclib)/build-host-qt
+      - export QT_HOST_PREFIX=$(readlink -f ${PWD}/../srclib)/qt/6.10.1/gcc_64
+      - export QT_BUILD=$(readlink -f ${PWD}/../srclib)/build-qt
+      - export QTPREFIX=$(readlink -f ${PWD}/../srclib)/qt/6.10.1/android_arm64_v8a
+      - rm -rf $QT_HOST_PREFIX $QT_HOST_BUILD $QTPREFIX $QT_BUILD
+      - mkdir -p $BUILD_DIR $QT_HOST_PREFIX $QT_HOST_BUILD $QTPREFIX $QT_BUILD
+      - pushd $$OpenSSL$$
+      - PATH=$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH ./Configure shared
+        android-arm64 --prefix=$OPENSSL_INSTALL_DIR
+      - PATH=$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH make SHLIB_VERSION_NUMBER=
+        SHLIB_EXT= build_libs install_dev -j$(nproc)
+      - popd
+      - pushd ${QT_HOST_BUILD}
+      - $$Qt5$$/configure -opensource -confirm-license -prefix $QT_HOST_PREFIX -release
+        -submodules qtbase,qttools,qtquick3d -nomake tests -nomake examples -no-sql-mysql
+        -no-dbus -no-openssl -no-glib -no-icu -no-cups -no-fontconfig -no-gtk -no-egl
+        -skip qttestlib,qtwebengine,qtgamepad,qtwebchannel -skip qtwebview,qtwebsockets,qtwebglplugin,qtserialport,qtnetworkauth,qtsensors
+        -skip qtwayland,qtxmlpatterns,qtscxml,qtscript,qtconnectivity,qtimageformats
+        -skip qtlanguageserver,qtquicktimeline,qt5compat,qtactiveqt,qtcharts -skip
+        qtcoap,qtdatavis3d,qthttpserver,qtpositioning,qtdoc,qtgrpc,qtlocation,qtlottie
+        -skip qtmqtt,qtopcua,qtquick3dphysics,qtquickeffectmaker,qtremoteobjects,qtserialbus
+        -skip qtspeech,qtvirtualkeyboard -no-opengl -no-feature-debug -no-feature-itemmodeltester
+        -no-feature-testlib -system-pcre -system-harfbuzz -system-libpng -system-libjpeg
+        -no-feature-quickcontrols2-fusion -no-feature-quickcontrols2-imagine -no-feature-quickcontrols2-material
+        -no-feature-quickcontrols2-universal -no-feature-quickcontrols2-fluentwinui3
+        -no-feature-quickcontrols2-macos -no-feature-quickcontrols2-ios -no-feature-quickcontrols2-windows
+        -no-feature-qml-debug -no-feature-quick-designer -no-feature-localserver -no-feature-qml-profiler
+        -no-feature-qml-preview -system-openxr -no-feature-quick3d-assimp -system-freetype
+        -- -DCMAKE_INSTALL_MESSAGE=NEVER
+      - sed -i "/setInitialCapsMode(initialCapsMode);/i imeOptions |= android.view.inputmethod.EditorInfo.IME_FLAG_NO_FULLSCREEN;"
+        $$Qt5$$/qtbase/src/android/jar/src/org/qtproject/qt/android/QtEditText.java
+      - cmake --build . --parallel
+      - cmake --install .
+      - popd
+      - pushd ${QT_BUILD}
+      - $$Qt5$$/configure -platform android-clang --disable-rpath -opensource -confirm-license
+        -silent -prefix $QTPREFIX -release -nomake tests -nomake examples -no-sql-mysql
+        -no-dbus -no-use-gold-linker -sysconfdir /etc/xdg -opengl es2 -android-sdk
+        $$SDK$$ -android-ndk $$NDK$$ -android-arch ${ABI} -android-ndk-platform android-28
+        -skip qtwebengine,qtgamepad,qtwebchannel,qtwebview,qtwebsockets,qtwebglplugin
+        -skip qtserialport,qtnetworkauth,qt3d,qtwayland,qtxmlpatterns,qtscxml -skip
+        qtscript,qtconnectivity,qtlanguageserver,qtquicktimeline,qt5compat -skip qtactiveqt,qtcoap,qtdatavis3d,qthttpserver,qtpositioning,qtdoc,qtgrpc
+        -skip qtlocation,qtlottie,qtmqtt,qtopcua,qtquick3dphysics,qtquickeffectmaker
+        -skip qtremoteobjects,qtserialbus,qtspeech,qtvirtualkeyboard -no-feature-debug
+        -no-feature-itemmodeltester -qt-host-path $QT_HOST_PREFIX -openssl-runtime
+        -no-feature-quickcontrols2-fusion -no-feature-quickcontrols2-imagine -no-feature-quickcontrols2-material
+        -no-feature-quickcontrols2-universal -no-feature-quickcontrols2-fluentwinui3
+        -no-feature-quickcontrols2-macos -no-feature-quickcontrols2-ios -no-feature-quickcontrols2-windows
+        -no-feature-qml-debug -no-feature-quick-designer -no-feature-localserver -no-feature-quick3d-assimp
+        -- -DOPENSSL_ROOT_DIR=${OPENSSL_INSTALL_DIR} -DANDROID_ABI=${ABI} -DCMAKE_INSTALL_MESSAGE=NEVER
+      - cmake --build . --parallel
+      - cmake --install .
+      - popd
+      - export CMAKE_QT_LIB=${QTPREFIX}/lib/cmake/
+      - pushd android-build
+      - cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_ANDROID_API=26 -DCMAKE_TOOLCHAIN_FILE=$$NDK$$/build/cmake/android.toolchain.cmake
+        -DANDROID_ABI=${ABI} -DCMAKE_PREFIX_PATH=${CMAKE_QT_LIB}/Qt6/ -DCMAKE_FIND_ROOT_PATH=${QTPREFIX}/lib/
+        -Wno-dev ../
+      - cmake --build . --parallel
+      - make apk_release
+    ndk: 27.2.12479018
+
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: '25.1'
-CurrentVersionCode: 250115
+CurrentVersion: '26.0'
+CurrentVersionCode: 260001
