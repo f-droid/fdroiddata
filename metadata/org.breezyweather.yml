@@ -232,6 +232,27 @@ Builds:
       - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
         --replace unaligned.apk $$OUT$$
 
+  - versionName: 6.1.1_freenet
+    versionCode: 60101
+    commit: bec38bc952237ba585423551668e3cfa2c883f31
+    subdir: app
+    sudo:
+      - export CPUS_MAX=4
+      - export CPUS=$(getconf _NPROCESSORS_ONLN)
+      - for (( c=$CPUS_MAX; c<$CPUS; c++ )) ; do echo 0 > /sys/devices/system/cpu/cpu$c/online
+        ; done
+    gradle:
+      - freenet
+    binary: 
+      https://github.com/breezy-weather/breezy-weather/releases/download/v6.1.1/breezy-weather-v%v.apk
+    srclibs:
+      - reproducible-apk-tools@v0.3.0
+    prebuild: sed -i -e '/isEnable/s/true/false/' build.gradle.kts
+    postbuild:
+      - mv $$OUT$$ unaligned.apk
+      - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
+        --replace unaligned.apk $$OUT$$
+
 AllowedAPKSigningKeys: 29d435f70aa9aec3c1faff7f7ffa6e15785088d87f06ecfcab9c3cc62dc269d8
 
 MaintainerNotes: Per flavor versionName suffix does not allow to template the Binaries
@@ -239,5 +260,5 @@ MaintainerNotes: Per flavor versionName suffix does not allow to template the Bi
 
 AutoUpdateMode: None
 UpdateCheckMode: Tags ^v[\d.]+$
-CurrentVersion: 6.0.12_freenet
-CurrentVersionCode: 60012
+CurrentVersion: 6.1.1_freenet
+CurrentVersionCode: 60101
