@@ -1,0 +1,51 @@
+Categories:
+  - Games
+License: Apache-2.0
+AuthorName: xolatgames
+AuthorEmail: hello@xolat.games
+AuthorWebSite: https://xolat.games
+SourceCode: https://codeberg.org/xolatgames/cat-a-shooter
+IssueTracker: https://codeberg.org/xolatgames/cat-a-shooter/issues
+
+AutoName: Cat a shooter 😼
+
+RepoType: git
+Repo: https://codeberg.org/xolatgames/Cat-a-shooter-for-Android
+
+Builds:
+  - versionName: 0.1.6
+    versionCode: 4
+    commit: 5ba9570dfe4cb52d1ff1a191f1ea367e785ccf3b
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install make zip gcc-multilib -y
+    gradle:
+      - embed
+      - noRecord
+    prebuild:
+      - sed -i -e "/signingConfig/d" build.gradle
+      - make -C ../ download_deps
+    scandelete:
+      - app/src/main/cpp/
+    build:
+      - make -C ../ prepare
+      - export PATH="$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin:${PATH}"
+      - cd src/main/cpp/megasource/libs/LuaJIT/
+      - makewrap() { make clean; make HOST_CC="gcc ${4}" HOST_CFLAGS=-D_CRT_SECURE_NO_WARNINGS
+        CC=clang CROSS="$1" STATIC_CC="${1}${2}-clang -fPIC" DYNAMIC_CC="${1}${2}-clang
+        -fPIC" TARGET_AR="llvm-ar rcus" TARGET_SYS=Linux TARGET_LD="${1}${2}-clang"
+        TARGET_LDFLAGS=-fuse-ld=lld TARGET_STRIP=llvm-strip TARGET_SONAME=libluajit.so
+        CCDEBUG=-g; cp "src/libluajit.a" "android/${3}/libluajit.a"; cp "src/libluajit.so"
+        "android/${3}/libluajit.so"; }
+      - makewrap aarch64-linux-android 21 arm64-v8a " "
+      - makewrap x86_64-linux-android 21 x86_64 " "
+      - makewrap armv7a-linux-androideabi 21 armeabi-v7a -m32
+      - makewrap i686-linux-android 21 x86 -m32
+    ndk: 27.1.12297006
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: gradle.properties|app.version_code=(\d+)|.|app.version_name=([\d.]+)
+CurrentVersion: 0.1.6
+CurrentVersionCode: 4
