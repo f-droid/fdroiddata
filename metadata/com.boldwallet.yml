@@ -833,7 +833,57 @@ Builds:
       - ./build.sh
     ndk: r27b
 
+  - versionName: 2.1.14
+    versionCode: 47
+    commit: 7526f3f2dccf89e364651161023119b01ae886fb
+    subdir: android/app
+    sudo:
+      - apt-get update
+      - apt-get install -y gcc libc-dev golang-go npm
+    gradle:
+      - yes
+    srclibs:
+      - go@go1.24.2
+    rm:
+      - ios
+    prebuild:
+      - cd ../..
+      - sed -i '/react-native-vision-camera/d' package.json
+      - mv components/QRScanner.foss.tsx components/QRScanner.tsx
+      - npm install --build-from-source
+      - sed -i -e '/installReferrerVersion/,+12d' node_modules/react-native-device-info/android/build.gradle
+      - sdkmanager "platforms;android-21" "build-tools;33.0.0"
+    scanignore:
+      - node_modules/react-native-safe-area-context/android/build.gradle
+      - node_modules/lottie-react-native/android/build.gradle
+      - node_modules/react-native/sdks/hermesc/linux64-bin/hermesc
+      - node_modules/react-native-svg/android/build.gradle
+      - node_modules/react-native-biometrics/android/build.gradle
+      - node_modules/react-native-share/android/build.gradle
+      - node_modules/react-native-screens/android/build.gradle
+      - node_modules/react-native-encrypted-storage/android/build.gradle
+      - node_modules/react-native-device-info/android/build.gradle
+      - node_modules/react-native-linear-gradient/android/build.gradle
+      - node_modules/react-native-haptic-feedback/android/build.gradle
+      - node_modules/@react-native-community/netinfo/android/build.gradle
+    scandelete:
+      - node_modules
+      - android/app
+      - android/base/lib
+    build:
+      - pushd $$go$$/src
+      - ./make.bash
+      - popd
+      - export GOROOT=$$go$$
+      - export GOPATH="$HOME/go"
+      - export PATH="$GOROOT/bin:$PATH"
+      - export PATH="$GOPATH/bin:$PATH"
+      - cd ../../BBMTLib
+      - go install golang.org/x/mobile/cmd/gomobile@v0.0.0-20250408133729-978277e7eaf7
+      - ./build.sh
+    ndk: r27b
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 2.1.11
-CurrentVersionCode: 44
+CurrentVersion: 2.1.14
+CurrentVersionCode: 47
