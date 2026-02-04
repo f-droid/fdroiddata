@@ -5229,8 +5229,58 @@ Builds:
       - $$flutter$$/bin/flutter build apk --release --dart-define=cronetHttpNoPlay=true
     ndk: r25c
 
+  - versionName: 2.5.3
+    versionCode: 3034
+    commit: 38c1f0b1fd5512a72d51a9c8da8c697c1eb1c03a
+    subdir: mobile
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y gcc-multilib libc-dev make
+    output: build/app/outputs/flutter-apk/*.apk
+    srclibs:
+      - flutter@stable
+      - rustup@1.25.2
+    rm:
+      - design
+      - docker
+      - machine-learning
+      - mobile/ios
+      - server
+      - web
+    prebuild:
+      - sed -i -e 's/Xmx4096M/Xmx8G/' android/gradle.properties
+      - cp .isar-cargo.lock .isar/Cargo.lock
+      - export flutterVersion=$(sed -n -E "s/.*flutter:\s([0-9.]+)/\1/p" pubspec.yaml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - sed -i -e "s/^\#f//" pubspec.yaml
+      - sed -i -e 's/^\/\/f //' android/app/build.gradle
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+      - $$flutter$$/bin/dart run easy_localization:generate -S ../i18n
+      - $$flutter$$/bin/dart run bin/generate_keys.dart
+      - sed -i -e '/play-services-cronet/d' $PUB_CACHE/hosted/pub.dev/cronet_http-*/android/build.gradle
+      - cd $PUB_CACHE/hosted/pub.dev/geolocator_android-*/android
+      - sed -i -e '/gms/d' build.gradle
+      - cd src/main/java/com/baseflow/geolocator/location
+      - rm FusedLocationClient.java
+      - sed -i -e '/if (forceAndroidLocationManager) {/,/^  }/c return new LocationManagerClient(context,
+        locationOptions);}' -e '/isGooglePlayServicesAvailable/,/^  }/d' -e '/gms/d'
+        GeolocationManager.java
+    scandelete:
+      - mobile/.pub-cache
+    build:
+      - $$rustup$$/rustup-init.sh -y
+      - source $HOME/.cargo/env
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - bash ./scripts/fdroid_build_isar.sh
+      - $$flutter$$/bin/flutter build apk --release --dart-define=cronetHttpNoPlay=true
+    ndk: r25c
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: mobile/pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 2.5.2
-CurrentVersionCode: 3033
+CurrentVersion: 2.5.3
+CurrentVersionCode: 3034
