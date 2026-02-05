@@ -3823,8 +3823,36 @@ Builds:
       - $$flutter$$/bin/flutter build apk --flavor nightly
     ndk: r28c
 
+  - versionName: 2.5.0-beta.1
+    versionCode: 166
+    commit: 29b9aacfc62f885e6298a9142a34d5e7a8770423
+    subdir: app
+    output: build/app/outputs/flutter-apk/app-nightly-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - app/ios
+      - app/linux
+      - app/macos
+      - app/web
+      - app/windows
+    prebuild:
+      - sed -i -e '/signingConfig =/,+4d' android/app/build.gradle.kts
+      - flutterVersion=$(sed -n -E "s/^  flutter:\ (.*)/\1/p" pubspec.yaml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+    scandelete:
+      - app/.pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --flavor nightly
+    ndk: r28c
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v.+$
 UpdateCheckData: app/pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 2.4.3
-CurrentVersionCode: 165
+CurrentVersion: 2.5.0-beta.1
+CurrentVersionCode: 166
