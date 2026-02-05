@@ -234,7 +234,30 @@ Builds:
       - export PUB_CACHE=$(pwd)/.pub-cache
       - PATH=$$flutter$$/bin/:$PATH python3 deploy_web_app.py
 
+  - versionName: 7.2.0
+    versionCode: 37
+    commit: f189368396c36730bf162fdabd37f81afacc4c21
+    subdir: app
+    gradle:
+      - yes
+    srclibs:
+      - flutter@stable
+    prebuild:
+      - flutterVersion=$(sed -n -E "s/.*flutter-version:\ '(.*)'/\1/p" ../.github/workflows/release-draft.yml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - cd ../sensors_dashboard
+      - export PUB_CACHE=$(pwd)/../.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+    scandelete:
+      - .pub-cache
+    build:
+      - cd ..
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - PATH=$$flutter$$/bin/:$PATH python3 deploy_web_app.py
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 7.1.0
-CurrentVersionCode: 36
+CurrentVersion: 7.2.0
+CurrentVersionCode: 37
