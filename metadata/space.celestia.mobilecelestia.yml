@@ -1287,6 +1287,46 @@ Builds:
       - bash prepare_icu.sh
       - bash build_android.sh $(pwd) $$SDK$$/ndk/*
 
+  - versionName: 1.9.8
+    versionCode: 687
+    commit: 414ab8cbba93d50708b29ea1942bdaa5adc6578d
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install cmake tcsh gcc-multilib g++-multilib gettext gperf make meson
+        ncompress wget xz-utils imagemagick
+    gradle:
+      - unofficial
+    srclibs:
+      - Celestia@1_9_7_rc1
+      - CelestiaContent@9cdd5d71ae696fa9803f33e512e918bd9799e49c
+      - CelestiaLocalization@a93bcf2e40561136e2d9d66a54bff5f5336ae723
+      - celestia-apple-android-dependencies@1.0.36
+    prebuild:
+      - ln -s $$Celestia$$ ../..
+      - ln -s $$CelestiaContent$$ ../..
+      - ln -s $$CelestiaLocalization$$ ../..
+      - mv $$celestia-apple-android-dependencies$$ ../dependencies
+      - cd ../dependencies
+      - sed -i -e 's/wget/wget -q/' download.sh build_android.sh
+      - bash download.sh
+      - mkdir targz tarxz tgz
+      - for i in *.tar.gz; do tar -xzf $i -C targz; done
+      - for i in *.tar.xz; do tar -xJf $i -C tarxz; done
+      - for i in *.tgz; do tar -xzf $i -C tgz; done
+      - sdkmanager 'cmake;4.1.2'
+    scandelete:
+      - dependencies
+    build:
+      - bash downsize_textures.sh
+      - bash run_gperf.sh $$Celestia$$
+      - cd ../dependencies
+      - for i in $(ls targz); do tar -czf $i.tar.gz -C targz $i; done
+      - for i in $(ls tarxz); do tar -cJf $i.tar.xz -C tarxz $i; done
+      - for i in $(ls tgz); do tar -czf $i.tgz -C tgz $i; done
+      - bash prepare_icu.sh
+      - bash build_android.sh $(pwd) $$SDK$$/ndk/*
+
 MaintainerNotes: |-
   Celestia for android requires 4 more repositories to build:
     - Celestia;
@@ -1297,23 +1337,7 @@ MaintainerNotes: |-
   Commit hashes for these repositories are located upstream in 'versions.txt'
   file. We parse this file to get the correct hashes for dependencies.
 
-  During the prebuild they are temporarily moved into AndroidCelestia directory
-  to allow f-droid scanner to scan it. Third party dependencies are downloaded
-  with './download.sh' during prebuilt stage, however they are compressed
-  and only unpacked during the build stage with './prepare_icu.sh' and './build_android.sh'
-  scripts. Because of that, we unpack these archives during the prebuild stage
-  to allow F-Droid scanner to scan them, and then pack it back so build scripts
-  can process them as expected.
-
-  During the build stage, we move previously cloned repositories in their expected
-  locations. Third party dependencies are also built and moved to AndroidCelestia
-  directory.
-
-  F-Droid scanner detects various binaries in third party libraries, however
-  these are various test data and other files not needed for actual compilation.
-  They can be safely scandeleted.
-
 AutoUpdateMode: None
 UpdateCheckMode: Tags
-CurrentVersion: 1.9.7
-CurrentVersionCode: 682
+CurrentVersion: 1.9.8
+CurrentVersionCode: 687
