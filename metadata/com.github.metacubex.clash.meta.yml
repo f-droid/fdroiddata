@@ -922,8 +922,33 @@ Builds:
     gradleprops:
       - remove.suffix=true
 
+  - versionName: 2.11.22
+    versionCode: 211022
+    commit: f16f13b5f2bfd5503018f61aa019426a23a814cb
+    subdir: app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y golang-go
+    gradle:
+      - meta
+    prebuild:
+      - sed -i -e '/isEnable = true/d' -e 's|raw.githubusercontent.com/.*/releases|jitpack.io|'
+        -e '/signingConfig /d' ../build.gradle.kts
+      - sed -i -e 
+        's/com.github.kr328.golang:gradle-plugin/com.github.Kr328.golang-android-plugin:gradle-plugin/'
+        -e '/golang/s/1.0.4/cc84891461/' -e '/kaidl/s/1.15/7710f4347c/' ../gradle/libs.versions.toml
+      - sed -i -e 's/libs.quickie.bundled/"com.github.T8RIN.QuickieExtended:quickie-foss:1.14.0"/'
+        build.gradle.kts
+      - sed -i -e '/dependencies {/a coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")'
+        build.gradle.kts
+      - sed -i -e '/compileOptions {/a isCoreLibraryDesugaringEnabled = isApp' ../build.gradle.kts
+    ndk: r27c
+    gradleprops:
+      - remove.suffix=true
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v[\d.]+$
 UpdateCheckData: build.gradle.kts|versionCode = (\d+)|.|versionName = "(.+)"
-CurrentVersion: 2.11.21
-CurrentVersionCode: 211021
+CurrentVersion: 2.11.22
+CurrentVersionCode: 211022
