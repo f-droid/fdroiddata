@@ -270,8 +270,45 @@ Builds:
       - $$flutter$$/bin/dart run build_runner build --delete-conflicting-outputs
       - $$flutter$$/bin/flutter build apk --release --dart-define=isFdroid=true
 
+  - versionName: 1.12.0
+    versionCode: 6313
+    commit: 341f3ff3dd530f6289f207c1819f0028b0231748
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+      - linux
+      - macos
+      - web
+      - windows
+      - lib/service/iap
+      - lib/page/iap_page.dart
+      - lib/providers/iap.dart
+      - lib/models/iap_state.dart
+    prebuild:
+      - sed -i -e '/in_app_purchase/d' pubspec.yaml
+      - sed -i -e '/in_app_purchase/,/version:/d' pubspec.lock
+      - sed -i -z -E -e 's/\n( +)if \(EnvVar\.enableInAppPurchase\) \{(\n(\1 +[^\n]*|\1|))*\n\1\}//'
+        -e 's/\n( +)if \(EnvVar\.enableInAppPurchase\)\n\1 +[A-Z][a-zA-Z]*\((\n(\1
+        +[^\n]*|\1|))*\n\1 +\),//' -e 's/\nimport [^\n]*iap[^\n]*//g' lib/page/home_page/settings_page.dart
+        lib/page/home_page.dart lib/service/book.dart lib/page/settings_page/sync.dart
+      - flutterVersion=$(sed -n -E "s/^\s*FLUTTER_VERSION=(.*)/\1/p" .github/workflows/setup.yaml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+      - $$flutter$$/bin/flutter gen-l10n
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/dart run build_runner build --delete-conflicting-outputs
+      - $$flutter$$/bin/flutter build apk --release --dart-define=isFdroid=true
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v[\d.]+$
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 1.11.0
-CurrentVersionCode: 6306
+CurrentVersion: 1.12.0
+CurrentVersionCode: 6313
