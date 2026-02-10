@@ -542,6 +542,94 @@ Builds:
       - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
         --replace unaligned.apk $$OUT$$
 
+  - versionName: 1.4.4
+    versionCode: 142
+    commit: 4370495f2c2040b9680030b0b7ea5efb4a4f6f60
+    sudo:
+      - mkdir -p /home/runner/work/my_quran
+      - chown -R vagrant /home/runner
+    output: build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
+    binary: 
+      https://github.com/dmouayad/my_quran/releases/download/v%v/MyQuran-v%v-armeabi-v7a-%c-release.apk
+    srclibs:
+      - flutter@stable
+      - reproducible-apk-tools@v0.3.0
+    rm:
+      - web
+      - windows
+    prebuild:
+      - export repo=/home/runner/work/my_quran/my_quran
+      - cd ..
+      - mv com.dmouayad.my_quran $repo
+      - pushd $repo
+      - flutterVersion=$(cat .flutter-version)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - popd
+      - mv $repo com.dmouayad.my_quran
+    scanignore:
+      - .pub-cache
+    build:
+      - export repo=/home/runner/work/my_quran/my_quran
+      - cd ..
+      - mv com.dmouayad.my_quran $repo
+      - pushd $repo
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform="android-arm"
+      - popd
+      - mv $repo com.dmouayad.my_quran
+    postbuild:
+      - mv $$OUT$$ unaligned.apk
+      - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
+        --replace unaligned.apk $$OUT$$
+
+  - versionName: 1.4.4
+    versionCode: 143
+    commit: 4370495f2c2040b9680030b0b7ea5efb4a4f6f60
+    sudo:
+      - mkdir -p /home/runner/work/my_quran
+      - chown -R vagrant /home/runner
+    output: build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+    binary: 
+      https://github.com/dmouayad/my_quran/releases/download/v%v/MyQuran-v%v-arm64-v8a-%c-release.apk
+    srclibs:
+      - flutter@stable
+      - reproducible-apk-tools@v0.3.0
+    rm:
+      - web
+      - windows
+    prebuild:
+      - export repo=/home/runner/work/my_quran/my_quran
+      - cd ..
+      - mv com.dmouayad.my_quran $repo
+      - pushd $repo
+      - flutterVersion=$(cat .flutter-version)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - popd
+      - mv $repo com.dmouayad.my_quran
+    scanignore:
+      - .pub-cache
+    build:
+      - export repo=/home/runner/work/my_quran/my_quran
+      - cd ..
+      - mv com.dmouayad.my_quran $repo
+      - pushd $repo
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform=android-arm64
+      - popd
+      - mv $repo com.dmouayad.my_quran
+    postbuild:
+      - mv $$OUT$$ unaligned.apk
+      - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
+        --replace unaligned.apk $$OUT$$
+
 AllowedAPKSigningKeys: 669a250f8fc6cea965bd4a4c076f1eae67ef62be9d29798664f1f19c9bf71e6b
 
 AutoUpdateMode: Version
@@ -550,5 +638,5 @@ VercodeOperation:
   - '%c * 10 + 2'
   - '%c * 10 + 3'
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 1.4.3
-CurrentVersionCode: 133
+CurrentVersion: 1.4.4
+CurrentVersionCode: 143
