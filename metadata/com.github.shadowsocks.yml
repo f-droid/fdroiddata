@@ -334,9 +334,61 @@ Builds:
         x86_64-linux-android
     ndk: 27.0.12077973
 
+  - versionName: 5.3.5-nightly
+    versionCode: 5030550
+    commit: ae28fd91931fe4d2d5aab044de9ceaf9ed07ad56
+    subdir: mobile
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y make gcc libc-dev file
+    gradle:
+      - yes
+    srclibs:
+      - rustup@1.28.2
+    rm:
+      - core/src/main/jni/badvpn/lwip/test/fuzz/inputs
+      - core/src/main/jni/badvpn/lime
+      - tv
+      - mobile/src/main/java/com/github/shadowsocks/ScannerActivity.kt
+    prebuild:
+      - echo "rust.rustcCommand=$HOME/.cargo/bin/rustc" >> ../local.properties
+      - echo "rust.cargoCommand=$HOME/.cargo/bin/cargo" >> ../local.properties
+      - echo "rust.pythonCommand=/usr/bin/python3" >> ../local.properties
+      - sed -i -e '/foojay/d' ../settings.gradle.kts
+      - sed -i -e '/oss.licenses/d' -e '/firebase/d' ../build.gradle.kts
+      - sed -i -e '/oss.licenses/d' -e '/firebase/d' -e '/kotlinx.coroutines.play.services/d'
+        ../core/build.gradle.kts
+      - sed -i -e '/gms/d' -e '/firebase/d' -e '/barcode.scanning/d' -e '/camera/d'
+        build.gradle.kts
+      - pushd ../core/src/main
+      - sed -i -e '/firebase/,/>$/d' -e '/gms/,/>$/d' AndroidManifest.xml
+      - sed -i -E -e '/service_subscription_working/s/%d(.*)%d/%1$d\1%2$d/' res/*/strings.xml
+      - cd java/com/github/shadowsocks
+      - sed -i -e '/firebase/Id' Core.kt bg/BaseService.kt
+      - popd
+      - pushd src/main
+      - sed -i -z -E -e 's/<activity[^<]+ScannerActivity[^>]+>//' AndroidManifest.xml
+      - sed -i -e '/CAMERA/d' AndroidManifest.xml
+      - sed -i -e '/"scan"/,/shortcut>/d' res/xml/shortcuts.xml
+      - sed -i -z -E -e 's/<item[^<]+action_scan_qr_code[^>]+>//' res/menu/profile_manager_menu.xml
+      - cd java/com/github/shadowsocks
+      - sed -i -e '/firebase/Id' MainActivity.kt
+      - sed -i -e '/OssLicensesMenuActivity/d' AboutFragment.kt
+      - sed -i -e '/ScannerActivity/d' -e '/action_scan_qr_code/,/^\s\+}/d' ProfilesFragment.kt
+      - popd
+      - sed -i -e '/isEnable/s/true/false/' ../buildSrc/src/main/kotlin/Helpers.kt
+    build:
+      - export rustVersion=$(grep RUST_VERSION ../.circleci/config.yml | cut -d ":"
+        -f2 | head -n1)
+      - '[[ $rustVersion ]]'
+      - $$rustup$$/rustup-init.sh -y --default-toolchain $rustVersion --target armv7-linux-androideabi
+        --target aarch64-linux-android --target i686-linux-android --target x86_64-linux-android
+    ndk: r27
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: 
   buildSrc/src/main/kotlin/Helpers.kt|versionCode\s=\s(\d+)|.|versionName\s=\s"(.+)"
-CurrentVersion: 5.3.4-nightly
-CurrentVersionCode: 5030450
+CurrentVersion: 5.3.5-nightly
+CurrentVersionCode: 5030550
