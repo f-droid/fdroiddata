@@ -3108,10 +3108,53 @@ Builds:
       - popd
       - mv $repo com.gokadzev.musify.fdroid
 
+  - versionName: 9.7.6
+    versionCode: 155
+    commit: 10a5b208ff495fa8ca31b452d26c1f4d7c32af57
+    sudo:
+      - apt-get update
+      - apt-get install -y yq
+      - mkdir -p /home/runner/work/Musify/
+      - chown -R vagrant /home/runner/
+      - export CPUS_MAX=4
+      - export CPUS=$(getconf _NPROCESSORS_ONLN)
+      - for (( c=$CPUS_MAX; c<$CPUS; c++ )) ; do echo 0 > /sys/devices/system/cpu/cpu$c/online
+        ; done
+    output: build/app/outputs/flutter-apk/app-fdroid-release.apk
+    srclibs:
+      - flutter@stable
+    prebuild:
+      - cd ..
+      - export repo=/home/runner/work/Musify/Musify
+      - export HOME=/home/runner
+      - mv com.gokadzev.musify.fdroid $repo
+      - pushd $repo
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export flutterVersion="$(yq -r .environment.flutter pubspec.yaml | sed 's/\^//g')"
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+      - popd
+      - mv $repo com.gokadzev.musify.fdroid
+    scandelete:
+      - .pub-cache
+    build:
+      - cd ..
+      - export repo=/home/runner/work/Musify/Musify
+      - export HOME=/home/runner
+      - mv com.gokadzev.musify.fdroid $repo
+      - pushd $repo
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --flavor fdroid -t lib/main_fdroid.dart
+      - popd
+      - mv $repo com.gokadzev.musify.fdroid
+    ndk: 27.0.12077973
+
 AllowedAPKSigningKeys: a3fdd79dae938381b8582553b1382f96f1bc78a3b7028ffd07ec061c1842823a
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 9.7.5
-CurrentVersionCode: 154
+CurrentVersion: 9.7.6
+CurrentVersionCode: 155
