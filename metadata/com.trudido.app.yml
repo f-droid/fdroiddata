@@ -115,10 +115,35 @@ Builds:
       - $$flutter$$/bin/flutter build apk --release --flavor fdroid --dart-define=IS_FDROID=true
         --split-per-abi --target-platform android-arm64
 
+  - versionName: 1.3.1
+    versionCode: 2022
+    commit: 9cacc192c8af5dcbfd93af491d804aea179a6435
+    output: build/app/outputs/flutter-apk/app-arm64-v8a-fdroid-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - web
+    prebuild:
+      - sed -i -e '/create("release") {/,/^        }/d' -e '/val releaseSigningConfig
+        =/,/^            }/d' android/app/build.gradle.kts
+      - sed -i -e '/foojay/d' android/settings.gradle.kts
+      - export flutterVersion=$(sed -n -E 's/^\s*flutter:\s*"?([0-9.]+)"?/\1/p' pubspec.yaml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --flavor fdroid --dart-define=IS_FDROID=true
+        --split-per-abi --target-platform android-arm64
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 VercodeOperation:
   - '%c + 2000'
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 1.2.7
-CurrentVersionCode: 2020
+CurrentVersion: 1.3.1
+CurrentVersionCode: 2022
