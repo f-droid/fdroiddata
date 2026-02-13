@@ -147,11 +147,38 @@ Builds:
       - flutter build apk --release --target-platform=android-arm64
     ndk: r28c
 
+  - versionName: 2.0.12
+    versionCode: 24
+    commit: de3b86eacb5b7640f4ecaa9e647d8461e8317054
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+      - linux
+      - macos
+      - web
+      - windows
+    prebuild:
+      - flutterVersion=$(sed -n -E "s/.*flutter-version:\ '(.*)'/\1/p" .github/workflows/release.yml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PATH=$$flutter$$/bin:$PATH
+      - flutter config --no-analytics
+    build:
+      - export PATH=$$flutter$$/bin:$PATH
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - flutter pub get
+      - mkdir -p assets/db
+      - python3 tools/build_ir_db.py
+      - flutter build apk --release --no-tree-shake-icons --target-platform=android-arm64
+    ndk: r28c
+
 MaintainerNotes: |
   The IR database is generated during the build by tools/build_ir_db.py.
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 2.0.11
-CurrentVersionCode: 23
+CurrentVersion: 2.0.12
+CurrentVersionCode: 24
