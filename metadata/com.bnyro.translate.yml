@@ -216,9 +216,28 @@ Builds:
       - $$reproducible-apk-tools$$/zipalign.py --pad-like-apksigner --replace unaligned.apk
         $$OUT$$
 
+  - versionName: '17.1'
+    versionCode: 53
+    commit: edd71ff2b06b8e8ed9de229855b4d7b048ff5c97
+    subdir: app
+    sudo:
+      - export CPUS_MAX=16
+      - export CPUS=$(getconf _NPROCESSORS_ONLN)
+      - for (( c=$CPUS_MAX; c<$CPUS; c++ )) ; do echo 0 > /sys/devices/system/cpu/cpu$c/online
+        ; done
+    gradle:
+      - yes
+    binary: https://github.com/you-apps/TranslateYou/releases/download/v%v/app-release.apk
+    srclibs:
+      - reproducible-apk-tools@v0.3.0
+    postbuild:
+      - mv $$OUT$$ unaligned.apk
+      - $$reproducible-apk-tools$$/zipalign.py --pad-like-apksigner --replace unaligned.apk
+        $$OUT$$
+
 AllowedAPKSigningKeys: b3bc73b117df5dfe38130c6c2b946852ae7088557fe8e433f0d9983a6b55cc95
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: '17.0'
-CurrentVersionCode: 52
+CurrentVersion: '17.1'
+CurrentVersionCode: 53
