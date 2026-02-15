@@ -1526,6 +1526,124 @@ Builds:
       - mv $repo/tsdm_client kzs.th000.tsdm_client
     ndk: r29
 
+  - versionName: 1.14.0
+    versionCode: 542
+    commit: 272332ebc2d80d59e99f7fed4c88ef355daa177e
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install make ninja-build cmake nasm meson rustup gcc libc-dev
+      - mkdir -p /home/runner/work/tsdm_client
+      - chown -R vagrant /home/runner
+    output: build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
+    binary: 
+      https://github.com/realth000/tsdm_client/releases/download/v%v/tsdm_client-armeabi_v7a.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+      - linux
+      - macos
+      - windows
+    prebuild:
+      - FLUTTER_VERSION=$(sed -n -E 's/.*CI_FLUTTER_VERSION:\ "(.*)".*/\1/p' .github/workflows/release_build.yml)
+      - '[[ $FLUTTER_VERSION ]]'
+      - git -C $$flutter$$ reset --hard $FLUTTER_VERSION
+      - RUST_VERSION=$(sed -n -E 's/.*CI_RUST_VERSION:\ "(.*)".*/\1/p' .github/workflows/release_build.yml)
+      - '[[ $RUST_VERSION ]]'
+      - export repo=/home/runner/work/tsdm_client/tsdm_client
+      - cd ..
+      - mv kzs.th000.tsdm_client $repo
+      - pushd $repo
+      - export HOME=/home/runner
+      - rustup default $RUST_VERSION
+      - rustup target add armv7-linux-androideabi
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+      - popd
+      - mv $repo kzs.th000.tsdm_client
+    scandelete:
+      - .pub-cache
+      - packages/flutter_avif
+    build:
+      - export repo=/home/runner/work/tsdm_client/tsdm_client
+      - cd ..
+      - mv kzs.th000.tsdm_client $repo
+      - pushd $repo
+      - export HOME=/home/runner
+      - cargo install cargo-ndk@3.5.4 --locked
+      - export PATH=$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin/:$$flutter$$/bin/:$PATH
+      - pushd packages/flutter_avif/rust
+      - cargo ndk -t armeabi-v7a -o ../flutter_avif_android/android/src/main/jniLibs
+        build --release
+      - popd
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - dart Makefile.dart
+      - flutter build apk --release --target-platform="android-arm"
+      - popd
+      - mv $repo kzs.th000.tsdm_client
+    ndk: r29
+
+  - versionName: 1.14.0
+    versionCode: 543
+    commit: 272332ebc2d80d59e99f7fed4c88ef355daa177e
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install make ninja-build cmake nasm meson rustup gcc libc-dev
+      - mkdir -p /home/runner/work/tsdm_client
+      - chown -R vagrant /home/runner
+    output: build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+    binary: 
+      https://github.com/realth000/tsdm_client/releases/download/v%v/tsdm_client-arm64_v8a.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+      - linux
+      - macos
+      - windows
+    prebuild:
+      - FLUTTER_VERSION=$(sed -n -E 's/.*CI_FLUTTER_VERSION:\ "(.*)".*/\1/p' .github/workflows/release_build.yml)
+      - '[[ $FLUTTER_VERSION ]]'
+      - git -C $$flutter$$ reset --hard $FLUTTER_VERSION
+      - RUST_VERSION=$(sed -n -E 's/.*CI_RUST_VERSION:\ "(.*)".*/\1/p' .github/workflows/release_build.yml)
+      - '[[ $RUST_VERSION ]]'
+      - export repo=/home/runner/work/tsdm_client/tsdm_client
+      - cd ..
+      - mv kzs.th000.tsdm_client $repo
+      - pushd $repo
+      - export HOME=/home/runner
+      - rustup default $RUST_VERSION
+      - rustup target add aarch64-linux-android
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+      - popd
+      - mv $repo kzs.th000.tsdm_client
+    scandelete:
+      - .pub-cache
+      - packages/flutter_avif
+    build:
+      - export repo=/home/runner/work/tsdm_client/tsdm_client
+      - cd ..
+      - mv kzs.th000.tsdm_client $repo
+      - pushd $repo
+      - export HOME=/home/runner
+      - cargo install cargo-ndk@3.5.4 --locked
+      - export PATH=$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin/:$$flutter$$/bin/:$PATH
+      - pushd packages/flutter_avif/rust
+      - cargo ndk -t arm64-v8a -o ../flutter_avif_android/android/src/main/jniLibs
+        build --release
+      - popd
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - dart Makefile.dart
+      - flutter build apk --release --target-platform="android-arm64"
+      - popd
+      - mv $repo kzs.th000.tsdm_client
+    ndk: r29
+
 AllowedAPKSigningKeys: 56468a3eda42aecdf399fb5337dfb553008ad76eddf8d06c5a5e6d39e7fea1f1
 
 AutoUpdateMode: Version
@@ -1534,5 +1652,5 @@ VercodeOperation:
   - 10 * %c + 2
   - 10 * %c + 3
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 1.13.0
-CurrentVersionCode: 533
+CurrentVersion: 1.14.0
+CurrentVersionCode: 543
