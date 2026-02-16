@@ -1343,6 +1343,18 @@ Builds:
       - CelestiaLocalization@dc5f7da1f3e7dbc80e196d585b2bf30468f878a8
       - celestia-apple-android-dependencies@08f5bcfbe3d1acde2d0d6c3ac2ebd889eb3e6e0e
     prebuild:
+      - export CELESTIA_HASH=$(sed -nr 's/^Celestia=(.*)$/\1/p' ../versions.txt)
+      - '[[ $CELESTIA_HASH ]]'
+      - git -C $$Celestia$$ checkout -f $CELESTIA_HASH
+      - export CONTENT_HASH=$(sed -nr 's/^CelestiaContent=(.*)$/\1/p' ../versions.txt)
+      - '[[ $CONTENT_HASH ]]'
+      - git -C $$CelestiaContent$$ checkout -f $CONTENT_HASH
+      - export LOC_HASH=$(sed -nr 's/^CelestiaLocalization=(.*)$/\1/p' ../versions.txt)
+      - '[[ $LOC_HASH ]]'
+      - git -C $$CelestiaLocalization$$ checkout -f $LOC_HASH
+      - export DEP_HASH=$(sed -nr 's/^apple-android-dependencies=(.*)$/\1/p' ../versions.txt)
+      - '[[ $DEP_HASH ]]'
+      - git -C $$celestia-apple-android-dependencies$$ checkout -f $DEP_HASH
       - ln -s $$Celestia$$ ../..
       - ln -s $$CelestiaContent$$ ../..
       - ln -s $$CelestiaLocalization$$ ../..
@@ -1377,7 +1389,7 @@ MaintainerNotes: |-
   Commit hashes for these repositories are located upstream in 'versions.txt'
   file. We parse this file to get the correct hashes for dependencies.
 
-AutoUpdateMode: None
+AutoUpdateMode: Version
 UpdateCheckMode: Tags
 CurrentVersion: 1.9.9
 CurrentVersionCode: 693
