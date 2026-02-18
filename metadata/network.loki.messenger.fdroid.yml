@@ -2375,6 +2375,32 @@ Builds:
       - gradle publishToMavenLocal
     ndk: r27
 
+  - versionName: 1.31.2
+    versionCode: 4395
+    commit: a442a6310462ec95e02fd7242479a14a83d4eaa7
+    subdir: app
+    submodules: true
+    gradle:
+      - website
+    srclibs:
+      - libsession-util-android@b9061a4d9c521a2fb86b400191040080d70e1f64
+    prebuild:
+      - sed -i -e '/gms/d' -e 's/raw.github.com.*"/jitpack.io"/' -e 's|developer.huawei.com/repo/|jitpack.io|'
+        -e 's/oxen.rocks.*"/jitpack.io"/' -e '/repositories {/a mavenLocal()' ../build.gradle.kts
+      - sed -i -e '/google.services/d' -e '/isEnable/d' -e '/defaultConfig/a applicationIdSuffix
+        = ".fdroid"' -e '/setAlternativeAppName/s/null/"Session F-Droid"/' -e '/setAuthorityPostfix/s/""/".fdroid"/'
+        build.gradle.kts
+      - sed -i -e '/c2dm/d' src/main/AndroidManifest.xml
+      - sdkmanager 'cmake;3.22.1'
+    scandelete:
+      - build-logic/build
+    build:
+      - sed -i -e 's/1.1.0-5-gb9061a4/dev-snapshot/' ../gradle/libs.versions.toml
+      - cd $$libsession-util-android$$
+      - gradle assembleRelease
+      - gradle publishToMavenLocal
+    ndk: r27
+
 MaintainerNotes: The libsession-util-android srclib should match the version of libsessionUtilAndroidVersion
   in 
   https://github.com/session-foundation/session-android/blob/master/gradle/libs.versions.toml.
@@ -2387,5 +2413,5 @@ VercodeOperation:
   - 10*%c + 5
 UpdateCheckData: 
   app/build.gradle.kts|canonicalVersionCode\s=\s(\d+)|.|canonicalVersionName\s=\s"([\d.]+)"
-CurrentVersion: 1.31.1
-CurrentVersionCode: 4385
+CurrentVersion: 1.31.2
+CurrentVersionCode: 4395
