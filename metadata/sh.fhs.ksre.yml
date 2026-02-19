@@ -344,6 +344,80 @@ Builds:
       - gradle assembleRelease
     ndk: r27c
 
+  - versionName: 2.0.4
+    versionCode: 204
+    commit: 863b220ba82ac8c30576400b6e8fafbaa6946d84
+    timeout: 14400
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y g++ libc-dev make ccache unzip bzip2 autoconf autoconf-archive
+        automake cmake ninja-build libtool-bin nasm clang-18 lld-18 llvm-18 python3-venv
+        python3-dev
+      - apt-get install -y libgmp-dev libmpfr-dev libmpc-dev libssl-dev libbz2-dev
+        liblzma-dev bc xz-utils
+      - apt-get install -y libavcodec-dev libavformat-dev libswresample-dev libswscale-dev
+        libfreetype6-dev libfribidi-dev libsdl2-dev libsdl2-image-dev libsdl2-gfx-dev
+        libsdl2-mixer-dev libsdl2-ttf-dev libjpeg-dev libharfbuzz-dev libassimp-dev
+    output: 
+      renpy-build/renpy/rapt3/project/app/build/outputs/apk/release/app-release-unsigned.apk
+    srclibs:
+      - renpy@8.5.2.26010301
+      - renpy-build@renpy-8.5.2.26010301
+    prebuild:
+      - sed -i -e 's/0.0.0-localbuild/$$VERSION$$/' game/config.rpy .android.json
+      - sed -i -e 's/, "INTERNET"//' .android.json
+      - sed -i -e '/persistent.hdisabled/s/False/True/' game/config.rpy
+      - ln -s $$renpy-build$$ .
+      - pushd renpy-build
+      - sed -i -e 's|c.var("sysroot", .*)|c.var("sysroot", "/")|' renpybuild/run.py
+      - sed -i -e '/sysroot/d' -e '/live2d/d' -e '/steam/d' tasks/__init__.py
+      - sed -i -e '/steamapi/d' tasks/pythonlib.py
+      - sed -i -e "s|^sdkmanager =.*|sdkmanager = '$(which sdkmanager)'|" rapt/buildlib/rapt/plat.py
+      - sed -i -e '/plat.gradlew/i \        sys.exit(0)' -e '/config.numeric_version
+        =/d' rapt/buildlib/rapt/build.py
+      - sed -i -e '/signingConfigs {/,/^    }/d' -e '/signingConfig /d' rapt/templates/app-build.gradle
+      - sed -i -e "s/':renpyiap',//" rapt/templates/settings.gradle
+      - pushd rapt/prototype/
+      - rm -r renpyiap
+      - sed -i '/com.google.android.play/d' renpyandroid/build.gradle
+      - sed -i -e '/play.core/d' -e '/gms/d' -e 's/implements AssetPackStateUpdateListener//'
+        -e '/AssetPackManager/d' -e '/boolean checkPack/,/^    }/d' -e '/onStateUpdate/,/^    }/d'
+        -e '/assetPackStates/d' -e '/Constants.assetPacks.length/,/^ \{8\}}/s/^ \{12\}.*//'
+        -e '/Constants.assetPacks.length/athrow new UnsupportedOperationException("Handling
+        of asset packs removed for F-Droid build.");' renpyandroid/src/main/java/org/renpy/android/PythonSDLActivity.java
+      - popd
+      - mkdir -p tmp/cross.android/
+      - ln -s $$NDK$$ tmp/cross.android/android-ndk-r29
+      - ln -s $$renpy$$ renpy
+      - sed -i -e '/live2dmodel/d' renpy/src/Setup
+      - sed -i -e 's/"rapt"/"rapt3"/g' renpy/launcher/game/android.rpy
+      - sed -i -e '/does not exist/s/raise //' renpy/launcher/game/distribute.rpy
+      - sed -i -e '/Version("main"/d' -e 's/"fix"/"main"/' renpy/renpy/versions.py
+      - popd
+      - mkdir ksre/
+      - mv android* game project.json .android.json ksre/
+    build:
+      - export ROOT=$(pwd)
+      - cd renpy-build
+      - mkdir -p tmp/venv
+      - python3 -m venv tmp/venv
+      - source tmp/venv/bin/activate
+      - pip3 install -r requirements.txt
+      - pip3 install packaging==24.2
+      - RENPY_DEPS_INSTALL=/usr:/usr/lib/x86_64-linux-gnu/ ./renpy/run.sh renpy/launcher
+        quit
+      - python3 -m renpybuild --platform linux --arch x86_64
+      - python3 -m renpybuild --platform android --arch arm64_v8a
+      - cd renpy
+      - ./renpy3.sh launcher android_build $ROOT/ksre/
+      - cd rapt3/project
+      - ln -s 
+        $ROOT/renpy-build/tmp/build/sdl2.android-arm64_v8a/SDL2-*/android-project/app/src/main/java/org/libsdl
+        renpyandroid/src/main/java/org
+      - gradle assembleRelease
+    ndk: r29
+
 MaintainerNotes: |
   1. NSFW content is disabled by default.
   3. Live2d and steam related part are remove since they are not free.
@@ -356,5 +430,5 @@ MaintainerNotes: |
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v[\d.]+$
 UpdateCheckData: .android.json|"numeric_version":\s(\d+)||v([\d.]+)
-CurrentVersion: 2.0.3
-CurrentVersionCode: 203
+CurrentVersion: 2.0.4
+CurrentVersionCode: 204
