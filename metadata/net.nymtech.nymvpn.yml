@@ -743,11 +743,41 @@ Builds:
     gradleprops:
       - buildDeps=false
 
+  - versionName: v2.9.1
+    versionCode: 29100
+    commit: 55bf618fd52a0fbb57ea4233533e1ef211c1e692
+    subdir: nym-vpn-android/app
+    sudo:
+      - apt-get update
+      - apt-get install -y make gcc libc-dev golang-go rustup
+    gradle:
+      - fdroid
+    srclibs:
+      - go@go1.24.4
+    rm:
+      - nym-vpn-apple
+      - nym-vpn-app
+    prebuild:
+      - rustup default 1.91.0
+      - rustup target add aarch64-linux-android
+    build:
+      - pushd $$go$$/src
+      - ./make.bash
+      - popd
+      - export PATH="$$go$$/bin:$PATH"
+      - cargo install cargo-ndk@4.1.2 cargo-license@0.7.0 --locked
+      - export NDK_TOOLCHAIN_DIR="$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin"
+      - export RELEASE="true"
+      - make -C ../../nym-vpn-core -f Android.mk
+    ndk: r28c
+    gradleprops:
+      - buildDeps=false
+
 AllowedAPKSigningKeys: 3c98a016aa4f14a3ba185c764ed363415cf7ff3c3d328a87ffff2ff1b140ff06
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^nym-vpn-android-v[\d.]+$
 UpdateCheckData: nym-vpn-android/buildSrc/src/main/kotlin/Constants.kt|VERSION_CODE
   = (\d+)|.|VERSION_NAME = "(v[\d.]+)"
-CurrentVersion: v2.7.0
-CurrentVersionCode: 27000
+CurrentVersion: v2.9.1
+CurrentVersionCode: 29100
