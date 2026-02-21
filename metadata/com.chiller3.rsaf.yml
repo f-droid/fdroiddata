@@ -463,10 +463,34 @@ Builds:
     build: gradle rcbridge
     ndk: r29
 
+  - versionName: '3.34'
+    versionCode: 205312
+    commit: 43572008e9fca72c73345ec5210f81aa34d52d9f
+    subdir: app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y golang-go
+    gradle:
+      - yes
+    prebuild:
+      - sdkmanager "platforms;android-35" "build-tools;35.0.0"
+      - sed -i -e 's|-target=android|-target=android/arm64|' -e 's/include(.*)/include("arm64-v8a")/'
+        build.gradle.kts
+      - sed -i -e '/bootgo/s/1.24.6/1.24.4/' ../external/go/src/make.*
+      - sed -i -e '/minBootstrap/s/1.24.6/1.24.4/' ../external/go/src/cmd/dist/buildtool.go
+    scanignore:
+      - external/go/lib/fips140/*.zip
+      - external/go/lib/time/zoneinfo.zip
+    scandelete:
+      - external/go/src
+    build: gradle rcbridge
+    ndk: r29
+
 AllowedAPKSigningKeys: b2506499bea1c5a6e658f07be6773fe486999dc124204c6522af7407503ac9f9
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: metadata/version.txt|(\d+)||v([\d.]+)
-CurrentVersion: '3.33'
-CurrentVersionCode: 205056
+CurrentVersion: '3.34'
+CurrentVersionCode: 205312
