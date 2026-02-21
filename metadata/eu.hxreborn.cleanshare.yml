@@ -52,9 +52,28 @@ Builds:
       - gradle :api:publishApiPublicationToMavenLocal -x :checks:compileKotlin
       - popd
 
+  - versionName: 2.0.0
+    versionCode: 200
+    commit: 4151d81c1ebc30b38d2dbcdc513f15997b26e4c1
+    subdir: app
+    submodules: true
+    gradle:
+      - yes
+    prebuild:
+      - sed -i -e '/maven.pkg.github.com/d' ../libxposed/{api/api,service/interface,service/service}/build.gradle.kts
+      - sed -i -e '/signingConfig = /d' build.gradle.kts
+      - sed -i '/^$/N;/^\n$/d' build.gradle.kts
+    build:
+      - pushd ../libxposed/api
+      - gradle :api:publishApiPublicationToMavenLocal -x :checks:compileKotlin
+      - popd
+      - pushd ../libxposed/service
+      - gradle :interface:publishInterfacePublicationToMavenLocal :service:publishServicePublicationToMavenLocal
+      - popd
+
 AllowedAPKSigningKeys: 32b98dc709a7ee15fae073493a1aeca5d428316cc0d8b8f878eed64ba37f3297
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 1.1.0
-CurrentVersionCode: 110
+CurrentVersion: 2.0.0
+CurrentVersionCode: 200
