@@ -153,11 +153,40 @@ Builds:
       - $$rustup$$/rustup-init.sh -y --default-toolchain $RUST_VERSION --target aarch64-linux-android
         x86_64-linux-android
 
+  - versionName: 1.8.4
+    versionCode: 184
+    commit: 868130d3e4a13af3a0e4f07b01d85c8800a2ed25
+    subdir: composeApp
+    sudo:
+      - apt-get update
+      - apt-get install rustup gcc libc-dev
+    gradle:
+      - yes
+    rm:
+      - iosApp
+    prebuild:
+      - sed -i -e '/compose-desktop-build-windows/d' -e '/foojay/d' -e '/jogamp/d'
+        ../settings.gradle.kts
+      - sed -i -e '/signConfig/d' -e '/top.kagg886.compose.installer.windows/d' -e
+        '/configureComposeWindowsInstaller {/,/^}/d' build.gradle.kts
+      - sed -i -e '/jvmToolchain/d' -e 's/androidTarget()/androidTarget() { compilerOptions
+        { jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17) } }/' -e
+        's/jvm(\(.*\))/jvm(\1) { compilations.all { compilerOptions.configure { jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+        } } }/' -e '/android {/a compileOptions { targetCompatibility = JavaVersion.VERSION_17\nsourceCompatibility
+        = JavaVersion.VERSION_17 }' -e '/androidTarget {/a compilerOptions { jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+        }' ../lib/*/build.gradle.kts build.gradle.kts
+      - echo -e '\nAPP_VERSION_NAME=v$$VERSION$$' >> ../gradle.properties
+      - gradle exportLibraryDefinitions -PaboutLibraries.exportVariant=release
+      - RUST_VERSION=$(sed -n -E 's/channel = "([0-9.]+)"/\1/p' ../rust-toolchain.toml)
+      - '[[ $RUST_VERSION ]]'
+      - rustup default $RUST_VERSION
+      - rustup target add aarch64-linux-android x86_64-linux-android
+
 AllowedAPKSigningKeys: 0d0a5b77ee74694c0b63cb663f0639785603583610683da6f0aa2e73f7ff3bbc
 
 AutoUpdateMode: Version v%v
 UpdateCheckMode: HTTP
 UpdateCheckData: https://github.com/magic-cucumber/Pixiv-MultiPlatform/releases/latest|>v[\d.]+
   - (\d+)</h1>|.|>v([\d.]+) - \d+</h1>
-CurrentVersion: 1.8.3
-CurrentVersionCode: 183
+CurrentVersion: 1.8.4
+CurrentVersionCode: 184
