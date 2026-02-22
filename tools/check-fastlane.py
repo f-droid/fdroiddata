@@ -140,6 +140,9 @@ def main():
             # fastlane in srclibs is not supported
             print(f"RepoType of {appid} is srclib, skip", file=sys.stderr)
             continue
+        elif not app.RepoType:
+            # Disabled, NoSourceSince, archived, etc
+            continue
         else:
             build_dir = Path("build") / appid
         vcs = common.getvcs(app.RepoType, app.Repo, build_dir)
