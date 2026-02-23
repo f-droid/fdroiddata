@@ -5117,8 +5117,44 @@ Builds:
       - $$flutter$$/bin/flutter build apk --flavor fdroid --release
     ndk: r28b
 
+  - versionName: 7.3.6
+    versionCode: 5537
+    commit: 571c4a70fe97dbc13767a66c88e4b45d567a1022
+    subdir: src/ui/flutter_app
+    output: build/app/outputs/flutter-apk/app-fdroid-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - src/test
+      - src/ui/flutter_app/ios
+      - src/ui/flutter_app/linux
+      - src/ui/flutter_app/macos
+      - src/ui/flutter_app/windows
+      - src/ui/flutter_app/test
+      - src/ui/qt
+      - tests
+    prebuild:
+      - export FLUTTER_VERSION=$(sed -n -E "s/.*flutter-version:\s'(.*)'/\1/p" ../../../.github/workflows/flutter.yml
+        | head -n 1)
+      - '[[ $FLUTTER_VERSION ]]'
+      - git -C $$flutter$$ checkout -f $FLUTTER_VERSION
+      - mv android/app/build.gradle_fdroid android/app/build.gradle
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export PATH=$$flutter$$/bin:$PATH
+      - cd ../../..
+      - sed -i -e '/ensure_flutter/d' -e 's/symbolic-ref --short/describe --exact-match
+        --tags/' flutter-init.sh
+      - ./flutter-init.sh
+    scandelete:
+      - src/ui/flutter_app/.pub-cache
+      - scripts
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --flavor fdroid --release
+    ndk: r28b
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v.*$
 UpdateCheckData: src/ui/flutter_app/pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 7.3.3
-CurrentVersionCode: 5519
+CurrentVersion: 7.3.6
+CurrentVersionCode: 5537
