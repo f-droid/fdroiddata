@@ -2121,9 +2121,39 @@ Builds:
       - echo 'package com.newsblur.activity;class SubscriptionActivity:NbActivity()
         {}' > activity/SubscriptionActivity.kt
 
+  - versionName: 13.12.2
+    versionCode: 257
+    commit: 4f9029b5ed76569417ffc8006ac0f6773881b74c
+    subdir: clients/android/NewsBlur/app
+    gradle:
+      - yes
+    rm:
+      - clients/android/NewsBlur/app/src/main/java/com/newsblur/service/SubscriptionSyncService.kt
+      - clients/android/NewsBlur/app/src/main/java/com/newsblur/subscription/
+    prebuild:
+      - pushd ../../../..
+      - mv clients/android/NewsBlur ..
+      - rm -r ./*
+      - mkdir -p clients/android
+      - mv ../NewsBlur clients/android
+      - popd
+      - sed -i -e '/play/d' -e '/billing/d' build.gradle.kts
+      - sed -i -z -E -e 's/<service[^>]+SubscriptionSyncService[^>]+\/>//' src/main/AndroidManifest.xml
+      - cd src/main/java/com/newsblur
+      - sed -i -z -E 's/if \(reviewInfo != null\) \{[^{]*\{[^}]*\}[^}]*\} else \{([^}]*)\}/\1/'
+        activity/FeedItemsList.kt
+      - sed -i -z -E 's/\n    private fun checkInAppReview\(\) \{([^}]*\}){3}\n    \}//'
+        activity/FeedItemsList.kt
+      - sed -i -e '/gms/d' -e '/play\.core/d' -e '/Review/d' -e '/reviewManager/d'
+        -e '/reviewInfo/d' -e '/checkInAppReview/d' activity/FeedItemsList.kt
+      - sed -i -e '/SubscriptionSyncService/d' activity/InitActivity.kt viewModel/LoginRegisterViewModel.kt
+        preference/PrefsRepo.kt
+      - echo 'package com.newsblur.activity;class SubscriptionActivity:NbActivity()
+        {}' > activity/SubscriptionActivity.kt
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: 
   clients/android/NewsBlur/app/build.gradle.kts|versionCode\s=\s(\d+)|.|versionName\s=\s"(.*)"
-CurrentVersion: 13.12.1
-CurrentVersionCode: 256
+CurrentVersion: 13.12.2
+CurrentVersionCode: 257
