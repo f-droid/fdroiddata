@@ -1,0 +1,45 @@
+Categories:
+  - System
+License: GPL-3.0-only
+AuthorName: Ephemera42
+SourceCode: https://github.com/ephemera42/TapjackingBypass
+IssueTracker: https://github.com/ephemera42/TapjackingBypass/issues
+
+AutoName: Tapjacking Bypass
+
+RepoType: git
+Repo: https://github.com/ephemera42/TapjackingBypass.git
+
+Builds:
+  - versionName: 1.0.0
+    versionCode: 1
+    commit: 278ffc56c12e3a9d1af4531771372a76f3d3a2cb
+    subdir: app
+    sudo:
+      - echo "deb http://deb.debian.org/debian sid main" > /etc/apt/sources.list.d/sid.list
+      - apt-get update
+      - apt-get install -y openjdk-25-jdk-headless
+      - update-alternatives --auto java
+      - apt-get install -y -t sid openjdk-8-jdk-headless
+    gradle:
+      - yes
+    srclibs:
+      - XposedBridge@v82
+    prebuild:
+      - sed -i -e '/foojay/d' -e '/api.xposed.info/d' ../settings.gradle.kts
+      - sed -i -e 's|libs.rovo89.xposed.api|files("$$XposedBridge$$/app/build/api/api.jar")|'
+        build.gradle.kts
+      - cd $$XposedBridge$$
+      - sed -i -e 's/1.5.0/3.3.3/' -e '/repositories {/a google()' -e 's/jcenter/mavenCentral/g'
+        build.gradle
+      - sed -i -e 's/2.10/4.10.1/' gradle/wrapper/gradle-wrapper.properties
+      - sed -i -e '/sdkSources/d' -e 's/hiddenapi.assembleRelease/":hiddenapistubs:assembleRelease"/'
+        app/build.gradle
+    build:
+      - cd $$XposedBridge$$
+      - JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 gradle :app:generateAPI
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: 1.0.0
+CurrentVersionCode: 1
