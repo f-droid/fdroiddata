@@ -101,8 +101,35 @@ Builds:
       - cd ..
       - $BUILD_TOOLS/zipalign 4 bin/resources.ap_ org.ucam.ssb22.pinyinfdroid.apk
 
+  - versionName: 2.12.64
+    versionCode: 95
+    commit: 644bf9cef2063e0f8b693271740719545141720a
+    sudo:
+      - echo "deb https://deb.debian.org/debian bookworm main" > /etc/apt/sources.list.d/bookworm.list
+      - apt-get update
+      - apt-get install -y -t bookworm openjdk-17-jdk-headless
+      - update-java-alternatives -s java-1.17.0-openjdk-amd64
+    output: org.ucam.ssb22.pinyinfdroid.apk
+    build:
+      - sdkmanager 'platforms;android-34' 'build-tools;34.0.0'
+      - PLATFORM=$$SDK$$/platforms/android-34
+      - BUILD_TOOLS=$$SDK$$/build-tools/34.0.0
+      - mkdir -p bin
+      - $BUILD_TOOLS/aapt package -0 '' -v -f -I $PLATFORM/android.jar -M AndroidManifest.xml
+        -A assets -S res -m -J gen -F bin/resources.ap_
+      - find src -type f -name '*.java' > argfile
+      - javac -source 1.8 -target 1.8 -Xlint:deprecation -classpath $PLATFORM/android.jar
+        -sourcepath 'src;gen' -d bin gen/org/ucam/ssb22/pinyinfdroid/R.java @argfile
+      - rm argfile
+      - $BUILD_TOOLS/d8 --lib $PLATFORM/android.jar --min-api 1 --output bin $(find
+        bin -type f -name '*.class')
+      - cd bin
+      - $BUILD_TOOLS/aapt add -0 '' resources.ap_ classes.dex
+      - cd ..
+      - $BUILD_TOOLS/zipalign 4 bin/resources.ap_ org.ucam.ssb22.pinyinfdroid.apk
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckName: Ignore
-CurrentVersion: 2.12.63
-CurrentVersionCode: 94
+CurrentVersion: 2.12.64
+CurrentVersionCode: 95
