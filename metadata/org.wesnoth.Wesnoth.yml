@@ -381,10 +381,64 @@ Builds:
         > ~/tmp/build.log
     ndk: r26d
 
+  - versionName: 1.19.21
+    versionCode: 1192100001
+    commit: f2e79b852db663fa3365b0eb72476dc7a1eb7ce3
+    subdir: packaging/android/app
+    submodules: true
+    sudo:
+      - echo "deb https://deb.debian.org/debian forky main" > /etc/apt/sources.list.d/forky.list
+      - apt-get update
+      - apt-get install -y -t forky meson
+      - apt-get install -y autoconf pkg-config automake make cmake scons g++ libc-dev
+        xz-utils lbzip2 wget ninja-build gperf
+    gradle:
+      - yes
+    prebuild:
+      - sed -i -e 's/include .*/include "armeabi-v7a"/' build.gradle
+      - sed -i -e 's/wget/wget -q/' ../build-android-dependencies/build-android-deps.sh
+      - echo F-Droid > ../../../data/dist
+    scandelete:
+      - data/test/scenarios/cve_tests/bytecode.bin
+      - utils/mp-server
+    build:
+      - cd ..
+      - PREFIXDIR=$(pwd)/dependencies/prefix BUILDDIR_PREFIX=$(pwd)/dependencies ANDROID_NDK_ROOT=$$NDK$$
+        ANDROID_HOME=$$SDK$$ ARCHS='armeabi-v7a' gradle buildCppDepends buildCppSource
+        > ~/tmp/build.log
+    ndk: r26d
+
+  - versionName: 1.19.21
+    versionCode: 1192100002
+    commit: f2e79b852db663fa3365b0eb72476dc7a1eb7ce3
+    subdir: packaging/android/app
+    submodules: true
+    sudo:
+      - echo "deb https://deb.debian.org/debian forky main" > /etc/apt/sources.list.d/forky.list
+      - apt-get update
+      - apt-get install -y -t forky meson
+      - apt-get install -y autoconf pkg-config automake make cmake scons g++ libc-dev
+        xz-utils lbzip2 wget ninja-build gperf
+    gradle:
+      - yes
+    prebuild:
+      - sed -i -e 's/include .*/include "arm64-v8a"/' build.gradle
+      - sed -i -e 's/wget/wget -q/' ../build-android-dependencies/build-android-deps.sh
+      - echo F-Droid > ../../../data/dist
+    scandelete:
+      - data/test/scenarios/cve_tests/bytecode.bin
+      - utils/mp-server
+    build:
+      - cd ..
+      - PREFIXDIR=$(pwd)/dependencies/prefix BUILDDIR_PREFIX=$(pwd)/dependencies ANDROID_NDK_ROOT=$$NDK$$
+        ANDROID_HOME=$$SDK$$ ARCHS='arm64-v8a' gradle buildCppDepends buildCppSource
+        > ~/tmp/build.log
+    ndk: r26d
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 VercodeOperation:
   - 1000 * %c + 1
   - 1000 * %c + 2
-CurrentVersion: 1.19.20
-CurrentVersionCode: 1192000002
+CurrentVersion: 1.19.21
+CurrentVersionCode: 1192100002
