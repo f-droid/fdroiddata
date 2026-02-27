@@ -5,17 +5,17 @@ Categories:
   - Internet
 License: AGPL-3.0-only
 AuthorName: Leander Beernaert
-SourceCode: https://github.com/LeanderBB/you-have-mail
-IssueTracker: https://github.com/LeanderBB/you-have-mail/issues
-Changelog: https://github.com/LeanderBB/you-have-mail/releases
+SourceCode: https://codeberg.org/angrypixel/you-have-mail
+IssueTracker: https://codeberg.org/angrypixel/you-have-mail/issues
+Changelog: https://codeberg.org/angrypixel/you-have-mail/releases
 
 Name: You Have Mail
 AutoName: You Have Mail
 
 RepoType: git
-Repo: https://github.com/LeanderBB/you-have-mail.git
+Repo: https://codeberg.org/angrypixel/you-have-mail.git
 Binaries: 
-  https://github.com/LeanderBB/you-have-mail/releases/download/v%v/you-have-mail-v%v.apk
+  https://codeberg.org/angrypixel/you-have-mail/releases/download/v%v/you-have-mail-v%v.apk
 
 Builds:
   - versionName: 0.7.2
@@ -463,9 +463,28 @@ Builds:
       - gradle assembleRelease
     ndk: r28c
 
+  - versionName: 0.22.1
+    versionCode: 46
+    commit: 12d4c350457a8fc38d674c447150cbca4d98cfe0
+    subdir: you-have-mail-android
+    sudo:
+      - apt-get update
+      - apt-get install -y rustup clang python-is-python3
+    output: app/build/outputs/apk/release/app-release-unsigned.apk
+    srclibs:
+      - reproducible-apk-tools@v0.3.0
+    build:
+      - rustup default 1.93.1
+      - gradle assembleRelease
+    postbuild:
+      - mv $$OUT$$ unaligned.apk
+      - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
+        --replace unaligned.apk $$OUT$$
+    ndk: r28c
+
 AllowedAPKSigningKeys: 1bb4b343aa705f49b73b3ef489c987dd2e2f684cc1b6eb49f625bcbf6c8f01ee
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 0.21.1
-CurrentVersionCode: 44
+CurrentVersion: 0.22.1
+CurrentVersionCode: 46
