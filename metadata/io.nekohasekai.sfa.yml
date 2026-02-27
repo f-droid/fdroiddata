@@ -1668,10 +1668,76 @@ Builds:
       - make lib_android
       - mv libbox.aar clients/android/app/libs
 
+  - versionName: 1.13.0
+    versionCode: 628
+    commit: 6da7e538e122b77c226ce48c1a6b4ecb61fd3fc4
+    subdir: clients/android/app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y gcc libc-dev make golang-go ninja-build file xz-utils
+      - export CPUS_MAX=16
+      - export CPUS=$(getconf _NPROCESSORS_ONLN)
+      - for (( c=$CPUS_MAX; c<$CPUS; c++ )) ; do echo 0 > /sys/devices/system/cpu/cpu$c/online
+        ; done
+      - echo "deb http://deb.debian.org/debian sid main" > /etc/apt/sources.list.d/sid.list
+      - apt-get update
+      - apt-get install -y -t sid openjdk-8-jdk-headless
+    gradle:
+      - other
+    binary: https://github.com/SagerNet/sing-box/releases/download/v%v/SFA-%v-universal.apk
+    srclibs:
+      - XposedBridge@v82
+      - cronet-go@d9ea2601b3a8bd0b2c54ec5c515cb25dfc468dab
+      - go@go1.25.0
+    prebuild:
+      - sed -i -e 's/api.xposed.info/maven.google.com/' ../settings.gradle.kts
+      - sed -i -e 's|"de.robv.android.xposed:api:82"|files("libs/api.jar")|' build.gradle.kts
+      - pushd $$XposedBridge$$
+      - sed -i -e 's/1.5.0/3.3.3/' -e '/repositories {/a google()' -e 's/jcenter/mavenCentral/g'
+        build.gradle
+      - sed -i -e 's/2.10/4.10.1/' gradle/wrapper/gradle-wrapper.properties
+      - sed -i -e '/sdkSources/d' -e 's/hiddenapi.assembleRelease/":hiddenapistubs:assembleRelease"/'
+        app/build.gradle
+      - popd
+      - sed -i -e '/java version should be openjdk 17/d' -e '/legacyTags :=/,/}, bindTarget)/d'
+        ../../../cmd/internal/build_libbox/main.go
+      - export NDK_VERSION=$(sed -n -E 's/ *ndkVersion = "([0-9.]+)"/\1/p' build.gradle.kts)
+      - sdkmanager "platforms;android-34" "build-tools;34.0.0" "ndk;$NDK_VERSION"
+      - sed -i -e '/isEnable/s/true/false/' build.gradle.kts
+      - mkdir libs
+      - git -C $$go$$ checkout -f $(sed -n -E "s/GO_VERSION=(go[0-9.]+)/\1/p" ../version.properties)
+      - export GOMODCACHE=$(pwd)/../../../.go
+      - go mod download
+    scanignore:
+      - .go
+    build:
+      - pushd $$XposedBridge$$
+      - JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 gradle :app:generateAPI
+      - popd
+      - mkdir -p libs
+      - mv $$XposedBridge$$/app/build/api/api.jar libs
+      - pushd $$go$$/src
+      - ./make.bash
+      - popd
+      - export GOPATH=$$go$$
+      - export PATH="$GOPATH/bin:$PATH"
+      - cd ../../..
+      - export GOMODCACHE=$(pwd)/.go
+      - pushd $$cronet-go$$
+      - for arch in arm arm64 386 amd64; do go run ./cmd/build-naive --target=android/$arch
+        build; go run ./cmd/build-naive --target=android/$arch package --local; diff
+        lib/android_$arch/libcronet.a $GOMODCACHE/github.com/sagernet/cronet-go/lib/android_$arch@*/libcronet.a;
+        done
+      - popd
+      - make lib_install
+      - make lib_android
+      - mv libbox.aar clients/android/app/libs
+
 AllowedAPKSigningKeys: 32250a4b5f3a6733df57a3b9ec16c38d2c7fc5f2f693a9636f8f7b3be3549641
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v[\d.]+$
 UpdateCheckData: clients/android/version.properties|VERSION_CODE=(\d+)|.|VERSION_NAME=([\d.]+)
-CurrentVersion: 1.12.22
-CurrentVersionCode: 620
+CurrentVersion: 1.13.0
+CurrentVersionCode: 628
