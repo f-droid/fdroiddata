@@ -599,10 +599,43 @@ Builds:
       - mv jna/jni/* libs
     ndk: r28c
 
+  - versionName: 6.3.1l
+    versionCode: 1116
+    commit: e2fc69affe5c6d7b67e8e83e9b8ee572ed0495f9
+    subdir: app
+    sudo:
+      - echo "deb https://deb.debian.org/debian bookworm main" > /etc/apt/sources.list.d/bookworm.list
+      - apt-get update
+      - apt-get install -y -t bookworm openjdk-17-jdk-headless
+      - update-java-alternatives -s java-1.17.0-openjdk-amd64
+      - apt-get install -y protobuf-compiler unzip gcc libc-dev rustup
+    gradle:
+      - libre
+    rm:
+      - app/src/main/java/ch/threema/app/libs
+      - app/libs/*
+    prebuild:
+      - sed -i -e '/exclusiveContent {/,/^        }/d' -e '/agconnect/d' ../build.gradle.kts
+      - rustup default $(sed -n -E 's/channel = "(.*)"/\1/p' ../domain/libthreema/rust-toolchain.toml)
+      - rustup target add armv7-linux-androideabi aarch64-linux-android i686-linux-android
+        x86_64-linux-android
+      - sed -i -e '/maven {/,+14d' -e "/commandLine(\"cargo\"/a environment(\"RUSTFLAGS\",
+        \"--remap-path-prefix=$HOME/.cargo=/rust/cargo\")" ../domain/build.gradle.kts
+      - sed -i -e '/isEnable/d' -e "s|extraCargoBuildArguments = listOf(|extraCargoBuildArguments
+        = listOf(\"--config\", \"build.rustflags = [ '--remap-path-prefix=$HOME/.cargo=/rust/cargo'
+        ]\",|" build.gradle.kts
+    build:
+      - curl -LO https://repo1.maven.org/maven2/net/java/dev/jna/jna/5.18.1/jna-5.18.1.aar
+      - echo "7f053e3ec99e14dd71259c82c1c8a02738d64a13c31226b2acc170f3060951e0  jna-5.18.1.aar"
+        | sha256sum -c -
+      - unzip jna-5.18.1.aar -d jna jni/{arm64-v8a,armeabi-v7a,x86_64,x86}/libjnidispatch.so
+      - mv jna/jni/* libs
+    ndk: r28c
+
 AllowedAPKSigningKeys: 0508b53ff102b538919c834e9e6b6afba046edf67e17ca4d1ce7a4b9c3823741
 
 AutoUpdateMode: Version +l %v
 UpdateCheckMode: Tags
 UpdateCheckData: app/build.gradle.kts|defaultVersionCode = (\d+)|.|appVersion = "([\d.]+)"
-CurrentVersion: 6.3.0
-CurrentVersionCode: 1113
+CurrentVersion: 6.3.1
+CurrentVersionCode: 1116
