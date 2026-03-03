@@ -53,8 +53,41 @@ Builds:
     scandelete:
       - node_modules
 
+  - versionName: 1.1.3
+    versionCode: 39
+    commit: 9c14bd04a91f39aec268c6ff652d7e673902a575
+    subdir: android/app
+    sudo:
+      - echo "deb https://deb.debian.org/debian forky main" > /etc/apt/sources.list.d/forky.list
+      - apt-get update
+      - apt-get install -y -t forky npm
+      - apt-get install -y python-is-python3
+    init:
+      - cd ../..
+      - npm cache clean || true
+      - npm_config_build_from_source=true npm ci
+      - rm -rf node_modules/expo-dev-client node_modules/expo-dev-menu node_modules/expo-dev-launcher
+        node_modules/@biomejs/biome || true
+    gradle:
+      - yes
+    prebuild:
+      - cd ../..
+      - printf "C\n" | ./build-android.sh n y
+      - python ./scripts/fix-for-fdroid.py
+      - sed -i -e '/artifacts/d' android/build.gradle
+    scanignore:
+      - node_modules/react-native/sdks/hermesc/linux64-bin/hermesc
+      - node_modules/expo-modules-core/android/ExpoModulesCorePlugin.gradle
+      - node_modules/expo-modules-autolinking/scripts/android/autolinking_implementation.gradle
+      - node_modules/@react-native-async-storage/async-storage/android/build.gradle
+      - node_modules/react-native-safe-area-context/android/build.gradle
+      - node_modules/react-native-conceal-crypto/android/build.gradle
+      - node_modules/react-native-svg/android/build.gradle
+    scandelete:
+      - node_modules
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags .*-f-droid
 UpdateCheckData: .env|ANDROID_VERSION_CODE=(\d+)|.|APP_VERSION=([^\s]+)
-CurrentVersion: 1.1.1
-CurrentVersionCode: 37
+CurrentVersion: 1.1.3
+CurrentVersionCode: 39
