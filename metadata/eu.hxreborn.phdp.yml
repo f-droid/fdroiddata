@@ -1,0 +1,41 @@
+Categories:
+  - System
+License: GPL-3.0-only
+AuthorName: hxreborn
+SourceCode: https://github.com/hxreborn/punch-hole-download-progress
+IssueTracker: https://github.com/hxreborn/punch-hole-download-progress/issues/new/choose
+
+AutoName: Punch-hole Download Progress
+
+RepoType: git
+Repo: https://github.com/hxreborn/punch-hole-download-progress.git
+Binaries: 
+  https://github.com/hxreborn/punch-hole-download-progress/releases/download/v%v/phdp-v%v-release.apk
+
+Builds:
+  - versionName: 1.9.0
+    versionCode: 10207
+    commit: 17ae3849df69eeef1428c0438bf54bb77e07add7
+    subdir: app
+    submodules: true
+    gradle:
+      - yes
+    prebuild:
+      - sed -i -e '/maven.pkg.github.com/d' ../libxposed/{api/api,service/interface,service/service}/build.gradle.kts
+      - sed -i -e '/signingConfig = /d' build.gradle.kts
+      - sed -i '/^$/N;/^\n$/d' build.gradle.kts
+    build:
+      - pushd ../libxposed/api
+      - gradle :api:publishApiPublicationToMavenLocal -x :checks:compileKotlin
+      - popd
+      - pushd ../libxposed/service
+      - gradle :interface:publishInterfacePublicationToMavenLocal :service:publishServicePublicationToMavenLocal
+      - popd
+
+AllowedAPKSigningKeys: 32b98dc709a7ee15fae073493a1aeca5d428316cc0d8b8f878eed64ba37f3297
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: gradle.properties|version\.code=(\d+)|gradle.properties|version\.name=(.+)
+CurrentVersion: 1.9.0
+CurrentVersionCode: 10207
