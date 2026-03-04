@@ -1,0 +1,62 @@
+Categories:
+  - Internet
+  - Multimedia
+License: MIT
+SourceCode: https://github.com/julius-d/ueberboese-app
+IssueTracker: https://github.com/julius-d/ueberboese-app/issues
+
+AutoName: Überböse
+
+RepoType: git
+Repo: https://github.com/julius-d/ueberboese-app
+Binaries: 
+  https://github.com/julius-d/ueberboese-app/releases/download/%v/ueberboese-app-%v.apk
+
+Builds:
+  - versionName: 0.25.0
+    versionCode: 27
+    commit: ad426d949516b666f0b9b73808316985a17ecf22
+    sudo:
+      - mkdir -p /home/runner/work/ueberboese-app
+      - chown -R vagrant /home/runner
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - macos
+      - linux
+      - web
+    prebuild:
+      - flutterVersion=$(sed -n -E "s/^[[:space:]]+flutter:[[:space:]]*([0-9.]+)/\1/p"
+        pubspec.yaml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export repo=/home/runner/work/ueberboese-app/ueberboese-app
+      - cd ..
+      - mv io.github.juliusd.ueberboese.app $repo
+      - pushd $repo
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+      - $$flutter$$/bin/dart run build_runner build --delete-conflicting-outputs
+      - popd
+      - mv $repo io.github.juliusd.ueberboese.app
+    scandelete:
+      - .pub-cache
+    build:
+      - export repo=/home/runner/work/ueberboese-app/ueberboese-app
+      - cd ..
+      - mv io.github.juliusd.ueberboese.app $repo
+      - pushd $repo
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release
+      - popd
+      - mv $repo io.github.juliusd.ueberboese.app
+
+AllowedAPKSigningKeys: 77bdb2207e61d74d082362e401fb25dbfd5cba2753b57d03f9f56edb27634a90
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 0.25.0
+CurrentVersionCode: 27
