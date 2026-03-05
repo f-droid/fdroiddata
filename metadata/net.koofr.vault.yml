@@ -115,7 +115,34 @@ Builds:
       - gradle bundleRelease
     ndk: r28c
 
+  - versionName: 0.1.24
+    versionCode: 124002
+    commit: fdc90bae9adc53b5d6022131bac4ef04a66a1685
+    subdir: vault-android/app
+    sudo:
+      - apt-get update
+      - apt-get install -y rustup gcc libc-dev
+    gradle:
+      - yes
+    srclibs:
+      - PhotoView@565505d5cb84f5977771b5d2ccb7726338e77224
+    rm:
+      - vault-android/app/libs
+    prebuild:
+      - sed '/sdk.dir/d' ../local.properties.example > ../local.properties
+      - sed -i -e '/maven {/,+2d' ../settings.gradle.kts
+      - sed -i -e '/photoview/d' build.gradle.kts
+    build:
+      - cp -R $$PhotoView$$/photoview/src/main/java/com src/main/java
+      - export GRADLE_CARGO_PROFILE=release
+      - rustup default 1.89.0
+      - rustup target add aarch64-linux-android armv7-linux-androideabi x86_64-linux-android
+        i686-linux-android
+      - gradle generateUniFFIBindings
+      - gradle cargoBuild
+    ndk: r28c
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 0.1.22
-CurrentVersionCode: 122001
+CurrentVersion: 0.1.24
+CurrentVersionCode: 124002
