@@ -612,7 +612,36 @@ Builds:
       - popd
     ndk: r23c
 
+  - versionName: 2.59.0
+    versionCode: 2590000
+    commit: 5f99773c724e3ceb68847f755340093bed3bb0fe
+    subdir: app
+    submodules: true
+    sudo:
+      - echo "deb https://deb.debian.org/debian bookworm main" > /etc/apt/sources.list.d/bookworm.list
+      - apt-get update
+      - apt-get install -y bzip2 cmake g++ make
+      - apt-get install -y -t bookworm openjdk-17-jdk-headless
+      - update-java-alternatives -s java-1.17.0-openjdk-amd64
+    gradle:
+      - yes
+    rm:
+      - binary/jni/openssl/fuzz/corpora
+      - binary/jni/openssl/cloudflare-quiche/quiche/deps/boringssl/src/fuzz
+      - binary/jni/openssl/cloudflare-quiche/fuzz
+    prebuild:
+      - sed -i -e 's/enable true/enable false/' build.gradle
+      - echo -e "\norg.gradle.jvmargs=-Xmx4096m" >> ../gradle.properties
+      - sed -i -e 's|boostorg.jfrog.io/artifactory/main|archives.boost.io|' ../binary/jni/boost/build-android.sh
+    scandelete:
+      - binary/jni/openssl
+    build:
+      - pushd ../binary/jni
+      - ./build.sh -d
+      - popd
+    ndk: r23c
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 2.58.0
-CurrentVersionCode: 2580000
+CurrentVersion: 2.59.0
+CurrentVersionCode: 2590000
