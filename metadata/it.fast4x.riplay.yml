@@ -40,9 +40,33 @@ Builds:
       - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --replace unaligned.apk
         $$OUT$$
 
+  - versionName: 0.7.70
+    versionCode: 70
+    commit: 39b23b23a8f052bbe6bca7f9d65664060b0fd5bf
+    subdir: composeApp
+    sudo:
+      - export CPUS_MAX=6
+      - export CPUS=$(getconf _NPROCESSORS_ONLN)
+      - for (( c=$CPUS_MAX; c<$CPUS; c++ )) ; do echo 0 > /sys/devices/system/cpu/cpu$c/online
+        ; done
+    gradle:
+      - foss
+    binary: 
+      https://github.com/fast4x/RiPlay/releases/download/v%v/RiPlay-foss-release-%v.apk
+    srclibs:
+      - reproducible-apk-tools@v0.3.0
+    rm:
+      - bundletool.jar
+    prebuild: sed -i -e '/jetbrains.space/d' -e '/androidx.dev/d' ../settings.gradle.kts
+      build.gradle.kts
+    postbuild:
+      - mv $$OUT$$ unaligned.apk
+      - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --replace unaligned.apk
+        $$OUT$$
+
 AllowedAPKSigningKeys: 9762e9ab732b0a1cf3c721168450533c8b1905ae1c9e658f488abb84debef2fb
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 0.7.69
-CurrentVersionCode: 69
+CurrentVersion: 0.7.70
+CurrentVersionCode: 70
