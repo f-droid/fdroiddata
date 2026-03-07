@@ -594,9 +594,51 @@ Builds:
       - ./build-and-distribute.sh --android
     ndk: 28.0.12433566
 
+  - versionName: 0.27.1
+    versionCode: 2701900
+    commit: e943f0a8515503789e70a24462e44aee054d094d
+    subdir: apps/mobile-app/android/app/
+    sudo:
+      - sysctl fs.inotify.max_user_watches=524288 || true
+      - apt-get update
+      - apt-get install -y gcc libc-dev npm rustup
+    init:
+      - cd ../..
+      - sed -i -e '/signingConfig /d' android/app/build.gradle
+      - npm install --production --build-from-source
+    gradle:
+      - yes
+    prebuild: sed -i -e 's/Xmx2048m/Xmx4g/' ../gradle.properties
+    scanignore:
+      - apps/mobile-app/android/build.gradle
+      - apps/mobile-app/node_modules/react-native/sdks/hermesc/linux64-bin/hermesc
+      - apps/mobile-app/node_modules/expo-modules-autolinking/scripts/android/autolinking_implementation.gradle
+      - apps/mobile-app/node_modules/expo-modules-core/android/ExpoModulesCorePlugin.gradle
+      - apps/mobile-app/node_modules/react-native-reanimated/android/build.gradle
+      - apps/mobile-app/node_modules/@react-native-async-storage/async-storage/android/build.gradle
+      - apps/mobile-app/node_modules/react-native-safe-area-context/android/build.gradle
+      - apps/mobile-app/node_modules/react-native-screens/android/build.gradle
+      - apps/mobile-app/node_modules/react-native-edge-to-edge/android/build.gradle
+      - apps/mobile-app/node_modules/react-native-webview/android/build.gradle
+      - apps/mobile-app/node_modules/react-native-aes-gcm-crypto/android/build.gradle
+      - apps/mobile-app/node_modules/react-native-context-menu-view/android/build.gradle
+      - apps/mobile-app/node_modules/react-native-get-random-values/android/build.gradle
+      - apps/mobile-app/node_modules/react-native-svg/android/build.gradle
+    scandelete:
+      - apps/mobile-app/node_modules/
+    build:
+      - cd ../..
+      - rustup default 1.93.0
+      - rustup target add aarch64-linux-android armv7-linux-androideabi x86_64-linux-android
+      - export ANDROID_NDK_HOME=${ANDROID_NDK}
+      - cd ../../core
+      - chmod +x build-and-distribute.sh
+      - ./build-and-distribute.sh --android
+    ndk: 28.0.12433566
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: 
   apps/mobile-app/android/app/build.gradle|versionCode\s+(\d+)|.|versionName\s+"(.+)"
-CurrentVersion: 0.27.0
-CurrentVersionCode: 2700901
+CurrentVersion: 0.27.1
+CurrentVersionCode: 2701900
