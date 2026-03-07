@@ -3181,6 +3181,50 @@ Builds:
         ./prepare_gdk_clang.sh "armeabi-v7a arm64-v8a"
     ndk: r26b
 
+  - versionName: 5.2.0
+    versionCode: 22000520
+    commit: aaef6d2b3529951374c16a1cb873845e51221ed8
+    subdir: androidApp
+    sudo:
+      - apt-get update
+      - apt-get install -y automake clang cmake jq libffi-dev libtool make pkg-config
+        swig virtualenv xz-utils rustup
+    gradle:
+      - production
+      - FDroid
+    srclibs:
+      - gdk@release_0.74.2
+    rm:
+      - gradle/verification-metadata.xml
+      - gms
+    prebuild:
+      - sed -i -e '/packages.jetbrains.team/d' ../settings.gradle.kts
+      - sed -i -e '/:gms/d' ../settings.gradle.kts build.gradle.kts
+      - sed -i -e '/mvn.breez/d;/zendesk/d;/jetbrains/d;/googleServices/d' ../build.gradle.kts
+      - sed -i -e '/libs.breez.sdk.kmp/d' -e '/jna/s|//||g' ../data/build.gradle.kts
+      - sed -i -e '/signingConfigs {/,+8d' -e '/signingConfigs.getByName/,+3d' -e
+        '/versionNameSuffix/d' -e '/googleServices/d' build.gradle.kts
+      - sed -i -e '/jvm/s/17/21/' ../gradle/libs.versions.toml
+      - cd ../gdk
+      - gdkVersion=$(sed -n -E 's/.*TAGNAME="(.*)"/\1/p' prepare_gdk_clang.sh)
+      - '[[ $gdkVersion ]]'
+      - git -C $$gdk$$ checkout $gdkVersion
+      - mv $$gdk$$ .
+      - rustVersion=$(sed -n -E 's/.*RUST_VERSION=(.*)/\1/p' gdk/docker/android/Dockerfile)
+      - rustup default $rustVersion
+      - rustup target add aarch64-linux-android armv7-linux-androideabi
+      - sed -i -e 's|boostorg.jfrog.io/artifactory/main|archives.boost.io|' gdk/tools/builddeps.sh
+      - sed -i -e '1a set -x' -e '/requirements/a pip install setuptools' prepare_gdk_clang.sh
+    scanignore:
+      - gdk/gdk/subprojects/gdk_rust/libgcc/libgcc.a
+    scandelete:
+      - gdk/gdk/subprojects/gdk_rust/gdk_electrum/test_data/store
+    build:
+      - cd ../gdk
+      - JAVA_HOME=$(readlink -f /usr/bin/javac | sed "s:/bin/javac::") PATH=$HOME/.local/bin:$PATH
+        ./prepare_gdk_clang.sh "armeabi-v7a arm64-v8a"
+    ndk: r26b
+
 MaintainerNotes: |-
   Watch prepare_gdk_clang.sh for changes on new builds.
 
@@ -3197,5 +3241,5 @@ UpdateCheckMode: Tags
 VercodeOperation:
   - 22000000 + %c
 UpdateCheckName: Ignore
-CurrentVersion: 5.1.4
-CurrentVersionCode: 22000514
+CurrentVersion: 5.2.0
+CurrentVersionCode: 22000520
