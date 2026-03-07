@@ -411,9 +411,34 @@ Builds:
     gradleprops:
       - isFDroidRelease=true
 
+  - versionName: 4.21.0
+    versionCode: 100179391
+    commit: 8289353052648fc6d437e709fb46bd9a987bff82
+    timeout: 14400
+    subdir: app
+    submodules: true
+    sudo:
+      - echo "deb https://deb.debian.org/debian bookworm main" > /etc/apt/sources.list.d/bookworm.list
+      - apt-get update
+      - apt-get install -y -t bookworm openjdk-17-jdk-headless
+      - update-java-alternatives -s java-1.17.0-openjdk-amd64
+    gradle:
+      - fdroid
+    prebuild:
+      - cd ..
+      - sed -i -e '/googleGms/d' build.gradle.kts
+      - 'printf "VersionCode: $$VERCODE$$\nVersionName: $$VERSION$$\n" > app/version.txt'
+      - sed -i -e '/foojay/d' kalium/settings.gradle.kts
+      - sed -i -e 's/signingConfigs.getByName("debug")/null/' buildSrc/src/main/kotlin/scripts/variants.gradle.kts
+    scandelete:
+      - build-logic/plugins/build
+    ndk: r27b
+    gradleprops:
+      - isFDroidRelease=true
+
 AutoUpdateMode: Version v%v
 UpdateCheckMode: HTTP
 UpdateCheckData: 
   https://github.com/wireapp/wire-android/releases/latest/download/version.txt|VersionCode:\s(\d+)|.|VersionName:\s(.*)
-CurrentVersion: 4.18.0
-CurrentVersionCode: 100163889
+CurrentVersion: 4.21.0
+CurrentVersionCode: 100179391
