@@ -23,9 +23,27 @@ Builds:
     gradle:
       - yes
 
+  - versionName: '3.1'
+    versionCode: 15
+    commit: 76a1b1ff7058c047e4b949c489e87e7851ce460a
+    subdir: app
+    sudo:
+      - echo "deb https://deb.debian.org/debian bookworm main" > /etc/apt/sources.list.d/bookworm.list
+      - apt-get update
+      - apt-get install -y -t bookworm openjdk-17-jdk-headless
+      - update-java-alternatives -s java-1.17.0-openjdk-amd64
+    gradle:
+      - yes
+    srclibs:
+      - reproducible-apk-tools@v0.3.0
+    postbuild:
+      - mv $$OUT$$ unaligned.apk
+      - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
+        --replace unaligned.apk $$OUT$$
+
 AllowedAPKSigningKeys: 6103bcb5e2cac688f1454cf5e64c9227885cb8534b726655ce394c45ad17791d
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: '1.4'
-CurrentVersionCode: 11
+CurrentVersion: '3.1'
+CurrentVersionCode: 15
