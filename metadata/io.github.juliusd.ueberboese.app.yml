@@ -53,10 +53,50 @@ Builds:
       - popd
       - mv $repo io.github.juliusd.ueberboese.app
 
+  - versionName: 0.26.0
+    versionCode: 28
+    commit: 584a87710e292a7cf18da3ccfe83af1bd5c41c0b
+    sudo:
+      - mkdir -p /home/runner/work/ueberboese-app
+      - chown -R vagrant /home/runner
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - macos
+      - linux
+      - web
+    prebuild:
+      - flutterVersion=$(sed -n -E "s/^[[:space:]]+flutter:[[:space:]]*([0-9.]+)/\1/p"
+        pubspec.yaml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export repo=/home/runner/work/ueberboese-app/ueberboese-app
+      - cd ..
+      - mv io.github.juliusd.ueberboese.app $repo
+      - pushd $repo
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+      - $$flutter$$/bin/dart run build_runner build --delete-conflicting-outputs
+      - popd
+      - mv $repo io.github.juliusd.ueberboese.app
+    scandelete:
+      - .pub-cache
+    build:
+      - export repo=/home/runner/work/ueberboese-app/ueberboese-app
+      - cd ..
+      - mv io.github.juliusd.ueberboese.app $repo
+      - pushd $repo
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release
+      - popd
+      - mv $repo io.github.juliusd.ueberboese.app
+
 AllowedAPKSigningKeys: 77bdb2207e61d74d082362e401fb25dbfd5cba2753b57d03f9f56edb27634a90
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 0.25.0
-CurrentVersionCode: 27
+CurrentVersion: 0.26.0
+CurrentVersionCode: 28
