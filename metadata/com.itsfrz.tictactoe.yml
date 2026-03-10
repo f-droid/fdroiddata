@@ -1,0 +1,45 @@
+Categories:
+  - Games
+License: MIT
+AuthorName: Faraz Sheikh
+AuthorEmail: faraz.ar.sheikh@gmail.com
+AuthorWebSite: https://farazsheikh.web.app/
+SourceCode: https://github.com/Itsfrz/TicTacToe
+IssueTracker: https://github.com/Itsfrz/TicTacToe/issues
+Changelog: https://github.com/Itsfrz/TicTacToe/releases
+
+AutoName: TicTacToe
+
+RepoType: git
+Repo: https://github.com/Itsfrz/TicTacToe
+Binaries: 
+  https://github.com/Itsfrz/TicTacToe/releases/download/v%v/com.itsfrz.tictactoe_%c.binary.apk
+
+Builds:
+  - versionName: 1.0.0
+    versionCode: 1
+    commit: 75fa316b4a74331272d61c662863d8b0307ebc47
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y zip
+    gradle:
+      - yes
+    srclibs:
+      - reproducible-apk-tools@dc069dc4cddf6ab5162f3ed3be1bc8a14711273f
+    prebuild:
+      - echo "kotlin.compiler.execution.strategy=in-process" >> ../gradle.properties
+      - echo "org.gradle.java.home=/usr/lib/jvm/java-21-openjdk-amd64" >> ../gradle.properties
+      - echo "org.gradle.workers.max=1" >> ../gradle.properties
+    postbuild:
+      - mv $$OUT$$ unaligned.apk
+      - zip -d unaligned.apk 'META-INF/*'
+      - python3 $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
+        --replace unaligned.apk $$OUT$$
+
+AllowedAPKSigningKeys: 9ee96f1984a512738a043b5afd5d5b8043b863697e33ecee126a76c107f1fae0
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: 1.0.0
+CurrentVersionCode: 1
