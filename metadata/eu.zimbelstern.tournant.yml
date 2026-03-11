@@ -302,9 +302,31 @@ Builds:
       - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
         --replace unaligned.apk $$OUT$$
 
+  - versionName: 2.11.0
+    versionCode: 40
+    commit: 783b27ee323ebc5673aec1d4676b52a14dc9619a
+    subdir: app
+    sudo:
+      - apt-get update
+      - export CPUS_MAX=4
+      - export CPUS=$(getconf _NPROCESSORS_ONLN)
+      - for (( c=$CPUS_MAX; c<$CPUS; c++ )) ; do echo 0 > /sys/devices/system/cpu/cpu$c/online
+        ; done
+    gradle:
+      - full
+    srclibs:
+      - reproducible-apk-tools@v0.3.0
+    prebuild:
+      - git reset --soft daf70b2f9c2cfc182771cf6ccf65be2205f31d65
+      - sed -i -e '/relativePath/s|app/||' build.gradle.kts
+    postbuild:
+      - mv $$OUT$$ unaligned.apk
+      - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
+        --replace unaligned.apk $$OUT$$
+
 AllowedAPKSigningKeys: a23db5fd8aab1b88051125e127600577e3dcbc80ff73ddfc4a8d245b1765c13f
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 2.10.4
-CurrentVersionCode: 39
+CurrentVersion: 2.11.0
+CurrentVersionCode: 40
