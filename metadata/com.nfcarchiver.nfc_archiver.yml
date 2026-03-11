@@ -1,0 +1,47 @@
+Categories:
+  - Connectivity
+  - System
+License: MIT
+AuthorName: mezinster
+SourceCode: https://github.com/mezinster/nfcarchiver
+IssueTracker: https://github.com/mezinster/nfcarchiver/issues
+
+AutoName: NFC Archiver
+
+RepoType: git
+Repo: https://github.com/mezinster/nfcarchiver.git
+
+Builds:
+  - versionName: 1.0.8
+    versionCode: 8
+    commit: 00d7d41694dd779187362b272a6cd092be454049
+    sudo:
+      - echo 'deb http://deb.debian.org/debian bookworm main' > /etc/apt/sources.list.d/bookworm.list
+      - apt-get update
+      - apt-get install -y openjdk-17-jdk-headless
+      - update-java-alternatives -a
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+    prebuild:
+      - flutterVersion=$(sed -n -E "s/.*FLUTTER_VERSION:\ '(.*)'/\1/p" .github/workflows/release.yml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+    scandelete:
+      - .pub-cache
+    build:
+      - export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter gen-l10n
+      - $$flutter$$/bin/flutter build apk --release
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 1.0.8
+CurrentVersionCode: 8
