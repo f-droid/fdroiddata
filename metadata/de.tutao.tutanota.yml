@@ -5639,7 +5639,49 @@ Builds:
       - node --max-old-space-size=4096 webapp prod --app mail --mobile-build
     ndk: r28c
 
+  - versionName: 335.260310.0
+    versionCode: 396605
+    commit: af80d33dc054d18207497fa35edf718cbc8fe337
+    subdir: app-android/app
+    submodules: true
+    sudo:
+      - echo "deb https://deb.debian.org/debian forky main" > /etc/apt/sources.list.d/forky.list
+      - apt-get update
+      - apt-get install -y -t forky npm
+      - apt-get install -y g++ make emscripten tclsh rustup
+      - npm install -g npm@10.0.0
+      - sysctl fs.inotify.max_user_watches=524288 || true
+    gradle:
+      - fdroid
+    rm:
+      - app-ios
+    prebuild:
+      - cd ../..
+      - node buildSrc/fixFdroidDeps.js
+      - rustup default 1.84.1
+      - rustup target add aarch64-linux-android armv7-linux-androideabi x86_64-linux-android
+        i686-linux-android
+      - npm install
+      - npm run build-packages
+      - rm -rf packages/node-mimimi/dist/*.node
+      - mkdir -p build/app-android
+      - node buildSrc/prepareMobileBuild.js --app mail
+    scandelete:
+      - node_modules
+      - target
+      - app-android/libs
+      - packages
+    build:
+      - cd ../..
+      - set -o allexport; . libs/sqlcipher-android/android-sqlcipher-ver; set +o allexport
+      - pushd libs/sqlcipher-android; ANDROID_SQLCIPHER_OUTPUT_DIR=../../app-android/libs
+        ANDROID_NDK_VERSION=$(basename $$NDK$$) bash build-sqlcipher-android.sh; popd
+      - mv app-android/libs/sqlcipher-android-${SQLCIPHER_ANDROID_VERSION}-release.aar
+        app-android/libs/sqlcipher-android.aar
+      - node --max-old-space-size=4096 webapp prod --app mail --mobile-build
+    ndk: r28c
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags tutanota-fdroid-release-*
-CurrentVersion: 332.260303.0
-CurrentVersionCode: 396603
+CurrentVersion: 335.260310.0
+CurrentVersionCode: 396605
