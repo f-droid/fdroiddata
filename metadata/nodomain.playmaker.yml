@@ -285,8 +285,33 @@ Builds:
         Unsigned' bin/playmaker.apk
     ndk: 23.2.8568313
 
+  - versionName: 1.15.2
+    versionCode: 23
+    commit: a6545156b0653facc13cfc4838ba065cff7c9dfe
+    sudo:
+      - apt-get update
+      - apt-get install -y gcc make libc-dev scons pkg-config libx11-dev libxcursor-dev
+        libxinerama-dev libgl1-mesa-dev libglu1-mesa-dev libasound2-dev libpulse-dev
+        libudev-dev libxi-dev libxrandr-dev libwayland-dev git-lfs g++
+    output: playmaker.apk
+    srclibs:
+      - Godot@4.5.1-stable
+    prebuild: sed -i -e '/custom_template\/release/s|""|"$$Godot$$/bin/android_release.apk"|'
+      export_presets.cfg
+    build:
+      - export ANDROID_SDK_ROOT=$$SDK$$
+      - export ANDROID_NDK_ROOT=$$NDK$$
+      - export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+      - pushd $$Godot$$
+      - scons -j `nproc` platform=linuxbsd target=editor
+      - scons -j `nproc` platform=android target=template_release arch=arm64 generate_apk=yes
+      - popd
+      - $$Godot$$/bin/godot.linuxbsd.editor.x86_64 --headless --export-release 'Android
+        Unsigned' playmaker.apk
+    ndk: r28b
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: export_presets.cfg|version/code=(\d+)|project.godot|config/version="(.+)"
-CurrentVersion: 1.15.1
-CurrentVersionCode: 22
+CurrentVersion: 1.15.2
+CurrentVersionCode: 23
