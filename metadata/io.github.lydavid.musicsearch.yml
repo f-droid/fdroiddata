@@ -1702,10 +1702,36 @@ Builds:
     scandelete:
       - build-logic/convention/build
 
+  - versionName: 1.91.0
+    versionCode: 830
+    commit: a77a0b3a9012a90e78ec8bea9434b7d49abb78e2
+    subdir: android/app
+    sudo:
+      - apt-get update
+      - export CPUS_MAX=4
+      - export CPUS=$(getconf _NPROCESSORS_ONLN)
+      - for (( c=$CPUS_MAX; c<$CPUS; c++ )) ; do echo 0 > /sys/devices/system/cpu/cpu$c/online
+        ; done
+    gradle:
+      - fDroid
+    prebuild:
+      - echo "TVVTSUNCUkFJTlpfQ0xJRU5UX0lEPWtpbVpiWXlaYUVia2Ewb0Npb1ExNUdINWhlNFp4dGtXCg=="
+        | base64 -d > ../../not_so_secret.properties
+      - echo 
+        "TVVTSUNCUkFJTlpfQ0xJRU5UX1NFQ1JFVD00ZVlINmpqRzBVVm1GRGN1Yk1CSThrVVlxT18xVkxHRAo="
+        | base64 -d >> ../../not_so_secret.properties
+      - sed -i -e '/firebase/d' -e '/google.services/d' ../../build.gradle.kts
+      - sed -i -e 's/\.debug//' 
+        ../../shared/domain/src/commonMain/kotlin/ly/david/musicsearch/shared/domain/Constants.kt
+      - sed -i -e '/iosMain/,/^        }/d' ../../shared/build.gradle.kts
+      - sed -i -e '/iosMain/d' ../../core/logging/implementation/build.gradle.kts
+    scandelete:
+      - build-logic/convention/build
+
 AllowedAPKSigningKeys: c9b37762445dfcab7eabea79195d7f5c32501180f7c31403cf5cb427fd6810fc
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: gradle.properties|VERSION_CODE=(\d+)|.|VERSION_NAME=(.*)
-CurrentVersion: 1.90.3
-CurrentVersionCode: 824
+CurrentVersion: 1.91.0
+CurrentVersionCode: 830
