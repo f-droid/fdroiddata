@@ -1,0 +1,52 @@
+Categories:
+  - Games
+License: MIT
+WebSite: https://rozworld.itch.io
+SourceCode: https://codeberg.org/rozworld/final-roz-game-new
+IssueTracker: https://codeberg.org/rozworld/final-roz-game-new
+
+RepoType: git
+Repo: https://codeberg.org/rozworld/final-roz-game-new
+
+Builds:
+  - versionName: '1.0'
+    versionCode: 1
+    commit: 395a7e0bb42748b45dbc7e9523d86b57b12bb8c6
+    timeout: 14400
+    sudo:
+      - apt-get update
+      - apt-get install -y build-essential scons pkg-config libx11-dev libxcursor-dev
+        libxinerama-dev libxrandr-dev libxi-dev libasound2-dev libpulse-dev libudev-dev
+        libfontconfig1-dev libdbus-1-dev clang
+    output: FinalRozGameNew.apk
+    srclibs:
+      - Godot@4.3-stable
+    prebuild:
+      - mkdir -p ~/templates/4.3.stable
+      - cp templates/android_debug.apk ~/templates/4.3.stable/
+      - cp templates/android_release.apk ~/templates/4.3.stable/
+      - echo "task clean {}" > build.gradle
+      - echo "include ':'" > settings.gradle
+    build:
+      - export ANDROID_HOME=$$SDK$$
+      - cd $$Godot$$
+      - scons -j `nproc` platform=linuxbsd target=editor use_llvm=yes dev_build=no
+      - cd -
+      - mkdir -p ~/.local/share/godot/export_templates/4.3.stable
+      - cp ~/templates/4.3.stable/* ~/.local/share/godot/export_templates/4.3.stable/
+      - export GODOT_EXE=$$Godot$$/bin/godot.linuxbsd.editor.x86_64.llvm
+      - mkdir -p ~/.config/godot/
+      - echo '[gd_resource type="EditorSettings" format=3]' > ~/.config/godot/editor_settings-4.tres
+      - echo '[resource]' >> ~/.config/godot/editor_settings-4.tres
+      - echo 'export/android/android_sdk_path = "$$SDK$$"' >> ~/.config/godot/editor_settings-4.tres
+      - echo 'export/android/java_sdk_path = "/usr/lib/jvm/java-21-openjdk-amd64"'
+        >> ~/.config/godot/editor_settings-4.tres
+      - echo 'export/android/shutdown_adb_on_exit = true' >> ~/.config/godot/editor_settings-4.tres
+      - sed -i 's/package\/signed=true/package\/signed=false/g' export_presets.cfg
+      - $GODOT_EXE --headless --editor --import --quit
+      - $GODOT_EXE --headless --export-release "Android" ./FinalRozGameNew.apk
+
+AutoUpdateMode: None
+UpdateCheckMode: None
+CurrentVersion: '1.0'
+CurrentVersionCode: 1
