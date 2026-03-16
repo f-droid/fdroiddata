@@ -180,10 +180,33 @@ Builds:
         28
     ndk: r27d
 
+  - versionName: 0.5.4
+    versionCode: 504
+    commit: 5cf4b908ac4ca14d74e9544f5e37153ec4c7bf32
+    subdir: android/app
+    sudo:
+      - apt-get update
+      - apt-get install -y gcc libc-dev pkg-config libssl-dev cmake nasm libclang-dev
+        make rustup
+    gradle:
+      - yes
+    build:
+      - export RUST_VERSION=$(sed -n 's/channel = "\(.*\)"/\1/p' ../../rust-toolchain.toml)
+      - rustup default $RUST_VERSION
+      - rustup target add aarch64-linux-android armv7-linux-androideabi x86_64-linux-android
+      - cargo install --locked cargo-ndk@4.1.2
+      - cd ../..
+      - export RUSTFLAGS="--remap-path-prefix $(pwd)=/c --remap-path-prefix $HOME/.cargo=/cargo
+        -C link-arg=-Wl,--build-id=none"
+      - cargo ndk -t aarch64-linux-android -t armv7-linux-androideabi -t x86_64-linux-android
+        -o android/app/src/main/jniLibs build --release --lib --features mobile --platform
+        28
+    ndk: r27d
+
 AllowedAPKSigningKeys: 6679a06eec4933fe2933f5be32db3b3e716d42e93c7f230358e779587bab1ac0
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: Cargo.toml|version_code = (\d+)|.|version = "([\d.]+)"
-CurrentVersion: 0.5.1
-CurrentVersionCode: 501
+CurrentVersion: 0.5.4
+CurrentVersionCode: 504
