@@ -433,10 +433,39 @@ Builds:
       - cd src/main/go
       - ./gobuild
 
+  - versionName: 1.8.2
+    versionCode: 10802
+    commit: 4b34e21292a555fdf246d2b29cb63ffd90e9b2f0
+    sudo:
+      - apt-get update
+      - apt-get install -y golang-go gcc libc-dev
+    gradle:
+      - yes
+    srclibs:
+      - go@go1.23.0
+    prebuild:
+      - export goVersion=$(grep go\  src/main/go/go.mod | cut -d " " -f2)
+      - '[[ $goVersion ]]'
+      - git -C $$go$$ checkout -f go$goVersion
+      - ./proppatch.sh gradle.properties appVersionName "$$VERSION$$"
+      - ./proppatch.sh gradle.properties appVersionCode $$VERCODE$$
+      - ./proppatch.sh gradle.properties baseUrlRel "https://timur.mobi/prose/"
+      - ./proppatch.sh gradle.properties android.useAndroidX true
+      - ./proppatch.sh gradle.properties android.defaults.buildfeatures.buildconfig
+        true
+    build:
+      - pushd $$go$$/src
+      - ./make.bash
+      - popd
+      - export GOPATH=$$go$$
+      - export PATH="$GOPATH/bin:$PATH"
+      - cd src/main/go
+      - ./gobuild
+
 AllowedAPKSigningKeys: 0b2c8663fafe65f73c5a0ec60d38392c64384d9b91cc9712db3b748874fe5c75
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v[\d.]+$
 UpdateCheckData: gradle-build.sh|appVersionCode\s(\d+)|.|appVersionName\s"(.*)"
-CurrentVersion: 1.8.1
-CurrentVersionCode: 10801
+CurrentVersion: 1.8.2
+CurrentVersionCode: 10802
