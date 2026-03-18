@@ -157,10 +157,34 @@ Builds:
         by '\''com.microsoft.graph:microsoft-graph'\''/,+12d' ../buildsystem/dependencies.gradle
       - sed -i -e '/prebuild.gradle/d' -e '/msgraphAuth/,+5d' build.gradle
 
+  - versionName: 1.12.3
+    versionCode: 3030
+    commit: 640592d387078ab655cad27a4d7a48a49feea351
+    subdir: presentation
+    sudo:
+      - echo "deb https://deb.debian.org/debian bookworm main" > /etc/apt/sources.list.d/bookworm.list
+      - apt-get update
+      - apt-get install -y -t bookworm openjdk-17-jdk-headless
+      - update-java-alternatives -s java-1.17.0-openjdk-amd64
+    gradle:
+      - lite
+    srclibs:
+      - reproducible-apk-tools@v0.3.0
+    prebuild:
+      - sed -i -e '/dependencies.googlePlayServicesAuth/,+41d' -e '/msgraphAuth/,+5d'
+        ../data/build.gradle
+      - sed -i -e '/\/\/ needed for '\''com.microsoft.device.display'\'' required
+        by '\''com.microsoft.graph:microsoft-graph'\''/,+12d' ../buildsystem/dependencies.gradle
+      - sed -i -e '/prebuild.gradle/d' -e '/msgraphAuth/,+5d' build.gradle
+    postbuild:
+      - mv $$OUT$$ unaligned.apk
+      - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
+        --replace unaligned.apk $$OUT$$
+
 AllowedAPKSigningKeys: f7c3ec3b0d588d3cb52983e9eb1a7421c93d4339a286398e71d7b651e8d8ecdd
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^[\d.]+$
 UpdateCheckData: build.gradle|androidVersionCode\s=\s(\d+)|.|androidVersionName\s=\s'(.+)'
-CurrentVersion: 1.12.2
-CurrentVersionCode: 3020
+CurrentVersion: 1.12.3
+CurrentVersionCode: 3030
