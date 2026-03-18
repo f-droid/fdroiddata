@@ -1791,34 +1791,27 @@ Builds:
     subdir: app-android/calendar
     submodules: true
     sudo:
+      - echo "deb https://deb.debian.org/debian forky main" > /etc/apt/sources.list.d/forky.list
       - apt-get update
-      - apt-get install -y g++ make emscripten tclsh
-      - curl -Lo node.tar.gz https://nodejs.org/dist/v22.16.0/node-v22.16.0-linux-x64.tar.gz
-      - echo "fb870226119d47378fa9c92c4535389c72dae14fcc7b47e6fdcc82c43de5a547 node.tar.gz"
-        | sha256sum -c -
-      - tar xzf node.tar.gz --strip-components=1 -C /usr/local/
+      - apt-get install -y -t forky npm
+      - apt-get install -y g++ make emscripten tclsh rustup
+      - npm install -g npm@10.0.0
       - sysctl fs.inotify.max_user_watches=524288 || true
     gradle:
       - fdroid
-    srclibs:
-      - rustup@1.27.1
     rm:
       - app-ios
     prebuild:
       - cd ../..
       - node buildSrc/fixFdroidDeps.js
-      - $$rustup$$/rustup-init.sh -y --default-toolchain 1.84.1 --target 
-        aarch64-linux-android,armv7-linux-androideabi,x86_64-linux-android,i686-linux-android
-      - source $HOME/.cargo/env
+      - rustup default 1.84.1
+      - rustup target add aarch64-linux-android armv7-linux-androideabi x86_64-linux-android
+        i686-linux-android
       - npm install
       - npm run build-packages
       - rm -rf packages/node-mimimi/dist/*.node
       - mkdir -p build-calendar-app/app-android
       - node buildSrc/prepareMobileBuild.js --app calendar
-      - sed -i -e "/cargo {/a cargoCommand = \"$(which cargo)\"\nrustcCommand = \"$(which
-        rustc)\"" -e "s|\"cargo\"|\"$(which cargo)\"|" tuta-sdk/android/sdk/build.gradle.kts
-      - sed -i -e "/cargo {/a cargoCommand = \"$(which cargo)\"\nrustcCommand = \"$(which
-        rustc)\"" app-android/tutashared/build.gradle.kts
     scandelete:
       - node_modules
       - target
@@ -1827,8 +1820,10 @@ Builds:
     build:
       - cd ../..
       - set -o allexport; . libs/sqlcipher-android/android-sqlcipher-ver; set +o allexport
-      - pushd libs/sqlcipher-android; ANDROID_SQLCIPHER_OUTPUT_DIR=../../app-android/libs
-        ANDROID_NDK_VERSION=$(basename $$NDK$$) bash build-sqlcipher-android.sh; popd
+      - pushd libs/sqlcipher-android
+      - ANDROID_SQLCIPHER_OUTPUT_DIR=../../app-android/libs ANDROID_NDK_VERSION=$(basename
+        $$NDK$$) bash build-sqlcipher-android.sh
+      - popd
       - mv app-android/libs/sqlcipher-android-${SQLCIPHER_ANDROID_VERSION}-release.aar
         app-android/libs/sqlcipher-android.aar
       - node --max-old-space-size=4096 webapp prod --app calendar --mobile-build
