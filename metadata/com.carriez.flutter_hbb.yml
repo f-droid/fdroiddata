@@ -1164,6 +1164,91 @@ Builds:
       - flutter/android/app/build.gradle
     build: flutter/build_fdroid.sh "$$VERSION$$" "$$VERCODE$$" x86_64 build
 
+  - versionName: 1.4.6
+    versionCode: 104060004
+    commit: dba5fea66f6c65c375a5280a4a3b4029f6cca38e
+    timeout: 14400
+    submodules: true
+    sudo:
+      - echo "deb https://deb.debian.org/debian bookworm main" > /etc/apt/sources.list.d/bookworm.list
+      - apt-get update
+      - apt-get install -y -t bookworm openjdk-17-jdk-headless
+      - update-java-alternatives -s java-1.17.0-openjdk-amd64
+      - apt-get -y install clang libclang-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev
+        libgtk-3-dev make nasm ninja-build patchelf pkg-config wget xz-utils yasm
+        yq zip libssl-dev cmake cmake-data
+    output: flutter/build/app/outputs/flutter-apk/app-release.apk
+    rm:
+      - flutter/ios
+      - flutter/linux
+      - flutter/macos
+      - flutter/test
+      - flutter/windows
+    prebuild: flutter/build_fdroid.sh "$$VERSION$$" "$$VERCODE$$" armeabi-v7a prebuild
+    scanignore:
+      - flutter/android/app/build.gradle
+    build: flutter/build_fdroid.sh "$$VERSION$$" "$$VERCODE$$" armeabi-v7a build
+
+  - versionName: 1.4.6
+    versionCode: 104060005
+    commit: 1abc897c451c8b5bbff3792509a7fef9d12f2ce3
+    timeout: 14400
+    submodules: true
+    sudo:
+      - echo "deb https://deb.debian.org/debian bookworm main" > /etc/apt/sources.list.d/bookworm.list
+      - apt-get update
+      - apt-get install -y -t bookworm openjdk-17-jdk-headless
+      - update-java-alternatives -s java-1.17.0-openjdk-amd64
+      - apt-get -y install clang libclang-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev
+        libgtk-3-dev make nasm ninja-build patchelf pkg-config wget xz-utils yasm
+        yq zip libssl-dev cmake cmake-data
+    output: flutter/build/app/outputs/flutter-apk/app-release.apk
+    rm:
+      - flutter/ios
+      - flutter/linux
+      - flutter/macos
+      - flutter/test
+      - flutter/windows
+    prebuild:
+      - sed -i 's|--dart-output ./flutter/lib/generated_bridge.dart|& --llvm-path
+        "$(dirname $(dirname $(find /usr/lib/ -name libclang.so 2>/dev/null)))"|'
+        flutter/build_fdroid.sh
+      - sed -i -e 's/\sNDK_VERSION=/NDK_VERSION="27.2.12479018"; echo /' flutter/build_fdroid.sh
+      - flutter/build_fdroid.sh "$$VERSION$$" "$$VERCODE$$" arm64-v8a prebuild
+    scanignore:
+      - flutter/android/app/build.gradle
+    build: flutter/build_fdroid.sh "$$VERSION$$" "$$VERCODE$$" arm64-v8a build
+
+  - versionName: 1.4.6
+    versionCode: 104060006
+    commit: 1abc897c451c8b5bbff3792509a7fef9d12f2ce3
+    timeout: 14400
+    submodules: true
+    sudo:
+      - echo "deb https://deb.debian.org/debian bookworm main" > /etc/apt/sources.list.d/bookworm.list
+      - apt-get update
+      - apt-get install -y -t bookworm openjdk-17-jdk-headless
+      - update-java-alternatives -s java-1.17.0-openjdk-amd64
+      - apt-get -y install clang libclang-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev
+        libgtk-3-dev make nasm ninja-build patchelf pkg-config wget xz-utils yasm
+        yq zip libssl-dev automake libtool cmake cmake-data
+    output: flutter/build/app/outputs/flutter-apk/app-release.apk
+    rm:
+      - flutter/ios
+      - flutter/linux
+      - flutter/macos
+      - flutter/test
+      - flutter/windows
+    prebuild:
+      - sed -i 's|--dart-output ./flutter/lib/generated_bridge.dart|& --llvm-path
+        "$(dirname $(dirname $(find /usr/lib/ -name libclang.so 2>/dev/null)))"|'
+        flutter/build_fdroid.sh
+      - sed -i -e 's/\sNDK_VERSION=/NDK_VERSION="27.2.12479018"; echo /' flutter/build_fdroid.sh
+      - flutter/build_fdroid.sh "$$VERSION$$" "$$VERCODE$$" x86_64 prebuild
+    scanignore:
+      - flutter/android/app/build.gradle
+    build: flutter/build_fdroid.sh "$$VERSION$$" "$$VERCODE$$" x86_64 build
+
 MaintainerNotes: |-
   Licaon_Kter: Tracking AF applied because Rustdesk connects to rustdesk.com on start and sends a
   lot of data per https://rustdesk.com/privacy.html point 3 letter d
