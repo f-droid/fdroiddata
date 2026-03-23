@@ -1,0 +1,49 @@
+Categories:
+  - Development
+  - System
+License: GPL-3.0-only
+AuthorName: NeroTeam - KaijinLab
+WebSite: https://neroteam.com
+SourceCode: https://github.com/iodn/tap-ducky
+IssueTracker: https://github.com/iodn/tap-ducky/issues
+Changelog: https://github.com/iodn/tap-ducky/releases
+Liberapay: KaijinLab
+Bitcoin: bc1qtf79uecssueu4u4u86zct46vcs0vcd2cnmvw6f
+
+AutoName: TapDucky
+
+RequiresRoot: true
+
+RepoType: git
+Repo: https://github.com/iodn/tap-ducky.git
+
+Builds:
+  - versionName: 1.0.3
+    versionCode: 3
+    commit: 8bae741338cd0b047fe4fae8bc64d5d31af07982
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@stable
+    prebuild:
+      - flutterVersion=$(sed -n -E "s/.*flutter-version:\ '(.*)'/\1/p" .github/workflows/release.yml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PATH=$$flutter$$/bin:$PATH
+      - flutter config --no-analytics
+      - flutter pub get
+    build:
+      - export PATH=$$flutter$$/bin:$PATH
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - mkdir -p assets/db
+      - python3 tools/build_usbids_db.py
+      - flutter build apk --release --target-platform=android-arm64
+    ndk: r28c
+
+MaintainerNotes: |
+  The USB IDs SQLite database is generated during the build by tools/build_usbids_db.py.
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 1.0.3
+CurrentVersionCode: 3
