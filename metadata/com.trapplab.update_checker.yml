@@ -1,0 +1,65 @@
+AntiFeatures:
+  NonFreeNet:
+    en-US: Rely on 1000mobiles.info
+Categories:
+  - Security
+  - System
+License: MIT
+AuthorName: trapplab
+SourceCode: https://github.com/trapplab/update-checker
+IssueTracker: https://github.com/trapplab/update-checker/issues
+Donate: https://buymeacoffee.com/trapplab
+
+AutoName: End of Updates Checker
+
+RepoType: git
+Repo: https://github.com/trapplab/update-checker
+
+Builds:
+  - versionName: 0.1.4
+    versionCode: 104
+    commit: 2265b5b762d749512b61d324ea6142b3184a8127
+    submodules: true
+    sudo:
+      - mkdir -p /home/runner/work/update-checker
+      - chown -R vagrant /home/runner
+    output: build/app/outputs/flutter-apk/app-fdroid-release.apk
+    binary: 
+      https://github.com/trapplab/update-checker/releases/download/%v/update-checker-fdroid-arm64-v8a-%v.apk
+    rm:
+      - linux
+    prebuild:
+      - export repo=/home/runner/work/update-checker/update-checker
+      - cd ..
+      - mv com.trapplab.update_checker $repo
+      - pushd $repo
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - flutter/bin/flutter config --no-analytics
+      - flutter/bin/flutter pub get
+      - popd
+      - mv $repo com.trapplab.update_checker
+    scanignore:
+      - flutter/bin/cache
+    scandelete:
+      - flutter
+      - .pub-cache
+    build:
+      - export repo=/home/runner/work/update-checker/update-checker
+      - cd ..
+      - mv com.trapplab.update_checker $repo
+      - pushd $repo
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - ./scripts/prepare_flavor.sh fdroid
+      - flutter/bin/flutter build apk --flavor fdroid --target-platform=android-arm64
+        --release --extra-gen-snapshot-options=--deterministic --split-debug-info=/tmp/debug-info
+      - popd
+      - mv $repo com.trapplab.update_checker
+    ndk: 28.2.13676358
+
+AllowedAPKSigningKeys: 2a379f0243074469e075a1b9d51a72f0ea67428995bd4dd54fd0bb76a77ebe92
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 0.1.4
+CurrentVersionCode: 104
