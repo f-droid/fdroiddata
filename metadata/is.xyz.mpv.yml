@@ -1166,7 +1166,73 @@ Builds:
       - ./buildall.sh
     ndk: r29
 
+  - versionName: 2026-03-22-release
+    versionCode: 45
+    commit: 7059a764b1f30fb24d9170289463446de0e6046e
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y make automake pkg-config libtool nasm python3-jsonschema
+        gperf python3-jinja2 meson
+    gradle:
+      - default
+    srclibs:
+      - mbedtls@v3.6.5
+      - dav1d@d69235dd804b24c04ed05639cffcc912cd6cfd75
+      - FFmpeg@9047fa1b084f76b1b4d065af2d743df1b40dfb56
+      - libxml2@v2.15.2
+      - fontconfig@2.17.1
+      - freetype2@VER-2-14-2
+      - fribidi@v1.0.16
+      - harfbuzz@13.0.1
+      - libunibreak@libunibreak_6_1
+      - libass@fadc390583f24eb5cf98f16925fd3adee50bca88
+      - libplacebo@33b5dfada6a84692912e4d41f673f895df79479e
+      - mpv@c798884163c1b779b0b17755631e319a17683e52
+    prebuild:
+      - sed -i -e '/enable true/d' -e '/universalBase/s/8000/0/' build.gradle
+      - cd ../buildscripts/
+      - mkdir -p sdk
+      - ln -s $$NDK$$ sdk/android-ndk-r29
+      - mkdir -p deps
+      - pushd deps/
+      - cp -r $$mbedtls$$ mbedtls
+      - cp -r $$dav1d$$ dav1d
+      - cp -r $$FFmpeg$$ ffmpeg
+      - cp -r $$libxml2$$ libxml2
+      - cp -r $$fontconfig$$ fontconfig
+      - cp -r $$freetype2$$ freetype2
+      - cp -r $$fribidi$$ fribidi
+      - cp -r $$harfbuzz$$ harfbuzz
+      - cp -r $$libunibreak$$ unibreak
+      - cp -r $$libass$$ libass
+      - cp -r $$libplacebo$$ libplacebo
+      - cp -r $$mpv$$ mpv
+      - mkdir lua
+      - curl -Lo lua.tar.gz https://www.lua.org/ftp/lua-5.2.4.tar.gz
+      - echo "b9e2e4aad6789b3b63a056d442f7b39f0ecfca3ae0f1fc0ae4e9614401b69f4b lua.tar.gz"
+        | sha256sum -c -
+      - tar -xz --strip-components=1 -C lua -f lua.tar.gz
+      - cd unibreak
+      - ./bootstrap
+      - popd
+      - sed -i -e '/gradlew/d' scripts/mpv-android.sh
+      - sed -i -e '/"$target" == "mpv-android"/,/ls -lh/d' buildall.sh
+    scandelete:
+      - buildscripts/deps/mbedtls/
+      - buildscripts/deps/lua.tar.gz
+      - buildscripts/deps/libplacebo/3rdparty/jinja/tests/res/package.zip
+      - buildscripts/deps/libplacebo/3rdparty/glad/
+      - buildscripts/deps/harfbuzz/src/wasm/
+      - buildscripts/deps/harfbuzz/src/rust/Cargo.toml
+    build:
+      - cd ../buildscripts/
+      - ./buildall.sh --arch arm64 mpv
+      - ./buildall.sh --arch x86_64 mpv
+      - ./buildall.sh
+    ndk: r29
+
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: 2025-12-27-release
-CurrentVersionCode: 44
+CurrentVersion: 2026-03-22 -release
+CurrentVersionCode: 45
