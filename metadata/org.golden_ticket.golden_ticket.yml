@@ -1,0 +1,47 @@
+AntiFeatures:
+  NonFreeNet:
+    en-US: Connects to servers (golden-ticket.org) for game data/accounts and api.stripe.com
+      for optional premium membership.
+Categories:
+  - Games
+License: MIT
+AuthorName: Jayotis
+AuthorWebSite: https://golden-ticket.org
+SourceCode: https://gitlab.com/number-smithy/golden-ticket
+IssueTracker: https://gitlab.com/number-smithy/golden-ticket/-/issues
+
+AutoName: golden_ticket
+
+RepoType: git
+Repo: https://gitlab.com/number-smithy/golden-ticket.git
+Binaries: 
+  https://gitlab.com/number-smithy/golden-ticket/-/releases/v%v+%c-fdroid-r1/downloads/org.golden_ticket.golden_ticket_%c-signed.apk
+
+Builds:
+  - versionName: 4.4.11
+    versionCode: 20
+    commit: 9d3292c44d542c415357e680a9ee5cf38efdc309
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@stable
+    prebuild:
+      - flutterVersion=$(sed -n -E "s/^\s*fdroid_flutter:\s*(.*)$/\1/p" pubspec.yaml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - cp lib/src/golden_ticket/dev_config.dart.template lib/src/golden_ticket/dev_config.dart
+      - sed -i '/org.gradle.java.home/d' android/gradle.properties
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter pub get
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --dart-define=PLAY_STORE_BUILD=false
+
+AllowedAPKSigningKeys: bf56dc721b303b66bd3339f15f5a456ed4d076c7f1edd1b24f8e26e331c12436
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^v\d+\.\d+\.\d+\+\d+-fdroid-r1$
+UpdateCheckData: '|\+(\d+)-fdroid-r1$||^v([\d.]+)\+'
+CurrentVersion: 4.4.11
+CurrentVersionCode: 20
