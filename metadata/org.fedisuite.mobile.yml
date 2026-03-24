@@ -1,0 +1,80 @@
+Categories:
+  - Internet
+  - Social Network
+License: GPL-3.0-only
+AuthorName: Christin Löhner
+WebSite: https://www.fedisuite.com/
+SourceCode: https://github.com/christinloehner/FediSuite-Android-App
+IssueTracker: https://github.com/christinloehner/FediSuite-Android-App/issues
+Changelog: https://github.com/christinloehner/FediSuite-Android-App/releases
+
+AutoName: FediSuite
+Summary: Manage, schedule and analyze your Fediverse accounts with FediSuite
+Description: |
+  FediSuite is a mobile client for the FediSuite Fediverse management platform.
+
+  It connects to a specific FediSuite instance chosen by the user. This can be
+  the official hosted instance at app.fedisuite.com or a self-hosted FediSuite
+  instance.
+
+  Features include:
+
+  * secure login with instance-scoped sessions
+  * mobile dashboard and account summaries
+  * account analytics and insights
+  * queue management for scheduled, draft, published and failed posts
+  * composer with media support and scheduling
+  * connected account management
+  * mobile preferences for theme, language, timezone and default account
+
+  The app is designed as a touch-first Android experience with bottom tabs,
+  card-based screens and explicit loading, empty and error states.
+
+RepoType: git
+Repo: https://github.com/christinloehner/FediSuite-Android-App.git
+
+Builds:
+  - versionName: 0.9.10
+    versionCode: 1
+    commit: v0.9.10
+    subdir: android
+    sudo:
+      - apt-get update
+      - apt-get install -y nodejs npm openjdk-17-jdk-headless
+    init:
+      - cd ..
+      - npm ci
+      - npm run sync-version
+    prebuild:
+      - gradle clean
+    output: app/build/outputs/apk/release/org.fedisuite.mobile-$$VERSION$$.apk
+    scanignore:
+      - android/build.gradle
+      - node_modules/react-native/sdks/hermesc/linux64-bin/hermesc
+      - node_modules/expo-modules-autolinking/scripts/android/autolinking_implementation.gradle
+      - node_modules/expo-modules-core/android/ExpoModulesCorePlugin.gradle
+      - node_modules/@react-native-async-storage/async-storage/android/build.gradle
+      - node_modules/react-native-safe-area-context/android/build.gradle
+      - node_modules/react-native-screens/android/build.gradle
+      - node_modules/react-native-reanimated/android/build.gradle
+    scandelete:
+      - node_modules
+    build:
+      - gradle assembleRelease
+
+MaintainerNotes: |
+  Initial packaging recipe for the Expo/React-Native Android app.
+
+  The Android build needs Node.js/npm in addition to Gradle because the release
+  build embeds the JavaScript bundle via Expo/React Native.
+
+  Version information is read from the plain-text file `version`.
+
+  The upstream project currently keeps `versionCode` in
+  `android/app/build.gradle` at `1`, so future updates will require explicit
+  upstream versionCode bumps in addition to versionName/tag updates.
+
+AutoUpdateMode: None
+UpdateCheckMode: None
+CurrentVersion: 0.9.10
+CurrentVersionCode: 1
