@@ -1,0 +1,177 @@
+AntiFeatures:
+  NonFreeAssets:
+    en-US: Some graphics used are not libre.
+  TetheredNet:
+    en-US: Relies on lichess.org.
+Categories:
+  - Games
+License: GPL-3.0-or-later
+AuthorName: lichess.org
+AuthorEmail: contact@lichess.org
+WebSite: https://lichess.org
+SourceCode: https://github.com/lichess-org/mobile
+IssueTracker: https://github.com/lichess-org/mobile/issues
+Translation: https://crowdin.com/project/lichess
+Changelog: https://github.com/lichess-org/mobile/releases
+Donate: https://lichess.org/patron
+
+AutoName: Lichess
+
+RepoType: git
+Repo: https://github.com/lichess-org/mobile
+
+Builds:
+  - versionName: 0.22.7
+    versionCode: 220701
+    commit: 15942281d79184a7cbc40e2502ff271ce8c2becb
+    sudo:
+      - mkdir -p /home/runner/work/mobile
+      - chown -R vagrant /home/runner
+    output: build/app/outputs/flutter-apk/app-x86_64-release.apk
+    binary: https://github.com/lichess-org/mobile/releases/download/v%v/%c-x86_64-fdroid.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+      - linux
+    prebuild:
+      - export repo=/home/runner/work/mobile/mobile
+      - cd ..
+      - mv org.lichess.mobileV2 $repo
+      - pushd $repo
+      - flutterVersion=$(cat flutter-version)
+      - git -C $$flutter$$ checkout $flutterVersion
+      - git -C $$flutter$$ apply $repo/flutter.patch
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+      - sed -i -e '/play-services-cronet/d' $PUB_CACHE/hosted/pub.dev/cronet_http-*/android/build.gradle
+      - sed -i 's/-Wl,/-Wl,--build-id=none,/' 
+        .pub-cache/hosted/pub.dev/{{jni,multistockfish_chess,multistockfish_sf16}-*/src,multistockfish_variant-*/android}/CMakeLists.txt
+      - truncate -s 0 .pub-cache/hosted/pub.dev/webcrypto-*/android/CMakeLists.txt
+      - $$flutter$$/bin/dart run build_runner build
+      - popd
+      - mv $repo org.lichess.mobileV2
+    scandelete:
+      - .dart_tool
+      - .pub-cache
+    build:
+      - export repo=/home/runner/work/mobile/mobile
+      - cd ..
+      - mv org.lichess.mobileV2 $repo
+      - pushd $repo
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export SOURCE_DATE_EPOCH=0
+      - $$flutter$$/bin/flutter build apk --split-per-abi --target-platform="android-x64"
+        --dart-define=cronetHttpNoPlay=true --dart-define=LICHESS_HOST=lichess.org
+        --dart-define=LICHESS_WS_HOST=socket.lichess.org --dart-define=LICHESS_WS_SECRET=wG1OLhUR3CSXdDybqrtIW227QGrtiM3d
+      - popd
+      - mv $repo org.lichess.mobileV2
+
+  - versionName: 0.22.7
+    versionCode: 220702
+    commit: 15942281d79184a7cbc40e2502ff271ce8c2becb
+    sudo:
+      - mkdir -p /home/runner/work/mobile
+      - chown -R vagrant /home/runner
+    output: build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
+    binary: 
+      https://github.com/lichess-org/mobile/releases/download/v%v/%c-armeabi-v7a-fdroid.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+      - linux
+    prebuild:
+      - export repo=/home/runner/work/mobile/mobile
+      - cd ..
+      - mv org.lichess.mobileV2 $repo
+      - pushd $repo
+      - flutterVersion=$(cat flutter-version)
+      - git -C $$flutter$$ checkout $flutterVersion
+      - git -C $$flutter$$ apply $repo/flutter.patch
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+      - sed -i -e '/play-services-cronet/d' $PUB_CACHE/hosted/pub.dev/cronet_http-*/android/build.gradle
+      - sed -i 's/-Wl,/-Wl,--build-id=none,/' 
+        .pub-cache/hosted/pub.dev/{{jni,multistockfish_chess,multistockfish_sf16}-*/src,multistockfish_variant-*/android}/CMakeLists.txt
+      - truncate -s 0 .pub-cache/hosted/pub.dev/webcrypto-*/android/CMakeLists.txt
+      - $$flutter$$/bin/dart run build_runner build
+      - popd
+      - mv $repo org.lichess.mobileV2
+    scandelete:
+      - .dart_tool
+      - .pub-cache
+    build:
+      - export repo=/home/runner/work/mobile/mobile
+      - cd ..
+      - mv org.lichess.mobileV2 $repo
+      - pushd $repo
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export SOURCE_DATE_EPOCH=0
+      - $$flutter$$/bin/flutter build apk --split-per-abi --target-platform="android-arm"
+        --dart-define=cronetHttpNoPlay=true --dart-define=LICHESS_HOST=lichess.org
+        --dart-define=LICHESS_WS_HOST=socket.lichess.org --dart-define=LICHESS_WS_SECRET=wG1OLhUR3CSXdDybqrtIW227QGrtiM3d
+      - popd
+      - mv $repo org.lichess.mobileV2
+
+  - versionName: 0.22.7
+    versionCode: 220703
+    commit: 15942281d79184a7cbc40e2502ff271ce8c2becb
+    sudo:
+      - mkdir -p /home/runner/work/mobile
+      - chown -R vagrant /home/runner
+    output: build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+    binary: 
+      https://github.com/lichess-org/mobile/releases/download/v%v/%c-arm64-v8a-fdroid.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+      - linux
+    prebuild:
+      - export repo=/home/runner/work/mobile/mobile
+      - cd ..
+      - mv org.lichess.mobileV2 $repo
+      - pushd $repo
+      - flutterVersion=$(cat flutter-version)
+      - git -C $$flutter$$ checkout $flutterVersion
+      - git -C $$flutter$$ apply $repo/flutter.patch
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+      - sed -i -e '/play-services-cronet/d' $PUB_CACHE/hosted/pub.dev/cronet_http-*/android/build.gradle
+      - sed -i 's/-Wl,/-Wl,--build-id=none,/' 
+        .pub-cache/hosted/pub.dev/{{jni,multistockfish_chess,multistockfish_sf16}-*/src,multistockfish_variant-*/android}/CMakeLists.txt
+      - truncate -s 0 .pub-cache/hosted/pub.dev/webcrypto-*/android/CMakeLists.txt
+      - $$flutter$$/bin/dart run build_runner build
+      - popd
+      - mv $repo org.lichess.mobileV2
+    scandelete:
+      - .dart_tool
+      - .pub-cache
+    build:
+      - export repo=/home/runner/work/mobile/mobile
+      - cd ..
+      - mv org.lichess.mobileV2 $repo
+      - pushd $repo
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export SOURCE_DATE_EPOCH=0
+      - $$flutter$$/bin/flutter build apk --split-per-abi --target-platform="android-arm64"
+        --dart-define=cronetHttpNoPlay=true --dart-define=LICHESS_HOST=lichess.org
+        --dart-define=LICHESS_WS_HOST=socket.lichess.org --dart-define=LICHESS_WS_SECRET=wG1OLhUR3CSXdDybqrtIW227QGrtiM3d
+      - popd
+      - mv $repo org.lichess.mobileV2
+
+AllowedAPKSigningKeys: 496ed2c1542892a094a2a6e26d59cd07fb7e8c711355876dad3859ea82f8af62
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags .*fdroid
+VercodeOperation:
+  - 100 * %c + 1
+  - 100 * %c + 2
+  - 100 * %c + 3
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 0.22.7
+CurrentVersionCode: 220703
