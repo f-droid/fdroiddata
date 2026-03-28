@@ -4635,7 +4635,32 @@ Builds:
       - cd ../../daemon/bin/jni
       - PACKAGEDIR=../../../jami-android/libjamiclient/src/main/java ./make-swig.sh
 
+  - versionName: 20260327-01
+    versionCode: 491
+    commit: 66dee6b2ea36e1bbce11b87f419781d8f667eb8e
+    timeout: 10800
+    subdir: jami-android/app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y automake autopoint bzip2 cmake g++ gettext libtool libyaml-cpp-dev
+        make pkg-config python-is-python3 yasm swig
+    gradle:
+      - withUnifiedPush
+    prebuild:
+      - sed -i -e 's/9.4.0-rc-1/9.4.0/' ../gradle/wrapper/gradle-wrapper.properties
+      - sed -i -e "/android {/a lint { abortOnError = false }" build.gradle.kts
+      - sed -i -e '/gms/d' ../build.gradle.kts
+      - sed -i '/DCMAKE_INTERPROCEDURAL_OPTIMIZATION/d' build.gradle.kts ../../daemon/contrib/src/main.mak
+      - sdkmanager 'cmake;4.1.2'
+    scandelete:
+      - daemon/contrib/src/*/package.json
+      - daemon/compat/msvc/package.json
+    build:
+      - cd ../../daemon/bin/jni
+      - PACKAGEDIR=../../../jami-android/libjamiclient/src/main/java ./make-swig.sh
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 20260312-01
-CurrentVersionCode: 490
+CurrentVersion: 20260327-01
+CurrentVersionCode: 491
