@@ -1,0 +1,47 @@
+Categories:
+  - Games
+License: CC0-1.0
+AuthorName: Mystic Jungle
+AuthorWebSite: https://mystic-jungle.itch.io/
+SourceCode: https://codeberg.org/MysticJungle/collect-the-cookies
+IssueTracker: https://codeberg.org/MysticJungle/collect-the-cookies/issues
+
+RepoType: git
+Repo: https://codeberg.org/MysticJungle/collect-the-cookies
+
+Builds:
+  - versionName: 1.0.0
+    versionCode: 1
+    commit: cfff4b4f0aa939eed8f490484cc0c4465650f9d5
+    sudo:
+      - apt-get update
+      - apt-get install -y g++ make libc-dev scons pkg-config libx11-dev libxcursor-dev
+        libxinerama-dev libgl1-mesa-dev libglu1-mesa-dev libasound2-dev libpulse-dev
+        libudev-dev libxi-dev libxrandr-dev libwayland-dev git-lfs
+    output: bin/collectthecookies.apk
+    srclibs:
+      - Godot@4.5.1-stable
+    prebuild:
+      - mkdir -p bin
+      - mkdir -p android
+      - sed -i -e '/custom_template\/release/s|""|"$$Godot$$/bin/android_release.apk"|'
+        export_presets.cfg
+    build:
+      - export ANDROID_SDK_ROOT=$$SDK$$
+      - export ANDROID_NDK_ROOT=$$NDK$$
+      - export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+      - pushd $$Godot$$
+      - scons -j `nproc` platform=linuxbsd target=editor
+      - scons -j `nproc` platform=android target=template_release arch=arm64
+      - cd platform/android/java
+      - gradle generateGodotTemplates
+      - popd
+      - $$Godot$$/bin/godot.linuxbsd.editor.x86_64 --headless --export-release 'Android
+        Unsigned' bin/collectthecookies.apk
+    ndk: 28.1.13356709
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: export_presets.cfg|version/code=(\d+)|project.godot|config/version="(.+)"
+CurrentVersion: 1.0.0
+CurrentVersionCode: 1
