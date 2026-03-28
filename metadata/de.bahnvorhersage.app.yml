@@ -307,7 +307,31 @@ Builds:
       - dist/_nuxt/*.wasm
       - android/app/src/main/assets/public/_nuxt/*.wasm
 
+  - versionName: 0.7.0
+    versionCode: 16
+    commit: 24f03e30a997143a3db4de90c797157f30caa02d
+    subdir: android/app
+    sudo:
+      - echo "deb https://deb.debian.org/debian forky main" > /etc/apt/sources.list.d/forky.list
+      - apt-get update
+      - apt-get install -y -t forky npm
+      - apt-get install -y make g++ libc-dev
+    init:
+      - cd ../..
+      - npm install --build-from-source
+      - npm run build-only
+      - npx cap sync
+    gradle:
+      - yes
+    rm:
+      - ios
+    prebuild: sed -i -e '/keystoreProperties/d' build.gradle
+    scandelete:
+      - node_modules
+      - dist/_nuxt/*.wasm
+      - android/app/src/main/assets/public/_nuxt/*.wasm
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 0.6.2
-CurrentVersionCode: 15
+CurrentVersion: 0.7.0
+CurrentVersionCode: 16
