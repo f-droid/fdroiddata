@@ -1,0 +1,39 @@
+Categories:
+  - Note
+License: GPL-3.0-or-later
+AuthorName: Norm Plum
+SourceCode: https://github.com/NormPlum/SilentShare
+IssueTracker: https://github.com/NormPlum/SilentShare/issues
+
+RepoType: git
+Repo: https://github.com/NormPlum/SilentShare.git
+
+Builds:
+  - versionName: 1.0.3
+    versionCode: 10003
+    commit: 0f9981cc1e26c5d43358fdf9aa2208579705daa2
+    sudo:
+      - apt-get update
+      - apt-get install -y scons pkgconf g++
+    output: silentshare.apk
+    srclibs:
+      - Godot@4.6.1-stable
+    build:
+      - export REPO=$PWD
+      - export JAVA_HOME=$(dirname $(dirname $(readlink -f $(which javac))))
+      - export ANDROID_HOME=$$SDK$$
+      - pushd $$Godot$$
+      - python3 misc/scripts/install_swappy_android.py
+      - scons platform=linuxbsd optimize=speed
+      - scons target=template_release profile=$REPO/.build/scons_profile.py build_profile=$REPO/.build/profile.gdbuild
+      - mv bin/android_release.apk $REPO/android_release.apk
+      - popd
+      - $$Godot$$/bin/godot.linuxbsd.editor.x86_64 --headless --export-release "Android
+        (fdroid)" silentshare.apk
+    ndk: 28.1.13356709
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: export_presets.cfg|version/code=(\d+)|.|version/name="([\d.]+)"
+CurrentVersion: 1.0.3
+CurrentVersionCode: 10003
