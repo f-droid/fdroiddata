@@ -3003,8 +3003,70 @@ Builds:
       - flutter build apk --flavor fdroid -t lib/main.dart --dart-define=cronetHttpNoPlay=true
     ndk: r21
 
+  - versionName: 4.4.19
+    versionCode: 756
+    commit: 337fea4f960f279c5e9e79f8b21d49944ae6855f
+    subdir: mobile/apps/auth
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y automake libtool make
+    output: build/app/outputs/flutter-apk/app-fdroid-release.apk
+    srclibs:
+      - libsodium@4a15ab7cd0a4b78a7356e5f488d5345b8d314549
+      - flutter@stable
+    rm:
+      - cli
+      - desktop
+      - docs
+      - infra
+      - server
+      - web
+      - mobile/apps/auth/ios
+      - mobile/apps/auth/linux
+      - mobile/apps/auth/macos
+      - mobile/apps/auth/migration-guides
+      - mobile/apps/auth/web
+      - mobile/apps/auth/windows
+    prebuild:
+      - flutterVersion=$(sed -n -E 's/.*FLUTTER_VERSION:\ "(.*)"/\1/p' ../../../.github/workflows/auth-release.yml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+      - pushd ../../packages/strings
+      - $$flutter$$/bin/flutter pub get
+      - $$flutter$$/bin/flutter gen-l10n
+      - popd
+      - sed -i -e '/play-services-cronet/d' $PUB_CACHE/hosted/pub.dev/cronet_http-*/android/build.gradle
+      - sed -i -e '/jvmToolchain/s/17/21/' $PUB_CACHE/git/qr_code_scanner-*/android/build.gradle
+    scandelete:
+      - mobile/apps/auth/.pub-cache
+      - mobile/apps/auth/assets/simple-icons
+      - mobile/apps/photos
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export PATH=$$flutter$$/bin:$PATH
+      - pushd $$libsodium$$
+      - ./autogen.sh -s
+      - ./dist-build/android-armv7-a.sh
+      - ./dist-build/android-armv8-a.sh
+      - ./dist-build/android-x86.sh
+      - ./dist-build/android-x86_64.sh
+      - popd
+      - export 
+        sodium_lib=$PUB_CACHE/hosted/pub.dev/sodium_libs-2.2.1+6/android/src/main/jniLibs
+      - cp $$libsodium$$/libsodium-android-armv7-a/lib/libsodium.so $sodium_lib/armeabi-v7a/
+      - cp $$libsodium$$/libsodium-android-westmere/lib/libsodium.so $sodium_lib/x86_64/
+      - cp $$libsodium$$/libsodium-android-armv8-a+crypto/lib/libsodium.so $sodium_lib/arm64-v8a/
+      - cp $$libsodium$$/libsodium-android-i686/lib/libsodium.so $sodium_lib/x86/
+      - flutter pub run flutter_launcher_icons -f fdroid_flutter_icons.yaml
+      - flutter build apk --flavor fdroid -t lib/main.dart --dart-define=cronetHttpNoPlay=true
+    ndk: r21
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^auth-v.*[0-9]$
 UpdateCheckData: mobile/apps/auth/pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 4.4.15
-CurrentVersionCode: 590
+CurrentVersion: 4.4.19
+CurrentVersionCode: 756
