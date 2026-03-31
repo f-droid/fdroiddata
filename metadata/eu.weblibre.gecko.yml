@@ -537,10 +537,168 @@ Builds:
       - flutter build apk --release --no-tree-shake-icons --split-per-abi --target-platform="android-arm64"
     ndk: 29.0.14206865
 
+  - versionName: 0.10.1
+    versionCode: 382
+    commit: v0.10.1
+    timeout: 36000
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y cmake make m4 pkg-config python-is-python3 python3-venv
+        tcl gyp ninja-build bzip2 libffi-dev libsqlite3-dev binutils-dev clang lld
+        libssl-dev zlib1g-dev npm rustup wget terser
+      - echo "deb https://deb.debian.org/debian bookworm main" > /etc/apt/sources.list.d/bookworm.list
+      - apt-get update
+      - apt-get install -y -t bookworm openjdk-17-jdk-headless
+      - update-java-alternatives -s java-1.17.0-openjdk-amd64
+    output: build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
+    srclibs:
+      - MozFennec@FIREFOX-ANDROID_149_0_RELEASE
+      - MozAppServices@v149.0
+      - MozGlean@v67.0.0
+      - MozGleanAS@v67.0.0
+      - UnifiedPushAC@5001f61025535f17bec8409c7706bc97e3d440c8
+      - gmscore@v0.3.13.250932
+      - wasi-sdk@wasi-sdk-20
+      - llvm@3b5e7c83a6e226d5bd7ed2e9b67449b64812074c
+      - llvm_android@e727bfb014bd436f581a66a450c939a6983a1fc3
+      - toolchain-utils@dd1ee45a84cb07337f9d5d0a6769d9b865c6e620
+      - MozFennecComponents@d56eabcc1e13f886e82262bc351421f0d4b211d0
+      - flutter@stable
+      - transistor-background-fetch@ca8d2f7a9cf1880dfaf9bcb2c2176fab19e0b124
+    prebuild:
+      - export MAVEN_REPO_URL="https://only-for-validation.local"
+      - export MAVEN_USERNAME=""
+      - export MAVEN_PASSWORD=""
+      - source $$MozFennecComponents$$/setup.sh armeabi-v7a
+      - $$MozFennecComponents$$/prebuild.sh
+      - sed -i -e 's/maven {.*background_fetch.*/mavenLocal()/' android/build.gradle
+      - sed -i 's/maven { name "Mozilla"; url "https:\/\/gitlab\.com\/api\/v4\/projects\/71401321\/packages\/maven"
+        }/mavenLocal()/' ../packages/flutter_mozilla_components/android/build.gradle
+      - flutterVersion=$(sed -n -E "s/.*flutter-version:\ '?([^']*)'?/\1/p" ../.github/workflows/build.yml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export PATH=$PUB_CACHE/bin/:$$flutter$$/bin/:$PATH
+      - flutter config --no-analytics
+      - flutter pub global activate melos
+      - melos bootstrap
+      - melos run update-assets --no-select
+      - pushd ../packages/flutter_mozilla_components/javascript/container_proxy
+      - npm ci
+      - popd
+      - pushd ../packages/flutter_mozilla_components/javascript/readability
+      - npm ci
+      - popd
+      - sed -i -e '/maven {/,/^        }/cmavenLocal()' $PUB_CACHE/hosted/pub.dev/background_fetch-*/android/build.gradle
+    scandelete:
+      - app/.pub-cache
+      - packages/flutter_mozilla_components/javascript/container_proxy/node_modules
+    build:
+      - export MAVEN_REPO_URL="https://only-for-validation.local"
+      - export MAVEN_USERNAME=""
+      - export MAVEN_PASSWORD=""
+      - pushd ../packages/flutter_mozilla_components/javascript/container_proxy
+      - npx webpack
+      - popd
+      - pushd ../packages/flutter_mozilla_components/javascript/readability
+      - npx webpack
+      - popd
+      - source $$MozFennecComponents$$/setup.sh armeabi-v7a
+      - $$MozFennecComponents$$/build.sh
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export PATH=$PUB_CACHE/bin/:$$flutter$$/bin/:$PATH
+      - pushd $$transistor-background-fetch$$/android/tsbackgroundfetch/
+      - gradle assembleRelease
+      - gradle publishToMavenLocal
+      - popd
+      - flutter config --no-analytics
+      - flutter build apk --release --no-tree-shake-icons --split-per-abi --target-platform="android-arm"
+    ndk: 29.0.14206865
+
+  - versionName: 0.10.1
+    versionCode: 383
+    commit: v0.10.1
+    timeout: 36000
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y cmake make m4 pkg-config python-is-python3 python3-venv
+        tcl gyp ninja-build bzip2 libffi-dev libsqlite3-dev binutils-dev clang lld
+        libssl-dev zlib1g-dev npm rustup wget terser
+      - echo "deb https://deb.debian.org/debian bookworm main" > /etc/apt/sources.list.d/bookworm.list
+      - apt-get update
+      - apt-get install -y -t bookworm openjdk-17-jdk-headless
+      - update-java-alternatives -s java-1.17.0-openjdk-amd64
+    output: build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+    srclibs:
+      - MozFennec@FIREFOX-ANDROID_149_0_RELEASE
+      - MozAppServices@v149.0
+      - MozGlean@v67.0.0
+      - MozGleanAS@v67.0.0
+      - UnifiedPushAC@5001f61025535f17bec8409c7706bc97e3d440c8
+      - gmscore@v0.3.13.250932
+      - wasi-sdk@wasi-sdk-20
+      - llvm@3b5e7c83a6e226d5bd7ed2e9b67449b64812074c
+      - llvm_android@e727bfb014bd436f581a66a450c939a6983a1fc3
+      - toolchain-utils@dd1ee45a84cb07337f9d5d0a6769d9b865c6e620
+      - MozFennecComponents@d56eabcc1e13f886e82262bc351421f0d4b211d0
+      - flutter@stable
+      - transistor-background-fetch@ca8d2f7a9cf1880dfaf9bcb2c2176fab19e0b124
+    prebuild:
+      - export MAVEN_REPO_URL="https://only-for-validation.local"
+      - export MAVEN_USERNAME=""
+      - export MAVEN_PASSWORD=""
+      - source $$MozFennecComponents$$/setup.sh arm64-v8a
+      - $$MozFennecComponents$$/prebuild.sh
+      - sed -i -e 's/maven {.*background_fetch.*/mavenLocal()/' android/build.gradle
+      - sed -i 's/maven { name "Mozilla"; url "https:\/\/gitlab\.com\/api\/v4\/projects\/71401321\/packages\/maven"
+        }/mavenLocal()/' ../packages/flutter_mozilla_components/android/build.gradle
+      - flutterVersion=$(sed -n -E "s/.*flutter-version:\ '?([^']*)'?/\1/p" ../.github/workflows/build.yml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export PATH=$PUB_CACHE/bin/:$$flutter$$/bin/:$PATH
+      - flutter config --no-analytics
+      - flutter pub global activate melos
+      - melos bootstrap
+      - melos run update-assets --no-select
+      - pushd ../packages/flutter_mozilla_components/javascript/container_proxy
+      - npm ci
+      - popd
+      - pushd ../packages/flutter_mozilla_components/javascript/readability
+      - npm ci
+      - popd
+      - sed -i -e '/maven {/,/^        }/cmavenLocal()' $PUB_CACHE/hosted/pub.dev/background_fetch-*/android/build.gradle
+    scandelete:
+      - app/.pub-cache
+      - packages/flutter_mozilla_components/javascript/container_proxy/node_modules
+    build:
+      - export MAVEN_REPO_URL="https://only-for-validation.local"
+      - export MAVEN_USERNAME=""
+      - export MAVEN_PASSWORD=""
+      - pushd ../packages/flutter_mozilla_components/javascript/container_proxy
+      - npx webpack
+      - popd
+      - pushd ../packages/flutter_mozilla_components/javascript/readability
+      - npx webpack
+      - popd
+      - source $$MozFennecComponents$$/setup.sh arm64-v8a
+      - $$MozFennecComponents$$/build.sh
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export PATH=$PUB_CACHE/bin/:$$flutter$$/bin/:$PATH
+      - pushd $$transistor-background-fetch$$/android/tsbackgroundfetch/
+      - gradle assembleRelease
+      - gradle publishToMavenLocal
+      - popd
+      - flutter config --no-analytics
+      - flutter build apk --release --no-tree-shake-icons --split-per-abi --target-platform="android-arm64"
+    ndk: 29.0.14206865
+
 MaintainerNotes: Scanner detects 'com/google/android/gms/...' from microG libs for
   webauth
 
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: 0.10.0
-CurrentVersionCode: 373
+CurrentVersion: 0.10.1
+CurrentVersionCode: 383
