@@ -205,17 +205,14 @@ Builds:
     submodules: true
     sudo:
       - apt-get update
-      - apt-get install -y make g++ libc-dev libclang-dev cmake
+      - apt-get install -y make g++ libc-dev libclang-dev cmake rustup
       - git config --system core.abbrev 10
     gradle:
       - aarch64
-    srclibs:
-      - rustup@1.28.2
     prebuild:
-      - $$rustup$$/rustup-init.sh -y --default-toolchain 1.87.0 --target aarch64-linux-android
-      - source ~/.cargo/env
-      - cargo install cargo-ndk@4.1.2
-      - sed -i -e "s|\"cargo\",|\"$(which cargo)\",|" build.gradle.kts
+      - rustup default 1.87.0
+      - rustup target add aarch64-linux-android
+      - cargo install cargo-ndk@4.1.2 --locked
     scandelete:
       - app/bergamot/src/main/cpp/third_party/cld2/internal/test_shuffle_1000_48_666.utf8.gz
       - app/bergamot/src/main/cpp/bergamot-translator/wasm/module/package.json
