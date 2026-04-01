@@ -418,10 +418,55 @@ Builds:
       - mv $repo/Wispar app.wispar.wispar
     ndk: r27
 
+  - versionName: 0.10.1
+    versionCode: 36
+    commit: 86a897315f51e19fafc08c3e330963779aa52d88
+    sudo:
+      - mkdir -p /home/runner/work/Wispar
+      - chown -R vagrant /home/runner
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - package.json
+      - ios
+      - linux
+      - macos
+      - website
+      - windows
+    prebuild:
+      - export flutterVersion=$(sed -n -E "s/^\s*flutter:\s*'?([0-9.]+)'?/\1/p" pubspec.yaml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export repo=/home/runner/work/Wispar/Wispar
+      - sed -i -e '/background_fetch/d' android/app/build.gradle
+      - cd ..
+      - mv app.wispar.wispar $repo
+      - pushd $repo
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter packages pub get
+      - $$flutter$$/bin/dart run pdfrx:remove_wasm_modules
+      - sed -i -e '1a add_link_options("LINKER:--build-id=none")' $PUB_CACHE/hosted/pub.dev/pdfium_flutter-*/android/CMakeLists.txt
+      - popd
+      - mv $repo app.wispar.wispar
+    scandelete:
+      - .pub-cache
+    build:
+      - export repo=/home/runner/work/Wispar/Wispar
+      - cd ..
+      - mv app.wispar.wispar $repo
+      - pushd $repo
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release
+      - popd
+      - mv $repo app.wispar.wispar
+    ndk: r27
+
 AllowedAPKSigningKeys: 136f15f8e739afa03c2e5cbc4a51983e87f38f48e956b42cff2bd4dc769af2ab
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 0.9.0
-CurrentVersionCode: 30
+CurrentVersion: 0.10.1
+CurrentVersionCode: 36
