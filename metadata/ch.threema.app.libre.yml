@@ -665,10 +665,41 @@ Builds:
       - mv jna/jni/* libs
     ndk: r28c
 
+  - versionName: 6.4.0l
+    versionCode: 1136
+    commit: 65acf422e7158d0a4bf7e70877cca1509c92c434
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y protobuf-compiler unzip gcc libc-dev rustup
+    gradle:
+      - libre
+    rm:
+      - .git
+      - app/src/main/java/ch/threema/app/libs
+      - app/libs/*
+    prebuild:
+      - sed -i -e '/exclusiveContent {/,/^        }/d' -e '/agconnect/d' ../build.gradle.kts
+      - rustup default $(sed -n -E 's/channel = "(.*)"/\1/p' ../domain/libthreema/rust-toolchain.toml)
+      - rustup target add armv7-linux-androideabi aarch64-linux-android i686-linux-android
+        x86_64-linux-android
+      - sed -i -e '/maven {/,+14d' -e "/commandLine(\"cargo\"/a environment(\"RUSTFLAGS\",
+        \"--remap-path-prefix=$HOME/.cargo=/rust/cargo\")" ../domain/build.gradle.kts
+      - sed -i -e '/isEnable/d' -e "s|extraCargoBuildArguments = listOf(|extraCargoBuildArguments
+        = listOf(\"--config\", \"build.rustflags = [ '--remap-path-prefix=$HOME/.cargo=/rust/cargo'
+        ]\",|" build.gradle.kts
+    build:
+      - curl -LO https://repo1.maven.org/maven2/net/java/dev/jna/jna/5.18.1/jna-5.18.1.aar
+      - echo "7f053e3ec99e14dd71259c82c1c8a02738d64a13c31226b2acc170f3060951e0  jna-5.18.1.aar"
+        | sha256sum -c -
+      - unzip jna-5.18.1.aar -d jna jni/{arm64-v8a,armeabi-v7a,x86_64,x86}/libjnidispatch.so
+      - mv jna/jni/* libs
+    ndk: r28c
+
 AllowedAPKSigningKeys: 0508b53ff102b538919c834e9e6b6afba046edf67e17ca4d1ce7a4b9c3823741
 
 AutoUpdateMode: Version +l %v
 UpdateCheckMode: Tags
 UpdateCheckData: app/build.gradle.kts|defaultVersionCode = (\d+)|.|appVersion = "([\d.]+)"
-CurrentVersion: 6.3.2
-CurrentVersionCode: 1118
+CurrentVersion: 6.4.0
+CurrentVersionCode: 1136
