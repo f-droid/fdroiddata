@@ -1,0 +1,47 @@
+Categories:
+  - Online Media Player
+License: Unlicense
+SourceCode: https://github.com/sirdeepsleep/FirTube/
+IssueTracker: https://github.com/sirdeepsleep/FirTube/issues
+
+AutoName: FirTube
+
+RepoType: git
+Repo: https://github.com/sirdeepsleep/FirTube/
+Binaries: https://github.com/sirdeepsleep/FirTube/releases/download/v%v/app-release.apk
+
+Builds:
+  - versionName: '3.0'
+    versionCode: 3
+    commit: 7f9c3223cfca8d5b6f2ff1e145d8577c7cdc90ae
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y rustup gcc libc-dev
+    gradle:
+      - yes
+    build:
+      - rustup default 1.94.0
+      - rustup target add aarch64-linux-android armv7-linux-androideabi x86_64-linux-android
+      - cargo install cargo-ndk@4.1.2 --locked
+      - pushd src/main/rust
+      - export RUSTFLAGS="-C strip=symbols -C codegen-units=1 --remap-path-prefix=$(pwd)=/build
+        --remap-path-prefix=$HOME=/home/runner"
+      - cargo ndk -t arm64-v8a -t armeabi-v7a -t x86_64 build --release
+      - popd
+      - mkdir -p src/main/jniLibs/arm64-v8a src/main/jniLibs/armeabi-v7a src/main/jniLibs/x86_64
+      - cp src/main/rust/target/aarch64-linux-android/release/libargon_security.so
+        src/main/jniLibs/arm64-v8a/
+      - cp src/main/rust/target/armv7-linux-androideabi/release/libargon_security.so
+        src/main/jniLibs/armeabi-v7a/
+      - cp src/main/rust/target/x86_64-linux-android/release/libargon_security.so
+        src/main/jniLibs/x86_64/
+      - rm -rf src/main/rust/target
+    ndk: r27d
+
+AllowedAPKSigningKeys: 453970b5f306db01f8df63823b66229351f371b6eaa2f534c4814f884e34d29a
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: '3.0'
+CurrentVersionCode: 3
