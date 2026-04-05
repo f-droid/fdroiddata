@@ -239,6 +239,40 @@ Builds:
       - gradle assembleRelease
       - gradle publishToMavenLocal
 
+  - versionName: 2.6.4
+    versionCode: 2060499
+    commit: 9d8544b955304b3d9620b88c4219b02b3eb85e8d
+    subdir: app
+    sudo:
+      - export CPUS_MAX=16
+      - export CPUS=$(getconf _NPROCESSORS_ONLN)
+      - for (( c=$CPUS_MAX; c<$CPUS; c++ )) ; do echo 0 > /sys/devices/system/cpu/cpu$c/online
+        ; done
+      - echo "deb https://deb.debian.org/debian bookworm main" > /etc/apt/sources.list.d/bookworm.list
+      - apt-get update
+      - apt-get install -y -t bookworm openjdk-17-jdk-headless
+      - update-java-alternatives -s java-1.17.0-openjdk-amd64
+    gradle:
+      - libre
+    output: build/outputs/apk/libre/release/jellyfin-android-*-libre-release-unsigned.apk
+    srclibs:
+      - ExoPlayer@r2.19.1
+    prebuild:
+      - echo 'jellyfin.version=$$VERSION$$' >> ../gradle.properties
+      - export cronetVersion=$(sed -n -E 's/cronet-embedded = "(.*)"/\1/p' ../gradle/libs.versions.toml)
+      - sed -i -e 
+        "s/\"com.google.android.gms:play-services-cronet:.*\"/\"org.chromium.net:cronet-embedded:$cronetVersion\"/"
+        -e 's/extension-cronet/extension-embeded/' $$ExoPlayer$$/extensions/cronet/build.gradle
+      - sed -i -e 
+        's/com.google.android.gms:play-services-cronet/org.chromium.net:cronet-embedded/'
+        $$ExoPlayer$$/missing_aar_type_workaround.gradle
+      - sed -i -e 's/extension-cronet/extension-embeded/' ../gradle/libs.versions.toml
+      - sed -i -e '/repositories {/a mavenLocal()' ../build.gradle.kts
+    build:
+      - cd $$ExoPlayer$$/extensions/cronet
+      - gradle assembleRelease
+      - gradle publishToMavenLocal
+
 AllowedAPKSigningKeys: d881796ed2a67ff6ef9f676828723c6b1fa18e09388962cba4abc4a594a69131
 
 AutoUpdateMode: Version v%v
@@ -246,5 +280,5 @@ UpdateCheckMode: HTTP
 UpdateCheckIgnore: (beta|rc)
 UpdateCheckData: 
   https://repo.jellyfin.org/releases/client/android/version.txt|^v.*?=(\d+)|.|^v(.*?)=\d+
-CurrentVersion: 2.6.3
-CurrentVersionCode: 2060399
+CurrentVersion: 2.6.4
+CurrentVersionCode: 2060499
