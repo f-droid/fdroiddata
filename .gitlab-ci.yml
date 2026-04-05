@@ -496,7 +496,7 @@ check apk:
   before_script:
     - ls tmp/*.apk 2> /dev/null || exit 0
     - apt-get update
-    - apt-get install -qy --no-install-recommends fdroidserver curl
+    - apt-get install -qy --no-install-recommends fdroidserver curl unzip zip
     - export fdroidserver=$PWD/fdroidserver
     - *install_fdroid_server
     - sdkmanager "build-tools;36.0.0"
@@ -562,6 +562,33 @@ check apk:
             severity="info"
           fi
           generate_report $appid $location "Signing Key: $dn" "signing_key" "$file Signing Key" $severity >> codequality.json;
+        fi
+
+        # size and abi
+        size=$(ls -lh $apk | tr -s ' ' | cut -d ' ' -f 5);
+        tempd=$(mktemp -d);
+        unzip -q $apk -d $tempd;
+        if [[ -e $tempd/lib/ ]]; then
+          abis=$(ls "$tempd/lib/");
+            if [[ $(ls $tempd/lib/ | wc -l) -gt 1 ]]; then
+              abilist="";
+              for abi in $abis; do
+                cp -R $tempd extracted;
+                for other in $abis; do
+                  if [ $other != $abi ]; then
+                      rm -rf extracted/lib/$other;
+                  fi
+                done
+                zip -rq $abi.apk extracted;
+                abilist+="$abi ($(ls -lh $apk | tr -s ' ' | cut -d ' ' -f 5)) ";
+                rm -rf extracted $abi.apk
+              done
+              generate_report $appid $location "APK ABI and size: $abilist, $size" "abi_size" "$file ABI and size" "info" >> codequality.json;
+            else
+              generate_report $appid $location "APK ABI and size: $abis, $size" "abi_size" "$file ABI and size" "info" >> codequality.json;
+            fi
+        else
+          generate_report $appid $location "APK ABI and size: No native lib, $size" "abi_size" "$file ABI and size" "info" >> codequality.json;
         fi
       done
     - sed -i -e '$s/,$/]/' codequality.json
