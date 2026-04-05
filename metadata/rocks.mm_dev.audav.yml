@@ -1,0 +1,74 @@
+Categories:
+  - Multimedia
+License: GPL-3.0-only
+AuthorName: mm-dev
+SourceCode: https://codeberg.org/mm-dev/audav
+IssueTracker: https://codeberg.org/mm-dev/audav/issues
+Bitcoin: bc1qtd03k9fnulmxrgwsrruvp053rgal905em2c0cq
+
+AutoName: audav
+
+RepoType: git
+Repo: https://codeberg.org/mm-dev/audav.git
+
+Builds:
+  - versionName: 0.9.0
+    versionCode: 12
+    commit: e830ad308c925077731278201623e6c6b35ef51f
+    output: build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - 000-ASSETS
+      - linux
+      - macos
+      - test
+      - web
+      - windows
+    prebuild:
+      - flutterVersion=$(sed -n -E 's/^  flutter:\ "(.*)"/\1/p' pubspec.yaml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform="android-arm"
+
+  - versionName: 0.9.0
+    versionCode: 13
+    commit: e830ad308c925077731278201623e6c6b35ef51f
+    output: build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - 000-ASSETS
+      - linux
+      - macos
+      - test
+      - web
+      - windows
+    prebuild:
+      - flutterVersion=$(sed -n -E 's/^  flutter:\ "(.*)"/\1/p' pubspec.yaml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform="android-arm64"
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+VercodeOperation:
+  - '%c * 10 + 2'
+  - '%c * 10 + 3'
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 0.0.9
+CurrentVersionCode: 13
