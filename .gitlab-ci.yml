@@ -572,6 +572,8 @@ check apk:
           abis=$(ls "$tempd/lib/");
             if [[ $(ls $tempd/lib/ | wc -l) -gt 1 ]]; then
               abilist="";
+              filehashlist="";
+              filenamelist="";
               for abi in $abis; do
                 cp -R $tempd extracted;
                 for other in $abis; do
@@ -580,10 +582,15 @@ check apk:
                   fi
                 done
                 zip -rq $abi.apk extracted;
-                abilist+="$abi ($(ls -lh $apk | tr -s ' ' | cut -d ' ' -f 5)) ";
+                abilist+="$abi ($(ls -lh $abi.apk | tr -s ' ' | cut -d ' ' -f 5)) ";
+                filehashlist+="$(ls $tempd/lib/$abi | sort | md5sum)\n"
+                filenamelist+="$abi ($(ls -m $tempd/lib/$abi)) "
                 rm -rf extracted $abi.apk
               done
               generate_report $appid $location "APK ABI and size: $abilist, $size" "abi_size" "$file ABI and size" "info" >> codequality.json;
+              if [[ $(echo -e $filehashlist | uniq | wc -l) != 2 ]]; then
+                generate_report $appid $location "APK has different libs in different ABI: $filenamelist" "abi_diff" "$file ABI diff" "major" >> codequality.json;
+              fi
             else
               generate_report $appid $location "APK ABI and size: $abis, $size" "abi_size" "$file ABI and size" "info" >> codequality.json;
             fi
