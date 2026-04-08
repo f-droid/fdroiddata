@@ -51,10 +51,42 @@ Builds:
         -extldflags=-Wl,-z,max-page-size=16384' -o ../app/libs/tunnel.aar github.com/nqmgaming/blockads-tunnel
     ndk: r26b
 
+  - versionName: 6.1.6
+    versionCode: 43
+    commit: 5f415c54db52f6c7e41c47cf913adc973d622ac6
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y golang-go gcc libc-dev make
+    gradle:
+      - yes
+    output: build/outputs/apk/release/app-universal-release-unsigned.apk
+    srclibs:
+      - go@go1.23.5
+    rm:
+      - app/libs
+    build:
+      - pushd $$go$$/src
+      - ./make.bash
+      - popd
+      - export PATH="$$go$$/bin:$PATH"
+      - sdkmanager 'platforms;android-24'
+      - export GOPATH="$PWD/.gopath"
+      - export PATH="$GOPATH/bin:$PATH"
+      - export GOFLAGS="-buildvcs=false"
+      - go version
+      - go install github.com/sagernet/gomobile/cmd/gomobile@v0.1.12
+      - gomobile init
+      - mkdir -p libs
+      - cd ../tunnel
+      - gomobile bind -target=android -androidapi 24 -trimpath -ldflags='-s -w -buildid=
+        -extldflags=-Wl,-z,max-page-size=16384' -o ../app/libs/tunnel.aar github.com/nqmgaming/blockads-tunnel
+    ndk: r26b
+
 AllowedAPKSigningKeys: 229ea49584360b22a8c7e7e530cfb7e1103faa1b6ba5f32837691fb96fdcfe5a
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: app/build.gradle.kts|versionCode\s=\s(\d+)|.|versionName\s=\s"([\d.]+)"
-CurrentVersion: 6.1.4
-CurrentVersionCode: 41
+CurrentVersion: 6.1.6
+CurrentVersionCode: 43
