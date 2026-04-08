@@ -529,10 +529,37 @@ Builds:
     scandelete:
       - build-conventions-secant
 
+  - versionName: 3.2.1
+    versionCode: 1605
+    commit: 6768b6c71c5a66377d2527386968165203c046a8
+    subdir: app
+    sudo:
+      - export CPUS_MAX=8
+      - export CPUS=$(getconf _NPROCESSORS_ONLN)
+      - for (( c=$CPUS_MAX; c<$CPUS; c++ )) ; do echo 0 > /sys/devices/system/cpu/cpu$c/online
+        ; done
+    gradle:
+      - zcashmainnet
+      - foss
+    rm:
+      - ui-screenshot-test
+      - build-conventions-secant/src/main/kotlin/secant.emulator-wtf-conventions.gradle.kts
+    prebuild:
+      - cd ..
+      - sed -i -e '/JVM_TOOLCHAIN=/s/17/21/' gradle.properties
+      - sed -i -e '/start wtf maven/,/end wtf maven/d' -e '/include("ui-screenshot-test")/d'
+        settings.gradle.kts
+      - sed -i -e '/wtf.emulator.gradle/d' -e '/secant.emulator-wtf-conventions/d'
+        */build.gradle.kts
+      - sed -i -e '/gms/d' -e '/com.google.firebase/d' build.gradle.kts
+      - sed -i -e '/wtf.emulator/d' -e '/com.vdurmont/d' -e '/org.json:json/d' -e
+        '/gms/d' -e '/firebase/d' -e '/auto-value-gson-runtime/d' -e '/autotransient/d'
+        buildscript-gradle.lockfile build-conventions-secant/gradle.lockfile
+
 AllowedAPKSigningKeys: 412a1d2412a0be5ffbad9e7dd1eeedb9442dad8b9e9dffc334c07a0c3645ddfe
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: '|[\d.]+-(\d+)||([\d.]+)-\d+'
-CurrentVersion: 3.1.0
-CurrentVersionCode: 1516
+CurrentVersion: 3.2.1
+CurrentVersionCode: 1605
