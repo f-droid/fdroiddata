@@ -89,8 +89,48 @@ Builds:
       - buildozer android release
     ndk: r25b
 
+  - versionName: 0.2.10
+    versionCode: 1021210
+    commit: 94009c29be21b2e6b4149f6b12cec0aad56e739f
+    subdir: src
+    sudo:
+      - apt-get update
+      - apt-get install -y g++ libc-dev make automake libltdl-dev libtool zlib1g-dev
+        libffi-dev libssl-dev python3-pip python3-pexpect python3-virtualenv python3-sh
+        ant python3-platformdirs python3-colorama python3-jinja2 python3-build python3-toml
+        python3-packaging zip
+      - pip3 install --break-system-packages 'Cython==0.29.36'
+      - rm /opt/android-sdk/tools/bin/sdkmanager
+      - ln -s $(which sdkmanager) /opt/android-sdk/tools/bin/sdkmanager
+      - echo -e '#!/bin/sh\nls /opt/android-sdk/platforms | sed "s/android-/API level:\
+        /g"' > /opt/android-sdk/tools/bin/avdmanager
+      - chmod +x /opt/android-sdk/tools/bin/avdmanager
+    output: bin/*.apk
+    srclibs:
+      - cpython@v3.11.5
+      - python-for-android@v2024.01.21
+      - buildozer@1.5.0
+    prebuild:
+      - sdkmanager 'platforms;android-33' 'build-tools;33.0.0'
+      - sed -i -e 's/log_level =.*/log_level = 2/' -e '/^\[app\]/aandroid.ndk_path
+        = $$NDK$$\nandroid.sdk_path = $$SDK$$\nandroid.skip_update = True\np4a.source_dir
+        = $$python-for-android$$\nandroid.ant_path = /usr' -e 's/python3==3.11.5/python3==3.11.5,hostpython3==3.11.5/'
+        buildozer.spec
+      - sed -i 's/gradle-8.0.2-all/gradle-8.5-all/' 
+        $$python-for-android$$/pythonforandroid/bootstraps/common/build/gradle/wrapper/gradle-wrapper.properties
+    build:
+      - pushd $$cpython$$
+      - ./configure --prefix=$HOME/.local
+      - make -j`nproc`
+      - make altinstall
+      - popd
+      - export PATH="$PATH:$HOME/.local/bin"
+      - pip3.11 install $$buildozer$$
+      - buildozer android release
+    ndk: r25b
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: src/main.py|__version_code__ = (\d+)|.|__version__ = "([\d.]+)"
-CurrentVersion: 0.2.9
-CurrentVersionCode: 1021209
+CurrentVersion: 0.2.10
+CurrentVersionCode: 1021210
