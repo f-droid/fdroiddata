@@ -40,8 +40,36 @@ Builds:
       - $$flutter$$/bin/flutter gen-l10n
       - $$flutter$$/bin/flutter build apk --release
 
+  - versionName: 0.8.3
+    versionCode: 3
+    commit: 6b3bf07cc1869cdf93cccd954d16b790a27deed5
+    subdir: banana_split_flutter
+    sudo:
+      - echo "deb https://deb.debian.org/debian bookworm main" > /etc/apt/sources.list.d/bookworm.list
+      - apt-get update
+      - apt-get install -y -t bookworm openjdk-17-jdk-headless
+      - update-java-alternatives -s java-1.17.0-openjdk-amd64
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@stable
+    prebuild:
+      - sed -i -e '/mobile_scanner/d' pubspec.yaml
+      - mv lib/widgets/shard_scanner.dart.fdroid lib/widgets/shard_scanner.dart
+      - flutterVersion=$(sed -n -E "s/.*FLUTTER_VERSION:\ '(.*)'/\1/p" ../.github/workflows/release.yml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+    scandelete:
+      - banana_split_flutter/.pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter gen-l10n
+      - $$flutter$$/bin/flutter build apk --release
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: banana_split_flutter/pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 0.8.2
-CurrentVersionCode: 2
+CurrentVersion: 0.8.3
+CurrentVersionCode: 3
