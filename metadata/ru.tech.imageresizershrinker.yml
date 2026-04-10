@@ -868,10 +868,29 @@ Builds:
       - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
         --replace unaligned.apk $$OUT$$
 
+  - versionName: 3.8.0
+    versionCode: 225
+    commit: 2c707eacbba5099ee6c49b77cce12a87f6e78775
+    subdir: app
+    gradle:
+      - foss
+    output: 
+      build/outputs/apk/foss/release/image-toolbox-*-foss-universal-release-unsigned.apk
+    srclibs:
+      - reproducible-apk-tools@v0.3.0
+    prebuild:
+      - sed -i -e '/gms/d' -e '/firebase/d' ../build.gradle.kts ../build-logic/convention/src/main/kotlin/ImageToolboxApplicationPlugin.kt
+      - sed -i -e '/androidx.dev/,/^        }/d' ../settings.gradle.kts
+    ndk: r28c
+    postbuild:
+      - mv $$OUT$$ unaligned.apk
+      - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
+        --replace unaligned.apk $$OUT$$
+
 AllowedAPKSigningKeys: 20d7689de0874f00015ea3e31fa067c15c03457d362d41d5e793db3a864fa534
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^[0-9.]*$
 UpdateCheckData: gradle/libs.versions.toml|versionCode = "(\d+)"|.|versionName = "([\d.]+)"
-CurrentVersion: 3.7.1
-CurrentVersionCode: 216
+CurrentVersion: 3.8.0
+CurrentVersionCode: 225
