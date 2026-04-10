@@ -1,0 +1,42 @@
+Categories:
+  - Games
+License: CC0-1.0
+AuthorName: Egor Yakovlev (yepgoryo)
+SourceCode: https://github.com/yepgoryo/EggReturnsHome
+IssueTracker: https://github.com/yepgoryo/EggReturnsHome/issues
+Bitcoin: bc1q6jp0g9jhrcx5l75gyg4c698yvg5qtm08j826p5
+
+RepoType: git
+Repo: https://github.com/yepgoryo/EggReturnsHome
+
+Builds:
+  - versionName: '1.6'
+    versionCode: 1
+    commit: 88e9beb649e52ed2a4e8bb9bcc6db10ac7e2ef49
+    sudo:
+      - apt-get update
+      - apt-get install -y pkgconf scons g++
+    output: output.apk
+    srclibs:
+      - Godot@4.6.2-stable
+    prebuild: sed -i -e '/custom_template\/release/s|""|"$$Godot$$/bin/android_release.apk"|'
+      -e '/custom_template\/debug/s|""|"$$Godot$$/bin/android_release.apk"|' -e '/signed/s/true/false/'
+      export_presets.cfg
+    build:
+      - pushd $$Godot$$
+      - export ANDROID_NDK_ROOT=$$NDK$$
+      - export ANDROID_HOME=$$SDK$$
+      - export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+      - scons -j `nproc` platform=linuxbsd target=editor
+      - scons -j `nproc` platform=android target=template_release arch=arm64 generate_apk=yes
+      - popd
+      - $$Godot$$/bin/godot.linuxbsd.editor.x86_64 --headless --export-release "Android"
+        output.apk
+    ndk: r28b
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: Scripts/constants.gd|const VERSION_CODE = (\d+)|.|const VERSION =
+  "([\d.]+)"
+CurrentVersion: '1.6'
+CurrentVersionCode: 1
