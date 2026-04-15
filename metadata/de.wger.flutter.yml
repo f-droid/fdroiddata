@@ -733,8 +733,35 @@ Builds:
       - $$flutter$$/bin/flutter build apk
     ndk: r28c
 
+  - versionName: 1.11.0
+    versionCode: 200
+    commit: e3e33b717ce3240a920f8c997c1e789cabc5e6b5
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - flatpak
+      - ios
+      - windows
+      - linux
+      - macos
+      - web
+    prebuild:
+      - flutterVersion=$(sed -n -E "s/.*flutter-version:\ (.*)/\1/p" .github/actions/flutter-common/action.yml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk
+    ndk: r28c
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 1.10.2
-CurrentVersionCode: 190
+CurrentVersion: 1.11.0
+CurrentVersionCode: 200
