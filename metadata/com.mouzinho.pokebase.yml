@@ -79,8 +79,39 @@ Builds:
       - cd android
       - gradle assembleRelease
 
+  - versionName: 1.0.2
+    versionCode: 3
+    commit: 947ebf434a504c1e10f77037210e86bf99631ee7
+    sudo:
+      - echo "deb https://deb.debian.org/debian bookworm main" > /etc/apt/sources.list.d/bookworm.list
+      - apt-get update
+      - apt-get install -y nodejs npm
+      - apt-get install -y -t bookworm openjdk-17-jdk-headless
+    output: android/app/build/outputs/apk/release/app-release-unsigned.apk
+    prebuild:
+      - npm install
+      - sed -i -e '1a "expo":{"autolinking":{"android":{"buildFromSource":[".*"]}}},'
+        package.json
+      - npx expo prebuild --platform android --no-install
+      - rm -fr ios
+      - sed -i -e '/signingConfig /d' android/app/build.gradle
+    scanignore:
+      - node_modules/react-native/sdks/hermesc/linux64-bin/hermesc
+      - node_modules/expo-modules-autolinking/scripts/android/autolinking_implementation.gradle
+      - node_modules/expo-modules-core/android/ExpoModulesCorePlugin.gradle
+      - node_modules/@react-native-async-storage/async-storage/android/build.gradle
+      - node_modules/react-native-safe-area-context/android/build.gradle
+      - node_modules/react-native-screens/android/build.gradle
+      - node_modules/react-native-svg/android/build.gradle
+      - node_modules/react-native-pager-view/android/build.gradle
+    scandelete:
+      - node_modules
+    build:
+      - cd android
+      - gradle assembleRelease
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: app.json|"versionCode":\s(\d+)|.|"version":\s"([\d.]+)"
-CurrentVersion: 1.0.1
-CurrentVersionCode: 2
+CurrentVersion: 1.0.2
+CurrentVersionCode: 3
