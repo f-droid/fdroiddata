@@ -438,10 +438,11 @@ fdroid build:
           for file in "${appid}_${vercode}.apk"; do
             if [[ -e "$CI_PROJECT_DIR/tmp/$file" ]]; then
               binary="binaries/${appid}_${vercode}.binary.apk"
-              signed="${appid}_${vercode}.signed.apk"
+              signed="signed/${appid}_${vercode}.signed.apk"
               if [[ -e "$CI_PROJECT_DIR/tmp/$binary" ]]; then
                 echo '[{"location":{"path":"metadata/'$appid'.yml","lines":{"begin":'$location'}},"description":"Reproducible build APK: '$CI_PROJECT_URL'/-/jobs/'$CI_JOB_ID'/artifacts/raw/tmp/'$binary'","check_name":"built_apk","fingerprint":"'$binary'","severity":"info"}]' > "$CODEQUALITY_DIR/${binary#*/}.json";
               else
+                mkdir -p "$CI_PROJECT_DIR/tmp/signed"
                 KEYSTORE=$(mktemp -d)/keystore.jks
                 PASS=111111
                 echo -e "$PASS\n$PASS\ny\ny\ny\ny\ny\ny\ny" | keytool -genkey -keyalg RSA -keystore $KEYSTORE -keysize 2048 2> /dev/null
