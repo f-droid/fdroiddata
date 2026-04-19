@@ -72,10 +72,98 @@ Builds:
     scandelete:
       - rdp-kotlin/jniLibs/
 
+  - versionName: 5.20.1
+    versionCode: 2561
+    commit: 7f09569e6df70d5605a78cf0b5982904c3f619e3
+    subdir: app
+    submodules: true
+    sudo:
+      - echo "deb https://deb.debian.org/debian forky main" > /etc/apt/sources.list.d/forky.list
+      - apt-get update
+      - apt-get install -y -t trixie make binutils gawk libc-dev rustup golang-go
+        nasm yasm cmake xz-utils bzip2 perl pkg-config autoconf automake libtool libtool-bin
+        libltdl-dev meson ninja-build libexpat1-dev libffi-dev python3 bison g++ xutils-dev
+        python3-xcbgen
+      - apt-get install -y -t forky libwayland-dev
+    gradle:
+      - arm64
+    prebuild: sdkmanager "cmake;3.31.6"
+    scandelete:
+      - core/ffmpeg/src/main/jniLibs
+      - core/local/src/main/jniLibs
+      - core/wayland/src/main/jniLibs
+      - rdp-kotlin/jniLibs
+      - rclone-android/build
+      - wayland-android
+      - reticulum-kt/test-scripts
+    build:
+      - export PATH="$HOME/.cargo/bin:$HOME/go/bin:$PATH"
+      - rustup default 1.85.0
+      - rustup target add aarch64-linux-android
+      - cargo install cargo-ndk@3.5.4 --locked
+      - go install golang.org/x/mobile/cmd/gomobile@latest
+      - go install golang.org/x/mobile/cmd/gobind@latest
+      - bash ../build-proot/build.sh
+      - ABI=arm64-v8a bash ../build-ffmpeg/build.sh
+      - mkdir -p ../core/ffmpeg/src/main/jniLibs/arm64-v8a
+      - cp ../build-ffmpeg/build-arm64-v8a/install/bin/libffmpeg.so ../core/ffmpeg/src/main/jniLibs/arm64-v8a/
+      - cp ../build-ffmpeg/build-arm64-v8a/install/bin/libffprobe.so ../core/ffmpeg/src/main/jniLibs/arm64-v8a/
+      - cp ../build-ffmpeg/build-arm64-v8a/install/bin/libc++_shared.so ../core/ffmpeg/src/main/jniLibs/arm64-v8a/
+      - pushd ../wayland-android
+      - ABI=arm64-v8a ./build_liblabwc_android.sh
+      - mkdir -p ../core/wayland/src/main/jniLibs/arm64-v8a
+      - cp jniLibs/arm64-v8a/liblabwc_android.so ../core/wayland/src/main/jniLibs/arm64-v8a/
+      - popd
+    ndk: r28c
+
+  - versionName: 5.20.1
+    versionCode: 2562
+    commit: 7f09569e6df70d5605a78cf0b5982904c3f619e3
+    subdir: app
+    submodules: true
+    sudo:
+      - echo "deb https://deb.debian.org/debian forky main" > /etc/apt/sources.list.d/forky.list
+      - apt-get update
+      - apt-get install -y -t trixie make binutils gawk libc-dev rustup golang-go
+        nasm yasm cmake xz-utils bzip2 perl pkg-config autoconf automake libtool libtool-bin
+        libltdl-dev meson ninja-build libexpat1-dev libffi-dev python3 bison g++ xutils-dev
+        python3-xcbgen
+      - apt-get install -y -t forky libwayland-dev
+    gradle:
+      - x64
+    prebuild: sdkmanager "cmake;3.31.6"
+    scandelete:
+      - core/ffmpeg/src/main/jniLibs
+      - core/local/src/main/jniLibs
+      - core/wayland/src/main/jniLibs
+      - rdp-kotlin/jniLibs
+      - rclone-android/build
+      - wayland-android
+      - reticulum-kt/test-scripts
+    build:
+      - export PATH="$HOME/.cargo/bin:$HOME/go/bin:$PATH"
+      - rustup default 1.85.0
+      - rustup target add x86_64-linux-android
+      - cargo install cargo-ndk@3.5.4 --locked
+      - go install golang.org/x/mobile/cmd/gomobile@latest
+      - go install golang.org/x/mobile/cmd/gobind@latest
+      - bash ../build-proot/build.sh
+      - ABI=x86_64 bash ../build-ffmpeg/build.sh
+      - mkdir -p ../core/ffmpeg/src/main/jniLibs/x86_64
+      - cp ../build-ffmpeg/build-x86_64/install/bin/libffmpeg.so ../core/ffmpeg/src/main/jniLibs/x86_64/
+      - cp ../build-ffmpeg/build-x86_64/install/bin/libffprobe.so ../core/ffmpeg/src/main/jniLibs/x86_64/
+      - cp ../build-ffmpeg/build-x86_64/install/bin/libc++_shared.so ../core/ffmpeg/src/main/jniLibs/x86_64/
+      - pushd ../wayland-android
+      - ABI=x86_64 ./build_liblabwc_android.sh
+      - mkdir -p ../core/wayland/src/main/jniLibs/x86_64
+      - cp jniLibs/x86_64/liblabwc_android.so ../core/wayland/src/main/jniLibs/x86_64/
+      - popd
+    ndk: r28c
+
 AutoUpdateMode: Version
-UpdateCheckMode: Tags
+UpdateCheckMode: Tags ^v[\d.]+$
 VercodeOperation:
   - 10 * %c + 1
   - 10 * %c + 2
-CurrentVersion: 4.51.11
-CurrentVersionCode: 2032
+CurrentVersion: 5.20.1
+CurrentVersionCode: 2562
