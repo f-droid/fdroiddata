@@ -1,0 +1,51 @@
+Categories:
+  - Cloud Storage & File Sync
+  - Internet
+License: MPL-2.0
+AuthorName: Siddarth Kumar
+AuthorWebSite: https://siddarthkay.com
+WebSite: https://siddarthkay.com/projects/sycup
+SourceCode: https://github.com/siddarthkay/syncup
+IssueTracker: https://github.com/siddarthkay/syncup/issues
+Changelog: https://github.com/siddarthkay/syncup/releases
+
+AutoName: SyncUp
+
+RepoType: git
+Repo: https://github.com/siddarthkay/syncup
+Binaries: 
+  https://github.com/siddarthkay/syncup/releases/download/v%v/syncup-%v-arm64-v8a.apk
+
+Builds:
+  - versionName: 1.1.12
+    versionCode: 29628615
+    commit: 02cf729ce53bbc6a945e79b4fd7fe03e9cd50a34
+    sudo:
+      - apt-get update
+      - apt-get install -y make nix-setup-systemd nix
+      - chown -R vagrant /nix
+    output: mobile-app/android/app/build/outputs/apk/release/app-release.apk
+    prebuild:
+      - mkdir -p ~/.config/nix
+      - echo "experimental-features = nix-command flakes" >> ~/.config/nix/nix.conf
+      - sdkmanager "platforms;android-23"
+      - rm -rf mobile-app/ios
+      - make setup
+      - make patch-node-modules
+    scanignore:
+      - mobile-app/node_modules/react-native/sdks/hermesc
+    build:
+      - export ANDROID_NDK_HOME=$$NDK$$
+      - export ANDROID_NDK_ROOT=$$NDK$$
+      - export FDROID_VERSION_CODE=$$VERCODE$$
+      - make release-android ANDROID_TARGETS=android/arm64 ANDROID_ABI=arm64-v8a
+    ndk: r27b
+
+AllowedAPKSigningKeys: 813fe1ade9c8041814ad151f8bf7767421d0f4b962668812083117d9d81d5dae
+
+AutoUpdateMode: Version v%v
+UpdateCheckMode: HTTP
+UpdateCheckData: 
+  https://github.com/siddarthkay/syncup/releases/latest/download/VERSIONCODE|(\d+)|https://raw.githubusercontent.com/siddarthkay/syncup/HEAD/VERSION|(\d+\.\d+\.\d+)
+CurrentVersion: 1.1.12
+CurrentVersionCode: 29628615
