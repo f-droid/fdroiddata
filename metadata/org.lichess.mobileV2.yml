@@ -164,6 +164,149 @@ Builds:
       - popd
       - mv $repo org.lichess.mobileV2
 
+  - versionName: 0.23.5
+    versionCode: 230501
+    commit: 631c64934baea43227de85695ef29b6a188005a0
+    sudo:
+      - mkdir -p /home/runner/work/mobile
+      - chown -R vagrant /home/runner
+    output: build/app/outputs/flutter-apk/app-x86_64-release.apk
+    binary: https://github.com/lichess-org/mobile/releases/download/v%v/%c-x86_64-fdroid.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+      - linux
+    prebuild:
+      - export repo=/home/runner/work/mobile/mobile
+      - cd ..
+      - mv org.lichess.mobileV2 $repo
+      - pushd $repo
+      - flutterVersion=$(cat flutter-version)
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - git -C $$flutter$$ apply $repo/flutter.patch
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+      - sed -i -e '/play-services-cronet/d' $PUB_CACHE/hosted/pub.dev/cronet_http-*/android/build.gradle
+      - sed -i 's/-Wl,/-Wl,--build-id=none,/' 
+        .pub-cache/hosted/pub.dev/{{jni,multistockfish_chess,multistockfish_sf16}-*/src,multistockfish_variant-*/android}/CMakeLists.txt
+      - truncate -s 0 .pub-cache/hosted/pub.dev/webcrypto-*/android/CMakeLists.txt
+      - $$flutter$$/bin/dart run build_runner build
+      - popd
+      - mv $repo org.lichess.mobileV2
+    scandelete:
+      - .dart_tool
+      - .pub-cache
+    build:
+      - export repo=/home/runner/work/mobile/mobile
+      - cd ..
+      - mv org.lichess.mobileV2 $repo
+      - pushd $repo
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export SOURCE_DATE_EPOCH=0
+      - $$flutter$$/bin/flutter build apk --split-per-abi --target-platform="android-x64"
+        --dart-define=cronetHttpNoPlay=true --dart-define=LICHESS_HOST=lichess.org
+        --dart-define=LICHESS_WS_HOST=socket.lichess.org --dart-define=LICHESS_WS_SECRET=wG1OLhUR3CSXdDybqrtIW227QGrtiM3d
+      - popd
+      - mv $repo org.lichess.mobileV2
+
+  - versionName: 0.23.5
+    versionCode: 230502
+    commit: 631c64934baea43227de85695ef29b6a188005a0
+    sudo:
+      - mkdir -p /home/runner/work/mobile
+      - chown -R vagrant /home/runner
+    output: build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
+    binary: 
+      https://github.com/lichess-org/mobile/releases/download/v%v/%c-armeabi-v7a-fdroid.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+      - linux
+    prebuild:
+      - export repo=/home/runner/work/mobile/mobile
+      - cd ..
+      - mv org.lichess.mobileV2 $repo
+      - pushd $repo
+      - flutterVersion=$(cat flutter-version)
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - git -C $$flutter$$ apply $repo/flutter.patch
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+      - sed -i -e '/play-services-cronet/d' $PUB_CACHE/hosted/pub.dev/cronet_http-*/android/build.gradle
+      - sed -i 's/-Wl,/-Wl,--build-id=none,/' 
+        .pub-cache/hosted/pub.dev/{{jni,multistockfish_chess,multistockfish_sf16}-*/src,multistockfish_variant-*/android}/CMakeLists.txt
+      - truncate -s 0 .pub-cache/hosted/pub.dev/webcrypto-*/android/CMakeLists.txt
+      - $$flutter$$/bin/dart run build_runner build
+      - popd
+      - mv $repo org.lichess.mobileV2
+    scandelete:
+      - .dart_tool
+      - .pub-cache
+    build:
+      - export repo=/home/runner/work/mobile/mobile
+      - cd ..
+      - mv org.lichess.mobileV2 $repo
+      - pushd $repo
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export SOURCE_DATE_EPOCH=0
+      - $$flutter$$/bin/flutter build apk --split-per-abi --target-platform="android-arm"
+        --dart-define=cronetHttpNoPlay=true --dart-define=LICHESS_HOST=lichess.org
+        --dart-define=LICHESS_WS_HOST=socket.lichess.org --dart-define=LICHESS_WS_SECRET=wG1OLhUR3CSXdDybqrtIW227QGrtiM3d
+      - popd
+      - mv $repo org.lichess.mobileV2
+
+  - versionName: 0.23.5
+    versionCode: 230503
+    commit: 631c64934baea43227de85695ef29b6a188005a0
+    sudo:
+      - mkdir -p /home/runner/work/mobile
+      - chown -R vagrant /home/runner
+    output: build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+    binary: 
+      https://github.com/lichess-org/mobile/releases/download/v%v/%c-arm64-v8a-fdroid.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+      - linux
+    prebuild:
+      - export repo=/home/runner/work/mobile/mobile
+      - cd ..
+      - mv org.lichess.mobileV2 $repo
+      - pushd $repo
+      - flutterVersion=$(cat flutter-version)
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - git -C $$flutter$$ apply $repo/flutter.patch
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+      - sed -i -e '/play-services-cronet/d' $PUB_CACHE/hosted/pub.dev/cronet_http-*/android/build.gradle
+      - sed -i 's/-Wl,/-Wl,--build-id=none,/' 
+        .pub-cache/hosted/pub.dev/{{jni,multistockfish_chess,multistockfish_sf16}-*/src,multistockfish_variant-*/android}/CMakeLists.txt
+      - truncate -s 0 .pub-cache/hosted/pub.dev/webcrypto-*/android/CMakeLists.txt
+      - $$flutter$$/bin/dart run build_runner build
+      - popd
+      - mv $repo org.lichess.mobileV2
+    scandelete:
+      - .dart_tool
+      - .pub-cache
+    build:
+      - export repo=/home/runner/work/mobile/mobile
+      - cd ..
+      - mv org.lichess.mobileV2 $repo
+      - pushd $repo
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export SOURCE_DATE_EPOCH=0
+      - $$flutter$$/bin/flutter build apk --split-per-abi --target-platform="android-arm64"
+        --dart-define=cronetHttpNoPlay=true --dart-define=LICHESS_HOST=lichess.org
+        --dart-define=LICHESS_WS_HOST=socket.lichess.org --dart-define=LICHESS_WS_SECRET=wG1OLhUR3CSXdDybqrtIW227QGrtiM3d
+      - popd
+      - mv $repo org.lichess.mobileV2
+
 AllowedAPKSigningKeys: 496ed2c1542892a094a2a6e26d59cd07fb7e8c711355876dad3859ea82f8af62
 
 AutoUpdateMode: Version
@@ -173,5 +316,5 @@ VercodeOperation:
   - 100 * %c + 2
   - 100 * %c + 3
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 0.22.7
-CurrentVersionCode: 220703
+CurrentVersion: 0.23.5
+CurrentVersionCode: 230503
