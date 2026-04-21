@@ -6,17 +6,17 @@ License: Apache-2.0
 AuthorEmail: contact@tella-app.org
 AuthorWebSite: https://wearehorizontal.org
 WebSite: https://tella-app.org
-SourceCode: https://github.com/Horizontal-org/Tella-Android-FOSS
-IssueTracker: https://github.com/Horizontal-org/Tella-Android-FOSS/issues
+SourceCode: https://github.com/Horizontal-org/Tella-Android
+IssueTracker: https://github.com/Horizontal-org/Tella-Android/issues
 Translation: https://app.lokalise.com/public/9394139661a3d89da6fa91.77098206/
 Donate: https://wearehorizontal.org/donate.html
 
 AutoName: Tella
 
 RepoType: git
-Repo: https://github.com/Horizontal-org/Tella-Android-FOSS.git
+Repo: https://github.com/Horizontal-org/Tella-Android.git
 Binaries: 
-  https://github.com/Horizontal-org/Tella-Android-FOSS/releases/download/v%v(%c)/mobile-release-FOSS-%c.apk
+  https://github.com/Horizontal-org/Tella-Android/releases/download/vFoss%v(%c)/mobile-release-Foss-%c.apk
 
 Builds:
   - versionName: 2.0.15
@@ -37,9 +37,42 @@ Builds:
     gradle:
       - yes
 
+  - versionName: 2.20.2
+    versionCode: 232
+    commit: 2cdd61608e267e03411539a20dd46cf219d7cb2a
+    subdir: mobile
+    gradle:
+      - fdroid
+    output: build/outputs/apk/fdroid/release/mobile-fdroid-release*.apk
+    srclibs:
+      - reproducible-apk-tools@v0.3.0
+    prebuild:
+      - perl -ni -e 'print unless /firebase|crashlytics|com\.google\.gms/' ../build.gradle
+      - perl -ni -e 'print unless /firebase|crashlytics|com\.google\.gms/ && !/\.contains\(/
+        && !/ENABLE_CRASHLYTICS/' build.gradle
+      - if [ -d src/main/assets ]; then find src/main/assets -type f \( -name '*.json'
+        -o -name '*.properties' \) -exec perl -0777 -pi -e 's/\r\n/\n/g' {} +; fi
+      - printf '%s\n' 'org.gradle.caching=false' 'org.gradle.parallel=false' 'org.gradle.workers.max=1'
+        'org.gradle.configureondemand=false' >> ../gradle.properties
+    build: gradle clean assembleFdroidRelease
+    ndk: 28.0.12916984
+    gradleprops:
+      - fdroid
+    postbuild:
+      - $$reproducible-apk-tools$$/inplace-fix.py --page-size 16 sort-baseline $$OUT$$
+        --apk
+      - $$reproducible-apk-tools$$/inplace-fix.py --page-size 16 fix-pg-map-id $$OUT$$
+        '381d455'
+      - $$reproducible-apk-tools$$/inplace-fix.py --page-size 16 fix-newlines $$OUT$$
+        --from-crlf 'META-INF/services/*'
+      - mv $$OUT$$ unaligned.apk
+      - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
+        --replace unaligned.apk $$OUT$$
+
 AllowedAPKSigningKeys: 0f98d162b443e71de141a93aec27c6d5acaa725dba4c3fca97457258c193a729
 
 AutoUpdateMode: Version
-UpdateCheckMode: Tags
-CurrentVersion: 2.11.0
-CurrentVersionCode: 186
+UpdateCheckMode: Tags ^vFoss[0-9]+\.[0-9]+\.[0-9]+\([0-9]+\)$
+UpdateCheckData: mobile/build.gradle|versionCode\s+(\d+)|.|versionName\s+"([^"]+)"
+CurrentVersion: 2.20.2
+CurrentVersionCode: 232
