@@ -4047,8 +4047,36 @@ Builds:
       - $$flutter$$/bin/flutter build apk --flavor nightly
     ndk: r28c
 
+  - versionName: 2.5.1-rc.1
+    versionCode: 175
+    commit: 9a3e2ea98462caf39697f898b469e2de96092cb8
+    subdir: app
+    output: build/app/outputs/flutter-apk/app-nightly-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - app/ios
+      - app/linux
+      - app/macos
+      - app/web
+      - app/windows
+    prebuild:
+      - sed -i -e '/signingConfig =/,+4d' android/app/build.gradle.kts
+      - flutterVersion=$(sed -n -E "s/^  flutter:\ (.*)/\1/p" pubspec.yaml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+    scandelete:
+      - app/.pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --flavor nightly
+    ndk: r28c
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v.+-.+$
 UpdateCheckData: app/pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 2.5.1-rc.0
-CurrentVersionCode: 174
+CurrentVersion: 2.5.1-rc.1
+CurrentVersionCode: 175
