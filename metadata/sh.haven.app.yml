@@ -117,9 +117,54 @@ Builds:
       - popd
     ndk: r28c
 
+  - versionName: 5.24.19
+    versionCode: 2831
+    commit: 3927a8520069bd8c0f486fd45d2b600bcbfb3d26
+    subdir: app
+    submodules: true
+    sudo:
+      - echo "deb https://deb.debian.org/debian forky main" > /etc/apt/sources.list.d/forky.list
+      - apt-get update
+      - apt-get install -y -t trixie make binutils gawk libc-dev rustup golang-go
+        nasm yasm cmake xz-utils bzip2 perl pkg-config autoconf automake libtool libtool-bin
+        libltdl-dev meson ninja-build libexpat1-dev libffi-dev python3 bison g++ xutils-dev
+        python3-xcbgen
+      - apt-get install -y -t forky libwayland-dev
+    gradle:
+      - arm64
+    prebuild: sdkmanager "cmake;3.31.6" "platforms;android-26"
+    scandelete:
+      - core/ffmpeg/src/main/jniLibs
+      - core/local/src/main/jniLibs
+      - core/wayland/src/main/jniLibs
+      - rdp-kotlin/jniLibs
+      - rclone-android/build
+      - wayland-android
+      - reticulum-kt/test-scripts
+    build:
+      - export PATH="$HOME/.cargo/bin:$HOME/go/bin:$PATH"
+      - rustup default 1.85.0
+      - rustup target add aarch64-linux-android
+      - cargo install cargo-ndk@3.5.4 --locked
+      - go install golang.org/x/mobile/cmd/gomobile@latest
+      - go install golang.org/x/mobile/cmd/gobind@latest
+      - bash ../rclone-android/tools/build-android.sh
+      - bash ../build-proot/build.sh
+      - ABI=arm64-v8a bash ../build-ffmpeg/build.sh
+      - mkdir -p ../core/ffmpeg/src/main/jniLibs/arm64-v8a
+      - cp ../build-ffmpeg/build-arm64-v8a/install/bin/libffmpeg.so ../core/ffmpeg/src/main/jniLibs/arm64-v8a/
+      - cp ../build-ffmpeg/build-arm64-v8a/install/bin/libffprobe.so ../core/ffmpeg/src/main/jniLibs/arm64-v8a/
+      - cp ../build-ffmpeg/build-arm64-v8a/install/bin/libc++_shared.so ../core/ffmpeg/src/main/jniLibs/arm64-v8a/
+      - pushd ../wayland-android
+      - ABI=arm64-v8a ./build_liblabwc_android.sh
+      - mkdir -p ../core/wayland/src/main/jniLibs/arm64-v8a
+      - cp jniLibs/arm64-v8a/liblabwc_android.so ../core/wayland/src/main/jniLibs/arm64-v8a/
+      - popd
+    ndk: r28c
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v[\d.]+$
 VercodeOperation:
   - 10 * %c + 1
-CurrentVersion: 5.24.12
-CurrentVersionCode: 2761
+CurrentVersion: 5.24.19
+CurrentVersionCode: 2831
