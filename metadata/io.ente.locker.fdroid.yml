@@ -90,8 +90,81 @@ Builds:
         --dart-define=cronetHttpNoPlay=true
     ndk: r21
 
+  - versionName: 1.0.2
+    versionCode: 99
+    commit: bc81ba9ce06441234a12113d7a059176af6afd2a
+    subdir: mobile/apps/locker
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y automake libtool make gcc libc-dev rustup
+    output: build/app/outputs/flutter-apk/app-fdroid-release.apk
+    srclibs:
+      - libsodium@ee009287afd480b60a9a4d75b19afdc0f705e9d9
+      - flutter@stable
+    rm:
+      - architecture
+      - cli
+      - desktop
+      - docs
+      - infra
+      - server
+      - web
+      - mobile/apps/auth
+      - mobile/apps/photos
+      - mobile/apps/locker/ios
+      - mobile/apps/locker/linux
+      - mobile/apps/locker/macos
+      - mobile/apps/locker/web
+      - mobile/apps/locker/windows
+    prebuild:
+      - sed -i -e "s/'stable'/'1.94.1'/" ../../packages/rust/cargokit/build_tool/lib/src/builder.dart
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - flutterVersion=$(sed -n -E 's/.*FLUTTER_VERSION:\ "(.*)"/\1/p' ../../../.github/workflows/locker-release.yml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - $$flutter$$/bin/flutter config --no-analytics
+      - pushd ../../packages/strings
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - $$flutter$$/bin/flutter gen-l10n
+      - popd
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - sed -i -e '/play-services-cronet/d' $PUB_CACHE/hosted/pub.dev/cronet_http-*/android/build.gradle
+    scandelete:
+      - mobile/apps/locker/.pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export PATH=$$flutter$$/bin:$HOME/.cargo/bin:$PATH
+      - rustup default 1.94.1
+      - cargo install flutter_rust_bridge_codegen@2.12.0 --locked
+      - pushd ../../packages/rust
+      - flutter_rust_bridge_codegen generate
+      - popd
+      - sodiumLibsPkg=$(python3 -c "import json; from urllib.parse import urlparse,
+        unquote; pkg = next(p for p in json.load(open('.dart_tool/package_config.json'))['packages']
+        if p['name'] == 'sodium_libs'); print(unquote(urlparse(pkg['rootUri']).path))")
+      - '[[ -n "$sodiumLibsPkg" && -d "$sodiumLibsPkg" ]]'
+      - sed -i -e '/dependsOn downloadLibsodium/d' $sodiumLibsPkg/android/build.gradle
+      - sodiumLibsPath="$sodiumLibsPkg/android/src/main/jniLibs"
+      - mkdir -p "$sodiumLibsPath"/armeabi-v7a "$sodiumLibsPath"/x86_64 "$sodiumLibsPath"/arm64-v8a
+        "$sodiumLibsPath"/x86
+      - pushd $$libsodium$$
+      - ./autogen.sh -s
+      - ./dist-build/android-armv7-a.sh
+      - ./dist-build/android-armv8-a.sh
+      - ./dist-build/android-x86.sh
+      - ./dist-build/android-x86_64.sh
+      - popd
+      - cp $$libsodium$$/libsodium-android-armv7-a/lib/libsodium.so "$sodiumLibsPath"/armeabi-v7a/
+      - cp $$libsodium$$/libsodium-android-westmere/lib/libsodium.so "$sodiumLibsPath"/x86_64/
+      - cp $$libsodium$$/libsodium-android-armv8-a+crypto/lib/libsodium.so "$sodiumLibsPath"/arm64-v8a/
+      - cp $$libsodium$$/libsodium-android-i686/lib/libsodium.so "$sodiumLibsPath"/x86/
+      - $$flutter$$/bin/flutter build apk --release --flavor fdroid -t lib/main.dart
+        --dart-define=cronetHttpNoPlay=true
+    ndk: r21
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^locker-v[0-9.]+$
 UpdateCheckData: mobile/apps/locker/pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 1.0.1
-CurrentVersionCode: 95
+CurrentVersion: 1.0.2
+CurrentVersionCode: 99
