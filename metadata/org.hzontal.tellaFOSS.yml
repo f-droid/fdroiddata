@@ -69,10 +69,27 @@ Builds:
       - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
         --replace unaligned.apk $$OUT$$
 
+  - versionName: 2.20.2
+    versionCode: 233
+    commit: e157b6d397e8bc8a6c6ce22dd41974f2a58ac854
+    subdir: mobile
+    gradle:
+      - fdroid
+    srclibs:
+      - reproducible-apk-tools@v0.3.0
+    prebuild: sed -i -e '/firebase/d' -e '/gms/d' {..,.}/build.gradle
+    ndk: 28.0.12916984
+    postbuild:
+      - $$reproducible-apk-tools$$/inplace-fix.py --page-size 16 fix-pg-map-id $$OUT$$
+        '381d455'
+      - mv $$OUT$$ unaligned.apk
+      - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
+        --replace unaligned.apk $$OUT$$
+
 AllowedAPKSigningKeys: 0f98d162b443e71de141a93aec27c6d5acaa725dba4c3fca97457258c193a729
 
 AutoUpdateMode: Version
-UpdateCheckMode: Tags ^vFoss[0-9]+\.[0-9]+\.[0-9]+\([0-9]+\)$
-UpdateCheckData: mobile/build.gradle|versionCode\s+(\d+)|.|versionName\s+"([^"]+)"
+UpdateCheckMode: Tags ^vFoss
+UpdateCheckName: org.hzontal.tella
 CurrentVersion: 2.20.2
-CurrentVersionCode: 232
+CurrentVersionCode: 233
