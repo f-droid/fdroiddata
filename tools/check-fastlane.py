@@ -27,7 +27,7 @@ def check_fastlane(app: metadata.App) -> list[dict[str, str]]:
         reports.append(
             {
                 "description": "Fastlane/Triple-T is not found",
-                "fingerprint": "fastlane not found",
+                "fingerprint": f"{app.id} fastlane not found",
                 "severity": "critical",
             }
         )
@@ -42,7 +42,7 @@ def check_fastlane(app: metadata.App) -> list[dict[str, str]]:
         reports.append(
             {
                 "description": "Fastlane/Triple-T for en-US not found or incomplete",
-                "fingerprint": "fastlane en-US not found",
+                "fingerprint": f"{app.id} fastlane en-US not found",
                 "severity": "critical",
             }
         )
@@ -71,7 +71,7 @@ def check_fastlane(app: metadata.App) -> list[dict[str, str]]:
                     reports.append(
                         {
                             "description": f"Fastlane/Triple-T has invalid locale {locale}, maybe a typo of {locale.replace(*replace)}",
-                            "fingerprint": f"fastlane invalid locale {locale}",
+                            "fingerprint": f"{app.id} fastlane invalid locale {locale}",
                             "severity": "major",
                         }
                     )
@@ -80,7 +80,7 @@ def check_fastlane(app: metadata.App) -> list[dict[str, str]]:
                 reports.append(
                     {
                         "description": f"Fastlane/Triple-T has invalid locale {locale}",
-                        "fingerprint": f"fastlane invalid locale {locale}",
+                        "fingerprint": f"{app.id} fastlane invalid locale {locale}",
                         "severity": "major",
                     }
                 )
@@ -90,7 +90,7 @@ def check_fastlane(app: metadata.App) -> list[dict[str, str]]:
                 reports.append(
                     {
                         "description": f"Fastlane/Triple-T {file} in {locale} should be shorter than {limit - 1} characters",
-                        "fingerprint": f"fastlane {locale} {file} exceed",
+                        "fingerprint": f"{app.id} fastlane {locale} {file} exceed",
                         "severity": "minor",
                     }
                 )
@@ -106,7 +106,7 @@ def check_fastlane(app: metadata.App) -> list[dict[str, str]]:
         reports.append(
             {
                 "description": f"Fastlane/Triple-T in {locale}: {', '.join(items)}",
-                "fingerprint": f"fastlane {locale} found",
+                "fingerprint": f"{app.id} fastlane {locale} found",
                 "severity": "info",
             }
         )
@@ -117,7 +117,7 @@ def check_fastlane(app: metadata.App) -> list[dict[str, str]]:
             reports.append(
                 {
                     "description": f"Fastlane/Triple-T in {locale} uses Markdown in description",
-                    "fingerprint": f"fastlane {locale} markdown",
+                    "fingerprint": f"{app.id} fastlane {locale} markdown",
                     "severity": "minor",
                 }
             )
