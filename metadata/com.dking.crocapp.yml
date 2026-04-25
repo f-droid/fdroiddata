@@ -1,0 +1,42 @@
+Categories:
+  - File Transfer
+  - Internet
+License: MIT
+AuthorName: Dastageer
+AuthorEmail: dastageer_foss@yahoo.com
+SourceCode: https://github.com/Dking08/croc-app
+IssueTracker: https://github.com/Dking08/croc-app/issues
+
+AutoName: croc-app
+
+RepoType: git
+Repo: https://github.com/Dking08/croc-app
+Binaries: https://github.com/Dking08/croc-app/releases/download/v%v/croc-app.apk
+
+Builds:
+  - versionName: 3.2.0
+    versionCode: 5
+    commit: dbbe01b89fa1353adcbec59657a2ff6cb3457f3b
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y golang-go gcc libc-dev
+    gradle:
+      - yes
+    srclibs:
+      - go@go1.25.3
+      - reproducible-apk-tools@v0.3.0
+    build:
+      - pushd $$go$$/src
+      - ./make.bash
+      - popd
+      - ln -sfn $$go$$ ../.fdroid-go
+    postbuild: $$reproducible-apk-tools$$/inplace-fix.py --zipalign fix-newlines $$OUT$$
+      'META-INF/services/*'
+
+AllowedAPKSigningKeys: 73aa29bf436123e6765233d11f05ed82d8ee72d4d3f8d9a00ed6a270be9a296a
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: 3.2.0
+CurrentVersionCode: 5
