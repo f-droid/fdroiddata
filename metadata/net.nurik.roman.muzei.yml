@@ -467,6 +467,37 @@ Builds:
       - sed -i -e '/signing {/,/^}/d' -e '/^publishing {/,/^}/d' ../muzei-api/build.gradle
       - sed -i -e '/agp/s/8.12.0/8.11.1/' ../gradle/libs.versions.toml
 
+  - versionName: 3.7.0-alpha02
+    versionCode: 370005
+    commit: fd2cd981e9a036a450303e7f56f6d0994fca10aa
+    subdir: main
+    gradle:
+      - yes
+    forceversion: true
+    rm:
+      - wearable
+      - example-unsplash
+      - main/google-services.json
+      - android-client-common/src/main/java/com/google/android/apps/muzei/wearable
+      - main/src/main/java/com/google/android/apps/muzei/wearable
+    prebuild:
+      - sed -i -e '/foojay/d' -e '/wearable/d' -e '/example-unsplash/d' ../settings.gradle
+      - sed -i -e '/gms/d' -e '/firebase/d' -e '/libs.coroutines.playservices/d' -e
+        '/libs.wearable.playservices/d' ../build.gradle ../*/build.gradle
+      - sed -i -e '/signingConfigs.release/d' -e '/FirebasePerformance/,/}$/d' -e
+        '/kotlinx-coroutines-play-services/d' build.gradle
+      - sed -i -e '/props/d' ../muzei-api/build.gradle
+      - pushd src/main/java/com/google/android/apps/muzei
+      - sed -i -e '/Firebase.analytics.logEvent($/,/})/d' notifications/NewWallpaperNotificationReceiver.kt
+      - sed -i -e '/com.google.firebase/d' -e '/Firebase.analytics.logEvent.*)$/d'
+        -e '/Firebase.analytics.logEvent.*{$/,/}$/d' -e '/Firebase/d' *.kt */*.kt
+      - sed -i -e '/WearableController/d' MuzeiWallpaperService.kt
+      - popd
+      - sed -i -z -E -e 's/<service\s+\S+wearable.*service>//' src/main/AndroidManifest.xml
+      - sed -i -e '/<queries>/i <uses-permission android:name="android.permission.INTERNET"
+        />' src/main/AndroidManifest.xml
+      - sed -i -e '/signing {/,/^}/d' -e '/^publishing {/,/^}/d' ../muzei-api/build.gradle
+
 MaintainerNotes: |-
   Custom version format, use the tag name as version name.
 
@@ -477,5 +508,5 @@ MaintainerNotes: |-
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v.*$
 UpdateCheckData: version.properties|code\s=\s(\d+)||v(.*)
-CurrentVersion: 3.7.0-alpha01
-CurrentVersionCode: 370003
+CurrentVersion: 3.7.0-alpha02
+CurrentVersionCode: 370005
