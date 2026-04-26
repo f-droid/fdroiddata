@@ -2123,6 +2123,33 @@ Builds:
       - $$reproducible-apk-tools$$/zipalign.py --page-size 4 --pad-like-apksigner
         --replace unaligned.apk $$OUT$$
 
+  - versionName: '11.03'
+    versionCode: 110300
+    commit: v11.03
+    subdir: wallet
+    sudo:
+      - rm /home/vagrant/gradlew-fdroid/gradlew-fdroid
+      - ln -s /usr/bin/gradle /home/vagrant/gradlew-fdroid/gradlew-fdroid
+      - ln -fs /usr/share/zoneinfo/CET /etc/localtime
+      - dpkg-reconfigure -f noninteractive tzdata
+      - apt-get update
+      - apt-get install -y gradle disorderfs
+    init:
+      - cd ../..
+      - mv de.schildbach.wallet de.schildbach.wallet_underlying
+      - mkdir de.schildbach.wallet
+      - disorderfs --sort-dirents=yes --reverse-dirents=no de.schildbach.wallet_underlying
+        de.schildbach.wallet
+      - cd de.schildbach.wallet/wallet
+    gradle:
+      - mainnet
+    srclibs:
+      - reproducible-apk-tools@v0.3.0
+    postbuild:
+      - mv $$OUT$$ unaligned.apk
+      - $$reproducible-apk-tools$$/zipalign.py --page-size 4 --pad-like-apksigner
+        --replace unaligned.apk $$OUT$$
+
 AllowedAPKSigningKeys:
   - bcb4b93636bb10c7ddaf61aa9604ff795dfdb05fad4d9412b335682f0b612e32
   - 58dcd8a0edf2a590683ba022d22a8dca5659aabf4728741a5c07af738d53db38
@@ -2134,5 +2161,5 @@ MaintainerNotes: |-
 
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: '11.02'
-CurrentVersionCode: 110200
+CurrentVersion: '11.03'
+CurrentVersionCode: 110300
