@@ -182,10 +182,34 @@ Builds:
       - export PUB_CACHE=$(pwd)/.pub-cache
       - $$flutter$$/bin/flutter build apk --flavor=fdroid
 
+  - versionName: 3.0.9
+    versionCode: 19
+    commit: 35a156275f3b90f09a88b6d5405a9750856f90a2
+    output: build/app/outputs/flutter-apk/app-fdroid-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - macos
+      - web
+      - screenshots
+    prebuild:
+      - sed -i -e '/^    _fetchRules();/d' lib/main.dart
+      - flutterVersion=$(sed -n -E 's/.*flutter-version:\ "(.*)"/\1/p' .github/workflows/main.yml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter packages pub get
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --flavor=fdroid
+
 MaintainerNotes: RSSHub itself is MIT licensed (https://github.com/DIYgod/RSSHub).
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 3.0.4
-CurrentVersionCode: 14
+CurrentVersion: 3.0.9
+CurrentVersionCode: 19
