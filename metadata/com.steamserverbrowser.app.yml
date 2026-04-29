@@ -1,0 +1,44 @@
+AntiFeatures:
+  NonFreeNet:
+    en-US: App connects to api.steampowered.com to retrieve the server list and game
+      names.
+Categories:
+  - Internet
+License: GPL-3.0-only
+AuthorName: surf5726
+SourceCode: https://github.com/surf5726/SteamServerBrowserAndroid
+IssueTracker: https://github.com/surf5726/SteamServerBrowserAndroid/issues
+Changelog: https://github.com/surf5726/SteamServerBrowserAndroid/releases
+
+AutoName: Steam Server Browser
+
+RepoType: git
+Repo: https://github.com/surf5726/SteamServerBrowserAndroid
+
+Builds:
+  - versionName: 1.0.0
+    versionCode: 1
+    commit: 1fdf985a45c87082bad87089ad40f402d9666696
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@stable
+    prebuild:
+      - flutterVersion=$(sed -n -E "s/.*flutter-version:\ '(.*)'/\1/p" .github/workflows/release.yml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+      - sed -i -e '/play-services-cronet/d' $PUB_CACHE/hosted/pub.dev/cronet_http-*/android/build.gradle
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --target-platform android-arm64
+        --dart-define=cronetHttpNoPlay=true
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 1.0.0
+CurrentVersionCode: 1
