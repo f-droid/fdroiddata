@@ -199,10 +199,37 @@ Builds:
       - popd
       - gradle assembleRelease
 
+  - versionName: 0.12.0
+    versionCode: 22
+    commit: 9dfa2ef5b6f01c988b3cab39f4d28ea70c505948
+    subdir: android/app
+    sudo:
+      - echo "deb https://deb.debian.org/debian bookworm main" > /etc/apt/sources.list.d/bookworm.list
+      - apt-get update
+      - apt-get install -y npm
+      - apt-get install -y -t bookworm openjdk-17-jdk-headless
+      - update-java-alternatives -s java-1.17.0-openjdk-amd64
+    gradle:
+      - yes
+    prebuild:
+      - cd ../..
+      - npm ci
+      - find node_modules/ -iname "*.node" -exec rm {} \;
+      - sed -i -e '/gms/d' android/build.gradle
+    scanignore:
+      - node_modules/@capacitor/cli/assets/capacitor-cordova-android-plugins.tar.gz
+    scandelete:
+      - node_modules/
+    build:
+      - pushd ../..
+      - COMMIT_HASH=$(git rev-parse --short=7 HEAD) npm run build-prod
+      - npx cap sync android
+      - popd
+
 AllowedAPKSigningKeys: 0b712c45eba65a7ee6e5ba3b4d0ab62e0a3c5386c1007b2047c2a58de9c79f31
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v.*$
 UpdateCheckData: android/app/build.gradle|versionCode\s(\d+)||v([\d.]+)
-CurrentVersion: 0.10.0
-CurrentVersionCode: 20
+CurrentVersion: 0.12.0
+CurrentVersionCode: 22
