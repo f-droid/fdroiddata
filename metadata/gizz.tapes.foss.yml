@@ -73,8 +73,24 @@ Builds:
       - for d in buildSrc android networking networking-integration; do mv ../$d/$d.gradle.kts
         ../$d/build.gradle.kts; done
 
+  - versionName: JOJAM
+    versionCode: 64
+    commit: 42136b7d49c0e592ee4ac754c4df69f59b8623ee
+    subdir: androidApp
+    gradle:
+      - foss
+    rm:
+      - iosApp
+    prebuild:
+      - sed -i -e '/foojay/d' ../settings.gradle.kts
+      - sed -i -e '/firebase/d' -e '/gms/d' -e '/google.services/d' -e '/CrashlyticsExtension/,+2d'
+        -e '/GoogleServicesTask/,+2d' -e '/signingConfig =/d' androidApp.gradle.kts
+      - sed -i -e '/buildFileName/d' ../{.,buildSrc}/settings.gradle.kts
+      - for d in buildSrc androidApp composeApp networking networking-integration;
+        do mv ../$d/$d.gradle.kts ../$d/build.gradle.kts; done
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: gradle.properties|defaultBuildNumber=(\d+)|.|versionName=(.+)
-CurrentVersion: IceV
-CurrentVersionCode: 63
+CurrentVersion: JOJAM
+CurrentVersionCode: 64
