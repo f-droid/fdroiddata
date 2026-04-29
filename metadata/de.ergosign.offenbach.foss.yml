@@ -1,0 +1,45 @@
+AntiFeatures:
+  NonFreeNet:
+    en-US: Connects to proprietary city and event APIs (offenbach.de, rce-event.de)
+      and the NINA warning service.
+  TetheredNet:
+    en-US: Relies on OpenStreetMap for map data.
+Categories:
+  - Internet
+License: EUPL-1.2
+SourceCode: https://gitlab.opencode.de/offenbach/offenbach-app
+IssueTracker: https://gitlab.opencode.de/offenbach/offenbach-app/-/issues
+
+AutoName: Offenbach App
+
+RepoType: git
+Repo: https://gitlab.opencode.de/offenbach/offenbach-app.git
+
+Builds:
+  - versionName: 1.1.5
+    versionCode: 36
+    commit: d0b9c2ed3a17cf28b1be314884558068067735ef
+    subdir: offenbach_app
+    output: build/app/outputs/flutter-apk/app-foss-release.apk
+    srclibs:
+      - flutter@stable
+    prebuild:
+      - flutterVersion=$(sed -n -E 's/.*"flutter":\s*"([^"]+)".*/\1/p' ../.fvmrc)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+    scandelete:
+      - offenbach_app/.pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk -t lib/main_foss.dart --flavor "foss" --dart-define-from-file
+        "env/foss.json" --release
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: 
+  offenbach_app/pubspec.yaml|version:\s*.+\+([0-9]+)|offenbach_app/pubspec.yaml|version:\s*([0-9.]+)\+
+CurrentVersion: 1.1.5
+CurrentVersionCode: 36
