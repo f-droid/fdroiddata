@@ -565,9 +565,38 @@ Builds:
     build: ../scripts/build_deps.sh
     ndk: r21e
 
+  - versionName: 1.6.0
+    versionCode: 183000
+    commit: d49f368b046971f35511c7ae08886cb45d302f81
+    subdir: app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y make g++ swig lib32stdc++6 lib32z1 autogen automake autopoint
+        libtool pkg-config po4a xutils-dev libzstd-dev
+    gradle:
+      - normal
+      - production
+      - fat
+    rm:
+      - tor-android/external/openssl/fuzz
+      - tor-android/external/openssl/cloudflare-quiche/fuzz
+      - tor-android/external/openssl/cloudflare-quiche/quiche/deps/boringssl/src/fuzz
+    prebuild:
+      - sed -i -e 's|./gradlew|gradle|' ../scripts/build_deps.sh
+      - sed -i -e '/signingConfigs.getByName/d' -e 's/isEnable\ =\ true/isEnable\
+        =\ false/' ../ics-openvpn/main/build.gradle.kts
+      - sed -i -e '/gpmaven/d' ../tor-android/sampletorapp/build.gradle
+    scandelete:
+      - bitmask-core-android
+      - ics-openvpn/main/src/main/cpp
+      - tor-android/external
+    build: ../scripts/build_deps.sh > $HOME/tmp/build.log
+    ndk: r28c
+
 MaintainerNotes: The "build" commands are extracted from build_deps.sh.
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^[0-9.]+$
-CurrentVersion: 1.5.3
-CurrentVersionCode: 182000
+CurrentVersion: 1.6.0
+CurrentVersionCode: 183000
