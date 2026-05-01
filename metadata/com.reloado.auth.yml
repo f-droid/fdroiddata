@@ -130,6 +130,120 @@ Builds:
       - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
         --replace unaligned.apk $$OUT$$
 
+  - versionName: 1.0.3
+    versionCode: 41
+    commit: 9aedecad61811a5d993af0427087d562e2e94ba2
+    output: build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
+    binary: 
+      https://github.com/refda/reloado_auth/releases/download/v%v/app-armeabi-v7a-release.apk
+    srclibs:
+      - flutter@stable
+      - reproducible-apk-tools@v0.3.0
+    prebuild:
+      - flutterVersion=$(awk -F"'" '/flutter-version/{print $2}' .github/workflows/release.yml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - cd ..
+      - mv com.reloado.auth /tmp/build
+      - pushd /tmp/build
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+      - sed -i -e '1a add_link_options("LINKER:--build-id=none")' $PUB_CACHE/hosted/pub.dev/flutter_zxing-*/*/CMakeLists.txt
+      - popd
+      - mv /tmp/build com.reloado.auth
+    scandelete:
+      - .pub-cache
+    build:
+      - cd ..
+      - mv com.reloado.auth /tmp/build
+      - pushd /tmp/build
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform=android-arm
+      - popd
+      - mv /tmp/build com.reloado.auth
+    ndk: r27
+    postbuild:
+      - mv $$OUT$$ unaligned.apk
+      - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
+        --replace unaligned.apk $$OUT$$
+
+  - versionName: 1.0.3
+    versionCode: 42
+    commit: 9aedecad61811a5d993af0427087d562e2e94ba2
+    output: build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+    binary: 
+      https://github.com/refda/reloado_auth/releases/download/v%v/app-arm64-v8a-release.apk
+    srclibs:
+      - flutter@stable
+      - reproducible-apk-tools@v0.3.0
+    prebuild:
+      - flutterVersion=$(awk -F"'" '/flutter-version/{print $2}' .github/workflows/release.yml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - cd ..
+      - mv com.reloado.auth /tmp/build
+      - pushd /tmp/build
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+      - sed -i -e '1a add_link_options("LINKER:--build-id=none")' $PUB_CACHE/hosted/pub.dev/flutter_zxing-*/*/CMakeLists.txt
+      - popd
+      - mv /tmp/build com.reloado.auth
+    scandelete:
+      - .pub-cache
+    build:
+      - cd ..
+      - mv com.reloado.auth /tmp/build
+      - pushd /tmp/build
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform=android-arm64
+      - popd
+      - mv /tmp/build com.reloado.auth
+    ndk: r27
+    postbuild:
+      - mv $$OUT$$ unaligned.apk
+      - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
+        --replace unaligned.apk $$OUT$$
+
+  - versionName: 1.0.3
+    versionCode: 43
+    commit: 9aedecad61811a5d993af0427087d562e2e94ba2
+    output: build/app/outputs/flutter-apk/app-x86_64-release.apk
+    binary: 
+      https://github.com/refda/reloado_auth/releases/download/v%v/app-x86_64-release.apk
+    srclibs:
+      - flutter@stable
+      - reproducible-apk-tools@v0.3.0
+    prebuild:
+      - flutterVersion=$(awk -F"'" '/flutter-version/{print $2}' .github/workflows/release.yml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - cd ..
+      - mv com.reloado.auth /tmp/build
+      - pushd /tmp/build
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+      - sed -i -e '1a add_link_options("LINKER:--build-id=none")' $PUB_CACHE/hosted/pub.dev/flutter_zxing-*/*/CMakeLists.txt
+      - popd
+      - mv /tmp/build com.reloado.auth
+    scandelete:
+      - .pub-cache
+    build:
+      - cd ..
+      - mv com.reloado.auth /tmp/build
+      - pushd /tmp/build
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform=android-x64
+      - popd
+      - mv /tmp/build com.reloado.auth
+    ndk: r27
+    postbuild:
+      - mv $$OUT$$ unaligned.apk
+      - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
+        --replace unaligned.apk $$OUT$$
+
 AllowedAPKSigningKeys: 611c68cd6708ea63e7ec9a08c6a78d68e69ae085a2c7c8d1fc196d16d62c1fac
 
 AutoUpdateMode: Version
@@ -139,5 +253,5 @@ VercodeOperation:
   - '%c - 1'
   - '%c'
 UpdateCheckData: fdroid_version_code|(\d+)|pubspec.yaml|version:\s(.+)\+
-CurrentVersion: 1.0.2
-CurrentVersionCode: 33
+CurrentVersion: 1.0.3
+CurrentVersionCode: 43
