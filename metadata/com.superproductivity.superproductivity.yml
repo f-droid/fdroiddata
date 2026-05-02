@@ -2157,7 +2157,34 @@ Builds:
       - dist/browser/assets/test-plugin.zip
       - src/assets/test-plugin.zip
 
+  - versionName: 18.4.3
+    versionCode: 1804039000
+    commit: 30d7e7d717b3860ba8b987cf1c3244a75644f20a
+    subdir: android/app
+    sudo:
+      - echo "deb https://deb.debian.org/debian forky main" > /etc/apt/sources.list.d/forky.list
+      - apt-get update
+      - apt-get install -y -t forky npm
+      - apt-get install -y g++ make libc-dev libvips-dev
+    gradle:
+      - fdroid
+    prebuild:
+      - cd ../..
+      - sed -i -e "s/getEnv('UNSPLASH_KEY')/''/" src/app/core/unsplash/unsplash.service.ts
+      - npm install --build-from-source
+      - npm run buildFrontend:prodWeb
+      - npm run sync:android
+    scanignore:
+      - android/app/src/main/assets/public/assets/test-plugin.zip
+    scandelete:
+      - node_modules
+      - packages/plugin-dev/node_modules
+      - packages/plugin-dev/*/node_modules
+      - packages/vite-plugin/node_modules
+      - dist/browser/assets/test-plugin.zip
+      - src/assets/test-plugin.zip
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v(?!11.0.3)[\d.]+$
-CurrentVersion: 18.3.0
-CurrentVersionCode: 1803009000
+CurrentVersion: 18.4.3
+CurrentVersionCode: 1804039000
