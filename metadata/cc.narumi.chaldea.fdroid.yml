@@ -1838,8 +1838,37 @@ Builds:
       - $$flutter$$/bin/flutter build apk --flavor fdroid
     ndk: r28c
 
+  - versionName: 2.5.27
+    versionCode: 989
+    commit: f0210b603ee6ad2ecb93d4f9086ebee188ac2d7c
+    output: build/app/outputs/flutter-apk/app-fdroid-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+      - linux
+      - macos
+      - test
+      - web
+      - windows
+    prebuild:
+      - flutterVersion=$(sed -n -E "s/^\s*flutter:\ (.*)/\1/p" pubspec.yaml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - sdkmanager 'cmake;3.10.2.4988404'
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/dart scripts/patch_before_build.dart fdroid
+      - $$flutter$$/bin/flutter pub get
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --flavor fdroid
+    ndk: r28c
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v[\d.]+
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 2.5.26
-CurrentVersionCode: 988
+CurrentVersion: 2.5.27
+CurrentVersionCode: 989
