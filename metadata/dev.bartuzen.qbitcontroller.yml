@@ -309,11 +309,30 @@ Builds:
         break; sha256sum apk/assets/dexopt/baseline.prof; rm -fr apk; taskset --cpu-list
         0-5 gradle clean assembleFreeRelease; done
 
+  - versionName: 2.2.0
+    versionCode: 28
+    commit: db51a5af80451e1940d65e037ca1c8892f367a78
+    subdir: composeApp
+    gradle:
+      - free
+    prebuild:
+      - sed -i -e '/gms/d' -e '/firebase/d' ../build.gradle.kts
+      - sed -i '/foojay-resolver-convention/d' ../settings.gradle.kts
+    postbuild:
+      - curl -Lo upstream.apk 
+        https://github.com/Bartuzen/qBitController/releases/download/v$$VERSION$$/qbitcontroller-$$VERSION$$-android.apk
+      - unzip -q upstream.apk -d apk
+      - export hash=$(sha256sum apk/assets/dexopt/baseline.prof)
+      - rm -rf apk upstream.apk
+      - for i in {1..10}; do unzip -q $$OUT$$ -d apk; sha256sum -c - <<< $hash &&
+        break; sha256sum apk/assets/dexopt/baseline.prof; rm -fr apk; taskset --cpu-list
+        0-5 gradle clean assembleFreeRelease; done
+
 AllowedAPKSigningKeys: 366038e51ee41078a23a37fd9212238ebad03f1de073e81c738bb6f07b114339
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: buildSrc/src/main/java/dev/bartuzen/qbitcontroller/Versions.kt|AppVersionCode
   = (\d+)|.|AppVersion = "(.+)"
-CurrentVersion: 2.1.0
-CurrentVersionCode: 27
+CurrentVersion: 2.2.0
+CurrentVersionCode: 28
