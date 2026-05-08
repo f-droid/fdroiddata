@@ -378,7 +378,41 @@ Builds:
       - scripts/android-build-freerdp.sh --conf scripts/android-build-release.conf
     ndk: 29.0.13113456
 
+  - versionName: 3.26.0
+    versionCode: 3026000
+    commit: 3f6d7cb1f8973cc84c66b258a9a61c4e2b2f30a6
+    subdir: client/Android/Studio/aFreeRDP
+    sudo:
+      - apt-get update
+      - apt-get install -y build-essential file libncurses6 make nasm pkg-config
+    patch:
+      - opus-source.diff
+      - tls-seclevel-0.diff
+    gradle:
+      - yes
+    rm:
+      - client/Mac
+      - client/Wayland
+      - client/Windows
+      - client/X11
+      - client/SDL
+      - client/iOS
+      - channels/*/client/test
+      - channels/*/common/test
+      - client/*/test
+      - libfreerdp/*/test
+      - winpr/libwinpr/*/test
+      - server
+      - uwac
+      - rdtk
+    prebuild:
+      - sed -i -e "/hasProperty('RELEASE/,+2d" -e '/println/d' ../build.gradle
+      - sed -i -e 's/versionCode =.*/versionCode = $$VERCODE$$/' -e 's/versionName
+        =.*/versionName = "$$VERSION$$"/' build.gradle
+      - sdkmanager 'cmake;3.31.6'
+    ndk: 29.0.13113456
+
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: 3.20.0
-CurrentVersionCode: 3020000
+CurrentVersion: 3.26.0
+CurrentVersionCode: 3026000
