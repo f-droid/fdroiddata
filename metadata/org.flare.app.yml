@@ -53,6 +53,38 @@ Builds:
       - flare-android-project/app/src/main/jni
     ndk: r22b
 
+  - versionName: '1.15'
+    versionCode: 115
+    commit: 9c0e784ce8b0c8c41cca8c5b31c6cf6845269908
+    timeout: 15000
+    subdir: flare-android-project/app
+    sudo:
+      - apt-get update
+      - apt-get install -y build-essential file
+    gradle:
+      - yes
+    prebuild:
+      - sed -i -e '/foojay/d' ../settings.gradle
+      - cd src/main/jni
+      - git clone https://github.com/libsdl-org/SDL SDL2
+      - git clone https://github.com/libsdl-org/SDL_image SDL2_image
+      - git clone https://github.com/libsdl-org/SDL_mixer SDL2_mixer
+      - git clone https://github.com/libsdl-org/SDL_ttf SDL2_ttf
+      - cd SDL2
+      - git reset --hard 674989261d1f3c7efd36a1cfdfc0efbc1cca6949
+      - cd ../SDL2_image
+      - git reset --hard aa804aace7fa2cf93b9e88244f70a11f549f42d3
+      - cd ../SDL2_mixer
+      - git reset --hard fe903003892c00ed4a6641a5c8c2cc09057e065d
+      - cd ../SDL2_ttf
+      - git reset --hard  ff952bc8ddc072ebea64cda6c8f27d49097d8eae
+      - cd ..
+      - for i in SDL2 SDL2_image SDL2_mixer SDL2_ttf; do cd "$i"; git submodule init;
+        git submodule update; cd -; done
+    scandelete:
+      - flare-android-project/app/src/main/jni
+    ndk: r22b
+
 MaintainerNotes: |-
   SDL repo commits were provided by the author and reflect the upstream build environment.
   Scanner complains about binary test data in SDL repos that's safe to scandelete.
@@ -61,5 +93,5 @@ MaintainerNotes: |-
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: '1.14'
-CurrentVersionCode: 114
+CurrentVersion: '1.15'
+CurrentVersionCode: 115
