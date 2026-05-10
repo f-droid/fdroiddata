@@ -3,6 +3,8 @@ Categories:
   - Navigation
   - System
 License: AGPL-3.0-only
+AuthorName: Freeyourgadget
+AuthorWebSite: https://codeberg.org/Freeyourgadget
 WebSite: https://gadgetbridge.org/
 SourceCode: https://codeberg.org/Freeyourgadget/Gadgetbridge
 IssueTracker: https://codeberg.org/Freeyourgadget/Gadgetbridge/issues
@@ -2255,11 +2257,40 @@ Builds:
       - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
         --replace unaligned.apk $$OUT$$
 
+  - versionName: 0.91.0
+    versionCode: 247
+    commit: 25b39b6d7c2290c9e8c5eb5f348f495c120e9704
+    subdir: app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y cmake gcc gcc-multilib make python3-crc32c
+    gradle:
+      - mainline
+    srclibs:
+      - reproducible-apk-tools@v0.3.0
+    rm:
+      - external/jerryscript/tools/babel/package.json
+    scanignore:
+      - external/fossil-hr-gbapps/navigationApp/build/files/icons/icLock
+      - external/fossil-hr-gbapps/navigationApp/build/files/icons/icHome
+      - external/fossil-hr-gbapps/navigationApp/build/files/icons/!preview
+    scandelete:
+      - app/src/main/assets/fossil_hr
+      - external/fossil-hr-gbapps/watchface/build/files/icons
+    build:
+      - cd ../external
+      - ./build_fossil_hr_gbapps.sh
+    postbuild:
+      - mv $$OUT$$ unaligned.apk
+      - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
+        --replace unaligned.apk $$OUT$$
+
 AllowedAPKSigningKeys:
   - 01cce9316fcb77ea02c6dea81fde9f3176469202c0cea0514c0e03cb969bc7be
   - a2c2222dbefbb55158dab7fd7cd6da83a009e3ae1bc1e371c1f865c5455652f0
 
 AutoUpdateMode: None
 UpdateCheckMode: Tags
-CurrentVersion: 0.90.0
-CurrentVersionCode: 246
+CurrentVersion: 0.91.0
+CurrentVersionCode: 247
