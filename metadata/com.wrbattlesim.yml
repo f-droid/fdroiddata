@@ -1,0 +1,96 @@
+Categories:
+  - Games
+License: AGPL-3.0-only
+SourceCode: https://github.com/terminator-ger/wrsim/tree/HEAD
+IssueTracker: https://github.com/terminator-ger/wrsim/issues
+
+AutoName: wrbattlesim
+
+RepoType: git
+Repo: https://github.com/terminator-ger/wrsim.git
+
+Builds:
+  - versionName: 1.0.0
+    versionCode: 1000001
+    commit: 635596b68b699f8bbadc10b077c43797cdaaf43e
+    submodules: true
+    output: build/app/outputs/apk/release/app-armeabi-v7a-release-unsigned.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+      - macos
+      - web
+    prebuild:
+      - flutterVersion=$(sed -n -E 's/^[[:space:]]*flutter-version:[[:space:]]*(.*)/\1/p'
+        .github/workflows/release.yml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform="android-arm"
+
+  - versionName: 1.0.0
+    versionCode: 1000002
+    commit: 635596b68b699f8bbadc10b077c43797cdaaf43e
+    submodules: true
+    output: build/app/outputs/apk/release/app-arm64-v8a-release-unsigned.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+      - macos
+      - web
+    prebuild:
+      - flutterVersion=$(sed -n -E 's/^[[:space:]]*flutter-version:[[:space:]]*(.*)/\1/p'
+        .github/workflows/release.yml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform="android-arm64"
+
+  - versionName: 1.0.0
+    versionCode: 1000003
+    commit: 635596b68b699f8bbadc10b077c43797cdaaf43e
+    submodules: true
+    output: build/app/outputs/apk/release/app-x86_64-release-unsigned.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+      - macos
+      - web
+    prebuild:
+      - flutterVersion=$(sed -n -E 's/^[[:space:]]*flutter-version:[[:space:]]*(.*)/\1/p'
+        .github/workflows/release.yml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform="android-x64"
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+VercodeOperation:
+  - '%c * 10 + 1'
+  - '%c * 10 + 2'
+  - '%c * 10 + 3'
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 1.0.0
+CurrentVersionCode: 1000003
