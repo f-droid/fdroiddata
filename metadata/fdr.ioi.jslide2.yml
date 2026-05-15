@@ -1,0 +1,47 @@
+Categories:
+  - Games
+License: GPL-3.0-or-later
+AuthorName: Haxya One
+AuthorWebSite: https://hexyea.itch.io/
+SourceCode: https://codeberg.org/hasya101/jSlide2
+IssueTracker: https://codeberg.org/hasya101/jSlide2/issues
+
+RepoType: git
+Repo: https://codeberg.org/hasya101/jSlide2.git
+
+Builds:
+  - versionName: 101.0.10_fdr
+    versionCode: 1001110
+    commit: 4d613e1dd53c66eb6208eb9a5acb77010ee93fec
+    sudo:
+      - apt-get update
+      - apt-get install -y python3-invoke build-essential scons clang pkg-config libx11-dev
+        libxcursor-dev libxinerama-dev libgl1-mesa-dev libglu-dev libasound2-dev libpulse-dev
+        libudev-dev libxi-dev libxrandr-dev wget apt-transport-https gpg
+    output: bin/jSlide2.apk
+    srclibs:
+      - Godot@4.6.2-stable
+    prebuild:
+      - mkdir -p bin
+      - mkdir -p android
+      - sed -i -e '/custom_template\/release/s|""|"$$Godot$$/bin/android_release.apk"|'
+        export_presets.cfg
+    build:
+      - export ANDROID_SDK_ROOT=$$SDK$$
+      - export ANDROID_NDK_ROOT=$$NDK$$
+      - export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+      - pushd $$Godot$$
+      - scons -j `nproc` platform=linuxbsd target=editor use_llvm=yes
+      - scons -j `nproc` platform=android target=template_release arch=arm64 use_llvm=yes
+      - cd platform/android/java
+      - gradle generateGodotTemplates
+      - popd
+      - $$Godot$$/bin/godot.linuxbsd.editor.x86_64.llvm --headless --export-release
+        'Android' bin/jSlide2.apk
+    ndk: r28b
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: export_presets.cfg|version/code=(\d+)|.|version/name="(.+)"
+CurrentVersion: 101.0.1
+CurrentVersionCode: 1001110
