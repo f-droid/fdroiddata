@@ -81,11 +81,32 @@ Builds:
       - flutter build apk --release --target-platform=android-arm64
     ndk: r28c
 
+  - versionName: 1.0.6
+    versionCode: 6
+    commit: 8d2b529051e508b4c876e2ba8318b772c4b419b4
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@stable
+    prebuild:
+      - flutterVersion=$(sed -n -E "s/.*flutter-version:\ '(.*)'/\1/p" .github/workflows/release.yml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PATH=$$flutter$$/bin:$PATH
+      - flutter config --no-analytics
+      - flutter pub get
+    build:
+      - export PATH=$$flutter$$/bin:$PATH
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - mkdir -p assets/db
+      - python3 tools/build_usbids_db.py
+      - flutter build apk --release --target-platform=android-arm64
+    ndk: r28c
+
 MaintainerNotes: |
   The USB IDs SQLite database is generated during the build by tools/build_usbids_db.py.
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 1.0.5
-CurrentVersionCode: 5
+CurrentVersion: 1.0.6
+CurrentVersionCode: 6
