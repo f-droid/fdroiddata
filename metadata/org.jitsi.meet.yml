@@ -3771,13 +3771,14 @@ Builds:
     subdir: android/app
     sudo:
       - apt-get update
-      - apt-get install -y cmake emscripten esbuild make
+      - apt-get install -y cmake emscripten esbuild make gcc libc-dev golang-go
       - echo "deb https://deb.debian.org/debian forky main" > /etc/apt/sources.list.d/forky.list
       - apt-get update
       - apt-get install -y -t forky npm
     gradle:
       - yes
     srclibs:
+      - esbuild@v0.25.2
       - matrix-olm@3.2.3
     prebuild:
       - sdkmanager 'ndk;27.1.12297006' 'ndk;26.1.10909125'
@@ -3831,6 +3832,11 @@ Builds:
       - make -j$(nproc) js
       - popd
       - cp -f $$matrix-olm$$/javascript/olm.wasm ../../node_modules/@matrix-org/olm/
+      - pushd $$esbuild$$
+      - make esbuild
+      - popd
+      - cp $$esbuild$$/esbuild ../../node_modules/esbuild/bin/esbuild
+      - cp $$esbuild$$/esbuild ../../node_modules/@esbuild/linux-x64/bin/esbuild
       - cd ../sdk
       - gradle assembleRelease
 
