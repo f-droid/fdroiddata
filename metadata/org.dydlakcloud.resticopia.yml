@@ -195,10 +195,44 @@ Builds:
       - ./build-go-binaries.sh
     ndk: r26b
 
+  - versionName: 0.8.5
+    versionCode: 19
+    commit: 66e3aae165837edd98283a2c92f66b76cfc041ed
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y gcc libc-dev make autoconf automake libtool pkg-config
+        wget file gawk libarchive-dev uthash-dev swig xsltproc strace golang-go
+    gradle:
+      - yes
+    srclibs:
+      - go@go1.23.5
+    build:
+      - pushd $$go$$/src
+      - ./make.bash
+      - popd
+      - export GOPATH=$$go$$
+      - export PATH="$GOPATH/bin:$PATH"
+      - cd ..
+      - export ANDROID_NDK_ROOT=$$NDK$$
+      - export CGO_ENABLED=1
+      - export TZ=UTC
+      - export SOURCE_DATE_EPOCH=$(git log -1 --format=%ct HEAD)
+      - export VERSION=v0.15_release
+      - export GOFLAGS="-buildvcs=false -trimpath -ldflags=-buildid="
+      - export CGO_CFLAGS="-g0 -O2 -Wno-unused-command-line-argument"
+      - export CGO_LDFLAGS="-s -w"
+      - export CFLAGS="$CGO_CFLAGS -fdebug-prefix-map=/build= -ffile-prefix-map=/build="
+      - export CXXFLAGS=$CFLAGS
+      - export LDFLAGS=$CGO_LDFLAGS
+      - chmod +x build-go-binaries.sh build-native-binaries.sh
+      - ./build-go-binaries.sh
+    ndk: r26b
+
 AllowedAPKSigningKeys: d0450607a6356d31603d2204888b5326aaf018338199a807cc7f81a1eb7629bf
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: gradle.properties|VERSION_CODE=(\d+)|.|VERSION_NAME=(.*)
-CurrentVersion: 0.8.1
-CurrentVersionCode: 16
+CurrentVersion: 0.8.5
+CurrentVersionCode: 19
