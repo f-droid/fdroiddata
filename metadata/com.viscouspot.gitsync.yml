@@ -415,6 +415,207 @@ Builds:
       - mv $repo/GitSync com.viscouspot.gitsync
     ndk: 29.0.13113456
 
+  - versionName: 1.8.58
+    versionCode: 18581
+    commit: fb78e657ee0a3c0dc099a30bead2a52da8983044
+    sudo:
+      - mkdir -p /home/runner
+      - chown vagrant /home/runner
+      - apt-get update
+      - apt-get install -y clang libclang-dev cmake make pkg-config libssl-dev rustup
+    output: build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
+    binary: 
+      https://github.com/ViscousPot/GitSync/releases/download/v%v/app-armeabi-v7a-release-signed.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+    prebuild:
+      - export repo=/home/runner/work/GitSync
+      - mkdir -p $repo
+      - cd ..
+      - mv com.viscouspot.gitsync $repo/GitSync
+      - pushd $repo/GitSync
+      - rustup default 1.88.0
+      - flutterVersion=$(sed -n -E "s/^\s+flutter:\ (.*)/\1/p" pubspec.yaml | head
+        -1)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PATH="$HOME/.cargo/bin:$$flutter$$/bin:$PATH"
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - rustup target add armv7-linux-androideabi
+      - cargo install flutter_rust_bridge_codegen --version 2.12.0 --locked
+      - cargo install cargo-expand --version 1.0.121 --locked
+      - echo 'const oauthRedirectUrl = "gitsync://auth";' > lib/constant/secrets.dart
+      - echo 'const gitHubClientId = "Ov23lifj0BGiuwsRpS9V";' >> lib/constant/secrets.dart
+      - echo 'const gitHubClientSecret = "9370aafe91536f88b20a041cb140376941c8c59a";'
+        >> lib/constant/secrets.dart
+      - echo 'const gitHubAppClientId = "Iv23liYhW00bkcw9EuX4";' >> lib/constant/secrets.dart
+      - echo 'const gitHubAppClientSecret = "d63e073d3b07de1c86e9ec0b871ab7f60eea15d8";'
+        >> lib/constant/secrets.dart
+      - echo 'const giteaClientId = "f33ae6b1-a79c-426f-99ff-e8fd299f0a54";' >> lib/constant/secrets.dart
+      - echo 'const gitlabClientId = "dd6666081443e81854c2a31b3bbb6dae3a7715338fdbae4bc18f151e5597398c";'
+        >> lib/constant/secrets.dart
+      - echo 'const codebergClientId = "426db6d5-07df-4ad2-b0bb-5d28d306f9fb";' >>
+        lib/constant/secrets.dart
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+      - rm -rf rust/target
+      - popd
+      - mv $repo/GitSync com.viscouspot.gitsync
+    scandelete:
+      - .pub-cache
+    build:
+      - export repo=/home/runner/work/GitSync
+      - cd ..
+      - mv com.viscouspot.gitsync $repo/GitSync
+      - pushd $repo/GitSync
+      - export PATH="$HOME/.cargo/bin:$$flutter$$/bin:$PATH"
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+      - export CARGO_ENCODED_RUSTFLAGS=$(printf '%s\x1f%s\x1f%s' "--remap-path-prefix=$HOME/.cargo/registry/src=/cargo/registry/src"
+        "--remap-path-prefix=$repo/GitSync=." "-Ccodegen-units=1")
+      - export SOURCE_DATE_EPOCH=$(git -C $repo/GitSync log -1 --pretty=%ct)
+      - flutter_rust_bridge_codegen generate
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform="android-arm"
+      - popd
+      - mv $repo/GitSync com.viscouspot.gitsync
+    ndk: 29.0.13113456
+
+  - versionName: 1.8.58
+    versionCode: 18582
+    commit: fb78e657ee0a3c0dc099a30bead2a52da8983044
+    sudo:
+      - mkdir -p /home/runner
+      - chown vagrant /home/runner
+      - apt-get update
+      - apt-get install -y clang libclang-dev cmake make pkg-config libssl-dev rustup
+    output: build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+    binary: 
+      https://github.com/ViscousPot/GitSync/releases/download/v%v/app-arm64-v8a-release-signed.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+    prebuild:
+      - export repo=/home/runner/work/GitSync
+      - mkdir -p $repo
+      - cd ..
+      - mv com.viscouspot.gitsync $repo/GitSync
+      - pushd $repo/GitSync
+      - rustup default 1.88.0
+      - flutterVersion=$(sed -n -E "s/^\s+flutter:\ (.*)/\1/p" pubspec.yaml | head
+        -1)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PATH="$HOME/.cargo/bin:$$flutter$$/bin:$PATH"
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - rustup target add aarch64-linux-android
+      - cargo install flutter_rust_bridge_codegen --version 2.12.0 --locked
+      - cargo install cargo-expand --version 1.0.121 --locked
+      - echo 'const oauthRedirectUrl = "gitsync://auth";' > lib/constant/secrets.dart
+      - echo 'const gitHubClientId = "Ov23lifj0BGiuwsRpS9V";' >> lib/constant/secrets.dart
+      - echo 'const gitHubClientSecret = "9370aafe91536f88b20a041cb140376941c8c59a";'
+        >> lib/constant/secrets.dart
+      - echo 'const gitHubAppClientId = "Iv23liYhW00bkcw9EuX4";' >> lib/constant/secrets.dart
+      - echo 'const gitHubAppClientSecret = "d63e073d3b07de1c86e9ec0b871ab7f60eea15d8";'
+        >> lib/constant/secrets.dart
+      - echo 'const giteaClientId = "f33ae6b1-a79c-426f-99ff-e8fd299f0a54";' >> lib/constant/secrets.dart
+      - echo 'const gitlabClientId = "dd6666081443e81854c2a31b3bbb6dae3a7715338fdbae4bc18f151e5597398c";'
+        >> lib/constant/secrets.dart
+      - echo 'const codebergClientId = "426db6d5-07df-4ad2-b0bb-5d28d306f9fb";' >>
+        lib/constant/secrets.dart
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+      - rm -rf rust/target
+      - popd
+      - mv $repo/GitSync com.viscouspot.gitsync
+    scandelete:
+      - .pub-cache
+    build:
+      - export repo=/home/runner/work/GitSync
+      - cd ..
+      - mv com.viscouspot.gitsync $repo/GitSync
+      - pushd $repo/GitSync
+      - export PATH="$HOME/.cargo/bin:$$flutter$$/bin:$PATH"
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+      - export CARGO_ENCODED_RUSTFLAGS=$(printf '%s\x1f%s\x1f%s' "--remap-path-prefix=$HOME/.cargo/registry/src=/cargo/registry/src"
+        "--remap-path-prefix=$repo/GitSync=." "-Ccodegen-units=1")
+      - export SOURCE_DATE_EPOCH=$(git -C $repo/GitSync log -1 --pretty=%ct)
+      - flutter_rust_bridge_codegen generate
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform="android-arm64"
+      - popd
+      - mv $repo/GitSync com.viscouspot.gitsync
+    ndk: 29.0.13113456
+
+  - versionName: 1.8.58
+    versionCode: 18583
+    commit: fb78e657ee0a3c0dc099a30bead2a52da8983044
+    sudo:
+      - mkdir -p /home/runner
+      - chown vagrant /home/runner
+      - apt-get update
+      - apt-get install -y clang libclang-dev cmake make pkg-config libssl-dev rustup
+    output: build/app/outputs/flutter-apk/app-x86_64-release.apk
+    binary: 
+      https://github.com/ViscousPot/GitSync/releases/download/v%v/app-x86_64-release-signed.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+    prebuild:
+      - export repo=/home/runner/work/GitSync
+      - mkdir -p $repo
+      - cd ..
+      - mv com.viscouspot.gitsync $repo/GitSync
+      - pushd $repo/GitSync
+      - rustup default 1.88.0
+      - flutterVersion=$(sed -n -E "s/^\s+flutter:\ (.*)/\1/p" pubspec.yaml | head
+        -1)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PATH="$HOME/.cargo/bin:$$flutter$$/bin:$PATH"
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - rustup target add x86_64-linux-android
+      - cargo install flutter_rust_bridge_codegen --version 2.12.0 --locked
+      - cargo install cargo-expand --version 1.0.121 --locked
+      - echo 'const oauthRedirectUrl = "gitsync://auth";' > lib/constant/secrets.dart
+      - echo 'const gitHubClientId = "Ov23lifj0BGiuwsRpS9V";' >> lib/constant/secrets.dart
+      - echo 'const gitHubClientSecret = "9370aafe91536f88b20a041cb140376941c8c59a";'
+        >> lib/constant/secrets.dart
+      - echo 'const gitHubAppClientId = "Iv23liYhW00bkcw9EuX4";' >> lib/constant/secrets.dart
+      - echo 'const gitHubAppClientSecret = "d63e073d3b07de1c86e9ec0b871ab7f60eea15d8";'
+        >> lib/constant/secrets.dart
+      - echo 'const giteaClientId = "f33ae6b1-a79c-426f-99ff-e8fd299f0a54";' >> lib/constant/secrets.dart
+      - echo 'const gitlabClientId = "dd6666081443e81854c2a31b3bbb6dae3a7715338fdbae4bc18f151e5597398c";'
+        >> lib/constant/secrets.dart
+      - echo 'const codebergClientId = "426db6d5-07df-4ad2-b0bb-5d28d306f9fb";' >>
+        lib/constant/secrets.dart
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+      - rm -rf rust/target
+      - popd
+      - mv $repo/GitSync com.viscouspot.gitsync
+    scandelete:
+      - .pub-cache
+    build:
+      - export repo=/home/runner/work/GitSync
+      - cd ..
+      - mv com.viscouspot.gitsync $repo/GitSync
+      - pushd $repo/GitSync
+      - export PATH="$HOME/.cargo/bin:$$flutter$$/bin:$PATH"
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+      - export CARGO_ENCODED_RUSTFLAGS=$(printf '%s\x1f%s\x1f%s' "--remap-path-prefix=$HOME/.cargo/registry/src=/cargo/registry/src"
+        "--remap-path-prefix=$repo/GitSync=." "-Ccodegen-units=1")
+      - export SOURCE_DATE_EPOCH=$(git -C $repo/GitSync log -1 --pretty=%ct)
+      - flutter_rust_bridge_codegen generate
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform="android-x64"
+      - popd
+      - mv $repo/GitSync com.viscouspot.gitsync
+    ndk: 29.0.13113456
+
 AllowedAPKSigningKeys: f5cd024f134ce7d5d7c41ef27f0a9f02e3b1ad14760257811bab2959945130d9
 
 MaintainerNotes: |
@@ -455,5 +656,5 @@ VercodeOperation:
   - '%c * 10 + 2'
   - '%c * 10 + 3'
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 1.8.56
-CurrentVersionCode: 18563
+CurrentVersion: 1.8.58
+CurrentVersionCode: 18583
