@@ -84,7 +84,34 @@ Builds:
     gradleprops:
       - fdroid
 
+  - versionName: '7.0'
+    versionCode: 41
+    commit: a86fcf3bd0a030156e641fc6bb29c86664e33624
+    subdir: android/app
+    sudo:
+      - apt-get update
+      - apt-get install -y npm
+    gradle:
+      - yes
+    rm:
+      - ios
+    prebuild:
+      - sed -i -e '/java.home/d' ../gradle.properties
+      - sed -i -e '/JavaLanguageVersion\|JavaVersion/s/17/21/' ../build.gradle
+      - pushd ../..
+      - npm install --build-from-source
+      - mkdir -p app/images/backgrounds
+      - cp -r public/images/backgrounds/* app/images/backgrounds/
+      - mkdir -p android/app/capacitor-cordova-android-plugins
+      - echo "// Empty cordova variables" > android/app/capacitor-cordova-android-plugins/cordova.variables.gradle
+      - bash mobile-build.sh
+      - popd
+    scandelete:
+      - node_modules
+    gradleprops:
+      - fdroid
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: '6.0'
-CurrentVersionCode: 37
+CurrentVersion: '7.0'
+CurrentVersionCode: 41
