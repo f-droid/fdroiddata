@@ -430,7 +430,25 @@ Builds:
       - chmod +x ./build-fftw-android.sh && ./build-fftw-android.sh
     ndk: 29.0.14206865
 
+  - versionName: 1.16.0
+    versionCode: 41
+    commit: 6926ef38842c1c031d2b93172070ede3938beaa7
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y rustup gcc libc-dev
+    gradle:
+      - yes
+    prebuild:
+      - export RUST_TOOLCHAIN_FILE="../core/recognition/native/songrecfp/rust-toolchain.toml"
+      - export RUST_CHANNEL=$(awk -F'"' '/^[[:space:]]*channel[[:space:]]*=/{print
+        $2; exit}' "$RUST_TOOLCHAIN_FILE")
+      - rustup toolchain install "$RUST_CHANNEL" --profile minimal
+      - rustup default "$RUST_CHANNEL"
+      - cargo install cargo-ndk@4.1.2 --locked
+    ndk: 29.0.14206865
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v[0-9.]+$
-CurrentVersion: 1.15.1
-CurrentVersionCode: 40
+CurrentVersion: 1.16.0
+CurrentVersionCode: 41
