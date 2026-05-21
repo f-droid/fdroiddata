@@ -1975,8 +1975,59 @@ Builds:
       - tools/build_wsnet.sh
       - bash ./tools/build_strongswan.sh $(pwd)/strongswan-src $$OpenSSL$$ $(pwd)/strongswan/libs
 
+  - versionName: '4.0'
+    versionCode: 2208
+    commit: e4d0a098301879d4a5004dde7c7c399097822358
+    subdir: mobile
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y automake bison flex gettext gperf libtool make pkg-config
+        swig jq zip cmake musl-dev golang ninja-build g++
+    gradle:
+      - fdroid
+    srclibs:
+      - OpenSSL@OpenSSL_1_1_1t
+      - vcpkg@2025.01.13
+    rm:
+      - base/src/google/libs/in-app-purchasing-2.0.76.jar
+      - openvpn/src/main/cpp/lz4/tests
+      - openvpn/src/main/cpp/mbedtls/tests
+      - openvpn/src/main/cpp/openvpn3/test/unittests
+      - openvpn/src/main/cpp/mbedtls/programs/fuzz/corpuses/client
+      - openvpn/src/main/cpp/mbedtls/programs/fuzz/corpuses/dtlsclient
+      - openvpn/src/main/cpp/mbedtls/programs/fuzz/corpuses/server
+      - openvpn/src/main/cpp/mbedtls/programs/fuzz/corpuses/dtlsserver
+      - openvpn/src/main/cpp/mbedtls/tests/data_files/hash_file_1
+      - openvpn/src/main/cpp/mbedtls/tests/data_files/hash_file_2
+      - openvpn/src/main/cpp/mbedtls/tests/data_files/hash_file_3
+      - tv
+      - strongswan/libs
+      - strongswan-src/testing/hosts/alice/etc/raddb/certs/random
+      - wgtunnel/tools/wireguard-tools/contrib/external-tests
+      - wgtunnel/tools/elf-cleaner/tests
+      - wgtunnel/.cxx
+      - base/src/main/libs/wsnet.aar
+    prebuild: sed -i -e '/jvmToolchain/d' -e '/JavaLanguageVersion/d' ../*/build.gradle*
+    build:
+      - sdkmanager 'ndk;27.2.12479018'
+      - pushd $$vcpkg$$
+      - export VCPKG_FEATURE_FLAGS=-binarycaching
+      - ./bootstrap-vcpkg.sh -disableMetrics
+      - popd
+      - export VCPKG_ROOT=$$vcpkg$$
+      - export NDK=$$SDK$$/ndk/27.2.12479018
+      - export ANDROID_NDK_ROOT=$NDK
+      - export ANDROID_NDK_HOME=$NDK
+      - export ANDROID_NDK=$NDK
+      - export PATH=$PATH:$$SDK$$/tools:$$SDK$$/platform-tools:$NDK
+      - cd ..
+      - git apply hide_release_block.patch
+      - tools/build_wsnet.sh
+      - bash ./tools/build_strongswan.sh $(pwd)/strongswan-src $$OpenSSL$$ $(pwd)/strongswan/libs
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-UpdateCheckData: mobile/build.gradle|versionCode (\d+)||v?([\d.]+)
-CurrentVersion: '3.100'
-CurrentVersionCode: 2135
+UpdateCheckData: build.gradle|appVersionCode = (\d+)|appVersionName = "([\d.]+)"|v?([\d.]+)
+CurrentVersion: '4.0'
+CurrentVersionCode: 2208
