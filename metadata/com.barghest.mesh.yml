@@ -1,0 +1,46 @@
+Categories:
+  - Connectivity
+  - Security
+  - VPN & Proxy
+License: AGPL-3.0-or-later
+WebSite: https://barghest.asia/work/mesh/
+SourceCode: https://github.com/BARGHEST-ngo/MESH
+IssueTracker: https://github.com/BARGHEST-ngo/MESH/issues
+
+AutoName: MESH
+
+RepoType: git
+Repo: https://github.com/BARGHEST-ngo/MESH
+Binaries: https://github.com/BARGHEST-ngo/MESH/releases/download/v%v/mesh-%v.apk
+
+Builds:
+  - versionName: 0.1.6-alpha
+    versionCode: 362
+    commit: v0.1.6-alpha
+    subdir: android-client/android
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y golang-go gcc libc-dev make zip
+    gradle:
+      - yes
+    prebuild:
+      - echo -e "\norg.gradle.jvmargs=-Xmx4096m" >> gradle.properties
+      - sdkmanager 'platforms;android-34' 'platform-tools' 'build-tools;36.0.0'
+      - sed -i -e 's|$(ANDROID_HOME)/cmdline-tools/latest/bin/sdkmanager|sdkmanager|g'
+        -e 's/list_installed/list/' ../Makefile
+      - sed -i -e 's/getVersionProperty("VERSION_LONG")/"$$VERSION$$"/' build.gradle
+    scandelete:
+      - tailscale
+    build:
+      - export ANDROID_NDK_ROOT=$$NDK$$
+      - make -C .. env
+      - make -C .. libtailscale
+    ndk: r23c
+
+AllowedAPKSigningKeys: 57ee4b4302bf4f6d5269588d6b4cf8160294c1500dba8c567ec0dfa96d298497
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: 0.1.6-alpha
+CurrentVersionCode: 362
