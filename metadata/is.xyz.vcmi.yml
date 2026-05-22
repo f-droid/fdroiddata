@@ -10,9 +10,9 @@ Changelog: https://github.com/vcmi/vcmi/blob/HEAD/ChangeLog.md
 Description: |-
   VCMI is work-in-progress attempt to recreate engine for Heroes of Might and Magic III, giving it new and extended possibilities.
 
-  This is an VCMI port for Android. To play it, you need to use your own, legally acquired Heroes of Might and Magic III data files.
+  This is VCMI port for Android. To play it, you need to use your own, legally acquired Heroes of Might and Magic III data files.
 
-  Installation: Copy "Data", "Maps" and "Mp3" from Heroes III to any folder on mobile device, then open VCMI, select Heroes III data import option, then select the folder where you copied Heroes III data.
+  Installation: see https://vcmi.eu/players/Installation_Android/
 
 RepoType: git
 Repo: https://github.com/vcmi/vcmi.git
@@ -1468,60 +1468,123 @@ Builds:
       - cmake --build build
     ndk: r25c
 
-  - versionName: 1.5.4
-    versionCode: 15401
-    disable: see https://github.com/vcmi/vcmi/pull/3817
-    commit: 286a70c007cc8ec1c0b36eb157d6b2b89b7f1dda
-    timeout: 30000
-    subdir: android/vcmi-app
+  - versionName: 1.7.4
+    versionCode: 17401
+    commit: 9949b089a45338e00a62debe6f613c31cfd07ebe
     submodules: true
     sudo:
+      - echo "deb https://deb.debian.org/debian bookworm main" > /etc/apt/sources.list.d/bookworm.list
       - apt-get update
-      - apt-get install -y ninja-build pipx xz-utils unzip g++ make libssl-dev
-      - apt-get install -y cmake -t bookworm-backports
-    gradle:
-      - yes
+      - apt-get install -y make g++ libc-dev cmake ninja-build pipx
+      - apt-get install -y -t bookworm openjdk-17-jdk-headless
+      - update-java-alternatives -s java-1.17.0-openjdk-amd64
+    output: 
+      out/build/android-conan-ninja-release/android-build/vcmi-app/build/outputs/apk/release/*.apk
     srclibs:
-      - conan@1.60.1
+      - conan@2.28.1
     prebuild:
+      - sdkmanager "platforms;android-35"
       - pipx install $$conan$$
-      - cd ../..
-      - export CONAN_USER_HOME="$(pwd)"
-      - export CONAN_USER_HOME_SHORT="$(pwd)"
-      - export PATH="${HOME}/.local/bin:$PATH"
-      - mkdir .conan
-      - pushd .conan
-      - curl -Lo aarch64-v8a.txz 
-        https://github.com/vcmi/vcmi-dependencies/releases/download/android-1.1/aarch64-v8a.txz
-      - sha256sum -c <<< 'ea8d97b4ec714bbc19fe216e8a47f26ee23faeffceabc2c93adc6d4023eaa1ee  aarch64-v8a.txz'
-      - tar -xf aarch64-v8a.txz
-      - rm aarch64-v8a.txz
-      - popd
-      - conan profile new default --detect
-      - conan info . --profile:build=default --profile:host=CI/conan/android-64
-      - sed -i -e 's/versionCode.*$/versionCode $$VERCODE$$/' android/vcmi-app/build.gradle
+      - export PATH="$HOME/.local/bin:$PATH"
+      - conan profile detect || true
+      - sed -i -e 's/versionCode.*$/versionCode $$VERCODE$$/' -e 's/signingConfig
+        = signingConfigs.*//g' android/vcmi-app/build.gradle
+      - '[ "$GRADLE_USER_HOME" ] || GRADLE_USER_HOME=~/.gradle'
+      - mkdir -p "$GRADLE_USER_HOME"
+      - echo "android.bundle.enableUncompressedNativeLibs=true" > "$GRADLE_USER_HOME/gradle.properties"
     scandelete:
-      - .conan
       - osx
     build:
-      - cd ../..
-      - export GENERATE_ONLY_BUILT_CONFIG=1
-      - export CONAN_USER_HOME="$(pwd)"
-      - export CONAN_USER_HOME_SHORT="$(pwd)"
-      - export PATH="${HOME}/.local/bin:$PATH"
-      - conan install . --install-folder=conan-generated --build --profile:build=default
-        --profile:host=CI/conan/android-64 -s compiler.cppstd=11 -c tools.android:ndk_path=$$NDK$$
-      - mkdir build
-      - cmake -S . -B build -G Ninja -D CMAKE_BUILD_TYPE=Release -D CMAKE_TOOLCHAIN_FILE=conan-generated/conan_toolchain.cmake
-      - cmake --build build
-    ndk: r25c
+      - export PATH="$HOME/.local/bin:$PATH"
+      - export CONAN_OPTIONS="--options ffmpeg/*:shared=True"
+      - dependencies/build.sh android-arm64 2>~/tmp/conan_output.txt
+      - conan install . --output-folder=conan-generated --build=never --profile=dependencies/conan_profiles/android-64-ndk
+        --profile=dependencies/conan_profiles/base/android-system $CONAN_OPTIONS
+      - ndkPackage='android-ndk'
+      - hexRegex='[[:xdigit:]]+'
+      - ndkPackageRevision=$(conan list --format=compact "$ndkPackage/*:*" | egrep
+        --only-matching "$ndkPackage/\\w+#$hexRegex:$hexRegex")
+      - ndkPath="$(conan cache path "$ndkPackageRevision")/bin"
+      - mkdir -p "$$SDK$$/ndk"
+      - ln -s "$ndkPath" "$$SDK$$/ndk/$(fgrep 'Pkg.Revision' "$ndkPath/source.properties"
+        | cut -d ' ' -f 3)"
+      - ln -s $(which gradle) android/gradlew
+      - cmake --preset android-conan-ninja-release -D ANDROIDDEPLOYQT_OPTIONS=
+      - cmake --build --preset android-conan-ninja-release
+
+  - versionName: 1.7.4
+    versionCode: 17402
+    commit: 9949b089a45338e00a62debe6f613c31cfd07ebe
+    submodules: true
+    sudo:
+      - echo "deb https://deb.debian.org/debian bookworm main" > /etc/apt/sources.list.d/bookworm.list
+      - apt-get update
+      - apt-get install -y make g++ libc-dev cmake ninja-build pipx
+      - apt-get install -y -t bookworm openjdk-17-jdk-headless
+      - update-java-alternatives -s java-1.17.0-openjdk-amd64
+    output: 
+      out/build/android-conan-ninja-release/android-build/vcmi-app/build/outputs/apk/release/*.apk
+    srclibs:
+      - conan@2.28.1
+    prebuild:
+      - sdkmanager "platforms;android-35"
+      - pipx install $$conan$$
+      - export PATH="$HOME/.local/bin:$PATH"
+      - conan profile detect || true
+      - sed -i -e 's/versionCode.*$/versionCode $$VERCODE$$/' -e 's/signingConfig
+        = signingConfigs.*//g' android/vcmi-app/build.gradle
+      - '[ "$GRADLE_USER_HOME" ] || GRADLE_USER_HOME=~/.gradle'
+      - mkdir -p "$GRADLE_USER_HOME"
+      - echo "android.bundle.enableUncompressedNativeLibs=true" > "$GRADLE_USER_HOME/gradle.properties"
+    scandelete:
+      - osx
+    build:
+      - export PATH="$HOME/.local/bin:$PATH"
+      - export CONAN_OPTIONS="--options ffmpeg/*:shared=True"
+      - dependencies/build.sh android-x64 2>~/tmp/conan_output.txt
+      - conan install . --output-folder=conan-generated --build=never --profile=dependencies/conan_profiles/android-x64-ndk
+        --profile=dependencies/conan_profiles/base/android-system $CONAN_OPTIONS
+      - ndkPackage='android-ndk'
+      - hexRegex='[[:xdigit:]]+'
+      - ndkPackageRevision=$(conan list --format=compact "$ndkPackage/*:*" | egrep
+        --only-matching "$ndkPackage/\\w+#$hexRegex:$hexRegex")
+      - ndkPath="$(conan cache path "$ndkPackageRevision")/bin"
+      - mkdir -p "$$SDK$$/ndk"
+      - ln -fs "$ndkPath" "$$SDK$$/ndk/$(fgrep 'Pkg.Revision' "$ndkPath/source.properties"
+        | cut -d ' ' -f 3)"
+      - ln -fs $(which gradle) android/gradlew
+      - cmake --preset android-conan-ninja-release -D ANDROIDDEPLOYQT_OPTIONS=
+      - cmake --build --preset android-conan-ninja-release
 
 MaintainerNotes: |-
-  VCMI requires conan version bigger than 1.54.0 (but not 2.x) for managing and
-  building dependencies. Conan is not available in bullseye repos, so we install
-  it from source with python-pip.
+  VCMI requires CMake v3.26+ and JDK v17.
 
-  VCMI needs android-ndk-r25c supplied by conan to build. The NDK package in conan
+  VCMI requires Conan v2 (minimum v2.13) for managing and
+  building dependencies. Conan is not available in Debian repos, so we install
+  it from source with pipx. Console output of dependencies build is huge
+  and easily overflows max GitLab limit of 4 MB, therefore the stderr
+  output is redirected to file ~/tmp/conan_output.txt which also becomes
+  accessible as GitLab job artifact.
+
+  VCMI uses NDK downloaded through Conan (it's the same binary distribution
+  just wrapped into Conan recipe) and symlinks it to $ANDROID_HOME/ndk.
+
+  NDK is also required during 'gradle assemble' phase, otherwise gradle won't
+  strip native libraries and the resulting APK would be ~180 mb instead of
+  ~25 mb. We reuse conan NDK for this.
+
+  VCMI uses Qt which invokes gradle internally via androiddeployqt tool.
+  androiddeployqt is invoked in CMake project directly in a post-build step.
+
+  Qt 5 relies on the legacy android.bundle.enableUncompressedNativeLibs=true
+  AGP setting, but it's no longer allowed to be placed into project settings
+  since AGP v8.1 - the only solution is to place this flag to the global
+  gradle.properties file that lives in GRADLE_USER_HOME or ~/.gradle folder.
+
+  Notes for older builds:
+  Versions >=1.2 <1.7 require Conan v1.
+
+  Versions <1.7: VCMI needs android-ndk-r25c supplied by conan to build. The NDK package in conan
   uses official google NDK, but modifies it to work with conan. We download conan build
   files for NDK and change the conan NDK package to provide our own android-ndk-r25c
   (in either case, conan also performs its own sha256sum check and it has a matching
@@ -1538,11 +1601,7 @@ MaintainerNotes: |-
   Upstream only provides armeabi-v7a and arm64-v8a builds, and there's conan profiles only
   for these architectures.
 
-  NDK is also required during 'gradle assemble' phase, otherwise gradle wont strip native libraries
-  and the resulting APK would be ~180 mb instead of ~25 mb. We reuse conan NDK for this.
-
-  Notes for older builds:
-  Build process requires 2 NDKs: r14b to build the dependencies (SDL and boost) and r17c to build the game itself.
+  Build process for versions <1.2 requires 2 NDKs: r14b to build the dependencies (SDL and boost) and r17c to build the game itself.
   Commit hashes for the launcher and vcmi itself match the APK released on google play. The newer commit reported in the app itself is a bug.
   The prebuilt section fixes a number of things to allow building dependencies and libraries from the source.
   Upstream uses prebuilt libs instead and their build procedures were not updated for some time.
@@ -1557,11 +1616,10 @@ MaintainerNotes: |-
   in the "init" section. Because of this, we also bump minSdk version to 21
   (android 5.0).
 
-ArchivePolicy: 0
 AutoUpdateMode: None
 UpdateCheckMode: None
 VercodeOperation:
   - 10 * %c
   - 10 * %c + 1
-CurrentVersion: 1.6.7
-CurrentVersionCode: 16701
+CurrentVersion: 1.7.4
+CurrentVersionCode: 17402
