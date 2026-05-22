@@ -79,9 +79,30 @@ Builds:
       - python3 $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
         --replace unaligned.apk $$OUT$$
 
+  - versionName: 1.0.4
+    versionCode: 4
+    commit: 97f457a2d6c45b793027dd00f1c54d24277a06ac
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y zip
+    gradle:
+      - yes
+    srclibs:
+      - reproducible-apk-tools@dc069dc4cddf6ab5162f3ed3be1bc8a14711273f
+    prebuild:
+      - echo "kotlin.compiler.execution.strategy=in-process" >> ../gradle.properties
+      - echo "org.gradle.java.home=/usr/lib/jvm/java-21-openjdk-amd64" >> ../gradle.properties
+      - echo "org.gradle.workers.max=1" >> ../gradle.properties
+    postbuild:
+      - mv $$OUT$$ unaligned.apk
+      - zip -d unaligned.apk 'META-INF/*'
+      - python3 $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
+        --replace unaligned.apk $$OUT$$
+
 AllowedAPKSigningKeys: 9ee96f1984a512738a043b5afd5d5b8043b863697e33ecee126a76c107f1fae0
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 1.0.3
-CurrentVersionCode: 3
+CurrentVersion: 1.0.4
+CurrentVersionCode: 4
