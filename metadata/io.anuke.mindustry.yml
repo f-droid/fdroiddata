@@ -913,6 +913,49 @@ Builds:
     gradleprops:
       - versionType=fdroid
 
+  - versionName: 8-fdroid-158
+    versionCode: 1099
+    commit: ed54566a14c4403f70cd2a8d95194e1e4145820e
+    subdir: android
+    sudo:
+      - apt-get update
+      - apt-get install -y wget g++
+    gradle:
+      - yes
+    srclibs:
+      - Arc@v158
+    prebuild:
+      - sdkmanager 'platforms;android-30'
+      - echo -e 'androidBuildCode=$$VERCODE$$\nbuild=$$VERCODE$$\nmodifier=beta\ntype=fdroid'
+        > ../core/assets/version.properties
+      - echo 'buildversion=$$VERSION$$' | sed 's/=.*fdroid-/=/' >> ../gradle.properties
+      - sed -i -e '/publishing{/,/^    }/d' ../build.gradle
+      - mv $$Arc$$ ..
+      - sed -i -e '/publishing{/,/^    }/d' ../Arc/build.gradle
+      - sed -i -e '/Arc/s/rootDir.parent/rootDir/' -e 's|../Arc|Arc|g' ../{settings,build,android/build}.gradle
+    scanignore:
+      - android/src/mindustry/android/AndroidLauncher.java
+      - android/src/mindustry/android/AndroidRhinoContext.java
+    scandelete:
+      - Arc
+    build:
+      - cd ..
+      - pushd Arc
+      - gradle recompileUnsafe
+      - gradle arc-core:jnigenBuildAllAndroid
+      - gradle arc-core:jnigenBuildAllLinux
+      - gradle extensions:freetype:jnigenBuildAllAndroid
+      - rm -r natives/*/libs
+      - mv arc-core/build/natives/android32 natives/natives-android/libs
+      - mv arc-core/build/natives/linux64 natives/natives-desktop/libs
+      - mv extensions/freetype/build/natives/android32 natives/natives-freetype-android/libs
+      - gradle clean
+      - popd
+      - gradle pack
+    ndk: r25b
+    gradleprops:
+      - versionType=fdroid
+
 MaintainerNotes: |-
   libgdx.so and libgdx-freetype.so binaries are extracted from
   com.badlogicgames.gdx:gdx-platform JARs that come from Maven Central.
@@ -928,5 +971,5 @@ UpdateCheckMode: HTTP
 UpdateCheckData: 
   https://raw.githubusercontent.com/Anuken/MindustryBuilds/master/version_fdroid.txt
   |versionCode=(\d+)|.|versionName=(.*)
-CurrentVersion: 8-fdroid-157.4
-CurrentVersionCode: 1098
+CurrentVersion: 8-fdroid-158
+CurrentVersionCode: 1099
