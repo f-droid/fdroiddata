@@ -1,0 +1,155 @@
+Categories:
+  - Habit Tracker
+License: GPL-3.0-only
+AuthorName: ResurrectDev1
+AuthorWebSite: https://github.com/resurrectdev1
+SourceCode: https://github.com/resurrectdev1/grove
+IssueTracker: https://github.com/resurrectdev1/grove/issues
+Changelog: https://github.com/resurrectdev1/Grove/releases
+
+AutoName: Grove
+
+RepoType: git
+Repo: https://github.com/resurrectdev1/grove
+
+Builds:
+  - versionName: 0.5.8
+    versionCode: 31
+    commit: 865d87bae4b75360dbad3b5d7ed8b2c13bbd066b
+    sudo:
+      - mkdir -p /home/resurrectdev
+      - chown -R vagrant /home/resurrectdev
+    output: build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
+    binary: 
+      https://github.com/resurrectdev1/grove/releases/download/v%v/app-armeabi-v7a-release.apk
+    srclibs:
+      - reproducible-apk-tools@v0.3.0
+      - flutter@stable
+    prebuild:
+      - flutterVersion=$(cat .flutter-version)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - sed -i -e '/buildTypes {/,/^    }/d' android/app/build.gradle.kts
+      - export repo=/home/resurrectdev/grove
+      - cd ..
+      - mv com.resurrect.grove $repo
+      - pushd $repo
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+      - popd
+      - mv $repo com.resurrect.grove
+    scandelete:
+      - .pub-cache
+    build:
+      - export repo=/home/resurrectdev/grove
+      - cd ..
+      - mv com.resurrect.grove $repo
+      - pushd $repo
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform="android-arm"
+      - popd
+      - mv $repo com.resurrect.grove
+    ndk: r28c
+    postbuild:
+      - mv $$OUT$$ unaligned.apk
+      - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
+        --replace unaligned.apk $$OUT$$
+
+  - versionName: 0.5.8
+    versionCode: 32
+    commit: 865d87bae4b75360dbad3b5d7ed8b2c13bbd066b
+    sudo:
+      - mkdir -p /home/resurrectdev
+      - chown -R vagrant /home/resurrectdev
+    output: build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+    binary: 
+      https://github.com/resurrectdev1/grove/releases/download/v%v/app-arm64-v8a-release.apk
+    srclibs:
+      - reproducible-apk-tools@v0.3.0
+      - flutter@stable
+    prebuild:
+      - flutterVersion=$(cat .flutter-version)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - sed -i -e '/buildTypes {/,/^    }/d' android/app/build.gradle.kts
+      - export repo=/home/resurrectdev/grove
+      - cd ..
+      - mv com.resurrect.grove $repo
+      - pushd $repo
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+      - popd
+      - mv $repo com.resurrect.grove
+    scandelete:
+      - .pub-cache
+    build:
+      - export repo=/home/resurrectdev/grove
+      - cd ..
+      - mv com.resurrect.grove $repo
+      - pushd $repo
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform="android-arm64"
+      - popd
+      - mv $repo com.resurrect.grove
+    ndk: r28c
+    postbuild:
+      - mv $$OUT$$ unaligned.apk
+      - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
+        --replace unaligned.apk $$OUT$$
+
+  - versionName: 0.5.8
+    versionCode: 33
+    commit: 865d87bae4b75360dbad3b5d7ed8b2c13bbd066b
+    sudo:
+      - mkdir -p /home/resurrectdev
+      - chown -R vagrant /home/resurrectdev
+    output: build/app/outputs/flutter-apk/app-x86_64-release.apk
+    binary: 
+      https://github.com/resurrectdev1/grove/releases/download/v%v/app-x86_64-release.apk
+    srclibs:
+      - reproducible-apk-tools@v0.3.0
+      - flutter@stable
+    prebuild:
+      - flutterVersion=$(cat .flutter-version)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - sed -i -e '/buildTypes {/,/^    }/d' android/app/build.gradle.kts
+      - export repo=/home/resurrectdev/grove
+      - cd ..
+      - mv com.resurrect.grove $repo
+      - pushd $repo
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+      - popd
+      - mv $repo com.resurrect.grove
+    scandelete:
+      - .pub-cache
+    build:
+      - export repo=/home/resurrectdev/grove
+      - cd ..
+      - mv com.resurrect.grove $repo
+      - pushd $repo
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform="android-x64"
+      - popd
+      - mv $repo com.resurrect.grove
+    ndk: r28c
+    postbuild:
+      - mv $$OUT$$ unaligned.apk
+      - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
+        --replace unaligned.apk $$OUT$$
+
+AllowedAPKSigningKeys: 95a245c1fe96a028a37d0cf5ef3afebb765795712dc22e9d6c30bffee5fa80bd
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+VercodeOperation:
+  - '%c * 10 + 1'
+  - '%c * 10 + 2'
+  - '%c * 10 + 3'
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 0.5.8
+CurrentVersionCode: 33
