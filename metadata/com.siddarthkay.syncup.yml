@@ -41,11 +41,35 @@ Builds:
       - make release-android ANDROID_TARGETS=android/arm64 ANDROID_ABI=arm64-v8a
     ndk: r27b
 
+  - versionName: 1.1.14-rc1
+    versionCode: 29664474
+    commit: fdc03ef1d1e6d8a763b5cf57f6c8285ef90e8d21
+    sudo:
+      - apt-get update
+      - apt-get install -y make nix-setup-systemd nix
+      - chown -R vagrant /nix
+    output: mobile-app/android/app/build/outputs/apk/release/app-release.apk
+    prebuild:
+      - mkdir -p ~/.config/nix
+      - echo "experimental-features = nix-command flakes" >> ~/.config/nix/nix.conf
+      - sdkmanager "platforms;android-23"
+      - rm -rf mobile-app/ios
+      - make setup
+      - make patch-node-modules
+    scanignore:
+      - mobile-app/node_modules/react-native/sdks/hermesc
+    build:
+      - export ANDROID_NDK_HOME=$$NDK$$
+      - export ANDROID_NDK_ROOT=$$NDK$$
+      - export FDROID_VERSION_CODE=$$VERCODE$$
+      - make release-android ANDROID_TARGETS=android/arm64 ANDROID_ABI=arm64-v8a VERSION_NAME=$$VERSION$$
+    ndk: r27b
+
 AllowedAPKSigningKeys: 813fe1ade9c8041814ad151f8bf7767421d0f4b962668812083117d9d81d5dae
 
 AutoUpdateMode: Version v%v
 UpdateCheckMode: HTTP
 UpdateCheckData: 
   https://github.com/siddarthkay/syncup/releases/latest/download/VERSIONCODE|(\d+)|https://raw.githubusercontent.com/siddarthkay/syncup/HEAD/VERSION|(\d+\.\d+\.\d+)
-CurrentVersion: 1.1.12
-CurrentVersionCode: 29628615
+CurrentVersion: 1.1.14-rc1
+CurrentVersionCode: 29664474
