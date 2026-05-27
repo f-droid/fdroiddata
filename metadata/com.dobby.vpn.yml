@@ -1702,11 +1702,77 @@ Builds:
       - :outline:build
       - :outline:copyOutlineAar
 
+  - versionName: 1.2.51
+    versionCode: 1002051
+    commit: 8660e1ec7619f62d08c2f2baa9b6d644ad07be65
+    subdir: kmp_module/app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y golang-go zip
+      - echo "deb https://deb.debian.org/debian bookworm main" > /etc/apt/sources.list.d/bookworm.list
+      - apt-get update
+      - apt-get install -y -t bookworm openjdk-17-jdk-headless
+      - update-java-alternatives -s java-1.17.0-openjdk-amd64
+    gradle:
+      - yes
+    srclibs:
+      - go@go1.25.1
+    rm:
+      - swift_module
+    build:
+      - pushd $$go$$/src
+      - ./make.bash
+      - popd
+      - export GOROOT=$$go$$
+      - export GOPATH="$HOME/go"
+      - export PATH="$GOROOT/bin:$GOPATH/bin:$PATH"
+      - cd ../..
+      - mkdir -p go_module/modules/Cloak
+      - cp -r Cloak/internal go_module/modules/Cloak/
+      - pushd go_module
+      - go mod tidy
+      - go mod download
+      - sdkmanager "platforms;android-35" "platforms;android-36" "build-tools;36.0.0"
+        "ndk;27.0.11718014"
+      - export ANDROID_SDK_ROOT="$$SDK$$"
+      - export ANDROID_NDK_HOME="$$SDK$$/ndk/27.0.11718014"
+      - export PATH="$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH"
+      - export DEBUG_PREFIX_FLAGS="-fdebug-prefix-map=$ANDROID_SDK_ROOT=/android-sdk
+        -fdebug-prefix-map=$ANDROID_NDK_HOME=/android-ndk"
+      - export CC=aarch64-linux-android21-clang
+      - export CXX=aarch64-linux-android21-clang++
+      - export CGO_ENABLED=1
+      - export GOOS=android
+      - export GOARCH=arm64
+      - export CGO_CFLAGS="$DEBUG_PREFIX_FLAGS ${CGO_CFLAGS:-}"
+      - export CGO_LDFLAGS="$DEBUG_PREFIX_FLAGS -Wl,-z,max-page-size=16384 ${CGO_LDFLAGS:-}"
+      - go build -tags linux -ldflags="-buildid=" -v -trimpath -buildvcs=false -o
+        libbackend.so -buildmode c-shared ./kotlin_exports/
+      - popd
+      - mkdir -p kmp_module/backend/src/main/cpp/include/arm64-v8a
+      - mkdir -p kmp_module/backend/src/main/jniLibs/arm64-v8a
+      - cp go_module/libbackend.h kmp_module/backend/src/main/cpp/include/arm64-v8a/libbackend.h
+      - cp go_module/libbackend.so kmp_module/backend/src/main/jniLibs/arm64-v8a/libbackend.so
+      - export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+      - export PATH="$JAVA_HOME/bin:$PATH"
+      - cd kmp_module
+      - sed -i -e "s/^versionCode=.*/versionCode=$$VERCODE$$/" -e "s/^versionName=.*/versionName=$$VERSION$$/"
+        gradle.properties
+      - export COMMIT=$(git rev-parse HEAD)
+      - printf 
+        "\nprojectRepositoryCommit=$COMMIT\nprojectRepositoryCommitLink=https://github.com/DobbyVPN/DobbyVPN/tree/$COMMIT\n"
+        >> gradle.properties
+      - printf "\nandroid.suppressUnsupportedCompileSdk=35\n" >> gradle.properties
+      - printf "\nkotlin.native.ignoreDisabledTargets=true\n" >> gradle.properties
+    preassemble:
+      - :backend:build
+
 AllowedAPKSigningKeys: c3f0414a74012060d7c6aa3a3d9dac0aa13c1bd23b7512eefd860fb865e67933
 
 AutoUpdateMode: Version v%v
 UpdateCheckMode: HTTP
 UpdateCheckData: 
   https://github.com/DobbyVPN/DobbyVPN/releases/latest/download/version.txt|versionCode=(\d+)|.|versionName=([\d.]+)
-CurrentVersion: 1.2.7
-CurrentVersionCode: 1002007
+CurrentVersion: 1.2.51
+CurrentVersionCode: 1002051
