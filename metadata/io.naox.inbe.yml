@@ -5,19 +5,19 @@ Categories:
 License: MIT
 AuthorName: NaoX
 AuthorEmail: contact@naox.io
-WebSite: https://naox.io
-SourceCode: https://github.com/naoxio/inbreeze
-IssueTracker: https://github.com/naoxio/inbreeze/issues
+WebSite: https://inbreeze.netlify.app
+SourceCode: https://github.com/waozixyz/inbe-legacy
+IssueTracker: https://github.com/waozixyz/inbe-legacy/issues
 Translation: https://toolate.othing.xyz/projects/inner-breeze/
-Changelog: https://raw.githubusercontent.com/naoxio/inbreeze/HEAD/CHANGELOG.md
+Changelog: https://raw.githubusercontent.com/waozixyz/inbe-legacy/HEAD/CHANGELOG.md
 Donate: https://coindrop.to/naox
 Liberapay: NaoX
 
 AutoName: Inner Breeze
 
 RepoType: git
-Repo: https://github.com/naoxio/inbreeze.git
-Binaries: https://github.com/naoxio/inbreeze/releases/download/%v/InnerBreeze.apk
+Repo: https://github.com/waozixyz/inbe-legacy.git
+Binaries: https://github.com/waozixyz/inbe-legacy/releases/download/%v/InnerBreeze.apk
 
 Builds:
   - versionName: 1.0.1
@@ -918,10 +918,49 @@ Builds:
       - popd
       - mv $repo/inbreeze io.naox.inbe
 
+  - versionName: 1.5.0
+    versionCode: 40
+    commit: 8c1c72b3d32fc7e731fae9fb83820a5a1a062bc9
+    sudo:
+      - mkdir -p /home/runner/
+      - chown vagrant /home/runner/
+      - echo "deb https://deb.debian.org/debian bookworm main" > /etc/apt/sources.list.d/bookworm.list
+      - apt-get update
+      - apt-get install -y -t bookworm openjdk-17-jdk-headless
+      - update-java-alternatives -s java-1.17.0-openjdk-amd64
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@3.24.0
+    rm:
+      - linux
+      - web
+    prebuild:
+      - export repo=/home/runner/work/inbe-legacy
+      - mkdir -p $repo
+      - cd ..
+      - mv io.naox.inbe $repo/inbe-legacy
+      - pushd $repo/inbe-legacy
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+      - popd
+      - mv $repo/inbe-legacy io.naox.inbe
+    scandelete:
+      - .pub-cache
+    build:
+      - export repo=/home/runner/work/inbe-legacy
+      - cd ..
+      - mv io.naox.inbe $repo/inbe-legacy
+      - pushd $repo/inbe-legacy
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release
+      - popd
+      - mv $repo/inbe-legacy io.naox.inbe
+
 AllowedAPKSigningKeys: e46142735e771143667aed150d5467a4e553165e45e0d4acfc21933e31b9e050
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 1.4.0
-CurrentVersionCode: 38
+CurrentVersion: 1.5.0
+CurrentVersionCode: 40
