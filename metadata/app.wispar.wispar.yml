@@ -463,10 +463,71 @@ Builds:
       - mv $repo app.wispar.wispar
     ndk: r27
 
+  - versionName: 0.10.3
+    versionCode: 39
+    commit: 2a1de6a28003078760254bd90cc71ad3e913fe11
+    sudo:
+      - apt-get update
+      - apt-get install -y gcc libc-dev ninja-build
+      - mkdir -p /home/runner/work/Wispar
+      - chown -R vagrant /home/runner
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@stable
+      - pdfium-binaries@chromium/7520
+    rm:
+      - ios
+      - linux
+      - macos
+      - website
+      - windows
+    prebuild:
+      - export flutterVersion=$(sed -n -E "s/^\s*flutter:\s*'?([0-9.]+)'?/\1/p" pubspec.yaml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export repo=/home/runner/work/Wispar/Wispar
+      - cd ..
+      - mv app.wispar.wispar $repo
+      - pushd $repo
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter packages pub get
+      - $$flutter$$/bin/dart run pdfrx:remove_wasm_modules
+      - sed -i -e '1a add_link_options("LINKER:--build-id=none")' $PUB_CACHE/hosted/pub.dev/{pdfium_flutter-*/android,jni-*/src}/CMakeLists.txt
+      - sed -i -e 's/if (.*) return targetPath/return targetPath/' $PUB_CACHE/hosted/pub.dev/pdfium_dart-*/lib/src/pdfium_downloader.dart
+      - sed -i -e 's|DOWNLOAD \S*|COPY_FILE $$pdfium-binaries$$/${PDFIUM_ARCHIVE_NAME}.tgz|'
+        -e '/ERROR_QUIET/d' $PUB_CACHE/hosted/pub.dev/pdfium_flutter-*/android/CMakeLists.txt
+      - popd
+      - mv $repo app.wispar.wispar
+    scandelete:
+      - .pub-cache
+    build:
+      - export repo=/home/runner/work/Wispar/Wispar
+      - cd ..
+      - mv app.wispar.wispar $repo
+      - pushd $repo
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - pushd $$pdfium-binaries$$
+      - export PDFium_BRANCH="chromium/7520"
+      - export PDFium_VERSION="144.0.7520.0"
+      - sed -i 's|sudo |echo |g' steps/01-install.sh
+      - echo 'sed -i "s|  sys.exit(main())|  sys.exit(0)|g" pdfium/build/install-build-deps.py'
+        >> steps/02-checkout.sh
+      - truncate -s 0 steps/09-test.sh
+      - ./build.sh -b "$PDFium_BRANCH" android arm
+      - ./build.sh -b "$PDFium_BRANCH" android arm64
+      - ./build.sh -b "$PDFium_BRANCH" android x64
+      - cp pdfium-android-x64.tgz pdfium-android-x86.tgz
+      - popd
+      - $$flutter$$/bin/flutter build apk --release
+      - popd
+      - mv $repo app.wispar.wispar
+    ndk: r27
+
 AllowedAPKSigningKeys: 136f15f8e739afa03c2e5cbc4a51983e87f38f48e956b42cff2bd4dc769af2ab
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 0.10.1
-CurrentVersionCode: 36
+CurrentVersion: 0.10.3
+CurrentVersionCode: 39
