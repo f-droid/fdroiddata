@@ -1,0 +1,47 @@
+AntiFeatures:
+  TetheredNet:
+    en-US: Rely on SponsorBlock API.
+Categories:
+  - Multimedia
+License: MIT
+AuthorName: Guy Steiff
+SourceCode: https://github.com/Guy-Steiff/SponsorCut
+IssueTracker: https://github.com/Guy-Steiff/SponsorCut/issues
+
+Name: SponsorCut
+AutoName: SponsorCut
+
+RepoType: git
+Repo: https://github.com/Guy-Steiff/SponsorCut
+
+Builds:
+  - versionName: '1.0'
+    versionCode: 1
+    commit: 8184047588cb4b42d2f71802bb9c4d0491df99dc
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y autoconf automake libtool pkg-config nasm cmake gcc gperf
+        texinfo yasm bison autogen wget autopoint meson ninja-build ragel groff make
+    gradle:
+      - yes
+    srclibs:
+      - InfinityLoop1308-ffmpeg-kit@efd648489598efdc65e2e2f06ae69e065e257077
+    prebuild:
+      - export ANDROID_NDK_ROOT=$$NDK$$
+      - pushd $$InfinityLoop1308-ffmpeg-kit$$ && ./android.sh --lts --enable-android-media-codec
+        --enable-android-zlib --disable-x86 --disable-arm-v7a --disable-arm-v7a-neon
+        && popd
+      - mkdir -p libs
+      - find $$InfinityLoop1308-ffmpeg-kit$$/prebuilt -name ffmpeg-kit.aar -exec cp
+        {} libs/ffmpeg-kit.aar \;
+    scanignore:
+      - app/libs
+    ndk: 25.2.9519653
+
+AllowedAPKSigningKeys: 71a5664ef1c0fc06303bbc948400c6daf1fc69ee7a519babdd88a8d8dcfa0ccd
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: '1.0'
+CurrentVersionCode: 1
