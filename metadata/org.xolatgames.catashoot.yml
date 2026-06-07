@@ -77,8 +77,40 @@ Builds:
       - makewrap i686-linux-android 21 x86 -m32
     ndk: 27.1.12297006
 
+  - versionName: 1.0.0
+    versionCode: 6
+    commit: 3610ce1c711561d3e38f16b837844fa4d8b9cc2e
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install make zip gcc-multilib -y
+    gradle:
+      - embed
+      - noRecord
+    prebuild:
+      - echo 'org.gradle.jvmargs=-Xmx4g' >> ../gradle.properties
+      - sed -i -e "/signingConfig/d" build.gradle
+      - make -C ../ download_deps
+    scandelete:
+      - app/src/main/cpp/
+    build:
+      - make -C ../ prepare
+      - export PATH="$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin:${PATH}"
+      - cd src/main/cpp/megasource/libs/LuaJIT/
+      - makewrap() { make clean; make HOST_CC="gcc ${4}" HOST_CFLAGS=-D_CRT_SECURE_NO_WARNINGS
+        CC=clang CROSS="$1" STATIC_CC="${1}${2}-clang -fPIC" DYNAMIC_CC="${1}${2}-clang
+        -fPIC" TARGET_AR="llvm-ar rcus" TARGET_SYS=Linux TARGET_LD="${1}${2}-clang"
+        TARGET_LDFLAGS=-fuse-ld=lld TARGET_STRIP=llvm-strip TARGET_SONAME=libluajit.so
+        CCDEBUG=-g; cp "src/libluajit.a" "android/${3}/libluajit.a"; cp "src/libluajit.so"
+        "android/${3}/libluajit.so"; }
+      - makewrap aarch64-linux-android 21 arm64-v8a " "
+      - makewrap x86_64-linux-android 21 x86_64 " "
+      - makewrap armv7a-linux-androideabi 21 armeabi-v7a -m32
+      - makewrap i686-linux-android 21 x86 -m32
+    ndk: 27.1.12297006
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: gradle.properties|app.version_code=(\d+)|.|app.version_name=([\d.]+)
-CurrentVersion: 0.1.7
-CurrentVersionCode: 5
+CurrentVersion: 1.0.0
+CurrentVersionCode: 6
