@@ -1,3 +1,5 @@
+**The title of this merge request should start with the app name.**
+
 **Please make sure your repo is public and your branch is not protected. See <https://docs.gitlab.com/user/project/repository/branches/protected/>. We enable fast-forward merges by default. If your branch is protected, we can't rebase it before merge it.**
 
 **Please read [the guide](https://gitlab.com/fdroid/fdroiddata/-/blob/master/CONTRIBUTING.md) first if this is your first contribution. Please make sure your metadata follows the best practice in [our templates](https://gitlab.com/fdroid/fdroiddata/tree/master/templates).**
