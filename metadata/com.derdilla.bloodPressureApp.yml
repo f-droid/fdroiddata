@@ -1,8 +1,10 @@
 Categories:
   - Health Manager
   - Sports & Health
-License: MIT
+License: GPL-3.0-or-later
 AuthorName: derdilla
+AuthorEmail: contact@derdilla.com
+AuthorWebSite: https://derdilla.com
 SourceCode: https://github.com/derdilla/blood-pressure-monitor-fl
 IssueTracker: https://github.com/derdilla/blood-pressure-monitor-fl/issues
 Translation: https://hosted.weblate.org/projects/blood-pressure-monitor-fl/
@@ -1124,8 +1126,51 @@ Builds:
       - export PUB_CACHE=.pub-cache
       - $$flutter$$/bin/flutter build apk --flavor fdroid --release --obfuscate --split-debug-info=./build/debug-info
 
+  - versionName: 1.8.14
+    versionCode: 56
+    commit: 938f878403ee2670d8cc763685c8d961ddbcfba9
+    subdir: app
+    output: build/app/outputs/flutter-apk/app-fdroid-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - app/ios
+      - app/linux
+      - app/macos
+      - app/web
+      - app/windows
+      - app/test
+      - health_data_store/test
+      - settings_annotation/test
+      - docs
+      - tools
+    prebuild:
+      - export flutterVersion=$(sed -n -E "s/.*flutter:\s*'(.*)'/\1/p" pubspec.yaml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - sed -i -e 's/-Xmx1536M/-Xmx4096M/' android/gradle.properties
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - pushd ../health_data_store
+      - $$flutter$$/bin/dart run build_runner build
+      - $$flutter$$/bin/dart pub get
+      - popd
+      - pushd ../settings_builder
+      - $$flutter$$/bin/flutter pub get
+      - popd
+      - pushd ../settings_annotation
+      - $$flutter$$/bin/flutter pub get
+      - popd
+      - $$flutter$$/bin/flutter pub get
+      - $$flutter$$/bin/dart run build_runner build
+    scandelete:
+      - app/.pub-cache
+    build:
+      - export PUB_CACHE=.pub-cache
+      - $$flutter$$/bin/flutter build apk --flavor fdroid --release --obfuscate --split-debug-info=./build/debug-info
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: app/pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 1.8.13
-CurrentVersionCode: 55
+CurrentVersion: 1.8.14
+CurrentVersionCode: 56
