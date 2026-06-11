@@ -1,0 +1,105 @@
+Categories:
+  - Party Game
+License: GPL-3.0-or-later
+AuthorName: Ari Donnenfeld
+SourceCode: https://gitlab.com/ari-donnenfeld/pictionary-generator
+IssueTracker: https://gitlab.com/ari-donnenfeld/pictionary-generator/-/work_items
+
+AutoName: Pictionary Generator
+
+RepoType: git
+Repo: https://gitlab.com/ari-donnenfeld/pictionary-generator.git
+
+Builds:
+  - versionName: 1.1.8
+    versionCode: 121
+    commit: 2ccb0f9125d34edf2853fb9cf9d633a693f526d6
+    output: build/app/outputs/flutter-apk/app-x86_64-release.apk
+    binary: 
+      https://gitlab.com/api/v4/projects/37895109/packages/generic/release_files/v%v/app-x86_64-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+      - linux
+      - macos
+      - web
+      - windows
+    prebuild:
+      - flutterVersion=$(sed -n -E 's/.*flutter:(.*)/\1/p' .gitlab-ci.yml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform="android-x64"
+
+  - versionName: 1.1.8
+    versionCode: 122
+    commit: 2ccb0f9125d34edf2853fb9cf9d633a693f526d6
+    output: build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
+    binary: 
+      https://gitlab.com/api/v4/projects/37895109/packages/generic/release_files/v%v/app-armeabi-v7a-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+      - linux
+      - macos
+      - web
+      - windows
+    prebuild:
+      - flutterVersion=$(sed -n -E 's/.*flutter:(.*)/\1/p' .gitlab-ci.yml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform="android-arm"
+
+  - versionName: 1.1.8
+    versionCode: 123
+    commit: 2ccb0f9125d34edf2853fb9cf9d633a693f526d6
+    output: build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+    binary: 
+      https://gitlab.com/api/v4/projects/37895109/packages/generic/release_files/v%v/app-arm64-v8a-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+      - linux
+      - macos
+      - web
+      - windows
+    prebuild:
+      - flutterVersion=$(sed -n -E 's/.*flutter:(.*)/\1/p' .gitlab-ci.yml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform="android-arm64"
+
+AllowedAPKSigningKeys: 61542417602000faa22d2c832866ed9efded1806a712bf263bee26a3c7bffd04
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+VercodeOperation:
+  - 10*%c+1
+  - 10*%c+2
+  - 10*%c+3
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 1.1.8
+CurrentVersionCode: 123
