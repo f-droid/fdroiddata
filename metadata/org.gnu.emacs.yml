@@ -1042,6 +1042,47 @@ Builds:
       - make all
     ndk: r26d
 
+  - versionName: 31.0.90
+    versionCode: 310090003
+    commit: 916572f6e0ab3e36f7098b6d9b5ff19f87240da4
+    timeout: 15000
+    sudo:
+      - apt-get update
+      - apt-get install -y make gcc m4 libncurses-dev autoconf texinfo g++
+      - echo "deb https://deb.debian.org/debian bookworm main" > /etc/apt/sources.list.d/bookworm.list
+      - apt-get update
+      - apt-get install -y -t bookworm openjdk-17-jdk-headless
+      - update-java-alternatives -s java-1.17.0-openjdk-amd64
+    output: java/emacs-*.apk
+    prebuild:
+      - sdkmanager 'platforms;android-36' 'build-tools;36.1.0'
+      - sed -i 's/android:versionCode="[^"]*"/android:versionCode="$$VERCODE$$"/'
+        java/AndroidManifest.xml.in
+      - mkdir emacs_deps
+      - cd emacs_deps
+      - bash ../admin/download-android-deps.sh 64
+    scanignore:
+      - admin/charsets/glibc/*.gz
+      - build-aux/dir_top
+    scandelete:
+      - test
+      - etc/e
+      - emacs_deps
+    build:
+      - pushd etc/e
+      - tic -o ../ ./eterm-color.ti
+      - popd
+      - ./autogen.sh
+      - export deps=`pwd`/emacs_deps
+      - ./configure --with-android=$$SDK$$/platforms/android-36/android.jar --without-android-debug
+        --with-gif --with-gnutls --with-harfbuzz --with-jpeg --with-native-compilation=no
+        --with-ndk-path="$(cat $deps/search-path.txt)" --with-png --with-selinux --with-sqlite3
+        --with-tiff --with-tree-sitter --with-webp --with-xml2 
+        ANDROID_CC=$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android22-clang
+        SDK_BUILD_TOOLS=$$SDK$$/build-tools/36.1.0 || (cat config.log; false)
+      - make all
+    ndk: r27d
+
 MaintainerNotes: |-
   Build instructions can be found at:
   https://git.savannah.gnu.org/cgit/emacs.git/tree/java/INSTALL
@@ -1072,6 +1113,27 @@ MaintainerNotes: |-
     not needed for the build;
   * etc/e - contains prebuilt terminfo data, which is deleted and built
     again during the build.
+
+  We must currently build with OpenJDK 17 because of
+  https://debbugs.gnu.org/cgi/bugreport.cgi?bug=81211
+
+  To upgrade the NDK beyond version r28c, we will need at least
+  build-tools 36.1.0 on the buildserver, else we get the following error
+  from apksigner:
+
+    Exception in thread "main" com.android.apksig.apk.ApkFormatException: Malformed ZIP entry: lib/arm64-v8a/libloader.so
+    	at com.android.apksig.ApkSigner.fulfillInspectInputJarEntryRequest(ApkSigner.java:737)
+    	at com.android.apksig.ApkSigner.sign(ApkSigner.java:446)
+    	at com.android.apksig.ApkSigner.sign(ApkSigner.java:237)
+    	at com.android.apksigner.ApkSignerTool.sign(ApkSignerTool.java:424)
+    	at com.android.apksigner.ApkSignerTool.main(ApkSignerTool.java:94)
+    Caused by: com.android.apksig.zip.ZipFormatException: Unexpected size of uncompressed data of lib/arm64-v8a/libloader.so. Expected: 4294967295 bytes, actual: 137436859792 bytes
+    	at com.android.apksig.internal.zip.LocalFileRecord.outputUncompressedData(LocalFileRecord.java:387)
+    	at com.android.apksig.ApkSigner.fulfillInspectInputJarEntryRequest(ApkSigner.java:735)
+    	... 4 more
+
+  To see the full output of `make all`, replace with
+  `make V=1 all >& ../../tmp/make.log`, and look for a `tmp/make.log` artifact.
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^emacs-\d+\.\d+$
