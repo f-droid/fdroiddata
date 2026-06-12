@@ -1,0 +1,99 @@
+Categories:
+  - Internet
+License: GPL-2.0-only
+AuthorName: Martin Kribs, Paul à Brassard
+SourceCode: https://git.pabr.de/apps/unofficial_checkmk_monitoring
+IssueTracker: https://git.pabr.de/apps/unofficial_checkmk_monitoring/-/issues
+
+AutoName: Unofficial CheckMK Monitoring
+
+RepoType: git
+Repo: https://git.pabr.de/apps/unofficial_checkmk_monitoring.git
+
+Builds:
+  - versionName: 1.1.1
+    versionCode: 211
+    commit: 12d3ef79cdc11c031caeef963bbd521346a8643d
+    output: build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
+    binary: 
+      https://git.pabr.de/apps/unofficial_checkmk_monitoring/-/releases/v%v/downloads/app-armeabi-v7a-release-v%v.apk
+    srclibs:
+      - flutter@stable
+    prebuild:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export SOURCE_DATE_EPOCH=1
+      - flutterVersion=$(sed -n -E 's/.*"flutter":\s*"([^"]+)".*/\1/p' .fvmrc)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export SOURCE_DATE_EPOCH=1
+      - echo "fdroidBuild=true" >> local.properties
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform="android-arm"
+    ndk: r28c
+
+  - versionName: 1.1.1
+    versionCode: 212
+    commit: 12d3ef79cdc11c031caeef963bbd521346a8643d
+    output: build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+    binary: 
+      https://git.pabr.de/apps/unofficial_checkmk_monitoring/-/releases/v%v/downloads/app-arm64-v8a-release-v%v.apk
+    srclibs:
+      - flutter@stable
+    prebuild:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export SOURCE_DATE_EPOCH=1
+      - flutterVersion=$(sed -n -E 's/.*"flutter":\s*"([^"]+)".*/\1/p' .fvmrc)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export SOURCE_DATE_EPOCH=1
+      - echo "fdroidBuild=true" >> local.properties
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform="android-arm64"
+    ndk: r28c
+
+  - versionName: 1.1.1
+    versionCode: 213
+    commit: 12d3ef79cdc11c031caeef963bbd521346a8643d
+    output: build/app/outputs/flutter-apk/app-x86_64-release.apk
+    binary: 
+      https://git.pabr.de/apps/unofficial_checkmk_monitoring/-/releases/v%v/downloads/app-x86_64-release-v%v.apk
+    srclibs:
+      - flutter@stable
+    prebuild:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export SOURCE_DATE_EPOCH=1
+      - flutterVersion=$(sed -n -E 's/.*"flutter":\s*"([^"]+)".*/\1/p' .fvmrc)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export SOURCE_DATE_EPOCH=1
+      - echo "fdroidBuild=true" >> local.properties
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform="android-x64"
+    ndk: r28c
+
+AllowedAPKSigningKeys: 1c000b4d9237b288001f1413dd1f01958de40cbc1b8500bd9c85ac020526228e
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags v\d+\.\d+\.\d+$
+VercodeOperation:
+  - '%c * 10 + 1'
+  - '%c * 10 + 2'
+  - '%c * 10 + 3'
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 1.1.1
+CurrentVersionCode: 213
