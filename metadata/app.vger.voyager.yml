@@ -2661,9 +2661,30 @@ Builds:
     scandelete:
       - node_modules/
 
+  - versionName: 2.47.0
+    versionCode: 907
+    commit: 914bccf3a6e144be05984694be79ebbe1baedf9e
+    subdir: android/app
+    sudo:
+      - echo "deb https://deb.debian.org/debian forky main" > /etc/apt/sources.list.d/forky.list
+      - apt-get update
+      - apt-get install -y -t forky npm
+      - npm install -g corepack
+      - corepack enable
+    init:
+      - pnpm install --frozen-lockfile
+      - CI_PLATFORM=android BUILD_FOSS_ONLY=true pnpm run build
+      - cd ../..
+      - npx cap sync android --deployment
+    gradle:
+      - yes
+    prebuild: sed -i -e '/google-services/d' ../build.gradle
+    scandelete:
+      - node_modules/
+
 AllowedAPKSigningKeys: 8b4d5cf69eaf147cd9a868c740d37d5fe1471a2f62c67d536038bcdbd9bc7ade
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 2.46.0
-CurrentVersionCode: 887
+CurrentVersion: 2.47.0
+CurrentVersionCode: 907
