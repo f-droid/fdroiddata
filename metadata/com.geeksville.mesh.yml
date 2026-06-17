@@ -712,11 +712,40 @@ Builds:
       - build-logic/convention/build
       - core/proto/src/main/proto/packages/ts/package.json
 
+  - versionName: 2.7.14 (29321034) fdroid
+    versionCode: 29321034
+    commit: cf68c86af556cfd44d83064a1a03df6f63707014
+    subdir: androidApp
+    submodules: true
+    sudo:
+      - echo "deb https://deb.debian.org/debian bookworm main" > /etc/apt/sources.list.d/bookworm.list
+      - apt-get update
+      - apt-get install -y -t bookworm openjdk-17-jdk-headless
+      - export CPUS_MAX=4
+      - export CPUS=$(getconf _NPROCESSORS_ONLN)
+      - for (( c=$CPUS_MAX; c<$CPUS; c++ )) ; do echo 0 > /sys/devices/system/cpu/cpu$c/online
+        ; done
+    gradle:
+      - fdroid
+    output: 
+      build/outputs/apk/fdroid/release/androidApp-fdroid-universal-release-unsigned.apk
+    binary: 
+      https://github.com/meshtastic/Meshtastic-Android/releases/download/v2.7.14/androidApp-fdroid-universal-release.apk
+    prebuild:
+      - sed -i -e '/foojay-resolver/d' -e '90,99d' ../settings.gradle.kts
+      - sed -i -e '/firebase/d' {..,../build-logic/convention}/build.gradle.kts
+      - sed -i -e '/firebase-crashlytics/d' ../build-logic/convention/src/main/kotlin/AnalyticsConventionPlugin.kt
+    scanignore:
+      - settings.gradle.kts
+      - build-logic/settings.gradle.kts
+    scandelete:
+      - core/proto/src/main/proto/packages/ts/package.json
+
 AllowedAPKSigningKeys: a93b456568c175db0800a09f06777f892d812432adb8a3df73bc3e7f06c80c6d
 
 AutoUpdateMode: Version v%v
 UpdateCheckMode: HTTP
 UpdateCheckData: https://github.com/meshtastic/Meshtastic-Android/releases/latest|>v[\d.]+
   \((\d+)\)<|.|>v([\d.]+ \(\d+\))<
-CurrentVersion: 2.7.10 (29319661) fdroid
-CurrentVersionCode: 29319661
+CurrentVersion: 2.7.14 (29321034) fdroid
+CurrentVersionCode: 29321034
