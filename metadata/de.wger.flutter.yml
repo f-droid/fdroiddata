@@ -762,8 +762,51 @@ Builds:
       - $$flutter$$/bin/flutter build apk
     ndk: r28c
 
+  - versionName: 2.0.0
+    versionCode: 210
+    commit: a679ad63fd5f0bdc0fa195925aca39cb0eaceaca
+    sudo:
+      - apt-get update
+      - apt-get install -y gcc libc-dev make
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@stable
+      - rustup@1.28.2
+    rm:
+      - flatpak
+      - ios
+      - windows
+      - linux
+      - macos
+      - web
+    prebuild:
+      - flutterVersion=$(sed -n -E "s/.*flutter-version:\ (.*)/\1/p" .github/actions/flutter-common/action.yml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+      - $$rustup$$/rustup-init.sh -y --profile minimal --default-toolchain 1.87.0
+        --target armv7-linux-androideabi --target aarch64-linux-android --target x86_64-linux-android
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - source $HOME/.cargo/env
+      - cargo install cargo-ndk@4.1.2 --locked
+      - pushd $PUB_CACHE/hosted/pub.dev/sqlite3_connection_pool-*/
+      - cargo ndk -t armv7-linux-androideabi -t aarch64-linux-android -t x86_64-linux-android
+        build --release --lib
+      - mkdir -p lib/src/precompiled
+      - cp target/armv7-linux-androideabi/release/libsqlite3_connection_pool.so lib/src/precompiled/libsqlite3_connection_pool.android_v7a.so
+      - cp target/aarch64-linux-android/release/libsqlite3_connection_pool.so lib/src/precompiled/libsqlite3_connection_pool.android_v8a.so
+      - cp target/x86_64-linux-android/release/libsqlite3_connection_pool.so lib/src/precompiled/libsqlite3_connection_pool.android_x86_64.so
+      - popd
+      - $$flutter$$/bin/flutter build apk
+    ndk: r28c
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 1.11.0
-CurrentVersionCode: 200
+CurrentVersion: 2.0.0
+CurrentVersionCode: 210
