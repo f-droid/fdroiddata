@@ -1,0 +1,63 @@
+Categories:
+  - Connectivity
+  - Multimedia
+License: AGPL-3.0-or-later
+AuthorName: Ian Williams
+SourceCode: https://github.com/GlassOnTin/opendsp-4x4
+IssueTracker: https://github.com/GlassOnTin/opendsp-4x4/issues
+Donate: https://ko-fi.com/glassontin
+Liberapay: GlassOnTin
+
+AutoName: openDSP-4x4
+
+RepoType: git
+Repo: https://github.com/GlassOnTin/opendsp-4x4.git
+Binaries: 
+  https://github.com/GlassOnTin/opendsp-4x4/releases/download/v%v/opendsp-4x4-%v.apk
+
+Builds:
+  - versionName: 0.2.2
+    versionCode: 6
+    commit: 361096a4d27582029cc4739a689fc8dea133de4d
+    subdir: android/app
+    sudo:
+      - apt-get update
+      - apt-get install -y golang-go rustup build-essential cmake
+      - curl -Lo node.tar.gz https://nodejs.org/dist/v24.11.1/node-v24.11.1-linux-x64.tar.gz
+      - echo "58a5ff5cc8f2200e458bea22e329d5c1994aa1b111d499ca46ec2411d58239ca  node.tar.gz"
+        | sha256sum -c -
+      - tar xzf node.tar.gz --strip-components=1 -C /usr/local/
+    gradle:
+      - yes
+    srclibs:
+      - esbuild@v0.25.12
+      - rollup@v4.62.0
+    prebuild:
+      - pushd ../../web
+      - npm ci --ignore-scripts
+      - rm -f node_modules/@rollup/rollup-linux-x64-gnu/rollup.linux-x64-gnu.node
+      - popd
+    scandelete:
+      - web/node_modules/@esbuild
+    build:
+      - pushd $$esbuild$$
+      - go build ./cmd/esbuild
+      - popd
+      - pushd $$rollup$$
+      - npm install --no-save --no-audit --no-fund @napi-rs/cli@3.4.1
+      - ./node_modules/.bin/napi build --cwd rust/bindings_napi --platform --release
+        --no-js --dts native.d.ts --output-dir ../.. --package-json-path ../../package.json
+      - popd
+      - pushd ../../web
+      - cp -f $$rollup$$/rollup.linux-x64-gnu.node node_modules/@rollup/rollup-linux-x64-gnu/rollup.linux-x64-gnu.node
+      - ESBUILD_BINARY_PATH="$$esbuild$$/esbuild" VITE_TARGET=android npm run build
+      - popd
+      - mkdir -p src/main/assets/www
+      - cp -a ../../web/dist/. src/main/assets/www/
+
+AllowedAPKSigningKeys: 12b4463c8a6a356c64a743ed912a047b05a210f113829de15c71b748e63fe2a1
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^v[0-9.]+$
+CurrentVersion: 0.2.2
+CurrentVersionCode: 6
