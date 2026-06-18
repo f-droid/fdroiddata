@@ -38,9 +38,35 @@ Builds:
       - make -C .. libtailscale
     ndk: r23c
 
+  - versionName: 0.1.7-alpha
+    versionCode: 363
+    commit: 141ab29dec888023baf3d1da6b3ef5573473ec1e
+    subdir: android-client/android
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y golang-go gcc libc-dev make zip
+    gradle:
+      - yes
+    prebuild:
+      - echo -e "\norg.gradle.jvmargs=-Xmx4096m" >> gradle.properties
+      - sdkmanager 'platforms;android-34' 'platform-tools' 'build-tools;36.0.0'
+      - sed -i -e 's|$(ANDROID_HOME)/cmdline-tools/latest/bin/sdkmanager|sdkmanager|g'
+        -e 's/list_installed/list/' ../Makefile
+      - sed -i -e 's/getVersionProperty("VERSION_LONG")/"$$VERSION$$"/' build.gradle
+    scandelete:
+      - tailscale
+    build:
+      - export ANDROID_NDK_ROOT=$$NDK$$
+      - make -C .. env
+      - make -C .. libtailscale
+    ndk: r23c
+
 AllowedAPKSigningKeys: 57ee4b4302bf4f6d5269588d6b4cf8160294c1500dba8c567ec0dfa96d298497
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 0.1.6-alpha
-CurrentVersionCode: 362
+UpdateCheckData: 
+  android-client/android/build.gradle|versionCode\s(\d+)|android-client/barghest.version|VERSION_LONG="(.*)"
+CurrentVersion: 0.1.7-alpha
+CurrentVersionCode: 363
