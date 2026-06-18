@@ -1,0 +1,36 @@
+Categories:
+  - Sports & Health
+License: GPL-3.0-or-later
+AuthorName: Simeon Simeonov
+SourceCode: https://codeberg.org/sgs/scorecounter
+IssueTracker: https://codeberg.org/sgs/scorecounter/issues
+Changelog: https://codeberg.org/sgs/scorecounter/src/branch/main/CHANGELOG.md
+
+AutoName: scorecounter
+
+RepoType: git
+Repo: https://codeberg.org/sgs/scorecounter.git
+
+Builds:
+  - versionName: 1.2.1
+    versionCode: 1020100
+    commit: 9d0e020e280f17c4263e0bf1593c3fa4391c52b7
+    sudo:
+      - apt-get update
+      - apt-get install -y gcc make libc-dev pkg-config python3-dev python3-venv libgirepository1.0-dev
+        libcairo2-dev gir1.2-gtk-3.0 libcanberra-gtk3-module zipalign
+    output: dist/scorecounter-$$VERSION$$.apk
+    prebuild:
+      - python3 -m venv $HOME/beeware-venv
+      - $HOME/beeware-venv/bin/pip3 install -r requirements.lock
+      - sdkmanager "cmdline-tools;19.0"
+    build:
+      - $HOME/beeware-venv/bin/briefcase package android -p apk
+      - zipalign -v -p 4 dist/scorecounter-$$VERSION$$.apk dist/scorecounter-$$VERSION$$-aligned.apk
+      - mv dist/scorecounter-$$VERSION$$-aligned.apk dist/scorecounter-$$VERSION$$.apk
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^[\d.]+$
+UpdateCheckData: .fdroid.json|"version_code":\s(\d+)||([\d.]+)
+CurrentVersion: 1.2.1
+CurrentVersionCode: 1020100
