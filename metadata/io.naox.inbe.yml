@@ -2,15 +2,12 @@ Categories:
   - Meditation
   - Sports & Health
 License: MIT
-AuthorName: NaoX
-AuthorEmail: contact@naox.io
+AuthorName: Waozi
+AuthorEmail: hello@waozi.xyz
 WebSite: https://inbreeze.netlify.app
 SourceCode: https://github.com/waozixyz/inbe-legacy
 IssueTracker: https://github.com/waozixyz/inbe-legacy/issues
-Translation: https://toolate.othing.xyz/projects/inner-breeze/
 Changelog: https://raw.githubusercontent.com/waozixyz/inbe-legacy/HEAD/CHANGELOG.md
-Donate: https://coindrop.to/naox
-Liberapay: NaoX
 
 AutoName: Inner Breeze
 
@@ -956,10 +953,46 @@ Builds:
       - popd
       - mv $repo/inbe-legacy io.naox.inbe
 
+  - versionName: 1.5.3
+    versionCode: 43
+    commit: b128bc928cd4fc8276034027fb27db5bfb5b6679
+    sudo:
+      - mkdir -p /home/runner/
+      - chown vagrant /home/runner/
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@3.41.9
+    rm:
+      - linux
+      - web
+    prebuild:
+      - export repo=/home/runner/work/inbe-legacy
+      - mkdir -p $repo
+      - cd ..
+      - mv io.naox.inbe $repo/inbe-legacy
+      - pushd $repo/inbe-legacy
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+      - scripts/disable-dartjni-build-id.sh
+      - popd
+      - mv $repo/inbe-legacy io.naox.inbe
+    scandelete:
+      - .pub-cache
+    build:
+      - export repo=/home/runner/work/inbe-legacy
+      - cd ..
+      - mv io.naox.inbe $repo/inbe-legacy
+      - pushd $repo/inbe-legacy
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release
+      - popd
+      - mv $repo/inbe-legacy io.naox.inbe
+
 AllowedAPKSigningKeys: e46142735e771143667aed150d5467a4e553165e45e0d4acfc21933e31b9e050
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 1.5.0
-CurrentVersionCode: 40
+CurrentVersion: 1.5.3
+CurrentVersionCode: 43
