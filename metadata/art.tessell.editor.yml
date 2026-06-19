@@ -1,0 +1,44 @@
+Categories:
+  - Graphics
+License: Apache-2.0
+AuthorName: Mario Càllisto
+AuthorEmail: mario.callisto@proton.me
+WebSite: https://tessell.art/editor
+SourceCode: https://github.com/tessell-art/editor
+IssueTracker: https://github.com/tessell-art/editor/issues
+Changelog: https://github.com/tessell-art/editor/blob/main/CHANGELOG.md
+
+AutoName: Tessella
+
+RepoType: git
+Repo: https://github.com/tessell-art/editor.git
+
+Builds:
+  - versionName: 0.6.1
+    versionCode: 601
+    commit: 9b0c88d991d90d30526d813b676d2410454de500
+    subdir: android/app
+    sudo:
+      - echo "deb https://deb.debian.org/debian forky main" > /etc/apt/sources.list.d/forky.list
+      - apt-get update
+      - apt-get install -y -t forky nodejs npm
+      - curl -Lo sbt.tgz https://github.com/sbt/sbt/releases/download/v1.12.9/sbt-1.12.9.tgz
+      - echo "94d2eda5486d343aebb24c675368c2d220880bbe540457917b65a844d7cb061c sbt.tgz"
+        | sha256sum -c -
+      - tar xzf sbt.tgz --strip-components=1 -C /usr/local/
+    gradle:
+      - yes
+    prebuild:
+      - cd ../..
+      - npm ci
+      - npm run build
+    scandelete:
+      - node_modules
+      - target
+      - project/target
+      - project/project/target
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^v[0-9.]+$
+CurrentVersion: 0.6.1
+CurrentVersionCode: 601
