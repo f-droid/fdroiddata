@@ -1675,11 +1675,37 @@ Builds:
       - core/analytics/firebase
       - core/remoteconfig/firebase
 
+  - versionName: 26.6.1
+    versionCode: 5406001
+    commit: c9ca70f917c62f56855532c7d3b46cf14b4d9320
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y openjdk-25-jdk-headless
+      - update-alternatives --auto java
+    gradle:
+      - free
+    prebuild:
+      - sed -i -e '/withPlugin/,/^      }/d' -e '/crashlytics/d' -e '/googleServices/d'
+        -e '/firebase/d' -e '/playPublish/d' -e '/play {/,/^}/d' -e '/= createSigningConfig/d'
+        -e 's/versionName = .*/versionName = "$$VERSION$$"/' -e 's/versionCode = .*/versionCode
+        = $$VERCODE$$/' build.gradle.kts
+      - sed -i -e '/review/d' ../features/review/play/build.gradle.kts
+      - sed -i -e '/crashlytics/d' ../core/logging/crashlytics/build.gradle.kts
+      - echo -e "\norg.gradle.jvmargs=-XX:MaxHeapSize=2048m" >> ../gradle.properties
+      - echo -e "\norg.gradle.unsafe.configuration-cache=false" >> ../gradle.properties
+      - sed -i -e '/includeProprietaryLibraries/s/true/false/' ../gradle.properties
+      - sed -i -e '/foojay/d' ../{.,plugins}/settings.gradle.kts
+    scandelete:
+      - artwork
+      - core/analytics/firebase
+      - core/remoteconfig/firebase
+
 MaintainerNotes: Scanignore the plugin built in the useless but can't disabled gradle
   clean so we don't need to fight against fdroidserver.
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^[\d.]+-\d+$
 UpdateCheckData: '|-(\d+)||(.*)-'
-CurrentVersion: 26.5.3
-CurrentVersionCode: 5405003
+CurrentVersion: 26.6.1
+CurrentVersionCode: 5406001
