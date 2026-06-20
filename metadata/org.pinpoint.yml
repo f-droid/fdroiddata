@@ -1,0 +1,73 @@
+AntiFeatures:
+  TetheredNet:
+    en-US: Depends on the OpenStreetMap map tiles
+Categories:
+  - Multimedia
+  - Navigation
+License: GPL-3.0-or-later
+AuthorName: StrangeGirlMurph
+AuthorWebSite: https://github.com/StrangeGirlMurph
+SourceCode: https://github.com/StrangeGirlMurph/Pinpoint
+IssueTracker: https://github.com/StrangeGirlMurph/Pinpoint/issues
+Changelog: https://github.com/StrangeGirlMurph/Pinpoint/releases
+
+AutoName: Pinpoint
+
+RepoType: git
+Repo: https://github.com/StrangeGirlMurph/Pinpoint
+Binaries: 
+  https://github.com/StrangeGirlMurph/Pinpoint/releases/download/v%v/Pinpoint-arm64-v8a-foss.apk
+
+Builds:
+  - versionName: 1.0.0
+    versionCode: 2001
+    commit: 35fa9910436eee6da90f157f608308ff69ab551d
+    sudo:
+      - mkdir -p /home/runner/work/Pinpoint
+      - chown -R vagrant /home/runner
+    output: build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+      - macos
+      - windows
+      - linux
+      - web
+    prebuild:
+      - export repo=/home/runner/work/Pinpoint
+      - cd ..
+      - mv org.pinpoint $repo/Pinpoint
+      - pushd $repo/Pinpoint
+      - sed -i -e 's/^#f//' pubspec.yaml
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - flutterVersion=$(sed -n -E "s/.*flutter-version:\ '(.*)'/\1/p" .github/workflows/release.yml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PATH=$$flutter$$/bin:$PATH
+      - flutter config --no-analytics
+      - flutter pub get
+      - popd
+      - mv $repo/Pinpoint org.pinpoint
+    scandelete:
+      - .pub-cache
+    build:
+      - export repo=/home/runner/work/Pinpoint
+      - cd ..
+      - mv org.pinpoint $repo/Pinpoint
+      - pushd $repo/Pinpoint
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export PATH=$$flutter$$/bin:$PATH
+      - flutter build apk --release --split-per-abi --target-platform=android-arm64
+      - popd
+      - mv $repo/Pinpoint org.pinpoint
+
+AllowedAPKSigningKeys: e9b4343e4902564189972e532f17a16d9511a089035e26fe37698b9ae1d6ae52
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+VercodeOperation:
+  - '%c + 2000'
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 1.0.0
+CurrentVersionCode: 2001
