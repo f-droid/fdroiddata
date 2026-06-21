@@ -103,10 +103,31 @@ Builds:
       - export PUB_CACHE=$(pwd)/.pub-cache
       - $$flutter$$/bin/flutter build apk --release --dart-define=PLAY_STORE_BUILD=false
 
+  - versionName: 4.10.1
+    versionCode: 35
+    commit: 871a51912fe3af2b52d8174aeced931f85518f00
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@stable
+    prebuild:
+      - flutterVersion=$(sed -n -E "s/^\s*fdroid_flutter:\s*(.*)$/\1/p" pubspec.yaml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - cp lib/src/golden_ticket/dev_config.dart.template lib/src/golden_ticket/dev_config.dart
+      - sed -i '/org.gradle.java.home/d' android/gradle.properties
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --dart-define=PLAY_STORE_BUILD=false
+
 AllowedAPKSigningKeys: bf56dc721b303b66bd3339f15f5a456ed4d076c7f1edd1b24f8e26e331c12436
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v\d+\.\d+\.\d+\+\d+-fdroid-r1$
 UpdateCheckData: '|\+(\d+)-fdroid-r1$||^v([\d.]+)\+'
-CurrentVersion: 4.10.0
-CurrentVersionCode: 34
+CurrentVersion: 4.10.1
+CurrentVersionCode: 35
