@@ -1,0 +1,74 @@
+AntiFeatures:
+  NonFreeNet:
+    en-US: May use maps and download images and mensa information from non-free online
+      services
+  TetheredNet:
+    en-US: For now, this app can only be used with the Stud.IP instance of the University
+      of Passau. Configurable providers are in the works
+Categories:
+  - Calendar & Agenda
+  - File Transfer
+  - Navigation
+  - News
+  - Science & Education
+License: MIT
+AuthorName: Nico Mexis
+AuthorEmail: info@femtopedia.de
+AuthorWebSite: https://nmexis.me
+SourceCode: https://github.com/ThexXTURBOXx/studipassau
+IssueTracker: https://github.com/ThexXTURBOXx/studipassau/issues
+Translation: 
+  https://app.localizely.com/projects/32cea4c8-ff53-4e34-94d8-bcdc8643b236/main/translations
+Donate: https://github.com/sponsors/ThexXTURBOXx
+
+AutoName: StudiPassau
+
+RepoType: git
+Repo: https://github.com/ThexXTURBOXx/studipassau.git
+Binaries: https://github.com/ThexXTURBOXx/studipassau/releases/download/%v/app-release.apk
+
+Builds:
+  - versionName: 2.1.3
+    versionCode: 213
+    commit: 9dd94328ca0d4df137c826a11e7d6db43c924c41
+    submodules: true
+    sudo:
+      - mkdir -p /home/runner/work/studipassau
+      - chown -R vagrant /home/runner
+    output: build/app/outputs/flutter-apk/app-release.apk
+    rm:
+      - ios
+    prebuild:
+      - export repo=/home/runner/work/studipassau/studipassau
+      - cd ..
+      - mv studip_uni_passau.femtopedia.de.unipassaustudip $repo
+      - pushd $repo
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - .flutter/bin/flutter config --no-analytics
+      - .flutter/bin/flutter pub get --enforce-lockfile
+      - popd
+      - mv $repo studip_uni_passau.femtopedia.de.unipassaustudip
+    scanignore:
+      - .flutter/bin/cache
+    scandelete:
+      - .flutter
+      - .pub-cache
+    build:
+      - export repo=/home/runner/work/studipassau/studipassau
+      - cd ..
+      - mv studip_uni_passau.femtopedia.de.unipassaustudip $repo
+      - pushd $repo
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - .flutter/bin/dart run intl_utils:generate
+      - .flutter/bin/dart run build_runner build
+      - .flutter/bin/flutter build apk --release
+      - popd
+      - mv $repo studip_uni_passau.femtopedia.de.unipassaustudip
+
+AllowedAPKSigningKeys: f17448cfb1bd29bc4b29932de068feab87175654dfac0e1a48605f2aeecebaef
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 2.1.3
+CurrentVersionCode: 213
