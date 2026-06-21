@@ -1,0 +1,94 @@
+AntiFeatures:
+  TetheredNet:
+    en-US: Species discovery requires iNaturalist's API; maps use OpenStreetMap tiles;
+      species detail pages fetch Wikipedia summaries.
+Categories:
+  - Science & Education
+License: MIT
+AuthorName: Fiona Wille
+AuthorEmail: marlinid.app@gmail.com
+SourceCode: https://github.com/fwille/marlin
+IssueTracker: https://github.com/fwille/marlin/issues
+Changelog: https://github.com/fwille/marlin/releases
+
+AutoName: Marlin
+
+RepoType: git
+Repo: https://github.com/fwille/marlin.git
+
+Builds:
+  - versionName: 1.1.4
+    versionCode: 71
+    commit: f68b87c871f627a5237dbf4e6826098390cff0bb
+    subdir: android/app
+    sudo:
+      - echo "deb https://deb.debian.org/debian forky main" > /etc/apt/sources.list.d/forky.list
+      - apt-get update
+      - apt-get install -y -t forky nodejs npm
+    init: npm ci --omit=dev
+    gradle:
+      - yes
+    output: build/outputs/apk/release/app-release-unsigned.apk
+    prebuild:
+      - cd ../..
+      - sdkmanager 'cmake;3.22.1'
+      - npx expo prebuild --no-install --platform android
+      - echo 'org.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=1024m' >> android/gradle.properties
+      - sed -i -E 's/versionCode [0-9]+/versionCode 71/' android/app/build.gradle
+      - find node_modules -type f \( -name '*.gradle' -o -name '*.gradle.kts' -o -name
+        '*.kt' \) -exec sed -i -e 's/JavaVersion.VERSION_17/JavaVersion.VERSION_21/g'
+        -e 's/jvmToolchain(17)/jvmToolchain(21)/g' {} +
+    scanignore:
+      - node_modules/hermes-compiler/hermesc/linux64-bin/hermesc
+      - node_modules/expo-modules-core/android/ExpoModulesCorePlugin.gradle
+      - node_modules/@react-native-masked-view/masked-view/android/build.gradle
+      - node_modules/react-native-safe-area-context/android/build.gradle
+      - node_modules/react-native-screens/android/build.gradle
+      - node_modules/react-native-webview/android/build.gradle
+    scandelete:
+      - node_modules
+    ndk: 27.1.12297006
+    gradleprops:
+      - reactNativeArchitectures=armeabi-v7a
+
+  - versionName: 1.1.4
+    versionCode: 72
+    commit: f68b87c871f627a5237dbf4e6826098390cff0bb
+    subdir: android/app
+    sudo:
+      - echo "deb https://deb.debian.org/debian forky main" > /etc/apt/sources.list.d/forky.list
+      - apt-get update
+      - apt-get install -y -t forky nodejs npm
+    init: npm ci --omit=dev
+    gradle:
+      - yes
+    output: build/outputs/apk/release/app-release-unsigned.apk
+    prebuild:
+      - cd ../..
+      - sdkmanager 'cmake;3.22.1'
+      - npx expo prebuild --no-install --platform android
+      - echo 'org.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=1024m' >> android/gradle.properties
+      - sed -i -E 's/versionCode [0-9]+/versionCode 72/' android/app/build.gradle
+      - find node_modules -type f \( -name '*.gradle' -o -name '*.gradle.kts' -o -name
+        '*.kt' \) -exec sed -i -e 's/JavaVersion.VERSION_17/JavaVersion.VERSION_21/g'
+        -e 's/jvmToolchain(17)/jvmToolchain(21)/g' {} +
+    scanignore:
+      - node_modules/hermes-compiler/hermesc/linux64-bin/hermesc
+      - node_modules/expo-modules-core/android/ExpoModulesCorePlugin.gradle
+      - node_modules/@react-native-masked-view/masked-view/android/build.gradle
+      - node_modules/react-native-safe-area-context/android/build.gradle
+      - node_modules/react-native-screens/android/build.gradle
+      - node_modules/react-native-webview/android/build.gradle
+    scandelete:
+      - node_modules
+    ndk: 27.1.12297006
+    gradleprops:
+      - reactNativeArchitectures=arm64-v8a
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags v(.+)
+VercodeOperation:
+  - '%c * 10 + 1'
+  - '%c * 10 + 2'
+CurrentVersion: 1.1.4
+CurrentVersionCode: 72
