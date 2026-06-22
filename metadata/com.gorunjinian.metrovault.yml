@@ -1,0 +1,45 @@
+Categories:
+  - Wallet
+License: GPL-3.0-or-later
+AuthorName: Gorun Jinian
+WebSite: https://gorunjinian.com
+SourceCode: https://github.com/gorunjinian/MetroVault
+IssueTracker: https://github.com/gorunjinian/MetroVault/issues
+
+AutoName: Metro Vault
+
+RepoType: git
+Repo: https://github.com/gorunjinian/MetroVault.git
+Binaries: 
+  https://github.com/gorunjinian/MetroVault/releases/download/v%v/MetroVault-%v-release.apk
+
+Builds:
+  - versionName: 3.8.6
+    versionCode: 5
+    commit: f967a8fa37fd357832b1ba353cca66e9b8d09cb4
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y make g++ cmake
+    gradle:
+      - yes
+    srclibs:
+      - Secp256k1Kmp@v0.23.0
+    prebuild:
+      - sed -i -e '/foojay/d' ../settings.gradle.kts
+      - echo 'target_link_options( secp256k1-jni PRIVATE -Wl,--build-id=none )' >>
+        $$Secp256k1Kmp$$/jni/android/src/main/CMakeLists.txt
+      - sed -i 's/mavenCentral()/mavenLocal(); mavenCentral()/' ../settings.gradle.kts
+    build:
+      - sdkmanager "cmake;3.31.5"
+      - pushd $$Secp256k1Kmp$$
+      - gradle :jni:android:publishToMavenLocal
+      - popd
+    ndk: r28c
+
+AllowedAPKSigningKeys: 1245554ceb17cea21e9912af7bf60d38d716f5884d4b3664e5338462cc76fd03
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^v[0-9.]+$
+CurrentVersion: 3.8.6
+CurrentVersionCode: 5
