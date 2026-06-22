@@ -12,7 +12,7 @@ Changelog: https://github.com/deadlyjack/Acode/blob/HEAD/CHANGELOG.md
 AutoName: Acode
 
 RepoType: git
-Repo: https://github.com/deadlyjack/Acode.git
+Repo: https://github.com/Acode-Foundation/Acode.git
 
 Builds:
   - versionName: 1.2.143
@@ -1509,6 +1509,8 @@ Builds:
 
   - versionName: 1.12.0
     versionCode: 1000
+    disable: accidentally picked from pre-release, due to config issue, wrong version
+      code bump too (disabled).
     commit: 81b8ff85d6970f056d7256c6b25c0d1070d64254
     sudo:
       - sysctl fs.inotify.max_user_watches=524288 || true
@@ -1539,8 +1541,55 @@ Builds:
       - webpack --progress --mode production
       - cordova build android --release -- --packageType=apk
 
+  - versionName: 1.12.6
+    versionCode: 1001
+    commit: 208bb55315f2c62545a8e361e29ddbad16192bb4
+    sudo:
+      - apt-get update
+      - apt-get install -y npm rustup build-essential
+      - npm install -g cordova pnpm@10.33.0
+    output: platforms/android/app/build/outputs/apk/release/app-release-unsigned.apk
+    srclibs:
+      - rspack@v2.0.8
+    rm:
+      - src/plugins/iap
+      - src/plugins/proot
+    prebuild:
+      - sdkmanager 'build-tools;36.0.0'
+      - sed -i -e '/iap/d' -e '/proot/d' -e '/com.foxdebug.acode.rk.auth/s/{},/{},/'
+        package.json
+      - sed -i -e '/iap.startConnection/,/Purchase error/c} catch (e) {' src/main.js
+      - sed -i -e '/Donate/d' src/settings/mainSettings.js
+      - sed -i -e 's/acodefree/acode/' utils/config.js
+      - sed -i -e 's/build/prepare/' utils/scripts/build.sh
+      - sed -i -e '/core-google-shortcuts/d' src/plugins/system/plugin.xml
+      - sed -i '/return prettier\.format/,/});/c\    return content;' 'hooks/modify-java-files.js'
+      - mkdir -p www/css/build www/js/build
+      - npm install
+      - export RSPACK_VER=$(grep '"@rspack/core"' package.json | sed 's/.*"@rspack\/core":\s*"[^0-9]*\([0-9][^"]*\)".*/\1/')
+      - '[[ $RSPACK_VER ]]'
+      - git -C $$rspack$$ checkout -f v${RSPACK_VER}
+      - export RUST_VER=$(grep 'channel' $$rspack$$/rust-toolchain.toml | sed 's/.*channel\s*=\s*"\([^"]*\)".*/\1/')
+      - rustup default "${RUST_VER}"
+      - pnpm install --frozen-lockfile --dir $$rspack$$
+      - pnpm i --ignore-workspace --no-lockfile --dir $$rspack$$/crates/node_binding
+    scandelete:
+      - node_modules
+    build:
+      - pushd $$rspack$$
+      - export CARGO_INCREMENTAL=0
+      - export RUSTFLAGS="-C debuginfo=0"
+      - RUST_TARGET=x86_64-unknown-linux-gnu USE_NAPI_CROSS=1 pnpm run build:cli:release
+      - packages/rspack-cli/bin/rspack.js --version
+      - popd
+      - npm run setup
+      - node ./utils/config.js prod paid
+      - $$rspack$$/packages/rspack-cli/bin/rspack.js --mode production
+      - cp ./src/boot.js ./www/build/boot.js
+      - cordova build android --release -- --packageType=apk
+
 AutoUpdateMode: Version
-UpdateCheckMode: Tags
+UpdateCheckMode: Tags ^v?[\d.]+$
 UpdateCheckData: config.xml|android-versionCode="(\d+)"|.|version="([\d.]+)"
-CurrentVersion: 1.12.0
-CurrentVersionCode: 1000
+CurrentVersion: 1.12.6
+CurrentVersionCode: 1001
