@@ -8,14 +8,9 @@
 #    Using a docker container to build editor and export template from source is highly recommended
 #    Make sure scons flags and Godot version exactly match ones used here
 #    Example Dockerfile and build scripts can be found here
-#    https://codeberg.org/dulvui/99managers-futsal-edition/src/commit/680ad3afc07a1ce12f208745fdac8697f458493a/scripts/build/
-# 3. For Godot 4.6.3 or later, sign apk manually with --alignment-preserved flag
-#    apksigner sign --alignment-preserved --ks-key-alias $KS_ALIAS --ks $KS_PATH output.apk
-#    Note: Godot uses build tools  36.1.0 and ndk 29 since v4.6.3
-#    For that reason the --alignment-preserved flag is needed
-#    https://github.com/obfusk/apksigcopier?tab=readme-ov-file#what-about-signatures-made-by-apksigner-from-build-tools--3500-rc1
-#
-# For non-reproducible builds
+#    https://codeberg.org/dulvui/99managers-futsal-edition/src/commit/f30d124d73fd8ad5703fec8d94a434ee16166a63/scripts/build/
+# 3. Sign upstream apk manually with the following command
+#    apksigner sign --ks-key-alias $KS_ALIAS --ks $KS_PATH output.apk
 
 Builds:
   - versionName: 1.0.0
@@ -24,15 +19,17 @@ Builds:
     sudo:
       - apt-get update
 	  # For llvm build use clang instead
+      # strip-nondeterminism only needed for reproducible builds
       - apt-get install -y pkgconf scons g++ strip-nondeterminism
     output: output.apk
     srclibs:
 	  # Set the Godot version here
       # For reproducible builds use exact version commit, to assure exact same code is used
       - Godot@35e80b3a8822a9df9be390814b62f44c0a9c69e8
+      # Needed only for reproducible builds
+      - reproducible-apk-tools@v0.3.0
     build:
 	  # Build Godot
-      - export REPO=$PWD
       - pushd $$Godot$$
       - export ANDROID_NDK_ROOT=$$NDK$$
       - export ANDROID_HOME=$$SDK$$
@@ -44,10 +41,14 @@ Builds:
       - popd
       - mv $$Godot$$/bin/android_release.apk ./android_release.apk
       - $$Godot$$/bin/godot.linuxbsd.editor.x86_64 --headless --export-release "F-Droid" output.apk
-      # Remove if not reproducible build
-      - strip-nondeterminism -t zip output.apk
 	# Use r28b for Godot 4.6.2 or earlier
     ndk: r29b
+    # Needed only for reproducible builds
+    postbuild:
+      - strip-nondeterminism -t zip $$OUT$$
+      - mv $$OUT$$ unaligned.apk
+      - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
+        --replace unaligned.apk $$OUT$$
 
 # Remove if not reproducible build
 # apksigner verify --print-certs output.apk | grep SHA-256
