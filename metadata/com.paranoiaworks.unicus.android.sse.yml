@@ -182,6 +182,26 @@ Builds:
       - sed -i -e 's/env.ANDROID_NDK_ROOT/env.ANDROID_NDK_HOME/' build.gradle
     ndk: r25b
 
+  - versionName: 3.2.1
+    versionCode: 150
+    commit: d76c21dcfb8b271b9b4e524d2c1a39baa92cb4b2
+    subdir: MainApp
+    sudo:
+      - export CPUS_MAX=1
+      - export CPUS=$(getconf _NPROCESSORS_ONLN)
+      - for (( c=$CPUS_MAX; c<$CPUS; c++ )) ; do echo 0 > /sys/devices/system/cpu/cpu$c/online
+        ; done
+      - apt-get update
+      - apt-get install -y gcc libc-dev rustup
+    gradle:
+      - yes
+    prebuild:
+      - rustup default 1.86.0
+      - rustup target add armv7-linux-androideabi aarch64-linux-android x86_64-linux-android
+      - chmod +x ../CryptoLibs/jni-Blake3mt/blake3jni/release.sh
+      - sed -i -e 's/env.ANDROID_NDK_ROOT/env.ANDROID_NDK_HOME/' build.gradle
+    ndk: r29
+
 AllowedAPKSigningKeys: b9da156a44f97e91061920ae6de934446c349502756a04528fa7bec311a9543d
 
 MaintainerNotes: The app might not be reproducible in the CI as rust might embed compile
@@ -189,5 +209,5 @@ MaintainerNotes: The app might not be reproducible in the CI as rust might embed
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 3.2.0.5
-CurrentVersionCode: 141
+CurrentVersion: 3.2.1
+CurrentVersionCode: 150
