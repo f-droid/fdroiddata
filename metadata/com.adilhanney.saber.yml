@@ -13104,6 +13104,138 @@ Builds:
         --target-platform="android-x64"
     ndk: r28c
 
+  - versionName: 1.34.3
+    versionCode: 1340301
+    commit: f7d4d90b54e1ffcddd16bed232598678c666222d
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y gcc libc-dev ninja-build rustup
+    output: build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
+    rm:
+      - .github
+      - assets_raw
+      - flatpak
+      - installers
+      - ios
+      - linux
+      - macos
+      - packages/onyxsdk_pen
+      - snap
+      - windows
+    prebuild:
+      - ./patches/pre/remove_dev_dependencies.sh
+      - ./patches/pre/remove_linux_dependencies.sh
+      - ./patches/pre/remove_proprietary_dependencies.sh
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - submodules/flutter/bin/flutter config --no-analytics
+      - submodules/flutter/bin/flutter pub get
+      - ./patches/post/patch_rust_versions.sh
+    scanignore:
+      - submodules/flutter/bin/cache
+    scandelete:
+      - submodules/flutter
+      - .pub-cache
+    build:
+      - rustup default $(grep 'channel =' rust-toolchain.toml | cut -d '"' -f2)
+      - rustup target add armv7-linux-androideabi
+      - export ANDROID_NDK_ROOT=$$NDK$$
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - ./patches/post/disable_prebuilt_pdfium.sh
+      - ./scripts/build_pdfium.sh arm
+      - submodules/flutter/bin/flutter build apk --split-per-abi --dart-define=FLAVOR="F-Droid"
+        --dart-define=APP_STORE="F-Droid" --dart-define=UPDATE_CHECK="false" --dart-define=OFFLINE_FONTS_ONLY="true"
+        --target-platform="android-arm"
+    ndk: r28c
+
+  - versionName: 1.34.3
+    versionCode: 1340302
+    commit: f7d4d90b54e1ffcddd16bed232598678c666222d
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y gcc libc-dev ninja-build rustup
+    output: build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+    rm:
+      - .github
+      - assets_raw
+      - flatpak
+      - installers
+      - ios
+      - linux
+      - macos
+      - packages/onyxsdk_pen
+      - snap
+      - windows
+    prebuild:
+      - ./patches/pre/remove_dev_dependencies.sh
+      - ./patches/pre/remove_linux_dependencies.sh
+      - ./patches/pre/remove_proprietary_dependencies.sh
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - submodules/flutter/bin/flutter config --no-analytics
+      - submodules/flutter/bin/flutter pub get
+      - ./patches/post/patch_rust_versions.sh
+    scanignore:
+      - submodules/flutter/bin/cache
+    scandelete:
+      - submodules/flutter
+      - .pub-cache
+    build:
+      - rustup default $(grep 'channel =' rust-toolchain.toml | cut -d '"' -f2)
+      - rustup target add aarch64-linux-android
+      - export ANDROID_NDK_ROOT=$$NDK$$
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - ./patches/post/disable_prebuilt_pdfium.sh
+      - ./scripts/build_pdfium.sh arm64
+      - submodules/flutter/bin/flutter build apk --split-per-abi --dart-define=FLAVOR="F-Droid"
+        --dart-define=APP_STORE="F-Droid" --dart-define=UPDATE_CHECK="false" --dart-define=OFFLINE_FONTS_ONLY="true"
+        --target-platform="android-arm64"
+    ndk: r28c
+
+  - versionName: 1.34.3
+    versionCode: 1340303
+    commit: f7d4d90b54e1ffcddd16bed232598678c666222d
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y gcc libc-dev ninja-build rustup
+    output: build/app/outputs/flutter-apk/app-x86_64-release.apk
+    rm:
+      - .github
+      - assets_raw
+      - flatpak
+      - installers
+      - ios
+      - linux
+      - macos
+      - packages/onyxsdk_pen
+      - snap
+      - windows
+    prebuild:
+      - ./patches/pre/remove_dev_dependencies.sh
+      - ./patches/pre/remove_linux_dependencies.sh
+      - ./patches/pre/remove_proprietary_dependencies.sh
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - submodules/flutter/bin/flutter config --no-analytics
+      - submodules/flutter/bin/flutter pub get
+      - ./patches/post/patch_rust_versions.sh
+    scanignore:
+      - submodules/flutter/bin/cache
+    scandelete:
+      - submodules/flutter
+      - .pub-cache
+    build:
+      - rustup default $(grep 'channel =' rust-toolchain.toml | cut -d '"' -f2)
+      - rustup target add x86_64-linux-android
+      - export ANDROID_NDK_ROOT=$$NDK$$
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - ./patches/post/disable_prebuilt_pdfium.sh
+      - ./scripts/build_pdfium.sh x64
+      - submodules/flutter/bin/flutter build apk --split-per-abi --dart-define=FLAVOR="F-Droid"
+        --dart-define=APP_STORE="F-Droid" --dart-define=UPDATE_CHECK="false" --dart-define=OFFLINE_FONTS_ONLY="true"
+        --target-platform="android-x64"
+    ndk: r28c
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 VercodeOperation:
@@ -13111,5 +13243,5 @@ VercodeOperation:
   - '%c * 10 + 2'
   - '%c * 10 + 3'
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 1.34.2
-CurrentVersionCode: 1340203
+CurrentVersion: 1.34.3
+CurrentVersionCode: 1340303
