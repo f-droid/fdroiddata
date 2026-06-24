@@ -1,5 +1,22 @@
 # PLEASE REMOVE ALL COMMENTS BEFORE SUBMITTING TO F-DROID DATA!
 
+# For reproducible builds following steps are necessary
+# 1. Create upstream export template named "F-Droid" with the following values set
+#    a. Set `./android_release.apk` for `custom_template/debug` and `custom_template/release`
+#    b. For Godot 4.6.3 or later, set signed checkbox to false
+# 2. Upstream apk must be built from clean godot project without any cached assets/resources
+#    Using a docker container to build editor and export template from source is highly recommended
+#    Make sure scons flags and Godot version exactly match ones used here
+#    Example Dockerfile and build scripts can be found here
+#    https://codeberg.org/dulvui/99managers-futsal-edition/src/commit/680ad3afc07a1ce12f208745fdac8697f458493a/scripts/build/
+# 3. For Godot 4.6.3 or later, sign apk manually with --alignment-preserved flag
+#    apksigner sign --alignment-preserved --ks-key-alias $KS_ALIAS --ks $KS_PATH output.apk
+#    Note: Godot uses build tools  36.1.0 and ndk 29 since v4.6.3
+#    For that reason the --alignment-preserved flag is needed
+#    https://github.com/obfusk/apksigcopier?tab=readme-ov-file#what-about-signatures-made-by-apksigner-from-build-tools--3500-rc1
+#
+# For non-reproducible builds
+
 Builds:
   - versionName: 1.0.0
     versionCode: 1
@@ -7,23 +24,38 @@ Builds:
     sudo:
       - apt-get update
 	  # For llvm build use clang instead
-      - apt-get install -y pkgconf scons g++
+      - apt-get install -y pkgconf scons g++ strip-nondeterminism
     output: output.apk
     srclibs:
 	  # Set the Godot version here
-      - Godot@4.6-stable
+      # For reproducible builds use exact version commit, to assure exact same code is used
+      - Godot@35e80b3a8822a9df9be390814b62f44c0a9c69e8
     build:
 	  # Build Godot
+      - export REPO=$PWD
       - pushd $$Godot$$
       - export ANDROID_NDK_ROOT=$$NDK$$
       - export ANDROID_HOME=$$SDK$$
       - export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
-      - scons -j `nproc` platform=linuxbsd target=editor
-      - scons -j `nproc` platform=android target=template_release arch=arm64 generate_apk=yes
+      - export SCONS="scons -j `nproc` verbose=no warnings=no progress=no"
+      - $SCONS target=editor platform=linux
+      - $SCONS target=template_release platform=android arch=arm64 production=yes swappy=no
+        generate_android_binaries=yes generate_apk=yes
       - popd
-	  # Move the template apk. This path is set by custom_template/release in export_presets.cfg
-      - mv $$Godot$$/bin/android_release.apk android-release.apk
-	  # Use your preset name here.
-      - $$Godot$$/bin/godot.linuxbsd.editor.x86_64 --headless --export-release
-        "Android Release" output.apk
-    ndk: r28b
+      - mv $$Godot$$/bin/android_release.apk ./android_release.apk
+      - $$Godot$$/bin/godot.linuxbsd.editor.x86_64 --headless --export-release "F-Droid" output.apk
+      # Remove if not reproducible build
+      - strip-nondeterminism -t zip output.apk
+	# Use r28b for Godot 4.6.2 or earlier
+    ndk: r29b
+
+# Remove if not reproducible build
+# apksigner verify --print-certs output.apk | grep SHA-256
+AllowedAPKSigningKeys: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+# export_presets.cfg can be used to detect new versions
+UpdateCheckData: export_presets.cfg|version/code=(\d+)|.|version/name="([\d.]+)"
+CurrentVersion: '1.0'
+CurrentVersionCode: 1
