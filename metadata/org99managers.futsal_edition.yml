@@ -1,0 +1,59 @@
+Categories:
+  - Sport Game
+License: AGPL-3.0-or-later
+AuthorName: Simon Dalvai
+AuthorEmail: info@simondalvai.org
+AuthorWebSite: https://simondalvai.org
+WebSite: https://99managers.org
+SourceCode: https://codeberg.org/dulvui/99managers-futsal-edition/
+IssueTracker: https://codeberg.org/dulvui/99managers-futsal-edition/issues/
+Donate: https://simondalvai.org/donate
+
+Name: 99Managers Futsal Edition
+AutoName: 99Managers Futsal Edition
+
+RepoType: git
+Repo: https://codeberg.org/dulvui/99managers-futsal-edition.git
+Binaries: 
+  https://codeberg.org/dulvui/99managers-futsal-edition/releases/download/%v/99managers-futsal-edition-android.apk
+
+Builds:
+  - versionName: v0.8.1
+    versionCode: 12
+    commit: 77289e6ce1346173892a8c89b86c76e730a45406
+    sudo:
+      - apt-get update
+      - apt-get install -y pkgconf scons g++ strip-nondeterminism
+    output: game/output.apk
+    srclibs:
+      - Godot@35e80b3a8822a9df9be390814b62f44c0a9c69e8
+      - reproducible-apk-tools@v0.3.0
+    build:
+      - export REPO=$PWD
+      - pushd $$Godot$$
+      - export ANDROID_NDK_ROOT=$$NDK$$
+      - export ANDROID_HOME=$$SDK$$
+      - export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+      - export SCONS="scons -j `nproc` verbose=no warnings=no progress=no"
+      - export PROFILE_EDITOR=$REPO/scripts/build/scons_profile_editor.py
+      - export PROFILE_ANDROID=$REPO/scripts/build/scons_profile_android.py
+      - $SCONS target=editor platform=linux profile=$PROFILE_EDITOR
+      - $SCONS target=template_release profile=$PROFILE_ANDROID swappy=no
+      - popd
+      - mv $$Godot$$/bin/android_release.apk ./game/android_release.apk
+      - $$Godot$$/bin/godot.linuxbsd.editor.x86_64 --headless --path game --export-release
+        "Android F-Droid" output.apk
+    ndk: 29.0.14206865
+    postbuild:
+      - strip-nondeterminism -t zip $$OUT$$
+      - mv $$OUT$$ unaligned.apk
+      - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
+        --replace unaligned.apk $$OUT$$
+
+AllowedAPKSigningKeys: fb0febc96059f6d76f077d774f0134f7903d66a55e8ff1fe185c49c5ffe12b7f
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: game/export_presets.cfg|version/code=(\d+)|.|version/name="(v[\d.]+)"
+CurrentVersion: v0.8.1
+CurrentVersionCode: 12
