@@ -1,0 +1,56 @@
+Categories:
+  - Multimedia
+License: AGPL-3.0-or-later
+AuthorName: MLM Games
+AuthorWebSite: https://ragebreaker.itch.io
+SourceCode: https://github.com/mlm-games/yadaw
+IssueTracker: https://github.com/mlm-games/yadaw/issues
+Changelog: https://github.com/mlm-games/yadaw/blob/HEAD/CHANGELOG.md
+Donate: https://github.com/sponsors/mlm-games
+
+AutoName: Yadaw
+
+RepoType: git
+Repo: https://github.com/mlm-games/yadaw.git
+Binaries: 
+  https://github.com/mlm-games/yadaw/releases/download/v%v/yadaw-%v-fdroid-arm64-v8a.apk
+
+Builds:
+  - versionName: 0.9.2
+    versionCode: 16779522
+    commit: 9c216860d07e045d519859766d41150aec435d36
+    sudo:
+      - apt-get update
+      - apt-get install -y gcc libc-dev rustup
+    output: target/release/apk/yadaw.apk
+    srclibs:
+      - reproducible-apk-tools@v0.3.0
+    rm:
+      - third_party/android/termux/
+    prebuild:
+      - export ANDROID_API=$(sed -E -n 's/.*ANDROID_API.*"(.*)".*/\1/p' .github/workflows/release.yml)
+      - export ANDROID_BUILD_TOOLS=$(sed -E -n 's/.*ANDROID_BUILD_TOOLS.*"(.*)".*/\1/p'
+        .github/workflows/release.yml | head -1)
+      - sdkmanager "platforms;android-$ANDROID_API" "build-tools;$ANDROID_BUILD_TOOLS"
+      - export RUST_VERSION=$(sed -n -E 's/channel = "(.*)"/\1/p' rust-toolchain.toml)
+      - rustup default $RUST_VERSION
+      - rustup target add aarch64-linux-android
+      - export CARGO_RAPK_TAG=$(sed -E -n 's/.*CARGO_RAPK_VERSION.*"([^"]+)".*/\1/p'
+        .github/workflows/release.yml)
+      - cargo install --git https://github.com/mlm-games/cargo-rapk.git --tag v$CARGO_RAPK_TAG
+        cargo-rapk --locked
+    build: cargo rapk build --release --deterministic --unsigned --target aarch64-linux-android
+      --no-default-features --features android,clap-host --lib
+    ndk: 28.2.13676358
+    postbuild:
+      - mv $$OUT$$ unaligned.apk
+      - $$reproducible-apk-tools$$/zipalign.py --pad-like-apksigner --replace unaligned.apk
+        $$OUT$$
+
+AllowedAPKSigningKeys: 4aed2f691df64a7b0fea25a6b8c80183c6dc520e049dac0178defa1d6472228f
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: Cargo.toml|version_code\s*=\s*([0-9]+)|Cargo.toml|version\s*=\s*"([^"]+)"
+CurrentVersion: 0.9.2
+CurrentVersionCode: 16779522
