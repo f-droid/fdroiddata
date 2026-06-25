@@ -37,9 +37,32 @@ Builds:
       - popd
     ndk: r28c
 
+  - versionName: 3.8.7
+    versionCode: 6
+    commit: 8fb4d4f9d18ecc2992b237183bd62b996022bd78
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y make g++ cmake
+    gradle:
+      - yes
+    srclibs:
+      - Secp256k1Kmp@v0.23.0
+    prebuild:
+      - sed -i -e '/foojay/d' ../settings.gradle.kts
+      - echo 'target_link_options( secp256k1-jni PRIVATE -Wl,--build-id=none )' >>
+        $$Secp256k1Kmp$$/jni/android/src/main/CMakeLists.txt
+      - sed -i 's/mavenCentral()/mavenLocal(); mavenCentral()/' ../settings.gradle.kts
+    build:
+      - sdkmanager "cmake;3.31.5"
+      - pushd $$Secp256k1Kmp$$
+      - gradle :jni:android:publishToMavenLocal
+      - popd
+    ndk: r28c
+
 AllowedAPKSigningKeys: 1245554ceb17cea21e9912af7bf60d38d716f5884d4b3664e5338462cc76fd03
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v[0-9.]+$
-CurrentVersion: 3.8.6
-CurrentVersionCode: 5
+CurrentVersion: 3.8.7
+CurrentVersionCode: 6
