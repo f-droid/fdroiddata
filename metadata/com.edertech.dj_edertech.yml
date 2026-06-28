@@ -44,6 +44,7 @@ Builds:
 
   - versionName: 1.1.0
     versionCode: 2
+    disable: https://gitlab.com/ederson-itabaiana/dj_edertech/-/work_items/1
     commit: 86d5b5eadd06dfac3045e428f31b55e82da97ab7
     output: build/app/outputs/apk/release/app-release-unsigned.apk
     srclibs:
@@ -55,14 +56,11 @@ Builds:
       - web
     prebuild:
       - export FLUTTER_VERSION=$(cat flutter_version.txt)
-      - '[[ -z $FLUTTER_VERSION ]] && exit 1'
-      - pushd $$flutter$$
-      - git checkout -f $FLUTTER_VERSION
-      - popd
-      - sed -i -e '/flutter_barcode_scanner/d' pubspec.yaml
+      - '[[ -z $FLUTTER_VERSION ]]'
+      - git -C $$flutter$$ checkout -f $FLUTTER_VERSION
       - export PUB_CACHE=$(pwd)/.pub-cache
       - $$flutter$$/bin/flutter config --no-analytics
-      - $$flutter$$/bin/flutter pub get
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
     scandelete:
       - .pub-cache
     build:
