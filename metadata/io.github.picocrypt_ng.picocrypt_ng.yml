@@ -1,0 +1,205 @@
+Categories:
+  - File Encryption & Vault
+License: GPL-3.0-only
+AuthorName: Picocrypt-NG
+SourceCode: https://github.com/Picocrypt-NG/Picocrypt-NG
+IssueTracker: https://github.com/Picocrypt-NG/Picocrypt-NG/issues
+Changelog: https://github.com/Picocrypt-NG/Picocrypt-NG/releases
+
+AutoName: Picocrypt-NG
+
+RepoType: git
+Repo: https://github.com/Picocrypt-NG/Picocrypt-NG.git
+
+Builds:
+  - versionName: '2.18'
+    versionCode: 218001
+    commit: 3261587f8b10471a6ed3c5ad132ada0f7c06e4cf
+    subdir: android/app
+    sudo:
+      - apt-get update
+      - apt-get install -y golang-go gcc libc-dev make
+      - mkdir -p /home/runner/work/Picocrypt-NG
+      - chown -R vagrant /home/runner/
+    gradle:
+      - yes
+    binary: 
+      https://github.com/Picocrypt-NG/Picocrypt-NG/releases/download/%v/Picocrypt-NG-android-armeabi-v7a.apk
+    srclibs:
+      - go@go1.26.0
+    rm:
+      - dist/macos/Picocrypt-NG.app.zip
+    prebuild:
+      - sdkmanager "platforms;android-36" "build-tools;36.0.0"
+      - sed -i -e 's/isUniversalApk = true/isUniversalApk = false/' build.gradle.kts
+      - sed -i -e 's/include(".*")/include("armeabi-v7a")/' build.gradle.kts
+      - printf '\nPICOCRYPT_VERSION_NAME=%s\nPICOCRYPT_VERSION_CODE=%s\n' "$$VERSION$$"
+        "$(( $$VERCODE$$ / 10 ))" >> ../gradle.properties
+    build:
+      - pushd $$go$$/src
+      - sed -i -e '/bootgo/s/1.24.6/1.24.4/' make.*
+      - sed -i -e '/minBootstrap/s/1.24.6/1.24.4/' cmd/dist/buildtool.go
+      - GOROOT_BOOTSTRAP=/usr/lib/go ./make.bash
+      - popd
+      - export GOROOT=$$go$$
+      - export GOPATH="$HOME/go"
+      - export PATH="$GOROOT/bin:$GOPATH/bin:$PATH"
+      - export GOFLAGS="-buildvcs=false"
+      - go install golang.org/x/mobile/cmd/gomobile@v0.0.0-20260209203831-923679eb55af
+      - go install golang.org/x/mobile/cmd/gobind@v0.0.0-20260209203831-923679eb55af
+      - mkdir -p "$HOME/go/pkg/gomobile"
+      - export repo=/home/runner/work/Picocrypt-NG/Picocrypt-NG
+      - cd ../../..
+      - mv io.github.picocrypt_ng.picocrypt_ng $repo
+      - pushd $repo/android
+      - ./build-gomobile.sh
+      - popd
+      - mv $repo io.github.picocrypt_ng.picocrypt_ng
+    ndk: 29.0.14206865
+
+  - versionName: '2.18'
+    versionCode: 218002
+    commit: 3261587f8b10471a6ed3c5ad132ada0f7c06e4cf
+    subdir: android/app
+    sudo:
+      - apt-get update
+      - apt-get install -y golang-go gcc libc-dev make
+      - mkdir -p /home/runner/work/Picocrypt-NG
+      - chown -R vagrant /home/runner/
+    gradle:
+      - yes
+    binary: 
+      https://github.com/Picocrypt-NG/Picocrypt-NG/releases/download/%v/Picocrypt-NG-android-arm64-v8a.apk
+    srclibs:
+      - go@go1.26.0
+    rm:
+      - dist/macos/Picocrypt-NG.app.zip
+    prebuild:
+      - sdkmanager "platforms;android-36" "build-tools;36.0.0"
+      - sed -i -e 's/isUniversalApk = true/isUniversalApk = false/' build.gradle.kts
+      - sed -i -e 's/include(".*")/include("arm64-v8a")/' build.gradle.kts
+      - printf '\nPICOCRYPT_VERSION_NAME=%s\nPICOCRYPT_VERSION_CODE=%s\n' "$$VERSION$$"
+        "$(( $$VERCODE$$ / 10 ))" >> ../gradle.properties
+    build:
+      - pushd $$go$$/src
+      - sed -i -e '/bootgo/s/1.24.6/1.24.4/' make.*
+      - sed -i -e '/minBootstrap/s/1.24.6/1.24.4/' cmd/dist/buildtool.go
+      - GOROOT_BOOTSTRAP=/usr/lib/go ./make.bash
+      - popd
+      - export GOROOT=$$go$$
+      - export GOPATH="$HOME/go"
+      - export PATH="$GOROOT/bin:$GOPATH/bin:$PATH"
+      - export GOFLAGS="-buildvcs=false"
+      - go install golang.org/x/mobile/cmd/gomobile@v0.0.0-20260209203831-923679eb55af
+      - go install golang.org/x/mobile/cmd/gobind@v0.0.0-20260209203831-923679eb55af
+      - mkdir -p "$HOME/go/pkg/gomobile"
+      - export repo=/home/runner/work/Picocrypt-NG/Picocrypt-NG
+      - cd ../../..
+      - mv io.github.picocrypt_ng.picocrypt_ng $repo
+      - pushd $repo/android
+      - ./build-gomobile.sh
+      - popd
+      - mv $repo io.github.picocrypt_ng.picocrypt_ng
+    ndk: 29.0.14206865
+
+  - versionName: '2.18'
+    versionCode: 218003
+    commit: 3261587f8b10471a6ed3c5ad132ada0f7c06e4cf
+    subdir: android/app
+    sudo:
+      - apt-get update
+      - apt-get install -y golang-go gcc libc-dev make
+      - mkdir -p /home/runner/work/Picocrypt-NG
+      - chown -R vagrant /home/runner/
+    gradle:
+      - yes
+    binary: 
+      https://github.com/Picocrypt-NG/Picocrypt-NG/releases/download/%v/Picocrypt-NG-android-x86.apk
+    srclibs:
+      - go@go1.26.0
+    rm:
+      - dist/macos/Picocrypt-NG.app.zip
+    prebuild:
+      - sdkmanager "platforms;android-36" "build-tools;36.0.0"
+      - sed -i -e 's/isUniversalApk = true/isUniversalApk = false/' build.gradle.kts
+      - sed -i -e 's/include(".*")/include("x86")/' build.gradle.kts
+      - printf '\nPICOCRYPT_VERSION_NAME=%s\nPICOCRYPT_VERSION_CODE=%s\n' "$$VERSION$$"
+        "$(( $$VERCODE$$ / 10 ))" >> ../gradle.properties
+    build:
+      - pushd $$go$$/src
+      - sed -i -e '/bootgo/s/1.24.6/1.24.4/' make.*
+      - sed -i -e '/minBootstrap/s/1.24.6/1.24.4/' cmd/dist/buildtool.go
+      - GOROOT_BOOTSTRAP=/usr/lib/go ./make.bash
+      - popd
+      - export GOROOT=$$go$$
+      - export GOPATH="$HOME/go"
+      - export PATH="$GOROOT/bin:$GOPATH/bin:$PATH"
+      - export GOFLAGS="-buildvcs=false"
+      - go install golang.org/x/mobile/cmd/gomobile@v0.0.0-20260209203831-923679eb55af
+      - go install golang.org/x/mobile/cmd/gobind@v0.0.0-20260209203831-923679eb55af
+      - mkdir -p "$HOME/go/pkg/gomobile"
+      - export repo=/home/runner/work/Picocrypt-NG/Picocrypt-NG
+      - cd ../../..
+      - mv io.github.picocrypt_ng.picocrypt_ng $repo
+      - pushd $repo/android
+      - ./build-gomobile.sh
+      - popd
+      - mv $repo io.github.picocrypt_ng.picocrypt_ng
+    ndk: 29.0.14206865
+
+  - versionName: '2.18'
+    versionCode: 218004
+    commit: 3261587f8b10471a6ed3c5ad132ada0f7c06e4cf
+    subdir: android/app
+    sudo:
+      - apt-get update
+      - apt-get install -y golang-go gcc libc-dev make
+      - mkdir -p /home/runner/work/Picocrypt-NG
+      - chown -R vagrant /home/runner/
+    gradle:
+      - yes
+    binary: 
+      https://github.com/Picocrypt-NG/Picocrypt-NG/releases/download/%v/Picocrypt-NG-android-x86_64.apk
+    srclibs:
+      - go@go1.26.0
+    rm:
+      - dist/macos/Picocrypt-NG.app.zip
+    prebuild:
+      - sdkmanager "platforms;android-36" "build-tools;36.0.0"
+      - sed -i -e 's/isUniversalApk = true/isUniversalApk = false/' build.gradle.kts
+      - sed -i -e 's/include(".*")/include("x86_64")/' build.gradle.kts
+      - printf '\nPICOCRYPT_VERSION_NAME=%s\nPICOCRYPT_VERSION_CODE=%s\n' "$$VERSION$$"
+        "$(( $$VERCODE$$ / 10 ))" >> ../gradle.properties
+    build:
+      - pushd $$go$$/src
+      - sed -i -e '/bootgo/s/1.24.6/1.24.4/' make.*
+      - sed -i -e '/minBootstrap/s/1.24.6/1.24.4/' cmd/dist/buildtool.go
+      - GOROOT_BOOTSTRAP=/usr/lib/go ./make.bash
+      - popd
+      - export GOROOT=$$go$$
+      - export GOPATH="$HOME/go"
+      - export PATH="$GOROOT/bin:$GOPATH/bin:$PATH"
+      - export GOFLAGS="-buildvcs=false"
+      - go install golang.org/x/mobile/cmd/gomobile@v0.0.0-20260209203831-923679eb55af
+      - go install golang.org/x/mobile/cmd/gobind@v0.0.0-20260209203831-923679eb55af
+      - mkdir -p "$HOME/go/pkg/gomobile"
+      - export repo=/home/runner/work/Picocrypt-NG/Picocrypt-NG
+      - cd ../../..
+      - mv io.github.picocrypt_ng.picocrypt_ng $repo
+      - pushd $repo/android
+      - ./build-gomobile.sh
+      - popd
+      - mv $repo io.github.picocrypt_ng.picocrypt_ng
+    ndk: 29.0.14206865
+
+AllowedAPKSigningKeys: e2f2a971231aa0b86882c63b87b689c71632c6d55168b1ce856952d07f6172b7
+
+AutoUpdateMode: None
+UpdateCheckMode: None
+VercodeOperation:
+  - 10 * %c + 1
+  - 10 * %c + 2
+  - 10 * %c + 3
+  - 10 * %c + 4
+CurrentVersion: '2.18'
+CurrentVersionCode: 218004
