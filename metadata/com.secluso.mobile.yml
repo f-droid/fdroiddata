@@ -1,0 +1,147 @@
+Categories:
+  - Camera
+License: GPL-3.0-or-later
+AuthorName: Secluso
+AuthorWebSite: https://secluso.com
+WebSite: https://secluso.com
+SourceCode: https://github.com/secluso/mobile_app
+IssueTracker: https://github.com/secluso/mobile_app/issues
+Changelog: https://github.com/secluso/mobile_app/releases
+
+AutoName: Secluso
+
+RepoType: git
+Repo: https://github.com/secluso/mobile_app.git
+
+Builds:
+  - versionName: 1.0.2
+    versionCode: 71
+    commit: 83887efaaeff3e0a96acec3b9a8fc3c2ea703010
+    sudo:
+      - apt-get update
+      - apt-get install -y build-essential clang cmake pkg-config rustup
+    output: build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
+    binary: https://mirror.secluso.net/fdroid/%v/app-armeabi-v7a-release-signed.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - assets/design/review_front_door_preview.mp4
+      - ios
+      - linux
+      - macos
+      - windows
+    prebuild:
+      - flutterRevision=$(sed -n -E "s/^ARG FLUTTER_REVISION=(.*)$/\\1/p" tool/repro/Dockerfile)
+      - '[[ $flutterRevision ]]'
+      - git -C $$flutter$$ checkout -f "$flutterRevision"
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - rustup default 1.90.0
+      - rustup target add armv7-linux-androideabi aarch64-linux-android x86_64-linux-android
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export SECLUSO_ANDROID_TARGET_PLATFORM=android-arm
+      - export SECLUSO_ALLOW_UNSIGNED_RELEASE=1
+      - export SECLUSO_FDROID_BUILD=1
+      - $$flutter$$/bin/flutter build apk --release --no-pub --split-per-abi --target-platform="android-arm"
+        --dart-define=SECLUSO_FDROID_BUILD=true
+
+  - versionName: 1.0.2
+    versionCode: 72
+    commit: 83887efaaeff3e0a96acec3b9a8fc3c2ea703010
+    sudo:
+      - apt-get update
+      - apt-get install -y build-essential clang cmake pkg-config rustup
+    output: build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+    binary: https://mirror.secluso.net/fdroid/%v/app-arm64-v8a-release-signed.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - assets/design/review_front_door_preview.mp4
+      - ios
+      - linux
+      - macos
+      - windows
+    prebuild:
+      - flutterRevision=$(sed -n -E "s/^ARG FLUTTER_REVISION=(.*)$/\\1/p" tool/repro/Dockerfile)
+      - '[[ $flutterRevision ]]'
+      - git -C $$flutter$$ checkout -f "$flutterRevision"
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - rustup default 1.90.0
+      - rustup target add armv7-linux-androideabi aarch64-linux-android x86_64-linux-android
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export SECLUSO_ANDROID_TARGET_PLATFORM=android-arm64
+      - export SECLUSO_ALLOW_UNSIGNED_RELEASE=1
+      - export SECLUSO_FDROID_BUILD=1
+      - $$flutter$$/bin/flutter build apk --release --no-pub --split-per-abi --target-platform="android-arm64"
+        --dart-define=SECLUSO_FDROID_BUILD=true
+
+  - versionName: 1.0.2
+    versionCode: 73
+    commit: 83887efaaeff3e0a96acec3b9a8fc3c2ea703010
+    sudo:
+      - apt-get update
+      - apt-get install -y build-essential clang cmake pkg-config rustup
+    output: build/app/outputs/flutter-apk/app-x86_64-release.apk
+    binary: https://mirror.secluso.net/fdroid/%v/app-x86_64-release-signed.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - assets/design/review_front_door_preview.mp4
+      - ios
+      - linux
+      - macos
+      - windows
+    prebuild:
+      - flutterRevision=$(sed -n -E "s/^ARG FLUTTER_REVISION=(.*)$/\\1/p" tool/repro/Dockerfile)
+      - '[[ $flutterRevision ]]'
+      - git -C $$flutter$$ checkout -f "$flutterRevision"
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - rustup default 1.90.0
+      - rustup target add armv7-linux-androideabi aarch64-linux-android x86_64-linux-android
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export SECLUSO_ANDROID_TARGET_PLATFORM=android-x64
+      - export SECLUSO_ALLOW_UNSIGNED_RELEASE=1
+      - export SECLUSO_FDROID_BUILD=1
+      - $$flutter$$/bin/flutter build apk --release --no-pub --split-per-abi --target-platform="android-x64"
+        --dart-define=SECLUSO_FDROID_BUILD=true
+
+AllowedAPKSigningKeys: 8d9a6a155126b4079d891f9d1516394dc15f8f17cbd14dfe4b3300806ae9f1a1
+
+MaintainerNotes: |
+  The F-Droid build is manual rather than a normal Gradle flavor. The build
+  recipe below enables the special F-Droid path, emits one APK per ABI, and
+  keeps the Android release builds unsigned for F-Droid signing.
+
+  Upload the matching signed APKs to the R2 mirror under
+  https://mirror.secluso.net/fdroid/%v/ using these filenames (F-Droid only
+  fetches these to verify reproducibility against its own from-source build):
+    - app-armeabi-v7a-release-signed.apk
+    - app-arm64-v8a-release-signed.apk
+    - app-x86_64-release-signed.apk
+
+  The app can be pointed at a self-hosted relay from inside the UI, so it is
+  not tied to one fixed hosted service.
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+VercodeOperation:
+  - 10 * %c + 1
+  - 10 * %c + 2
+  - 10 * %c + 3
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 1.0.2
+CurrentVersionCode: 73
