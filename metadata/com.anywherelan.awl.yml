@@ -1,0 +1,92 @@
+Categories:
+  - Connectivity
+  - Internet
+  - VPN & Proxy
+License: MPL-2.0
+AuthorName: Anywherelan
+AuthorEmail: hello@anywherelan.com
+AuthorWebSite: https://anywherelan.com/
+WebSite: https://anywherelan.com/
+SourceCode: https://github.com/anywherelan/awl
+IssueTracker: https://github.com/anywherelan/awl/issues
+Changelog: https://github.com/anywherelan/awl/releases
+
+AutoName: Anywherelan
+
+RepoType: git
+Repo: https://github.com/anywherelan/awl-flutter.git
+Binaries: https://github.com/anywherelan/awl/releases/download/v%v/awl-android-v%v.apk
+
+Builds:
+  - versionName: 0.18.0
+    versionCode: 18000
+    commit: af75e54d1c60c3a974a38f7d211ccb1c4cc537e3
+    timeout: 20000
+    sudo:
+      - apt-get update
+      - apt-get install -y make golang-go
+      - mkdir -p /home/runner/work/awl/awl
+      - chown -R vagrant /home/runner
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@stable
+      - go@release-branch.go1.26
+      - awl@a489caafca51bbd4558d2f41bf51176d0bd902fc
+    rm:
+      - web
+    prebuild:
+      - sdkmanager "platforms;android-24" "platforms;android-36" "platform-tools"
+      - git -C $$awl$$ checkout -f v$$VERSION$$
+      - 'goVersion=$(grep -m1 go-version: $$awl$$/.github/workflows/build-manual.yml
+        | grep -oP "(?<=go-version: )\S+")'
+      - '[[ $goVersion ]]'
+      - git -C $$go$$ checkout -f go$goVersion
+      - sed -i -e '/GOTOOLCHAIN/s/auto/local/' $$go$$/go.env
+      - export GOROOT_BOOTSTRAP=$(go env GOROOT)
+      - sed -i -e '/bootgo/s/1.24.6/1.24.4/' $$go$$/src/make.*
+      - sed -i -e '/minBootstrap/s/1.24.6/1.24.4/' $$go$$/src/cmd/dist/buildtool.go
+      - flutterVersion=$(sed -n -E "s/^\s+flutter-version:\ '([0-9.]+)'/\1/p" $$awl$$/.github/workflows/build-manual.yml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PUB_CACHE=$PWD/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - sed -i -e '1a add_link_options("LINKER:--build-id=none")' $PUB_CACHE/hosted/pub.dev/flutter_zxing-*/*/CMakeLists.txt
+      - export CI_ROOT=/home/runner/work/awl/awl
+      - mv $$awl$$ $CI_ROOT/awl
+    scandelete:
+      - .pub-cache
+    build:
+      - export CI_ROOT=/home/runner/work/awl/awl
+      - export repo=$CI_ROOT/awl-flutter
+      - cd ..
+      - export ORIG_PARENT=$(pwd)
+      - mv com.anywherelan.awl $CI_ROOT/awl-flutter
+      - export SOURCE_DATE_EPOCH=$(git -C $repo log -1 --format=%ct)
+      - export GOPATH=$repo/.gopath
+      - export PATH=$$go$$/bin:$GOPATH/bin:$$flutter$$/bin:$PATH
+      - export GOTOOLCHAIN=local
+      - export ANDROID_NDK_ROOT=$$NDK$$
+      - unset ANDROID_NDK_HOME
+      - export PUB_CACHE=$repo/.pub-cache
+      - pushd $$go$$/src
+      - ./make.bash
+      - popd
+      - cd $CI_ROOT/awl
+      - export GOMOBILE_VERSION=$(go list -m -f '{{.Version}}' golang.org/x/mobile)
+      - go install golang.org/x/mobile/cmd/gomobile@$GOMOBILE_VERSION
+      - gomobile init
+      - mkdir -p static
+      - touch static/anything
+      - ./build.sh android
+      - cd $ORIG_PARENT
+      - mv $CI_ROOT/awl-flutter com.anywherelan.awl
+    ndk: 27.3.13750724
+
+AllowedAPKSigningKeys: 74dd8b2638f7f0ef61431317588f96141baaea8715825b2858d0dfce0c07b177
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 0.18.0
+CurrentVersionCode: 18000
