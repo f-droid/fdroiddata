@@ -552,7 +552,7 @@ check apk:
 
         # manifest
         androguard axml $file -o AndroidManifest.xml
-        for permission in $(sed -n 's|.*<uses-permission android:name="\([^"]\+\)".*|\1|p' AndroidManifest.xml); do
+        for permission in $(sed 's/>/>\n/g' AndroidManifest.xml | sed -n 's|.*<uses-permission\S* android:name="\([^"]\+\)".*|\1|p'); do
             generate_report $appid $location "Permission $permission" "permission" "$file $permission" "info" >> codequality.json;
         done
         grep 'android:usesCleartextTraffic="true"' AndroidManifest.xml && \
