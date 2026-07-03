@@ -206,11 +206,103 @@ Builds:
     gradleprops:
       - reactNativeArchitectures=arm64-v8a
 
+  - versionName: 0.14.0
+    versionCode: 14001
+    commit: afe4df9c5f4eddc4e97e7113e7a424f86e248b51
+    subdir: mobile/android/app
+    sudo:
+      - echo "deb https://deb.debian.org/debian forky main" > /etc/apt/sources.list.d/forky.list
+      - apt-get update
+      - apt-get install -y -t forky npm
+    init:
+      - cd ../..
+      - sed -i -e '/JavaVersion\|jvmTarget/s/17/21/' modules/fdroid-location/android/build.gradle
+      - npm ci
+    gradle:
+      - fdroid
+    output: build/outputs/apk/fdroid/release/app-fdroid-armeabi-v7a-release-unsigned.apk
+    prebuild:
+      - cd ../..
+      - sed -i -e '1a 
+        "expo":{"autolinking":{"android":{"buildFromSource":[".*"],"exclude":["expo-notifications","expo-location"]}}},'
+        package.json
+      - sed -i '/jvmToolchain\|JavaVersion/s/17/21/' node_modules/@react-native/gradle-plugin/*/build.gradle.kts
+        node_modules/@react-native/gradle-plugin/react-native-gradle-plugin/src/main/kotlin/com/facebook/react/utils/JdkConfiguratorUtils.kt
+      - sed -i -e '/javaVersion/s/17/21/' node_modules/@pchmn/expo-material3-theme/android/build.gradle
+      - echo "EXPO_PUBLIC_DISTRIBUTION=fdroid" >> ../../.env
+      - npx expo prebuild --platform android --no-install
+      - sed -i -e '/installreferrer/d' node_modules/expo-application/android/build.gradle
+      - sed -i -e '/import com.android.installreferrer/d' -e '/AsyncFunction.*getInstallReferrerAsync/,/^    }/d'
+        node_modules/expo-application/android/src/main/java/expo/modules/application/ApplicationModule.kt
+      - sed -i -e '/signingConfig /d' android/app/build.gradle
+      - sed -i -e 's/versionCode [0-9]\+/versionCode $$VERCODE$$/' android/app/build.gradle
+      - printf 
+        "\nandroid.lintOptions.checkReleaseBuilds=false\norg.gradle.jvmargs=-Xmx8g\norg.gradle.parallel=true\norg.gradle.caching=true\n"
+        >> android/gradle.properties
+    scanignore:
+      - mobile/node_modules/hermes-compiler/hermesc/linux64-bin/hermesc
+      - mobile/node_modules/react-native-safe-area-context/android/build.gradle
+      - mobile/node_modules/react-native-screens/android/build.gradle
+      - mobile/node_modules/react-native-legal/android/build.gradle
+      - mobile/node_modules/expo-modules-core/android/ExpoModulesCorePlugin.gradle
+      - mobile/node_modules/@pchmn/expo-material3-theme/android/build.gradle
+      - mobile/node_modules/@react-native-masked-view/masked-view/android/build.gradle
+    scandelete:
+      - mobile/node_modules
+    gradleprops:
+      - reactNativeArchitectures=armeabi-v7a
+
+  - versionName: 0.14.0
+    versionCode: 14002
+    commit: afe4df9c5f4eddc4e97e7113e7a424f86e248b51
+    subdir: mobile/android/app
+    sudo:
+      - echo "deb https://deb.debian.org/debian forky main" > /etc/apt/sources.list.d/forky.list
+      - apt-get update
+      - apt-get install -y -t forky npm
+    init:
+      - cd ../..
+      - sed -i -e '/JavaVersion\|jvmTarget/s/17/21/' modules/fdroid-location/android/build.gradle
+      - npm ci
+    gradle:
+      - fdroid
+    output: build/outputs/apk/fdroid/release/app-fdroid-arm64-v8a-release-unsigned.apk
+    prebuild:
+      - cd ../..
+      - sed -i -e '1a 
+        "expo":{"autolinking":{"android":{"buildFromSource":[".*"],"exclude":["expo-notifications","expo-location"]}}},'
+        package.json
+      - sed -i '/jvmToolchain\|JavaVersion/s/17/21/' node_modules/@react-native/gradle-plugin/*/build.gradle.kts
+        node_modules/@react-native/gradle-plugin/react-native-gradle-plugin/src/main/kotlin/com/facebook/react/utils/JdkConfiguratorUtils.kt
+      - sed -i -e '/javaVersion/s/17/21/' node_modules/@pchmn/expo-material3-theme/android/build.gradle
+      - echo "EXPO_PUBLIC_DISTRIBUTION=fdroid" >> ../../.env
+      - npx expo prebuild --platform android --no-install
+      - sed -i -e '/installreferrer/d' node_modules/expo-application/android/build.gradle
+      - sed -i -e '/import com.android.installreferrer/d' -e '/AsyncFunction.*getInstallReferrerAsync/,/^    }/d'
+        node_modules/expo-application/android/src/main/java/expo/modules/application/ApplicationModule.kt
+      - sed -i -e '/signingConfig /d' android/app/build.gradle
+      - sed -i -e 's/versionCode [0-9]\+/versionCode $$VERCODE$$/' android/app/build.gradle
+      - printf 
+        "\nandroid.lintOptions.checkReleaseBuilds=false\norg.gradle.jvmargs=-Xmx8g\norg.gradle.parallel=true\norg.gradle.caching=true\n"
+        >> android/gradle.properties
+    scanignore:
+      - mobile/node_modules/hermes-compiler/hermesc/linux64-bin/hermesc
+      - mobile/node_modules/react-native-safe-area-context/android/build.gradle
+      - mobile/node_modules/react-native-screens/android/build.gradle
+      - mobile/node_modules/react-native-legal/android/build.gradle
+      - mobile/node_modules/expo-modules-core/android/ExpoModulesCorePlugin.gradle
+      - mobile/node_modules/@pchmn/expo-material3-theme/android/build.gradle
+      - mobile/node_modules/@react-native-masked-view/masked-view/android/build.gradle
+    scandelete:
+      - mobile/node_modules
+    gradleprops:
+      - reactNativeArchitectures=arm64-v8a
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 VercodeOperation:
   - 10 * %c + 1
   - 10 * %c + 2
 UpdateCheckData: mobile/app.json|"versionCode":\s*(\d+)|.|"version":\s*"([^"]+)"
-CurrentVersion: 0.13.1
-CurrentVersionCode: 13012
+CurrentVersion: 0.14.0
+CurrentVersionCode: 14002
