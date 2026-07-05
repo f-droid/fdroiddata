@@ -62,7 +62,31 @@ Builds:
       - project/target
       - project/project/target
 
+  - versionName: 0.6.3
+    versionCode: 603
+    commit: 91ee26fd6b94db92ce15e808554a867e5049d186
+    subdir: android/app
+    sudo:
+      - echo "deb https://deb.debian.org/debian forky main" > /etc/apt/sources.list.d/forky.list
+      - apt-get update
+      - apt-get install -y -t forky nodejs npm
+      - curl -Lo sbt.tgz https://github.com/sbt/sbt/releases/download/v1.12.9/sbt-1.12.9.tgz
+      - echo "94d2eda5486d343aebb24c675368c2d220880bbe540457917b65a844d7cb061c sbt.tgz"
+        | sha256sum -c -
+      - tar xzf sbt.tgz --strip-components=1 -C /usr/local/
+    gradle:
+      - yes
+    prebuild:
+      - cd ../..
+      - npm ci
+      - npm run build
+    scandelete:
+      - node_modules
+      - target
+      - project/target
+      - project/project/target
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v[0-9.]+$
-CurrentVersion: 0.6.2
-CurrentVersionCode: 602
+CurrentVersion: 0.6.3
+CurrentVersionCode: 603
