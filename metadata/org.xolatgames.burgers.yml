@@ -1,0 +1,54 @@
+Categories:
+  - Action Game
+  - Platformer Game
+License: GPL-3.0-only
+AuthorName: xolatgames
+AuthorEmail: hello@xolat.games
+AuthorWebSite: https://xolat.games/
+SourceCode: https://codeberg.org/xolatgames/Battle-for-Burgers
+IssueTracker: https://codeberg.org/xolatgames/Battle-for-Burgers/issues
+Changelog: https://codeberg.org/xolatgames/Battle-for-Burgers/src/branch/main/CHANGELOG.md
+Bitcoin: bc1qhmrztwhfgmfaenrqrmqtwff20pc6uudsd3e27t
+
+AutoName: Battle for Burgers 🍔🍔🍔
+
+RepoType: git
+Repo: https://codeberg.org/xolatgames/Battle-for-Burgers.git
+
+Builds:
+  - versionName: 1.5.1
+    versionCode: 6
+    commit: 82cea996fd325bdddd201fd428ecab54c7f419ff
+    sudo:
+      - apt-get update
+      - apt-get install clang gettext pkg-config scons -y
+    init: sdkmanager --install "cmdline-tools;latest"
+    output: Battle-for-Burgers.apk
+    srclibs:
+      - Godot@4.6.3-stable
+    build:
+      - pushd $$Godot$$
+      - export ANDROID_NDK_ROOT=$$NDK$$
+      - export ANDROID_HOME=$$SDK$$
+      - export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+      - export SCONS="scons -j `nproc` verbose=no warnings=no progress=no profile=fdroid/custom.py"
+      - $SCONS target=editor platform=linuxbsd
+      - $SCONS target=template_release platform=android arch=arm64 production=yes
+        swappy=no generate_android_binaries=yes generate_apk=yes
+      - popd
+      - mv $$Godot$$/bin/android_release.apk ./android_release.apk
+      - mkdir .godot
+      - chmod +x fdroid/generate_configs.sh
+      - ./fdroid/generate_configs.sh
+      - export EXPORT_PRESETS="export_presets.cfg"
+      - export VERSION_CODE=`cat project.godot | grep version_code | sed -e "s/config\/version_code=//"`
+      - sed -i -e "s/version\/code=0/version\/code=${VERSION_CODE}/" ${EXPORT_PRESETS}
+      - $$Godot$$/bin/godot.linuxbsd.editor.x86_64 --headless --export-release "F-Droid"
+        Battle-for-Burgers.apk
+    ndk: 28.1.13356709
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: project.godot|config/version_code=(\d+)|.|config/version="([\d.]+)"
+CurrentVersion: 1.5.1
+CurrentVersionCode: 6
