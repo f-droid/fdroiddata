@@ -506,7 +506,7 @@ check apk:
   before_script:
     - ls tmp/*.apk 2> /dev/null || exit 0
     - apt-get update
-    - apt-get install -qy --no-install-recommends fdroidserver curl unzip zip
+    - apt-get install -qy --no-install-recommends fdroidserver curl unzip zip jq
     - export fdroidserver=$PWD/fdroidserver
     - *install_fdroid_server
     - sdkmanager "build-tools;36.0.0"
@@ -571,7 +571,7 @@ check apk:
           else
             severity="info"
           fi
-          generate_report $appid $location "Signing Key: $dn" "signing_key" "$file Signing Key" $severity >> codequality.json;
+          generate_report $appid $location "Signing Key: $(printf "$dn" | jq -Rr '@json[1:-1]')" "signing_key" "$file Signing Key" $severity >> codequality.json;
         fi
 
         # size and abi
