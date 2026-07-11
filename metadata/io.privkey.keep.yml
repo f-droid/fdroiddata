@@ -68,6 +68,60 @@ Builds:
       - gradle assembleRelease
     ndk: r29
 
+  - versionName: 1.1.8
+    versionCode: 262
+    commit: 2100c5e3e0a49341d078ae71bc942e5ec7f0756d
+    sudo:
+      - apt-get update
+      - apt-get install -y --no-install-recommends pkg-config cmake make ninja-build
+        g++ libc-dev rustup
+    output: app/build/outputs/apk/release/app-arm64-v8a-release.apk
+    binary: 
+      https://github.com/privkeyio/keep-android/releases/download/v%v/keep-android-v%v-arm64-v8a.apk
+    srclibs:
+      - keep@ded5f70eac80bff3722598b4a2ebf3f50a2567a7
+    prebuild:
+      - git -C $$keep$$ checkout -f $(cat keep.version)
+      - rustup default 1.89.0
+      - rustup target add aarch64-linux-android
+      - cargo install --locked --version 4.1.2 cargo-ndk
+    build:
+      - export KEEP_REPO=$$keep$$
+      - export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+      - export PATH=$HOME/.cargo/bin:$JAVA_HOME/bin:$PATH
+      - export AWS_LC_SYS_CMAKE_BUILDER=1
+      - export SOURCE_DATE_EPOCH="$(./scripts/derive-sde.sh)"
+      - export TARGETS=aarch64-linux-android
+      - gradle assembleRelease
+    ndk: r29
+
+  - versionName: 1.1.8
+    versionCode: 264
+    commit: 2100c5e3e0a49341d078ae71bc942e5ec7f0756d
+    sudo:
+      - apt-get update
+      - apt-get install -y --no-install-recommends pkg-config cmake make ninja-build
+        g++ libc-dev rustup
+    output: app/build/outputs/apk/release/app-x86_64-release.apk
+    binary: 
+      https://github.com/privkeyio/keep-android/releases/download/v%v/keep-android-v%v-x86_64.apk
+    srclibs:
+      - keep@ded5f70eac80bff3722598b4a2ebf3f50a2567a7
+    prebuild:
+      - git -C $$keep$$ checkout -f $(cat keep.version)
+      - rustup default 1.89.0
+      - rustup target add x86_64-linux-android
+      - cargo install --locked --version 4.1.2 cargo-ndk
+    build:
+      - export KEEP_REPO=$$keep$$
+      - export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+      - export PATH=$HOME/.cargo/bin:$JAVA_HOME/bin:$PATH
+      - export AWS_LC_SYS_CMAKE_BUILDER=1
+      - export SOURCE_DATE_EPOCH="$(./scripts/derive-sde.sh)"
+      - export TARGETS=x86_64-linux-android
+      - gradle assembleRelease
+    ndk: r29
+
 AllowedAPKSigningKeys: 3eb0e6f6f4e0962ebd717f84eea47428b73087b686c956633d6a9fcc4c854f50
 
 AutoUpdateMode: Version
@@ -75,5 +129,5 @@ UpdateCheckMode: Tags
 VercodeOperation:
   - 10 * %c + 2
   - 10 * %c + 4
-CurrentVersion: 1.1.7
-CurrentVersionCode: 254
+CurrentVersion: 1.1.8
+CurrentVersionCode: 264
