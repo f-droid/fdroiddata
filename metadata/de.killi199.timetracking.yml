@@ -88,11 +88,91 @@ Builds:
     gradleprops:
       - reactNativeArchitectures=arm64-v8a
 
+  - versionName: 1.4.0
+    versionCode: 231
+    commit: 546cb6ff982e97a993d084268c711b835995631f
+    subdir: android/app
+    sudo:
+      - echo "deb https://deb.debian.org/debian forky main" > /etc/apt/sources.list.d/forky.list
+      - apt-get update
+      - apt-get install -y -t forky npm
+      - corepack enable
+    gradle:
+      - yes
+    prebuild:
+      - cd ../..
+      - sed -i -e '/"expo-location"/d' package.json
+      - sed -i -e '/"expo-notifications"/d' package.json
+      - sed -i -e '/"@maplibre\/maplibre-react-native"/d' package.json
+      - sed -i -e 's/"versionCode":[ ]*[0-9]*/"versionCode":$$VERCODE$$/' package.json
+      - yarn config set --home enableTelemetry 0
+      - npm_config_build_from_source=true yarn install --no-immutable
+      - find node_modules -type f \( -name "*.gradle" -o -name "*.gradle.kts" -o -name
+        "*.kt" \) -exec sed -i -e 's/JavaVersion.VERSION_17/JavaVersion.VERSION_21/g'
+        -e 's/jvmToolchain(17)/jvmToolchain(21)/g' -e 's/JvmTarget.fromTarget("17")/JvmTarget.fromTarget("21")/g'
+        {} +
+      - yarn generate-licenses
+      - npx expo prebuild --clean --platform android --no-install
+      - echo "" >> android/gradle.properties
+      - echo "org.gradle.jvmargs=-Xmx3g -XX:MaxMetaspaceSize=1024m" >> android/gradle.properties
+    scanignore:
+      - node_modules/hermes-compiler/hermesc/linux64-bin/hermesc
+      - node_modules/expo-modules-core/android/ExpoModulesCorePlugin.gradle
+      - node_modules/@react-native-masked-view/masked-view/android/build.gradle
+      - node_modules/react-native-safe-area-context/android/build.gradle
+      - node_modules/react-native-nfc-manager/android/build.gradle
+      - node_modules/react-native-screens/android/build.gradle
+    scandelete:
+      - .yarn/install-state.gz
+      - node_modules
+    gradleprops:
+      - reactNativeArchitectures=x86_64
+
+  - versionName: 1.4.0
+    versionCode: 232
+    commit: 546cb6ff982e97a993d084268c711b835995631f
+    subdir: android/app
+    sudo:
+      - echo "deb https://deb.debian.org/debian forky main" > /etc/apt/sources.list.d/forky.list
+      - apt-get update
+      - apt-get install -y -t forky npm
+      - corepack enable
+    gradle:
+      - yes
+    prebuild:
+      - cd ../..
+      - sed -i -e '/"expo-location"/d' package.json
+      - sed -i -e '/"expo-notifications"/d' package.json
+      - sed -i -e '/"@maplibre\/maplibre-react-native"/d' package.json
+      - sed -i -e 's/"versionCode":[ ]*[0-9]*/"versionCode":$$VERCODE$$/' package.json
+      - yarn config set --home enableTelemetry 0
+      - npm_config_build_from_source=true yarn install --no-immutable
+      - find node_modules -type f \( -name "*.gradle" -o -name "*.gradle.kts" -o -name
+        "*.kt" \) -exec sed -i -e 's/JavaVersion.VERSION_17/JavaVersion.VERSION_21/g'
+        -e 's/jvmToolchain(17)/jvmToolchain(21)/g' -e 's/JvmTarget.fromTarget("17")/JvmTarget.fromTarget("21")/g'
+        {} +
+      - yarn generate-licenses
+      - npx expo prebuild --clean --platform android --no-install
+      - echo "" >> android/gradle.properties
+      - echo "org.gradle.jvmargs=-Xmx3g -XX:MaxMetaspaceSize=1024m" >> android/gradle.properties
+    scanignore:
+      - node_modules/hermes-compiler/hermesc/linux64-bin/hermesc
+      - node_modules/expo-modules-core/android/ExpoModulesCorePlugin.gradle
+      - node_modules/@react-native-masked-view/masked-view/android/build.gradle
+      - node_modules/react-native-safe-area-context/android/build.gradle
+      - node_modules/react-native-nfc-manager/android/build.gradle
+      - node_modules/react-native-screens/android/build.gradle
+    scandelete:
+      - .yarn/install-state.gz
+      - node_modules
+    gradleprops:
+      - reactNativeArchitectures=arm64-v8a
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 VercodeOperation:
   - '%c * 10 + 1'
   - '%c * 10 + 2'
 UpdateCheckData: package.json|"versionCode":\s*(\d+)|.|"version":\s*"([^"]+)"
-CurrentVersion: 1.3.2
-CurrentVersionCode: 222
+CurrentVersion: 1.4.0
+CurrentVersionCode: 232
