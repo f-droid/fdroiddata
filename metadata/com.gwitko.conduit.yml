@@ -1937,6 +1937,138 @@ Builds:
       - mv $repo com.gwitko.conduit
     ndk: r29
 
+  - versionName: 1.4.13
+    versionCode: 381
+    commit: 8e31da108e983b0154a8d222b61c4b151eeb51b3
+    sudo:
+      - mkdir -p /home/runner/work/Conduit
+      - chown -R vagrant /home/runner/work
+    output: build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
+    binary: 
+      https://github.com/gwitko/Conduit/releases/download/v%v/app-armeabi-v7a-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+      - third_party/source-offer/upstream-sources
+    prebuild:
+      - flutterVersion=$(sed -n -E "s/.*flutter-version:\ '(.*)'/\1/p" .github/workflows/release.yml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export repo=/home/runner/work/Conduit/Conduit
+      - cd ..
+      - mv com.gwitko.conduit $repo
+      - pushd $repo
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - popd
+      - mv $repo com.gwitko.conduit
+    scandelete:
+      - .pub-cache
+    build:
+      - export repo=/home/runner/work/Conduit/Conduit
+      - cd ..
+      - mv com.gwitko.conduit $repo
+      - pushd $repo
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform="android-arm"
+      - popd
+      - mv $repo com.gwitko.conduit
+    ndk: r29
+
+  - versionName: 1.4.13
+    versionCode: 382
+    commit: 8e31da108e983b0154a8d222b61c4b151eeb51b3
+    sudo:
+      - apt-get update
+      - apt-get install -y autoconf autogen automake autopoint bison build-essential
+        curl file flex g++ g++-multilib gawk gettext gnupg gperf git intltool jq libfl-dev
+        libglib2.0-dev libltdl-dev libtool-bin lrzip lzip lz4 lzop m4 patch patchelf
+        pkg-config python-is-python3 python3-pip python3-setuptools python3-venv python-wheel-common
+        rsync scons tar unzip wget xz-utils zip zstd
+      - mkdir -p /home/runner/work/Conduit
+      - chown -R vagrant /home/runner/work
+      - mkdir -p /data/data /tmp/conduit-termux-build
+      - chown -R vagrant /data /tmp/conduit-termux-build
+    output: build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+    binary: 
+      https://github.com/gwitko/Conduit/releases/download/v%v/app-arm64-v8a-release.apk
+    srclibs:
+      - flutter@stable
+      - TermuxPackages@ac296452b8ebec390cad3bce9060577c96099b10
+    rm:
+      - ios
+      - third_party/source-offer/upstream-sources
+    prebuild:
+      - flutterVersion=$(sed -n -E "s/.*flutter-version:\ '(.*)'/\1/p" .github/workflows/release.yml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export repo=/home/runner/work/Conduit/Conduit
+      - cd ..
+      - mv com.gwitko.conduit $repo
+      - pushd $repo
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - ANDROID_HOME=$$SDK$$ ANDROID_SDK_ROOT=$$SDK$$ NDK=$$NDK$$ TERMUX_PACKAGES_DIR=$$TermuxPackages$$
+        TERMUX_QUIET_BUILD=true bash tools/build-local-shell-binaries.sh --no-android-setup
+      - popd
+      - mv $repo com.gwitko.conduit
+    scanignore:
+      - android/app/src/main/jniLibs/arm64-v8a/*.so
+    scandelete:
+      - .pub-cache
+    build:
+      - export repo=/home/runner/work/Conduit/Conduit
+      - cd ..
+      - mv com.gwitko.conduit $repo
+      - pushd $repo
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform="android-arm64"
+      - popd
+      - mv $repo com.gwitko.conduit
+    ndk: r29
+
+  - versionName: 1.4.13
+    versionCode: 383
+    commit: 8e31da108e983b0154a8d222b61c4b151eeb51b3
+    sudo:
+      - mkdir -p /home/runner/work/Conduit
+      - chown -R vagrant /home/runner/work
+    output: build/app/outputs/flutter-apk/app-x86_64-release.apk
+    binary: https://github.com/gwitko/Conduit/releases/download/v%v/app-x86_64-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+      - third_party/source-offer/upstream-sources
+    prebuild:
+      - flutterVersion=$(sed -n -E "s/.*flutter-version:\ '(.*)'/\1/p" .github/workflows/release.yml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export repo=/home/runner/work/Conduit/Conduit
+      - cd ..
+      - mv com.gwitko.conduit $repo
+      - pushd $repo
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - popd
+      - mv $repo com.gwitko.conduit
+    scandelete:
+      - .pub-cache
+    build:
+      - export repo=/home/runner/work/Conduit/Conduit
+      - cd ..
+      - mv com.gwitko.conduit $repo
+      - pushd $repo
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform="android-x64"
+      - popd
+      - mv $repo com.gwitko.conduit
+    ndk: r29
+
 AllowedAPKSigningKeys: 4ed20142cd6220598a573d2df2927b5f239db262ce2d6c84cdac507aa5b32c5f
 
 AutoUpdateMode: Version
@@ -1946,5 +2078,5 @@ VercodeOperation:
   - '%c * 10 + 2'
   - '%c * 10 + 3'
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 1.4.12
-CurrentVersionCode: 373
+CurrentVersion: 1.4.13
+CurrentVersionCode: 383
