@@ -1,5 +1,6 @@
 Categories:
   - Multimedia
+  - Music Practice Tool
   - Science & Education
 License: MIT
 AuthorName: Felix Monninger
@@ -46,9 +47,40 @@ Builds:
       - cp assets/shaders/* android/app/src/main/assets/shaders/
     ndk: r28c
 
+  - versionName: '1.29'
+    versionCode: 29
+    commit: 66ad75bbc6d35e5bb67c777ed8450c561a22846d
+    subdir: pitchvis_viewer/android/app
+    sudo:
+      - apt-get update
+      - apt-get install -y gcc libc-dev rustup
+    gradle:
+      - yes
+    prebuild:
+      - rustup default 1.97.0
+      - rustup target add aarch64-linux-android
+    scandelete:
+      - pitchvis_android_serial
+      - dagc_fork/examples/dagc-wasm/pkg/dagc_wasm_bg.wasm
+    build:
+      - export PATH="$HOME/.cargo/bin:$PATH"
+      - cargo install cargo-ndk --version 4.1.2 --locked
+      - export ANDROID_NDK=$$NDK$$
+      - cd ../../..
+      - export CARGO_TARGET_AARCH64_LINUX_ANDROID_RUSTFLAGS="-Clink-arg=-lc++_shared
+        --remap-path-prefix=$(pwd)=/build --remap-path-prefix=${CARGO_HOME:-$HOME/.cargo}=/cargo"
+      - cd pitchvis_viewer && ANDROID_NDK_ROOT="$ANDROID_NDK" cargo ndk -t arm64-v8a
+        -o android/app/src/main/jniLibs/ rustc --release --lib --crate-type cdylib
+      - cp 
+        "$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/aarch64-linux-android/libc++_shared.so"
+        android/app/src/main/jniLibs/arm64-v8a/
+      - mkdir -p android/app/src/main/assets/shaders
+      - cp assets/shaders/* android/app/src/main/assets/shaders/
+    ndk: r28c
+
 AllowedAPKSigningKeys: 0bc6a6264f97dd09fe46616daa0aea8a6bab013f12cfc4bccda54cc5b54c1a05
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: '1.28'
-CurrentVersionCode: 28
+CurrentVersion: '1.29'
+CurrentVersionCode: 29
