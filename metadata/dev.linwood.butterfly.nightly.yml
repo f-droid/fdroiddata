@@ -4271,8 +4271,56 @@ Builds:
       - $$flutter$$/bin/flutter build apk --flavor nightly
     ndk: r28c
 
+  - versionName: 2.6.0-beta.2
+    versionCode: 188
+    commit: 27c1f9f8fb048f4493090e773b9f805ff8460cf2
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y rustup gcc libc-dev
+    output: build/app/outputs/flutter-apk/app-nightly-release.apk
+    srclibs:
+      - flutter@stable
+      - pdfium-binaries@chromium/7811
+    rm:
+      - app/ios
+      - app/linux
+      - app/macos
+      - app/web
+      - app/windows
+    prebuild:
+      - flutterVersion=$(sed -n -E "s/^  flutter:\ (.*)/\1/p" pubspec.yaml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - sed -i -e '/signingConfig/,+4d' android/app/build.gradle.kts
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - grep chromium%2F7811 $PUB_CACHE/hosted/pub.dev/pdfium_dart-*/hook/build.dart
+      - sed -i -e '/get(archiveUri)/,+3c final bytes = await 
+        File("$$pdfium-binaries$$/pdfium-${target.archivePlatform}-${target.archiveArch}.tgz").readAsBytes();'
+        -e 's/response.bodyBytes/bytes/' -e '/http/d' $PUB_CACHE/hosted/pub.dev/pdfium_dart-*/hook/build.dart
+    scandelete:
+      - app/.pub-cache
+    build:
+      - pushd $$pdfium-binaries$$
+      - export PDFium_BRANCH="chromium/7811"
+      - export PDFium_VERSION="149.0.7811.0"
+      - sed -i 's|sudo |echo |g' steps/01-install.sh
+      - echo 'sed -i "s|  sys.exit(main())|  sys.exit(0)|g" pdfium/build/install-build-deps.py'
+        >> steps/02-checkout.sh
+      - truncate -s 0 steps/09-test.sh
+      - ./build.sh -b "$PDFium_BRANCH" android arm
+      - ./build.sh -b "$PDFium_BRANCH" android arm64
+      - ./build.sh -b "$PDFium_BRANCH" android x64
+      - cp pdfium-android-x64.tgz pdfium-android-x86.tgz
+      - popd
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --flavor nightly
+    ndk: r28c
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v.+-.+$
 UpdateCheckData: app/pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 2.6.0-beta.0
-CurrentVersionCode: 186
+CurrentVersion: 2.6.0-beta.2
+CurrentVersionCode: 188
