@@ -1,0 +1,78 @@
+Categories:
+  - Calendar & Agenda
+  - Email
+  - Messaging
+License: AGPL-3.0-or-later
+AuthorName: Axichat Developers
+WebSite: https://axi.chat
+SourceCode: https://github.com/axichat/axichat
+IssueTracker: https://github.com/axichat/axichat/issues
+Changelog: https://github.com/axichat/axichat/releases
+Donate: https://axi.chat/donate
+
+RepoType: git
+Repo: https://github.com/axichat/axichat.git
+Binaries: 
+  https://github.com/axichat/axichat/releases/download/v%v/app-arm64-v8a-production-release.apk
+
+Builds:
+  - versionName: 0.8.8
+    versionCode: 2016
+    commit: 6eb1873fe8f5e19229ba0a3bdc29e6102e811c6f
+    sudo:
+      - apt-get update
+      - apt-get install -y gcc make libc-dev pkg-config perl rustup unzip
+    output: build/app/outputs/flutter-apk/app-arm64-v8a-production-release.apk
+    srclibs:
+      - flutter@stable
+      - pdfium-binaries@chromium/7520
+    prebuild:
+      - flutterVersion=$(tr -d '\r\n' < .flutter-version)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - python3 tool/patch_fdroid_in_app_update.py "$PUB_CACHE"
+      - python3 tool/strip_dev_flutter_plugins.py
+      - $$flutter$$/bin/dart run pdfrx:remove_wasm_modules
+      - grep 'set(PDFIUM_RELEASE chromium%2F7520)' $PUB_CACHE/hosted/pub.dev/pdfium_flutter-*/android/CMakeLists.txt
+      - sed -i -e 's|file(DOWNLOAD 
+        https://github.com/bblanchon/pdfium-binaries/releases/download/${PDFIUM_RELEASE}/${PDFIUM_ARCHIVE_NAME}.tgz
+        ${PDFIUM_RELEASE_DIR}/${PDFIUM_ARCHIVE_NAME}.tgz)|file(COPY "$$pdfium-binaries$$/${PDFIUM_ARCHIVE_NAME}.tgz"
+        DESTINATION ${PDFIUM_RELEASE_DIR})|' $PUB_CACHE/hosted/pub.dev/pdfium_flutter-*/android/CMakeLists.txt
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export CARGO_HOME=/tmp/axichat-cargo-home
+      - export CARGO_TARGET_DIR=/tmp/axichat-cargo-target
+      - rustup default 1.90.0
+      - rustup target add aarch64-linux-android
+      - pushd $$pdfium-binaries$$
+      - export PDFium_BRANCH="chromium/7520"
+      - export PDFium_VERSION="144.0.7520.0"
+      - sed -i 's|sudo |echo |g' steps/01-install.sh
+      - echo 'sed -i "s|  sys.exit(main())|  sys.exit(0)|g" pdfium/build/install-build-deps.py'
+        >> steps/02-checkout.sh
+      - truncate -s 0 steps/09-test.sh
+      - ./build.sh -b "$PDFium_BRANCH" android arm64
+      - cp pdfium-android-arm64.tgz pdfium-android-arm.tgz
+      - cp pdfium-android-arm64.tgz pdfium-android-x64.tgz
+      - cp pdfium-android-arm64.tgz pdfium-android-x86.tgz
+      - popd
+      - $$flutter$$/bin/dart run build_runner build --delete-conflicting-outputs
+      - $$flutter$$/bin/flutter build apk --flavor production --release --split-per-abi
+        --target-platform=android-arm64 --build-number=$(($$VERCODE$$ % 1000)) --dart-define=EMAIL_PUBLIC_TOKEN=axichatpublictoken
+        --dart-define=ENABLE_SHOREBIRD=false
+    ndk: 28.2.13676358
+
+AllowedAPKSigningKeys: 92d96304e82efa324f6aab21d731b32f05dbb3c8d42fc5514ea6755f33498d2e
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+VercodeOperation:
+  - 2000 + %c
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 0.8.8
+CurrentVersionCode: 2016
