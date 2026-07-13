@@ -396,22 +396,69 @@ Builds:
       - sed -i -e '/dynamic.features/d' build.gradle
       - sed -i -e 's|maven.pkg.github.com.*")|jitpack.io")|' ../smswithoutborders_libsignal-doubleratchet/build.gradle
 
-  - versionName: 0.73.0
-    versionCode: 87
-    disable: https://github.com/dekusms/DekuSMS-Android/issues/499#issuecomment-4885473973
-    commit: 737d680d421666e8b95d1ccc69dd31e4304d29ab
+  - versionName: 0.75.0
+    versionCode: 8901
+    commit: d65eedd60da1ddf6c5a7fc663635d86af9dc1304
     subdir: app
     submodules: true
     gradle:
       - yes
+    binary: 
+      https://github.com/dekusms/DekuSMS-Android/releases/download/89/%v-armeabi-v7a.apk
+    srclibs:
+      - reproducible-apk-tools@v0.3.0
     prebuild:
       - sed -i -e '/foojay/d' ../settings.gradle
-      - sed -i -e 's/universalApk false/universalApk true/' build.gradle
+      - sed -i -e 's/include .*/include "armeabi-v7a"/' build.gradle
+    postbuild:
+      - mv $$OUT$$ unaligned.apk
+      - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
+        --replace unaligned.apk $$OUT$$
+
+  - versionName: 0.75.0
+    versionCode: 8902
+    commit: d65eedd60da1ddf6c5a7fc663635d86af9dc1304
+    subdir: app
+    submodules: true
+    gradle:
+      - yes
+    binary: https://github.com/dekusms/DekuSMS-Android/releases/download/89/%v-x86_64.apk
+    srclibs:
+      - reproducible-apk-tools@v0.3.0
+    prebuild:
+      - sed -i -e '/foojay/d' ../settings.gradle
+      - sed -i -e 's/include .*/include "x86_64"/' build.gradle
+    postbuild:
+      - mv $$OUT$$ unaligned.apk
+      - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
+        --replace unaligned.apk $$OUT$$
+
+  - versionName: 0.75.0
+    versionCode: 8903
+    commit: d65eedd60da1ddf6c5a7fc663635d86af9dc1304
+    subdir: app
+    submodules: true
+    gradle:
+      - yes
+    binary: https://github.com/dekusms/DekuSMS-Android/releases/download/89/%v-arm64-v8a.apk
+    srclibs:
+      - reproducible-apk-tools@v0.3.0
+    prebuild:
+      - sed -i -e '/foojay/d' ../settings.gradle
+      - sed -i -e 's/include .*/include "arm64-v8a"/' build.gradle
+    postbuild:
+      - mv $$OUT$$ unaligned.apk
+      - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
+        --replace unaligned.apk $$OUT$$
 
 AllowedAPKSigningKeys: dee0522c2f17d711e6b468bf212abfd10d346350c8df41c4d474d34c33fc01fc
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
+VercodeOperation:
+  - '%c * 100 + 1'
+  - '%c * 100 + 2'
+  - '%c * 100 + 3'
 UpdateCheckData: version.properties|tagVersion=(\d+)|.|versionName=(.*)
-CurrentVersion: 0.73.0
-CurrentVersionCode: 87
+CurrentVersion: 0.75.0
+CurrentVersionCode: 8903
