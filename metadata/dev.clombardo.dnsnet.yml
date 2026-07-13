@@ -375,11 +375,42 @@ Builds:
       - gradle assembleRelease
     ndk: 29.0.14206865
 
+  - versionName: 1.3.16
+    versionCode: 77
+    commit: c2a3b33326da420f78f683fd4ae8e50fb70acfae
+    subdir: app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y cmake make g++ libc-dev rustup libclang-dev
+      - mkdir -p /home/runner/work/DNSNet
+      - chown -R vagrant /home/runner
+    output: build/outputs/apk/release/*.apk
+    prebuild:
+      - sed -i -e '/foojay/d' ../settings.gradle.kts
+      - sed -i '/^        bundletool {/,/^        }/d' build.gradle.kts
+      - sed -i -e '/cargo {/a extraCargoBuildArguments = remapCargo' ../service/build.gradle.kts
+      - rm ../rust-toolchain.toml
+      - export HOME=/home/runner
+      - rustup default nightly-2026-05-30
+      - rustup target add x86_64-linux-android aarch64-linux-android armv7-linux-androideabi
+    build:
+      - cd ../..
+      - export HOME=/home/runner
+      - export repo=/home/runner/work/DNSNet/DNSNet
+      - export RUSTFLAGS=--remap-path-prefix=$HOME/.cargo=/rust/cargo
+      - mv dev.clombardo.dnsnet $repo
+      - pushd $repo
+      - gradle assembleRelease
+      - popd
+      - mv $repo dev.clombardo.dnsnet
+    ndk: 29.0.14206865
+
 AllowedAPKSigningKeys: d76f6207d8182cdc1ee2dcbfe74db2edf37f36b82d084b017f79fe9f067121e4
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: build.gradle.kts|versionCode by extra { (\d+) }|.|versionName by
   extra { "([\d.]+)" }
-CurrentVersion: 1.3.15
-CurrentVersionCode: 76
+CurrentVersion: 1.3.16
+CurrentVersionCode: 77
