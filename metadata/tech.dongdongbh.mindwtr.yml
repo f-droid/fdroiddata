@@ -476,6 +476,48 @@ Builds:
       - UNSIGNED_APK=1 FOSS_BUILD=1 SKIP_FDROID_PREP=1 ARCHS=arm64-v8a bash scripts/android_build.sh
     ndk: r27b
 
+  - versionName: 1.1.0
+    versionCode: 98
+    commit: 90337218adb1cb4f682d3e8726e1c355881e7de6
+    subdir: apps/mobile
+    sudo:
+      - apt-get update
+      - curl -Lo node.tar.gz https://nodejs.org/dist/v24.13.1/node-v24.13.1-linux-x64.tar.gz
+      - echo "7ad28fb172a9ab0593f86c1a39e5c268d0d8fc3d6cb0167f455b5655a7a6e2fd node.tar.gz"
+        | sha256sum -c -
+      - tar xzf node.tar.gz --strip-components=1 -C /usr/local/
+    output: build/mindwtr-$$VERSION$$-arm64-v8a-foss.apk
+    prebuild:
+      - npm ci --workspaces=false --legacy-peer-deps --no-audit --no-fund --prefix
+        ../../packages/core
+      - FDROID_EXPO_BUILD_FROM_SOURCE=1 bash scripts/fdroid_prep.sh
+      - rm -rf modules/play-store-updates
+      - npm ci --workspaces=false --legacy-peer-deps --no-audit --no-fund
+      - node scripts/fdroid_patch_expo_application.js
+      - node scripts/fdroid_patch_android_jvm_targets.js
+      - sed -i -e '/android {/a compileOptions { sourceCompatibility JavaVersion.VERSION_17;
+        targetCompatibility JavaVersion.VERSION_17 }\nkotlinOptions { jvmTarget =
+        JavaVersion.VERSION_17.toString() }' modules/notification-open-intents/android/build.gradle
+      - sed -i -e '/android {/a compileOptions { sourceCompatibility JavaVersion.VERSION_17;
+        targetCompatibility JavaVersion.VERSION_17 }\nkotlinOptions { jvmTarget =
+        JavaVersion.VERSION_17.toString() }' modules/system-bars/android/build.gradle
+    scanignore:
+      - apps/mobile/node_modules/react-native/sdks/hermesc/linux64-bin/hermesc
+      - apps/mobile/node_modules/@react-native-async-storage/async-storage/android/build.gradle
+      - apps/mobile/node_modules/expo-modules-core/android/ExpoModulesCorePlugin.gradle
+      - apps/mobile/node_modules/expo-modules-autolinking/scripts/android/autolinking_implementation.gradle
+      - apps/mobile/node_modules/react-native-alarm-notification/android/build.gradle
+      - apps/mobile/node_modules/react-native-safe-area-context/android/build.gradle
+      - apps/mobile/node_modules/react-native-screens/android/build.gradle
+      - apps/mobile/node_modules/react-native-svg/android/build.gradle
+    scandelete:
+      - apps/mobile/node_modules
+      - packages/core/node_modules
+    build:
+      - export NODE_OPTIONS=--max-old-space-size=6144
+      - UNSIGNED_APK=1 FOSS_BUILD=1 SKIP_FDROID_PREP=1 ARCHS=arm64-v8a bash scripts/android_build.sh
+    ndk: r27b
+
 MaintainerNotes: |-
   Upstream ships F-Droid-compatible localized metadata in metadata/<locale>/.
 
@@ -488,5 +530,5 @@ MaintainerNotes: |-
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v[\d.]+$
 UpdateCheckData: 'apps/mobile/app.json|"versionCode": ([0-9]+)|.|"version": "([0-9.]+)"'
-CurrentVersion: 1.0.5
-CurrentVersionCode: 82
+CurrentVersion: 1.1.0
+CurrentVersionCode: 98
