@@ -232,7 +232,34 @@ Builds:
     scandelete:
       - node_modules
 
+  - versionName: 1.12.1
+    versionCode: 42
+    commit: 8934c2925d9313f2746cbeee1536b4c8fac864bb
+    subdir: apps/mobile/android/app
+    sudo:
+      - apt-get update
+      - apt-get install -y npm
+    gradle:
+      - foss
+    prebuild:
+      - cd ../../../..
+      - npm ci --workspace=@colota/shared --workspace=@colota/mobile
+      - find node_modules/@react-native/gradle-plugin -name 'build.gradle.kts' -exec
+        sed -i 's/jvmToolchain(17)/jvmToolchain(21)/' {} +
+      - sed -i -e 's/VERSION_17/VERSION_21/g' -e 's/jvmToolchain(17)/jvmToolchain(21)/g'
+        node_modules/@react-native/gradle-plugin/react-native-gradle-plugin/src/main/kotlin/com/facebook/react/utils/JdkConfiguratorUtils.kt
+      - npm run build -w @colota/shared
+      - sed -i 's/enable !gradle.*/enable false/' apps/mobile/android/app/build.gradle
+      - sed -i '/play-services-location/d' node_modules/@maplibre/maplibre-react-native/android/build.gradle
+    scanignore:
+      - node_modules/hermes-compiler/hermesc/linux64-bin/hermesc
+      - node_modules/react-native-safe-area-context/android/build.gradle
+      - node_modules/react-native-svg/android/build.gradle
+      - node_modules/react-native-screens/android/build.gradle
+    scandelete:
+      - node_modules
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v[0-9]+\.[0-9]+\.[0-9]+$
-CurrentVersion: 1.12.0
-CurrentVersionCode: 41
+CurrentVersion: 1.12.1
+CurrentVersionCode: 42
