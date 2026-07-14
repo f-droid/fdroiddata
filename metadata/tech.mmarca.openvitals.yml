@@ -5,15 +5,15 @@ License: AGPL-3.0-or-later
 AuthorName: Manuel
 AuthorEmail: manuel@mmarca.tech
 AuthorWebSite: https://www.mmarca.tech/
-SourceCode: https://codeberg.org/mmarca-tech/OpenVitals
-IssueTracker: https://codeberg.org/mmarca-tech/OpenVitals/issues
+SourceCode: https://codeberg.org/OpenVitals/mobile-app
+IssueTracker: https://codeberg.org/OpenVitals/mobile-app/issues
 
 AutoName: OpenVitals
 
 RepoType: git
-Repo: https://codeberg.org/mmarca-tech/OpenVitals
+Repo: https://codeberg.org/OpenVitals/mobile-app
 Binaries: 
-  https://codeberg.org/mmarca-tech/OpenVitals/releases/download/v%v/OpenVitals-v%v.apk
+  https://codeberg.org/OpenVitals/mobile-app/releases/download/v%v/OpenVitals-v%v.apk
 
 Builds:
   - versionName: 1.3.1
@@ -88,9 +88,101 @@ Builds:
       - yes
     prebuild: sed -i -e '/foojay/d' ../settings.gradle.kts
 
+  - versionName: 2.2.5
+    versionCode: 1070303671
+    commit: d6f41784c787f15b8d90e2e35deecdbbe469c41a
+    sudo:
+      - apt-get update
+      - apt-get install -y build-essential clang cmake ninja-build pkg-config
+      - mkdir -p /woodpecker/src/codeberg.org/OpenVitals
+      - chown -R vagrant /woodpecker
+    output: build/app/outputs/flutter-apk/app-release.apk
+    binary: 
+      https://codeberg.org/OpenVitals/mobile-app/releases/download/v%v/OpenVitals-v%v-armeabi-v7a.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+    prebuild:
+      - sdkmanager "platforms;android-37.0" "build-tools;37.0.0"
+      - export repo=/woodpecker/src/codeberg.org/OpenVitals/mobile-app
+      - cd ..
+      - mv tech.mmarca.openvitals $repo
+      - pushd $repo
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export flutterVersion=$(sed -n 's|.*cirruslabs/flutter:\([0-9][0-9.]*\).*|\1|p'
+        .woodpecker/release.yml | head -1)
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - $$flutter$$/bin/flutter config --no-analytics --no-cli-animations
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - popd
+      - mv $repo tech.mmarca.openvitals
+    scandelete:
+      - .pub-cache
+    build:
+      - export repo=/woodpecker/src/codeberg.org/OpenVitals/mobile-app
+      - cd ..
+      - mv tech.mmarca.openvitals $repo
+      - pushd $repo
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export baseCode=$(sed -n 's/^version:[[:space:]]*[0-9.]*+\([0-9][0-9]*\).*/\1/p'
+        pubspec.yaml | head -1)
+      - $$flutter$$/bin/flutter build apk --release --target-platform android-arm
+        --build-number $(($baseCode * 10 + 1))
+      - popd
+      - mv $repo tech.mmarca.openvitals
+
+  - versionName: 2.2.5
+    versionCode: 1070303672
+    commit: d6f41784c787f15b8d90e2e35deecdbbe469c41a
+    sudo:
+      - apt-get update
+      - apt-get install -y build-essential clang cmake ninja-build pkg-config
+      - mkdir -p /woodpecker/src/codeberg.org/OpenVitals
+      - chown -R vagrant /woodpecker
+    output: build/app/outputs/flutter-apk/app-release.apk
+    binary: 
+      https://codeberg.org/OpenVitals/mobile-app/releases/download/v%v/OpenVitals-v%v-arm64-v8a.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+    prebuild:
+      - sdkmanager "platforms;android-37.0" "build-tools;37.0.0"
+      - export repo=/woodpecker/src/codeberg.org/OpenVitals/mobile-app
+      - cd ..
+      - mv tech.mmarca.openvitals $repo
+      - pushd $repo
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export flutterVersion=$(sed -n 's|.*cirruslabs/flutter:\([0-9][0-9.]*\).*|\1|p'
+        .woodpecker/release.yml | head -1)
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - $$flutter$$/bin/flutter config --no-analytics --no-cli-animations
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - popd
+      - mv $repo tech.mmarca.openvitals
+    scandelete:
+      - .pub-cache
+    build:
+      - export repo=/woodpecker/src/codeberg.org/OpenVitals/mobile-app
+      - cd ..
+      - mv tech.mmarca.openvitals $repo
+      - pushd $repo
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export baseCode=$(sed -n 's/^version:[[:space:]]*[0-9.]*+\([0-9][0-9]*\).*/\1/p'
+        pubspec.yaml | head -1)
+      - $$flutter$$/bin/flutter build apk --release --target-platform android-arm64
+        --build-number $(($baseCode * 10 + 2))
+      - popd
+      - mv $repo tech.mmarca.openvitals
+
 AllowedAPKSigningKeys: 0416c0651543e951ef3b6c1ed9beb13833bff3a2be9ddacf492270712861e05d
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v[\d.]+$
-CurrentVersion: 1.7.3
-CurrentVersionCode: 17003
+VercodeOperation:
+  - 10 * %c + 1
+  - 10 * %c + 2
+UpdateCheckData: pubspec.yaml|version:\s+[\d.]+\+(\d+)|.|version:\s+([\d.]+)\+
+CurrentVersion: 2.2.5
+CurrentVersionCode: 1070303672
