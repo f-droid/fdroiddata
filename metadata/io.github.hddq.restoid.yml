@@ -684,6 +684,74 @@ Builds:
       - popd
       - ../scripts/build_restic.sh $$go$$/bin/go
 
+  - versionName: 0.6.1
+    versionCode: 201
+    commit: 4b965f76d09cd4e0dcc8b0461a8f6eded97f5b38
+    subdir: app
+    submodules: true
+    sudo:
+      - echo "deb http://deb.debian.org/debian forky main" > /etc/apt/sources.list.d/forky.list
+      - apt-get update
+      - apt-get install -y -t forky golang-go
+      - apt-get install -y gcc libc-dev
+    gradle:
+      - yes
+    output: build/outputs/apk/release/app-arm64-v8a-release-unsigned.apk
+    binary: https://github.com/hddq/restoid/releases/download/v%v/app-arm64-v8a-release.apk
+    srclibs:
+      - go@go1.26.2
+    prebuild:
+      - GO_VER=$(cat ../.go-version | tr -d '\r\n')
+      - git -C $$go$$ checkout -f "go${GO_VER#go}"
+      - NDK_VER=$(sed -n -E 's/.*ndkVersion = "(.*)".*/\1/p' build.gradle.kts | tr
+        -d ' ')
+      - sdkmanager "ndk;$NDK_VER"
+    scanignore:
+      - restic/internal/repository/testdata/test-repo.tar.gz
+      - restic/internal/backend/testdata/repo-layout-default.tar.gz
+      - restic/internal/checker/testdata/duplicate-packs-in-index-test-repo.tar.gz
+      - restic/internal/checker/testdata/checker-test-repo.tar.gz
+      - restic/cmd/restic/testdata
+    build:
+      - pushd $$go$$/src
+      - GOROOT_BOOTSTRAP=/usr/lib/go ./make.bash
+      - popd
+      - ../scripts/build_restic.sh $$go$$/bin/go
+
+  - versionName: 0.6.1
+    versionCode: 202
+    commit: 4b965f76d09cd4e0dcc8b0461a8f6eded97f5b38
+    subdir: app
+    submodules: true
+    sudo:
+      - echo "deb http://deb.debian.org/debian forky main" > /etc/apt/sources.list.d/forky.list
+      - apt-get update
+      - apt-get install -y -t forky golang-go
+      - apt-get install -y gcc libc-dev
+    gradle:
+      - yes
+    output: build/outputs/apk/release/app-x86_64-release-unsigned.apk
+    binary: https://github.com/hddq/restoid/releases/download/v%v/app-x86_64-release.apk
+    srclibs:
+      - go@go1.26.2
+    prebuild:
+      - GO_VER=$(cat ../.go-version | tr -d '\r\n')
+      - git -C $$go$$ checkout -f "go${GO_VER#go}"
+      - NDK_VER=$(sed -n -E 's/.*ndkVersion = "(.*)".*/\1/p' build.gradle.kts | tr
+        -d ' ')
+      - sdkmanager "ndk;$NDK_VER"
+    scanignore:
+      - restic/internal/repository/testdata/test-repo.tar.gz
+      - restic/internal/backend/testdata/repo-layout-default.tar.gz
+      - restic/internal/checker/testdata/duplicate-packs-in-index-test-repo.tar.gz
+      - restic/internal/checker/testdata/checker-test-repo.tar.gz
+      - restic/cmd/restic/testdata
+    build:
+      - pushd $$go$$/src
+      - GOROOT_BOOTSTRAP=/usr/lib/go ./make.bash
+      - popd
+      - ../scripts/build_restic.sh $$go$$/bin/go
+
 AllowedAPKSigningKeys: f15f66103ee8daaf23c3913025500f08ef360849a69c427bed7db7016c3b14d3
 
 AutoUpdateMode: Version
@@ -691,5 +759,5 @@ UpdateCheckMode: Tags
 VercodeOperation:
   - 10 * %c + 1
   - 10 * %c + 2
-CurrentVersion: 0.6.0
-CurrentVersionCode: 192
+CurrentVersion: 0.6.1
+CurrentVersionCode: 202
