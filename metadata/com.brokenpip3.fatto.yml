@@ -121,10 +121,37 @@ Builds:
         --language kotlin --no-format --out-dir ../../android/app/src/main/uniffi
     ndk: r26b
 
+  - versionName: 0.9.0
+    versionCode: 21
+    commit: c68b0b46a2a0a45b51bbb7472a75373df0fc0f6d
+    subdir: android/app
+    sudo:
+      - apt-get update
+      - apt-get install -y gcc libc6-dev rustup
+    gradle:
+      - yes
+    output: build/outputs/apk/release/app-arm64-v8a-release-unsigned.apk
+    build:
+      - export CARGO_HOME=$HOME/.cargo
+      - rustup toolchain install 1.94.1 --target aarch64-linux-android --target x86_64-linux-android
+      - rustup default 1.94.1
+      - cargo install --locked cargo-ndk
+      - cd ../../rust/taskchampion-android
+      - export ANDROID_NDK_HOME=$$NDK$$
+      - export RUSTFLAGS="--remap-path-prefix $(pwd)=/c --remap-path-prefix $HOME/.cargo=/cargo
+        -C link-arg=-Wl,--build-id=none"
+      - rm -rf ../../android/app/src/main/jniLibs ../../android/app/src/main/uniffi
+      - cargo ndk -t arm64-v8a -t x86_64 -o ../../android/app/src/main/jniLibs build
+        --release
+      - cargo build --release
+      - cargo run --bin uniffi-bindgen generate --library target/release/libtaskchampion_android.so
+        --language kotlin --no-format --out-dir ../../android/app/src/main/uniffi
+    ndk: r26b
+
 AllowedAPKSigningKeys: 61be3c725348a5cdf027e9a122d8319d1ebdae0d39c8224f436a8b9ff0475434
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v[\d.]+$
 UpdateCheckData: android/version.properties|VERSION_CODE=(\d+)|.|VERSION_NAME=(.+)
-CurrentVersion: 0.8.2
-CurrentVersionCode: 20
+CurrentVersion: 0.9.0
+CurrentVersionCode: 21
