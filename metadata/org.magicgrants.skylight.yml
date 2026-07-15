@@ -1,0 +1,125 @@
+Categories:
+  - Wallet
+License: MIT
+AuthorName: MAGIC Grants
+AuthorEmail: info@magicgrants.org
+WebSite: https://skylight.magicgrants.org
+SourceCode: https://github.com/magicgrants/skylight-wallet
+IssueTracker: https://github.com/magicgrants/skylight-wallet/issues
+Changelog: https://github.com/magicgrants/skylight-wallet/releases
+
+AutoName: Skylight Wallet
+
+RepoType: git
+Repo: https://github.com/magicgrants/skylight-wallet
+
+Builds:
+  - versionName: 1.0.11
+    versionCode: 4021
+    commit: 12f41078785491c2c18ac50a59a08e4e969ea8d9
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y make libc-dev g++ rustup pkg-config autoconf automake libtool
+        ccache cmake lbzip2 gperf unzip llvm libssl-dev zlib1g-dev libncurses-dev
+        xz-utils
+    output: build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
+    binary: 
+      https://github.com/magicgrants/skylight-wallet/releases/download/v%v/skylight-wallet-v%v-armeabi-v7a.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - android/app/src/main/jniLibs
+      - ios
+      - linux
+      - macos
+      - web
+      - windows
+    scandelete:
+      - monero_c/monero/tests
+      - monero_c/monero/external/rapidjson/package.json
+      - monero_c/monero/external/trezor-common/defs/ethereum/tokens/build.gradle
+      - monero_c/wownero
+      - monero_c/zano
+    build: bash scripts/fdroid-build.sh armeabi-v7a $$flutter$$
+    ndk: 28.1.13356709
+
+  - versionName: 1.0.11
+    versionCode: 4022
+    commit: 12f41078785491c2c18ac50a59a08e4e969ea8d9
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y make libc-dev g++ rustup pkg-config autoconf automake libtool
+        ccache cmake lbzip2 gperf unzip llvm libssl-dev zlib1g-dev libncurses-dev
+        xz-utils
+    output: build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+    binary: 
+      https://github.com/magicgrants/skylight-wallet/releases/download/v%v/skylight-wallet-v%v-arm64-v8a.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - android/app/src/main/jniLibs
+      - ios
+      - linux
+      - macos
+      - web
+      - windows
+    scandelete:
+      - monero_c/monero/tests
+      - monero_c/monero/external/rapidjson/package.json
+      - monero_c/monero/external/trezor-common/defs/ethereum/tokens/build.gradle
+      - monero_c/wownero
+      - monero_c/zano
+    build: bash scripts/fdroid-build.sh arm64-v8a $$flutter$$
+    ndk: 28.1.13356709
+
+  - versionName: 1.0.11
+    versionCode: 4023
+    commit: 12f41078785491c2c18ac50a59a08e4e969ea8d9
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y make libc-dev g++ rustup pkg-config autoconf automake libtool
+        ccache cmake lbzip2 gperf unzip llvm libssl-dev zlib1g-dev libncurses-dev
+        xz-utils
+    output: build/app/outputs/flutter-apk/app-x86_64-release.apk
+    binary: 
+      https://github.com/magicgrants/skylight-wallet/releases/download/v%v/skylight-wallet-v%v-x86_64.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - android/app/src/main/jniLibs
+      - ios
+      - linux
+      - macos
+      - web
+      - windows
+    scandelete:
+      - monero_c/monero/tests
+      - monero_c/monero/external/rapidjson/package.json
+      - monero_c/monero/external/trezor-common/defs/ethereum/tokens/build.gradle
+      - monero_c/wownero
+      - monero_c/zano
+    build: bash scripts/fdroid-build.sh x86_64 $$flutter$$
+    ndk: 28.1.13356709
+
+AllowedAPKSigningKeys: 15fa527885f7042110304d1af00881072709bd38e9842caf9cd89e08061c5e52
+
+MaintainerNotes: |
+  monero_c: vendored jniLibs are removed (rm) and rebuilt from vtnerd/monero_c at the commit pinned in pubspec.lock before flutter build;
+  built with -j$(nproc); reproducible.patch forces make's classic pipe jobserver (fixes the make 4.4 --jobserver-auth error).
+  tor_ffi_plugin: needs Rust; toolchain 1.83.0 matches upstream Dockerfile.builder.
+  Reproducibility: monero_c and the app build at fixed paths (/tmp/monero_c, /tmp/skylight) so build-dir
+  paths baked into openssl, Flutter AOT (libapp.so), tor's openssl-sys and zxing match the release build;
+  GIT_COMMITTER_DATE is pinned for a deterministic Monero version hash.
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+VercodeOperation:
+  - 10 * %c + 1
+  - 10 * %c + 2
+  - 10 * %c + 3
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 1.0.11
+CurrentVersionCode: 4023
