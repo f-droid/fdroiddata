@@ -442,6 +442,153 @@ Builds:
       - popd
       - mv $repo org.framasoft.peertube
 
+  - versionName: 2.2.1
+    versionCode: 3601
+    commit: c3b5e1d4fff560ebdeff1cc33b0e9d3ae05cd681
+    sudo:
+      - mkdir -p /builds/framasoft/peertube
+      - chown -R vagrant /builds
+    output: build/app/outputs/flutter-apk/app-armeabi-v7a-stable-release.apk
+    binary: https://builds.joinpeertube.org/mobile/peertube_v%v_arm.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+    prebuild:
+      - flutterVersion=$(sed -n -E "s/.*flutter:\ '(.*)'/\1/p" pubspec.yaml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export repo=/builds/framasoft/peertube/mobile-application
+      - cd ..
+      - mv org.framasoft.peertube $repo
+      - pushd $repo
+      - sed -i '/^  flutter_chrome_cast:/,/^  [a-z]/ { /^  flutter_chrome_cast:/d;
+        /^  [a-z]/!d; }' pubspec.yaml
+      - sed -i -e '/\( fading_edge_scrollview\|flutter_chrome_cast\|get\|marquee\):/,/
+        version:/d' pubspec.lock
+      - rm -rf lib/features/video/cast/chromecast/
+      - rm -f lib/features/video/cast/cast_button.dart
+      - mkdir -p lib/features/video/cast/chromecast
+      - cp -r scripts/cast_fdroid_stub/chromecast/* lib/features/video/cast/chromecast/
+      - cp scripts/cast_fdroid_stub/cast_button.dart lib/features/video/cast/
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - sed -i -e 's/-Wl,/-Wl,--build-id=none,/' .pub-cache/hosted/pub.dev/jni-*/src/CMakeLists.txt
+      - $$flutter$$/bin/dart run build_runner build --delete-conflicting-outputs
+      - popd
+      - mv $repo org.framasoft.peertube
+    scandelete:
+      - .pub-cache
+    build:
+      - export repo=/builds/framasoft/peertube/mobile-application
+      - cd ..
+      - mv org.framasoft.peertube $repo
+      - pushd $repo
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --dart-define-from-file=env-stable.json
+        --flavor=stable --dart-define=buildType=fdroid --split-per-abi --target-platform="android-arm"
+      - popd
+      - mv $repo org.framasoft.peertube
+
+  - versionName: 2.2.1
+    versionCode: 3602
+    commit: c3b5e1d4fff560ebdeff1cc33b0e9d3ae05cd681
+    sudo:
+      - mkdir -p /builds/framasoft/peertube
+      - chown -R vagrant /builds
+    output: build/app/outputs/flutter-apk/app-arm64-v8a-stable-release.apk
+    binary: https://builds.joinpeertube.org/mobile/peertube_v%v_arm64.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+    prebuild:
+      - flutterVersion=$(sed -n -E "s/.*flutter:\ '(.*)'/\1/p" pubspec.yaml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export repo=/builds/framasoft/peertube/mobile-application
+      - cd ..
+      - mv org.framasoft.peertube $repo
+      - pushd $repo
+      - sed -i '/^  flutter_chrome_cast:/,/^  [a-z]/ { /^  flutter_chrome_cast:/d;
+        /^  [a-z]/!d; }' pubspec.yaml
+      - sed -i -e '/\( fading_edge_scrollview\|flutter_chrome_cast\|get\|marquee\):/,/
+        version:/d' pubspec.lock
+      - rm -rf lib/features/video/cast/chromecast/
+      - rm -f lib/features/video/cast/cast_button.dart
+      - mkdir -p lib/features/video/cast/chromecast
+      - cp -r scripts/cast_fdroid_stub/chromecast/* lib/features/video/cast/chromecast/
+      - cp scripts/cast_fdroid_stub/cast_button.dart lib/features/video/cast/
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - sed -i -e 's/-Wl,/-Wl,--build-id=none,/' .pub-cache/hosted/pub.dev/jni-*/src/CMakeLists.txt
+      - $$flutter$$/bin/dart run build_runner build --delete-conflicting-outputs
+      - popd
+      - mv $repo org.framasoft.peertube
+    scandelete:
+      - .pub-cache
+    build:
+      - export repo=/builds/framasoft/peertube/mobile-application
+      - cd ..
+      - mv org.framasoft.peertube $repo
+      - pushd $repo
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --dart-define-from-file=env-stable.json
+        --flavor=stable --dart-define=buildType=fdroid --split-per-abi --target-platform="android-arm64"
+      - popd
+      - mv $repo org.framasoft.peertube
+
+  - versionName: 2.2.1
+    versionCode: 3603
+    commit: c3b5e1d4fff560ebdeff1cc33b0e9d3ae05cd681
+    sudo:
+      - mkdir -p /builds/framasoft/peertube
+      - chown -R vagrant /builds
+    output: build/app/outputs/flutter-apk/app-x86_64-stable-release.apk
+    binary: https://builds.joinpeertube.org/mobile/peertube_v%v_x86_64.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+    prebuild:
+      - flutterVersion=$(sed -n -E "s/.*flutter:\ '(.*)'/\1/p" pubspec.yaml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export repo=/builds/framasoft/peertube/mobile-application
+      - cd ..
+      - mv org.framasoft.peertube $repo
+      - pushd $repo
+      - sed -i '/^  flutter_chrome_cast:/,/^  [a-z]/ { /^  flutter_chrome_cast:/d;
+        /^  [a-z]/!d; }' pubspec.yaml
+      - sed -i -e '/\( fading_edge_scrollview\|flutter_chrome_cast\|get\|marquee\):/,/
+        version:/d' pubspec.lock
+      - rm -rf lib/features/video/cast/chromecast/
+      - rm -f lib/features/video/cast/cast_button.dart
+      - mkdir -p lib/features/video/cast/chromecast
+      - cp -r scripts/cast_fdroid_stub/chromecast/* lib/features/video/cast/chromecast/
+      - cp scripts/cast_fdroid_stub/cast_button.dart lib/features/video/cast/
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - sed -i -e 's/-Wl,/-Wl,--build-id=none,/' .pub-cache/hosted/pub.dev/jni-*/src/CMakeLists.txt
+      - $$flutter$$/bin/dart run build_runner build --delete-conflicting-outputs
+      - popd
+      - mv $repo org.framasoft.peertube
+    scandelete:
+      - .pub-cache
+    build:
+      - export repo=/builds/framasoft/peertube/mobile-application
+      - cd ..
+      - mv org.framasoft.peertube $repo
+      - pushd $repo
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --dart-define-from-file=env-stable.json
+        --flavor=stable --dart-define=buildType=fdroid --split-per-abi --target-platform="android-x64"
+      - popd
+      - mv $repo org.framasoft.peertube
+
 AllowedAPKSigningKeys: c3c605c9387aa2d6fd0170fbe39636dc83845ac4e655b4e822fdbd349b0293db
 
 AutoUpdateMode: Version
@@ -451,5 +598,5 @@ VercodeOperation:
   - '%c * 100 + 2'
   - '%c * 100 + 3'
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 2.1.4
-CurrentVersionCode: 3403
+CurrentVersion: 2.2.1
+CurrentVersionCode: 3603
