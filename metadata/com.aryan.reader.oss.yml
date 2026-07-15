@@ -119,9 +119,23 @@ Builds:
       - oss
     prebuild: sed -i -e '/jogamp/d' -e '/https.jitpack/d' ../settings.gradle.kts
 
+  - versionName: 1.0.52-oss
+    versionCode: 56
+    commit: 22c6995dc55025bae5e32c591a39a393f64a1fa4
+    subdir: app
+    gradle:
+      - oss
+    srclibs:
+      - reproducible-apk-tools@v0.3.0
+    prebuild: sed -i -e '/jogamp/d' -e '/https.jitpack/d' ../settings.gradle.kts
+    postbuild:
+      - mv $$OUT$$ unaligned.apk
+      - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
+        --replace unaligned.apk $$OUT$$
+
 AllowedAPKSigningKeys: 4d77f55745749b04fcbe9a60e1a2edca5dd0cfbbd72bb58ce0dd156cb1b814c9
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 1.0.50-oss
-CurrentVersionCode: 54
+CurrentVersion: 1.0.52-oss
+CurrentVersionCode: 56
