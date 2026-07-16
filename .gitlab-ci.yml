@@ -387,7 +387,13 @@ fdroid build:
     # buildserver VM host, while here it is basically in the
     # buildserver VM.
     # https://gitlab.com/fdroid/fdroid-bootstrap-buildserver/-/merge_requests/30
-    - curl --silent 'https://gitlab.com/fdroid/fdroid-bootstrap-buildserver/-/raw/master/roles/production_hardening/files/gitconfig' >> $CI_PROJECT_DIR/../.gitconfig
+    - git -C /tmp/ clone https://gitlab.com/fdroid/fdroid-bootstrap-buildserver.git
+    # use a fixed commit ID to provide cryptographic verification that we got the right file
+    - git -C /tmp/fdroid-bootstrap-buildserver config transfer.fsckObjects true
+    - git -C /tmp/fdroid-bootstrap-buildserver checkout -B master b33507043e6750065745dd2d8c35d3bb5c633c11
+    - git -C /tmp/fdroid-bootstrap-buildserver pull origin master --ff-only
+    - cp ../fdroid-bootstrap-buildserver/roles/production_hardening/files/gitconfig
+        $CI_PROJECT_DIR/../.gitconfig
 
     - for d in logs tmp unsigned $home_vagrant/.android $home_vagrant/.gradle $home_vagrant/metadata; do
           test -d $d || mkdir $d;
