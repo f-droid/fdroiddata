@@ -23,12 +23,16 @@ variables:
     description: push with `git push -o ci.variable="CI_ENABLE_MERGE_REQUEST_PIPELINES=false"` to disable merge request pipelines (e.g., to use self-hosted runners)
     value: "true"
 
+# Install fdroidserver from git using a pinned SHA1 commit ID as the
+# root of trust. fsckObjects is enabled to verify all new commits
+# pulled in on top of that root of trust. The pinned commit ID can be
+# updated to any newer version in master as needed, but is not required.
 .install_fdroid_server: &install_fdroid_server
   - rm -rf $fdroidserver
-  - mkdir $fdroidserver
-  - git ls-remote https://gitlab.com/fdroid/fdroidserver.git master
-  - curl --silent https://gitlab.com/fdroid/fdroidserver/-/archive/master/fdroidserver-master.tar.gz
-        | tar -xz --directory=$fdroidserver --strip-components=1
+  - git clone --shallow-since=2026-07-13 https://gitlab.com/fdroid/fdroidserver.git $fdroidserver
+  - git -C $fdroidserver config transfer.fsckObjects true
+  - git -C $fdroidserver checkout -B master a35fdfddd9c66823987a410566a6101186e39c84
+  - git -C $fdroidserver pull origin master --ff-only
   - export PATH="$fdroidserver:$PATH"
   - export PYTHONPATH="$fdroidserver:$fdroidserver/examples"
   - export PYTHONUNBUFFERED=true
