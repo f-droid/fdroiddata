@@ -1,0 +1,43 @@
+Categories:
+  - Dice
+License: GPL-3.0-or-later
+AuthorName: Tim Middleton
+SourceCode: https://github.com/timtoo/randomlydie
+IssueTracker: https://github.com/timtoo/randomlydie/issues
+Changelog: https://github.com/timtoo/randomlydie/blob/main/CHANGELOG.md
+
+AutoName: Randomly/Die
+
+RepoType: git
+Repo: https://github.com/timtoo/randomlydie.git
+Binaries: https://github.com/timtoo/randomlydie/releases/download/v%v/randomlydie-%v.apk
+
+Builds:
+  - versionName: 6.1.1
+    versionCode: 60101
+    commit: 5d81d00d7d3ed3af91947289f977ffad3cefadcd
+    subdir: android/app
+    sudo:
+      - echo "deb http://deb.debian.org/debian forky main" > /etc/apt/sources.list.d/forky.list
+      - apt-get update
+      - apt-get install -y -t forky nodejs npm
+    init:
+      - cd ../..
+      - npm install pnpm@11.13.0 --no-save --no-package-lock
+      - ./node_modules/.bin/pnpm install --frozen-lockfile
+    gradle:
+      - yes
+    prebuild:
+      - cd ../..
+      - CAPACITOR_BUILD=1 ./node_modules/.bin/pnpm exec quasar build
+      - ./node_modules/.bin/pnpm exec cap sync android
+    scandelete:
+      - node_modules
+
+AllowedAPKSigningKeys: c35eb08fb741cf59306601eb86c9999ea593dcfc4554d1c2aa26704d17065f94
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: android/app/build.gradle|versionCode\s+(\d+)||v?([\d.]+)
+CurrentVersion: 6.1.1
+CurrentVersionCode: 60101
