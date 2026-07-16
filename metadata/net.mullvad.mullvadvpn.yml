@@ -1300,9 +1300,40 @@ Builds:
       - gradle --console plain fdroidRelease
     ndk: r27d
 
+  - versionName: '2026.8'
+    versionCode: 26089000
+    commit: 4dd3b1e684a33d09a02c26799b62c174ddffad88
+    timeout: 10800
+    subdir: android/app
+    sudo:
+      - apt-get update
+      - apt-get install -y build-essential protobuf-compiler libprotobuf-dev
+    init: NDK_PATH="$$NDK$$" ../fdroid-build/init.sh
+    output: build/outputs/apk/ossProd/release/app-oss-prod-release-unsigned.apk
+    rm:
+      - desktop
+      - graphics
+      - ios
+      - windows
+      - building/sigstore
+      - android/lib/billing
+      - mullvad-nsis
+    prebuild:
+      - sed -i -e 's|Repositories.GradlePlugins|"https://plugins.gradle.org/m2/"|'
+        ../build.gradle.kts
+      - sed -i -e '/billing/d' ../settings.gradle.kts
+      - sed -i -e '/projects.lib.billing/d' build.gradle.kts
+      - sed -i '/\"desktop\//d' ../../Cargo.toml
+      - sed -i '/\"mullvad-nsis\"/d' ../../Cargo.toml
+    build:
+      - NDK_PATH="$$NDK$$" source ../fdroid-build/env.sh
+      - export GRADLE_OPTS='-Dorg.gradle.jvmargs=-Xmx4096M -Dkotlin.daemon.jvm.options="-Xmx4096M"'
+      - gradle --console plain fdroidRelease
+    ndk: r27d
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^android/[0-9]{4}\.[0-9]+$
 UpdateCheckData: 
   dist-assets/android-version-code.txt|(\d+)|dist-assets/android-version-name.txt|(.+)
-CurrentVersion: '2026.7'
-CurrentVersionCode: 26079000
+CurrentVersion: '2026.8'
+CurrentVersionCode: 26089000
