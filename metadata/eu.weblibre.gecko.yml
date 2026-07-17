@@ -861,10 +861,240 @@ Builds:
         --target-platform="android-arm64"
     ndk: 29.0.14206865
 
-MaintainerNotes: Scanner detects 'com/google/android/gms/...' from microG libs for
-  webauth
+  - versionName: 0.20.0
+    versionCode: 402
+    commit: 8caa84609c7459f5c233f49d0258f9f594cf242d
+    timeout: 36000
+    subdir: apps/weblibre
+    sudo:
+      - apt-get update
+      - apt-get install -y cmake make m4 pkg-config python-is-python3 python3-venv
+        tcl gyp ninja-build bzip2 libffi-dev libsqlite3-dev binutils-dev clang lld
+        libssl-dev zlib1g-dev rustup wget terser curl xz-utils gcc libc-dev file golang-go
+      - echo "deb https://deb.debian.org/debian bookworm main" > /etc/apt/sources.list.d/bookworm.list
+      - apt-get update
+      - apt-get install -y -t bookworm openjdk-17-jdk-headless
+      - update-java-alternatives -s java-1.17.0-openjdk-amd64
+      - curl -Lo node.tar.xz https://nodejs.org/dist/v20.19.5/node-v20.19.5-linux-x64.tar.xz
+      - echo "315046739a513a70e03a4a55a8afda8cf979f30852e576075c340084e3f8ac0f  node.tar.xz"
+        | sha256sum -c -
+      - tar xJf node.tar.xz --strip-components=1 -C /usr/local/
+    output: build/app/outputs/flutter-apk/app-armeabi-v7a-stable-release.apk
+    srclibs:
+      - MozFennec@FIREFOX-ANDROID_152_0_4_RELEASE
+      - MozAppServices@e4bae80948d661174185d1faac2b359888e88a98
+      - MozGlean@v67.3.2
+      - MozGleanAS@v67.3.1
+      - UnifiedPushAC@1.0.4
+      - gmscore@v0.3.15.250932
+      - wasi-sdk@wasi-sdk-20
+      - llvm@3b5e7c83a6e226d5bd7ed2e9b67449b64812074c
+      - llvm_android@e727bfb014bd436f581a66a450c939a6983a1fc3
+      - toolchain-utils@dd1ee45a84cb07337f9d5d0a6769d9b865c6e620
+      - MozFennecComponents@18c3f46a0e9f0d3a395da2521280841222254b57
+      - flutter@stable
+      - go@go1.25.0
+      - sing-box@v1.13.12
+      - IPtProxy@5.4.2
+      - SagerNetGomobile@v0.1.12
+      - cronet-go@v148.0.7778.96-1
+    prebuild:
+      - export MAVEN_REPO_URL="https://only-for-validation.local"
+      - export MAVEN_USERNAME="fdroid"
+      - export MAVEN_PASSWORD="fdroid"
+      - export SRCLIB_DIR=$(dirname $$MozFennecComponents$$)
+      - source $$MozFennecComponents$$/setup.sh armeabi-v7a
+      - $$MozFennecComponents$$/prebuild.sh
+      - sed -i -e '/background_fetch/d' android/build.gradle
+      - sed -i 's/maven { name "Mozilla"; url "https:\/\/gitlab\.com\/api\/v4\/projects\/71401321\/packages\/maven"
+        }/mavenLocal()/' ../../packages/flutter_mozilla_components/android/build.gradle
+      - flutterVersion=$(sed -n -E "s/.*flutter-version:\ '?([^']*)'?/\1/p" ../../.github/workflows/build.yml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+      - export ANDROID_NDK_HOME=$$NDK$$
+      - export ANDROID_NDK_ROOT=$$NDK$$
+      - export NDK_HOME=$$NDK$$
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export GOPATH=$(pwd)/.gopath
+      - export GOMODCACHE=$GOPATH/pkg/mod
+      - export PATH=$PUB_CACHE/bin/:$GOPATH/bin:$$flutter$$/bin/:$PATH
+      - sdkmanager "platforms;android-24" "platforms;android-37.0" "build-tools;37.0.0"
+      - flutter config --no-analytics
+      - flutter pub global activate melos 7.8.1
+      - pushd ../../
+      - melos bootstrap --enforce-lockfile
+      - melos run update-assets --no-select
+      - melos run build-components --no-select
+      - popd
+      - rm -rf 
+        ../../packages/flutter_mozilla_components/javascript/container_proxy/node_modules
+        ../../packages/flutter_mozilla_components/javascript/readability/node_modules
+    scanignore:
+      - apps/weblibre/assets/sites/raw/tranco-top-1m.csv.zip
+    scandelete:
+      - apps/weblibre/.pub-cache
+    build:
+      - export MAVEN_REPO_URL="https://only-for-validation.local"
+      - export MAVEN_USERNAME="fdroid"
+      - export MAVEN_PASSWORD="fdroid"
+      - export SRCLIB_DIR=$(dirname $$MozFennecComponents$$)
+      - source $$MozFennecComponents$$/setup.sh armeabi-v7a
+      - $$MozFennecComponents$$/build.sh
+      - export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+      - export ANDROID_NDK_HOME=$$NDK$$
+      - export ANDROID_NDK_ROOT=$$NDK$$
+      - export NDK_HOME=$$NDK$$
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export GOPATH=$(pwd)/.gopath
+      - export GOMODCACHE=$GOPATH/pkg/mod
+      - export PATH=$PUB_CACHE/bin/:$GOPATH/bin:$$flutter$$/bin/:$PATH
+      - pushd $$go$$/src
+      - ./make.bash
+      - popd
+      - export GOROOT=$$go$$
+      - export PATH=$GOROOT/bin:$PATH
+      - pushd $$SagerNetGomobile$$
+      - go install ./cmd/gomobile ./cmd/gobind
+      - popd
+      - pushd $$cronet-go$$
+      - go run ./cmd/build-naive --target=android/arm build
+      - go run ./cmd/build-naive --target=android/arm package --local
+      - popd
+      - sed -i -e '/github.com\/sagernet\/cronet-go\/all/d' -e '/github.com\/sagernet\/cronet-go\/lib\//d'
+        $$sing-box$$/go.mod
+      - sed -i '/_ "github.com\/sagernet\/cronet-go\/all"/d' $$sing-box$$/protocol/naive/outbound.go
+      - sed -i '/replace www\.bamsoftware\.com\/git\/dnstt\.git/a replace github.com/sagernet/cronet-go
+        => $$cronet-go$$\nreplace github.com/sagernet/gomobile => $$SagerNetGomobile$$'
+        ../../native/go_mobile_runtime/scripts/build-android.sh
+      - ../../native/go_mobile_runtime/scripts/fdroid-prebuild.sh --sing-box-source
+        $$sing-box$$ --iptproxy-source $$IPtProxy$$ --dnstt-source $$IPtProxy$$/dnstt
+        --target android/arm --skip-install-gomobile --allow-dirty
+      - flutter config --no-analytics
+      - flutter build apk --release --flavor stable --no-tree-shake-icons --split-per-abi
+        --target-platform="android-arm"
+    ndk: 29.0.14206865
+
+  - versionName: 0.20.0
+    versionCode: 403
+    commit: 8caa84609c7459f5c233f49d0258f9f594cf242d
+    timeout: 36000
+    subdir: apps/weblibre
+    sudo:
+      - apt-get update
+      - apt-get install -y cmake make m4 pkg-config python-is-python3 python3-venv
+        tcl gyp ninja-build bzip2 libffi-dev libsqlite3-dev binutils-dev clang lld
+        libssl-dev zlib1g-dev rustup wget terser curl xz-utils gcc libc-dev file golang-go
+      - echo "deb https://deb.debian.org/debian bookworm main" > /etc/apt/sources.list.d/bookworm.list
+      - apt-get update
+      - apt-get install -y -t bookworm openjdk-17-jdk-headless
+      - update-java-alternatives -s java-1.17.0-openjdk-amd64
+      - curl -Lo node.tar.xz https://nodejs.org/dist/v20.19.5/node-v20.19.5-linux-x64.tar.xz
+      - echo "315046739a513a70e03a4a55a8afda8cf979f30852e576075c340084e3f8ac0f  node.tar.xz"
+        | sha256sum -c -
+      - tar xJf node.tar.xz --strip-components=1 -C /usr/local/
+    output: build/app/outputs/flutter-apk/app-arm64-v8a-stable-release.apk
+    srclibs:
+      - MozFennec@FIREFOX-ANDROID_152_0_4_RELEASE
+      - MozAppServices@e4bae80948d661174185d1faac2b359888e88a98
+      - MozGlean@v67.3.2
+      - MozGleanAS@v67.3.1
+      - UnifiedPushAC@1.0.4
+      - gmscore@v0.3.15.250932
+      - wasi-sdk@wasi-sdk-20
+      - llvm@3b5e7c83a6e226d5bd7ed2e9b67449b64812074c
+      - llvm_android@e727bfb014bd436f581a66a450c939a6983a1fc3
+      - toolchain-utils@dd1ee45a84cb07337f9d5d0a6769d9b865c6e620
+      - MozFennecComponents@18c3f46a0e9f0d3a395da2521280841222254b57
+      - flutter@stable
+      - go@go1.25.0
+      - sing-box@v1.13.12
+      - IPtProxy@5.4.2
+      - SagerNetGomobile@v0.1.12
+      - cronet-go@v148.0.7778.96-1
+    prebuild:
+      - export MAVEN_REPO_URL="https://only-for-validation.local"
+      - export MAVEN_USERNAME="fdroid"
+      - export MAVEN_PASSWORD="fdroid"
+      - export SRCLIB_DIR=$(dirname $$MozFennecComponents$$)
+      - source $$MozFennecComponents$$/setup.sh arm64-v8a
+      - $$MozFennecComponents$$/prebuild.sh
+      - sed -i -e '/background_fetch/d' android/build.gradle
+      - sed -i 's/maven { name "Mozilla"; url "https:\/\/gitlab\.com\/api\/v4\/projects\/71401321\/packages\/maven"
+        }/mavenLocal()/' ../../packages/flutter_mozilla_components/android/build.gradle
+      - flutterVersion=$(sed -n -E "s/.*flutter-version:\ '?([^']*)'?/\1/p" ../../.github/workflows/build.yml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+      - export ANDROID_NDK_HOME=$$NDK$$
+      - export ANDROID_NDK_ROOT=$$NDK$$
+      - export NDK_HOME=$$NDK$$
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export GOPATH=$(pwd)/.gopath
+      - export GOMODCACHE=$GOPATH/pkg/mod
+      - export PATH=$PUB_CACHE/bin/:$GOPATH/bin:$$flutter$$/bin/:$PATH
+      - sdkmanager "platforms;android-24" "platforms;android-37.0" "build-tools;37.0.0"
+      - flutter config --no-analytics
+      - flutter pub global activate melos 7.8.1
+      - pushd ../../
+      - melos bootstrap --enforce-lockfile
+      - melos run update-assets --no-select
+      - melos run build-components --no-select
+      - popd
+      - rm -rf 
+        ../../packages/flutter_mozilla_components/javascript/container_proxy/node_modules
+        ../../packages/flutter_mozilla_components/javascript/readability/node_modules
+    scanignore:
+      - apps/weblibre/assets/sites/raw/tranco-top-1m.csv.zip
+    scandelete:
+      - apps/weblibre/.pub-cache
+    build:
+      - export MAVEN_REPO_URL="https://only-for-validation.local"
+      - export MAVEN_USERNAME="fdroid"
+      - export MAVEN_PASSWORD="fdroid"
+      - export SRCLIB_DIR=$(dirname $$MozFennecComponents$$)
+      - source $$MozFennecComponents$$/setup.sh arm64-v8a
+      - $$MozFennecComponents$$/build.sh
+      - export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+      - export ANDROID_NDK_HOME=$$NDK$$
+      - export ANDROID_NDK_ROOT=$$NDK$$
+      - export NDK_HOME=$$NDK$$
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export GOPATH=$(pwd)/.gopath
+      - export GOMODCACHE=$GOPATH/pkg/mod
+      - export PATH=$PUB_CACHE/bin/:$GOPATH/bin:$$flutter$$/bin/:$PATH
+      - pushd $$go$$/src
+      - ./make.bash
+      - popd
+      - export GOROOT=$$go$$
+      - export PATH=$GOROOT/bin:$PATH
+      - pushd $$SagerNetGomobile$$
+      - go install ./cmd/gomobile ./cmd/gobind
+      - popd
+      - pushd $$cronet-go$$
+      - go run ./cmd/build-naive --target=android/arm64 build
+      - go run ./cmd/build-naive --target=android/arm64 package --local
+      - popd
+      - sed -i -e '/github.com\/sagernet\/cronet-go\/all/d' -e '/github.com\/sagernet\/cronet-go\/lib\//d'
+        $$sing-box$$/go.mod
+      - sed -i '/_ "github.com\/sagernet\/cronet-go\/all"/d' $$sing-box$$/protocol/naive/outbound.go
+      - sed -i '/replace www\.bamsoftware\.com\/git\/dnstt\.git/a replace github.com/sagernet/cronet-go
+        => $$cronet-go$$\nreplace github.com/sagernet/gomobile => $$SagerNetGomobile$$'
+        ../../native/go_mobile_runtime/scripts/build-android.sh
+      - ../../native/go_mobile_runtime/scripts/fdroid-prebuild.sh --sing-box-source
+        $$sing-box$$ --iptproxy-source $$IPtProxy$$ --dnstt-source $$IPtProxy$$/dnstt
+        --target android/arm64 --skip-install-gomobile --allow-dirty
+      - flutter config --no-analytics
+      - flutter build apk --release --flavor stable --no-tree-shake-icons --split-per-abi
+        --target-platform="android-arm64"
+    ndk: 29.0.14206865
+
+MaintainerNotes: |-
+  Scanner detects 'com/google/android/gms/...' from microG libs for webauth.
+  The v0.20.0 weblibre-go.aar is generated during build from the declared
+  sing-box, IPtProxy, dnstt, SagerNet gomobile, and cronet-go sources.
 
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: 0.11.0
-CurrentVersionCode: 393
+CurrentVersion: 0.20.0
+CurrentVersionCode: 403
