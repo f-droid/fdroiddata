@@ -47,8 +47,39 @@ Builds:
         Battle-for-Burgers.apk
     ndk: 28.1.13356709
 
+  - versionName: 1.6.0
+    versionCode: 7
+    commit: 5c6ac5ec8b127ddc240c21d76c6f4ee22a127501
+    sudo:
+      - apt-get update
+      - apt-get install clang gettext pkg-config scons -y
+    init: sdkmanager --install "cmdline-tools;latest"
+    output: Battle-for-Burgers.apk
+    srclibs:
+      - Godot@4.6.3-stable
+    build:
+      - pushd $$Godot$$
+      - export ANDROID_NDK_ROOT=$$NDK$$
+      - export ANDROID_HOME=$$SDK$$
+      - export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+      - export SCONS="scons -j `nproc` verbose=no warnings=no progress=no profile=fdroid/custom.py"
+      - $SCONS target=editor platform=linuxbsd
+      - $SCONS target=template_release platform=android arch=arm64 production=yes
+        swappy=no generate_android_binaries=yes generate_apk=yes
+      - popd
+      - mv $$Godot$$/bin/android_release.apk ./android_release.apk
+      - mkdir .godot
+      - chmod +x fdroid/generate_configs.sh
+      - ./fdroid/generate_configs.sh
+      - export EXPORT_PRESETS="export_presets.cfg"
+      - export VERSION_CODE=`cat project.godot | grep version_code | sed -e "s/config\/version_code=//"`
+      - sed -i -e "s/version\/code=0/version\/code=${VERSION_CODE}/" ${EXPORT_PRESETS}
+      - $$Godot$$/bin/godot.linuxbsd.editor.x86_64 --headless --export-release "F-Droid"
+        Battle-for-Burgers.apk
+    ndk: 28.1.13356709
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: project.godot|config/version_code=(\d+)|.|config/version="([\d.]+)"
-CurrentVersion: 1.5.1
-CurrentVersionCode: 6
+CurrentVersion: 1.6.0
+CurrentVersionCode: 7
