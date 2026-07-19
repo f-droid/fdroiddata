@@ -146,8 +146,39 @@ Builds:
       - gradle assembleRelease
     ndk: r21e
 
+  - versionName: 2.2.0
+    versionCode: 3145748
+    commit: 61e1f3a37dca2be0642bde641a8e8112605c4485
+    sudo:
+      - apt-get update
+      - apt-get install -y npm
+    output: android/app/build/outputs/apk/release/*.apk
+    prebuild:
+      - npm install
+      - sed -i -e '/"expo":\ {/a "autolinking":{"android":{"buildFromSource":[".*"]}},'
+        package.json
+      - sed -i '/jvmToolchain\|JavaVersion/s/17/21/' node_modules/@react-native/gradle-plugin/*/build.gradle.kts
+        node_modules/@react-native/gradle-plugin/react-native-gradle-plugin/src/main/kotlin/com/facebook/react/utils/JdkConfiguratorUtils.kt
+      - npx expo prebuild --platform android
+      - sed -i -e '/signingConfig /d' android/app/build.gradle
+    scanignore:
+      - node_modules/hermes-compiler/hermesc/linux64-bin/hermesc
+      - node_modules/@react-native-async-storage/async-storage/android/build.gradle
+      - node_modules/@react-native-masked-view/masked-view/android/build.gradle
+      - node_modules/react-native-safe-area-context/android/build.gradle
+      - node_modules/react-native-screens/android/build.gradle
+      - node_modules/@react-native-picker/picker/android/build.gradle
+      - node_modules/expo-dev-launcher/android/build.gradle
+      - node_modules/expo-modules-core/android/ExpoModulesCorePlugin.gradle
+      - node_modules/expo-dev-menu/android/build.gradle
+    scandelete:
+      - node_modules/
+    build:
+      - cd android/app
+      - gradle assembleRelease
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^android-.+
 UpdateCheckData: app.json|"versionCode":\s(\d+)|.|"version":\s"([\d.]+)"
-CurrentVersion: 2.1.0
-CurrentVersionCode: 3145747
+CurrentVersion: 2.2.0
+CurrentVersionCode: 3145748
