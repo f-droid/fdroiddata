@@ -89,9 +89,32 @@ Builds:
     gradleprops:
       - fdroid
 
+  - versionName: 2.0.7
+    versionCode: 20007
+    commit: 96f1f3279b9922f31038b8d422d3b64363da5985
+    subdir: zerion-android
+    submodules: true
+    gradle:
+      - official
+    srclibs:
+      - reproducible-apk-tools@v0.3.0
+    rm:
+      - libs/gradle-witness.jar
+      - bramble-java
+      - gradle/verification-metadata.xml
+    prebuild: sed -i "/include ':bramble-java'/d" ../settings.gradle
+    gradleprops:
+      - fdroid
+    postbuild:
+      - $$reproducible-apk-tools$$/inplace-fix.py --zipalign fix-newlines $$OUT$$
+        'assets/hotspot.html'
+      - mv $$OUT$$ unaligned.apk
+      - $$reproducible-apk-tools$$/zipalign.py --page-size 4 --pad-like-apksigner
+        --replace unaligned.apk $$OUT$$
+
 AllowedAPKSigningKeys: d7fdb11125890d133ae89d8ba4f4331d9045e21ef01d9899a7cdee6888f704c8
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 2.0.6
-CurrentVersionCode: 20006
+CurrentVersion: 2.0.7
+CurrentVersionCode: 20007
