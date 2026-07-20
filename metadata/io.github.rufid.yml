@@ -31,16 +31,37 @@ Builds:
     gradleprops:
       - rufid.includePayloads=true
 
+  - versionName: 0.2.1
+    versionCode: 5
+    commit: 37fdee29d5251ecbd13fefe8851aebb0a56eaf96
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y --no-install-recommends autoconf automake clang cmake cpio
+        dosfstools file flex g++ libgcrypt20-dev libgpg-error-dev libtool libtool-bin
+        lld llvm make mingw-w64 mtools nasm ninja-build p7zip-full patch perl pkg-config
+    gradle:
+      - yes
+    prebuild: sdkmanager "platforms;android-35" "build-tools;35.0.0"
+    build:
+      - export PATH=$PATH:/usr/sbin
+      - bash ../scripts/fdroid/stage-source-payloads.sh
+    ndk: r29
+    gradleprops:
+      - rufid.includePayloads=true
+
 MaintainerNotes: |-
   Payloads must not be extracted from any opaque APK. FreeDOS uses the official
   FreeDOS 1.4 LiteUSB archive only as a verified package/source input; the
   staged FAT16 image is assembled from source-built FreeDOS kernel, FreeCOM,
   SYS, and boot sector artifacts, with package-source audit records kept outside
-  the APK. UEFI:NTFS and wimlib are built from pinned upstream source paths.
-  7-Zip-JBinding is built from pinned upstream source with RAR/unRAR native
-  sources excluded from the Android CMake input.
+  the APK. UEFI:NTFS, wimlib, and NTFS-3G are built from pinned upstream source
+  paths. 7-Zip-JBinding is built from pinned upstream source with RAR/unRAR
+  native sources excluded from the Android CMake input. NTFS-3G configure
+  generation requires the libgcrypt m4 macro, but the Android build disables
+  NTFS-3G crypto support.
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v[\d.]+$
-CurrentVersion: 0.1.2
-CurrentVersionCode: 3
+CurrentVersion: 0.2.1
+CurrentVersionCode: 5
