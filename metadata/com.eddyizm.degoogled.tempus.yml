@@ -1,0 +1,76 @@
+Categories:
+  - Online Media Player
+  - Podcast
+  - Radio
+License: GPL-3.0-only
+AuthorName: eddyizm
+SourceCode: https://github.com/eddyizm/tempus
+IssueTracker: https://github.com/eddyizm/tempus/issues
+Changelog: https://eddyizm.github.io/tempus/CHANGELOG.html
+Donate: https://ko-fi.com/eddyizm
+Liberapay: eddyizm
+Bitcoin: 3QVHSSCJvn6yXEcJ3A3cxYLMmbvFsrnUs5
+
+AutoName: Tempus
+
+RepoType: git
+Repo: https://github.com/eddyizm/tempus
+Binaries: 
+  https://github.com/eddyizm/tempus/releases/download/v%v/app-degoogled-release.apk
+
+Builds:
+  - versionName: 4.22.2
+    versionCode: 38
+    commit: 4b194e21b7317e08a753674df40fa118d442d1f8
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y make ninja-build cmake nasm zip
+    gradle:
+      - degoogled
+    srclibs:
+      - media-moneytoo@1.9.2
+      - FFmpeg@release/6.0
+    prebuild: sed -i -e '/foojay/d' ../settings.gradle
+    scandelete:
+      - libs/
+    build:
+      - export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+      - mkdir -p ../libs
+      - export ROOT_LIBS_DIR="$(realpath ../libs)"
+      - export FFMPEG_EXT_PATH="$$media-moneytoo$$/libraries/decoder_ffmpeg/src/main"
+      - export HOST_PLATFORM="$(uname -s | tr '[:upper:]' '[:lower:]')-x86_64"
+      - export ANDROID_ABI=24
+      - export ENABLED_DECODERS=(alac)
+      - pushd "${FFMPEG_EXT_PATH}/jni"
+      - ln -sf "$$FFmpeg$$" ffmpeg
+      - sed -i 's/^LDFLAGS="/LDFLAGS="-Wl,--build-id=none /' $$media-moneytoo$$/libraries/decoder_ffmpeg/src/main/jni/build_ffmpeg.sh
+      - export CFLAGS="-fno-ident -ffile-prefix-map=${PWD}=. -fdebug-prefix-map=${PWD}=.
+        -Wl,--build-id=none"
+      - export LDFLAGS="-Wl,--build-id=none"
+      - export SOURCE_DATE_EPOCH=0
+      - export ARFLAGS="rcsD"
+      - ./build_ffmpeg.sh "${FFMPEG_EXT_PATH}" "$$NDK$$" "${HOST_PLATFORM}" "${ANDROID_ABI}"
+        "${ENABLED_DECODERS[@]}"
+      - popd
+      - cd "$$media-moneytoo$$"
+      - ./gradlew :lib-decoder-ffmpeg:bundleReleaseAar
+      - mkdir -p /tmp/aar_strip
+      - cp libraries/decoder_ffmpeg/buildout/outputs/aar/lib-decoder-ffmpeg-release.aar
+        /tmp/aar_strip/
+      - cd /tmp/aar_strip
+      - unzip -q lib-decoder-ffmpeg-release.aar
+      - rm lib-decoder-ffmpeg-release.aar
+      - find . -name "*.so" -exec "$$NDK$$/toolchains/llvm/prebuilt/${HOST_PLATFORM}/bin/llvm-strip"
+        --remove-section=.note.gnu.build-id {} \;
+      - zip -q -X -r "${ROOT_LIBS_DIR}/lib-decoder-ffmpeg-release.aar" *
+      - rm -rf /tmp/aar_strip
+      - cd ..
+    ndk: 29.0.14206865
+
+AllowedAPKSigningKeys: b78501b934d04e0aca8d94afd6726a4d1dce65797f1d41710f643c2900eb1d1d
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^v[\d.]+$
+CurrentVersion: 4.22.2
+CurrentVersionCode: 38
