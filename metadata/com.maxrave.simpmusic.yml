@@ -468,10 +468,32 @@ Builds:
       - sed -i -e '/isEnable/d' build.gradle.kts
     ndk: r28c
 
+  - versionName: 1.6.0
+    versionCode: 55
+    commit: cebd12db61423de5310a2b3e681993265237e392
+    subdir: androidApp
+    submodules: true
+    sudo:
+      - export CPUS_MAX=16
+      - export CPUS=$(getconf _NPROCESSORS_ONLN)
+      - for (( c=$CPUS_MAX; c<$CPUS; c++ )) ; do echo 0 > /sys/devices/system/cpu/cpu$c/online
+        ; done
+    gradle:
+      - yes
+    binary: 
+      https://github.com/maxrave-dev/SimpMusic/releases/download/v%v/SimpMusic-foss-universal-release.apk
+    prebuild:
+      - sed -i -e '/jogamp/d' -e '/bravepipeproject/d' -e '/foojay/d' ../settings.gradle.kts
+      - sed -i -e '/isEnable/d' build.gradle.kts
+      - sed -i -e '/implementation.*cast/d' ../cast/build.gradle.kts
+    ndk: r28c
+    gradleprops:
+      - isFullBuild=false
+
 AllowedAPKSigningKeys: 76c53bd813ae8f1ce2778f7814b515785719bf9a82c6bee03b8b2dfd706055a1
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: gradle/libs.versions.toml|version-code\s=\s"(\d+)"|.|version-name\s=\s"(.*)"
-CurrentVersion: 1.5.1
-CurrentVersionCode: 54
+CurrentVersion: 1.6.0
+CurrentVersionCode: 55
