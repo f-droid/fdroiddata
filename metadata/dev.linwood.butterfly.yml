@@ -1421,8 +1421,53 @@ Builds:
       - $$flutter$$/bin/flutter build apk --flavor production
     ndk: r28c
 
+  - versionName: 2.5.4
+    versionCode: 189
+    commit: 09c9ee2bc9cb5760e4dbf20aa6f1e4e166e8769a
+    subdir: app
+    output: build/app/outputs/flutter-apk/app-production-release.apk
+    srclibs:
+      - flutter@stable
+      - pdfium-binaries@chromium/7811
+    rm:
+      - app/ios
+      - app/linux
+      - app/macos
+      - app/web
+      - app/windows
+    prebuild:
+      - export version=$(grep "^  flutter:" pubspec.yaml | cut -d ":" -f2|head -n1)
+      - '[[ $version ]]'
+      - git -C $$flutter$$ checkout -f $version
+      - sed -i -e '/signingConfig/,+4d' android/app/build.gradle.kts
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - grep chromium%2F7811 $PUB_CACHE/hosted/pub.dev/pdfium_dart-*/hook/build.dart
+      - sed -i -e '/get(archiveUri)/,+3c final bytes = await 
+        File("$$pdfium-binaries$$/pdfium-${target.archivePlatform}-${target.archiveArch}.tgz").readAsBytes();'
+        -e 's/response.bodyBytes/bytes/' -e '/http/d' $PUB_CACHE/hosted/pub.dev/pdfium_dart-*/hook/build.dart
+    scandelete:
+      - app/.pub-cache
+    build:
+      - pushd $$pdfium-binaries$$
+      - export PDFium_BRANCH="chromium/7811"
+      - export PDFium_VERSION="149.0.7811.0"
+      - sed -i 's|sudo |echo |g' steps/01-install.sh
+      - echo 'sed -i "s|  sys.exit(main())|  sys.exit(0)|g" pdfium/build/install-build-deps.py'
+        >> steps/02-checkout.sh
+      - truncate -s 0 steps/09-test.sh
+      - ./build.sh -b "$PDFium_BRANCH" android arm
+      - ./build.sh -b "$PDFium_BRANCH" android arm64
+      - ./build.sh -b "$PDFium_BRANCH" android x64
+      - cp pdfium-android-x64.tgz pdfium-android-x86.tgz
+      - popd
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --flavor production
+    ndk: r28c
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v[\d.]+$
 UpdateCheckData: app/pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 2.5.3
-CurrentVersionCode: 185
+CurrentVersion: 2.5.4
+CurrentVersionCode: 189
