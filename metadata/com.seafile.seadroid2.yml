@@ -1754,7 +1754,28 @@ Builds:
     build: bash ../build_libheif.sh
     ndk: r27
 
+  - versionName: 4.0.10
+    versionCode: 390
+    commit: cf50276f32122f12faa537f069fd01a945e65556
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y cmake ninja-build pkg-config nasm
+    gradle:
+      - yes
+    prebuild:
+      - sed -i -e '/firebase/d' -e '/gms/d' {.,..}/build.gradle
+      - sed -i -e '/crashlytics/Id' src/main/java/com/seafile/seadroid2/ui/main/MainActivity.java
+      - sed -i -e 
+        's/com.google.android.gms.common.util.CollectionUtils/com.blankj.utilcode.util.CollectionUtils/'
+        src/main/java/com/seafile/seadroid2/ui/activities/ActivityAdapter.java
+      - sed -i -e 's/sysctl -n hw.ncpu/nproc/' -e 's/darwin/linux/' ../build_libheif.sh
+    scandelete:
+      - app/src/main/cpp/libheif/lib
+    build: bash ../build_libheif.sh
+    ndk: r27
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 4.0.9
-CurrentVersionCode: 380
+CurrentVersion: 4.0.10
+CurrentVersionCode: 390
