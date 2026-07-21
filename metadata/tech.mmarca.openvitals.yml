@@ -272,6 +272,102 @@ Builds:
       - popd
       - mv $repo tech.mmarca.openvitals
 
+  - versionName: 2.2.8
+    versionCode: 1070304011
+    commit: 92c254becb6f4f7feaf22ead803ba9fdf25c6a24
+    sudo:
+      - apt-get update
+      - apt-get install -y build-essential clang cmake ninja-build pkg-config
+      - mkdir -p /woodpecker/src/codeberg.org/OpenVitals
+      - chown -R vagrant /woodpecker
+    output: build/app/outputs/flutter-apk/app-release.apk
+    binary: 
+      https://codeberg.org/OpenVitals/mobile-app/releases/download/v%v/OpenVitals-v%v-armeabi-v7a.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+    prebuild:
+      - sdkmanager "platforms;android-37.0" "build-tools;37.0.0"
+      - export repo=/woodpecker/src/codeberg.org/OpenVitals/mobile-app
+      - cd ..
+      - mv tech.mmarca.openvitals $repo
+      - pushd $repo
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export flutterVersion=$(sed -n 's|.*cirruslabs/flutter:\([0-9][0-9.]*\).*|\1|p'
+        .woodpecker/release.yml | head -1)
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - $$flutter$$/bin/flutter config --no-analytics --no-cli-animations
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - $$flutter$$/bin/dart run build_runner build --delete-conflicting-outputs
+      - cd packages/health_connect_native
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - $$flutter$$/bin/dart run pigeon --input pigeons/messages.dart
+      - popd
+      - mv $repo tech.mmarca.openvitals
+    scandelete:
+      - .pub-cache
+    build:
+      - export repo=/woodpecker/src/codeberg.org/OpenVitals/mobile-app
+      - cd ..
+      - mv tech.mmarca.openvitals $repo
+      - pushd $repo
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export baseCode=$(sed -n 's/^version:[[:space:]]*[0-9.]*+\([0-9][0-9]*\).*/\1/p'
+        pubspec.yaml | head -1)
+      - $$flutter$$/bin/flutter build apk --release --target-platform android-arm
+        --build-number $(($baseCode * 10 + 1))
+      - popd
+      - mv $repo tech.mmarca.openvitals
+
+  - versionName: 2.2.8
+    versionCode: 1070304012
+    commit: 92c254becb6f4f7feaf22ead803ba9fdf25c6a24
+    sudo:
+      - apt-get update
+      - apt-get install -y build-essential clang cmake ninja-build pkg-config
+      - mkdir -p /woodpecker/src/codeberg.org/OpenVitals
+      - chown -R vagrant /woodpecker
+    output: build/app/outputs/flutter-apk/app-release.apk
+    binary: 
+      https://codeberg.org/OpenVitals/mobile-app/releases/download/v%v/OpenVitals-v%v-arm64-v8a.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+    prebuild:
+      - sdkmanager "platforms;android-37.0" "build-tools;37.0.0"
+      - export repo=/woodpecker/src/codeberg.org/OpenVitals/mobile-app
+      - cd ..
+      - mv tech.mmarca.openvitals $repo
+      - pushd $repo
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export flutterVersion=$(sed -n 's|.*cirruslabs/flutter:\([0-9][0-9.]*\).*|\1|p'
+        .woodpecker/release.yml | head -1)
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - $$flutter$$/bin/flutter config --no-analytics --no-cli-animations
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - $$flutter$$/bin/dart run build_runner build --delete-conflicting-outputs
+      - cd packages/health_connect_native
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - $$flutter$$/bin/dart run pigeon --input pigeons/messages.dart
+      - popd
+      - mv $repo tech.mmarca.openvitals
+    scandelete:
+      - .pub-cache
+    build:
+      - export repo=/woodpecker/src/codeberg.org/OpenVitals/mobile-app
+      - cd ..
+      - mv tech.mmarca.openvitals $repo
+      - pushd $repo
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export baseCode=$(sed -n 's/^version:[[:space:]]*[0-9.]*+\([0-9][0-9]*\).*/\1/p'
+        pubspec.yaml | head -1)
+      - $$flutter$$/bin/flutter build apk --release --target-platform android-arm64
+        --build-number $(($baseCode * 10 + 2))
+      - popd
+      - mv $repo tech.mmarca.openvitals
+
 AllowedAPKSigningKeys: 0416c0651543e951ef3b6c1ed9beb13833bff3a2be9ddacf492270712861e05d
 
 AutoUpdateMode: Version
@@ -280,5 +376,5 @@ VercodeOperation:
   - 10 * %c + 1
   - 10 * %c + 2
 UpdateCheckData: pubspec.yaml|version:\s+[\d.]+\+(\d+)|.|version:\s+([\d.]+)\+
-CurrentVersion: 2.2.7
-CurrentVersionCode: 1070303722
+CurrentVersion: 2.2.8
+CurrentVersionCode: 1070304012
