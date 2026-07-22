@@ -917,11 +917,49 @@ Builds:
     gradleprops:
       - buildDeps=false
 
+  - versionName: 2026.11.3
+    versionCode: 20261103
+    commit: 1f49414c9093b4994c153a4e0936dd38613dbf39
+    subdir: nym-vpn-android/app
+    sudo:
+      - apt-get update
+      - apt-get install -y make gcc libc-dev golang-go rustup
+    gradle:
+      - fdroid
+    binary: 
+      https://github.com/nymtech/nym-vpn-client/releases/download/nym-vpn-v%v/nym-vpn-fdroid-%v-release.apk
+    srclibs:
+      - go@go1.24.4
+    rm:
+      - nym-vpn-apple
+      - nym-vpn-app
+    prebuild:
+      - source '../../.env'
+      - rustup default "$RUST_VERSION"
+      - rustup target add x86_64-linux-android aarch64-linux-android armv7-linux-androideabi
+      - sed -i -e '/foojay/d' ../settings.gradle.kts
+    scanignore:
+      - nym-vpn-core/crates/nym-vpn-lib/src/adblocker/builtin/*.txt.gz
+      - nym-vpn-core/crates/nym-socks5-proxy/builtin/*.txt.gz
+      - nym-vpn-core/crates/nym-socks5-proxy/builtin/*.json.gz
+    build:
+      - pushd $$go$$/src
+      - ./make.bash
+      - popd
+      - export PATH="$$go$$/bin:$PATH"
+      - cargo install cargo-ndk@4.1.2 cargo-license@0.7.0 --locked
+      - export NDK_TOOLCHAIN_DIR="$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin"
+      - export RELEASE="true"
+      - make -C ../../nym-vpn-core -f Android.mk
+    ndk: r28c
+    gradleprops:
+      - buildDeps=false
+
 AllowedAPKSigningKeys: 3c98a016aa4f14a3ba185c764ed363415cf7ff3c3d328a87ffff2ff1b140ff06
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^nym-vpn-v[\d.]+$
 UpdateCheckData: nym-vpn-android/buildSrc/src/main/kotlin/Constants.kt|VERSION_CODE
   = (\d+)|.|VERSION_NAME = "(v?[\d.]+)"
-CurrentVersion: 2026.11.2
-CurrentVersionCode: 20261102
+CurrentVersion: 2026.11.3
+CurrentVersionCode: 20261103
