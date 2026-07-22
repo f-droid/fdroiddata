@@ -6770,6 +6770,147 @@ Builds:
       - mv /tmp/build com.poppingmoon.aria
     ndk: r28c
 
+  - versionName: 1.5.9
+    versionCode: 1071
+    commit: ce50cd3e4aef836770bc538de6c1389e6490611c
+    sudo:
+      - apt-get update
+      - apt-get install -y gcc libc-dev rustup
+    output: build/app/outputs/flutter-apk/app-x86_64-release.apk
+    binary: https://github.com/poppingmoon/aria/releases/download/v%v/aria-v%v-x86_64.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+      - linux
+      - macos
+      - web
+      - windows
+    prebuild:
+      - sed -i -e "s/local_build:\ false/local_build:\ true/" pubspec.yaml
+      - rustVersion=$(sed -n -E 's/channel = "(.*)"/\1/p' rust/rust-toolchain.toml)
+      - rustup default $rustVersion
+      - rustup target add x86_64-linux-android
+      - export version=$(grep flutter .fvmrc | cut -d ":" -f2 | cut -d "\"" -f2)
+      - '[[ $version ]]'
+      - git -C $$flutter$$ checkout -f $version
+      - cd ..
+      - mv com.poppingmoon.aria /tmp/build
+      - pushd /tmp/build/
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - popd
+      - mv /tmp/build com.poppingmoon.aria
+    scandelete:
+      - .pub-cache
+    build:
+      - export PATH=/tmp/cargo/bin:$PATH
+      - export HOME=/tmp
+      - cd ..
+      - mv com.poppingmoon.aria /tmp/build
+      - pushd /tmp/build/
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - echo $$NDK$$
+      - export PATH=$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform="android-x64"
+      - popd
+      - mv /tmp/build com.poppingmoon.aria
+    ndk: r28c
+
+  - versionName: 1.5.9
+    versionCode: 1072
+    commit: ce50cd3e4aef836770bc538de6c1389e6490611c
+    sudo:
+      - apt-get update
+      - apt-get install -y gcc libc-dev rustup
+    output: build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
+    binary: 
+      https://github.com/poppingmoon/aria/releases/download/v%v/aria-v%v-armeabi-v7a.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+      - linux
+      - macos
+      - web
+      - windows
+    prebuild:
+      - sed -i -e "s/local_build:\ false/local_build:\ true/" pubspec.yaml
+      - rustVersion=$(sed -n -E 's/channel = "(.*)"/\1/p' rust/rust-toolchain.toml)
+      - rustup default $rustVersion
+      - rustup target add armv7-linux-androideabi
+      - export version=$(grep flutter .fvmrc | cut -d ":" -f2 | cut -d "\"" -f2)
+      - '[[ $version ]]'
+      - git -C $$flutter$$ checkout -f $version
+      - cd ..
+      - mv com.poppingmoon.aria /tmp/build
+      - pushd /tmp/build/
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - popd
+      - mv /tmp/build com.poppingmoon.aria
+    scandelete:
+      - .pub-cache
+    build:
+      - export HOME=/tmp
+      - cd ..
+      - mv com.poppingmoon.aria /tmp/build
+      - pushd /tmp/build/
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export PATH=$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform="android-arm"
+      - popd
+      - mv /tmp/build com.poppingmoon.aria
+    ndk: r28c
+
+  - versionName: 1.5.9
+    versionCode: 1073
+    commit: ce50cd3e4aef836770bc538de6c1389e6490611c
+    sudo:
+      - apt-get update
+      - apt-get install -y gcc libc-dev rustup
+    output: build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+    binary: https://github.com/poppingmoon/aria/releases/download/v%v/aria-v%v-arm64-v8a.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+      - linux
+      - macos
+      - web
+      - windows
+    prebuild:
+      - sed -i -e "s/local_build:\ false/local_build:\ true/" pubspec.yaml
+      - rustVersion=$(sed -n -E 's/channel = "(.*)"/\1/p' rust/rust-toolchain.toml)
+      - rustup default $rustVersion
+      - rustup target add aarch64-linux-android
+      - export version=$(grep flutter .fvmrc | cut -d ":" -f2 | cut -d "\"" -f2)
+      - '[[ $version ]]'
+      - git -C $$flutter$$ checkout -f $version
+      - cd ..
+      - mv com.poppingmoon.aria /tmp/build
+      - pushd /tmp/build/
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - popd
+      - mv /tmp/build com.poppingmoon.aria
+    scandelete:
+      - .pub-cache
+    build:
+      - export HOME=/tmp
+      - cd ..
+      - mv com.poppingmoon.aria /tmp/build
+      - pushd /tmp/build/
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export PATH=$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform="android-arm64"
+      - popd
+      - mv /tmp/build com.poppingmoon.aria
+    ndk: r28c
+
 AllowedAPKSigningKeys: b47f49781b7dcd4df69c6e437999d07defe27421f006b9fb6a13756880928ee2
 
 AutoUpdateMode: Version
@@ -6779,5 +6920,5 @@ VercodeOperation:
   - '%c * 10 + 2'
   - '%c * 10 + 3'
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 1.5.8
-CurrentVersionCode: 1063
+CurrentVersion: 1.5.9
+CurrentVersionCode: 1073
