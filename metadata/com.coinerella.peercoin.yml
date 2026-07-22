@@ -1766,10 +1766,39 @@ Builds:
       - $$flutter$$/bin/flutter packages pub run build_runner build --delete-conflicting-outputs
       - $$flutter$$/bin/flutter build apk
 
+  - versionName: 1.4.8
+    versionCode: 160
+    commit: 402b4a740ef725dc38273cd893284fd2ce9d3ff7
+    sudo:
+      - apt-get update
+      - apt-get install -y rustup gcc libc-dev
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@3.44.7
+      - transistor-background-fetch@34676021268c22c5cd356d9c96644aa0ee5fb68d
+    rm:
+      - ios
+      - test_driver
+    prebuild:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter packages pub get --enforce-lockfile
+      - export CARGO_HOME="$HOME/.cargo"
+      - rustup default 1.87.0
+      - rustup target add aarch64-linux-android armv7-linux-androideabi x86_64-linux-android
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter pub run flutter_launcher_icons:main -f fdroid_flutter_launcher_icons.yaml
+      - $$flutter$$/bin/flutter pub run flutter_native_splash:create
+      - $$flutter$$/bin/flutter packages pub run build_runner build --delete-conflicting-outputs
+      - $$flutter$$/bin/flutter build apk
+
 MaintainerNotes: Ignore local maven repo for flutter_background_fetch.
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 1.4.7
-CurrentVersionCode: 156
+CurrentVersion: 1.4.8
+CurrentVersionCode: 160
