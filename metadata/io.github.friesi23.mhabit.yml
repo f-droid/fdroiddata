@@ -2802,10 +2802,50 @@ Builds:
       - popd
       - mv $repo io.github.friesi23.mhabit
 
+  - versionName: 1.26.1
+    versionCode: 174
+    commit: 6be095ba1b9cef05482f0b69773feadf8f7830ab
+    submodules: true
+    sudo:
+      - mkdir -p /home/runner/work/mhabit
+      - chown -R vagrant /home/runner/
+    output: build/app/outputs/flutter-apk/app-release.apk
+    rm:
+      - .vscode
+      - demo
+      - ios
+    prebuild:
+      - sed -i -e '/signingConfig /d' android/app/build.gradle
+      - export repo=/home/runner/work/mhabit/mhabit
+      - cd ..
+      - mv io.github.friesi23.mhabit $repo
+      - pushd $repo
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - .flutter/bin/flutter config --no-analytics
+      - .flutter/bin/flutter pub get --enforce-lockfile
+      - sed -i -E -e 's/-Wl,(--build-id=none,)*/-Wl,--build-id=none,/g' $PUB_CACHE/hosted/*/jni-*/src/CMakeLists.txt
+      - popd
+      - mv $repo io.github.friesi23.mhabit
+    scanignore:
+      - .flutter/bin/cache
+    scandelete:
+      - .flutter
+      - .pub-cache
+      - test
+    build:
+      - export repo=/home/runner/work/mhabit/mhabit
+      - cd ..
+      - mv io.github.friesi23.mhabit $repo
+      - pushd $repo
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - .flutter/bin/flutter build apk
+      - popd
+      - mv $repo io.github.friesi23.mhabit
+
 AllowedAPKSigningKeys: 4a31e799063f721d62135f0925f316c2f5e5ab08b462fc4b957673c9b40869b5
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v.*$
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 1.25.7
-CurrentVersionCode: 172
+CurrentVersion: 1.26.1
+CurrentVersionCode: 174
