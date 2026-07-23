@@ -16,7 +16,7 @@ Binaries:
 Builds:
   - versionName: 1.3.1
     versionCode: 25
-    commit: v1.3.1
+    commit: 98e90a42eef3511048db554c5217aba68ae0f2b2
     subdir: app
     gradle:
       - yes
@@ -34,7 +34,7 @@ Builds:
 
   - versionName: 1.4.0
     versionCode: 26
-    commit: v1.4.0
+    commit: 0dcfaca1a6db1789716f7269402bb588e428df44
     subdir: app
     gradle:
       - yes
@@ -52,7 +52,25 @@ Builds:
 
   - versionName: 1.4.3
     versionCode: 29
-    commit: v1.4.3
+    commit: ba40091418cd8c53a16bbcd5c751a4bc8ccd1da6
+    subdir: app
+    gradle:
+      - yes
+    postbuild:
+      - curl -Lo upstream.apk 
+        https://github.com/jamestomasino/stutter-android/releases/download/v$$VERSION$$/app-release-signed.apk
+      - unzip -q upstream.apk -d apk
+      - export hash_prof=$(sha256sum apk/assets/dexopt/baseline.prof)
+      - export hash_profm=$(sha256sum apk/assets/dexopt/baseline.profm)
+      - rm -rf apk upstream.apk
+      - for i in {1..10}; do unzip -q $$OUT$$ -d apk; sha256sum -c - <<< $hash_prof
+        && sha256sum -c - <<< $hash_profm && break; sha256sum apk/assets/dexopt/baseline.prof;
+        sha256sum apk/assets/dexopt/baseline.profm; rm -fr apk; gradle clean assembleRelease;
+        done
+
+  - versionName: 1.4.4
+    versionCode: 30
+    commit: 9f3b33c8e71c79244ef5042b07f3a83b0de81abc
     subdir: app
     gradle:
       - yes
@@ -72,5 +90,5 @@ AllowedAPKSigningKeys: 2d8755472efcfb3c11649070205d47e66461a30c8f7949f2dac24251f
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 1.4.3
-CurrentVersionCode: 29
+CurrentVersion: 1.4.4
+CurrentVersionCode: 30
