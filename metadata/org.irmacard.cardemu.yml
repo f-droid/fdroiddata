@@ -1646,10 +1646,77 @@ Builds:
       - $$flutter$$/bin/flutter build apk --flavor beta
     ndk: 28.2.13676358
 
+  - versionName: 8.1.2
+    versionCode: 4194516
+    commit: 9a7d5c1c0c290ba936f2043007d634e892f0dc63
+    subdir: yivi_fdroid
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y build-essential tcl unzip
+      - apt-get install -y -t trixie-backports golang-go
+    output: build/app/outputs/flutter-apk/app-beta-release.apk
+    srclibs:
+      - flutter@stable
+      - go@go1.26.0
+      - OpenSSL@openssl-3.4.1
+      - sqlcipher@v4.14.0
+    rm:
+      - yivi_app
+      - .vscode
+    prebuild:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export version=$(grep "^FLUTTER_VERSION" ../ci_scripts/install_flutter.sh
+        | cut -d "\"" -f2)
+      - '[[ $version ]]'
+      - git -C $$flutter$$ checkout -f $version
+      - export goVersion=$(grep "^go " ../yivi_core/go.mod | cut -d " " -f2)
+      - '[[ $goVersion ]]'
+      - git -C $$go$$ checkout -f go$goVersion
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - sdkmanager 'platforms;android-36' 'build-tools;36.1.0'
+    scandelete:
+      - yivi_fdroid/.pub-cache
+    build:
+      - pushd $$go$$/src
+      - ./make.bash
+      - popd
+      - export GOROOT="$$go$$"
+      - export GOPATH="$PWD/golang"
+      - export GOTOOLCHAIN=local
+      - export PATH="$$go$$/bin:$GOPATH/bin:$PATH"
+      - export ANDROID_NDK_HOME="$$NDK$$"
+      - export ANDROID_NDK_ROOT="$$NDK$$"
+      - export ROOT="$(cd .. && pwd)"
+      - export TC="$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64"
+      - export PATH="$TC/bin:$PATH"
+      - for ABI in arm64-v8a armeabi-v7a x86_64; do case "$ABI" in arm64-v8a) TRIPLE=aarch64-linux-android;
+        HOSTT=aarch64-linux-android; OSSL=android-arm64;; armeabi-v7a) TRIPLE=armv7a-linux-androideabi;
+        HOSTT=arm-linux-androideabi; OSSL=android-arm;; x86_64) TRIPLE=x86_64-linux-android;
+        HOSTT=x86_64-linux-android; OSSL=android-x86_64;; esac; PREFIX="$ROOT/build/sqlcipher-prebuilt/android/$ABI";
+        rm -rf "$ROOT/bo"; cp -a "$$OpenSSL$$" "$ROOT/bo"; ( cd "$ROOT/bo" && ./Configure
+        "$OSSL" -D__ANDROID_API__=26 --prefix="$PREFIX" no-shared no-tests no-ui-console
+        no-engine no-async && make -j$(nproc) build_libs && make install_dev ); rm
+        -rf "$ROOT/bs"; cp -a "$$sqlcipher$$" "$ROOT/bs"; ( cd "$ROOT/bs" && CC="$TC/bin/${TRIPLE}26-clang"
+        AR="$TC/bin/llvm-ar" RANLIB="$TC/bin/llvm-ranlib" ./configure --host="$HOSTT"
+        --prefix="$PREFIX" --disable-shared --with-tempstore=yes --disable-tcl CFLAGS="-DSQLITE_HAS_CODEC
+        -DSQLCIPHER_CRYPTO_OPENSSL -DSQLITE_TEMP_STORE=2 -DSQLITE_EXTRA_INIT=sqlcipher_extra_init
+        -DSQLITE_EXTRA_SHUTDOWN=sqlcipher_extra_shutdown -I$PREFIX/include" LDFLAGS="-L$PREFIX/lib
+        -lcrypto" && make -j$(nproc) libsqlite3.a && mkdir -p "$PREFIX/lib" "$PREFIX/include/sqlcipher"
+        && cp libsqlite3.a "$PREFIX/lib/libsqlcipher.a" && cp sqlite3.h "$PREFIX/include/sqlite3.h"
+        && cp sqlite3.h "$PREFIX/include/sqlcipher/sqlite3.h" ); done
+      - cp -a "$ROOT/build/sqlcipher-prebuilt/android/arm64-v8a/include" "$ROOT/build/sqlcipher-prebuilt/android/include"
+      - (cd "$ROOT" && bash ci_scripts/install_gomobile.sh)
+      - (cd "$ROOT" && bash bind_go.sh android)
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --flavor beta
+    ndk: 28.2.13676358
+
 MaintainerNotes: uses Sentry.io configured as opt-in
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v.*$
 UpdateCheckData: yivi_fdroid/pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 8.1.1
-CurrentVersionCode: 4194515
+CurrentVersion: 8.1.2
+CurrentVersionCode: 4194516
