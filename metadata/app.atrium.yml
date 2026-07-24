@@ -1,0 +1,128 @@
+Categories:
+  - Download
+  - Remote Controller
+License: GPL-3.0-or-later
+AuthorName: retransmit
+SourceCode: https://github.com/retransmit/Atrium
+IssueTracker: https://github.com/retransmit/Atrium/issues
+Changelog: https://github.com/retransmit/Atrium/releases
+
+AutoName: Atrium
+
+RepoType: git
+Repo: https://github.com/retransmit/Atrium.git
+
+Builds:
+  - versionName: 1.1.1
+    versionCode: 101
+    commit: c969ef593e86bda206b0342389f1ed30922e5faa
+    subdir: app
+    output: build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
+    binary: 
+      https://github.com/retransmit/Atrium/releases/download/v%v/app-armeabi-v7a-release.apk
+    srclibs:
+      - flutter@stable
+    prebuild:
+      - flutterVersion=$(sed -n -E "s/^  FLUTTER_VERSION:\ (.*)$/\1/p" ../.github/workflows/release.yml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - cd ../..
+      - mv app.atrium /tmp/build
+      - pushd /tmp/build/app
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export PATH=$$flutter$$/bin:$PATH
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - cd .. && $$flutter$$/bin/dart run tool/build_all.dart
+      - popd
+      - mv /tmp/build app.atrium
+    scandelete:
+      - app/.pub-cache
+    build:
+      - cd ../..
+      - mv app.atrium /tmp/build
+      - pushd /tmp/build/app
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform=android-arm
+      - popd
+      - mv /tmp/build app.atrium
+
+  - versionName: 1.1.1
+    versionCode: 102
+    commit: c969ef593e86bda206b0342389f1ed30922e5faa
+    subdir: app
+    output: build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+    binary: 
+      https://github.com/retransmit/Atrium/releases/download/v%v/app-arm64-v8a-release.apk
+    srclibs:
+      - flutter@stable
+    prebuild:
+      - flutterVersion=$(sed -n -E "s/^  FLUTTER_VERSION:\ (.*)$/\1/p" ../.github/workflows/release.yml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - cd ../..
+      - mv app.atrium /tmp/build
+      - pushd /tmp/build/app
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export PATH=$$flutter$$/bin:$PATH
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - cd .. && $$flutter$$/bin/dart run tool/build_all.dart
+      - popd
+      - mv /tmp/build app.atrium
+    scandelete:
+      - app/.pub-cache
+    build:
+      - cd ../..
+      - mv app.atrium /tmp/build
+      - pushd /tmp/build/app
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform=android-arm64
+      - popd
+      - mv /tmp/build app.atrium
+
+  - versionName: 1.1.1
+    versionCode: 103
+    commit: c969ef593e86bda206b0342389f1ed30922e5faa
+    subdir: app
+    output: build/app/outputs/flutter-apk/app-x86_64-release.apk
+    binary: 
+      https://github.com/retransmit/Atrium/releases/download/v%v/app-x86_64-release.apk
+    srclibs:
+      - flutter@stable
+    prebuild:
+      - flutterVersion=$(sed -n -E "s/^  FLUTTER_VERSION:\ (.*)$/\1/p" ../.github/workflows/release.yml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - cd ../..
+      - mv app.atrium /tmp/build
+      - pushd /tmp/build/app
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export PATH=$$flutter$$/bin:$PATH
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - cd .. && $$flutter$$/bin/dart run tool/build_all.dart
+      - popd
+      - mv /tmp/build app.atrium
+    scandelete:
+      - app/.pub-cache
+    build:
+      - cd ../..
+      - mv app.atrium /tmp/build
+      - pushd /tmp/build/app
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform=android-x64
+      - popd
+      - mv /tmp/build app.atrium
+
+AllowedAPKSigningKeys: 5ebad1ff2f9cdc63f28b364addf9e858330db26909d9eba8dfbccb998de37351
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+VercodeOperation:
+  - '%c * 10 + 1'
+  - '%c * 10 + 2'
+  - '%c * 10 + 3'
+UpdateCheckData: app/pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 1.1.1
+CurrentVersionCode: 103
