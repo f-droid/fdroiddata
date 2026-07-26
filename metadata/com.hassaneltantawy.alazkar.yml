@@ -85,8 +85,32 @@ Builds:
       - export PUB_CACHE=$(pwd)/.pub-cache
       - $$flutter$$/bin/flutter build apk --release --flavor prod
 
+  - versionName: 1.2.0
+    versionCode: 15
+    commit: 7b2902faee36886e529b124770e63d89b5fe0944
+    subdir: alazkar
+    output: build/app/outputs/flutter-apk/app-prod-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - dll
+      - alazkar/ios
+    prebuild:
+      - sed -i -e 's/-Xmx1536M/-Xmx4g/' android/gradle.properties
+      - export flutterVersion=$(sed -n -E 's/.*"flutter":\s"([0-9.]+)"/\1/p' .fvmrc)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter packages pub get --enforce-lockfile
+    scandelete:
+      - alazkar/.pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --flavor prod
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: alazkar/pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 1.1.01
-CurrentVersionCode: 14
+CurrentVersion: 1.2.0
+CurrentVersionCode: 15
