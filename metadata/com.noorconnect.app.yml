@@ -6,14 +6,14 @@ AntiFeatures:
 Categories:
   - Alarm Clock
   - Religion
-License: MIT
-SourceCode: https://github.com/darkmaster0345/Noor-connect
-IssueTracker: https://github.com/darkmaster0345/Noor-connect/issues
+License: GPL-3.0-only
+SourceCode: https://gitlab.com/theredhacker0345/Noor-connect
+IssueTracker: https://gitlab.com/theredhacker0345/Noor-connect/issues
 
 AutoName: Noor Connect
 
 RepoType: git
-Repo: https://github.com/darkmaster0345/Noor-connect.git
+Repo: https://gitlab.com/theredhacker0345/Noor-connect.git
 
 Builds:
   - versionName: 1.2.0
@@ -33,7 +33,35 @@ Builds:
     scandelete:
       - node_modules
 
+  - versionName: 2.0.1
+    versionCode: 6
+    commit: 89046224248edba14d3c697026a2192134ae36a1
+    subdir: android/app
+    sudo:
+      - apt-get update
+      - apt-get install -y golang-go make npm
+    gradle:
+      - foss
+    srclibs:
+      - esbuild@v0.21.5
+    prebuild:
+      - cd ../..
+      - npm ci
+    scanignore:
+      - node_modules/@capacitor/cli/assets/capacitor-cordova-android-plugins.tar.gz
+    scandelete:
+      - node_modules
+    build:
+      - pushd $$esbuild$$
+      - make esbuild
+      - popd
+      - cd ../..
+      - cp $$esbuild$$/esbuild node_modules/@esbuild/linux-x64/bin/
+      - cp $$esbuild$$/esbuild node_modules/esbuild/bin/
+      - npm run build
+      - npx cap sync android
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 1.2.0
-CurrentVersionCode: 4
+CurrentVersion: 2.0.1
+CurrentVersionCode: 6
