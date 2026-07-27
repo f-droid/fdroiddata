@@ -2,8 +2,8 @@ Categories:
   - Task
 License: GPL-3.0-only
 AuthorName: Benoit Brummer
-SourceCode: https://codeberg.org/trougnouf/cfait
-IssueTracker: https://codeberg.org/trougnouf/cfait/issues
+SourceCode: https://git.disroot.org/trougnouf/cfait
+IssueTracker: https://git.disroot.org/trougnouf/cfait/issues
 Liberapay: trougnouf
 Bitcoin: bc1qc3z9ctv34v0ufxwpmq875r89umnt6ggeclp979
 Litecoin: ltc1qv0xcmeuve080j7ad2cj2sd9d22kgqmlxfxvhmg
@@ -11,8 +11,9 @@ Litecoin: ltc1qv0xcmeuve080j7ad2cj2sd9d22kgqmlxfxvhmg
 AutoName: Cfait
 
 RepoType: git
-Repo: https://codeberg.org/trougnouf/cfait.git
-Binaries: https://codeberg.org/trougnouf/cfait/releases/download/v%v/cfait-android-v%v.apk
+Repo: https://git.disroot.org/trougnouf/cfait.git
+Binaries: 
+  https://git.disroot.org/trougnouf/cfait/releases/download/v%v/cfait-android-v%v.apk
 
 Builds:
   - versionName: 0.4.5
@@ -456,10 +457,40 @@ Builds:
         28
     ndk: r27d
 
+  - versionName: 1.1.1
+    versionCode: 10101
+    commit: 373d0db1b2776fa4e0f1fd84b33b5324921d7786
+    subdir: android/app
+    sudo:
+      - apt-get update
+      - apt-get install -y gcc libc-dev pkg-config libssl-dev cmake nasm libclang-dev
+        make rustup
+    gradle:
+      - yes
+    build:
+      - export RUST_VERSION=$(sed -n 's/channel = "\(.*\)"/\1/p' ../../rust-toolchain.toml)
+      - rustup default $RUST_VERSION
+      - rustup target add aarch64-linux-android armv7-linux-androideabi x86_64-linux-android
+      - cargo install --locked cargo-ndk@4.1.2
+      - cd ../..
+      - export CARGO_PROFILE_RELEASE_CODEGEN_UNITS="1"
+      - export CARGO_PROFILE_RELEASE_PANIC="abort"
+      - export CFLAGS="-ffile-prefix-map=$(pwd)=/c -ffile-prefix-map=$HOME/.cargo=/cargo
+        -fno-exceptions -fno-unwind-tables"
+      - export CXXFLAGS="-ffile-prefix-map=$(pwd)=/c -ffile-prefix-map=$HOME/.cargo=/cargo
+        -fno-exceptions -fno-unwind-tables"
+      - export RUST_SYSROOT="$(rustc --print sysroot)"
+      - export RUSTFLAGS="--remap-path-prefix $(pwd)=/c --remap-path-prefix $HOME/.cargo=/cargo
+        --remap-path-prefix $RUST_SYSROOT=/rustc-sysroot -C link-arg=-Wl,--build-id=none"
+      - cargo ndk -t aarch64-linux-android -t armv7-linux-androideabi -t x86_64-linux-android
+        -o android/app/src/main/jniLibs build --release --lib --features mobile --platform
+        28
+    ndk: r27d
+
 AllowedAPKSigningKeys: 6679a06eec4933fe2933f5be32db3b3e716d42e93c7f230358e779587bab1ac0
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v[\d.]+$
 UpdateCheckData: Cargo.toml|version_code = (\d+)|.|version = "([\d.]+)"
-CurrentVersion: 1.0.9
-CurrentVersionCode: 10009
+CurrentVersion: 1.1.1
+CurrentVersionCode: 10101
