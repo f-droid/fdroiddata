@@ -25,6 +25,7 @@ Binaries:
 Builds:
   - versionName: 5.0.3
     versionCode: 49
+    disable: key change
     commit: v5.0.3-f-droid
     subdir: platforms/android/app
     sudo:
@@ -50,6 +51,7 @@ Builds:
 
   - versionName: 5.0.4
     versionCode: 50
+    disable: key change
     commit: 4f5ad10d2228a2cbc35b937cd615d7c31e3c7203
     subdir: platforms/android/app
     sudo:
@@ -61,10 +63,36 @@ Builds:
       - yes
     prebuild: sed -i -e '/addSigningProps(cdv/d' build.gradle
 
-AllowedAPKSigningKeys: 7282c0675240b2b5716def5bffd5cdb6955401b02871e4a1f40458aadde2ca56
+  - versionName: 6.0.0
+    versionCode: 51
+    commit: 877b96ee12a258e4e356f84fac5c34b8007c896b
+    subdir: platforms/android/app
+    gradle:
+      - yes
+    srclibs:
+      - reproducible-apk-tools@v0.3.0
+    prebuild:
+      - sed -i -e '/addSigningProps(cdv/d' build.gradle
+      - cp src/main/assets/www/cordova.js src/main/assets/www/cordova_plugins.js /tmp/
+      - cp -a src/main/assets/www/plugins /tmp/cordova-plugins
+      - rm -rf src/main/assets/www
+      - cp -a ../../../www src/main/assets/
+      - mv /tmp/cordova.js /tmp/cordova_plugins.js src/main/assets/www/
+      - mv /tmp/cordova-plugins src/main/assets/www/plugins
+    scanignore:
+      - www/_next/static/media
+      - platforms/android/app/src/main/assets/www/_next/static/media
+    postbuild: $$reproducible-apk-tools$$/inplace-fix.py --zipalign fix-newlines $$OUT$$
+      'assets/www/*.html' 'assets/www/*/*.html' 'assets/www/*/*/*.html' 'assets/www/*/*/*/*.html'
+      'assets/www/*.txt' 'assets/www/*/*.txt' 'assets/www/*/*/*.txt' 'assets/www/*/*/*/*.txt'
+      'assets/www/manifest.webmanifest' 'assets/www/_next/static/chunks/*.js' 'assets/www/_next/static/chunks/*.css'
+      'assets/www/_next/static/*/*.js' 'assets/www/_next/static/*/*.json' 'assets/www/_next/static/media/*.svg'
+      'assets/www/brand/*.svg' 'assets/www/plugins/*/*.js'
+
+AllowedAPKSigningKeys: 90dcc62357308cee4dd62d24b150154272bab6c50b3056ca4f06c9bbc34aa74b
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags .*-f-droid
 UpdateCheckData: config.xml|android-versionCode="(\d+)"|.|<widget.*version="([^"]+)"
-CurrentVersion: 5.0.4
-CurrentVersionCode: 50
+CurrentVersion: 6.0.0
+CurrentVersionCode: 51
