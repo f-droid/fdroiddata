@@ -1,0 +1,123 @@
+AntiFeatures:
+  NonFreeNet:
+    en-US: The app streams audio and fetches program/EPG data through radiozeit's
+      proprietary backend services (stream, API and EPG endpoints), which are not
+      free software and are required for the app to work.
+  Tracking:
+    en-US: A pseudonymous, per-install identifier is sent in the X-App-User header
+      to the backend for aggregate usage analytics. No personal data is collected;
+      an opt-in variant is planned.
+Categories:
+  - Podcast
+  - Radio
+License: GPL-3.0-only
+AuthorName: mixd.tv
+AuthorWebSite: https://radiozeit.de
+WebSite: https://freies-radio.radiozeit.de
+SourceCode: https://github.com/mixdtv/freies-radio-app
+IssueTracker: https://github.com/mixdtv/freies-radio-app/issues
+
+RepoType: git
+Repo: https://github.com/mixdtv/freies-radio-app.git
+Binaries: 
+  https://github.com/mixdtv/freies-radio-app/releases/download/v%v/freiesradio-fdroid-%c.apk
+
+Builds:
+  - versionName: 1.0.3
+    versionCode: 211
+    commit: ff693d77a435837d8de79f5be524ba950066daac
+    output: build/app/outputs/flutter-apk/app-armeabi-v7a-fdroid-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+      - .env.example.json
+    prebuild:
+      - python3 scripts/prepare-fdroid-pubspec.py
+      - cp pubspec.lock.fdroid pubspec.lock
+      - cp lib/features/location/location_service_fdroid_stub.dart lib/features/location/location_service.dart
+      - flutterVersion=$(sed -n -E "s/.*flutter-version:\ '(.*)'/\1/p" .github/workflows/analyze.yml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --flavor fdroid --split-per-abi
+        --target-platform=android-arm --dart-define=API_KEY=fdroid-public-readonly
+        --dart-define=API_URL=https://api.freies-radio.radiozeit.de/ --dart-define=EPG_URL=https://epg.freies-radio.radiozeit.de/radio/epg/
+        --dart-define=USE_SOURCE_STREAM=true --dart-define=ENABLE_ARCHIVE_PLAYBACK=true
+        --dart-define=FORCE_HLS_STATIONS=alex
+
+  - versionName: 1.0.3
+    versionCode: 212
+    commit: ff693d77a435837d8de79f5be524ba950066daac
+    output: build/app/outputs/flutter-apk/app-arm64-v8a-fdroid-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+      - .env.example.json
+    prebuild:
+      - python3 scripts/prepare-fdroid-pubspec.py
+      - cp pubspec.lock.fdroid pubspec.lock
+      - cp lib/features/location/location_service_fdroid_stub.dart lib/features/location/location_service.dart
+      - flutterVersion=$(sed -n -E "s/.*flutter-version:\ '(.*)'/\1/p" .github/workflows/analyze.yml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --flavor fdroid --split-per-abi
+        --target-platform=android-arm64 --dart-define=API_KEY=fdroid-public-readonly
+        --dart-define=API_URL=https://api.freies-radio.radiozeit.de/ --dart-define=EPG_URL=https://epg.freies-radio.radiozeit.de/radio/epg/
+        --dart-define=USE_SOURCE_STREAM=true --dart-define=ENABLE_ARCHIVE_PLAYBACK=true
+        --dart-define=FORCE_HLS_STATIONS=alex
+
+  - versionName: 1.0.3
+    versionCode: 213
+    commit: ff693d77a435837d8de79f5be524ba950066daac
+    output: build/app/outputs/flutter-apk/app-x86_64-fdroid-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+      - .env.example.json
+    prebuild:
+      - python3 scripts/prepare-fdroid-pubspec.py
+      - cp pubspec.lock.fdroid pubspec.lock
+      - cp lib/features/location/location_service_fdroid_stub.dart lib/features/location/location_service.dart
+      - flutterVersion=$(sed -n -E "s/.*flutter-version:\ '(.*)'/\1/p" .github/workflows/analyze.yml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --flavor fdroid --split-per-abi
+        --target-platform=android-x64 --dart-define=API_KEY=fdroid-public-readonly
+        --dart-define=API_URL=https://api.freies-radio.radiozeit.de/ --dart-define=EPG_URL=https://epg.freies-radio.radiozeit.de/radio/epg/
+        --dart-define=USE_SOURCE_STREAM=true --dart-define=ENABLE_ARCHIVE_PLAYBACK=true
+        --dart-define=FORCE_HLS_STATIONS=alex
+
+AllowedAPKSigningKeys: 292117c4bc8117f718b983072fdd199d9441df974bd4467024e4b3c350774d48
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+VercodeOperation:
+  - '%c * 10 + 1'
+  - '%c * 10 + 2'
+  - '%c * 10 + 3'
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 1.0.3
+CurrentVersionCode: 213
