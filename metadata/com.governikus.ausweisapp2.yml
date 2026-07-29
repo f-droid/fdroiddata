@@ -1096,6 +1096,61 @@ Builds:
       - make apk
     ndk: 29.0.14206865
 
+  - versionName: 2.5.4
+    versionCode: 329
+    commit: 05f2f103e7b2319d09243adf05e005e3f55b68b2
+    timeout: 40000
+    sudo:
+      - apt-get update
+      - apt-get install -y build-essential ccache cmake g++ make maven ninja-build
+    output: build/dist/AusweisApp-$$VERSION$$-armeabi-v7a.apk
+    rm:
+      - test/fixture
+      - resources/packaging/macos
+    prebuild: sdkmanager "cmdline-tools;19.0" "build-tools;36.1.0" "platforms;android-36"
+    scandelete:
+      - resources/packaging/android/build.gradle.append.aar
+    build:
+      - export ANDROID_SDK_ROOT=$$SDK$$
+      - mkdir libs/build build
+      - cd libs/build
+      - cmake .. -DCMAKE_TOOLCHAIN_FILE=../../cmake/android.toolchain.cmake -DCMAKE_BUILD_TYPE=release
+      - make -j$(nproc)
+      - cd ../../build
+      - cmake .. -DCMAKE_TOOLCHAIN_FILE=../cmake/android.toolchain.cmake -DCMAKE_BUILD_TYPE=MinSizeRel
+        -DCMAKE_PREFIX_PATH=$(realpath ../libs/build/dist) -DANDROID_VERSION_CODE=$$VERCODE$$
+        -DVENDOR=F-Droid -DVENDOR_DOMAIN=f-droid.org
+      - make apk
+    ndk: 29.0.14206865
+
+  - versionName: 2.5.4
+    versionCode: 330
+    commit: 05f2f103e7b2319d09243adf05e005e3f55b68b2
+    timeout: 40000
+    sudo:
+      - apt-get update
+      - apt-get install -y build-essential ccache cmake g++ make maven ninja-build
+    output: build/dist/AusweisApp-$$VERSION$$-arm64-v8a.apk
+    rm:
+      - test/fixture
+      - resources/packaging/macos
+    prebuild: sdkmanager "cmdline-tools;19.0" "build-tools;36.1.0" "platforms;android-36"
+    scandelete:
+      - resources/packaging/android/build.gradle.append.aar
+    build:
+      - export ANDROID_SDK_ROOT=$$SDK$$
+      - mkdir libs/build build
+      - cd libs/build
+      - cmake .. -DCMAKE_TOOLCHAIN_FILE=../../cmake/android.toolchain.cmake -DCMAKE_BUILD_TYPE=release
+        -DCMAKE_ANDROID_ARCH_ABI=arm64-v8a
+      - make -j$(nproc)
+      - cd ../../build
+      - cmake .. -DCMAKE_TOOLCHAIN_FILE=../cmake/android.toolchain.cmake -DCMAKE_BUILD_TYPE=MinSizeRel
+        -DCMAKE_PREFIX_PATH=$(realpath ../libs/build/dist) -DANDROID_VERSION_CODE=$$VERCODE$$
+        -DVENDOR=F-Droid -DVENDOR_DOMAIN=f-droid.org -DCMAKE_ANDROID_ARCH_ABI=arm64-v8a
+      - make apk
+    ndk: 29.0.14206865
+
 AutoUpdateMode: Version %v
 UpdateCheckMode: HTTP
 VercodeOperation:
@@ -1103,5 +1158,5 @@ VercodeOperation:
   - 1 + %c
 UpdateCheckData: 
   https://appl.governikus-asp.de/ausweisapp2/apk/AusweisApp-armeabi-v7a.apk.dump|versionCode='(\d+)'|.|versionName='([\d.]+)'
-CurrentVersion: 2.5.1
-CurrentVersionCode: 306
+CurrentVersion: 2.5.4
+CurrentVersionCode: 330
