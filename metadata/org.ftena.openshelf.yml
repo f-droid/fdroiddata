@@ -49,10 +49,42 @@ Builds:
         $PUB_CACHE/hosted/pub.dev/flutter_tesseract_ocr-0.4.31/android/libs/tesseract4android-release.aar
       - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform="android-arm64"
 
+  - versionName: 1.1.1
+    versionCode: 2002
+    commit: 3bdb2c92909f97334fa0d46ac6688b8edb92a590
+    output: build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+    srclibs:
+      - flutter@stable
+      - tesseract4android@4.9.0
+    rm:
+      - ios
+      - linux
+      - macos
+      - web
+      - windows
+    prebuild:
+      - flutterVersion=$(sed -n -E "s/.*flutter-version:\ '(.*)'/\1/p" .github/workflows/release.yml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+    scandelete:
+      - .pub-cache
+    build:
+      - pushd $$tesseract4android$$/tesseract4android
+      - gradle assembleStandardRelease
+      - popd
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - cp 
+        $$tesseract4android$$/tesseract4android/build/outputs/aar/tesseract4android-standard-release.aar
+        $PUB_CACHE/hosted/pub.dev/flutter_tesseract_ocr-0.4.31/android/libs/tesseract4android-release.aar
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform="android-arm64"
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 VercodeOperation:
   - '%c + 2000'
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 1.0.0
-CurrentVersionCode: 2001
+CurrentVersion: 1.1.1
+CurrentVersionCode: 2002
