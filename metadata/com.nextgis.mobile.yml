@@ -353,7 +353,25 @@ Builds:
     scanignore:
       - app/src/main/res/raw/mapnik.zip
 
+  - versionName: 3.2.0
+    versionCode: 197
+    commit: 7152fa3ed054795e0f50923de787761a77b40a58
+    subdir: app
+    submodules: true
+    gradle:
+      - yes
+    prebuild:
+      - sed -i -e '/gms/d' -e 's/throw new GradleException/println/' -e 's/targetSdk7  Version/targetSdkVersion/'
+        {..,.}/build.gradle
+      - sed -i -e '/gms/d' -e '/getTracker() {/,/^    }/d' -e '/getTracker/d' -e '/setExceptionHandler()
+        {/,/^    }/d' -e '/setExceptionHandler/d' -e '/GoogleAnalytics/d' -e '/mTracker/d'
+        -e '/sendEvent/,/^    }/s/^        .*//' -e '/sendScreen/,/^    }/s/^        .*//'
+        src/main/java/com/nextgis/mobile/MainApplication.java
+      - sed -i -e 's/-XX:MaxPermSize=512m//' ../gradle.properties
+    scanignore:
+      - app/src/main/res/raw/mapnik.zip
+
 AutoUpdateMode: None
 UpdateCheckMode: RepoManifest
 CurrentVersion: 3.2.0
-CurrentVersionCode: 196
+CurrentVersionCode: 197
