@@ -301,10 +301,46 @@ Builds:
       - popd
       - mv $repo com.wangjinli.carvita
 
+  - versionName: 1.2.1
+    versionCode: 10
+    commit: 3113f1d675854bbe92d99a1aa8300c741a35f1ff
+    sudo:
+      - mkdir -p /home/runner/work/carvita
+      - chown -R vagrant /home/runner/
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@stable
+    prebuild:
+      - sed -i -e '/gradle.taskGraph.whenReady {/,/^}/d' android/app/build.gradle.kts
+      - flutterVersion=$(sed -n -E "s/.*flutter-version:\ *([0-9]+\.[0-9]+\.[0-9]+)/\1/p"
+        .github/workflows/flutter.yml | head -n 1)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export repo=/home/runner/work/carvita/carvita
+      - cd ..
+      - mv com.wangjinli.carvita $repo
+      - pushd $repo
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - popd
+      - mv $repo com.wangjinli.carvita
+    scandelete:
+      - .pub-cache
+    build:
+      - export repo=/home/runner/work/carvita/carvita
+      - cd ..
+      - mv com.wangjinli.carvita $repo
+      - pushd $repo
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk
+      - popd
+      - mv $repo com.wangjinli.carvita
+
 AllowedAPKSigningKeys: fa873f425f12eafff33632c533340263e41147a7c3302559f58c32dd96391ef8
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v.*$
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 1.2.0
-CurrentVersionCode: 9
+CurrentVersion: 1.2.1
+CurrentVersionCode: 10
