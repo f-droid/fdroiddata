@@ -1,0 +1,56 @@
+Categories:
+  - Text to Speech
+License: GPL-3.0-only
+AuthorName: Luke Howson
+AuthorEmail: libretastic@gmail.com
+AuthorWebSite: https://libretastic.github.io/
+WebSite: https://libretastic.github.io/
+SourceCode: https://github.com/libretastic/libreaac-android
+IssueTracker: https://github.com/libretastic/libreaac-android/issues
+
+AutoName: LibreAAC
+
+RepoType: git
+Repo: https://github.com/libretastic/libreaac-android.git
+Binaries: 
+  https://github.com/libretastic/libreaac-android/releases/download/v%v/app-release.apk
+
+Builds:
+  - versionName: 0.1.13
+    versionCode: 14
+    commit: 7799eaf0c4a9682fb48e67da95af4550f3babdce
+    subdir: app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y nodejs npm
+    gradle:
+      - yes
+    rm:
+      - app/src/main/assets
+    build:
+      - pushd ../upstream/libreaac
+      - npm ci
+      - npm run build
+      - popd
+      - ../scripts/sync-frontend.sh ../upstream/libreaac/dist $(git -C ../upstream/libreaac
+        rev-parse HEAD)
+    gradleprops:
+      - libreaacReleaseSigningEnabled=false
+      - libreaacBundledOpenboardsRequired=true
+      - libreaacBundledOpenboardsDelivery=base
+
+AllowedAPKSigningKeys: aad2f12a9125a9f2f97b0070cb6b2dfd10b26ed989a84b4f12ff99bee66e52ba
+
+MaintainerNotes: |-
+  The Android repository contains a pinned compiled frontend for ordinary
+  builds. F-Droid removes it and rebuilds it from the pinned public submodule.
+
+  Release tags pin both the frontend and reviewed openboards revisions as Git
+  submodules. Auto-generated build entries therefore retain the exact external
+  source revisions without separate srclib updates.
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: 0.1.13
+CurrentVersionCode: 14
