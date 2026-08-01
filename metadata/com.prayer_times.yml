@@ -1,0 +1,67 @@
+AntiFeatures:
+  NonFreeNet:
+    en-US: Prayer times from AlAdhan, whose server code is not published.
+  TetheredNet:
+    en-US: Optional features rely on fixed services (AlAdhan, Nominatim).
+Categories:
+  - Religion
+License: AGPL-3.0-or-later
+AuthorName: Hassan El Ghamri
+AuthorEmail: mihrab@elghamri.se
+SourceCode: https://github.com/Hassan-PS/Mihrab
+IssueTracker: https://github.com/Hassan-PS/Mihrab/issues
+Changelog: https://github.com/Hassan-PS/Mihrab/blob/HEAD/CHANGELOG.md
+
+AutoName: Mihrab
+
+RepoType: git
+Repo: https://github.com/Hassan-PS/Mihrab
+
+Builds:
+  - versionName: 2.8.3
+    versionCode: 231
+    commit: 16048cb942ee160518c95fb1d59bc3c1d91af7a7
+    subdir: android/app
+    sudo:
+      - apt-get update
+      - apt-get install -y npm
+    gradle:
+      - fdroid
+    prebuild:
+      - sed -i 's/SdkVersion = 37/SdkVersion = 36/' ../build.gradle
+      - sed -i 's/"37.0.0"/"36.0.0"/' ../build.gradle
+      - cd ../..
+      - npm ci --omit=optional --omit=dev --ignore-scripts --loglevel=error
+      - npm i --no-save --ignore-scripts --loglevel=error patch-package
+      - node node_modules/.bin/patch-package
+      - find node_modules/@react-native/gradle-plugin -name build.gradle.kts -exec
+        sed -i '/jvmToolchain/d' {} \;
+      - sed -i '/billing\|play-services\|amazon-appstore/d' node_modules/react-native-iap/android/build.gradle
+    scanignore:
+      - node_modules/@notifee/react-native/android/build.gradle
+      - node_modules/@notifee/react-native/android/libs
+      - node_modules/@react-native-async-storage/async-storage/android/build.gradle
+      - node_modules/@react-native-community/blur/android/build.gradle
+      - node_modules/@react-native-community/geolocation/android/build.gradle
+      - node_modules/@react-native-community/netinfo/android/build.gradle
+      - node_modules/react-native-blob-util/android/build.gradle
+      - node_modules/react-native-color-matrix-image-filters/android/build.gradle
+      - node_modules/react-native-encrypted-storage/android/build.gradle
+      - node_modules/react-native-safe-area-context/android/build.gradle
+      - node_modules/react-native-screens/android/build.gradle
+      - node_modules/react-native-share/android/build.gradle
+      - node_modules/react-native-svg/android/build.gradle
+      - node_modules/react-native-track-player/android/build.gradle
+      - node_modules/react-native-view-shot/android/build.gradle
+      - node_modules/react-native/ReactAndroid/publish.gradle
+      - node_modules/hermes-compiler/hermesc/linux64-bin/hermesc
+    scandelete:
+      - node_modules
+    ndk: 27.1.12297006
+    gradleprops:
+      - reactNativeArchitectures=arm64-v8a
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: 2.8.3
+CurrentVersionCode: 231
