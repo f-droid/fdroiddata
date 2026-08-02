@@ -1867,8 +1867,44 @@ Builds:
       - $$flutter$$/bin/flutter build apk --flavor fdroid
     ndk: r28c
 
+  - versionName: 2.6.0
+    versionCode: 990
+    commit: 389eb72e84ed283637edd684dea73a5c267670a3
+    output: build/app/outputs/flutter-apk/app-fdroid-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+      - linux
+      - macos
+      - test
+      - web
+      - windows
+    prebuild:
+      - sed -i -e 's|artifact.bytedance.com/repository/pangle|maven.google.com|' android/build.gradle.kts
+      - sed -i -e 's/compileSdk = 37/compileSdk { version = release(37) { minorApiLevel
+        = 0 } }/' android/app/build.gradle.kts
+      - sed -i -e 's/8.12.1/8.13.2/' android/settings.gradle.kts
+      - flutterVersion=$(sed -n -E "s/^\s*flutter:\ (.*)/\1/p" pubspec.yaml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - sdkmanager 'cmake;3.10.2.4988404'
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/dart scripts/patch_before_build.dart fdroid
+      - sed -i -e '/flutter_gromore_ads/,/version:/d' pubspec.lock
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - sed -i -e 's/compileSdk = 37/compileSdk { version = release(37) { minorApiLevel
+        = 0 } }/' $PUB_CACHE/hosted/pub.dev/permission_handler_android-*/android/build.gradle.kts
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --flavor fdroid
+    ndk: r28c
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v[\d.]+
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 2.5.27
-CurrentVersionCode: 989
+CurrentVersion: 2.6.0
+CurrentVersionCode: 990
