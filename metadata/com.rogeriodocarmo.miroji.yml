@@ -1,0 +1,52 @@
+Categories:
+  - Camera
+License: MIT
+AuthorName: Rogério do Carmo
+SourceCode: https://github.com/RogerioDoCarmo/mirror_app
+IssueTracker: https://github.com/RogerioDoCarmo/mirror_app/issues
+Changelog: https://github.com/RogerioDoCarmo/mirror_app/releases
+
+AutoName: Miroji
+
+RepoType: git
+Repo: https://github.com/RogerioDoCarmo/mirror_app-android.git
+
+Builds:
+  - versionName: 1.3.3
+    versionCode: 10303
+    commit: 627090c531c2044fc0d66fe8b377fe0d40f01271
+    subdir: android/app
+    sudo:
+      - apt-get update
+      - apt-get install -y nodejs npm
+      - npm install -g pnpm@10
+    init:
+      - cd ../..
+      - pnpm install --frozen-lockfile
+      - pnpm remove expo-dev-client
+      - patch -p1 -d node_modules/expo-camera/android < patches/expo-camera-remove-google-mlkit.patch
+    gradle:
+      - yes
+    prebuild:
+      - cd ../..
+      - sed -i '/jvmToolchain\|JavaVersion/s/17/21/' node_modules/@react-native/gradle-plugin/*/build.gradle.kts
+        node_modules/@react-native/gradle-plugin/react-native-gradle-plugin/src/main/kotlin/com/facebook/react/utils/JdkConfiguratorUtils.kt
+      - sed -i '/jvmTarget/s/17/21/' node_modules/@react-native-community/datetimepicker/android/build.gradle
+        node_modules/react-native-worklets/android/build.gradle
+      - sed -i 's/^reactNativeArchitectures=.*/reactNativeArchitectures=armeabi-v7a,arm64-v8a/'
+        android/gradle.properties
+      - sed -i 's/^expo.useLegacyPackaging=.*/expo.useLegacyPackaging=true/' android/gradle.properties
+    scanignore:
+      - node_modules/react-native/sdks/hermesc/linux64-bin
+      - node_modules/expo-modules-core/android/ExpoModulesCorePlugin.gradle
+      - node_modules/expo-modules-autolinking/scripts/android/autolinking_implementation.gradle
+      - node_modules/react-native/ReactAndroid/publish.gradle
+      - node_modules/react-native-safe-area-context/android/build.gradle
+    scandelete:
+      - node_modules
+    ndk: 27.1.12297006
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: 1.3.3
+CurrentVersionCode: 10303
