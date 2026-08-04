@@ -44,9 +44,37 @@ Builds:
       - ./java/build_jni.sh android-arm64 android-arm
     ndk: 26.1.10909125
 
+  - versionName: '2.3'
+    versionCode: 8
+    commit: 46c3eb61c382caa5de53dea5b64c49594e040050
+    subdir: android/app
+    sudo:
+      - apt-get update
+      - apt-get install -y rustup cmake build-essential clang libclang-dev
+      - apt-get install -y protobuf-compiler libprotobuf-dev
+    gradle:
+      - yes
+    prebuild:
+      - cd ../..
+      - ./scripts/setup-libsignal.sh
+      - cd ThirdParty/libsignal
+      - rustup target add aarch64-linux-android armv7-linux-androideabi
+    scandelete:
+      - ThirdParty/ObjectivePGP
+      - ThirdParty/libsignal/rust/attest/fuzz/seeds
+    build:
+      - export PROTOC=/usr/bin/protoc
+      - cd ../../ThirdParty/libsignal
+      - export SOURCE_DATE_EPOCH=$(git log -1 --pretty=%ct)
+      - export CFLAGS="-ffile-prefix-map=$PWD=."
+      - export CXXFLAGS="-ffile-prefix-map=$PWD=."
+      - export RUSTFLAGS="-C link-arg=-Wl,--build-id=none"
+      - ./java/build_jni.sh android-arm64 android-arm
+    ndk: 26.1.10909125
+
 AllowedAPKSigningKeys: 6470246992edc4a44478d40cb84fcb2bb08138162794c4ae951f5d4b8faf8e54
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 2.1.1
-CurrentVersionCode: 6
+CurrentVersion: '2.3'
+CurrentVersionCode: 8
