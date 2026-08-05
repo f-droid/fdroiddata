@@ -1,0 +1,56 @@
+Categories:
+  - Multimedia
+  - Music Practice Tool
+License: MIT
+AuthorName: Eric Blum
+SourceCode: https://github.com/Safrone/track-exploder
+IssueTracker: https://github.com/Safrone/track-exploder/issues
+Changelog: https://github.com/Safrone/track-exploder/blob/HEAD/CHANGELOG.md
+Donate: https://ko-fi.com/safrone
+
+AutoName: Track Exploder
+
+RepoType: git
+Repo: https://github.com/Safrone/track-exploder.git
+Binaries: 
+  https://github.com/Safrone/track-exploder/releases/download/v%v/Track-Exploder_v%v_android-arm64.apk
+
+Builds:
+  - versionName: 1.1.15
+    versionCode: 1001015
+    commit: 716cf4b7a4db07e06f6c28c7f3f23445f1e15e18
+    sudo:
+      - apt-get update
+      - apt-get install -y build-essential libclang-dev libssl-dev npm pkg-config
+        rustup
+    output: 
+      src-tauri/gen/android/app/build/outputs/apk/universal/release/app-universal-release-unsigned.apk
+    prebuild:
+      - rustup default 1.97.0
+      - rustup target add aarch64-linux-android
+      - export PATH="$HOME/.cargo/bin:$PATH"
+      - cargo install tauri-cli@2.11.4 --locked
+      - export NDK_HOME=$$NDK$$
+      - cargo tauri android init
+      - cp -rf src-tauri/icons/android/mipmap-* src-tauri/gen/android/app/src/main/res/
+      - cp -f src-tauri/icons/android/values/ic_launcher_background.xml src-tauri/gen/android/app/src/main/res/values/
+      - python3 .github/scripts/patch-android-signing.py --no-signing
+    build:
+      - export PATH="$HOME/.cargo/bin:$PATH"
+      - export NDK_HOME=$$NDK$$
+      - export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+      - export LIBCLANG_PATH=$(dirname $(find /usr/lib -maxdepth 3 -name 'libclang-*.so*'
+        -print -quit))
+      - export RUSTFLAGS=$(.github/scripts/android-release-rustflags.sh)
+      - npm ci
+      - cargo tauri android build --apk --target aarch64 --features mp3
+    ndk: r27c
+
+AllowedAPKSigningKeys: 112dd506bae62cc9fcf0c8e11f01d4b4fd9b9a325e8700986697307a8aa0a37d
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^v[\d.]+$
+UpdateCheckData: 
+  src-tauri/tauri.conf.json|"versionCode":\s*(\d+)|src-tauri/tauri.conf.json|"version":\s*"([\d.]+)"
+CurrentVersion: 1.1.15
+CurrentVersionCode: 1001015
