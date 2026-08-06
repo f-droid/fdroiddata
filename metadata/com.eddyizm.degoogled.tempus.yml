@@ -68,9 +68,58 @@ Builds:
       - cd ..
     ndk: 29.0.14206865
 
+  - versionName: 4.23.2
+    versionCode: 41
+    commit: a3e6a661e5d12f271322be1bd1f6f6f3eaf1ac50
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y make ninja-build cmake nasm zip
+    gradle:
+      - degoogled
+    srclibs:
+      - media-moneytoo@1.9.2
+      - FFmpeg@bda1c6f1f9041910ec5b2c279a08861203a1c95c
+    prebuild: sed -i -e '/foojay/d' ../settings.gradle
+    scandelete:
+      - libs/
+    build:
+      - export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+      - mkdir -p ../libs
+      - export ROOT_LIBS_DIR="$(realpath ../libs)"
+      - export FFMPEG_EXT_PATH="$$media-moneytoo$$/libraries/decoder_ffmpeg/src/main"
+      - export HOST_PLATFORM="$(uname -s | tr '[:upper:]' '[:lower:]')-x86_64"
+      - export ANDROID_ABI=24
+      - export ENABLED_DECODERS=(alac)
+      - pushd "${FFMPEG_EXT_PATH}/jni"
+      - ln -sf "$$FFmpeg$$" ffmpeg
+      - sed -i 's/^LDFLAGS="/LDFLAGS="-Wl,--build-id=none /' $$media-moneytoo$$/libraries/decoder_ffmpeg/src/main/jni/build_ffmpeg.sh
+      - export CFLAGS="-fno-ident -ffile-prefix-map=${PWD}=. -fdebug-prefix-map=${PWD}=.
+        -Wl,--build-id=none"
+      - export LDFLAGS="-Wl,--build-id=none"
+      - export SOURCE_DATE_EPOCH=0
+      - export ARFLAGS="rcsD"
+      - ./build_ffmpeg.sh "${FFMPEG_EXT_PATH}" "$$NDK$$" "${HOST_PLATFORM}" "${ANDROID_ABI}"
+        "${ENABLED_DECODERS[@]}"
+      - popd
+      - cd "$$media-moneytoo$$"
+      - ./gradlew :lib-decoder-ffmpeg:bundleReleaseAar
+      - mkdir -p /tmp/aar_strip
+      - cp libraries/decoder_ffmpeg/buildout/outputs/aar/lib-decoder-ffmpeg-release.aar
+        /tmp/aar_strip/
+      - cd /tmp/aar_strip
+      - unzip -q lib-decoder-ffmpeg-release.aar
+      - rm lib-decoder-ffmpeg-release.aar
+      - find . -name "*.so" -exec "$$NDK$$/toolchains/llvm/prebuilt/${HOST_PLATFORM}/bin/llvm-strip"
+        --remove-section=.note.gnu.build-id {} \;
+      - zip -q -X -r "${ROOT_LIBS_DIR}/lib-decoder-ffmpeg-release.aar" *
+      - rm -rf /tmp/aar_strip
+      - cd ..
+    ndk: 29.0.14206865
+
 AllowedAPKSigningKeys: b78501b934d04e0aca8d94afd6726a4d1dce65797f1d41710f643c2900eb1d1d
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v[\d.]+$
-CurrentVersion: 4.22.2
-CurrentVersionCode: 38
+CurrentVersion: 4.23.2
+CurrentVersionCode: 41
