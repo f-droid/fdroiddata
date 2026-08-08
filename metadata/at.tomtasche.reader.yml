@@ -576,8 +576,40 @@ Builds:
         ui/*/*.java ui/*.java; done
     ndk: r28b
 
-AutoUpdateMode: Version
-UpdateCheckMode: Tags
-UpdateCheckData: app/src/main/AndroidManifest.xml|versionCode="(\d+)|.|versionName="([\d.]+)
-CurrentVersion: '4.3'
-CurrentVersionCode: 199
+  - versionName: 4.13.0
+    versionCode: 41300
+    commit: v4.13.0
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y build-essential ccache cmake ninja-build pkgconf pipx python3
+      - PIPX_HOME=/opt/pipx PIPX_BIN_DIR=/usr/local/bin pipx install conan
+    patch:
+      - foss-4.13.0.patch
+    gradle:
+      - pro
+    srclibs:
+      - OpenDocument.core@v6.2.0
+      - conan-odr-index@0e10e964501bc2a3478137936902bb82a1c6ed61
+    prebuild:
+      - conan remote remove "*"
+      - conan remote add conancenter https://center2.conan.io
+      - conan profile detect
+      - conan export $$conan-odr-index$$/recipes/argon2/20190702/conanfile.py --version
+        20190702-odr
+      - core=$(sed -n 's/^odrCore = "\(.*\)"/\1/p' ../gradle/libs.versions.toml)
+      - pushd $$OpenDocument.core$$
+      - git fetch --tags origin
+      - git checkout "v$core"
+      - popd
+      - pushd $$OpenDocument.core$$/android
+      - gradle publishToMavenLocal -Podr.version="$core"
+      - popd
+      - version=$(git tag --points-at HEAD | grep -m1 -E '^v[0-9]+\.[0-9]+\.[0-9]+$')
+      - echo "odr.version=$version" >> ../gradle.properties
+    ndk: 28.1.13356709
+
+AutoUpdateMode: None
+UpdateCheckMode: None
+CurrentVersion: 4.13.0
+CurrentVersionCode: 41300

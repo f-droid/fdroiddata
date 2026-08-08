@@ -1,0 +1,388 @@
+diff --git a/app/build.gradle b/app/build.gradle
+index c410105a..53690dc3 100644
+--- a/app/build.gradle
++++ b/app/build.gradle
+@@ -123,8 +123,8 @@ android {
+         }
+ 
+         pro {
+-            applicationIdSuffix = ".pro"
+-            versionNameSuffix = "-pro"
++            // no suffix here: f-droid publishes this build under at.tomtasche.reader,
++            // the identity its listing has always had
+ 
+             if (hasReleaseSigning) {
+                 signingConfig = signingConfigs.releasePro
+@@ -189,10 +189,6 @@ dependencies {
+     // could. Nothing here has to be extracted or wired up at runtime any more.
+     implementation libs.odr.core.android
+ 
+-    implementation libs.play.services.ads
+-    implementation libs.play.review
+-    implementation libs.user.messaging.platform
+-
+     implementation libs.androidx.appcompat
+     implementation libs.androidx.core
+     implementation libs.material
+diff --git a/app/src/main/AndroidManifest.xml b/app/src/main/AndroidManifest.xml
+index 9ccf13c7..5d368295 100644
+--- a/app/src/main/AndroidManifest.xml
++++ b/app/src/main/AndroidManifest.xml
+@@ -55,13 +55,6 @@
+             android:enabled="true"
+             android:exported="false" />
+ 
+-        <meta-data
+-            android:name="com.google.android.gms.version"
+-            android:value="@integer/google_play_services_version" />
+-        <meta-data
+-            android:name="com.google.android.gms.ads.APPLICATION_ID"
+-            android:value="ca-app-pub-8161473686436957~9025061963" />
+-
+         <!--
+              every component name below deliberately keeps its historical
+              at.tomtasche.reader.* spelling even though the java package is now
+@@ -930,11 +923,6 @@
+             </intent-filter>
+         </activity-alias>
+ 
+-        <activity
+-            android:name="com.google.android.gms.ads.AdActivity"
+-            android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
+-            tools:replace="android:theme" />
+-
+         <provider
+             android:name="androidx.core.content.FileProvider"
+             android:authorities="${applicationId}.provider"
+diff --git a/app/src/main/java/app/opendocument/droid/background/LoaderService.kt b/app/src/main/java/app/opendocument/droid/background/LoaderService.kt
+index 2362011e..c157b504 100644
+--- a/app/src/main/java/app/opendocument/droid/background/LoaderService.kt
++++ b/app/src/main/java/app/opendocument/droid/background/LoaderService.kt
+@@ -13,8 +13,6 @@ import app.opendocument.droid.nonfree.AnalyticsConstants
+ import app.opendocument.droid.nonfree.AnalyticsManager
+ import app.opendocument.droid.nonfree.CrashManager
+ import app.opendocument.droid.ui.activity.DocumentFragment
+-import com.google.android.gms.common.ConnectionResult
+-import com.google.android.gms.common.GoogleApiAvailability
+ import java.io.File
+ 
+ /**
+@@ -82,15 +80,8 @@ class LoaderService : Service(), FileLoader.FileLoaderListener {
+ 
+     // copied from MainActivity, consider how to deduplicate
+     private fun initializeProprietaryLibraries() {
+-        var useProprietaryLibraries = !resources.getBoolean(R.bool.DISABLE_TRACKING)
+-
+-        if (useProprietaryLibraries) {
+-            val googleApi = GoogleApiAvailability.getInstance()
+-            val googleAvailability = googleApi.isGooglePlayServicesAvailable(this)
+-            if (googleAvailability != ConnectionResult.SUCCESS) {
+-                useProprietaryLibraries = false
+-            }
+-        }
++        // nothing proprietary is linked in, so there are no play services to probe for
++        val useProprietaryLibraries = !resources.getBoolean(R.bool.DISABLE_TRACKING)
+ 
+         crashManager = CrashManager()
+         crashManager.setEnabled(useProprietaryLibraries)
+diff --git a/app/src/main/java/app/opendocument/droid/nonfree/AdManager.kt b/app/src/main/java/app/opendocument/droid/nonfree/AdManager.kt
+index 2bee420b..a0ea19f1 100644
+--- a/app/src/main/java/app/opendocument/droid/nonfree/AdManager.kt
++++ b/app/src/main/java/app/opendocument/droid/nonfree/AdManager.kt
+@@ -1,180 +1,27 @@
+ package app.opendocument.droid.nonfree
+ 
+ import android.app.Activity
+-import android.view.View
+ import android.widget.LinearLayout
+-import com.google.android.gms.ads.AdRequest
+-import com.google.android.gms.ads.AdSize
+-import com.google.android.gms.ads.AdView
+-import com.google.android.gms.ads.MobileAds
+-import com.google.android.gms.ads.RequestConfiguration
+-import com.google.android.ump.ConsentRequestParameters
+-import com.google.android.ump.FormError
+-import com.google.android.ump.UserMessagingPlatform
+ 
+-/** The banner in the lite flavor, behind the consent form the ump sdk puts in front of it. */
++/**
++ * The banner, with the admob and ump sdks taken out. A build that ships no ads still carries the
++ * call sites, so every method stays and does nothing.
++ */
+ class AdManager {
+ 
+-    private var enabled = false
+-
+-    private lateinit var activity: Activity
+-    private lateinit var crashManager: CrashManager
+-    private lateinit var analyticsManager: AnalyticsManager
+-    private lateinit var adContainer: LinearLayout
+-    private var adView: AdView? = null
+-
+     fun initialize(
+         activity: Activity,
+         analyticsManager: AnalyticsManager,
+         crashManager: CrashManager,
+-    ) {
+-        if (!enabled) {
+-            return
+-        }
+-
+-        this.activity = activity
+-        this.crashManager = crashManager
+-        this.analyticsManager = analyticsManager
+-
+-        try {
+-            MobileAds.initialize(activity)
+-        } catch (e: Throwable) {
+-            // java.lang.VerifyError: com/google/android/gms/ads/internal/ClientApi
+-            crashManager.log(e)
+-
+-            enabled = false
+-        }
+-
+-        val configuration =
+-            RequestConfiguration.Builder().setTestDeviceIds(listOf(TEST_DEVICE_ID)).build()
+-        MobileAds.setRequestConfiguration(configuration)
+-    }
+-
+-    fun setEnabled(enabled: Boolean) {
+-        this.enabled = enabled
+-    }
+-
+-    fun setAdContainer(adContainer: LinearLayout) {
+-        this.adContainer = adContainer
+-    }
+-
+-    private fun showAds(adView: AdView) {
+-        if (!enabled) {
+-            return
+-        }
+-
+-        this.adView = adView
+-
+-        adContainer.removeAllViews()
+-
+-        val params =
+-            LinearLayout.LayoutParams(
+-                LinearLayout.LayoutParams.MATCH_PARENT,
+-                LinearLayout.LayoutParams.MATCH_PARENT,
+-            )
+-        adContainer.addView(adView, params)
+-
+-        adContainer.visibility = View.VISIBLE
+-    }
+-
+-    private fun hideGoogleAds() {
+-        activity.runOnUiThread { adContainer.visibility = View.GONE }
+-    }
+-
+-    fun showGoogleAds() {
+-        if (!enabled) {
+-            return
+-        }
+-
+-        val params = ConsentRequestParameters.Builder().setTagForUnderAgeOfConsent(false).build()
+-
+-        val consentInformation = UserMessagingPlatform.getConsentInformation(activity)
+-        consentInformation.requestConsentInfoUpdate(
+-            activity,
+-            params,
+-            {
+-                UserMessagingPlatform.loadAndShowConsentFormIfRequired(activity) { loadAndShowError
+-                    ->
+-                    if (loadAndShowError != null || !consentInformation.canRequestAds()) {
+-                        // without this the banner just silently stays hidden,
+-                        // and the ump sdk only logs an unspecific "Error
+-                        // making request."
+-                        crashManager.log(
+-                            "consent form failed: " +
+-                                describe(loadAndShowError) +
+-                                ", canRequestAds=" +
+-                                consentInformation.canRequestAds()
+-                        )
+-
+-                        hideGoogleAds()
+-
+-                        return@loadAndShowConsentFormIfRequired
+-                    }
+-
+-                    activity.runOnUiThread { showAdaptiveBanner() }
+-                }
+-            },
+-            { requestConsentError ->
+-                // fires for the mundane offline case too - a device that was asleep
+-                // times out against fundingchoicesmessages.google.com
+-                crashManager.log("consent info update failed: " + describe(requestConsentError))
+-
+-                hideGoogleAds()
+-            },
+-        )
+-    }
+-
+-    // https://developers.google.com/admob/android/banner/adaptive
+-    // the anchored adaptive size is deprecated in favour of the inline one, which sizes the
+-    // banner differently - a change to make on its own rather than in passing
+-    @Suppress("DEPRECATION")
+-    private fun showAdaptiveBanner() {
+-        val adView = AdView(activity)
+-
+-        // WindowManager.getDefaultDisplay() is deprecated and its replacement needs API
+-        // 30; the resources' metrics carry the same width and density.
+-        val metrics = activity.resources.displayMetrics
+-        val adWidth = (metrics.widthPixels / metrics.density).toInt()
+-
+-        adView.setAdSize(
+-            AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(activity, adWidth)
+-        )
+-        adView.adUnitId = AD_UNIT_ID
+-        adView.loadAd(AdRequest.Builder().build())
+-
+-        showAds(adView)
+-    }
+-
+-    fun removeAds() {
+-        enabled = false
+-
+-        hideGoogleAds()
+-    }
++    ) {}
+ 
+-    fun destroyAds() {
+-        try {
+-            // keeps throwing exceptions for some users:
+-            // Caused by: java.lang.NullPointerException
+-            // android.webkit.WebViewClassic.requestFocus(WebViewClassic.java:9898)
+-            // android.webkit.WebView.requestFocus(WebView.java:2133)
+-            // android.view.ViewGroup.onRequestFocusInDescendants(ViewGroup.java:2384)
+-            adView?.destroy()
+-        } catch (e: Exception) {
+-            crashManager.log(e)
+-        }
+-    }
++    fun setEnabled(enabled: Boolean) {}
+ 
+-    private companion object {
+-        const val AD_UNIT_ID = "ca-app-pub-8161473686436957/5931994762"
++    fun setAdContainer(adContainer: LinearLayout) {}
+ 
+-        const val TEST_DEVICE_ID = "46C05048B04145D0724C1ADA7FC17619"
++    fun showGoogleAds() {}
+ 
+-        fun describe(error: FormError?): String {
+-            if (error == null) {
+-                return "no error"
+-            }
++    fun removeAds() {}
+ 
+-            return error.errorCode.toString() + "/" + error.message
+-        }
+-    }
++    fun destroyAds() {}
+ }
+diff --git a/app/src/main/java/app/opendocument/droid/nonfree/InAppReview.kt b/app/src/main/java/app/opendocument/droid/nonfree/InAppReview.kt
+index 63180e16..0705aa6d 100644
+--- a/app/src/main/java/app/opendocument/droid/nonfree/InAppReview.kt
++++ b/app/src/main/java/app/opendocument/droid/nonfree/InAppReview.kt
+@@ -1,47 +1,12 @@
+ package app.opendocument.droid.nonfree
+ 
+ import android.app.Activity
+-import com.google.android.play.core.review.ReviewManagerFactory
+ 
+ /**
+- * The play in-app review sheet.
+- *
+- * Play decides from an undocumented per-user quota whether the sheet appears at all, and the
+- * completion listener fires the same way either way. The analytics events below are the only
+- * visibility there is.
++ * The play in-app review sheet, with play core taken out. There is no store to ask on a build
++ * that did not come from play, so the ask is gone rather than replaced.
+  */
+ object InAppReview {
+ 
+-    /**
+-     * Opens before the first ask - a fresh install has nothing to say yet, and asking costs stars.
+-     */
+-    const val MINIMUM_OPENS: Int = 3
+-
+-    fun requestIfEarned(activity: Activity, analyticsManager: AnalyticsManager, opens: Int) {
+-        if (opens < MINIMUM_OPENS) {
+-            return
+-        }
+-
+-        request(activity, analyticsManager)
+-    }
+-
+-    fun request(activity: Activity, analyticsManager: AnalyticsManager) {
+-        analyticsManager.report("in_app_review_eligible")
+-
+-        val manager = ReviewManagerFactory.create(activity)
+-        manager.requestReviewFlow().addOnCompleteListener { reviewInfoTask ->
+-            if (!reviewInfoTask.isSuccessful) {
+-                // usually an install that did not come from play, so there is no store to ask
+-                analyticsManager.report("in_app_review_error")
+-
+-                return@addOnCompleteListener
+-            }
+-
+-            analyticsManager.report("in_app_review_start")
+-
+-            manager.launchReviewFlow(activity, reviewInfoTask.result).addOnCompleteListener {
+-                analyticsManager.report("in_app_review_done")
+-            }
+-        }
+-    }
++    fun requestIfEarned(activity: Activity, analyticsManager: AnalyticsManager, opens: Int) {}
+ }
+diff --git a/app/src/main/java/app/opendocument/droid/ui/activity/MainActivity.kt b/app/src/main/java/app/opendocument/droid/ui/activity/MainActivity.kt
+index 06fdd978..a7a38dd7 100644
+--- a/app/src/main/java/app/opendocument/droid/ui/activity/MainActivity.kt
++++ b/app/src/main/java/app/opendocument/droid/ui/activity/MainActivity.kt
+@@ -48,8 +48,6 @@ import app.opendocument.droid.ui.OpenFileIdling
+ import app.opendocument.droid.ui.SnackbarHelper
+ import app.opendocument.droid.ui.TtsActionModeCallback
+ import app.opendocument.droid.ui.widget.RecentDocumentDialogFragment
+-import com.google.android.gms.common.ConnectionResult
+-import com.google.android.gms.common.GoogleApiAvailability
+ 
+ class MainActivity : AppCompatActivity(), MenuProvider {
+ 
+@@ -355,16 +353,8 @@ class MainActivity : AppCompatActivity(), MenuProvider {
+     }
+ 
+     private fun initializeProprietaryLibraries() {
+-        var useProprietaryLibraries = !resources.getBoolean(R.bool.DISABLE_TRACKING)
+-
+-        if (useProprietaryLibraries) {
+-            val googleApi = GoogleApiAvailability.getInstance()
+-            val googleAvailability = googleApi.isGooglePlayServicesAvailable(this)
+-            if (googleAvailability != ConnectionResult.SUCCESS) {
+-                useProprietaryLibraries = false
+-                googleApi.getErrorDialog(this, googleAvailability, GOOGLE_REQUEST_CODE)?.show()
+-            }
+-        }
++        // nothing proprietary is linked in, so there are no play services to probe for
++        val useProprietaryLibraries = !resources.getBoolean(R.bool.DISABLE_TRACKING)
+ 
+         crashManager = CrashManager()
+         crashManager.setEnabled(useProprietaryLibraries)
+diff --git a/settings.gradle b/settings.gradle
+index b754d6b5..ef443e1d 100644
+--- a/settings.gradle
++++ b/settings.gradle
+@@ -13,6 +13,14 @@ pluginManagement {
+ // for a public artifact, which no clean source builder such as f-droid can supply.
+ dependencyResolutionManagement {
+     repositories {
++        // f-droid builds odr-core-android from OpenDocument.core into the local maven
++        // repository and takes it from there. exclusively: without the filter a version
++        // that has not been built locally would silently resolve to the prebuilt AAR on
++        // maven central, and a source-only build would quietly stop being one
++        exclusiveContent {
++            forRepository { mavenLocal() }
++            filter { includeModule("app.opendocument", "odr-core-android") }
++        }
+         google()
+         mavenCentral()
+     }
