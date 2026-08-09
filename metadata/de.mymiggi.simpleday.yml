@@ -146,6 +146,141 @@ Builds:
       - gradle assembleRelease
     ndk: 27.1.12297006
 
+  - versionName: 1.4.0
+    versionCode: 8001
+    commit: 3d2d34bf2467f650be2d5255f82d19bc6899e2dd
+    sudo:
+      - echo "deb https://deb.debian.org/debian forky main" > /etc/apt/sources.list.d/forky.list
+      - apt-get update
+      - apt-get install -y -t forky npm
+    output: android/app/build/outputs/apk/release/app-release-unsigned.apk
+    srclibs:
+      - firebase-stub@ce90a956aacda17a85c60577ee443aeb83d876ef
+    prebuild:
+      - sed -i -e '1a "expo":{"autolinking":{"android":{"buildFromSource":[".*"]}}},'
+        package.json
+      - npm install --loglevel=error
+      - sdkmanager 'cmake;3.22.1'
+      - sed -i -e '/JavaVersion\|jvmToolchain/s/17/21/' node_modules/@react-native/gradle-plugin/*/build.gradle.kts
+        node_modules/@react-native/gradle-plugin/react-native-gradle-plugin/src/main/kotlin/com/facebook/react/utils/JdkConfiguratorUtils.kt
+      - find node_modules -path '*/android/build.gradle' -exec sed -i -e "s/jvmTarget
+        = '17'/jvmTarget = '21'/" -e '/JavaVersion/s/17/21/' {} +
+      - sed -i -e '/firebase/d' node_modules/expo-notifications/android/build.gradle
+      - cp -a $$firebase-stub$$/firebase-messaging/src node_modules/expo-notifications/android
+      - sed -i '/installreferrer/d' node_modules/expo-application/android/build.gradle
+      - sed -i -e '/import com.android.installreferrer/d' -e '/import android.os.RemoteException/d'
+        -e '/getInstallReferrerAsync/,/^    }$/d' 
+        node_modules/expo-application/android/src/main/java/expo/modules/application/ApplicationModule.kt
+      - APP_VARIANT=production npx expo prebuild --platform android --clean
+      - sed -i -e '/signingConfig /d' android/app/build.gradle
+      - sed -i 's/versionCode \([0-9][0-9]*\)/versionCode (\1 * 1000 + 1)/' android/app/build.gradle
+      - sed -i '/reactNativeArchitectures=/d' android/gradle.properties
+      - echo 'reactNativeArchitectures=armeabi-v7a' >> android/gradle.properties
+      - printf '\norg.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=2g\norg.gradle.workers.max=2\n'
+        >> android/gradle.properties
+    scanignore:
+      - node_modules/react-native/sdks/hermesc/linux64-bin/hermesc
+      - node_modules/expo-modules-core/android/ExpoModulesCorePlugin.gradle
+      - node_modules/expo-modules-autolinking/scripts/android/autolinking_implementation.gradle
+      - node_modules/react-native-screens/android/build.gradle
+      - node_modules/react-native-safe-area-context/android/build.gradle
+    scandelete:
+      - node_modules
+    build:
+      - cd android/app
+      - gradle assembleRelease
+    ndk: 27.1.12297006
+
+  - versionName: 1.4.0
+    versionCode: 8002
+    commit: 3d2d34bf2467f650be2d5255f82d19bc6899e2dd
+    sudo:
+      - echo "deb https://deb.debian.org/debian forky main" > /etc/apt/sources.list.d/forky.list
+      - apt-get update
+      - apt-get install -y -t forky npm
+    output: android/app/build/outputs/apk/release/app-release-unsigned.apk
+    srclibs:
+      - firebase-stub@ce90a956aacda17a85c60577ee443aeb83d876ef
+    prebuild:
+      - sed -i -e '1a "expo":{"autolinking":{"android":{"buildFromSource":[".*"]}}},'
+        package.json
+      - npm install --loglevel=error
+      - sdkmanager 'cmake;3.22.1'
+      - sed -i -e '/JavaVersion\|jvmToolchain/s/17/21/' node_modules/@react-native/gradle-plugin/*/build.gradle.kts
+        node_modules/@react-native/gradle-plugin/react-native-gradle-plugin/src/main/kotlin/com/facebook/react/utils/JdkConfiguratorUtils.kt
+      - find node_modules -path '*/android/build.gradle' -exec sed -i -e "s/jvmTarget
+        = '17'/jvmTarget = '21'/" -e '/JavaVersion/s/17/21/' {} +
+      - sed -i -e '/firebase/d' node_modules/expo-notifications/android/build.gradle
+      - cp -a $$firebase-stub$$/firebase-messaging/src node_modules/expo-notifications/android
+      - sed -i '/installreferrer/d' node_modules/expo-application/android/build.gradle
+      - sed -i -e '/import com.android.installreferrer/d' -e '/import android.os.RemoteException/d'
+        -e '/getInstallReferrerAsync/,/^    }$/d' 
+        node_modules/expo-application/android/src/main/java/expo/modules/application/ApplicationModule.kt
+      - APP_VARIANT=production npx expo prebuild --platform android --clean
+      - sed -i -e '/signingConfig /d' android/app/build.gradle
+      - sed -i 's/versionCode \([0-9][0-9]*\)/versionCode (\1 * 1000 + 2)/' android/app/build.gradle
+      - sed -i '/reactNativeArchitectures=/d' android/gradle.properties
+      - echo 'reactNativeArchitectures=arm64-v8a' >> android/gradle.properties
+      - printf '\norg.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=2g\norg.gradle.workers.max=2\n'
+        >> android/gradle.properties
+    scanignore:
+      - node_modules/react-native/sdks/hermesc/linux64-bin/hermesc
+      - node_modules/expo-modules-core/android/ExpoModulesCorePlugin.gradle
+      - node_modules/expo-modules-autolinking/scripts/android/autolinking_implementation.gradle
+      - node_modules/react-native-screens/android/build.gradle
+      - node_modules/react-native-safe-area-context/android/build.gradle
+    scandelete:
+      - node_modules
+    build:
+      - cd android/app
+      - gradle assembleRelease
+    ndk: 27.1.12297006
+
+  - versionName: 1.4.0
+    versionCode: 8003
+    commit: 3d2d34bf2467f650be2d5255f82d19bc6899e2dd
+    sudo:
+      - echo "deb https://deb.debian.org/debian forky main" > /etc/apt/sources.list.d/forky.list
+      - apt-get update
+      - apt-get install -y -t forky npm
+    output: android/app/build/outputs/apk/release/app-release-unsigned.apk
+    srclibs:
+      - firebase-stub@ce90a956aacda17a85c60577ee443aeb83d876ef
+    prebuild:
+      - sed -i -e '1a "expo":{"autolinking":{"android":{"buildFromSource":[".*"]}}},'
+        package.json
+      - npm install --loglevel=error
+      - sdkmanager 'cmake;3.22.1'
+      - sed -i -e '/JavaVersion\|jvmToolchain/s/17/21/' node_modules/@react-native/gradle-plugin/*/build.gradle.kts
+        node_modules/@react-native/gradle-plugin/react-native-gradle-plugin/src/main/kotlin/com/facebook/react/utils/JdkConfiguratorUtils.kt
+      - find node_modules -path '*/android/build.gradle' -exec sed -i -e "s/jvmTarget
+        = '17'/jvmTarget = '21'/" -e '/JavaVersion/s/17/21/' {} +
+      - sed -i -e '/firebase/d' node_modules/expo-notifications/android/build.gradle
+      - cp -a $$firebase-stub$$/firebase-messaging/src node_modules/expo-notifications/android
+      - sed -i '/installreferrer/d' node_modules/expo-application/android/build.gradle
+      - sed -i -e '/import com.android.installreferrer/d' -e '/import android.os.RemoteException/d'
+        -e '/getInstallReferrerAsync/,/^    }$/d' 
+        node_modules/expo-application/android/src/main/java/expo/modules/application/ApplicationModule.kt
+      - APP_VARIANT=production npx expo prebuild --platform android --clean
+      - sed -i -e '/signingConfig /d' android/app/build.gradle
+      - sed -i 's/versionCode \([0-9][0-9]*\)/versionCode (\1 * 1000 + 3)/' android/app/build.gradle
+      - sed -i '/reactNativeArchitectures=/d' android/gradle.properties
+      - echo 'reactNativeArchitectures=x86_64' >> android/gradle.properties
+      - printf '\norg.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=2g\norg.gradle.workers.max=2\n'
+        >> android/gradle.properties
+    scanignore:
+      - node_modules/react-native/sdks/hermesc/linux64-bin/hermesc
+      - node_modules/expo-modules-core/android/ExpoModulesCorePlugin.gradle
+      - node_modules/expo-modules-autolinking/scripts/android/autolinking_implementation.gradle
+      - node_modules/react-native-screens/android/build.gradle
+      - node_modules/react-native-safe-area-context/android/build.gradle
+    scandelete:
+      - node_modules
+    build:
+      - cd android/app
+      - gradle assembleRelease
+    ndk: 27.1.12297006
+
 MaintainerNotes: Binary scanner detects `com.google.firebase.messaging.*` classes
   from the firebase-stub srclib (FLOSS stub). Only local notifications are used -
   no FCM/push. android/ is generated by `expo prebuild` at build time, so checkupdates
@@ -159,5 +294,5 @@ VercodeOperation:
   - 1000 * %c + 2
   - 1000 * %c + 3
 UpdateCheckData: app.json|"versionCode":\s(\d+)|.|"version":\s"([^"]+)"
-CurrentVersion: 1.3.1
-CurrentVersionCode: 7003
+CurrentVersion: 1.4.0
+CurrentVersionCode: 8003
