@@ -75,10 +75,36 @@ Builds:
       'assets/www/_next/static/*/*.js' 'assets/www/_next/static/*/*.json' 'assets/www/_next/static/media/*.svg'
       'assets/www/brand/*.svg' 'assets/www/plugins/*/*.js'
 
+  - versionName: 6.0.2
+    versionCode: 53
+    commit: cfe5713313a386ad9b22001ad10f1d5f00d2f44b
+    subdir: platforms/android/app
+    gradle:
+      - yes
+    srclibs:
+      - reproducible-apk-tools@v0.3.0
+    prebuild:
+      - sed -i -e '/addSigningProps(cdv/d' build.gradle
+      - cp src/main/assets/www/cordova.js src/main/assets/www/cordova_plugins.js /tmp/
+      - cp -a src/main/assets/www/plugins /tmp/cordova-plugins
+      - rm -rf src/main/assets/www
+      - cp -a ../../../www src/main/assets/
+      - mv /tmp/cordova.js /tmp/cordova_plugins.js src/main/assets/www/
+      - mv /tmp/cordova-plugins src/main/assets/www/plugins
+    scanignore:
+      - www/_next/static/media
+      - platforms/android/app/src/main/assets/www/_next/static/media
+    postbuild: $$reproducible-apk-tools$$/inplace-fix.py --zipalign fix-newlines $$OUT$$
+      'assets/www/*.html' 'assets/www/*/*.html' 'assets/www/*/*/*.html' 'assets/www/*/*/*/*.html'
+      'assets/www/*.txt' 'assets/www/*/*.txt' 'assets/www/*/*/*.txt' 'assets/www/*/*/*/*.txt'
+      'assets/www/manifest.webmanifest' 'assets/www/_next/static/chunks/*.js' 'assets/www/_next/static/chunks/*.css'
+      'assets/www/_next/static/*/*.js' 'assets/www/_next/static/*/*.json' 'assets/www/_next/static/media/*.svg'
+      'assets/www/brand/*.svg' 'assets/www/plugins/*/*.js'
+
 AllowedAPKSigningKeys: 90dcc62357308cee4dd62d24b150154272bab6c50b3056ca4f06c9bbc34aa74b
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags .*-f-droid
 UpdateCheckData: config.xml|android-versionCode="(\d+)"|.|<widget.*version="([^"]+)"
-CurrentVersion: 6.0.1
-CurrentVersionCode: 52
+CurrentVersion: 6.0.2
+CurrentVersionCode: 53
