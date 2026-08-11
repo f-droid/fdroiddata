@@ -1,0 +1,47 @@
+Categories:
+  - Wallpaper
+License: AGPL-3.0-or-later
+AuthorName: Patrick Gaskin
+AuthorWebSite: https://pgaskin.net
+WebSite: https://pgaskin.net/windy/
+SourceCode: https://github.com/pgaskin/windy
+IssueTracker: https://github.com/pgaskin/windy/issues
+Changelog: https://github.com/pgaskin/windy/releases
+
+AutoName: Windy Live Wallpaper
+
+RepoType: git
+Repo: https://github.com/pgaskin/windy.git
+Binaries: https://github.com/pgaskin/windy/releases/download/v%v/WindyLiveWallpaper.apk
+
+Builds:
+  - versionName: '12'
+    versionCode: 12
+    commit: 2e21da6923db34104b109874aa95ad999ae2840f
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y gcc libc-dev rustup
+    gradle:
+      - yes
+    prebuild:
+      - export RUST_VERSION=$(sed -n -E 's/channel = "(.*)"/\1/p' ../rust-toolchain.toml)
+      - rustup default $RUST_VERSION
+      - rustup target add aarch64-linux-android armv7-linux-androideabi x86_64-linux-android
+      - cargo install cargo-ndk@4.1.2
+    ndk: 28.2.13676358
+
+AllowedAPKSigningKeys: 08d46917a818ad0c479733b458acb7488a4cc39f0a5a20ccc6a39181b2fb8f55
+
+MaintainerNotes: |-
+  - rust version is pinned in rust-toolchain.toml
+  - cargo-ndk version must match app/build.gradle (it'll be checked during the build)
+  - ndk version must match app/build.gradle
+  - location is opt-in and is not sent anywhere
+  - wind data updates are opt-in, with a configurable (and self-hostable) endpoint
+  - all code and assets (incuding the shaders and preview images) are original as of v8
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^v[0-9]+$
+CurrentVersion: '12'
+CurrentVersionCode: 12
