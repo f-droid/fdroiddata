@@ -1298,7 +1298,79 @@ Builds:
       - ./buildall.sh
     ndk: r29
 
+  - versionName: 2026-08-11-release
+    versionCode: 47
+    commit: ad98fc97ff1d25e217389e7238a1abda8c13a6c4
+    subdir: app
+    sudo:
+      - echo "deb https://deb.debian.org/debian forky main" > /etc/apt/sources.list.d/forky.list
+      - apt-get update
+      - apt-get install -y make automake pkg-config libtool nasm python3-jsonschema
+        gperf python3-jinja2
+      - apt-get install -y -t forky meson
+    gradle:
+      - default
+    srclibs:
+      - mbedtls@v3.6.7
+      - dav1d@54706fc6bc0cdecab7e9593974a4039cc038fca7
+      - FFmpeg@d32b387f2b0a484599d4587d651891f0c63c4238
+      - libxml2@v2.15.3
+      - fontconfig@2.18.2
+      - freetype2@VER-2-14-3
+      - fribidi@v1.0.16
+      - harfbuzz@14.2.1
+      - libunibreak@libunibreak_7_0
+      - libass@3087d2b2ffda76602a17f9b09d25cb8addc8d313
+      - libplacebo@4d82c6898551068d4ae6a6b5538efcddc2c7cf64
+      - curl@curl-8_21_0
+      - mpv@f4d13e1c2c91f3a56e589aef9cb44cbc02e26e47
+    prebuild:
+      - sed -i -e '/enable true/d' -e '/universalBase/s/8000/0/' build.gradle
+      - cd ../buildscripts/
+      - mkdir -p sdk
+      - ln -s $$NDK$$ sdk/android-ndk-r29
+      - mkdir -p deps
+      - pushd deps/
+      - cp -r $$mbedtls$$ mbedtls
+      - cp -r $$dav1d$$ dav1d
+      - cp -r $$FFmpeg$$ ffmpeg
+      - cp -r $$libxml2$$ libxml2
+      - cp -r $$fontconfig$$ fontconfig
+      - cp -r $$freetype2$$ freetype2
+      - cp -r $$fribidi$$ fribidi
+      - cp -r $$harfbuzz$$ harfbuzz
+      - cp -r $$libunibreak$$ unibreak
+      - cp -r $$libass$$ libass
+      - cp -r $$libplacebo$$ libplacebo
+      - cp -r $$curl$$ curl
+      - cp -r $$mpv$$ mpv
+      - mkdir lua
+      - curl -Lo lua.tar.gz https://www.lua.org/ftp/lua-5.2.4.tar.gz
+      - echo "b9e2e4aad6789b3b63a056d442f7b39f0ecfca3ae0f1fc0ae4e9614401b69f4b lua.tar.gz"
+        | sha256sum -c -
+      - tar -xz --strip-components=1 -C lua -f lua.tar.gz
+      - cd unibreak
+      - ./bootstrap
+      - cd ../curl
+      - autoreconf -fi
+      - popd
+      - sed -i -e '/gradlew/d' scripts/mpv-android.sh
+      - sed -i -e '/"$target" == "mpv-android"/,/ls -lh/d' buildall.sh
+    scandelete:
+      - buildscripts/deps/mbedtls/
+      - buildscripts/deps/lua.tar.gz
+      - buildscripts/deps/libplacebo/3rdparty/jinja/tests/res/package.zip
+      - buildscripts/deps/libplacebo/3rdparty/glad/
+      - buildscripts/deps/harfbuzz/src/wasm/
+      - buildscripts/deps/harfbuzz/src/rust/Cargo.toml
+    build:
+      - cd ../buildscripts/
+      - ./buildall.sh --arch arm64 mpv
+      - ./buildall.sh --arch x86_64 mpv
+      - ./buildall.sh
+    ndk: r29
+
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: 2026-06-25-release
-CurrentVersionCode: 46
+CurrentVersion: 2026-08-11-release
+CurrentVersionCode: 47
