@@ -1,0 +1,34 @@
+Categories:
+  - Connectivity
+  - System
+License: Apache-2.0
+AuthorName: Lena
+SourceCode: https://gitlab.com/0xlena/scrcpy-android
+IssueTracker: https://gitlab.com/0xlena/scrcpy-android/-/issues
+
+AutoName: scrcpy
+
+RepoType: git
+Repo: https://gitlab.com/0xlena/scrcpy-android.git
+
+Builds:
+  - versionName: '0.4'
+    versionCode: 4
+    commit: b6c19916afc382875836ee7d13c7cd6e5a5181c1
+    subdir: app
+    submodules: true
+    gradle:
+      - yes
+    build:
+      - pushd ../vendor/scrcpy/server
+      - gradle assembleRelease
+      - popd
+      - cp ../vendor/scrcpy/server/build/outputs/apk/release/server-release-unsigned.apk
+        src/main/assets/scrcpy-server.jar
+      - printf '4.0\n' > src/main/assets/scrcpy-server.version
+      - sha256sum src/main/assets/scrcpy-server.jar | cut -d' ' -f1 > src/main/assets/scrcpy-server.sha256
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: '0.4'
+CurrentVersionCode: 4
