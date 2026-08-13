@@ -1269,7 +1269,57 @@ Builds:
         | grep -F app-foss-release-unsigned.apk | cut -c-64 | tr -cd '0-9a-f' )"
       - sha256sum -c <<< "$sha256sum  $$OUT$$"
 
+  - versionName: 1.0.0 Wear OS
+    versionCode: 200
+    commit: 306e7b52011300ee7d3be09891215cdf704723cf
+    subdir: wear
+    gradle:
+      - yes
+    binary: 
+      https://github.com/CatimaLoyalty/Android/releases/download/v1.0.0-wearos/wear-release.apk
+    srclibs:
+      - reproducible-apk-tools@v0.3.0
+    postbuild:
+      - mv $$OUT$$ unaligned.apk
+      - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
+        --replace unaligned.apk $$OUT$$
+
+  - versionName: 2.45.0
+    versionCode: 1001
+    commit: 22193b1872ee0df6efa6111972b90b59a0253c4d
+    subdir: app
+    gradle:
+      - fdroidLegacy
+    postbuild:
+      - sha256sum="$( curl -L 
+        https://github.com/CatimaLoyalty/Android/releases/download/v$$VERSION$$/SHA256SUMS
+        | grep -F app-fdroidLegacy-release-unsigned.apk | cut -c-64 | tr -cd '0-9a-f'
+        )"
+      - sha256sum -c <<< "$sha256sum  $$OUT$$"
+
+  - versionName: 2.45.0
+    versionCode: 1002
+    commit: 22193b1872ee0df6efa6111972b90b59a0253c4d
+    subdir: app
+    gradle:
+      - foss
+    binary: 
+      https://github.com/CatimaLoyalty/Android/releases/download/v%v/app-foss-release.apk
+    srclibs:
+      - reproducible-apk-tools@v0.3.0
+    postbuild:
+      - mv $$OUT$$ unaligned.apk
+      - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
+        --replace unaligned.apk $$OUT$$
+
+AllowedAPKSigningKeys:
+  - d405cd69ede4c22074c328fb825689a84ab3fca4b3fdf0b6cc1333af62c67eb3
+  - 62864db787cc31928dc2c114673cdbb017beabb13ba6df6ae5256e738bb953ae
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 2.44.0
-CurrentVersionCode: 168
+VercodeOperation:
+  - '%c - 1'
+  - '%c'
+CurrentVersion: 2.45.0
+CurrentVersionCode: 1002
