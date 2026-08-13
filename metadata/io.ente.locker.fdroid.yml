@@ -381,8 +381,77 @@ Builds:
         --dart-define=cronetHttpNoPlay=true
     ndk: r28c
 
+  - versionName: 1.0.8
+    versionCode: 235
+    commit: 0607e5a08e1480224bf638b776188317284ed13e
+    subdir: mobile/apps/locker
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y automake libtool make gcc libc-dev rustup
+    output: build/app/outputs/flutter-apk/app-fdroid-release.apk
+    srclibs:
+      - libsodium@1.0.22-RELEASE
+      - flutter@stable
+    rm:
+      - architecture
+      - cli
+      - desktop
+      - docs
+      - infra
+      - server
+      - web
+      - mobile/apps/locker/ios
+    prebuild:
+      - sed -i -e "s/'stable'/'1.94.1'/" ../../packages/rust/cargokit/build_tool/lib/src/builder.dart
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - flutterVersion=$(sed -n -E 's/.*FLUTTER_VERSION:[[:space:]]*"([^"]+)".*/\1/p'
+        ../../../.github/actions/setup-flutter/action.yml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - $$flutter$$/bin/flutter config --no-analytics
+      - pushd ../../packages/strings
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - $$flutter$$/bin/flutter gen-l10n
+      - popd
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - sed -i -e '/play-services-cronet/d' $PUB_CACHE/hosted/pub.dev/cronet_http-*/android/build.gradle
+      - sed -i -e '/dependsOn downloadLibsodium/d' $PUB_CACHE/hosted/pub.dev/sodium_libs-*/android/build.gradle
+    scandelete:
+      - mobile/apps/locker/.pub-cache
+      - mobile/apps/auth
+      - mobile/apps/photos
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export PATH=$$flutter$$/bin:$HOME/.cargo/bin:$PATH
+      - rustup default 1.94.1
+      - cargo install flutter_rust_bridge_codegen@2.12.0 --locked
+      - pushd ../../packages/rust
+      - flutter_rust_bridge_codegen generate
+      - popd
+      - pushd $$libsodium$$
+      - export NDK_PLATFORM="android-21"
+      - ./autogen.sh -s
+      - ./dist-build/android-armv7-a.sh
+      - ./dist-build/android-armv8-a.sh
+      - ./dist-build/android-x86.sh
+      - ./dist-build/android-x86_64.sh
+      - popd
+      - pushd $PUB_CACHE/hosted/pub.dev/sodium_libs-*/android
+      - mkdir -p src/main/jniLibs
+      - cd src/main/jniLibs
+      - mkdir -p armeabi-v7a x86_64 arm64-v8a x86
+      - cp $$libsodium$$/libsodium-android-armv7-a/lib/libsodium.so armeabi-v7a/
+      - cp $$libsodium$$/libsodium-android-westmere/lib/libsodium.so x86_64/
+      - cp $$libsodium$$/libsodium-android-armv8-a+crypto/lib/libsodium.so arm64-v8a/
+      - cp $$libsodium$$/libsodium-android-i686/lib/libsodium.so x86/
+      - popd
+      - $$flutter$$/bin/flutter build apk --release --flavor fdroid -t lib/main.dart
+        --dart-define=cronetHttpNoPlay=true
+    ndk: r28c
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^locker-v[0-9.]+$
 UpdateCheckData: mobile/apps/locker/pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 1.0.6
-CurrentVersionCode: 182
+CurrentVersion: 1.0.8
+CurrentVersionCode: 235
