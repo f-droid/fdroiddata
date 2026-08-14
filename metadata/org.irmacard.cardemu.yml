@@ -1713,10 +1713,46 @@ Builds:
       - $$flutter$$/bin/flutter build apk --flavor beta
     ndk: 28.2.13676358
 
+  - versionName: 8.2.0
+    versionCode: 4194517
+    commit: f6522a150297369b68b0784ec301e44ebb748b54
+    subdir: yivi_fdroid
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y build-essential tcl unzip
+      - apt-get install -y -t trixie-backports golang-go
+    output: build/app/outputs/flutter-apk/app-beta-release.apk
+    srclibs:
+      - flutter@stable
+      - go@go1.26.0
+      - OpenSSL@openssl-3.4.1
+      - sqlcipher@v4.14.0
+    rm:
+      - yivi_app
+      - .vscode
+    prebuild:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export version=$(grep "^FLUTTER_VERSION" ../ci_scripts/install_flutter.sh
+        | cut -d "\"" -f2)
+      - '[[ $version ]]'
+      - git -C $$flutter$$ checkout -f $version
+      - export goVersion=$(grep "^go " ../yivi_core/go.mod | cut -d " " -f2)
+      - '[[ $goVersion ]]'
+      - git -C $$go$$ checkout -f go$goVersion
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - sdkmanager 'platforms;android-36' 'build-tools;36.1.0'
+    scandelete:
+      - yivi_fdroid/.pub-cache
+    build: FLUTTER_DIR=$$flutter$$ GO_SRC_DIR=$$go$$ OPENSSL_SRC_DIR=$$OpenSSL$$ SQLCIPHER_SRC_DIR=$$sqlcipher$$
+      ANDROID_NDK_HOME=$$NDK$$ bash fdroid_build.sh
+    ndk: 28.2.13676358
+
 MaintainerNotes: uses Sentry.io configured as opt-in
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v.*$
 UpdateCheckData: yivi_fdroid/pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 8.1.2
-CurrentVersionCode: 4194516
+CurrentVersion: 8.2.0
+CurrentVersionCode: 4194517
