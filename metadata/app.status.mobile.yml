@@ -1,0 +1,111 @@
+AntiFeatures:
+  NonFreeNet:
+    en-US: Relies on centralized services like Infura for blockchain interactions,
+      making it dependent on non-libre infrastructure.
+  TetheredNet:
+    en-US: Messaging and user profiles are stored on Waku servers rather than being
+      fully peer-to-peer, requiring a connection to a specific service instance.
+  Tracking:
+    en-US: Collects and processes IP addresses, wallet addresses, and transaction
+      details via the API Proxy Server. Data is shared with third-party services like
+      Infura, Grove, and Cryptocompare.
+Categories:
+  - Connectivity
+  - Messaging
+  - Security
+  - Wallet
+License: MPL-2.0
+AuthorName: Status Research & Development GmbH
+AuthorEmail: siddarth@status.im
+AuthorWebSite: https://status.app
+WebSite: https://status.app
+SourceCode: https://github.com/status-im/status-app
+IssueTracker: https://github.com/status-im/status-app/issues
+Changelog: https://github.com/status-im/status-app/releases
+
+AutoName: Status
+
+RepoType: git
+Repo: https://github.com/status-im/status-app.git
+Binaries: 
+  https://github.com/status-im/status-app/releases/download/%v/app.status.mobile_%c.apk
+
+Builds:
+  - versionName: 2.37.1
+    versionCode: 29500000
+    commit: 3a05c91e05a20844bd4f9e733324fe0785a158fc
+    timeout: 86400
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y make libc-dev g++ cmake ninja-build wget unzip xz-utils
+        file pkg-config python3-pip autoconf automake libtool flex bison gperf ruby
+        ca-certificates gnupg2 locales perl golang-go libgl1-mesa-dev libglu1-mesa-dev
+        freeglut3-dev libfontconfig1-dev libfreetype6-dev libx11-dev libx11-xcb-dev
+        libxext-dev libxfixes-dev libxi-dev libxrender-dev libxcb1-dev libxcb-glx0-dev
+        libxcb-keysyms1-dev libxcb-image0-dev libxcb-shm0-dev libxcb-icccm4-dev libxcb-sync-dev
+        libxcb-xfixes0-dev libxcb-shape0-dev libxcb-randr0-dev libxcb-render-util0-dev
+        libxcb-xinerama0-dev libxcb-xkb-dev libxkbcommon-dev libxkbcommon-x11-dev
+        libwayland-dev libssl-dev libsqlite3-dev libjpeg-dev libpng-dev libicu-dev
+        libdbus-1-dev libnss3-dev libcups2-dev libpulse-dev libasound2-dev libgstreamer1.0-dev
+        libgstreamer-plugins-base1.0-dev protobuf-compiler libprotobuf-dev libclang-dev
+        llvm-dev libxcursor-dev libxcomposite-dev libxdamage-dev libxrandr-dev libxtst-dev
+        libxss-dev libevent-dev libcap-dev libudev-dev libpci-dev libegl1-mesa-dev
+        nodejs libatspi2.0-dev libmtdev-dev libinput-dev libdrm-dev libgbm-dev nasm
+        yasm
+    output: mobile/bin/android/qt6/Status.apk
+    srclibs:
+      - Qt5@v6.9.2
+      - OpenSSL@openssl-3.0.15
+      - Nim@v2.2.4
+      - FFmpegAndroidMaker@7554426b6135027e15326890fe77c25eddfbc6d0
+    prebuild:
+      - mkdir -p $HOME/qt/6.9.2
+      - sdkmanager "platforms;android-35" "build-tools;35.0.0"
+      - ./fdroid/cleanup-binaries.sh
+    build:
+      - export FDROID_VERSION_CODE=$$VERCODE$$
+      - export SOURCE_DATE_EPOCH=1780226558
+      - (cd $$Nim$$ && sh build_all.sh)
+      - export ANDROID_NDK_ROOT=$$NDK$$
+      - export ANDROID_PLATFORM=android-35
+      - export ANDROID_API=35
+      - export STATUS_BUILD_TARGET=fdroid
+      - export STATUS_BUILD_APK_TYPE=universal-hermes-enabled
+      - export PATH="$$Nim$$/bin:$PATH"
+      - export BUILD_DIR=$(pwd)
+      - export OPENSSL_SRCDIR=$$OpenSSL$$
+      - export QT_SRCDIR=$$Qt5$$
+      - export FFMPEG_SRCDIR=$$FFmpegAndroidMaker$$
+      - export FFMPEG_DIR=$HOME/ffmpeg/arm64-v8a
+      - ./fdroid/build-openssl.sh
+      - ./fdroid/build-ffmpeg.sh
+      - ./fdroid/build-qt.sh
+      - ./fdroid/build-app.sh
+    ndk: r27c
+
+AllowedAPKSigningKeys: 64fd80527f622ee0ea0b9e629618ef63200c114c967d79bc4ac10baff885a5a4
+
+MaintainerNotes: |-
+  Status App requires Qt 6.9.2 built from source for Android. The build process:
+  1. Builds OpenSSL 3.0.15 for Android arm64-v8a
+  2. Builds Qt 6.9.2 for Linux host then Android arm64-v8a with OpenSSL
+  3. Builds the Status app using the Qt Android toolchain
+
+  Full build takes around 2 hours depending on host resources.
+
+  Dependencies:
+  - Qt 6.9.2 (built from source via srclib)
+  - Nim 2.2.4 (built from source via srclib)
+  - Go (from Debian)
+  - Android SDK (API 35) and NDK (27.2.12479018)
+  - OpenSSL 3.0.15 (built from source via srclib)
+  - FFmpeg 7.1.1 for Android arm64-v8a (built from source via ffmpeg-android-maker srclib,
+    required by Qt 6.9 QtMultimedia's FFmpeg backend for QCamera / QR scanning)
+
+AutoUpdateMode: Version %v
+UpdateCheckMode: HTTP
+UpdateCheckData: 
+  https://api.github.com/repos/status-im/status-app/releases/latest|app\.status\.mobile_(\d+)\.apk|.|"tag_name":\s*"(\d+\.\d+\.\d+)"
+CurrentVersion: 2.37.1
+CurrentVersionCode: 29500000
