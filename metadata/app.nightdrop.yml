@@ -1,0 +1,227 @@
+Categories:
+  - Messaging
+License: AGPL-3.0-or-later
+AuthorName: Night Drop
+AuthorEmail: security@nightdrop.app
+SourceCode: https://github.com/nightdropapp/nightdrop
+IssueTracker: https://github.com/nightdropapp/nightdrop/issues
+
+RepoType: git
+Repo: https://github.com/nightdropapp/nightdrop.git
+
+Builds:
+  - versionName: 0.1.21
+    versionCode: 4071
+    commit: 011a26d75f5d561874608065372c6eacb578e0c7
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y build-essential clang cmake pkg-config rustup
+      - mkdir -p /build
+      - chown -R vagrant /build
+    output: build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
+    binary: 
+      https://github.com/nightdropapp/nightdrop/releases/download/v%v/NightDrop-armeabi-v7a.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - app/ios
+      - app/linux
+      - app/macos
+      - app/windows
+    prebuild:
+      - export repo=/build/nightdrop
+      - flutterVersion=$(sed -n -E 's/.*"flutter"[^"]*"([^"]+)".*/\1/p' .fvmrc)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - cd ../..
+      - mv app.nightdrop $repo
+      - pushd $repo/app
+      - sed -i -e "s|_buildOptions?.toolchain.name ?? 'stable'|'1.96.0'|" rust_builder/cargokit/build_tool/lib/src/builder.dart
+      - rustup default 1.96.0
+      - rustup target add aarch64-linux-android armv7-linux-androideabi x86_64-linux-android
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - popd
+      - mv $repo app.nightdrop
+    scandelete:
+      - app/.pub-cache
+      - core/fuzz/seeds
+    build:
+      - export repo=/build/nightdrop
+      - export PATH="$$flutter$$/bin:$PATH"
+      - cd ../..
+      - mv app.nightdrop $repo
+      - pushd $repo/app
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export CARGO_HOME="$HOME/.cargo"
+      - export CARGO_ENCODED_RUSTFLAGS="--remap-path-prefix=$(cd ../ && pwd)=.$(printf
+        '\037')--remap-path-prefix=$CARGO_HOME=/cargo"
+      - flutter build apk --release --split-per-abi --target-platform=android-arm
+        --dart-define=NIGHTDROP_TOR=1 
+        --dart-define=NIGHTDROP_RELAY=bzcqxuxwvtmrmvprsoscnronkjf5wknfuj5ozxiq5fr6qowvnkwrwwad.onion
+      - popd
+      - mv $repo app.nightdrop
+    ndk: r28c
+
+  - versionName: 0.1.21
+    versionCode: 4072
+    commit: 011a26d75f5d561874608065372c6eacb578e0c7
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y build-essential clang cmake pkg-config rustup
+      - mkdir -p /build
+      - chown -R vagrant /build
+    output: build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+    binary: 
+      https://github.com/nightdropapp/nightdrop/releases/download/v%v/NightDrop-arm64-v8a.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - app/ios
+      - app/linux
+      - app/macos
+      - app/windows
+    prebuild:
+      - export repo=/build/nightdrop
+      - flutterVersion=$(sed -n -E 's/.*"flutter"[^"]*"([^"]+)".*/\1/p' .fvmrc)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - cd ../..
+      - mv app.nightdrop $repo
+      - pushd $repo/app
+      - sed -i -e "s|_buildOptions?.toolchain.name ?? 'stable'|'1.96.0'|" rust_builder/cargokit/build_tool/lib/src/builder.dart
+      - rustup default 1.96.0
+      - rustup target add aarch64-linux-android armv7-linux-androideabi x86_64-linux-android
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - popd
+      - mv $repo app.nightdrop
+    scandelete:
+      - app/.pub-cache
+      - core/fuzz/seeds
+    build:
+      - export repo=/build/nightdrop
+      - export PATH="$$flutter$$/bin:$PATH"
+      - cd ../..
+      - mv app.nightdrop $repo
+      - pushd $repo/app
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export CARGO_HOME="$HOME/.cargo"
+      - export CARGO_ENCODED_RUSTFLAGS="--remap-path-prefix=$(cd ../ && pwd)=.$(printf
+        '\037')--remap-path-prefix=$CARGO_HOME=/cargo"
+      - flutter build apk --release --split-per-abi --target-platform=android-arm64
+        --dart-define=NIGHTDROP_TOR=1 
+        --dart-define=NIGHTDROP_RELAY=bzcqxuxwvtmrmvprsoscnronkjf5wknfuj5ozxiq5fr6qowvnkwrwwad.onion
+      - popd
+      - mv $repo app.nightdrop
+    ndk: r28c
+
+  - versionName: 0.1.21
+    versionCode: 4073
+    commit: 011a26d75f5d561874608065372c6eacb578e0c7
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y build-essential clang cmake pkg-config rustup
+      - mkdir -p /build
+      - chown -R vagrant /build
+    output: build/app/outputs/flutter-apk/app-x86_64-release.apk
+    binary: 
+      https://github.com/nightdropapp/nightdrop/releases/download/v%v/NightDrop-x86_64.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - app/ios
+      - app/linux
+      - app/macos
+      - app/windows
+    prebuild:
+      - export repo=/build/nightdrop
+      - flutterVersion=$(sed -n -E 's/.*"flutter"[^"]*"([^"]+)".*/\1/p' .fvmrc)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - cd ../..
+      - mv app.nightdrop $repo
+      - pushd $repo/app
+      - sed -i -e "s|_buildOptions?.toolchain.name ?? 'stable'|'1.96.0'|" rust_builder/cargokit/build_tool/lib/src/builder.dart
+      - rustup default 1.96.0
+      - rustup target add aarch64-linux-android armv7-linux-androideabi x86_64-linux-android
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - popd
+      - mv $repo app.nightdrop
+    scandelete:
+      - app/.pub-cache
+      - core/fuzz/seeds
+    build:
+      - export repo=/build/nightdrop
+      - export PATH="$$flutter$$/bin:$PATH"
+      - cd ../..
+      - mv app.nightdrop $repo
+      - pushd $repo/app
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export CARGO_HOME="$HOME/.cargo"
+      - export CARGO_ENCODED_RUSTFLAGS="--remap-path-prefix=$(cd ../ && pwd)=.$(printf
+        '\037')--remap-path-prefix=$CARGO_HOME=/cargo"
+      - flutter build apk --release --split-per-abi --target-platform=android-x64
+        --dart-define=NIGHTDROP_TOR=1 
+        --dart-define=NIGHTDROP_RELAY=bzcqxuxwvtmrmvprsoscnronkjf5wknfuj5ozxiq5fr6qowvnkwrwwad.onion
+      - popd
+      - mv $repo app.nightdrop
+    ndk: r28c
+
+AllowedAPKSigningKeys: d08b8e6408aff4f43556c05b819fef25afdd6912be7a678b0552468a4582c0ac
+
+MaintainerNotes: |
+  Flutter UI over a cross-compiled Rust core (libnightdrop.so, built by cargokit through the
+  NDK), so the recipe provisions both toolchains.
+
+  Only 0.1.19 is offered. 0.1.0-0.1.3 shipped without the Android INTERNET permission and cannot
+  connect; 0.1.4 embedded AGP's opaque "dependency metadata" signing block, which check-apk
+  rejects (fixed in 0.1.5); 0.1.6 and 0.1.7 predate the build fixes below, so their published
+  APKs cannot be byte-matched. From 0.1.8 every release is built by this recipe exactly as it
+  stands, which is what makes binary: reproducible verification possible.
+
+  The build is moved to a fixed path, per the template. This is load-bearing, not cosmetic:
+  measured across two build paths, libapp.so (the Flutter AOT snapshot) plus libdartjni.so and
+  libflutter_zxing.so differ, while libnightdrop.so does not - the Rust remap flags below cover
+  our own crate, but nothing else. Without the fixed path a rebuild elsewhere cannot match the
+  published APK.
+
+  Pins, all needed to stay reproducible - bump together and re-verify:
+  Flutter is pinned upstream in app/.fvmrc (the standard fvm file, also consumed by the repo's
+  own CI) and extracted here, so a Flutter bump needs no change to this recipe. NDK r28c
+  (flutter.ndkVersion for that Flutter release), Rust 1.96.0 (also pinned in
+  rust-toolchain.toml). The remap flags strip the
+  build dir and cargo registry paths from the Rust core. They have to go in
+  CARGO_ENCODED_RUSTFLAGS, not RUSTFLAGS: cargokit's Android environment sets the encoded
+  variable for its NDK libgcc workaround, and that overrides plain RUSTFLAGS entirely. The
+  \037 is the unit separator cargo expects between encoded flags.
+
+  The sed patches cargokit, which otherwise runs "rustup run stable cargo build" and would
+  silently ignore rust-toolchain.toml. The usual "s/'stable'/'<version>'/" does not work here:
+  the crate ships a cargokit.yaml, so the toolchain comes from the parsed options rather than
+  the ?? fallback, and the whole expression has to be replaced.
+
+  core/fuzz/seeds is a binary fuzz corpus that trips the source scanner; not needed to build.
+
+  Version codes are versionCode * 10 + ABI (1 armeabi-v7a, 2 arm64-v8a, 3 x86_64), set in
+  app/android/app/build.gradle.kts, which is why VercodeOperation multiplies rather than adds.
+  The pubspec base jumped to 402 when the scheme changed: Flutter's own --split-per-abi offsets
+  had already published 1016/2016/4016, and every new code has to stay above those or Android
+  refuses the update.
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^v[\d.]+$
+VercodeOperation:
+  - '%c * 10 + 1'
+  - '%c * 10 + 2'
+  - '%c * 10 + 3'
+UpdateCheckData: app/pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 0.1.21
+CurrentVersionCode: 4073
