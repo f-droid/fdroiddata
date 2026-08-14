@@ -5,14 +5,14 @@ AuthorName: Dominik Hebeler
 AuthorEmail: dominik@suma-ev.de
 AuthorWebSite: https://metager.de
 WebSite: https://metager.de
-SourceCode: https://gitlab.metager.de/open-source/app-en
-IssueTracker: https://gitlab.metager.de/open-source/app-en/-/issues
+SourceCode: https://gitlab.metager.de/metager/metager-app
+IssueTracker: https://gitlab.metager.de/metager/metager-app/-/issues
 Donate: https://metager.de/spende
 
-AutoName: MetaGer Suche
+AutoName: MetaGer
 
 RepoType: git
-Repo: https://gitlab.metager.de/open-source/app-en.git
+Repo: https://gitlab.metager.de/metager/metager-app.git
 
 Builds:
   - versionName: 4.2.2
@@ -133,8 +133,33 @@ Builds:
     gradle:
       - yes
 
+  - versionName: 6.9.0
+    versionCode: 60900
+    commit: 57b637c79a769344cf43093e5941313cdc302e43
+    subdir: android/app
+    sudo:
+      - echo "deb https://deb.debian.org/debian forky main" > /etc/apt/sources.list.d/forky.list
+      - apt-get update
+      - apt-get install -y -t forky npm
+    gradle:
+      - yes
+    prebuild:
+      - npm ci --no-audit --no-fund
+      - sed -i '/jvmToolchain/s/17/21/' ../../node_modules/@react-native/gradle-plugin/*/build.gradle.kts
+      - sed -i -e '/jvmToolchain/s/17/21/' -e 's/fromTarget("17")/fromTarget("21")/'
+        ../../node_modules/react-native-worklets/android/build.gradle.kts ../../node_modules/react-native-reanimated/android/build.gradle.kts
+      - sed -i -e 's/JavaVersion.VERSION_17/JavaVersion.VERSION_21/g' -e 's/jvmToolchain(17)/jvmToolchain(21)/g'
+        ../../node_modules/@react-native/gradle-plugin/react-native-gradle-plugin/src/main/kotlin/com/facebook/react/utils/JdkConfiguratorUtils.kt
+    scanignore:
+      - node_modules/hermes-compiler/hermesc/linux64-bin/hermesc
+      - node_modules/react-native-safe-area-context/android/build.gradle
+      - node_modules/react-native-webview/android/build.gradle
+      - node_modules/react-native-svg/android/build.gradle
+    scandelete:
+      - node_modules
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^[\d.]+$
 UpdateCheckName: de.metager.metagerapp
-CurrentVersion: 5.1.12
-CurrentVersionCode: 50112
+CurrentVersion: 6.9.0
+CurrentVersionCode: 60900
