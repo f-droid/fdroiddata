@@ -1554,6 +1554,135 @@ Builds:
       - cmake --preset android-conan-ninja-release -D ANDROIDDEPLOYQT_OPTIONS=
       - cmake --build --preset android-conan-ninja-release
 
+  - versionName: 1.7.5
+    versionCode: 17500
+    commit: 6901839ae9760dfcd1d5ff2c4aa4ef6968fee752
+    submodules: true
+    sudo:
+      - echo "deb https://deb.debian.org/debian bookworm main" > /etc/apt/sources.list.d/bookworm.list
+      - apt-get update
+      - apt-get install -y make g++ libc-dev cmake ninja-build pipx
+      - apt-get install -y -t bookworm openjdk-17-jdk-headless
+      - update-java-alternatives -s java-1.17.0-openjdk-amd64
+    output: 
+      out/build/android-conan-ninja-release/android-build/vcmi-app/build/outputs/apk/release/*.apk
+    srclibs:
+      - conan@2.31.2
+    prebuild:
+      - sdkmanager "platforms;android-35"
+      - pipx install $$conan$$
+      - export PATH="$HOME/.local/bin:$PATH"
+      - conan profile detect || true
+      - sed -i -e 's/versionCode.*$/versionCode $$VERCODE$$/' -e 's/signingConfig
+        = signingConfigs.*//g' android/vcmi-app/build.gradle
+      - mkdir -p $HOME/.gradle
+      - echo "android.bundle.enableUncompressedNativeLibs=true" > $HOME/.gradle/gradle.properties
+    scandelete:
+      - osx
+    build:
+      - export PATH="$HOME/.local/bin:$PATH"
+      - export CONAN_OPTIONS="--options ffmpeg/*:shared=True"
+      - dependencies/build.sh android-armv7 2>~/tmp/conan_output.txt
+      - conan install . --output-folder=conan-generated --build=never --profile=dependencies/conan_profiles/android-32-ndk
+        --profile=dependencies/conan_profiles/base/android-system $CONAN_OPTIONS
+      - ndkPackage='android-ndk'
+      - hexRegex='[[:xdigit:]]+'
+      - ndkPackageRevision=$(conan list --format=compact "$ndkPackage/*:*" | egrep
+        --only-matching "$ndkPackage/\\w+#$hexRegex:$hexRegex")
+      - ndkPath="$(conan cache path "$ndkPackageRevision")/bin"
+      - mkdir -p "$$SDK$$/ndk"
+      - ln -s "$ndkPath" "$$SDK$$/ndk/$(fgrep 'Pkg.Revision' "$ndkPath/source.properties"
+        | cut -d ' ' -f 3)"
+      - ln -s $(which gradle) android/gradlew
+      - cmake --preset android-conan-ninja-release -D ANDROIDDEPLOYQT_OPTIONS=
+      - cmake --build --preset android-conan-ninja-release
+
+  - versionName: 1.7.5
+    versionCode: 17501
+    commit: 6901839ae9760dfcd1d5ff2c4aa4ef6968fee752
+    submodules: true
+    sudo:
+      - echo "deb https://deb.debian.org/debian bookworm main" > /etc/apt/sources.list.d/bookworm.list
+      - apt-get update
+      - apt-get install -y make g++ libc-dev cmake ninja-build pipx
+      - apt-get install -y -t bookworm openjdk-17-jdk-headless
+      - update-java-alternatives -s java-1.17.0-openjdk-amd64
+    output: 
+      out/build/android-conan-ninja-release/android-build/vcmi-app/build/outputs/apk/release/*.apk
+    srclibs:
+      - conan@2.31.2
+    prebuild:
+      - sdkmanager "platforms;android-35"
+      - pipx install $$conan$$
+      - export PATH="$HOME/.local/bin:$PATH"
+      - conan profile detect || true
+      - sed -i -e 's/versionCode.*$/versionCode $$VERCODE$$/' -e 's/signingConfig
+        = signingConfigs.*//g' android/vcmi-app/build.gradle
+      - mkdir -p $HOME/.gradle
+      - echo "android.bundle.enableUncompressedNativeLibs=true" > $HOME/.gradle/gradle.properties
+    scandelete:
+      - osx
+    build:
+      - export PATH="$HOME/.local/bin:$PATH"
+      - export CONAN_OPTIONS="--options ffmpeg/*:shared=True"
+      - dependencies/build.sh android-arm64 2>~/tmp/conan_output.txt
+      - conan install . --output-folder=conan-generated --build=never --profile=dependencies/conan_profiles/android-64-ndk
+        --profile=dependencies/conan_profiles/base/android-system $CONAN_OPTIONS
+      - ndkPackage='android-ndk'
+      - hexRegex='[[:xdigit:]]+'
+      - ndkPackageRevision=$(conan list --format=compact "$ndkPackage/*:*" | egrep
+        --only-matching "$ndkPackage/\\w+#$hexRegex:$hexRegex")
+      - ndkPath="$(conan cache path "$ndkPackageRevision")/bin"
+      - mkdir -p "$$SDK$$/ndk"
+      - ln -s "$ndkPath" "$$SDK$$/ndk/$(fgrep 'Pkg.Revision' "$ndkPath/source.properties"
+        | cut -d ' ' -f 3)"
+      - ln -s $(which gradle) android/gradlew
+      - cmake --preset android-conan-ninja-release -D ANDROIDDEPLOYQT_OPTIONS=
+      - cmake --build --preset android-conan-ninja-release
+
+  - versionName: 1.7.5
+    versionCode: 17502
+    commit: 6901839ae9760dfcd1d5ff2c4aa4ef6968fee752
+    submodules: true
+    sudo:
+      - echo "deb https://deb.debian.org/debian bookworm main" > /etc/apt/sources.list.d/bookworm.list
+      - apt-get update
+      - apt-get install -y make g++ libc-dev cmake ninja-build pipx
+      - apt-get install -y -t bookworm openjdk-17-jdk-headless
+      - update-java-alternatives -s java-1.17.0-openjdk-amd64
+    output: 
+      out/build/android-conan-ninja-release/android-build/vcmi-app/build/outputs/apk/release/*.apk
+    srclibs:
+      - conan@2.31.2
+    prebuild:
+      - sdkmanager "platforms;android-35"
+      - pipx install $$conan$$
+      - export PATH="$HOME/.local/bin:$PATH"
+      - conan profile detect || true
+      - sed -i -e 's/versionCode.*$/versionCode $$VERCODE$$/' -e 's/signingConfig
+        = signingConfigs.*//g' android/vcmi-app/build.gradle
+      - mkdir -p $HOME/.gradle
+      - echo "android.bundle.enableUncompressedNativeLibs=true" > $HOME/.gradle/gradle.properties
+    scandelete:
+      - osx
+    build:
+      - export PATH="$HOME/.local/bin:$PATH"
+      - export CONAN_OPTIONS="--options ffmpeg/*:shared=True"
+      - dependencies/build.sh android-x64 2>~/tmp/conan_output.txt
+      - conan install . --output-folder=conan-generated --build=never --profile=dependencies/conan_profiles/android-x64-ndk
+        --profile=dependencies/conan_profiles/base/android-system $CONAN_OPTIONS
+      - ndkPackage='android-ndk'
+      - hexRegex='[[:xdigit:]]+'
+      - ndkPackageRevision=$(conan list --format=compact "$ndkPackage/*:*" | egrep
+        --only-matching "$ndkPackage/\\w+#$hexRegex:$hexRegex")
+      - ndkPath="$(conan cache path "$ndkPackageRevision")/bin"
+      - mkdir -p "$$SDK$$/ndk"
+      - ln -fs "$ndkPath" "$$SDK$$/ndk/$(fgrep 'Pkg.Revision' "$ndkPath/source.properties"
+        | cut -d ' ' -f 3)"
+      - ln -fs $(which gradle) android/gradlew
+      - cmake --preset android-conan-ninja-release -D ANDROIDDEPLOYQT_OPTIONS=
+      - cmake --build --preset android-conan-ninja-release
+
 MaintainerNotes: |-
   VCMI requires CMake v3.26+ and JDK v17.
 
@@ -1619,5 +1748,5 @@ UpdateCheckMode: None
 VercodeOperation:
   - 10 * %c
   - 10 * %c + 1
-CurrentVersion: 1.7.4
-CurrentVersionCode: 17402
+CurrentVersion: 1.7.5
+CurrentVersionCode: 17502
