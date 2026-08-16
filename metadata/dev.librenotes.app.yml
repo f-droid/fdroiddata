@@ -1,0 +1,41 @@
+Categories:
+  - Note
+License: AGPL-3.0-only
+AuthorName: Piliii
+SourceCode: https://github.com/Piliii/LibreNotes
+IssueTracker: https://github.com/Piliii/LibreNotes/issues
+
+AutoName: LibreNotes
+
+RepoType: git
+Repo: https://github.com/Piliii/LibreNotes
+
+Builds:
+  - versionName: 1.2.0
+    versionCode: 3
+    commit: eb4751bd642cd92162c98d2dcfee0ddbed09e6aa
+    subdir: clients/app
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - clients/app/linux
+      - clients/app/web
+    prebuild:
+      - flutterVersion=$(sed -n -E "s/.*flutter-version:\ '(.*)'/\1/p" ../../.github/workflows/release.yml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+    scandelete:
+      - clients/app/.pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --target-platform=android-arm64
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: clients/app/pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 1.2.0
+CurrentVersionCode: 3
