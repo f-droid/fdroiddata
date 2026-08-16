@@ -1,0 +1,41 @@
+Categories:
+  - Game Helper
+License: AGPL-3.0-only
+AuthorName: ccev
+SourceCode: https://github.com/ccev/diadem
+IssueTracker: https://github.com/ccev/diadem/issues
+
+AutoName: Diadem
+
+RepoType: git
+Repo: https://github.com/ccev/diadem.git
+
+Builds:
+  - versionName: '0.9'
+    versionCode: 9
+    commit: af0ee226b24870b3714b616febb02542b82c3ce9
+    subdir: android/app
+    sudo:
+      - echo "deb https://deb.debian.org/debian forky main" > /etc/apt/sources.list.d/forky.list
+      - apt-get update
+      - apt-get install -y nodejs
+      - corepack enable
+    init:
+      - pushd ../..
+      - npm_config_engine_strict=false pnpm install --frozen-lockfile
+      - popd
+    gradle:
+      - yes
+    prebuild:
+      - pushd ../..
+      - bash setup.sh
+      - pnpm exec svelte-kit sync
+      - bash ./scripts/native/build-nogms.sh
+      - popd
+    scandelete:
+      - node_modules
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: '0.9'
+CurrentVersionCode: 9
