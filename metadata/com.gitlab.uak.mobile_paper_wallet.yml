@@ -87,7 +87,45 @@ Builds:
       - buildozer android release
     ndk: 25.2.9519653
 
+  - versionName: 1.4.3
+    versionCode: 102110403
+    commit: 0b0fba5361767443f77e80f9eb3f8bb039fb9408
+    subdir: src
+    sudo:
+      - apt-get update -qq
+      - apt-get install -y -qq g++ libc-dev make automake libltdl-dev libtool zlib1g-dev
+        libffi-dev libssl-dev cython3 python3-pip python3-pexpect python3-virtualenv
+        python3-sh python3-colorama python3-jinja2 python3-build python3-toml python3-packaging
+        ant python3.13-venv zip
+      - echo "deb https://deb.debian.org/debian bookworm main" > /etc/apt/sources.list.d/bookworm.list
+      - apt-get update
+      - apt-get install -y -t bookworm openjdk-17-jdk-headless
+      - update-java-alternatives -s java-1.17.0-openjdk-amd64
+      - rm /opt/android-sdk/tools/bin/sdkmanager
+      - ln -s $(which sdkmanager) /opt/android-sdk/tools/bin/sdkmanager
+    output: ../bin/mobile_paper_wallet-*-arm64-v8a_armeabi-v7a-release-unsigned.apk
+    srclibs:
+      - python-for-android@v2024.01.21
+      - buildozer@1.5.0
+    prebuild:
+      - sdkmanager 'platforms;android-33' 'build-tools;33.0.2'
+      - sed -r "s:#?android.sdk_path =.*:android.sdk_path = $$SDK$$:" -i ../buildozer.spec
+      - sed -r "s:#?android.ndk_path =.*:android.ndk_path = $$NDK$$:" -i ../buildozer.spec
+      - sed -r "s:#?android.ant_path =.*:android.ant_path = /usr:" -i ../buildozer.spec
+      - sed -r "s:#.*?android.skip_update =.*:android.skip_update = True:" -i ../buildozer.spec
+      - sed -r "s:#?p4a.source_dir =.*:p4a.source_dir = $$python-for-android$$:" -i
+        ../buildozer.spec
+      - sed -r "s:log_level =.*:log_level = 1:" -i ../buildozer.spec
+      - sed -i -e 's/# android.release_artifact = aab/android.release_artifact = apk/'
+        ../buildozer.spec
+    build:
+      - python3 -m venv $HOME/venv
+      - source $HOME/venv/bin/activate
+      - pip3 install $$buildozer$$ setuptools cython==0.29.34
+      - cd .. && buildozer android release
+    ndk: r25b
+
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: 1.4.1
-CurrentVersionCode: 102110401
+CurrentVersion: 1.4.3
+CurrentVersionCode: 102110403
