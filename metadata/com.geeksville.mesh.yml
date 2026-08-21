@@ -770,11 +770,41 @@ Builds:
       - settings.gradle.kts
       - build-logic/settings.gradle.kts
 
+  - versionName: 2.8.1 (29321949)
+    versionCode: 29321949
+    commit: 7c6a6cc195a2248cd50ed7f2395451cabcd93fdc
+    subdir: androidApp
+    sudo:
+      - apt-get update
+      - apt-get install -y openjdk-25-jdk-headless
+      - update-alternatives --auto java
+      - export CPUS_MAX=4
+      - export CPUS=$(getconf _NPROCESSORS_ONLN)
+      - for (( c=$CPUS_MAX; c<$CPUS; c++ )) ; do echo 0 > /sys/devices/system/cpu/cpu$c/online
+        ; done
+    gradle:
+      - fdroid
+    output: 
+      build/outputs/apk/fdroid/release/androidApp-fdroid-universal-release-unsigned.apk
+    binary: 
+      https://github.com/meshtastic/Meshtastic-Android/releases/download/v2.8.1/androidApp-fdroid-universal-release.apk
+    rm:
+      - desktopApp
+    prebuild:
+      - sed -i -e '/foojay-resolver/d' -e '78,87d' -e '/desktopApp/d' ../settings.gradle.kts
+      - sed -i -e '/firebase/d' -e '/flatpak.sources/,/^}/d' ../{.,build-logic/convention}/build.gradle.kts
+      - sed -i -e '/firebase-crashlytics/d' ../build-logic/convention/src/main/kotlin/AnalyticsConventionPlugin.kt
+      - sed -i -e '/":desktopApp",/d' ../build-logic/convention/src/main/kotlin/RootConventionPlugin.kt
+    scanignore:
+      - settings.gradle.kts
+      - build-logic/settings.gradle.kts
+      - build-logic/settings-plugin/settings.gradle.kts
+
 AllowedAPKSigningKeys: a93b456568c175db0800a09f06777f892d812432adb8a3df73bc3e7f06c80c6d
 
 AutoUpdateMode: Version v%v
 UpdateCheckMode: HTTP
 UpdateCheckData: https://github.com/meshtastic/Meshtastic-Android/releases/latest|>v[\d.]+
   \((\d+)\)<|.|>v([\d.]+ \(\d+\))<
-CurrentVersion: 2.8.0 (29321705)
-CurrentVersionCode: 29321705
+CurrentVersion: 2.8.1 (29321949)
+CurrentVersionCode: 29321949
