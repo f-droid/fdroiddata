@@ -1,0 +1,177 @@
+AntiFeatures:
+  Tracking:
+    en-US: Analytics are by default sent to https://posthog.tchap.numerique.gouv.fr.
+  TetheredNet:
+    en-US: Matrix Tchap homeserver is enforced.
+Categories:
+  - Internet
+  - Messaging
+  - Phone & SMS
+  - Voice & Video Chat
+License: AGPL-3.0-or-later
+AuthorName: Tchap
+AuthorEmail: support@tchap.beta.gouv.fr
+WebSite: https://tchap.numerique.gouv.fr
+SourceCode: https://github.com/Benjamin-Loison/tchap-android
+IssueTracker: https://github.com/tchapgouv/tchap-android/issues
+Changelog: https://github.com/tchapgouv/tchap-android/blob/develop/TCHAP_CHANGES.md
+
+RepoType: git
+Repo: https://github.com/Benjamin-Loison/tchap-android
+
+Builds:
+  - versionName: 2.21.0
+    versionCode: 402210001
+    commit: 3f73aa254a5189d4521c8e45a16eb972056598c0
+    timeout: 21600
+    subdir: vector-app
+    sudo:
+      - apt-get update
+      - apt-get install -y npm
+    gradle:
+      - fdroid
+      - tchap
+      - withoutpinning
+    srclibs:
+      - jitsi-meet@mobile-sdk-11.5.1
+    prebuild:
+      - sed -i -e 's/-XX:MaxPermSize\S*//' -e 's/Xmx4g/Xmx8g/' ../gradle.properties
+      - sed -i '/include/s/"armeabi-v7a".*/"armeabi-v7a"/' build.gradle
+      - sed -i -e '/repositories {/a mavenLocal()' -e '/Jitsi repo/,/^        }/d'
+        ../build.gradle
+      - sed -i -e '/com.google.firebase/d' -e '/gms/d' {.,..}/build.gradle
+      - sed -i -e '/git/d' $$jitsi-meet$$/android/scripts/release-sdk.sh
+      - sed -i -e '/javaVersion/s/17/21/' -e '/jvm/s/17/21/' $$jitsi-meet$$/android/build.gradle
+      - sed -i -e '/if (!rootProject.ext.libreBuild) {/,/^    }/d' $$jitsi-meet$$/android/sdk/build.gradle
+      - sed -i -e '/react-native-amplitude/d' -e '/react-native-giphy/d' -e '/react-native-google-signin/d'
+        $$jitsi-meet$$/android/settings.gradle
+    build:
+      - cd $$jitsi-meet$$
+      - export LIBRE_BUILD=true
+      - npm install --save false webpack-bundle-analyzer
+      - npm ci
+      - mkdir -p "$HOME/.m2"
+      - JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64 bash android/scripts/release-sdk.sh
+        "$HOME/.m2/repository"
+      - mkdir -p "$HOME/.m2/repository/org/webkit"
+      - cp -r node_modules/jsc-android/dist/org/webkit/android-jsc "$HOME/.m2/repository/org/webkit"
+
+  - versionName: 2.21.0
+    versionCode: 402210002
+    commit: 3f73aa254a5189d4521c8e45a16eb972056598c0
+    timeout: 21600
+    subdir: vector-app
+    sudo:
+      - apt-get update
+      - apt-get install -y npm
+    gradle:
+      - fdroid
+      - tchap
+      - withoutpinning
+    srclibs:
+      - jitsi-meet@mobile-sdk-11.5.1
+    prebuild:
+      - sed -i -e 's/-XX:MaxPermSize\S*//' -e 's/Xmx4g/Xmx8g/' ../gradle.properties
+      - sed -i '/include/s/"armeabi-v7a".*/"arm64-v8a"/' build.gradle
+      - sed -i -e '/repositories {/a mavenLocal()' -e '/Jitsi repo/,/^        }/d'
+        ../build.gradle
+      - sed -i -e '/com.google.firebase/d' -e '/gms/d' {.,..}/build.gradle
+      - sed -i -e '/git/d' $$jitsi-meet$$/android/scripts/release-sdk.sh
+      - sed -i -e '/javaVersion/s/17/21/' -e '/jvm/s/17/21/' $$jitsi-meet$$/android/build.gradle
+      - sed -i -e '/if (!rootProject.ext.libreBuild) {/,/^    }/d' $$jitsi-meet$$/android/sdk/build.gradle
+      - sed -i -e '/react-native-amplitude/d' -e '/react-native-giphy/d' -e '/react-native-google-signin/d'
+        $$jitsi-meet$$/android/settings.gradle
+    build:
+      - cd $$jitsi-meet$$
+      - export LIBRE_BUILD=true
+      - npm install --save false webpack-bundle-analyzer
+      - npm ci
+      - mkdir -p "$HOME/.m2"
+      - JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64 bash android/scripts/release-sdk.sh
+        "$HOME/.m2/repository"
+      - mkdir -p "$HOME/.m2/repository/org/webkit"
+      - cp -r node_modules/jsc-android/dist/org/webkit/android-jsc "$HOME/.m2/repository/org/webkit"
+
+  - versionName: 2.21.0
+    versionCode: 402210003
+    commit: 3f73aa254a5189d4521c8e45a16eb972056598c0
+    timeout: 21600
+    subdir: vector-app
+    sudo:
+      - apt-get update
+      - apt-get install -y npm
+    gradle:
+      - fdroid
+      - tchap
+      - withoutpinning
+    srclibs:
+      - jitsi-meet@mobile-sdk-11.5.1
+    prebuild:
+      - sed -i -e 's/-XX:MaxPermSize\S*//' -e 's/Xmx4g/Xmx8g/' ../gradle.properties
+      - sed -i '/include/s/"armeabi-v7a".*/"x86"/' build.gradle
+      - sed -i -e '/repositories {/a mavenLocal()' -e '/Jitsi repo/,/^        }/d'
+        ../build.gradle
+      - sed -i -e '/com.google.firebase/d' -e '/gms/d' {.,..}/build.gradle
+      - sed -i -e '/git/d' $$jitsi-meet$$/android/scripts/release-sdk.sh
+      - sed -i -e '/javaVersion/s/17/21/' -e '/jvm/s/17/21/' $$jitsi-meet$$/android/build.gradle
+      - sed -i -e '/if (!rootProject.ext.libreBuild) {/,/^    }/d' $$jitsi-meet$$/android/sdk/build.gradle
+      - sed -i -e '/react-native-amplitude/d' -e '/react-native-giphy/d' -e '/react-native-google-signin/d'
+        $$jitsi-meet$$/android/settings.gradle
+    build:
+      - cd $$jitsi-meet$$
+      - export LIBRE_BUILD=true
+      - npm install --save false webpack-bundle-analyzer
+      - npm ci
+      - mkdir -p "$HOME/.m2"
+      - JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64 bash android/scripts/release-sdk.sh
+        "$HOME/.m2/repository"
+      - mkdir -p "$HOME/.m2/repository/org/webkit"
+      - cp -r node_modules/jsc-android/dist/org/webkit/android-jsc "$HOME/.m2/repository/org/webkit"
+
+  - versionName: 2.21.0
+    versionCode: 402210004
+    commit: 3f73aa254a5189d4521c8e45a16eb972056598c0
+    timeout: 21600
+    subdir: vector-app
+    sudo:
+      - apt-get update
+      - apt-get install -y npm
+    gradle:
+      - fdroid
+      - tchap
+      - withoutpinning
+    srclibs:
+      - jitsi-meet@mobile-sdk-11.5.1
+    prebuild:
+      - sed -i -e 's/-XX:MaxPermSize\S*//' -e 's/Xmx4g/Xmx8g/' ../gradle.properties
+      - sed -i '/include/s/"armeabi-v7a".*/"x86_64"/' build.gradle
+      - sed -i -e '/repositories {/a mavenLocal()' -e '/Jitsi repo/,/^        }/d'
+        ../build.gradle
+      - sed -i -e '/com.google.firebase/d' -e '/gms/d' {.,..}/build.gradle
+      - sed -i -e '/git/d' $$jitsi-meet$$/android/scripts/release-sdk.sh
+      - sed -i -e '/javaVersion/s/17/21/' -e '/jvm/s/17/21/' $$jitsi-meet$$/android/build.gradle
+      - sed -i -e '/if (!rootProject.ext.libreBuild) {/,/^    }/d' $$jitsi-meet$$/android/sdk/build.gradle
+      - sed -i -e '/react-native-amplitude/d' -e '/react-native-giphy/d' -e '/react-native-google-signin/d'
+        $$jitsi-meet$$/android/settings.gradle
+    build:
+      - cd $$jitsi-meet$$
+      - export LIBRE_BUILD=true
+      - npm install --save false webpack-bundle-analyzer
+      - npm ci
+      - mkdir -p "$HOME/.m2"
+      - JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64 bash android/scripts/release-sdk.sh
+        "$HOME/.m2/repository"
+      - mkdir -p "$HOME/.m2/repository/org/webkit"
+      - cp -r node_modules/jsc-android/dist/org/webkit/android-jsc "$HOME/.m2/repository/org/webkit"
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+VercodeOperation:
+  - 1 + %c
+  - 2 + %c
+  - 3 + %c
+  - 4 + %c
+UpdateCheckData: vector-app/build.gradle|ext.versionCode = (\d+)|.|ext.versionName
+  = '(\d{,2}.\d{,2}.\d{,2})'
+CurrentVersion: 2.21.0
+CurrentVersionCode: 402210004
