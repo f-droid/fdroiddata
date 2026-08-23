@@ -312,8 +312,35 @@ Builds:
       - $$flutter$$/bin/flutter build apk --flavor nightly
     ndk: r28c
 
+  - versionName: 0.7.0
+    versionCode: 16
+    commit: b108e2b906f5e98b62e0383f59ca65d586838847
+    subdir: app
+    output: build/app/outputs/flutter-apk/app-nightly-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - app/ios
+      - app/linux
+      - app/macos
+      - app/web
+      - app/windows
+    prebuild:
+      - export version=$(grep "^  flutter:" pubspec.yaml | cut -d ":" -f2|head -n1)
+      - '[[ $version ]]'
+      - git -C $$flutter$$ checkout -f $version
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+    scandelete:
+      - app/.pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --flavor nightly
+    ndk: r28c
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v.+$
 UpdateCheckData: app/pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 0.6.0
-CurrentVersionCode: 15
+CurrentVersion: 0.7.0
+CurrentVersionCode: 16
