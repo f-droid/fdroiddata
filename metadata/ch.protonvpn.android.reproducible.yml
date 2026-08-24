@@ -1,0 +1,53 @@
+AntiFeatures:
+  NonFreeNet:
+    en-US: The backend is proprietary
+  TetheredNet:
+    en-US: Relies on Proton's API and VPN servers
+  Tracking:
+    en-US: Usage and crash reporting are enabled by default (require opt-out).
+Categories:
+  - Connectivity
+  - Internet
+  - VPN & Proxy
+License: GPL-3.0-only
+AuthorName: Proton
+AuthorEmail: support@protonvpn.com
+WebSite: https://protonvpn.com/
+SourceCode: https://github.com/ProtonVPN/android-app
+IssueTracker: https://github.com/ProtonVPN/android-app/issues
+Changelog: https://github.com/ProtonVPN/android-app/releases
+
+AutoName: ProtonVPN
+
+RepoType: git
+Repo: https://github.com/ProtonVPN/android-app.git
+Binaries: 
+  https://github.com/ProtonVPN/android-app/releases/download/%v/ProtonVPN-%v.%c.-production-vanilla-openSource-release-fdroid.apk
+
+Builds:
+  - versionName: 5.20.74.0
+    versionCode: 605207400
+    commit: 316a3d499e120bd2cab63c2cd8ac396e3ab3b24a
+    subdir: app
+    gradle:
+      - production
+      - vanilla
+      - openSource
+    srclibs:
+      - reproducible-apk-tools@v0.3.2
+    prebuild: sed -i -e '/triple/d' -e '/^play\ {/,/^}/d' build.gradle
+    gradleprops:
+      - buildUniversalApk
+      - appId=ch.protonvpn.android.reproducible
+    postbuild:
+      - mv "$$OUT$$" unaligned.apk
+      - $$reproducible-apk-tools$$/zipalign.py --page-size 4 --pad-like-apksigner
+        --replace unaligned.apk "$$OUT$$"
+
+AllowedAPKSigningKeys: dcc9439ec1a6c6a8d0203f3423ee42bcc8b970628e53cb73a0393f398dd5b853
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: metadata/version_fdroid.txt|versionCode=(\d+)|.|versionName=(.*)
+CurrentVersion: 5.20.74.0
+CurrentVersionCode: 605207400
