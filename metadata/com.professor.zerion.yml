@@ -134,9 +134,31 @@ Builds:
       - $$reproducible-apk-tools$$/zipalign.py --page-size 4 --pad-like-apksigner
         --replace unaligned.apk $$OUT$$
 
+  - versionName: 3.0.3
+    versionCode: 30300
+    commit: 7717379c399916a77f7ffc895ff799b36f79f6a5
+    subdir: zerion-android
+    submodules: true
+    gradle:
+      - official
+    srclibs:
+      - reproducible-apk-tools@v0.3.0
+    rm:
+      - libs/gradle-witness.jar
+      - gradle/verification-metadata.xml
+    prebuild: sed -i "/include ':bramble-java'/d" ../settings.gradle
+    gradleprops:
+      - fdroid
+    postbuild:
+      - $$reproducible-apk-tools$$/inplace-fix.py --zipalign fix-newlines $$OUT$$
+        'assets/i2p/certificates/reseed/*.crt' 'assets/i2p/certificates/ssl/*.crt'
+      - mv $$OUT$$ unaligned.apk
+      - $$reproducible-apk-tools$$/zipalign.py --page-size 4 --pad-like-apksigner
+        --replace unaligned.apk $$OUT$$
+
 AllowedAPKSigningKeys: d7fdb11125890d133ae89d8ba4f4331d9045e21ef01d9899a7cdee6888f704c8
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 3.0.1
-CurrentVersionCode: 30100
+CurrentVersion: 3.0.3
+CurrentVersionCode: 30300
