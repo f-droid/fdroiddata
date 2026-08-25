@@ -1,0 +1,51 @@
+Categories:
+  - System
+  - Theming
+  - Wallpaper
+License: GPL-3.0-only
+AuthorName: xLexip
+AuthorEmail: adaptive-theme@lexip.dev
+AuthorWebSite: https://lexip.dev
+WebSite: https://lexip.dev/hecate
+SourceCode: https://github.com/xLexip/Adaptive-Theme
+IssueTracker: https://github.com/xLexip/Adaptive-Theme/issues
+Changelog: https://github.com/xLexip/Adaptive-Theme/releases
+Donate: https://buymeacoffee.com/lexip
+
+AutoName: Adaptive Theme
+
+RepoType: git
+Repo: https://github.com/xLexip/Adaptive-Theme.git
+Binaries: 
+  https://github.com/xLexip/Adaptive-Theme/releases/download/v%v/Adaptive-Theme-v%v-foss.apk
+
+Builds:
+  - versionName: 2.5.0
+    versionCode: 136
+    commit: a0f73c03b0e780cb6b21f441b80a083e7af0654c
+    subdir: app
+    gradle:
+      - foss
+    rm:
+      - app/src/play
+    prebuild:
+      - sed -i '/com\.google\.gms:google-services/d; /com\.google\.firebase:firebase-crashlytics-gradle/d;
+        /pluginManager\.apply("com\.google\.gms\.google-services")/d; /pluginManager\.apply("com\.google\.firebase\.crashlytics")/d;
+        /playImplementation/d' build.gradle.kts
+      - sed -i '/appUpdateKtx/d; /firebaseBom/d; /firebaseAnalytics/d; /firebaseCrashlytics/d;
+        /^review =/d; /app-update-ktx/d; /^review-ktx/d; /firebase-/d' gradle/libs.versions.toml
+      - sed -i '/com\.google\.android\.play/d; /com\.google\.firebase/d' gradle.lockfile
+    ndk: 28.2.13676358
+
+AllowedAPKSigningKeys: 1a21e8104bce8e90a591b5527d01a5320b2a0d46fc8f97ea3d5af4225c9afd07
+
+MaintainerNotes: |-
+  Upstream also contains a play flavor. Remove the play-only source set and
+  dependency/plugin declarations before source scanning, then build only
+  assembleFossRelease. NDK r28c is required so AGP strips the DataStore native
+  libraries identically to the upstream reproducible binary.
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^v[0-9]+\.[0-9]+\.[0-9]+$
+CurrentVersion: 2.5.0
+CurrentVersionCode: 136
