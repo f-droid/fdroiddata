@@ -89,7 +89,35 @@ Builds:
       - npm run build
       - npx cap sync android
 
+  - versionName: 2.2.1
+    versionCode: 8
+    commit: 8cbe41eeb49428e6eea5d5d5c94f7c052dda9da9
+    subdir: android/app
+    sudo:
+      - apt-get update
+      - apt-get install -y golang-go make npm
+    gradle:
+      - foss
+    srclibs:
+      - esbuild@v0.21.5
+    prebuild:
+      - cd ../..
+      - npm ci
+    scanignore:
+      - node_modules/@capacitor/cli/assets/capacitor-cordova-android-plugins.tar.gz
+    scandelete:
+      - node_modules
+    build:
+      - pushd $$esbuild$$
+      - make esbuild
+      - popd
+      - cd ../..
+      - cp $$esbuild$$/esbuild node_modules/@esbuild/linux-x64/bin/
+      - cp $$esbuild$$/esbuild node_modules/esbuild/bin/
+      - npm run build
+      - npx cap sync android
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 2.2.0
-CurrentVersionCode: 7
+CurrentVersion: 2.2.1
+CurrentVersionCode: 8
