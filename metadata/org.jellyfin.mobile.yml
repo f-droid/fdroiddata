@@ -309,6 +309,24 @@ Builds:
     output: build/outputs/apk/libre/release/jellyfin-android-*-libre-release-unsigned.apk
     prebuild: echo 'jellyfin.version=$$VERSION$$' >> ../gradle.properties
 
+  - versionName: 2.7.2
+    versionCode: 2070299
+    commit: d668c25ac19f39f6af6c800120f6be360a3c8a69
+    subdir: app
+    sudo:
+      - export CPUS_MAX=16
+      - export CPUS=$(getconf _NPROCESSORS_ONLN)
+      - for (( c=$CPUS_MAX; c<$CPUS; c++ )) ; do echo 0 > /sys/devices/system/cpu/cpu$c/online
+        ; done
+      - echo "deb https://deb.debian.org/debian bookworm main" > /etc/apt/sources.list.d/bookworm.list
+      - apt-get update
+      - apt-get install -y -t bookworm openjdk-17-jdk-headless
+      - update-java-alternatives -s java-1.17.0-openjdk-amd64
+    gradle:
+      - libre
+    output: build/outputs/apk/libre/release/jellyfin-android-*-libre-release-unsigned.apk
+    prebuild: echo 'jellyfin.version=$$VERSION$$' >> ../gradle.properties
+
 AllowedAPKSigningKeys: d881796ed2a67ff6ef9f676828723c6b1fa18e09388962cba4abc4a594a69131
 
 AutoUpdateMode: Version v%v
@@ -316,5 +334,5 @@ UpdateCheckMode: HTTP
 UpdateCheckIgnore: (beta|rc)
 UpdateCheckData: 
   https://repo.jellyfin.org/releases/client/android/version.txt|^v.*?=(\d+)|.|^v(.*?)=\d+
-CurrentVersion: 2.7.1
-CurrentVersionCode: 2070199
+CurrentVersion: 2.7.2
+CurrentVersionCode: 2070299
