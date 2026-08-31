@@ -431,11 +431,49 @@ Builds:
       - motdLibboxAar=build/generated/libbox/libbox.aar
       - motdLibboxManifest=build/generated/libbox/libbox-v1.13.12.manifest
 
+  - versionName: 0.16.1
+    versionCode: 16001
+    commit: 4fe080bf55d1e5f698aacf6ba1c66d9a32edee69
+    subdir: app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y golang-go make unzip
+    gradle:
+      - yes
+    srclibs:
+      - go@go1.25.12
+    rm:
+      - app/libs/libbox.aar
+      - third_party/gomobile/internal/binres/testdata/bootstrap.bin
+      - third_party/sing-box/source/clients/android/settings.gradle.kts
+    prebuild:
+      - printf '\nmotdVersionName=%s\nmotdVersionCode=%s\nmotdSourceCommit=%s\n' "$$VERSION$$"
+        "$$VERCODE$$" "$$COMMIT$$" >> ../gradle.properties
+      - sdkmanager "platforms;android-23"
+      - sdkmanager "platforms;android-37.0" "build-tools;36.0.0"
+    build:
+      - pushd "$$go$$/src"
+      - ./make.bash
+      - popd
+      - export GOROOT="$$go$$"
+      - export PATH="$$go$$/bin:$PATH"
+      - export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+      - export LIBBOX_OUTPUT_DIR="$PWD/build/generated/libbox"
+      - export LIBBOX_NDK_HOME="$$NDK$$"
+      - export LIBBOX_PATCH_NDK_HOST_TOOLS=0
+      - ../third_party/sing-box/build-libbox.sh
+    ndk: 28.2.13676358
+    gradleprops:
+      - motdLibboxSource=true
+      - motdLibboxAar=build/generated/libbox/libbox.aar
+      - motdLibboxManifest=build/generated/libbox/libbox-v1.13.12.manifest
+
 AllowedAPKSigningKeys: 4104a03bbc48942df8346fbd331f7761d13f68af4a2ff4d14f730e501ce728c3
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v[0-9]+\.[0-9]+\.[0-9]+$
 UpdateCheckData: 
   gradle.properties|motdVersionCode=(\d+)|.|motdVersionName=([0-9]+\.[0-9]+\.[0-9]+)
-CurrentVersion: 0.16.0
-CurrentVersionCode: 16000
+CurrentVersion: 0.16.1
+CurrentVersionCode: 16001
