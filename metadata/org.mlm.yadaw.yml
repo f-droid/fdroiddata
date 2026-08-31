@@ -12,8 +12,6 @@ AutoName: Yadaw
 
 RepoType: git
 Repo: https://github.com/mlm-games/yadaw.git
-Binaries: 
-  https://github.com/mlm-games/yadaw/releases/download/v%v/yadaw-%v-fdroid-arm64-v8a.apk
 
 Builds:
   - versionName: 0.9.2
@@ -23,6 +21,8 @@ Builds:
       - apt-get update
       - apt-get install -y gcc libc-dev rustup
     output: target/release/apk/yadaw.apk
+    binary: 
+      https://github.com/mlm-games/yadaw/releases/download/v%v/yadaw-%v-fdroid-arm64-v8a.apk
     srclibs:
       - reproducible-apk-tools@v0.3.0
     rm:
@@ -47,10 +47,42 @@ Builds:
       - $$reproducible-apk-tools$$/zipalign.py --pad-like-apksigner --replace unaligned.apk
         $$OUT$$
 
+  - versionName: 0.10.8
+    versionCode: 16779784
+    commit: 1ed018a667788ce00d8e69824a5722df26833b96
+    sudo:
+      - apt-get update
+      - apt-get install -y gcc libc-dev rustup
+    output: target/release/apk/yadaw.apk
+    binary: https://github.com/mlm-games/yadaw/releases/download/v%v/yadaw-%v-arm64-v8a.apk
+    srclibs:
+      - reproducible-apk-tools@v0.3.0
+    prebuild:
+      - export ANDROID_API=$(sed -E -n 's/.*android-api.*"(.*)".*/\1/p' .github/workflows/release.yml)
+      - export ANDROID_BUILD_TOOLS=$(sed -E -n 's/.*android-build-tools.*"(.*)".*/\1/p'
+        .github/workflows/release.yml | head -1)
+      - sdkmanager "platforms;android-$ANDROID_API" "build-tools;$ANDROID_BUILD_TOOLS"
+      - export RUST_VERSION=$(sed -n -E 's/channel = "(.*)"/\1/p' rust-toolchain.toml)
+      - rustup default $RUST_VERSION
+      - rustup target add aarch64-linux-android
+      - export CARGO_RAPK_TAG=$(sed -E -n 's/.*cargo-rapk-version.*"(.*)".*/\1/p'
+        .github/workflows/release.yml)
+      - cargo install --git https://github.com/mlm-games/cargo-rapk.git --tag v$CARGO_RAPK_TAG
+        cargo-rapk --locked
+    build:
+      - export SOURCE_DATE_EPOCH=0
+      - cargo rapk build --release --deterministic --unsigned --target aarch64-linux-android
+        --lib
+    ndk: 29.0.14206865
+    postbuild:
+      - mv $$OUT$$ unaligned.apk
+      - $$reproducible-apk-tools$$/zipalign.py --pad-like-apksigner --replace unaligned.apk
+        $$OUT$$
+
 AllowedAPKSigningKeys: 4aed2f691df64a7b0fea25a6b8c80183c6dc520e049dac0178defa1d6472228f
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: Cargo.toml|version_code\s*=\s*([0-9]+)|Cargo.toml|version\s*=\s*"([^"]+)"
-CurrentVersion: 0.9.2
-CurrentVersionCode: 16779522
+CurrentVersion: 0.10.8
+CurrentVersionCode: 16779784
