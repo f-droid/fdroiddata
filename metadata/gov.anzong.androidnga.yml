@@ -369,8 +369,45 @@ Builds:
       - popd
       - mv $$android-floating-action-button$$/build/outputs/aar/*.aar libs/floatingactionmenu.aar
 
+  - versionName: 5.0.2
+    versionCode: 5002
+    commit: 22ba3082501bcbb08f52a66d787f970f59c2dda7
+    subdir: nga_phone_base_3.0
+    sudo:
+      - echo "deb https://deb.debian.org/debian bookworm main" > /etc/apt/sources.list.d/bookworm.list
+      - apt-get update
+      - apt-get install -t bookworm -y openjdk-17-jdk-headless
+      - update-java-alternatives -s java-1.17.0-openjdk-amd64
+    gradle:
+      - yes
+    srclibs:
+      - android-floating-action-button@2396953e0f8a1f329756320bd0663d250aadac83
+    rm:
+      - nga_phone_base_3.0/libs/*.aar
+      - lib_bu_statistics
+    prebuild:
+      - sed -i -e '/aliyun/d' ../build.gradle
+      - sed -i -e '/lib_bu_statistics/d' build.gradle
+      - sed -i -e 
+        's/com.nshmura:recyclertablayout:1.5.0/com.github.nshmura:RecyclerTabLayout:1.4.0/'
+        -e 
+        's/com.zhouyou:signseekbar:1.0.6/com.github.zhou-you:EasySignSeekBar:8c52404ab6/'
+        -e 's/net.steamcrafted:load-toast/com.github.code-mc:loadtoast/' -e 
+        's/me.imid.swipebacklayout.lib:library:1.1.0/com.github.ikew0ng:SwipeBackLayout:e1d109e5fe/'
+        ../lib_base_common/build.gradle
+      - find -type f -name "*.java" -exec sed -i -e '/CloudServerManager/d' {} +
+      - cd $$android-floating-action-button$$/..
+      - sed -i -e 's/3.1.1/7.2.2/' build.gradle
+      - sed -i -e '/gradle-mvn-push/d' library/build.gradle
+      - sed -i -e 's/4.4/7.3.3/' gradle/wrapper/gradle-wrapper.properties
+    build:
+      - pushd $$android-floating-action-button$$
+      - gradle assembleRelease
+      - popd
+      - mv $$android-floating-action-button$$/build/outputs/aar/*.aar libs/floatingactionmenu.aar
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: build.gradle|appVersionCode\s=\s(\d+)|.|appVersionName\s=\s'([\d.]+)'
-CurrentVersion: 4.2.0
-CurrentVersionCode: 4020
+CurrentVersion: 5.0.2
+CurrentVersionCode: 5002
