@@ -128,8 +128,46 @@ Builds:
       - sed -i -e '/signingConfig /d' build.gradle
       - gradle assembleRelease
 
+  - versionName: 1.5.0
+    versionCode: 49
+    commit: 78ab45695c60a8d366c56293c46eeeb0841245fe
+    sudo:
+      - apt-get update
+      - apt-get install npm
+      - echo "deb https://deb.debian.org/debian bookworm main" > /etc/apt/sources.list.d/bookworm.list
+      - apt-get update
+      - apt-get install -y -t bookworm openjdk-17-jdk-headless
+      - update-java-alternatives -s java-1.17.0-openjdk-amd64
+    init:
+      - npm remove expo-camera expo-dev-client
+      - npm ci
+    output: android/app/build/outputs/apk/release/*.apk
+    prebuild:
+      - sed -i '/^\s*\[$/{ N; /\n\s*"expo-camera"/{ :loop; N; /\],$/!b loop; d } }'
+        app.config.ts
+      - sed -i -e '/"expo":\ {/a "autolinking":{"android":{"buildFromSource":[".*"]}},'
+        package.json
+      - touch fdroid-build
+      - npx expo prebuild --platform android --clean
+    scanignore:
+      - node_modules/hermes-compiler/hermesc/linux64-bin/hermesc
+      - node_modules/react-native-launch-arguments/android/build.gradle
+      - node_modules/react-native-svg/android/build.gradle
+      - node_modules/react-native-screens/android/build.gradle
+      - node_modules/react-native-keyboard-controller/android/build.gradle
+      - node_modules/react-native-webview/android/build.gradle
+      - node_modules/react-native-safe-area-context/android/build.gradle
+      - node_modules/expo-modules-core/android/ExpoModulesCorePlugin.gradle
+      - node_modules/react-native-edge-to-edge/android/build.gradle
+    scandelete:
+      - node_modules
+    build:
+      - cd android/app
+      - sed -i -e '/signingConfig /d' build.gradle
+      - gradle assembleRelease
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: app.config.ts|versionCode:\s(\d+)|.|version:\s"([\d.]+)"
-CurrentVersion: 1.4.1
-CurrentVersionCode: 47
+CurrentVersion: 1.5.0
+CurrentVersionCode: 49
