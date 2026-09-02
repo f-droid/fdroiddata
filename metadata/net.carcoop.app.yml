@@ -1,0 +1,93 @@
+AntiFeatures:
+  TetheredNet:
+    en-US: Rely on tile.openstreetmap.org.
+Categories:
+  - Finance Manager
+  - Navigation
+  - Time Tracker
+License: GPL-3.0-only
+AuthorName: Hauke Altmann
+AuthorEmail: hauke@haukepauke.de
+WebSite: https://car-coop.net
+SourceCode: https://github.com/haukepauke/car-coop-app
+IssueTracker: https://github.com/haukepauke/car-coop-app/issues
+Changelog: https://github.com/haukepauke/car-coop-app/releases
+
+AutoName: Car Coop
+
+RepoType: git
+Repo: https://github.com/haukepauke/car-coop-app.git
+
+Builds:
+  - versionName: 1.0.5
+    versionCode: 61
+    commit: 4c6f16e5e2b5eb132b25679bfd82c1d3f8a40c78
+    output: build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
+    srclibs:
+      - flutter@stable
+    prebuild:
+      - flutterVersion=$(tr -d '\n' < .flutter-version)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - $$flutter$$/bin/dart run build_runner build --delete-conflicting-outputs
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform="android-arm"
+    ndk: 27.0.12077973
+
+  - versionName: 1.0.5
+    versionCode: 62
+    commit: 4c6f16e5e2b5eb132b25679bfd82c1d3f8a40c78
+    output: build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+    srclibs:
+      - flutter@stable
+    prebuild:
+      - flutterVersion=$(tr -d '\n' < .flutter-version)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+      - $$flutter$$/bin/dart run build_runner build --delete-conflicting-outputs
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform="android-arm64"
+    ndk: 27.0.12077973
+
+  - versionName: 1.0.5
+    versionCode: 63
+    commit: 4c6f16e5e2b5eb132b25679bfd82c1d3f8a40c78
+    output: build/app/outputs/flutter-apk/app-x86_64-release.apk
+    srclibs:
+      - flutter@stable
+    prebuild:
+      - flutterVersion=$(tr -d '\n' < .flutter-version)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+      - $$flutter$$/bin/dart run build_runner build --delete-conflicting-outputs
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform="android-x64"
+    ndk: 27.0.12077973
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^\d+\.\d+\.\d+$
+VercodeOperation:
+  - '%c * 10 + 1'
+  - '%c * 10 + 2'
+  - '%c * 10 + 3'
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 1.0.5
+CurrentVersionCode: 63
