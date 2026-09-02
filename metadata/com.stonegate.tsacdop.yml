@@ -8,8 +8,8 @@ AuthorName: stonegate
 AuthorEmail: tsacdop.app@gmail.com
 AuthorWebSite: https://tsacdop.stonegate.me
 WebSite: https://tsacdop.stonegate.me
-SourceCode: https://github.com/stonega/tsacdop
-IssueTracker: https://github.com/stonega/tsacdop/issues
+SourceCode: https://github.com/tsacdop/tsacdop
+IssueTracker: https://github.com/tsacdop/tsacdop/issues
 Donate: https://www.buymeacoffee.com/stonegate
 Liberapay: stonegate
 Bitcoin: 1PbByzEbvzvXf1qn9eMtmqW9h8ABd2z7tW
@@ -17,7 +17,7 @@ Bitcoin: 1PbByzEbvzvXf1qn9eMtmqW9h8ABd2z7tW
 AutoName: Tsacdop
 
 RepoType: git
-Repo: https://github.com/stonega/tsacdop
+Repo: https://github.com/tsacdop/tsacdop
 
 Builds:
   - versionName: 0.5.9
@@ -60,8 +60,93 @@ Builds:
       - $$flutter$$/bin/flutter build apk --flavor=fdroid
     ndk: r21d
 
-ArchivePolicy: 0
-AutoUpdateMode: None
-UpdateCheckMode: None
-CurrentVersion: 0.6.0
-CurrentVersionCode: 48
+  - versionName: 1.0.1
+    versionCode: 501
+    commit: a8e91ee748833b38fa090490345286379a038c72
+    output: build/app/outputs/flutter-apk/app-armeabi-v7a-fdroid-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+      - test
+      - preview
+      - tool
+    prebuild:
+      - flutterVersion=$(sed -n -E 's/^[[:space:]]*flutter:[[:space:]]*">=([0-9.]+)".*/\1/p'
+        pubspec.yaml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --flavor fdroid --split-per-abi
+        --target-platform android-arm
+    ndk: r28c
+
+  - versionName: 1.0.1
+    versionCode: 502
+    commit: a8e91ee748833b38fa090490345286379a038c72
+    output: build/app/outputs/flutter-apk/app-arm64-v8a-fdroid-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+      - test
+      - preview
+      - tool
+    prebuild:
+      - flutterVersion=$(sed -n -E 's/^[[:space:]]*flutter:[[:space:]]*">=([0-9.]+)".*/\1/p'
+        pubspec.yaml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --flavor fdroid --split-per-abi
+        --target-platform android-arm64
+    ndk: r28c
+
+  - versionName: 1.0.1
+    versionCode: 503
+    commit: a8e91ee748833b38fa090490345286379a038c72
+    output: build/app/outputs/flutter-apk/app-x86_64-fdroid-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+      - test
+      - preview
+      - tool
+    prebuild:
+      - flutterVersion=$(sed -n -E 's/^[[:space:]]*flutter:[[:space:]]*">=([0-9.]+)".*/\1/p'
+        pubspec.yaml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --flavor fdroid --split-per-abi
+        --target-platform android-x64
+    ndk: r28c
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^v[\d.]+$
+VercodeOperation:
+  - 10 * %c + 1
+  - 10 * %c + 2
+  - 10 * %c + 3
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 1.0.1
+CurrentVersionCode: 503
