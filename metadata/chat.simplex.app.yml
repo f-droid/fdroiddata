@@ -3732,6 +3732,62 @@ Builds:
       - ARCHES="aarch64" ./scripts/android/build-android.sh -gs "$$VERCODE$$" || ARCHES="aarch64"
         ./scripts/android/build-android.sh -gs "$$VERCODE$$"
 
+  - versionName: 7.0.2
+    versionCode: 375
+    commit: 4df04bdb3ff94059734ad2da7d2766de6dba2cc7
+    timeout: 60000
+    sudo:
+      - apt-get update
+      - apt-get install -y xz-utils zipalign zip
+      - mkdir -m 0755 /nix
+      - chown vagrant /nix
+      - chown -R vagrant /tmp
+      - sysctl -w kernel.pid_max=65535
+    init:
+      - TAG=$(git tag --points-at HEAD | head -n1) && export TAG=${TAG%%-*}
+      - git checkout ${TAG}-armv7a
+    output: simplex-chat-armeabi-v7a.apk
+    rm:
+      - blog
+      - docs
+      - images
+      - packages
+      - website
+    prebuild:
+      - cp -r ./apps/multiplatform/gradle .
+      - sed -i -e '/maven.pkg.jetbrains.space/d' ./apps/multiplatform/{build,settings}.gradle.kts
+    build:
+      - gradle -v
+      - export USER=vagrant
+      - ARCHES="armv7a" ./scripts/android/build-android.sh -gs "$$VERCODE$$" || ARCHES="armv7a"
+        ./scripts/android/build-android.sh -gs "$$VERCODE$$"
+
+  - versionName: 7.0.2
+    versionCode: 376
+    commit: 4df04bdb3ff94059734ad2da7d2766de6dba2cc7
+    timeout: 60000
+    sudo:
+      - apt-get update
+      - apt-get install -y xz-utils zipalign zip
+      - mkdir -m 0755 /nix
+      - chown vagrant /nix
+      - chown -R vagrant /tmp
+    output: simplex-chat-arm64-v8a.apk
+    rm:
+      - blog
+      - docs
+      - images
+      - packages
+      - website
+    prebuild:
+      - cp -r ./apps/multiplatform/gradle .
+      - sed -i -e '/maven.pkg.jetbrains.space/d' ./apps/multiplatform/{build,settings}.gradle.kts
+    build:
+      - gradle -v
+      - export USER=vagrant
+      - ARCHES="aarch64" ./scripts/android/build-android.sh -gs "$$VERCODE$$" || ARCHES="aarch64"
+        ./scripts/android/build-android.sh -gs "$$VERCODE$$"
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v[\d.]+$
 VercodeOperation:
@@ -3739,5 +3795,5 @@ VercodeOperation:
   - '%c+1'
 UpdateCheckData: 
   apps/multiplatform/gradle.properties|android\.version_code\s*=\s*(\d+)|apps/multiplatform/gradle.properties|android\.version_name\s*=\s*([\d.]+)
-CurrentVersion: 7.0.1
-CurrentVersionCode: 373
+CurrentVersion: 7.0.2
+CurrentVersionCode: 376
