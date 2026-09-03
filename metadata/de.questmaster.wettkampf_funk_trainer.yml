@@ -346,6 +346,93 @@ Builds:
         android-x64
     ndk: r28c
 
+  - versionName: 3.0.3
+    versionCode: 531
+    commit: 475126139ecabb7ed3a01df9250f72f2af0b5786
+    subdir: flutter
+    sudo:
+      - apt-get update
+      - apt-get install -y rustup gcc libc-dev
+    output: build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - flutter/ios
+      - flutter/windows
+    prebuild:
+      - flutterVersion=$(sed -n -E "s/^ENV FLUTTER_VERSION=(.*)/\1/p" ../Dockerfile.mobile)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PUB_CACHE=$$flutter$$/pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - rustup default 1.94.1
+      - rustup target add armv7-linux-androideabi
+      - cargo install cargo-ndk@4.1.2 --locked
+    build:
+      - export PUB_CACHE=$$flutter$$/pub-cache
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform
+        android-arm
+    ndk: r28c
+
+  - versionName: 3.0.3
+    versionCode: 532
+    commit: 475126139ecabb7ed3a01df9250f72f2af0b5786
+    subdir: flutter
+    sudo:
+      - apt-get update
+      - apt-get install -y rustup gcc libc-dev
+    output: build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - flutter/ios
+      - flutter/windows
+    prebuild:
+      - flutterVersion=$(sed -n -E "s/^ENV FLUTTER_VERSION=(.*)/\1/p" ../Dockerfile.mobile)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PUB_CACHE=$$flutter$$/pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - rustup default 1.94.1
+      - rustup target add aarch64-linux-android
+      - cargo install cargo-ndk@4.1.2 --locked
+    build:
+      - export PUB_CACHE=$$flutter$$/pub-cache
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform
+        android-arm64
+    ndk: r28c
+
+  - versionName: 3.0.3
+    versionCode: 533
+    commit: 475126139ecabb7ed3a01df9250f72f2af0b5786
+    subdir: flutter
+    sudo:
+      - apt-get update
+      - apt-get install -y rustup gcc libc-dev
+    output: build/app/outputs/flutter-apk/app-x86_64-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - flutter/ios
+      - flutter/windows
+    prebuild:
+      - flutterVersion=$(sed -n -E "s/^ENV FLUTTER_VERSION=(.*)/\1/p" ../Dockerfile.mobile)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PUB_CACHE=$$flutter$$/pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - rustup default 1.94.1
+      - rustup target add x86_64-linux-android
+      - cargo install cargo-ndk@4.1.2 --locked
+    build:
+      - export PUB_CACHE=$$flutter$$/pub-cache
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform
+        android-x64
+    ndk: r28c
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 VercodeOperation:
@@ -353,5 +440,5 @@ VercodeOperation:
   - '%c * 10 + 2'
   - '%c * 10 + 3'
 UpdateCheckData: flutter/pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 3.0.2
-CurrentVersionCode: 523
+CurrentVersion: 3.0.3
+CurrentVersionCode: 533
