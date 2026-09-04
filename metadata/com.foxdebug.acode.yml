@@ -1776,8 +1776,39 @@ Builds:
       - cp ./src/boot.js ./www/build/boot.js
       - cordova build android --release -- --packageType=apk
 
+  - versionName: 1.13.3
+    versionCode: 1008
+    commit: c735b50be3e38b89879695b4cfe5cfc08ef6d8fd
+    sudo:
+      - echo "deb https://deb.debian.org/debian forky main" > /etc/apt/sources.list.d/forky.list
+      - apt-get update
+      - apt-get install -y -t forky npm
+      - npm install -g cordova @rspack/cli
+    output: platforms/android/app/build/outputs/apk/release/app-release-unsigned.apk
+    rm:
+      - src/plugins/iap
+      - src/plugins/proot
+    prebuild:
+      - sdkmanager 'build-tools;36.0.0'
+      - sed -i -e '/iap/d' -e '/proot/d' -e '/com.foxdebug.acode.rk.auth/s/{},/{},/'
+        package.json
+      - sed -i -e '/iap.startConnection/,/Purchase error/c} catch (e) {' src/main.js
+      - sed -i -e '/Donate/d' src/settings/mainSettings.js
+      - sed -i -e 's/acodefree/acode/' utils/config.js
+      - sed -i -e 's/build/prepare/' utils/scripts/build.sh
+      - sed -i -e '/core-google-shortcuts/d' src/plugins/system/plugin.xml
+      - sed -i '/return prettier\.format/,/});/c\    return content;' 'hooks/modify-java-files.js'
+      - mkdir -p www/css/build www/js/build
+      - NPM_CONFIG_AUDIT=false NPM_CONFIG_FUND=false npm run setup
+    scandelete:
+      - node_modules
+    build:
+      - node ./utils/config.js prod paid
+      - rspack --mode production
+      - cordova build android --release -- --packageType=apk
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v?[\d.]+$
 UpdateCheckData: config.xml|android-versionCode="(\d+)"|.|version="([\d.]+)"
-CurrentVersion: 1.13.1
-CurrentVersionCode: 1007
+CurrentVersion: 1.13.3
+CurrentVersionCode: 1008
