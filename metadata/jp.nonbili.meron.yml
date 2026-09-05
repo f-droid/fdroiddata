@@ -1,0 +1,54 @@
+Categories:
+  - Email
+License: AGPL-3.0-only
+SourceCode: https://github.com/nonbili/meron
+IssueTracker: https://github.com/nonbili/meron/issues
+Donate: https://github.com/sponsors/nonbili
+Liberapay: rnons
+
+RepoType: git
+Repo: https://github.com/nonbili/meron
+Binaries: https://github.com/nonbili/meron/releases/download/android/v%v/meron-%v.apk
+
+Builds:
+  - versionName: 0.3.1
+    versionCode: 31
+    commit: c03bc1b8d3b526b9a5e481d0e28ab08dc7000627
+    subdir: mobile
+    sudo:
+      - sysctl fs.inotify.max_user_watches=524288 || true
+      - echo "deb https://deb.debian.org/debian forky main" > /etc/apt/sources.list.d/forky.list
+      - apt-get update
+      - apt-get install -y build-essential rustup
+      - apt-get install -y -t forky npm
+      - npm -g install --allow-scripts=bun bun@1.4.0
+      - mkdir -p /usr/local/lib/android
+      - ln -sfn /opt/android-sdk /usr/local/lib/android/sdk
+      - install -d -o vagrant -g vagrant /home/runner/work/meron/meron/meron-core/target
+    gradle:
+      - yes
+    output: android/build/outputs/apk/release/android-universal-release-unsigned.apk
+    prebuild:
+      - sed -i '/foojay-resolver/d' settings.gradle
+      - sed -i '/dependsOn tasks.named("packageRustCoreAndroid")/d' android/build.gradle
+      - cd ..
+      - bun scripts/i18n/catalog.ts generate
+      - rm -f package.json
+    build:
+      - export ANDROID_NDK_HOME=/usr/local/lib/android/sdk/ndk/27.3.13750724
+      - rustup default 1.96.1
+      - rustup target add aarch64-linux-android armv7-linux-androideabi
+      - export PATH="/home/vagrant/.cargo/bin:$PATH"
+      - export CARGO_TARGET_DIR=/home/runner/work/meron/meron/meron-core/target
+      - cd ..
+      - PROFILE=release mobile/scripts/package-rust-core-android.sh
+    ndk: 27.3.13750724
+
+AllowedAPKSigningKeys: d377b8ae9a31768658107674ebdbf6bf2d5859277a0a952ab44de0837613d204
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^android/v[0-9.]+$
+UpdateCheckData: 
+  mobile/android/build.gradle|releaseVersionCode\s*=\s*(\d+)|.|releaseVersionName\s*=\s*"([^"]+)"
+CurrentVersion: 0.3.1
+CurrentVersionCode: 31
