@@ -1,0 +1,42 @@
+Categories:
+  - Game Helper
+  - Internet
+License: MIT
+AuthorName: Taracair
+AuthorEmail: TARACAIR@GMAIL.COM
+SourceCode: https://github.com/Taracair/BlowTorch2
+IssueTracker: https://github.com/Taracair/BlowTorch2/issues
+Changelog: https://github.com/Taracair/BlowTorch2/releases
+
+AutoName: BlowTorch 2
+
+RepoType: git
+Repo: https://github.com/Taracair/BlowTorch2.git
+
+Builds:
+  - versionName: 2.4.3
+    versionCode: 263
+    commit: aa17f4a92ad2d46677103b9e37b64ebebb52ecdf
+    subdir: BT_Free
+    sudo:
+      - apt-get update
+      - apt-get install -y gcc-multilib libc6-dev-i386 make
+    gradle:
+      - production
+    prebuild:
+      - sed -i -e '/^org.gradle.java.home=/d' ../gradle.properties
+      - echo 'blowtorch.fdroid=true' >> ../gradle.properties
+      - sdkmanager "platforms;android-36" "build-tools;36.0.0"
+    scandelete:
+      - LuaJIT-2.0.5/src/luajit
+    build:
+      - export NDK_HOME=$$NDK$$ ANDROID_HOME=$$SDK$$
+      - cd ..
+      - ./build_ndk_libraries.sh
+    ndk: r26b
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^v[0-9.]+$
+UpdateCheckData: BT_Free/build.gradle|versionCode\s+(\d+)|.|versionName\s+"([\d.]+)"
+CurrentVersion: 2.4.3
+CurrentVersionCode: 263
