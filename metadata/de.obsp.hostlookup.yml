@@ -1,0 +1,76 @@
+AntiFeatures:
+  TetheredNet:
+    en-US: "The app enriches discovered IP addresses with network, location, and ASN
+      information from RIPEstat (including the maxmind-geo-lite endpoint) over HTTPS.
+      The resolver list and RIPEstat endpoint cannot be changed in settings. Providers
+      see your requests and public IP address.\n"
+  NonFreeNet:
+    en-US: "DNS queries are sent to mhost's fixed list of predefined public resolvers
+      over UDP, TCP, DNS-over-TLS, and DNS-over-HTTPS. UDP and TCP queries are unencrypted.
+      The resolver list cannot be changed in settings.\n"
+Categories:
+  - Connectivity
+License: Apache-2.0
+AuthorName: devkamiki
+AuthorEmail: kamiki@disroot.org
+AuthorWebSite: https://github.com/devkamiki
+SourceCode: https://github.com/devkamiki/hostlookup
+IssueTracker: https://github.com/devkamiki/hostlookup/issues
+Changelog: https://github.com/devkamiki/hostlookup/releases
+
+AutoName: HostLookup
+
+RepoType: git
+Repo: https://github.com/devkamiki/hostlookup
+Binaries: https://github.com/devkamiki/hostlookup/releases/download/v%v/HostLookup-%v.apk
+
+Builds:
+  - versionName: 0.2.1
+    versionCode: 3
+    commit: e9f79c0f7acbbe1d4b6fd47e5119973d4e99d60c
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y gcc libc-dev rustup
+    gradle:
+      - yes
+    srclibs:
+      - reproducible-apk-tools@v0.3.0
+    prebuild:
+      - rustup default 1.95.0
+      - rustup target add aarch64-linux-android x86_64-linux-android
+    ndk: 28.2.13676358
+    postbuild:
+      - mv $$OUT$$ unaligned.apk
+      - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
+        --replace unaligned.apk $$OUT$$
+
+AllowedAPKSigningKeys: 9e3898a2aa7424df7c08938f0a4250e3b40751f22a12decfdb394590b8fbcc56
+
+MaintainerNotes: |
+  The native library is cross-compiled from Rust source during the Gradle
+  build via native/build-android.sh.  Cargo uses --locked; Cargo.lock is
+  tracked in the repository.  Both arm64-v8a and x86_64 targets are built.
+
+  The JVM half of the TLS certificate verifier (rustls-platform-verifier) is
+  compiled from the vendored Kotlin source in
+  third_party/rustls-platform-verifier-android, pinned to upstream revision
+  996b1c903491641b17b3c9afb65d1352f6fc6b76 (tag v/0.7.0).  The precompiled
+  AAR previously in app/libs/ has been removed.
+
+  The Cargo Android support crate still appears in Cargo.lock but its AAR
+  is not used by Gradle or packaged into the APK.  Disclose this to the
+  scanner as scanignore if flagged.
+
+  Network behaviour: DNS queries go to mhost's fixed public resolver list
+  over UDP, TCP, DoT, and DoH.  IP enrichment uses RIPEstat.  See the
+  AntiFeatures section and docs/FDROID.md in the source tree for details.
+
+  Fastlane store metadata is in fastlane/metadata/android/en-US/.
+  Run `fdroid rewritemeta de.obsp.hostlookup` and
+  `fdroid lint de.obsp.hostlookup` after any edit.
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: 0.2.1
+CurrentVersionCode: 3
