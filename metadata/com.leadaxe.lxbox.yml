@@ -198,6 +198,188 @@ Builds:
       - cd $ORIG
       - mv $repo com.leadaxe.lxbox
 
+  - versionName: 2.23.1
+    versionCode: 22301501
+    commit: 42101434eb9cc172259f5f734a5186b9f4b67df7
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y gcc libc-dev make golang-go ninja-build file xz-utils
+      - mkdir -p /home/runner/work/LxBox
+      - chown -R vagrant /home/runner
+      - export CPUS_MAX=16
+      - export CPUS=$(getconf _NPROCESSORS_ONLN)
+      - for (( c=$CPUS_MAX; c<$CPUS; c++ )) ; do echo 0 > /sys/devices/system/cpu/cpu$c/online
+        ; done
+    output: build/app/outputs/flutter-apk/app-release.apk
+    binary: https://github.com/Leadaxe/LxBox/releases/download/v%v/LxBox-v%v-armeabi-v7a.apk
+    srclibs:
+      - flutter@stable
+      - go@release-branch.go1.26
+      - sing-box-lx@f402c1cfc0c45400525deec0ecf1098c15f2b9cf
+      - cronet-go@45832ab074849607406baa3e3a2c4660274602ed
+    rm:
+      - app/ios
+      - app/linux
+      - app/macos
+      - app/web
+      - app/windows
+    prebuild:
+      - export FLUTTER_VERSION=$(tr -d '[:space:]' < android/flutter.version)
+      - '[[ $FLUTTER_VERSION ]]'
+      - git -C $$flutter$$ checkout -q -f $FLUTTER_VERSION
+      - export NDK_VERSION=$(grep ndkVersion $$flutter$$/packages/flutter_tools/gradle/src/main/kotlin/FlutterExtension.kt
+        | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
+      - '[[ $NDK_VERSION ]]'
+      - export COMPILE_SDK=$(grep -oE "compileSdkVersion. Int = [0-9]+" $$flutter$$/packages/flutter_tools/gradle/src/main/kotlin/FlutterExtension.kt
+        | grep -oE "[0-9]+$")
+      - '[[ $COMPILE_SDK ]]'
+      - sdkmanager "ndk;$NDK_VERSION" "platforms;android-$COMPILE_SDK"
+      - "sed -i -e 's/^version: .*/version: $$VERSION$$+$$VERCODE$$/' pubspec.yaml"
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+    scandelete:
+      - app/.pub-cache
+    build:
+      - export repo=/home/runner/work/LxBox/LxBox
+      - cd ../..
+      - export ORIG=$(pwd)
+      - mv com.leadaxe.lxbox $repo
+      - cd $repo/app
+      - export NDK_VERSION=$(grep ndkVersion $$flutter$$/packages/flutter_tools/gradle/src/main/kotlin/FlutterExtension.kt
+        | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
+      - export ANDROID_NDK_HOME=$$SDK$$/ndk/$NDK_VERSION
+      - export CORE_VERSION=$(tr -d '[:space:]' < android/libbox.version)
+      - '[[ $CORE_VERSION ]]'
+      - git -C $$sing-box-lx$$ checkout -q -f $CORE_VERSION
+      - git -C $$sing-box-lx$$ submodule update --init submodules/sing-tun submodules/wireguard-go
+        submodules/gvisor
+      - export GO_VERSION=$(tr -d '[:space:]' < $$sing-box-lx$$/go.version)
+      - '[[ $GO_VERSION ]]'
+      - git -C $$go$$ checkout -q -f $GO_VERSION
+      - pushd $$sing-box-lx$$
+      - sed -i -e 's/^\tcheckJavaVersion()$//' -e '/\/\/ Build legacy variant/,/},
+        bindTarget)/d' cmd/internal/build_libbox/main.go
+      - export GOROOT_BOOTSTRAP=$(go env GOROOT)
+      - pushd $$go$$/src
+      - ./make.bash
+      - popd
+      - export GOROOT=$$go$$
+      - export GOPATH=$(pwd)/.gopath
+      - export PATH="$GOROOT/bin:$GOPATH/bin:$PATH"
+      - export GOMODCACHE=$(pwd)/.gomodcache
+      - export GOFLAGS=-mod=mod
+      - go mod download github.com/sagernet/cronet-go/lib/android_arm
+      - pushd $$cronet-go$$
+      - for arch in arm; do go run ./cmd/build-naive --target=android/$arch build
+        2>&1 | tail -60; go run ./cmd/build-naive --target=android/$arch package --local
+        2>&1 | tail -15; ref=$(find $GOMODCACHE/github.com/sagernet/cronet-go/lib
+        -maxdepth 1 -type d -name "android_$arch@*" | head -1)/libcronet.a; test -f
+        "$ref"; cmp lib/android_$arch/libcronet.a "$ref"; done
+      - popd
+      - make lib_install
+      - make lib_android
+      - popd
+      - mkdir -p android/app/libs
+      - mv $$sing-box-lx$$/libbox.aar android/app/libs/libbox.aar
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export LXBOX_ABI_FILTER=armeabi-v7a
+      - $$flutter$$/bin/flutter build apk --release --target-platform=android-arm
+      - cd $ORIG
+      - mv $repo com.leadaxe.lxbox
+
+  - versionName: 2.23.1
+    versionCode: 22301502
+    commit: 42101434eb9cc172259f5f734a5186b9f4b67df7
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y gcc libc-dev make golang-go ninja-build file xz-utils
+      - mkdir -p /home/runner/work/LxBox
+      - chown -R vagrant /home/runner
+      - export CPUS_MAX=16
+      - export CPUS=$(getconf _NPROCESSORS_ONLN)
+      - for (( c=$CPUS_MAX; c<$CPUS; c++ )) ; do echo 0 > /sys/devices/system/cpu/cpu$c/online
+        ; done
+    output: build/app/outputs/flutter-apk/app-release.apk
+    binary: https://github.com/Leadaxe/LxBox/releases/download/v%v/LxBox-v%v-arm64-v8a.apk
+    srclibs:
+      - flutter@stable
+      - go@release-branch.go1.26
+      - sing-box-lx@f402c1cfc0c45400525deec0ecf1098c15f2b9cf
+      - cronet-go@45832ab074849607406baa3e3a2c4660274602ed
+    rm:
+      - app/ios
+      - app/linux
+      - app/macos
+      - app/web
+      - app/windows
+    prebuild:
+      - export FLUTTER_VERSION=$(tr -d '[:space:]' < android/flutter.version)
+      - '[[ $FLUTTER_VERSION ]]'
+      - git -C $$flutter$$ checkout -q -f $FLUTTER_VERSION
+      - export NDK_VERSION=$(grep ndkVersion $$flutter$$/packages/flutter_tools/gradle/src/main/kotlin/FlutterExtension.kt
+        | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
+      - '[[ $NDK_VERSION ]]'
+      - export COMPILE_SDK=$(grep -oE "compileSdkVersion. Int = [0-9]+" $$flutter$$/packages/flutter_tools/gradle/src/main/kotlin/FlutterExtension.kt
+        | grep -oE "[0-9]+$")
+      - '[[ $COMPILE_SDK ]]'
+      - sdkmanager "ndk;$NDK_VERSION" "platforms;android-$COMPILE_SDK"
+      - "sed -i -e 's/^version: .*/version: $$VERSION$$+$$VERCODE$$/' pubspec.yaml"
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+    scandelete:
+      - app/.pub-cache
+    build:
+      - export repo=/home/runner/work/LxBox/LxBox
+      - cd ../..
+      - export ORIG=$(pwd)
+      - mv com.leadaxe.lxbox $repo
+      - cd $repo/app
+      - export NDK_VERSION=$(grep ndkVersion $$flutter$$/packages/flutter_tools/gradle/src/main/kotlin/FlutterExtension.kt
+        | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
+      - export ANDROID_NDK_HOME=$$SDK$$/ndk/$NDK_VERSION
+      - export CORE_VERSION=$(tr -d '[:space:]' < android/libbox.version)
+      - '[[ $CORE_VERSION ]]'
+      - git -C $$sing-box-lx$$ checkout -q -f $CORE_VERSION
+      - git -C $$sing-box-lx$$ submodule update --init submodules/sing-tun submodules/wireguard-go
+        submodules/gvisor
+      - export GO_VERSION=$(tr -d '[:space:]' < $$sing-box-lx$$/go.version)
+      - '[[ $GO_VERSION ]]'
+      - git -C $$go$$ checkout -q -f $GO_VERSION
+      - pushd $$sing-box-lx$$
+      - sed -i -e 's/^\tcheckJavaVersion()$//' -e '/\/\/ Build legacy variant/,/},
+        bindTarget)/d' cmd/internal/build_libbox/main.go
+      - export GOROOT_BOOTSTRAP=$(go env GOROOT)
+      - pushd $$go$$/src
+      - ./make.bash
+      - popd
+      - export GOROOT=$$go$$
+      - export GOPATH=$(pwd)/.gopath
+      - export PATH="$GOROOT/bin:$GOPATH/bin:$PATH"
+      - export GOMODCACHE=$(pwd)/.gomodcache
+      - export GOFLAGS=-mod=mod
+      - go mod download github.com/sagernet/cronet-go/lib/android_arm64
+      - pushd $$cronet-go$$
+      - for arch in arm64; do go run ./cmd/build-naive --target=android/$arch build
+        2>&1 | tail -60; go run ./cmd/build-naive --target=android/$arch package --local
+        2>&1 | tail -15; ref=$(find $GOMODCACHE/github.com/sagernet/cronet-go/lib
+        -maxdepth 1 -type d -name "android_$arch@*" | head -1)/libcronet.a; test -f
+        "$ref"; cmp lib/android_$arch/libcronet.a "$ref"; done
+      - popd
+      - make lib_install
+      - make lib_android
+      - popd
+      - mkdir -p android/app/libs
+      - mv $$sing-box-lx$$/libbox.aar android/app/libs/libbox.aar
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export LXBOX_ABI_FILTER=arm64-v8a
+      - $$flutter$$/bin/flutter build apk --release --target-platform=android-arm64
+      - cd $ORIG
+      - mv $repo com.leadaxe.lxbox
+
 AllowedAPKSigningKeys: 7987aec41d6521b56bdeec202e383edcff27963918b109b69791bf1f6636c1c4
 
 MaintainerNotes: |-
@@ -210,5 +392,5 @@ VercodeOperation:
   - '%c + 1'
   - '%c + 2'
 UpdateCheckData: app/pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 2.23.0
-CurrentVersionCode: 22300502
+CurrentVersion: 2.23.1
+CurrentVersionCode: 22301502
