@@ -1564,8 +1564,52 @@ Builds:
       - ios
     prebuild: sed -i -e '/ios/d' -e '/desktop/d' ../settings.gradle
 
+  - versionName: 4.0.0
+    versionCode: 911
+    commit: b959535378274404d1609118250a69fa24e53319
+    subdir: android
+    gradle:
+      - yes
+    rm:
+      - desktop
+      - ios
+    prebuild:
+      - sed -i -e '/ios/d' -e '/desktop/d' ../settings.gradle
+      - sed -i -e 's/appVersionCode = .*/appVersionCode = $$VERCODE$$/' ../build.gradle
+
+  - versionName: 4.0.0
+    versionCode: 912
+    commit: b959535378274404d1609118250a69fa24e53319
+    subdir: android
+    gradle:
+      - yes
+    binary: 
+      https://github.com/00-Evan/shattered-pixel-dungeon/releases/download/v%v/ShatteredPD-v%v-Android.apk
+    srclibs:
+      - reproducible-apk-tools@v0.3.2
+    rm:
+      - desktop
+      - ios
+    prebuild: sed -i -e '/ios/d' -e '/desktop/d' ../settings.gradle
+    postbuild:
+      - $$reproducible-apk-tools$$/inplace-fix.py fix-newlines "$$OUT$$" 'assets/gdx/*.atlas'
+        'assets/gdx/*.json' 'assets/messages/actors/*.properties' 'assets/messages/items/*.properties'
+        'assets/messages/journal/*.properties' 'assets/messages/levels/*.properties'
+        'assets/messages/misc/*.properties' 'assets/messages/plants/*.properties'
+        'assets/messages/scenes/*.properties' 'assets/messages/ui/*.properties' 'assets/messages/windows/*.properties'
+      - mv $$OUT$$ unaligned.apk
+      - $$reproducible-apk-tools$$/zipalign.py --page-size 4 --pad-like-apksigner
+        --replace unaligned.apk $$OUT$$
+
+AllowedAPKSigningKeys:
+  - 92a8d7a96447565aed749b12b03251842d65a7354ba67dc2443f4224d772f61c
+  - d45f760b89608b4b253a3b160dc2707f1ff4e8dd8ca4d2e8e1b81c2c72d81753
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v.*$
+VercodeOperation:
+  - '%c - 1'
+  - '%c'
 UpdateCheckData: build.gradle|appVersionCode = (\d+)|.|appVersionName = ['"](.*)['"]
-CurrentVersion: 3.3.8
-CurrentVersionCode: 896
+CurrentVersion: 4.0.0
+CurrentVersionCode: 912
