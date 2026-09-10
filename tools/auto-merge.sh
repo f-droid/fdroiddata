@@ -4,6 +4,11 @@ set -e
 
 cd "$(dirname "$(dirname "${BASH_SOURCE[0]}")")"
 
+if [ -z "$GITLAB_TOKEN" ]; then
+  echo "Please set GITLAB_TOKEN env variable"
+  exit 1
+fi
+
 mr=$1
 glab="glab --repo fdroid/fdroiddata"
 function retry {
