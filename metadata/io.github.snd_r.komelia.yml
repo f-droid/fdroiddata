@@ -8,6 +8,8 @@ AuthorName: Snd-R
 SourceCode: https://github.com/Snd-R/Komelia
 IssueTracker: https://github.com/Snd-R/Komelia/issues
 
+AutoName: Komelia
+
 RepoType: git
 Repo: https://github.com/Snd-R/Komelia
 
@@ -299,9 +301,35 @@ Builds:
     gradleprops:
       - snd.android.variant=fdroid
 
+  - versionName: 0.19.2
+    versionCode: 23
+    commit: 9331f4055cc7fbf1266b933bb8312d4e6770d615
+    subdir: komelia-app/androidApp
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y ninja-build pkg-config nasm automake autopoint libtool
+        gettext texinfo make libltdl-dev meson cmake
+      - echo "deb https://deb.debian.org/debian forky main" > /etc/apt/sources.list.d/forky.list
+      - apt-get update
+      - apt-get install -y -t forky npm
+    gradle:
+      - yes
+    scandelete:
+      - third_party
+    build:
+      - cd ../..
+      - ANDROID_NDK_PATH=$$NDK$$ ANDROID_SDK_PATH=$$SDK$$ ./cmake/android-build.sh
+        aarch64
+      - gradle android-aarch64_copyJniLibs
+      - gradle buildEpubReaders
+    ndk: r28c
+    gradleprops:
+      - snd.android.variant=fdroid
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-UpdateCheckData: komelia-app/build.gradle.kts|versionCode = (\d+)|gradle/libs.versions.toml|app-version
+UpdateCheckData: gradle/libs.versions.toml|android-versionCode = "(\d+)"|gradle/libs.versions.toml|app-version
   = "(.+)"
-CurrentVersion: 0.18.5
-CurrentVersionCode: 19
+CurrentVersion: 0.19.2
+CurrentVersionCode: 23
