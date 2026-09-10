@@ -1,0 +1,57 @@
+Categories:
+  - Cloud Storage & File Sync
+  - Password & 2FA
+  - Security
+License: GPL-3.0-or-later
+AuthorName: Hans Bjørck-Braun
+AuthorWebSite: https://deltasync.bjoerck-braun.dk
+WebSite: https://deltasync.bjoerck-braun.dk
+SourceCode: https://gitlab.com/Star95/keepass-deltasync
+IssueTracker: https://gitlab.com/Star95/keepass-deltasync/-/issues
+Changelog: https://gitlab.com/Star95/keepass-deltasync/-/blob/HEAD/CHANGELOG.md
+
+AutoName: DeltaSync
+
+RepoType: git
+Repo: https://gitlab.com/Star95/keepass-deltasync.git
+Binaries: 
+  https://github.com/HBBSoftware/Keepass-DeltaSync/releases/download/android/v%v/DeltaSync-%v.apk
+
+Builds:
+  - versionName: 0.4.2
+    versionCode: 7
+    commit: dce1172fbd5353be89dbc417616e1ff253c916e1
+    subdir: android/app
+    sudo:
+      - apt-get update
+      - apt-get install -y -t trixie-backports golang-go
+    gradle:
+      - yes
+    srclibs:
+      - go@go1.26.3
+    prebuild: sdkmanager "platforms;android-35" "build-tools;35.0.0"
+    build:
+      - pushd $$go$$/src
+      - ./make.bash
+      - popd
+      - export GOROOT=$$go$$
+      - export GOPATH="$HOME/go"
+      - export PATH="$GOROOT/bin:$GOPATH/bin:$PATH"
+      - export ANDROID_NDK_HOME=$$NDK$$
+      - cd ../../client
+      - go install golang.org/x/mobile/cmd/gomobile
+      - go install golang.org/x/mobile/cmd/gobind
+      - gomobile init
+      - mkdir -p ../android/libs
+      - gomobile bind -trimpath -androidapi 21 -o deltasync.aar ./mobile
+      - mv deltasync.aar ../android/libs/
+      - cd ../android/libs
+      - unzip -p deltasync.aar classes.jar > deltasync-classes.jar
+    ndk: 25.2.9519653
+
+AllowedAPKSigningKeys: 476e556a66d2614c6e43509fcc081ff54f1334e39f0ca1162e606c51ebd50d68
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^android/v[\d.]+$
+CurrentVersion: 0.4.2
+CurrentVersionCode: 7
