@@ -730,8 +730,31 @@ Builds:
       - export PUB_CACHE=$(pwd)/.pub-cache
       - $$flutter$$/bin/flutter build apk --target lib/main_fdroid.dart
 
+  - versionName: 2.15.1
+    versionCode: 73
+    commit: b684ffcca118e7d9a21e2c585c4c9e7ca218597f
+    output: build/app/outputs/apk/release/app-release-unsigned.apk
+    srclibs:
+      - flutter@3.47.2
+    rm:
+      - ios
+    prebuild:
+      - sed -i -e '/keystoreProperties.load(new FileInputStream(keystorePropertiesFile))/d'
+        android/app/build.gradle.kts
+      - sed -i -e '/  patrol/d' -e '/in_app_review/d' pubspec.yaml
+      - sed -i -e '/  patrol/,/version/d' -e '/in_app_review\|dispose_scope\|shelf\|http_multi_server/,/version/d'
+        pubspec.lock
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --target lib/main_fdroid.dart
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 2.15.0
-CurrentVersionCode: 72
+CurrentVersion: 2.15.1
+CurrentVersionCode: 73
