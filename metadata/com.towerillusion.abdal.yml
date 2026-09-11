@@ -1,0 +1,42 @@
+Categories:
+  - Board Game
+License: MIT
+AuthorName: Tower Illusion II
+SourceCode: https://github.com/towerillusionii/Abstract-Dots-and-Lines
+IssueTracker: https://github.com/towerillusionii/Abstract-Dots-and-Lines/issues
+
+RepoType: git
+Repo: https://github.com/towerillusionii/Abstract-Dots-and-Lines.git
+
+Builds:
+  - versionName: 1.0.0
+    versionCode: 1
+    commit: a3a5c1acbbbd208ee1de41a1ab56ae9167573e43
+    sudo:
+      - apt-get update
+      - apt-get install -y pkgconf scons g++ strip-nondeterminism
+    output: abstract-dots-and-lines.apk
+    srclibs:
+      - Godot@5b4e0cb0fd279832bbdd69fed5354d4e5ad26f88
+    build:
+      - pushd $$Godot$$
+      - export ANDROID_NDK_ROOT=$$NDK$$
+      - export ANDROID_HOME=$$SDK$$
+      - export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+      - export SCONS="scons -j `nproc` verbose=no warnings=no progress=no"
+      - $SCONS target=editor platform=linux
+      - export SCONS_ARGS="production=yes swappy=no "
+      - export SCONS_ARGS="$SCONS_ARGS generate_android_binaries=yes"
+      - export SCONS_ARGS="$SCONS_ARGS generate_apk=yes"
+      - $SCONS target=template_release platform=android arch=arm64 $SCONS_ARGS
+      - popd
+      - mv $$Godot$$/bin/android_release.apk ./android_release.apk
+      - export BUILD_ARGS="--headless --export-release F-Droid"
+      - $$Godot$$/bin/godot.linuxbsd.editor.x86_64 $BUILD_ARGS abstract-dots-and-lines.apk
+    ndk: r29
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: export_presets.cfg|version/code=(\d+)|.|version/name="([\d.]+)"
+CurrentVersion: 1.0.0
+CurrentVersionCode: 1
