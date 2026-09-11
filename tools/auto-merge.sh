@@ -4,8 +4,8 @@ set -e
 
 cd "$(dirname "$(dirname "${BASH_SOURCE[0]}")")"
 
-if [ -z "$GITLAB_TOKEN" ]; then
-  echo "Please set GITLAB_TOKEN env variable"
+if [ "$(glab auth status 2>&1 | grep Unauthorized | wc -l)" -gt 0 ]; then
+  echo "Please authenticate with glab auth login or set GITLAB_TOKEN env variable with a valid token"
   exit 1
 fi
 
