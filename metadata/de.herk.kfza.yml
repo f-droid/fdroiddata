@@ -1,0 +1,35 @@
+Categories:
+  - Science & Education
+License: MIT
+AuthorName: HerkDev
+SourceCode: https://github.com/HerkDev/KFZ-A
+IssueTracker: https://github.com/HerkDev/KFZ-A/issues
+
+AutoName: KFZ-A
+
+RepoType: git
+Repo: https://github.com/HerkDev/KFZ-A.git
+Binaries: https://github.com/HerkDev/KFZ-A/releases/download/v%v/KFZ-A-%v.apk
+
+Builds:
+  - versionName: 1.0.2
+    versionCode: 3
+    commit: 16a48cf4f48fdb9f754f3b175dc0bec22d62bb8e
+    subdir: app
+    gradle:
+      - yes
+    srclibs:
+      - reproducible-apk-tools@v0.3.0
+    postbuild:
+      - $$reproducible-apk-tools$$/inplace-fix.py --zipalign fix-newlines $$OUT$$
+        'assets/data/*.json' 'res/*.svg' 'assets/LICENSE' 'assets/*.md'
+      - mv $$OUT$$ unaligned.apk
+      - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
+        --replace unaligned.apk $$OUT$$
+
+AllowedAPKSigningKeys: 7b9a30784de829ef3424c9eb950af3db117a0328a27777e88a56f61c8faccd17
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: 1.0.2
+CurrentVersionCode: 3
