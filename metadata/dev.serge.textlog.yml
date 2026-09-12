@@ -101,6 +101,94 @@ Builds:
       - cd dev.serge.textlog
     ndk: r28c
 
+  - versionName: 0.8.0
+    versionCode: 4001
+    commit: cb7d2bab748a60a86567add30ced196d1abf8dbb
+    output: build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
+    binary: 
+      https://github.com/Faultless/textlog_flutter/releases/download/v%v/textlog-%v-armeabi-v7a.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+      - macos
+      - web
+      - test
+    prebuild:
+      - FLUTTER_VERSION=$(sed -n -E 's/.*flutter-version:[[:space:]]*([^[:space:]]+).*/\1/p'
+        .github/workflows/pages.yml)
+      - '[[ $FLUTTER_VERSION ]]'
+      - git -C $$flutter$$ checkout -f $FLUTTER_VERSION
+      - $$flutter$$/bin/flutter config --no-analytics
+      - export REPRO=/tmp/build
+      - mkdir -p $REPRO
+      - cd ..
+      - mv dev.serge.textlog $REPRO/textlog_flutter
+      - pushd $REPRO/textlog_flutter
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - popd
+      - mv $REPRO/textlog_flutter dev.serge.textlog
+      - cd dev.serge.textlog
+    scandelete:
+      - .pub-cache
+    build:
+      - export REPRO=/tmp/build
+      - mkdir -p $REPRO
+      - cd ..
+      - mv dev.serge.textlog $REPRO/textlog_flutter
+      - pushd $REPRO/textlog_flutter
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform=android-arm
+      - popd
+      - mv $REPRO/textlog_flutter dev.serge.textlog
+      - cd dev.serge.textlog
+    ndk: r28c
+
+  - versionName: 0.8.0
+    versionCode: 4002
+    commit: cb7d2bab748a60a86567add30ced196d1abf8dbb
+    output: build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+    binary: 
+      https://github.com/Faultless/textlog_flutter/releases/download/v%v/textlog-%v-arm64-v8a.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+      - macos
+      - web
+      - test
+    prebuild:
+      - FLUTTER_VERSION=$(sed -n -E 's/.*flutter-version:[[:space:]]*([^[:space:]]+).*/\1/p'
+        .github/workflows/pages.yml)
+      - '[[ $FLUTTER_VERSION ]]'
+      - git -C $$flutter$$ checkout -f $FLUTTER_VERSION
+      - $$flutter$$/bin/flutter config --no-analytics
+      - export REPRO=/tmp/build
+      - mkdir -p $REPRO
+      - cd ..
+      - mv dev.serge.textlog $REPRO/textlog_flutter
+      - pushd $REPRO/textlog_flutter
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - popd
+      - mv $REPRO/textlog_flutter dev.serge.textlog
+      - cd dev.serge.textlog
+    scandelete:
+      - .pub-cache
+    build:
+      - export REPRO=/tmp/build
+      - mkdir -p $REPRO
+      - cd ..
+      - mv dev.serge.textlog $REPRO/textlog_flutter
+      - pushd $REPRO/textlog_flutter
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform=android-arm64
+      - popd
+      - mv $REPRO/textlog_flutter dev.serge.textlog
+      - cd dev.serge.textlog
+    ndk: r28c
+
 AllowedAPKSigningKeys: c9a6e70cea72c16c2f146789eb2a7919cecfb36baad3666972fd001423cfe6d6
 
 AutoUpdateMode: Version
@@ -109,5 +197,5 @@ VercodeOperation:
   - 10 * %c + 1
   - 10 * %c + 2
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 0.7.3
-CurrentVersionCode: 3002
+CurrentVersion: 0.8.0
+CurrentVersionCode: 4002
