@@ -3,14 +3,14 @@ Categories:
   - Security
 License: AGPL-3.0-only
 AuthorName: Hardcore Sushi
-SourceCode: https://forge.chapril.org/hardcoresushi/DroidFS
-IssueTracker: https://forge.chapril.org/hardcoresushi/DroidFS/issues
-Changelog: https://forge.chapril.org/hardcoresushi/DroidFS/releases
+SourceCode: https://tangled.org/cipherd.arkensys.dedyn.io/DroidFS
+IssueTracker: https://tangled.org/cipherd.arkensys.dedyn.io/DroidFS/issues
+Changelog: https://github.com/hardcore-sushi/DroidFS/releases
 
 AutoName: DroidFS
 
 RepoType: git
-Repo: https://forge.chapril.org/hardcoresushi/DroidFS.git
+Repo: https://tangled.org/cipherd.arkensys.dedyn.io/DroidFS
 
 Builds:
   - versionName: 1.4.4
@@ -688,11 +688,104 @@ Builds:
     gradleprops:
       - abi=arm64-v8a
 
+  - versionName: 2.3.2
+    versionCode: 402
+    commit: fff51fc8072067826c3ebe9642dd8633186a1da0
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y golang-go golang-src build-essential pkg-config libssl-dev
+        nasm npm wget
+    patch:
+      - signing-key.patch
+    gradle:
+      - yes
+    prebuild:
+      - gpg --import signing-key.asc
+      - git verify-commit --raw HEAD 2>&1 | grep -q 'VALIDSIG B64EFE86CEE1D054F0821711AFE384344A45E13A'
+      - sdkmanager 'cmake;4.1.2'
+      - for dir in . libgocryptfs libcryfs; do git -C "$dir" submodule update --init;
+        done
+    scandelete:
+      - app/libgocryptfs/openssl/test
+      - app/libcryfs/vendor/cryptopp/vendor_cryptopp/TestData
+      - app/libcryfs/vendor/cryptopp/vendor_cryptopp/*.zip
+    build:
+      - cd libgocryptfs
+      - ./build.sh x86_64
+      - cd ../ffmpeg
+      - ./build.sh x86_64
+    ndk: r28c
+    gradleprops:
+      - abi=x86_64
+
+  - versionName: 2.3.2
+    versionCode: 403
+    commit: fff51fc8072067826c3ebe9642dd8633186a1da0
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y golang-go golang-src build-essential pkg-config libssl-dev
+        nasm npm wget
+    patch:
+      - signing-key.patch
+    gradle:
+      - yes
+    prebuild:
+      - gpg --import signing-key.asc
+      - git verify-commit --raw HEAD 2>&1 | grep -q 'VALIDSIG B64EFE86CEE1D054F0821711AFE384344A45E13A'
+      - sdkmanager 'cmake;4.1.2'
+      - for dir in . libgocryptfs libcryfs; do git -C "$dir" submodule update --init;
+        done
+    scandelete:
+      - app/libgocryptfs/openssl/test
+      - app/libcryfs/vendor/cryptopp/vendor_cryptopp/TestData
+      - app/libcryfs/vendor/cryptopp/vendor_cryptopp/*.zip
+    build:
+      - cd libgocryptfs
+      - ./build.sh armeabi-v7a
+      - cd ../ffmpeg
+      - ./build.sh armeabi-v7a
+    ndk: r28c
+    gradleprops:
+      - abi=armeabi-v7a
+
+  - versionName: 2.3.2
+    versionCode: 404
+    commit: fff51fc8072067826c3ebe9642dd8633186a1da0
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y golang-go golang-src build-essential pkg-config libssl-dev
+        nasm npm wget
+    patch:
+      - signing-key.patch
+    gradle:
+      - yes
+    prebuild:
+      - gpg --import signing-key.asc
+      - git verify-commit --raw HEAD 2>&1 | grep -q 'VALIDSIG B64EFE86CEE1D054F0821711AFE384344A45E13A'
+      - sdkmanager 'cmake;4.1.2'
+      - for dir in . libgocryptfs libcryfs; do git -C "$dir" submodule update --init;
+        done
+    scandelete:
+      - app/libgocryptfs/openssl/test
+      - app/libcryfs/vendor/cryptopp/vendor_cryptopp/TestData
+      - app/libcryfs/vendor/cryptopp/vendor_cryptopp/*.zip
+    build:
+      - cd libgocryptfs
+      - ./build.sh arm64-v8a
+      - cd ../ffmpeg
+      - ./build.sh arm64-v8a
+    ndk: r28c
+    gradleprops:
+      - abi=arm64-v8a
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v[\d.]+$
 VercodeOperation:
   - 10 * %c + 2
   - 10 * %c + 3
   - 10 * %c + 4
-CurrentVersion: 2.3.1
-CurrentVersionCode: 394
+CurrentVersion: 2.3.2
+CurrentVersionCode: 404
