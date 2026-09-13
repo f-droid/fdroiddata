@@ -983,13 +983,43 @@ Builds:
       - fdroid
     prebuild: sed -i -e '/enable true/d' build.gradle
 
+  - versionName: 1.16.0
+    versionCode: 461
+    commit: 1a9902eee0a3e230a4dfbd52c434cbeca324cf47
+    subdir: amethyst
+    sudo:
+      - apt-get update
+      - apt-get install -y rustup gcc libc-dev
+    gradle:
+      - fdroid
+    srclibs:
+      - reproducible-apk-tools@v0.3.0
+    scandelete:
+      - amethyst/src/main/jniLibs
+      - amethyst/src/test
+      - quartz
+    build:
+      - cd ../tools/arti-build
+      - sdkmanager "ndk;$(cat ANDROID_NDK_VERSION)"
+      - rustup target add aarch64-linux-android x86_64-linux-android
+      - cargo install cargo-ndk@4.1.2 --locked
+      - export PATH=$HOME/.cargo/bin:$PATH
+      - ./build-arti.sh
+    ndk: r28c
+    gradleprops:
+      - disableAbiSplits=true
+    postbuild:
+      - mv $$OUT$$ unaligned.apk
+      - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
+        --replace unaligned.apk $$OUT$$
+
 AllowedAPKSigningKeys: c2d0aa86bcb6b62090561a41bbe336e98b78c2d0210a498dc885f28e1348cf17
 
 MaintainerNotes: see https://gitlab.com/fdroid/fdroiddata/-/issues/2973#note_1428295385
   on NonFreeNet
 
-ArchivePolicy: 0
-AutoUpdateMode: None
-UpdateCheckMode: None
-CurrentVersion: 0.91.0
-CurrentVersionCode: 404
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: gradle/libs.versions.toml|appCode = "(\d+)"|.|app = "(.+)"
+CurrentVersion: 1.16.0
+CurrentVersionCode: 461
