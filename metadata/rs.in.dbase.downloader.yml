@@ -1,0 +1,217 @@
+AntiFeatures:
+  NonFreeNet:
+    en-US: The manual yt-dlp engine update in Settings downloads the latest yt-dlp
+      release through the GitHub API.
+Categories:
+  - Download
+License: GPL-3.0-only
+AuthorName: Velimir Majstorov
+SourceCode: https://github.com/DBase-In-Rs/Downloader
+IssueTracker: https://github.com/DBase-In-Rs/Downloader/issues
+Changelog: https://github.com/DBase-In-Rs/Downloader/blob/HEAD/CHANGELOG.md
+Donate: https://ko-fi.com/majstorov
+
+AutoName: DBase Downloader
+
+RepoType: git
+Repo: https://github.com/DBase-In-Rs/Downloader.git
+Binaries: 
+  https://github.com/DBase-In-Rs/Downloader/releases/download/v%v/app-arm64-v8a-fdroid-release.apk
+
+Builds:
+  - versionName: 1.0.10
+    versionCode: 171
+    commit: ccd63314e5e94ee4ce6f0910117efbdf0f977ada
+    sudo:
+      - mkdir -p /home/runner
+      - chown vagrant /home/runner
+      - apt-get update
+      - apt-get install -y cmake make
+    output: build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
+    binary: 
+      https://github.com/DBase-In-Rs/Downloader/releases/download/v%v/app-armeabi-v7a-fdroid-release.apk
+    srclibs:
+      - flutter@stable
+      - libwebp@v1.5.0
+    rm:
+      - android/app/src/main/jniLibs
+      - ios
+      - linux
+      - macos
+      - windows
+    prebuild:
+      - flutterVersion=$(sed -n -E "s/.*flutter-version:\ '(.*)'/\1/p" .github/workflows/flutter.yml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - mkdir -p /home/runner/work/Downloader
+      - cd ..
+      - mv rs.in.dbase.downloader /home/runner/work/Downloader/Downloader
+      - pushd /home/runner/work/Downloader/Downloader
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - popd
+      - mv /home/runner/work/Downloader/Downloader rs.in.dbase.downloader
+    scandelete:
+      - .pub-cache
+    build:
+      - cd ..
+      - mv rs.in.dbase.downloader /home/runner/work/Downloader/Downloader
+      - pushd /home/runner/work/Downloader/Downloader
+      - cmake -S $$libwebp$$ -B libwebp-build -DCMAKE_TOOLCHAIN_FILE=$$NDK$$/build/cmake/android.toolchain.cmake
+        -DANDROID_ABI=armeabi-v7a -DANDROID_PLATFORM=android-24 -DBUILD_SHARED_LIBS=ON
+        -DWEBP_BUILD_ANIM_UTILS=OFF -DWEBP_BUILD_CWEBP=OFF -DWEBP_BUILD_DWEBP=OFF
+        -DWEBP_BUILD_GIF2WEBP=OFF -DWEBP_BUILD_IMG2WEBP=OFF -DWEBP_BUILD_VWEBP=OFF
+        -DWEBP_BUILD_WEBPINFO=OFF -DWEBP_BUILD_WEBPMUX=OFF -DWEBP_BUILD_EXTRAS=OFF
+        -DCMAKE_SHARED_LINKER_FLAGS=-Wl,--build-id=none
+      - cmake --build libwebp-build -j
+      - mkdir -p android/app/src/main/jniLibs/armeabi-v7a
+      - cp libwebp-build/libsharpyuv.so libwebp-build/libwebp.so libwebp-build/libwebpdecoder.so
+        libwebp-build/libwebpdemux.so libwebp-build/libwebpmux.so android/app/src/main/jniLibs/armeabi-v7a/
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform="android-arm"
+        --dart-define=FDROID_BUILD=true
+      - popd
+      - mv /home/runner/work/Downloader/Downloader rs.in.dbase.downloader
+    ndk: r28c
+
+  - versionName: 1.0.10
+    versionCode: 172
+    commit: ccd63314e5e94ee4ce6f0910117efbdf0f977ada
+    sudo:
+      - mkdir -p /home/runner
+      - chown vagrant /home/runner
+      - apt-get update
+      - apt-get install -y cmake make
+    output: build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+    binary: 
+      https://github.com/DBase-In-Rs/Downloader/releases/download/v%v/app-arm64-v8a-fdroid-release.apk
+    srclibs:
+      - flutter@stable
+      - libwebp@v1.5.0
+    rm:
+      - android/app/src/main/jniLibs
+      - ios
+      - linux
+      - macos
+      - windows
+    prebuild:
+      - flutterVersion=$(sed -n -E "s/.*flutter-version:\ '(.*)'/\1/p" .github/workflows/flutter.yml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - mkdir -p /home/runner/work/Downloader
+      - cd ..
+      - mv rs.in.dbase.downloader /home/runner/work/Downloader/Downloader
+      - pushd /home/runner/work/Downloader/Downloader
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - popd
+      - mv /home/runner/work/Downloader/Downloader rs.in.dbase.downloader
+    scandelete:
+      - .pub-cache
+    build:
+      - cd ..
+      - mv rs.in.dbase.downloader /home/runner/work/Downloader/Downloader
+      - pushd /home/runner/work/Downloader/Downloader
+      - cmake -S $$libwebp$$ -B libwebp-build -DCMAKE_TOOLCHAIN_FILE=$$NDK$$/build/cmake/android.toolchain.cmake
+        -DANDROID_ABI=arm64-v8a -DANDROID_PLATFORM=android-24 -DBUILD_SHARED_LIBS=ON
+        -DWEBP_BUILD_ANIM_UTILS=OFF -DWEBP_BUILD_CWEBP=OFF -DWEBP_BUILD_DWEBP=OFF
+        -DWEBP_BUILD_GIF2WEBP=OFF -DWEBP_BUILD_IMG2WEBP=OFF -DWEBP_BUILD_VWEBP=OFF
+        -DWEBP_BUILD_WEBPINFO=OFF -DWEBP_BUILD_WEBPMUX=OFF -DWEBP_BUILD_EXTRAS=OFF
+        -DCMAKE_SHARED_LINKER_FLAGS=-Wl,--build-id=none
+      - cmake --build libwebp-build -j
+      - mkdir -p android/app/src/main/jniLibs/arm64-v8a
+      - cp libwebp-build/libsharpyuv.so libwebp-build/libwebp.so libwebp-build/libwebpdecoder.so
+        libwebp-build/libwebpdemux.so libwebp-build/libwebpmux.so android/app/src/main/jniLibs/arm64-v8a/
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform="android-arm64"
+        --dart-define=FDROID_BUILD=true
+      - popd
+      - mv /home/runner/work/Downloader/Downloader rs.in.dbase.downloader
+    ndk: r28c
+
+  - versionName: 1.0.10
+    versionCode: 173
+    commit: ccd63314e5e94ee4ce6f0910117efbdf0f977ada
+    sudo:
+      - mkdir -p /home/runner
+      - chown vagrant /home/runner
+      - apt-get update
+      - apt-get install -y cmake make
+    output: build/app/outputs/flutter-apk/app-x86_64-release.apk
+    binary: 
+      https://github.com/DBase-In-Rs/Downloader/releases/download/v%v/app-x86_64-fdroid-release.apk
+    srclibs:
+      - flutter@stable
+      - libwebp@v1.5.0
+    rm:
+      - android/app/src/main/jniLibs
+      - ios
+      - linux
+      - macos
+      - windows
+    prebuild:
+      - flutterVersion=$(sed -n -E "s/.*flutter-version:\ '(.*)'/\1/p" .github/workflows/flutter.yml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - mkdir -p /home/runner/work/Downloader
+      - cd ..
+      - mv rs.in.dbase.downloader /home/runner/work/Downloader/Downloader
+      - pushd /home/runner/work/Downloader/Downloader
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - popd
+      - mv /home/runner/work/Downloader/Downloader rs.in.dbase.downloader
+    scandelete:
+      - .pub-cache
+    build:
+      - cd ..
+      - mv rs.in.dbase.downloader /home/runner/work/Downloader/Downloader
+      - pushd /home/runner/work/Downloader/Downloader
+      - cmake -S $$libwebp$$ -B libwebp-build -DCMAKE_TOOLCHAIN_FILE=$$NDK$$/build/cmake/android.toolchain.cmake
+        -DANDROID_ABI=x86_64 -DANDROID_PLATFORM=android-24 -DBUILD_SHARED_LIBS=ON
+        -DWEBP_BUILD_ANIM_UTILS=OFF -DWEBP_BUILD_CWEBP=OFF -DWEBP_BUILD_DWEBP=OFF
+        -DWEBP_BUILD_GIF2WEBP=OFF -DWEBP_BUILD_IMG2WEBP=OFF -DWEBP_BUILD_VWEBP=OFF
+        -DWEBP_BUILD_WEBPINFO=OFF -DWEBP_BUILD_WEBPMUX=OFF -DWEBP_BUILD_EXTRAS=OFF
+        -DCMAKE_SHARED_LINKER_FLAGS=-Wl,--build-id=none
+      - cmake --build libwebp-build -j
+      - mkdir -p android/app/src/main/jniLibs/x86_64
+      - cp libwebp-build/libsharpyuv.so libwebp-build/libwebp.so libwebp-build/libwebpdecoder.so
+        libwebp-build/libwebpdemux.so libwebp-build/libwebpmux.so android/app/src/main/jniLibs/x86_64/
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform="android-x64"
+        --dart-define=FDROID_BUILD=true
+      - popd
+      - mv /home/runner/work/Downloader/Downloader rs.in.dbase.downloader
+    ndk: r28c
+
+AllowedAPKSigningKeys: df481a26a9d4a9aacf3c1a5e1957697fb4532bbbcdf3b8406c4be94fe7cc9376
+
+MaintainerNotes: |-
+  Builds pass --dart-define=FDROID_BUILD=true, which compiles out the GitHub
+  release check and the automatic yt-dlp update on app startup; the manual
+  yt-dlp engine update in Settings remains and is covered by the NonFreeNet
+  anti-feature. The Flutter version is read from the flutter-version pin in
+  .github/workflows/flutter.yml. Version codes follow F-Droid's
+  ABI split scheme: build number from pubspec.yaml * 10 + ABI code
+  (armeabi-v7a=1, arm64-v8a=2, x86_64=3). The prebuilt libwebp libraries in
+  android/app/src/main/jniLibs (16 KB-aligned replacements for the
+  4 KB-aligned copies youtubedl-android's FFmpeg package extracts) are
+  removed and rebuilt from source. For reproducibility the build is
+  relocated to the GitHub Actions workspace path, since the Dart AOT
+  snapshot embeds the project path; the published binaries are the
+  app-<abi>-fdroid-release.apk release assets, built by CI from the same
+  commit with the same FDROID_BUILD define and JDK 21, and signed with the
+  upstream key.
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^v[0-9.]+$
+VercodeOperation:
+  - '%c * 10 + 1'
+  - '%c * 10 + 2'
+  - '%c * 10 + 3'
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 1.0.10
+CurrentVersionCode: 173
