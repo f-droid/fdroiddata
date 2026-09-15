@@ -551,9 +551,40 @@ check apk:
         };
 
         # manifest
-        androguard axml $file -o AndroidManifest.xml
+        androguard axml $file -o AndroidManifest.xml;
         for permission in $(sed 's/>/>\n/g' AndroidManifest.xml | sed -n 's|.*<uses-permission\S* android:name="\([^"]\+\)".*|\1|p'); do
-            generate_report $appid $location "Permission $permission" "permission" "$file $permission" "info" >> codequality.json;
+          case "$permission" in
+            *_EXTERNAL_STORAGE) ;&
+            *READ_MEDIA_*) ;&
+            *ACCESS_*_LOCATION) ;&
+            *_SMS) ;&
+            *RECEIVE_WAP_PUSH) ;&
+            *RECEIVE_MMS) ;&
+            *READ_CALL_LOG) ;&
+            *WRITE_CALL_LOG) ;&
+            *PROCESS_OUTGOING_CALLS) ;&
+            *READ_PHONE_STATE) ;&
+            *CALL_PHONE) ;&
+            *ADD_VOICEMAIL) ;&
+            *USE_SIP) ;&
+            *_CONTACTS) ;&
+            *GET_ACCOUNTS) ;&
+            *_CALENDAR) ;&
+            *CAMERA) ;&
+            *RECORD_AUDIO) ;&
+            *BODY_SENSORS) ;&
+            *BODY_SENSORS_BACKGROUND) ;&
+            *REQUEST_INSTALL_PACKAGES) ;&
+            *BIND_ACCESSIBILITY_SERVICE) ;&
+            *BIND_NOTIFICATION_LISTENER_SERVICE) ;&
+            *SYSTEM_ALERT_WINDOW)
+              severity=minor;
+              ;;
+            *)
+              severity=info;
+              ;;
+          esac
+          generate_report $appid $location "Permission $permission" "permission" "$file $permission" "$severity" >> codequality.json;
         done
         grep 'android:usesCleartextTraffic="true"' AndroidManifest.xml && \
           generate_report $appid $location "Cleartext Traffic Permitted" "application_attribution" "$file cleartextTrafficPermitted" "major" >> codequality.json;
