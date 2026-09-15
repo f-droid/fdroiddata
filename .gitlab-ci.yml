@@ -506,7 +506,7 @@ check apk:
   before_script:
     - ls tmp/*.apk 2> /dev/null || exit 0
     - apt-get update
-    - apt-get install -qy --no-install-recommends fdroidserver curl unzip zip jq
+    - apt-get install -qy --no-install-recommends fdroidserver curl unzip zip jq binutils
     - export fdroidserver=$PWD/fdroidserver
     - *install_fdroid_server
     - sdkmanager "build-tools;36.0.0"
@@ -637,6 +637,16 @@ check apk:
             fi
         else
           generate_report $appid $location "APK ABI and size: No native lib, $size" "abi_size" "$file ABI and size" "info" >> codequality.json;
+        fi
+
+        # R8 Marker
+        unzip -q $apk classes.dex;
+        r8marker="$(strings classes.dex | grep -E "~~R8(Partial)?" | grep -o '{.*}' | jq -Rr '@json[1:-1]')";
+        rm classes.dex;
+        if [[ -n "$r8marker" ]]; then
+          generate_report $appid $location "APK R8 Marker: $r8marker" "r8_marker" "$file R8 Marker" "info" >> codequality.json;
+        else
+          generate_report $appid $location "APK has no R8 Marker, R8 is not used" "r8_marker" "$file R8 Marker" "minor" >> codequality.json;
         fi
       done
     - sed -i -e '$s/,$/]/' codequality.json
