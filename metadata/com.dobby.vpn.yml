@@ -2383,11 +2383,77 @@ Builds:
       - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
         --replace unaligned.apk $$OUT$$
 
+  - versionName: 1.5.0
+    versionCode: 1005000
+    commit: 6ad52ffe4c08b9ca95741fdddf0988696a35fbee
+    subdir: kmp_module/app
+    sudo:
+      - apt-get update
+      - apt-get install -y zip
+      - apt-get install -y -t trixie-backports golang-go
+      - echo "deb https://deb.debian.org/debian bookworm main" > /etc/apt/sources.list.d/bookworm.list
+      - apt-get update
+      - apt-get install -y -t bookworm openjdk-17-jdk-headless
+      - update-alternatives --set java /usr/lib/jvm/java-17-openjdk-amd64/bin/java
+      - update-alternatives --set javac /usr/lib/jvm/java-17-openjdk-amd64/bin/javac
+    gradle:
+      - yes
+    srclibs:
+      - go@go1.25.1
+      - reproducible-apk-tools@v0.3.2
+    rm:
+      - swift_module
+    build:
+      - pushd $$go$$/src
+      - ./make.bash
+      - popd
+      - export GOROOT=$$go$$
+      - export GOPATH="$HOME/go"
+      - export GO111MODULE=on
+      - export GOFLAGS="-trimpath -buildvcs=false"
+      - export SOURCE_DATE_EPOCH=0
+      - export PATH="$GOROOT/bin:$GOPATH/bin:$PATH"
+      - go env GOROOT GOVERSION GOFLAGS
+      - cd ../..
+      - export REPO_ROOT=$(pwd)
+      - pushd go_module
+      - go mod download
+      - go install golang.org/x/mobile/cmd/gomobile@v0.0.0-20260520154334-0e4426e1883d
+      - popd
+      - sdkmanager "platforms;android-35" "platforms;android-36" "build-tools;36.0.0"
+        "ndk;27.3.13750724"
+      - export ANDROID_SDK_ROOT="$$SDK$$"
+      - export ANDROID_HOME="$$SDK$$"
+      - export ANDROID_NDK_HOME="$$SDK$$/ndk/27.3.13750724"
+      - export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+      - export 
+        PATH="$JAVA_HOME/bin:$GOROOT/bin:$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin:$GOPATH/bin:$PATH"
+      - go install golang.org/x/mobile/cmd/gobind@v0.0.0-20260520154334-0e4426e1883d
+      - cd kmp_module
+      - sed -i -e "s/^versionCode=.*/versionCode=$$VERCODE$$/" -e "s/^versionName=.*/versionName=$$VERSION$$/"
+        gradle.properties
+      - export COMMIT=$(git rev-parse HEAD)
+      - printf 
+        "\nprojectRepositoryCommit=$COMMIT\nprojectRepositoryCommitLink=https://github.com/DobbyVPN/DobbyVPN/tree/$COMMIT\n"
+        >> gradle.properties
+      - printf "\ngomobileExecutable=$GOPATH/bin/gomobile\n" >> gradle.properties
+      - printf "\ngomobileGoRoot=$GOROOT\n" >> gradle.properties
+      - printf "\ngomobileAndroidSdkRoot=$ANDROID_SDK_ROOT\n" >> gradle.properties
+      - printf "\ngomobileAndroidNdkHome=$ANDROID_NDK_HOME\n" >> gradle.properties
+      - printf "\nandroid.suppressUnsupportedCompileSdk=35\n" >> gradle.properties
+      - printf "\nkotlin.native.ignoreDisabledTargets=true\n" >> gradle.properties
+    preassemble:
+      - :app:gomobileBindAndroid
+    postbuild:
+      - mv $$OUT$$ unaligned.apk
+      - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
+        --replace unaligned.apk $$OUT$$
+
 AllowedAPKSigningKeys: c3f0414a74012060d7c6aa3a3d9dac0aa13c1bd23b7512eefd860fb865e67933
 
 AutoUpdateMode: Version v%v
 UpdateCheckMode: HTTP
 UpdateCheckData: 
   https://github.com/DobbyVPN/DobbyVPN/releases/latest/download/version.txt|versionCode=(\d+)|.|versionName=([\d.]+)
-CurrentVersion: 1.4.8
-CurrentVersionCode: 1004008
+CurrentVersion: 1.5.0
+CurrentVersionCode: 1005000
