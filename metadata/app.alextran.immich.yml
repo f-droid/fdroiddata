@@ -5671,8 +5671,91 @@ Builds:
       - $$flutter$$/bin/flutter build apk --release --dart-define=cronetHttpNoPlay=true
     ndk: r25c
 
+  - versionName: 3.2.2
+    versionCode: 3020299
+    commit: 60b51cb3bc909e72fe963f4dfb1947515cb9ab3b
+    subdir: mobile
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y gcc-multilib libc-dev make rustup
+    output: build/app/outputs/flutter-apk/*.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - design
+      - docker
+      - machine-learning
+      - mobile/ios
+      - server
+      - web
+    prebuild:
+      - sed -i -e 's/Xmx4096M/Xmx8G/' android/gradle.properties
+      - export openapitoolsVersion=$(grep version ../open-api/openapitools.json |
+        cut -d "\"" -f4)
+      - '[[ $openapitoolsVersion ]]'
+      - export flutterVersion=$(sed -n -E "s/.*flutter:\s([0-9.]+)/\1/p" pubspec.yaml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - pushd ../open-api
+      - curl -Lo openapi-generator-cli.jar 
+        https://repo1.maven.org/maven2/org/openapitools/openapi-generator-cli/$openapitoolsVersion/openapi-generator-cli-$openapitoolsVersion.jar
+      - sed -i -e 's/openapi-generator-cli/java -jar openapi-generator-cli.jar/g'  ./bin/generate-dart-sdk.sh
+      - bash ./bin/generate-dart-sdk.sh
+      - popd
+      - sed -i -e "s/^\#f//" pubspec.yaml
+      - sed -i -e 's/^\/\/f //' -e '/media3-datasource-cronet/s/$/{exclude group:"com.google.android.gms",module:"play-services-cronet"}/'
+        -e '/def keyAliasVal = System/,+7d' -e '/def hasKeystore = file/,+8d' android/app/build.gradle
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - sed -i -e '/androidx.work:work-runtime-ktx/s/2.+/2.11.2/' $PUB_CACHE/hosted/pub.dev/home_widget-*/android/build.gradle
+      - $$flutter$$/bin/dart run build_runner build
+      - $$flutter$$/bin/dart run drift_dev make-migrations
+      - $$flutter$$/bin/dart run drift_dev schema generate --data-classes --companions
+        drift_schemas/main/ test/drift/main/generated/
+      - ls pigeon/*.dart | xargs -n1 -P4 -I{} $$flutter$$/bin/dart run pigeon --input
+        {}
+      - $$flutter$$/bin/dart run easy_localization:generate -S ../i18n
+      - $$flutter$$/bin/dart run bin/generate_keys.dart
+      - sed -i -e '/play-services-cronet/d' $PUB_CACHE/git/http-*/pkgs/cronet_http/android/build.gradle
+      - cd $PUB_CACHE/hosted/pub.dev/geolocator_android-*/android
+      - sed -i -e '/gms/d' build.gradle
+      - cd src/main/java/com/baseflow/geolocator/location
+      - rm FusedLocationClient.java
+      - sed -i -e '/if (forceAndroidLocationManager) {/,/^  }/c return new LocationManagerClient(context,
+        locationOptions);}' -e '/isGooglePlayServicesAvailable/,/^  }/d' -e '/gms/d'
+        GeolocationManager.java
+      - cd $PUB_CACHE/hosted/pub.dev/maplibre_gl-*/android
+      - sed -i -e '/gms/d' build.gradle
+      - cd src/main/java/org/maplibre/maplibregl
+      - rm GMSLocationEngine.java
+      - sed -i -e '/fun isGooglePlayServicesAvailable/,/^    }/d' -e 's/isGooglePlayServicesAvailable(context)/true/'
+        -e 's/GMSLocationEngine/MapLibreGPSLocationEngine/' -e '/gms/d' LocationEngineFactory.kt
+    scanignore:
+      - mobile/android/app/build.gradle
+    scandelete:
+      - mobile/.pub-cache
+      - mobile/.dart_tool
+      - open-api/openapi-generator-cli.jar
+    build:
+      - rustup default 1.94.1
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - rustup target add armv7-linux-androideabi aarch64-linux-android x86_64-linux-android
+      - cargo install cargo-ndk@4.1.2 --locked
+      - pushd $PUB_CACHE/hosted/pub.dev/sqlite3_connection_pool-*/
+      - cargo ndk -t armv7-linux-androideabi -t aarch64-linux-android -t x86_64-linux-android
+        build --release --lib
+      - mkdir -p lib/src/precompiled
+      - cp target/armv7-linux-androideabi/release/libsqlite3_connection_pool.so lib/src/precompiled/libsqlite3_connection_pool.android_v7a.so
+      - cp target/aarch64-linux-android/release/libsqlite3_connection_pool.so lib/src/precompiled/libsqlite3_connection_pool.android_v8a.so
+      - cp target/x86_64-linux-android/release/libsqlite3_connection_pool.so lib/src/precompiled/libsqlite3_connection_pool.android_x86_64.so
+      - popd
+      - $$flutter$$/bin/flutter build apk --release --dart-define=cronetHttpNoPlay=true
+    ndk: r25c
+
 AutoUpdateMode: Version
-UpdateCheckMode: Tags
+UpdateCheckMode: Tags ^v[\d.]+$
 UpdateCheckData: mobile/pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 3.1.0
-CurrentVersionCode: 3057
+CurrentVersion: 3.2.2
+CurrentVersionCode: 3020299
