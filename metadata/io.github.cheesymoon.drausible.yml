@@ -1,0 +1,132 @@
+Categories:
+  - Internet
+License: GPL-3.0-or-later
+AuthorName: cheesymoon
+SourceCode: https://github.com/cheesymoon/drausible
+IssueTracker: https://github.com/cheesymoon/drausible/issues
+Changelog: https://github.com/cheesymoon/drausible/blob/HEAD/CHANGELOG.md
+
+AutoName: Drausible
+
+RepoType: git
+Repo: https://github.com/cheesymoon/drausible.git
+
+Builds:
+  - versionName: 1.4.1
+    versionCode: 104011
+    commit: 905ad20da6e4b1895d663145e65a4fe2d683af7b
+    output: build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
+    binary: 
+      https://github.com/cheesymoon/drausible/releases/download/v%v/drausible-%v-armeabi-v7a.apk
+    srclibs:
+      - flutter@stable
+    prebuild:
+      - flutterVersion=$(sed -n -E "s/.*flutter-version:\ '(.*)'/\1/p" .github/workflows/release.yml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - cd ..
+      - mv io.github.cheesymoon.drausible /tmp/build
+      - pushd /tmp/build
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - popd
+      - mv /tmp/build io.github.cheesymoon.drausible
+    scandelete:
+      - .pub-cache
+    build:
+      - cd ..
+      - mv io.github.cheesymoon.drausible /tmp/build
+      - pushd /tmp/build
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform=android-arm
+      - popd
+      - mv /tmp/build io.github.cheesymoon.drausible
+    ndk: 26.3.11579264
+
+  - versionName: 1.4.1
+    versionCode: 104012
+    commit: 905ad20da6e4b1895d663145e65a4fe2d683af7b
+    output: build/app/outputs/flutter-apk/app-x86_64-release.apk
+    binary: 
+      https://github.com/cheesymoon/drausible/releases/download/v%v/drausible-%v-x86_64.apk
+    srclibs:
+      - flutter@stable
+    prebuild:
+      - flutterVersion=$(sed -n -E "s/.*flutter-version:\ '(.*)'/\1/p" .github/workflows/release.yml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - cd ..
+      - mv io.github.cheesymoon.drausible /tmp/build
+      - pushd /tmp/build
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - popd
+      - mv /tmp/build io.github.cheesymoon.drausible
+    scandelete:
+      - .pub-cache
+    build:
+      - cd ..
+      - mv io.github.cheesymoon.drausible /tmp/build
+      - pushd /tmp/build
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform=android-x64
+      - popd
+      - mv /tmp/build io.github.cheesymoon.drausible
+    ndk: 26.3.11579264
+
+  - versionName: 1.4.1
+    versionCode: 104013
+    commit: 905ad20da6e4b1895d663145e65a4fe2d683af7b
+    output: build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+    binary: 
+      https://github.com/cheesymoon/drausible/releases/download/v%v/drausible-%v-arm64-v8a.apk
+    srclibs:
+      - flutter@stable
+    prebuild:
+      - flutterVersion=$(sed -n -E "s/.*flutter-version:\ '(.*)'/\1/p" .github/workflows/release.yml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - cd ..
+      - mv io.github.cheesymoon.drausible /tmp/build
+      - pushd /tmp/build
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - popd
+      - mv /tmp/build io.github.cheesymoon.drausible
+    scandelete:
+      - .pub-cache
+    build:
+      - cd ..
+      - mv io.github.cheesymoon.drausible /tmp/build
+      - pushd /tmp/build
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform=android-arm64
+      - popd
+      - mv /tmp/build io.github.cheesymoon.drausible
+    ndk: 26.3.11579264
+
+AllowedAPKSigningKeys: 331922eecc7c66679c2d8bc237822b2b2a531d4bd29e3fdff7083d34f4cf3265
+
+MaintainerNotes: |-
+  Reproducible against the developer's signed APKs (binary: on each entry).
+
+  usesCleartextTraffic is deliberate: self-hosted Plausible instances often run without TLS on a LAN. Since 1.4.0 the app shows a warning on an http server address and refuses to save one until the user ticks a box.
+
+  Build in /tmp/build on both sides. The Dart AOT snapshot bakes in the absolute path to .dart_tool/flutter_build/dart_plugin_registrant.dart, so upstream CI builds from there too (.github/workflows/release.yml).
+
+  Flutter is read out of upstream's release workflow at the pinned commit, 3.32.8 for these entries. android/app/build.gradle.kts sets each split's versionCode itself, in an androidComponents onVariants block computing flutter.versionCode * 10 + abiCode, because Flutter 3.32.x reads output.versionCodeOverride without ever assigning to it (flutter/flutter#169790). Recheck the versionCodes and the ndk: pin after any Flutter bump.
+
+  Order matters in the last three build entries. Ascending versionCode, and each entry's output:/binary: must match the ABI its index implies (1 = armeabi-v7a, 2 = x86_64, 3 = arm64-v8a). checkupdates copies those entries verbatim and zips them against sorted versionCodes, so swapping two of them mislabels every autoupdate afterwards.
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^v[\d.]+$
+VercodeOperation:
+  - '%c * 10 + 1'
+  - '%c * 10 + 2'
+  - '%c * 10 + 3'
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 1.4.1
+CurrentVersionCode: 104013
