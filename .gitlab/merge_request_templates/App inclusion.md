@@ -1,50 +1,44 @@
-**The title of this merge request should follow "New app: app name" format.**
+## Checklist
 
-**Please make sure your fdroiddata fork is public and your branch is not protected. See <https://docs.gitlab.com/user/project/repository/branches/protected/>. We enable fast-forward merges by default. If your branch is protected, we can't rebase it before merge it.**
+### Policy
 
-**Please read [our Git guide](https://gitlab.com/fdroid/wiki/-/wikis/Tips-for-fdroiddata-contributors/Git-Usage) if you don't know how to rebase your branch. Don't rebase your branch if there is no conflict.**
+* [ ] The app complies with the [inclusion criteria](https://f-droid.org/docs/Inclusion_Policy).
+* [ ] The original app author has been notified (and does not oppose the inclusion). If you are not the author, please paste the link of the reply from the author.
+* [ ] The upstream app source code repo contains the app metadata in a [Fastlane](https://gitlab.com/snippets/1895688) or [Triple-T](https://gitlab.com/snippets/1901490) folder structure. The summary and description must be included and images, icon, and changelog should also be provided for better user experience. The `en-US` locale must be included.
 
-**Please read [the guide](https://gitlab.com/fdroid/fdroiddata/-/blob/master/CONTRIBUTING.md) first if this is your first contribution. Please make sure your metadata follows the best practice in [our templates](https://gitlab.com/fdroid/fdroiddata/tree/master/templates).**
+### Docs
 
-**Please try your best to make sure all pipelines passed before open a merge request. If a test pipeline fails please check the log. Please check that the build pipeline does build your app. If the build pipeline succeeds but there is no APK files produced then you may have a mistake. Please check if you disable the build. Do not submit a metadata generated with `fdroid import` directly, please remove the disable line at least. Please check if the metadata file is in the correct path. It must be put in `metadata/<applicationId>.yml`.**
+* [ ] Please read [the guide](https://gitlab.com/fdroid/fdroiddata/-/blob/master/CONTRIBUTING.md) first if this is your first contribution.
+* [ ] Please make sure your metadata follows the best practice in [our templates](https://gitlab.com/fdroid/fdroiddata/tree/master/templates).
+* [ ] Please read the [Build Metadata Reference](https://f-droid.org/docs/Build_Metadata_Reference/) and make sure your metadata is valid.
+* [ ] Please read the [Quick Start Guide](https://f-droid.org/en/docs/Submitting_to_F-Droid_Quick_Start_Guide/).
 
-**After all pipelines pass you can trigger the issue bot manually but do not trigger it too much which bloats the merge request.**
+### Merge Request Setup
 
-**F-Droid CI runners are under GitLab's FOSS program, so there's no need for you to pay for any CI time. If Gitlab starts asking for phone numbers or credit cards don't submit anything, just leave a note in the MR so we know we need to trigger the CI.**
-
-**Please remove above lines!**
-
-## Required
-
-<!--Please ensure that your MR meet following requirements-->
-
-* [ ] The app complies with the [inclusion criteria](https://f-droid.org/docs/Inclusion_Policy)
-* [ ] The original app author has been notified (and does not oppose the inclusion) <!--If you are not the author, please paste the link of the reply from the author.-->
+* [ ] The title of this merge request should follow "New app: app name" format.
+* [ ] Please make sure your fdroiddata fork is public and your branch is not protected. See <https://docs.gitlab.com/user/project/repository/branches/protected/>.
+* [ ] Please read [our Git guide](https://gitlab.com/fdroid/wiki/-/wikis/Tips-for-fdroiddata-contributors/Git-Usage) if you don't know how to rebase your branch. Don't rebase your branch if there is no conflict.
 * [ ] All related [fdroiddata](https://gitlab.com/fdroid/fdroiddata/issues) and [RFP issues](https://gitlab.com/fdroid/rfp/issues) have been referenced in this merge request
-* [ ] Builds with `fdroid build` and all pipelines pass
+* [ ] Please only submit one app in one MR.
+
+### Metadata
+
+* [ ] Metadata must be put in `metadata/<applicationId>.yml`.
+* [ ] Metadata must be a valid YAML file.
+* [ ] Metadata must use LF as line ending.
+* [ ] Don't add summary/description/changelog/images or anything that should be provided in upstream repo. Please check the Changes tab to make sure there is no other unrelated files added in the MR.
+* [ ] Releases are tagged and auto update is enabled unless there is a special reason.
 * [ ] There is an issue tracker and contact info of the author so that we can report bugs and contact the author.
+* [ ] An AuthorName must be added. It doesn't need to be the real name.
+* [ ] External repos are added as git submodules instead of srclibs. You can update git submodules without opening an MR in this repo and the submodule is covered by our scanner.
+* [ ] Enable [Reproducible Builds](https://f-droid.org/docs/Reproducible_Builds). We'll use your signature for improved security/reliability, also allowing users to switch between different channels. Do note that if you don't enable reproducible build then the apk will be signed with our key so you can't enable it later. If you can't enable this, please add the reasons here.
+* [ ] Setup abi split if the APK is large and the splitted ones can be much smaller.
+* [ ] Only the latest versions should be kept in the metadata before it's merged. If you update the metadata, please replace the old versions with the new ones.
+* [ ] Don't add any disabled versions in the metadata.
+* [ ] The `commit` field should be the full hash. Please don't use tag or branch in commit.
 
-## Strongly Recommended
+### Pipeline
 
-<!--We highly encourage you doing these things. They are not hard requirements but unless there are special reasons they are required.-->
-
-* [ ] The upstream app source code repo contains the app metadata _(summary/description/images/changelog/etc)_ in a [Fastlane](https://gitlab.com/snippets/1895688) or [Triple-T](https://gitlab.com/snippets/1901490) folder structure <!--If you are the author, please do add metadata in your repo; If you are not the author, please at least open an issue upstream for the metadata. With metadata in your repo, you can maintain it directly. Do not add summary and description in fdroiddata.-->
-* [ ] Releases are tagged and auto update is enabled <!--Our autoupdate workflow relies on the tag. Without this you have to add every version manually.-->
-
-## Suggested
-
-<!--These suggestions may be difficult to apply on your app. Please have a try.-->
-
-* [ ] External repos are added as git submodules instead of srclibs <!--You can update git submodules without opening an MR in this repo and the submodule is covered by our scanner.-->
-* [ ] Enable [Reproducible Builds](https://f-droid.org/docs/Reproducible_Builds) <!--We'll use your signature for improved security/reliability, also allowing users to switch between different channels. If you don't want reproducible build, please add `No, I don't want this.` here and uncheck it. Do note that if you don't enable reproducible build then the apk will be signed with our key so you can't enable it later.-->
-* [ ] Multiple apks for native code <!--If your app has native code and the size is large, please consider building multiple APK files instead of one universal apk.-->
-
----------------------
-
-<!--Add the corresponding issue number or remove this if this merge request does not close an issue at rfp.-->
-Closes rfp#<RFP issue number>
-
-<!--Add the corresponding issue number or remove this if this merge request does not close an issue at fdroiddata.-->
-Closes fdroiddata#<fdroiddata issue number>
-
-/label ~"New App"
+* [ ] All pipelines should pass.
+* [ ] All warnings and errors in the Reports tab should be fixed or explained.
+* [ ] F-Droid CI runners are under GitLab's FOSS program, so there's no need for you to pay for any CI time. If Gitlab starts asking for phone numbers or credit cards don't submit anything, just leave a note in the MR so we know we need to trigger the CI.
