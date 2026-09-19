@@ -1,0 +1,62 @@
+Categories:
+  - Board Game
+License: AGPL-3.0-only
+AuthorName: Dash1971
+SourceCode: https://github.com/Dash1971/maia-chess-android
+IssueTracker: https://github.com/Dash1971/maia-chess-android/issues
+Changelog: https://github.com/Dash1971/maia-chess-android/releases
+
+AutoName: Mobile Maia
+
+RepoType: git
+Repo: https://github.com/Dash1971/maia-chess-android.git
+Binaries: 
+  https://github.com/Dash1971/maia-chess-android/releases/download/v%v/Mobile-Maia-v%v.apk
+
+Builds:
+  - versionName: 2.1.2
+    versionCode: 75
+    commit: ebe11cf1c2e973fa50eb99391181c29d2f545937
+    sudo:
+      - apt-get update
+      - apt-get install -y git-lfs
+      - git lfs install
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@stable
+    prebuild:
+      - git lfs pull
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - flutterVersion=$(sed -n -E 's/.*"flutter"\s*:\s*"([^"]+)".*/\1/p' .fvmrc)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - python3 tool/prepare_reproducible_flutter_sdk.py --flutter-root $$flutter$$
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - python3 tool/prepare_reproducible_stockfish.py --package-config .dart_tool/package_config.json
+      - python3 tool/verify_model.py
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export SOURCE_DATE_EPOCH=$(git log -1 --format=%ct)
+      - $$flutter$$/bin/flutter build apk --release --config-only
+      - $$flutter$$/bin/dart tool/prepare_reproducible_package_config.dart .dart_tool/package_config.json
+      - $$flutter$$/bin/flutter build apk --release --no-pub --android-project-arg=mobileMaiaSourceDateEpoch=$SOURCE_DATE_EPOCH
+
+AllowedAPKSigningKeys: cd6c07c4efacf52bcccb83009b522c1dcad4a171197505a486f0a58edb6f172e
+
+MaintainerNotes: |-
+  The bundled AGPL-3.0 Maia-3 ONNX model is stored using Git LFS. The recipe
+  runs `git lfs pull` and then `tool/verify_model.py`, which checks the
+  fetched model's size and SHA-256 against the value pinned in the upstream
+  source tree, before building. The Flutter version is extracted from the
+  upstream .fvmrc and checked out before the reproducibility patch runs. The
+  guarded Flutter and Stockfish preparation steps are required for
+  deterministic, reproducible builds.
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 2.1.2
+CurrentVersionCode: 75
