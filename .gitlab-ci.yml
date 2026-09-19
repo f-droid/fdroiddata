@@ -645,7 +645,7 @@ check apk:
 
         # R8 Marker
         unzip -q $apk classes.dex;
-        r8marker="$(strings classes.dex | grep -E "~~R8(Partial)?" | grep -o '{.*}' | jq -Rr '@json[1:-1]')";
+        r8marker="$(strings classes.dex | sed -n -E 's/.*~~R8(Partial)?(\{.*\}).*/\2/p' | jq -Rr '@json[1:-1]')";
         rm classes.dex;
         if [[ -n "$r8marker" ]]; then
           generate_report $appid $location "APK R8 Marker: $r8marker" "r8_marker" "$file R8 Marker" "info" >> codequality.json;
