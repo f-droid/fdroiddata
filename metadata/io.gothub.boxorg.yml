@@ -1,0 +1,57 @@
+Categories:
+  - Inventory
+License: MIT
+AuthorName: Vincenz Koop
+AuthorEmail: info@gothub.io
+WebSite: https://boxorg.app
+SourceCode: https://codeberg.org/anderslum/boxorg
+IssueTracker: https://codeberg.org/anderslum/boxorg/issues
+Changelog: https://codeberg.org/anderslum/boxorg/releases
+
+AutoName: boxorg
+
+RepoType: git
+Repo: https://codeberg.org/anderslum/boxorg.git
+
+Builds:
+  - versionName: 1.0.2
+    versionCode: 6
+    commit: c88824ee0b0f75e3927f5b2f3d6119f8d538032f
+    sudo:
+      - echo "deb https://deb.debian.org/debian forky main" > /etc/apt/sources.list.d/forky.list
+      - apt-get update
+      - apt-get install -y -t forky nodejs npm
+      - npm install -g pnpm@11
+    init:
+      - pnpm install --frozen-lockfile
+      - sed -i '/jvmToolchain\|JavaVersion/s/17/21/' 
+        node_modules/.pnpm/@react-native+gradle-plugin@*/node_modules/@react-native/gradle-plugin/*/build.gradle.kts
+        node_modules/.pnpm/@react-native+gradle-plugin@*/node_modules/@react-native/gradle-plugin/react-native-gradle-plugin/src/main/kotlin/com/facebook/react/utils/JdkConfiguratorUtils.kt
+      - IZZY_BUILD=1 npx expo prebuild --platform android --no-install
+      - sed -i -e '/signingConfig /d' android/app/build.gradle
+      - sed -i -e 's/MaxMetaspaceSize=512m/MaxMetaspaceSize=1024m/' android/gradle.properties
+      - echo "android { lint { checkReleaseBuilds = false } }" >> android/app/build.gradle
+    output: android/app/build/outputs/apk/release/*.apk
+    scanignore:
+      - node_modules/.pnpm/react-native@*/node_modules/react-native/sdks/hermesc
+      - node_modules/.pnpm/react-native@*/node_modules/react-native/ReactAndroid/publish.gradle
+      - node_modules/.pnpm/expo-modules-core@*/node_modules/expo-modules-core/android/ExpoModulesCorePlugin.gradle
+      - node_modules/.pnpm/expo-modules-autolinking@*/node_modules/expo-modules-autolinking/scripts/android/autolinking_implementation.gradle
+      - node_modules/.pnpm/react-native-screens@*/node_modules/react-native-screens/android/build.gradle
+      - node_modules/.pnpm/react-native-svg@*/node_modules/react-native-svg/android/build.gradle
+      - node_modules/.pnpm/react-native-safe-area-context@*/node_modules/react-native-safe-area-context/android/build.gradle
+      - node_modules/.pnpm/react-native-webview@*/node_modules/react-native-webview/android/build.gradle
+      - node_modules/.pnpm/react-native-keyboard-controller@*/node_modules/react-native-keyboard-controller/android/build.gradle
+      - node_modules/.pnpm/@react-native-masked-view+masked-view@*/node_modules/@react-native-masked-view/masked-view/android/build.gradle
+    scandelete:
+      - node_modules
+    build:
+      - cd android/app
+      - gradle assembleRelease
+    ndk: r27b
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^v
+UpdateCheckData: app.config.js|versionCode:\s*(\d+)|.|version:\s*'([\d.]+)'
+CurrentVersion: 1.0.2
+CurrentVersionCode: 6
