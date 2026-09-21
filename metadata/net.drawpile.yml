@@ -602,6 +602,232 @@ Builds:
       - QT_ANDROID_PACKAGE_MODE=release cmake --build buildandroid-x86_64-release
         --config Release
 
+  - versionName: 2.3.1-beta.2
+    versionCode: 2030102001
+    commit: 02f1b4452011adcbd545fa5bf20eef01ee074d16
+    sudo:
+      - echo "deb http://deb.debian.org/debian bookworm main" >/etc/apt/sources.list.d/bookworm.list
+      - apt-get update
+      - apt-get install -y build-essential cmake nasm ninja-build openjdk-17-jdk-headless
+        pkg-config yasm
+      - update-java-alternatives --set java-1.17.0-openjdk-amd64
+      - rm -rf /opt/android-sdk/{build-tools,ndk,platforms}
+      - sdkmanager 'build-tools;36.0.0' 'ndk;27.3.13750724' 'platforms;android-36'
+      - echo '#!/usr/bin/env bash' 
+        >/opt/android-sdk/ndk/27.3.13750724/toolchains/llvm/prebuilt/linux-x86_64/bin/armv7a-linux-androideabi36-clang
+      - echo 'bin_dir=`dirname "$0"`' 
+        >>/opt/android-sdk/ndk/27.3.13750724/toolchains/llvm/prebuilt/linux-x86_64/bin/armv7a-linux-androideabi36-clang
+      - echo 'if [ "$1" != "-cc1" ]; then' 
+        >>/opt/android-sdk/ndk/27.3.13750724/toolchains/llvm/prebuilt/linux-x86_64/bin/armv7a-linux-androideabi36-clang
+      - echo '    "$bin_dir/clang" --target=armv7a-linux-androideabi36 "$@"' 
+        >>/opt/android-sdk/ndk/27.3.13750724/toolchains/llvm/prebuilt/linux-x86_64/bin/armv7a-linux-androideabi36-clang
+      - echo 'else' 
+        >>/opt/android-sdk/ndk/27.3.13750724/toolchains/llvm/prebuilt/linux-x86_64/bin/armv7a-linux-androideabi36-clang
+      - echo '    "$bin_dir/clang" "$@"' 
+        >>/opt/android-sdk/ndk/27.3.13750724/toolchains/llvm/prebuilt/linux-x86_64/bin/armv7a-linux-androideabi36-clang
+      - echo 'fi' 
+        >>/opt/android-sdk/ndk/27.3.13750724/toolchains/llvm/prebuilt/linux-x86_64/bin/armv7a-linux-androideabi36-clang
+      - echo '#!/usr/bin/env bash' 
+        >/opt/android-sdk/ndk/27.3.13750724/toolchains/llvm/prebuilt/linux-x86_64/bin/armv7a-linux-androideabi36-clang++
+      - echo 'bin_dir=`dirname "$0"`' 
+        >>/opt/android-sdk/ndk/27.3.13750724/toolchains/llvm/prebuilt/linux-x86_64/bin/armv7a-linux-androideabi36-clang++
+      - echo 'if [ "$1" != "-cc1" ]; then' 
+        >>/opt/android-sdk/ndk/27.3.13750724/toolchains/llvm/prebuilt/linux-x86_64/bin/armv7a-linux-androideabi36-clang++
+      - echo '    "$bin_dir/clang++" --target=armv7a-linux-androideabi36 "$@"' 
+        >>/opt/android-sdk/ndk/27.3.13750724/toolchains/llvm/prebuilt/linux-x86_64/bin/armv7a-linux-androideabi36-clang++
+      - echo 'else' 
+        >>/opt/android-sdk/ndk/27.3.13750724/toolchains/llvm/prebuilt/linux-x86_64/bin/armv7a-linux-androideabi36-clang++
+      - echo '    "$bin_dir/clang++" "$@"' 
+        >>/opt/android-sdk/ndk/27.3.13750724/toolchains/llvm/prebuilt/linux-x86_64/bin/armv7a-linux-androideabi36-clang++
+      - echo 'fi' 
+        >>/opt/android-sdk/ndk/27.3.13750724/toolchains/llvm/prebuilt/linux-x86_64/bin/armv7a-linux-androideabi36-clang++
+      - chmod +x 
+        /opt/android-sdk/ndk/27.3.13750724/toolchains/llvm/prebuilt/linux-x86_64/bin/armv7a-linux-androideabi36-clang
+      - chmod +x 
+        /opt/android-sdk/ndk/27.3.13750724/toolchains/llvm/prebuilt/linux-x86_64/bin/armv7a-linux-androideabi36-clang++
+    output: buildandroid-armeabi-v7a-release/bin/Drawpile-$$VERSION$$-23-23-armeabi-v7a.apk
+    build:
+      - BUILD_TYPE=release ANDROID_ABI=armeabi-v7a ANDROID_BUILD_TOOLS_VERSION=36.0.0
+        ANDROID_NDK_VERSION=27.3.13750724 ANDROID_PLATFORM_VERSION=36 ANDROID_TARGET_VERSION=23
+        ANDROID_SDK_DIR=$$SDK$$ ANDROID_SDKMANAGER=sdkmanager bash -c 'pkg/android/build.bash
+        setup && pkg/android/build.bash configure -DBUILD_ANDROID_VERSION_CODE=$$VERCODE$$
+        -DBUILD_VERSION=$$VERSION$$ -DCLANG_TIDY=OFF -DCMAKE_INTERPROCEDURAL_OPTIMIZATION=ON
+        -DDISABLE_UPDATE_CHECK_DEFAULT=ON -DDIST_BUILD=ON -DUSE_STRICT_ALIASING=ON
+        -DANDROID_MIN_SDK_VERSION=23'
+      - QT_ANDROID_PACKAGE_MODE=release cmake --build buildandroid-armeabi-v7a-release
+        --config Release
+
+  - versionName: 2.3.1-beta.2
+    versionCode: 2030102002
+    commit: 02f1b4452011adcbd545fa5bf20eef01ee074d16
+    sudo:
+      - echo "deb http://deb.debian.org/debian bookworm main" >/etc/apt/sources.list.d/bookworm.list
+      - apt-get update
+      - apt-get install -y build-essential cmake nasm ninja-build openjdk-17-jdk-headless
+        pkg-config yasm
+      - update-java-alternatives --set java-1.17.0-openjdk-amd64
+      - rm -rf /opt/android-sdk/{build-tools,ndk,platforms}
+      - sdkmanager 'build-tools;36.0.0' 'ndk;27.3.13750724' 'platforms;android-36'
+      - echo '#!/usr/bin/env bash' 
+        >/opt/android-sdk/ndk/27.3.13750724/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android36-clang
+      - echo 'bin_dir=`dirname "$0"`' 
+        >>/opt/android-sdk/ndk/27.3.13750724/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android36-clang
+      - echo 'if [ "$1" != "-cc1" ]; then' 
+        >>/opt/android-sdk/ndk/27.3.13750724/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android36-clang
+      - echo '    "$bin_dir/clang" --target=aarch64-linux-android36 "$@"' 
+        >>/opt/android-sdk/ndk/27.3.13750724/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android36-clang
+      - echo 'else' 
+        >>/opt/android-sdk/ndk/27.3.13750724/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android36-clang
+      - echo '    "$bin_dir/clang" "$@"' 
+        >>/opt/android-sdk/ndk/27.3.13750724/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android36-clang
+      - echo 'fi' 
+        >>/opt/android-sdk/ndk/27.3.13750724/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android36-clang
+      - echo '#!/usr/bin/env bash' 
+        >/opt/android-sdk/ndk/27.3.13750724/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android36-clang++
+      - echo 'bin_dir=`dirname "$0"`' 
+        >>/opt/android-sdk/ndk/27.3.13750724/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android36-clang++
+      - echo 'if [ "$1" != "-cc1" ]; then' 
+        >>/opt/android-sdk/ndk/27.3.13750724/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android36-clang++
+      - echo '    "$bin_dir/clang++" --target=aarch64-linux-android36 "$@"' 
+        >>/opt/android-sdk/ndk/27.3.13750724/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android36-clang++
+      - echo 'else' 
+        >>/opt/android-sdk/ndk/27.3.13750724/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android36-clang++
+      - echo '    "$bin_dir/clang++" "$@"' 
+        >>/opt/android-sdk/ndk/27.3.13750724/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android36-clang++
+      - echo 'fi' 
+        >>/opt/android-sdk/ndk/27.3.13750724/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android36-clang++
+      - chmod +x 
+        /opt/android-sdk/ndk/27.3.13750724/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android36-clang
+      - chmod +x 
+        /opt/android-sdk/ndk/27.3.13750724/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android36-clang++
+    output: buildandroid-arm64-v8a-release/bin/Drawpile-$$VERSION$$-30-35-arm64-v8a.apk
+    build:
+      - BUILD_TYPE=release ANDROID_ABI=arm64-v8a ANDROID_BUILD_TOOLS_VERSION=36.0.0
+        ANDROID_NDK_VERSION=27.3.13750724 ANDROID_PLATFORM_VERSION=36 ANDROID_TARGET_VERSION=35
+        ANDROID_SDK_DIR=$$SDK$$ ANDROID_SDKMANAGER=sdkmanager bash -c 'pkg/android/build.bash
+        setup && pkg/android/build.bash configure -DBUILD_ANDROID_VERSION_CODE=$$VERCODE$$
+        -DBUILD_VERSION=$$VERSION$$ -DCLANG_TIDY=OFF -DCMAKE_INTERPROCEDURAL_OPTIMIZATION=ON
+        -DDISABLE_UPDATE_CHECK_DEFAULT=ON -DDIST_BUILD=ON -DUSE_STRICT_ALIASING=ON
+        -DANDROID_MIN_SDK_VERSION=30'
+      - QT_ANDROID_PACKAGE_MODE=release cmake --build buildandroid-arm64-v8a-release
+        --config Release
+
+  - versionName: 2.3.1-beta.2
+    versionCode: 2030102003
+    commit: 02f1b4452011adcbd545fa5bf20eef01ee074d16
+    sudo:
+      - echo "deb http://deb.debian.org/debian bookworm main" >/etc/apt/sources.list.d/bookworm.list
+      - apt-get update
+      - apt-get install -y build-essential cmake nasm ninja-build openjdk-17-jdk-headless
+        pkg-config yasm
+      - update-java-alternatives --set java-1.17.0-openjdk-amd64
+      - rm -rf /opt/android-sdk/{build-tools,ndk,platforms}
+      - sdkmanager 'build-tools;36.0.0' 'ndk;27.3.13750724' 'platforms;android-36'
+      - rm -f 
+        /opt/android-sdk/ndk/27.3.13750724/toolchains/llvm/prebuilt/linux-x86_64/bin/i686-linux-android-ranlib
+      - ln -s 
+        /opt/android-sdk/ndk/27.3.13750724/toolchains/llvm/prebuilt/linux-x86_64/bin/{llvm-ranlib,i686-linux-android-ranlib}
+      - echo '#!/usr/bin/env bash' 
+        >/opt/android-sdk/ndk/27.3.13750724/toolchains/llvm/prebuilt/linux-x86_64/bin/i686-linux-android36-clang
+      - echo 'bin_dir=`dirname "$0"`' 
+        >>/opt/android-sdk/ndk/27.3.13750724/toolchains/llvm/prebuilt/linux-x86_64/bin/i686-linux-android36-clang
+      - echo 'if [ "$1" != "-cc1" ]; then' 
+        >>/opt/android-sdk/ndk/27.3.13750724/toolchains/llvm/prebuilt/linux-x86_64/bin/i686-linux-android36-clang
+      - echo '    "$bin_dir/clang" --target=i686-linux-android36 "$@"' 
+        >>/opt/android-sdk/ndk/27.3.13750724/toolchains/llvm/prebuilt/linux-x86_64/bin/i686-linux-android36-clang
+      - echo 'else' 
+        >>/opt/android-sdk/ndk/27.3.13750724/toolchains/llvm/prebuilt/linux-x86_64/bin/i686-linux-android36-clang
+      - echo '    "$bin_dir/clang" "$@"' 
+        >>/opt/android-sdk/ndk/27.3.13750724/toolchains/llvm/prebuilt/linux-x86_64/bin/i686-linux-android36-clang
+      - echo 'fi' 
+        >>/opt/android-sdk/ndk/27.3.13750724/toolchains/llvm/prebuilt/linux-x86_64/bin/i686-linux-android36-clang
+      - echo '#!/usr/bin/env bash' 
+        >/opt/android-sdk/ndk/27.3.13750724/toolchains/llvm/prebuilt/linux-x86_64/bin/i686-linux-android36-clang++
+      - echo 'bin_dir=`dirname "$0"`' 
+        >>/opt/android-sdk/ndk/27.3.13750724/toolchains/llvm/prebuilt/linux-x86_64/bin/i686-linux-android36-clang++
+      - echo 'if [ "$1" != "-cc1" ]; then' 
+        >>/opt/android-sdk/ndk/27.3.13750724/toolchains/llvm/prebuilt/linux-x86_64/bin/i686-linux-android36-clang++
+      - echo '    "$bin_dir/clang++" --target=i686-linux-android36 "$@"' 
+        >>/opt/android-sdk/ndk/27.3.13750724/toolchains/llvm/prebuilt/linux-x86_64/bin/i686-linux-android36-clang++
+      - echo 'else' 
+        >>/opt/android-sdk/ndk/27.3.13750724/toolchains/llvm/prebuilt/linux-x86_64/bin/i686-linux-android36-clang++
+      - echo '    "$bin_dir/clang++" "$@"' 
+        >>/opt/android-sdk/ndk/27.3.13750724/toolchains/llvm/prebuilt/linux-x86_64/bin/i686-linux-android36-clang++
+      - echo 'fi' 
+        >>/opt/android-sdk/ndk/27.3.13750724/toolchains/llvm/prebuilt/linux-x86_64/bin/i686-linux-android36-clang++
+      - chmod +x 
+        /opt/android-sdk/ndk/27.3.13750724/toolchains/llvm/prebuilt/linux-x86_64/bin/i686-linux-android36-clang
+      - chmod +x 
+        /opt/android-sdk/ndk/27.3.13750724/toolchains/llvm/prebuilt/linux-x86_64/bin/i686-linux-android36-clang++
+    output: buildandroid-x86-release/bin/Drawpile-$$VERSION$$-23-23-x86.apk
+    build:
+      - BUILD_TYPE=release ANDROID_ABI=x86 ANDROID_BUILD_TOOLS_VERSION=36.0.0 ANDROID_NDK_VERSION=27.3.13750724
+        ANDROID_PLATFORM_VERSION=36 ANDROID_TARGET_VERSION=23 ANDROID_SDK_DIR=$$SDK$$
+        ANDROID_SDKMANAGER=sdkmanager bash -c 'pkg/android/build.bash setup && pkg/android/build.bash
+        configure -DBUILD_ANDROID_VERSION_CODE=$$VERCODE$$ -DBUILD_VERSION=$$VERSION$$
+        -DCLANG_TIDY=OFF -DCMAKE_INTERPROCEDURAL_OPTIMIZATION=ON -DDISABLE_UPDATE_CHECK_DEFAULT=ON
+        -DDIST_BUILD=ON -DUSE_STRICT_ALIASING=ON -DANDROID_MIN_SDK_VERSION=23'
+      - QT_ANDROID_PACKAGE_MODE=release cmake --build buildandroid-x86-release --config
+        Release
+
+  - versionName: 2.3.1-beta.2
+    versionCode: 2030102004
+    commit: 02f1b4452011adcbd545fa5bf20eef01ee074d16
+    sudo:
+      - echo "deb http://deb.debian.org/debian bookworm main" >/etc/apt/sources.list.d/bookworm.list
+      - apt-get update
+      - apt-get install -y build-essential cmake nasm ninja-build openjdk-17-jdk-headless
+        pkg-config yasm
+      - update-java-alternatives --set java-1.17.0-openjdk-amd64
+      - rm -rf /opt/android-sdk/{build-tools,ndk,platforms}
+      - sdkmanager 'build-tools;36.0.0' 'ndk;27.3.13750724' 'platforms;android-36'
+      - rm -f 
+        /opt/android-sdk/ndk/27.3.13750724/toolchains/llvm/prebuilt/linux-x86_64/bin/x86_64-linux-android-ranlib
+      - ln -s 
+        /opt/android-sdk/ndk/27.3.13750724/toolchains/llvm/prebuilt/linux-x86_64/bin/{llvm-ranlib,x86_64-linux-android-ranlib}
+      - echo '#!/usr/bin/env bash' 
+        >/opt/android-sdk/ndk/27.3.13750724/toolchains/llvm/prebuilt/linux-x86_64/bin/x86_64-linux-android36-clang
+      - echo 'bin_dir=`dirname "$0"`' 
+        >>/opt/android-sdk/ndk/27.3.13750724/toolchains/llvm/prebuilt/linux-x86_64/bin/x86_64-linux-android36-clang
+      - echo 'if [ "$1" != "-cc1" ]; then' 
+        >>/opt/android-sdk/ndk/27.3.13750724/toolchains/llvm/prebuilt/linux-x86_64/bin/x86_64-linux-android36-clang
+      - echo '    "$bin_dir/clang" --target=x86_64-linux-android36 "$@"' 
+        >>/opt/android-sdk/ndk/27.3.13750724/toolchains/llvm/prebuilt/linux-x86_64/bin/x86_64-linux-android36-clang
+      - echo 'else' 
+        >>/opt/android-sdk/ndk/27.3.13750724/toolchains/llvm/prebuilt/linux-x86_64/bin/x86_64-linux-android36-clang
+      - echo '    "$bin_dir/clang" "$@"' 
+        >>/opt/android-sdk/ndk/27.3.13750724/toolchains/llvm/prebuilt/linux-x86_64/bin/x86_64-linux-android36-clang
+      - echo 'fi' 
+        >>/opt/android-sdk/ndk/27.3.13750724/toolchains/llvm/prebuilt/linux-x86_64/bin/x86_64-linux-android36-clang
+      - echo '#!/usr/bin/env bash' 
+        >/opt/android-sdk/ndk/27.3.13750724/toolchains/llvm/prebuilt/linux-x86_64/bin/x86_64-linux-android36-clang++
+      - echo 'bin_dir=`dirname "$0"`' 
+        >>/opt/android-sdk/ndk/27.3.13750724/toolchains/llvm/prebuilt/linux-x86_64/bin/x86_64-linux-android36-clang++
+      - echo 'if [ "$1" != "-cc1" ]; then' 
+        >>/opt/android-sdk/ndk/27.3.13750724/toolchains/llvm/prebuilt/linux-x86_64/bin/x86_64-linux-android36-clang++
+      - echo '    "$bin_dir/clang++" --target=x86_64-linux-android36 "$@"' 
+        >>/opt/android-sdk/ndk/27.3.13750724/toolchains/llvm/prebuilt/linux-x86_64/bin/x86_64-linux-android36-clang++
+      - echo 'else' 
+        >>/opt/android-sdk/ndk/27.3.13750724/toolchains/llvm/prebuilt/linux-x86_64/bin/x86_64-linux-android36-clang++
+      - echo '    "$bin_dir/clang++" "$@"' 
+        >>/opt/android-sdk/ndk/27.3.13750724/toolchains/llvm/prebuilt/linux-x86_64/bin/x86_64-linux-android36-clang++
+      - echo 'fi' 
+        >>/opt/android-sdk/ndk/27.3.13750724/toolchains/llvm/prebuilt/linux-x86_64/bin/x86_64-linux-android36-clang++
+      - chmod +x 
+        /opt/android-sdk/ndk/27.3.13750724/toolchains/llvm/prebuilt/linux-x86_64/bin/x86_64-linux-android36-clang
+      - chmod +x 
+        /opt/android-sdk/ndk/27.3.13750724/toolchains/llvm/prebuilt/linux-x86_64/bin/x86_64-linux-android36-clang++
+    output: buildandroid-x86_64-release/bin/Drawpile-$$VERSION$$-30-35-x86_64.apk
+    build:
+      - BUILD_TYPE=release ANDROID_ABI=x86_64 ANDROID_BUILD_TOOLS_VERSION=36.0.0 ANDROID_NDK_VERSION=27.3.13750724
+        ANDROID_PLATFORM_VERSION=36 ANDROID_TARGET_VERSION=35 ANDROID_SDK_DIR=$$SDK$$
+        ANDROID_SDKMANAGER=sdkmanager bash -c 'pkg/android/build.bash setup && pkg/android/build.bash
+        configure -DBUILD_ANDROID_VERSION_CODE=$$VERCODE$$ -DBUILD_VERSION=$$VERSION$$
+        -DCLANG_TIDY=OFF -DCMAKE_INTERPROCEDURAL_OPTIMIZATION=ON -DDISABLE_UPDATE_CHECK_DEFAULT=ON
+        -DDIST_BUILD=ON -DUSE_STRICT_ALIASING=ON -DANDROID_MIN_SDK_VERSION=30'
+      - QT_ANDROID_PACKAGE_MODE=release cmake --build buildandroid-x86_64-release
+        --config Release
+
 MaintainerNotes: |-
   Qt's Android build process is extremely fragile and will fail by the mere
   presence of superfluous build-tools, ndk or platform versions, no matter how
@@ -617,7 +843,10 @@ MaintainerNotes: |-
   need to run that ourselves anyway due to the Qt issues above.
 
   Qt incorrectly calls a ranlib on x86 and x86_64 that doesn't exist in the NDK
-  anymore. We make a symlink to llvm-ranlib to work around that.
+  anymore. We make a symlink to llvm-ranlib to work around that. It also only
+  supports NDK 27.3.13750724, but that doesn't provide clang and clang++
+  wrapper scripts for SDK 36. They're trivial though, so we generate those in
+  the sudo section.
 
   Regular versions look like "1.2.3" for stable versions and "1.2.3-beta.4" for
   unstable versions. Versions that contain only fixes for F-Droid and don't
