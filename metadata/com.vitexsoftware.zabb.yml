@@ -1,0 +1,122 @@
+Categories:
+  - Internet
+  - System
+License: MIT
+AuthorName: Vítězslav Dvořák
+AuthorEmail: info@vitexsoftware.com
+WebSite: https://zabb.vitexsoftware.com/
+SourceCode: https://github.com/VitexSoftware/Zabb
+IssueTracker: https://github.com/VitexSoftware/Zabb/issues
+Changelog: https://github.com/VitexSoftware/Zabb/releases
+
+AutoName: Zabb
+
+RepoType: git
+Repo: https://github.com/VitexSoftware/Zabb.git
+Binaries: https://github.com/VitexSoftware/Zabb/releases/download/v%v/zabb-%c.apk
+
+Builds:
+  - versionName: 0.6.11
+    versionCode: 111
+    commit: 1f221a1f2b777849401f41019c303e0e8b64d367
+    sudo:
+      - export CPUS_MAX=4
+      - export CPUS=$(getconf _NPROCESSORS_ONLN)
+      - for (( c=$CPUS_MAX; c<$CPUS; c++ )) ; do echo 0 > /sys/devices/system/cpu/cpu$c/online
+        ; done
+    output: build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
+    srclibs:
+      - flutter@stable
+    prebuild:
+      - flutterVersion=$(sed -n -E "s/.*flutter-version:\ '(.*)'/\1/p" .github/workflows/build.yml
+        | head -n1)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+    scandelete:
+      - .pub-cache
+    build:
+      - export ORIGDIR=$(pwd)
+      - export FIXEDDIR=/home/vagrant/build/com.vitexsoftware.zabb
+      - if [ "$ORIGDIR" != "$FIXEDDIR" ]; then rm -rf $FIXEDDIR; mkdir -p $(dirname
+        $FIXEDDIR); cd ..; mv $ORIGDIR $FIXEDDIR; fi
+      - cd $FIXEDDIR
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform="android-arm"
+      - if [ "$ORIGDIR" != "$FIXEDDIR" ]; then cd ..; mv $FIXEDDIR $ORIGDIR; fi
+
+  - versionName: 0.6.11
+    versionCode: 112
+    commit: 1f221a1f2b777849401f41019c303e0e8b64d367
+    sudo:
+      - export CPUS_MAX=4
+      - export CPUS=$(getconf _NPROCESSORS_ONLN)
+      - for (( c=$CPUS_MAX; c<$CPUS; c++ )) ; do echo 0 > /sys/devices/system/cpu/cpu$c/online
+        ; done
+    output: build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+    srclibs:
+      - flutter@stable
+    prebuild:
+      - flutterVersion=$(sed -n -E "s/.*flutter-version:\ '(.*)'/\1/p" .github/workflows/build.yml
+        | head -n1)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+    scandelete:
+      - .pub-cache
+    build:
+      - export ORIGDIR=$(pwd)
+      - export FIXEDDIR=/home/vagrant/build/com.vitexsoftware.zabb
+      - if [ "$ORIGDIR" != "$FIXEDDIR" ]; then rm -rf $FIXEDDIR; mkdir -p $(dirname
+        $FIXEDDIR); cd ..; mv $ORIGDIR $FIXEDDIR; fi
+      - cd $FIXEDDIR
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform="android-arm64"
+      - if [ "$ORIGDIR" != "$FIXEDDIR" ]; then cd ..; mv $FIXEDDIR $ORIGDIR; fi
+
+  - versionName: 0.6.11
+    versionCode: 113
+    commit: 1f221a1f2b777849401f41019c303e0e8b64d367
+    sudo:
+      - export CPUS_MAX=4
+      - export CPUS=$(getconf _NPROCESSORS_ONLN)
+      - for (( c=$CPUS_MAX; c<$CPUS; c++ )) ; do echo 0 > /sys/devices/system/cpu/cpu$c/online
+        ; done
+    output: build/app/outputs/flutter-apk/app-x86_64-release.apk
+    srclibs:
+      - flutter@stable
+    prebuild:
+      - flutterVersion=$(sed -n -E "s/.*flutter-version:\ '(.*)'/\1/p" .github/workflows/build.yml
+        | head -n1)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+    scandelete:
+      - .pub-cache
+    build:
+      - export ORIGDIR=$(pwd)
+      - export FIXEDDIR=/home/vagrant/build/com.vitexsoftware.zabb
+      - if [ "$ORIGDIR" != "$FIXEDDIR" ]; then rm -rf $FIXEDDIR; mkdir -p $(dirname
+        $FIXEDDIR); cd ..; mv $ORIGDIR $FIXEDDIR; fi
+      - cd $FIXEDDIR
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform="android-x64"
+      - if [ "$ORIGDIR" != "$FIXEDDIR" ]; then cd ..; mv $FIXEDDIR $ORIGDIR; fi
+
+AllowedAPKSigningKeys: 9bdb49a7dbacfbebe261248004cf837292379eb845dd42398f1e83b7d3fc8ba6
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+VercodeOperation:
+  - 10 * %c + 1
+  - 10 * %c + 2
+  - 10 * %c + 3
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 0.6.11
+CurrentVersionCode: 113
