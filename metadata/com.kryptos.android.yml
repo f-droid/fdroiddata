@@ -158,9 +158,39 @@ Builds:
       - ./java/build_jni.sh android-arm64 android-arm
     ndk: 26.1.10909125
 
+  - versionName: '2.4'
+    versionCode: 13
+    commit: f87569344dad3c374dc8bc27954b63dcb564e2ec
+    subdir: android/app
+    sudo:
+      - apt-get update
+      - apt-get install -y rustup cmake build-essential clang libclang-dev
+      - apt-get install -y protobuf-compiler libprotobuf-dev
+    gradle:
+      - yes
+    prebuild:
+      - cd ../..
+      - sed -i 's/ndkVersion = "30.0.16248370"/ndkVersion = "28.0.13004108"/' android/app/build.gradle.kts
+        android/libsignal/build.gradle.kts
+      - ./scripts/setup-libsignal.sh
+      - cd ThirdParty/libsignal
+      - rustup target add aarch64-linux-android armv7-linux-androideabi
+    scandelete:
+      - ThirdParty/ObjectivePGP
+      - ThirdParty/libsignal/rust/attest/fuzz/seeds
+    build:
+      - export PROTOC=/usr/bin/protoc
+      - cd ../../ThirdParty/libsignal
+      - export SOURCE_DATE_EPOCH=$(git log -1 --pretty=%ct)
+      - export CFLAGS="-ffile-prefix-map=$PWD=."
+      - export CXXFLAGS="-ffile-prefix-map=$PWD=."
+      - export RUSTFLAGS="-C link-arg=-Wl,--build-id=none"
+      - ./java/build_jni.sh android-arm64 android-arm
+    ndk: 28.0.13004108
+
 AllowedAPKSigningKeys: 6470246992edc4a44478d40cb84fcb2bb08138162794c4ae951f5d4b8faf8e54
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 2.3.3
-CurrentVersionCode: 11
+CurrentVersion: '2.4'
+CurrentVersionCode: 13
