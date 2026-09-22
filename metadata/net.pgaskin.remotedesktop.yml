@@ -33,7 +33,34 @@ Builds:
       - export RUST_VERSION=$(sed -n -E 's/channel = "(.*)"/\1/p' ../rust-toolchain.toml)
       - rustup default $RUST_VERSION
       - rustup target add aarch64-linux-android x86_64-linux-android
-      - cargo install cargo-ndk@4.1.2
+      - cargo install cargo-ndk@4.1.2 --locked
+    scandelete:
+      - third_party/freerdp/libfreerdp/codec/test
+      - third_party/gnutls/fuzz
+      - third_party/ironrdp/crates/ironrdp-graphics/src/rdp6/test_assets
+      - third_party/ironrdp/crates/ironrdp-graphics/src/zgfx/test_assets
+      - third_party/ironrdp/crates/ironrdp-testsuite-core
+      - third_party/libjpeg-turbo/java
+      - third_party/openssl/test
+
+  - versionName: '5'
+    versionCode: 5
+    commit: 2d76145c7575359e499930b5d22b21a2c0198cac
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y gcc libc-dev rustup xz-utils
+    gradle:
+      - yes
+    prebuild:
+      - git -C .. submodule update --init
+      - ../patch.sh -n
+      - sdkmanager 'cmake;3.30.5'
+      - gradle :backends:fetchCryptoSources
+      - export RUST_VERSION=$(sed -n -E 's/channel = "(.*)"/\1/p' ../rust-toolchain.toml)
+      - rustup default $RUST_VERSION
+      - rustup target add aarch64-linux-android x86_64-linux-android
+      - cargo install cargo-ndk@4.1.2 --locked
     scandelete:
       - third_party/freerdp/libfreerdp/codec/test
       - third_party/gnutls/fuzz
@@ -47,5 +74,5 @@ AllowedAPKSigningKeys: 08d46917a818ad0c479733b458acb7488a4cc39f0a5a20ccc6a39181b
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v[0-9]+$
-CurrentVersion: '4'
-CurrentVersionCode: 4
+CurrentVersion: '5'
+CurrentVersionCode: 5
