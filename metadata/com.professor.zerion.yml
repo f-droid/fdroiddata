@@ -156,9 +156,53 @@ Builds:
       - $$reproducible-apk-tools$$/zipalign.py --page-size 4 --pad-like-apksigner
         --replace unaligned.apk $$OUT$$
 
+  - versionName: 3.0.11
+    versionCode: 31100
+    commit: 6e24cdd8476b9ce96fb27ecae81203256bd52cfa
+    subdir: zerion-android
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y --no-install-recommends ca-certificates curl unzip git
+        build-essential cmake pkg-config libtool automake autoconf gperf python3 file
+        xz-utils
+      - mkdir -p /build
+      - chown vagrant:vagrant /build
+    gradle:
+      - official
+    srclibs:
+      - reproducible-apk-tools@v0.3.0
+    rm:
+      - libs/gradle-witness.jar
+      - gradle/verification-metadata.xml
+    prebuild:
+      - sed -i "/include ':bramble-java'/d" ../settings.gradle
+      - sed -i '/^LIBS=$(find ${MB} -name/c\LIBS="${MB}/lib/libwallet_api.a ${MB}/lib/libwallet.a
+        ${MB}/external/db_drivers/liblmdb/liblmdb.a ${MB}/external/easylogging++/libeasylogging.a
+        ${MB}/external/randomx/librandomx.a ${MB}/contrib/epee/src/libepee.a ${MB}/src/multisig/libmultisig.a
+        ${MB}/src/cryptonote_basic/libcryptonote_format_utils_basic.a ${MB}/src/cryptonote_basic/libcryptonote_basic.a
+        ${MB}/src/mnemonics/libmnemonics.a ${MB}/src/libversion.a ${MB}/src/cryptonote_core/libcryptonote_core.a
+        ${MB}/src/blockchain_db/libblockchain_db.a ${MB}/src/ringct/libringct_basic.a
+        ${MB}/src/ringct/libringct.a ${MB}/src/blocks/libblocks.a ${MB}/src/checkpoints/libcheckpoints.a
+        ${MB}/src/crypto/libcncrypto.a ${MB}/src/hardforks/libhardforks.a ${MB}/src/device_trezor/libdevice_trezor.a
+        ${MB}/src/rpc/librpc_base.a ${MB}/src/device/libdevice.a ${MB}/src/net/libnet.a
+        ${MB}/src/common/libcommon.a"' ../packaging/monero-android/build-monero-android.sh
+      - grep -q '^LIBS="${MB}/lib/libwallet_api.a ' ../packaging/monero-android/build-monero-android.sh
+    build: ANDROID_NDK_HOME=$$NDK$$ ../packaging/monero-android/fdroid-build.sh >
+      /tmp/libzmonero-build.log 2>&1 || (tail -n 300 /tmp/libzmonero-build.log; false)
+    ndk: r27b
+    gradleprops:
+      - fdroid
+    postbuild:
+      - $$reproducible-apk-tools$$/inplace-fix.py --zipalign fix-newlines $$OUT$$
+        'assets/i2p/certificates/reseed/*.crt' 'assets/i2p/certificates/ssl/*.crt'
+      - mv $$OUT$$ unaligned.apk
+      - $$reproducible-apk-tools$$/zipalign.py --page-size 4 --pad-like-apksigner
+        --replace unaligned.apk $$OUT$$
+
 AllowedAPKSigningKeys: d7fdb11125890d133ae89d8ba4f4331d9045e21ef01d9899a7cdee6888f704c8
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 3.0.3
-CurrentVersionCode: 30300
+CurrentVersion: 3.0.11
+CurrentVersionCode: 31100
