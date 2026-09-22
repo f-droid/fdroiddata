@@ -191,6 +191,94 @@ Builds:
       - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
         --replace unaligned.apk $$OUT$$
 
+  - versionName: 1.1.0
+    versionCode: 101009991
+    commit: b756d52e236470dfd25e3bac86f06cfb26f7755e
+    sudo:
+      - echo "deb http://deb.debian.org/debian forky main" > /etc/apt/sources.list.d/forky.list
+      - apt-get update
+      - apt-get install -y -t forky nodejs npm
+    init:
+      - export CI=1
+      - export EXPO_NO_TELEMETRY=1
+      - npm ci
+    output: android/app/build/outputs/apk/release/*.apk
+    binary: 
+      https://github.com/grantstephens/ReminDiary/releases/download/v%v/remindiary-v%v-armeabi-v7a.apk
+    srclibs:
+      - reproducible-apk-tools@v0.3.0
+    prebuild:
+      - export CI=1
+      - export EXPO_NO_TELEMETRY=1
+      - sed -i -e '/"version"/s/1.0.0/$$VERSION$$/' -e '/"android":\ {/a "versionCode":$$VERCODE$$,'
+        app.json
+      - sed -i -e '1a "expo":{"autolinking":{"android":{"buildFromSource":[".*"]}}},'
+        package.json
+      - npx expo prebuild --platform android --no-install
+      - sed -i '/jvmToolchain\|JavaVersion/s/17/21/' node_modules/@react-native/gradle-plugin/*/build.gradle.kts
+        node_modules/@react-native/gradle-plugin/react-native-gradle-plugin/src/main/kotlin/com/facebook/react/utils/JdkConfiguratorUtils.kt
+      - sed -i -e '/signingConfig /d' android/app/build.gradle
+      - printf '\norg.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=2g\n' >> android/gradle.properties
+    scanignore:
+      - node_modules/hermes-compiler/hermesc/linux64-bin/hermesc
+      - node_modules/react-native-screens/android/build.gradle
+      - node_modules/react-native-safe-area-context/android/build.gradle
+      - node_modules/expo-modules-core/android/ExpoModulesCorePlugin.gradle
+      - node_modules/react-native/ReactAndroid/publish.gradle
+    scandelete:
+      - node_modules/
+    build:
+      - cd android/app
+      - gradle -PreactNativeArchitectures=armeabi-v7a assembleRelease -PreactNativeDevServerIp=localhost
+    postbuild:
+      - mv $$OUT$$ unaligned.apk
+      - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
+        --replace unaligned.apk $$OUT$$
+
+  - versionName: 1.1.0
+    versionCode: 101009992
+    commit: b756d52e236470dfd25e3bac86f06cfb26f7755e
+    sudo:
+      - echo "deb http://deb.debian.org/debian forky main" > /etc/apt/sources.list.d/forky.list
+      - apt-get update
+      - apt-get install -y -t forky nodejs npm
+    init:
+      - export CI=1
+      - export EXPO_NO_TELEMETRY=1
+      - npm ci
+    output: android/app/build/outputs/apk/release/*.apk
+    binary: 
+      https://github.com/grantstephens/ReminDiary/releases/download/v%v/remindiary-v%v-arm64-v8a.apk
+    srclibs:
+      - reproducible-apk-tools@v0.3.0
+    prebuild:
+      - export CI=1
+      - export EXPO_NO_TELEMETRY=1
+      - sed -i -e '/"version"/s/1.0.0/$$VERSION$$/' -e '/"android":\ {/a "versionCode":$$VERCODE$$,'
+        app.json
+      - sed -i -e '1a "expo":{"autolinking":{"android":{"buildFromSource":[".*"]}}},'
+        package.json
+      - npx expo prebuild --platform android --no-install
+      - sed -i '/jvmToolchain\|JavaVersion/s/17/21/' node_modules/@react-native/gradle-plugin/*/build.gradle.kts
+        node_modules/@react-native/gradle-plugin/react-native-gradle-plugin/src/main/kotlin/com/facebook/react/utils/JdkConfiguratorUtils.kt
+      - sed -i -e '/signingConfig /d' android/app/build.gradle
+      - printf '\norg.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=2g\n' >> android/gradle.properties
+    scanignore:
+      - node_modules/hermes-compiler/hermesc/linux64-bin/hermesc
+      - node_modules/react-native-screens/android/build.gradle
+      - node_modules/react-native-safe-area-context/android/build.gradle
+      - node_modules/expo-modules-core/android/ExpoModulesCorePlugin.gradle
+      - node_modules/react-native/ReactAndroid/publish.gradle
+    scandelete:
+      - node_modules/
+    build:
+      - cd android/app
+      - gradle -PreactNativeArchitectures=arm64-v8a assembleRelease -PreactNativeDevServerIp=localhost
+    postbuild:
+      - mv $$OUT$$ unaligned.apk
+      - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
+        --replace unaligned.apk $$OUT$$
+
 AllowedAPKSigningKeys: a79298e44336ddcb4d63b728d70dda772381274274cbb44609bdaa6ff2e2f328
 
 AutoUpdateMode: Version
@@ -199,5 +287,5 @@ VercodeOperation:
   - '%c * 10 + 1'
   - '%c * 10 + 2'
 UpdateCheckData: fdroid-version.txt|versionCode=([0-9]+)|.|versionName=(.+)
-CurrentVersion: 1.0.7
-CurrentVersionCode: 100079992
+CurrentVersion: 1.1.0
+CurrentVersionCode: 101009992
