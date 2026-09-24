@@ -1,5 +1,6 @@
 AntiFeatures:
-  - NonFreeNet
+  NonFreeNet:
+    en-US: Booking systems are developed and hosted by UniNow GmbH
 Categories:
   - Pass Wallet
 License: GPL-3.0-or-later
@@ -62,10 +63,35 @@ Builds:
     gradleprops:
       - fdroid=true
 
+  - versionName: 1.3.1
+    versionCode: 7
+    commit: 80311d83cbe803fbdd6e5636a35f342c75c1b074
+    subdir: app
+    gradle:
+      - yes
+    srclibs:
+      - zxing-cpp@v3.1.1
+    prebuild:
+      - git -C $$zxing-cpp$$ checkout -f $(cat libs/zxingcpp.ref)
+      - cat libs/zxingcpp.cmake $$zxing-cpp$$/wrappers/android/zxingcpp/src/main/cpp/CMakeLists.txt
+        > CMakeLists.txt
+      - mv CMakeLists.txt $$zxing-cpp$$/wrappers/android/zxingcpp/src/main/cpp/CMakeLists.txt
+    scandelete:
+      - app/libs
+    build:
+      - pushd $$zxing-cpp$$
+      - cd wrappers/android/zxingcpp
+      - gradle assembleRelease
+      - popd
+      - cp $$zxing-cpp$$/wrappers/android/zxingcpp/build/outputs/aar/zxingcpp-release.aar
+        libs/zxingcpp-release.aar
+    gradleprops:
+      - fdroid=true
+
 AllowedAPKSigningKeys: f44dcdebfb54333fa205ff11eaa5aa1f47cde8217dd63a9fd979cd1fcf6d4241
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: fdroid.txt|\n(\d+)|.|v(.*)
-CurrentVersion: 1.2.2
-CurrentVersionCode: 5
+CurrentVersion: 1.3.1
+CurrentVersionCode: 7
