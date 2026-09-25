@@ -185,28 +185,28 @@ Builds:
       - popd
       - mv $$minetest_android_deps$$/deps ../native
 
-  - versionName: 5.13.0
-    versionCode: 5130000
-    disable: https://github.com/freeminer/freeminer/issues/304
-    commit: c164db4e7845c7fa89f2e68437eae29748b0e51f
+  - versionName: 5.17.0
+    versionCode: 5170000
+    commit: b268e6134563b1760487b79d7d422a74899ec0b2
     subdir: android/app
     submodules: true
     sudo:
       - apt-get update
-      - apt-get install -y gcc-multilib gettext make wget xz-utils
-      - apt-get install -y cmake -t bookworm-backports
+      - apt-get install -y cmake gcc-multilib gettext lbzip2 make wget xz-utils
     gradle:
       - yes
     srclibs:
-      - minetest_android_deps@5.14.0
+      - minetest_android_deps@5.17.0
     prebuild:
       - sed -i -e 's/enable true/enable false/' -e '/preBuild.dependsOn getDeps/d'
         -e 's/versionCode .*/versionCode $$VERCODE$$/' build.gradle ../native/build.gradle
       - sed -i -e '/cmake_minimum_required/aadd_link_options("LINKER:--build-id=none")'
         ../../CMakeLists.txt
-      - sed -i -e 's/8.12.3/8.11.1/' ../build.gradle
     scandelete:
+      - src/mapgen/earth/arnis-cpp/assets
       - src/external/msgpack-c/fuzz
+      - src/external/websocketpp/test/http
+      - src/mapgen/earth/arnis-cpp/tests/golden/facade/sfm/points
     build:
       - export ndkversion=$(grep "ndk_version = " ../build.gradle | cut -d "'" -f
         2)
@@ -222,5 +222,5 @@ Builds:
 
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: 5.13.0
-CurrentVersionCode: 5130000
+CurrentVersion: 5.17.0
+CurrentVersionCode: 5170000
