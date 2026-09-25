@@ -1,0 +1,59 @@
+AntiFeatures:
+  TetheredNet:
+    en-US: Online lookups (recalls, products, vehicles) use the developer's own service;
+      they are on by default and turned off with one switch in Settings.
+Categories:
+  - Multimedia
+  - Security
+License: GPL-3.0-or-later
+AuthorName: Verdetto
+AuthorEmail: support@verdettoqr.com
+AuthorWebSite: https://verdettoqr.com
+WebSite: https://verdettoqr.com
+SourceCode: https://gitlab.com/verdettoqr/verdetto-android
+IssueTracker: https://gitlab.com/verdettoqr/verdetto-android/-/issues
+Changelog: https://gitlab.com/verdettoqr/verdetto-android/-/releases
+
+AutoName: Verdetto
+
+RepoType: git
+Repo: https://gitlab.com/verdettoqr/verdetto-android.git
+Binaries: 
+  https://gitlab.com/verdettoqr/verdetto-android/-/releases/v%v/downloads/verdetto-%v-foss.apk
+
+Builds:
+  - versionName: 1.0.8
+    versionCode: 10008
+    commit: ef6de5b60612bb5a8faddc09f21d16014cd544a8
+    subdir: app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y make gcc libc-dev rustup
+    gradle:
+      - foss
+    prebuild:
+      - rustup default 1.98.0
+      - rustup target add aarch64-linux-android
+    scanignore:
+      - app/src/main/assets/safety
+    scandelete:
+      - core/fixtures
+      - tools/screens/fixtures/hot-fixture
+    ndk: 29.0.14206865
+
+AllowedAPKSigningKeys: 840fc3541e2228bc4545452b9d15bc912d24314ae3a35f3a4f5feeb014e3784f
+
+MaintainerNotes: |-
+  app/src/main/assets/safety is data, not code (scanignore): the bundled
+  link-list snapshot as gzipped text tables and one binary table, list.bin,
+  built from the public list repository
+  https://gitlab.com/verdettoqr/link-safety-list by its own tooling.
+  core/fixtures and tools/screens/fixtures/hot-fixture are test and rig data
+  the release build never reads (scandelete).
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^v[0-9]+\.[0-9]+\.[0-9]+$
+UpdateCheckData: app/version.properties|versionCode=(\d+)|.|versionName=(.+)
+CurrentVersion: 1.0.8
+CurrentVersionCode: 10008
