@@ -654,14 +654,15 @@ check apk:
         fi
 
         # R8 Marker
-        unzip -q $apk classes.dex;
-        r8marker="$(strings classes.dex | sed -n -E 's/.*~~R8(Partial)?(\{.*\}).*/\2/p' | jq -Rr '@json[1:-1]')";
-        rm classes.dex;
-        if [[ -n "$r8marker" ]]; then
-          generate_report $appid $location "APK R8 Marker: $r8marker" "r8_marker" "$file R8 Marker" "info" >> codequality.json;
-        else
-          generate_report $appid $location "APK has no R8 Marker, R8 is not used" "r8_marker" "$file R8 Marker" "minor" >> codequality.json;
-        fi
+        unzip -q $apk classes.dex && {
+          r8marker="$(strings classes.dex | sed -n -E 's/.*~~R8(Partial)?(\{.*\}).*/\2/p' | jq -Rr '@json[1:-1]')";
+          rm classes.dex;
+          if [[ -n "$r8marker" ]]; then
+            generate_report $appid $location "APK R8 Marker: $r8marker" "r8_marker" "$file R8 Marker" "info" >> codequality.json;
+          else
+            generate_report $appid $location "APK has no R8 Marker, R8 is not used" "r8_marker" "$file R8 Marker" "minor" >> codequality.json;
+          fi
+        };
       done
     - sed -i -e '$s/,$/]/' codequality.json
     - exit $EXITVALUE
