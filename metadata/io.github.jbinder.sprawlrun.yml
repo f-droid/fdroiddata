@@ -117,6 +117,111 @@ Builds:
       - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform=android-x64
     ndk: 28.2.13676358
 
+  - versionName: 0.3.0
+    versionCode: 51
+    commit: 9ee975b57d613347a0e238208e91178f789b33a2
+    output: build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+    prebuild:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - flutterVersion=$(sed -n -E 's/.*"flutter":\ "(.*)"/\1/p' .fvmrc)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter config --no-cli-animations
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - GEO=$(dirname $PUB_CACHE/hosted/pub.dev/geolocator_android-*/android/build.gradle)
+      - GM=$GEO/src/main/java/com/baseflow/geolocator/location/GeolocationManager.java
+      - rm $GEO/src/main/java/com/baseflow/geolocator/location/FusedLocationClient.java
+      - sed -i '/play-services-location/d' $GEO/build.gradle
+      - sed -i '/^import com\.google\.android\.gms\./d' $GM
+      - sed -i 's|return isGooglePlayServicesAvailable(context)|return new LocationManagerClient(context,
+        locationOptions);|' $GM
+      - sed -i '/new FusedLocationClient(context, locationOptions)/d' $GM
+      - sed -i '/^ *[:].*new LocationManagerClient/d' $GM
+      - sed -i '/private boolean isGooglePlayServicesAvailable/,/^  }$/d' $GM
+      - if grep -rq 'com\.google\.android\.gms' $GEO; then echo 'GMS still referenced
+        in geolocator_android'; exit 1; fi
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform=android-arm
+    ndk: 28.2.13676358
+
+  - versionName: 0.3.0
+    versionCode: 52
+    commit: 9ee975b57d613347a0e238208e91178f789b33a2
+    output: build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+    prebuild:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - flutterVersion=$(sed -n -E 's/.*"flutter":\ "(.*)"/\1/p' .fvmrc)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter config --no-cli-animations
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - GEO=$(dirname $PUB_CACHE/hosted/pub.dev/geolocator_android-*/android/build.gradle)
+      - GM=$GEO/src/main/java/com/baseflow/geolocator/location/GeolocationManager.java
+      - rm $GEO/src/main/java/com/baseflow/geolocator/location/FusedLocationClient.java
+      - sed -i '/play-services-location/d' $GEO/build.gradle
+      - sed -i '/^import com\.google\.android\.gms\./d' $GM
+      - sed -i 's|return isGooglePlayServicesAvailable(context)|return new LocationManagerClient(context,
+        locationOptions);|' $GM
+      - sed -i '/new FusedLocationClient(context, locationOptions)/d' $GM
+      - sed -i '/^ *[:].*new LocationManagerClient/d' $GM
+      - sed -i '/private boolean isGooglePlayServicesAvailable/,/^  }$/d' $GM
+      - if grep -rq 'com\.google\.android\.gms' $GEO; then echo 'GMS still referenced
+        in geolocator_android'; exit 1; fi
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform=android-arm64
+    ndk: 28.2.13676358
+
+  - versionName: 0.3.0
+    versionCode: 53
+    commit: 9ee975b57d613347a0e238208e91178f789b33a2
+    output: build/app/outputs/flutter-apk/app-x86_64-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+    prebuild:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - flutterVersion=$(sed -n -E 's/.*"flutter":\ "(.*)"/\1/p' .fvmrc)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter config --no-cli-animations
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - GEO=$(dirname $PUB_CACHE/hosted/pub.dev/geolocator_android-*/android/build.gradle)
+      - GM=$GEO/src/main/java/com/baseflow/geolocator/location/GeolocationManager.java
+      - rm $GEO/src/main/java/com/baseflow/geolocator/location/FusedLocationClient.java
+      - sed -i '/play-services-location/d' $GEO/build.gradle
+      - sed -i '/^import com\.google\.android\.gms\./d' $GM
+      - sed -i 's|return isGooglePlayServicesAvailable(context)|return new LocationManagerClient(context,
+        locationOptions);|' $GM
+      - sed -i '/new FusedLocationClient(context, locationOptions)/d' $GM
+      - sed -i '/^ *[:].*new LocationManagerClient/d' $GM
+      - sed -i '/private boolean isGooglePlayServicesAvailable/,/^  }$/d' $GM
+      - if grep -rq 'com\.google\.android\.gms' $GEO; then echo 'GMS still referenced
+        in geolocator_android'; exit 1; fi
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform=android-x64
+    ndk: 28.2.13676358
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 VercodeOperation:
@@ -124,5 +229,5 @@ VercodeOperation:
   - '%c * 10 + 2'
   - '%c * 10 + 3'
 UpdateCheckData: pubspec.yaml|version:\s+.*\+([0-9]+)|pubspec.yaml|version:\s+([0-9.]+)
-CurrentVersion: 0.2.2
-CurrentVersionCode: 43
+CurrentVersion: 0.3.0
+CurrentVersionCode: 53
