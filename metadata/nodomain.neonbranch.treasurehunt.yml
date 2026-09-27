@@ -1,0 +1,60 @@
+AntiFeatures:
+  TetheredNet:
+    en-US: Using tile.openstreetmap.org
+Categories:
+  - Sport Game
+  - Sports & Health
+License: Apache-2.0
+AuthorName: NeonBranch
+AuthorWebSite: https://codeberg.org/neonbranch
+SourceCode: https://codeberg.org/neonbranch/treasurehunt
+IssueTracker: https://codeberg.org/neonbranch/treasurehunt/issues
+Changelog: https://codeberg.org/neonbranch/treasurehunt/releases
+
+Name: TreasureHunt
+AutoName: Treasure Hunt
+
+RepoType: git
+Repo: https://codeberg.org/neonbranch/treasurehunt.git
+
+Builds:
+  - versionName: 0.7.2
+    versionCode: 83
+    commit: 89481f3eea9879db5ea1cad69979d24682862b0b
+    sudo:
+      - mkdir -p /home/daniel/AndroidStudioProjects
+      - chown -R vagrant /home/daniel
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - web
+    prebuild:
+      - flutterVersion=$(sed -n -E "s/^\s+flutter:\s*([0-9.]+)/\1/p" pubspec.yaml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - cd ..
+      - mv nodomain.neonbranch.treasurehunt /home/daniel/AndroidStudioProjects/schatzsuche
+      - pushd /home/daniel/AndroidStudioProjects/schatzsuche
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - popd
+      - mv /home/daniel/AndroidStudioProjects/schatzsuche nodomain.neonbranch.treasurehunt
+    scandelete:
+      - .pub-cache
+    build:
+      - cd ..
+      - mv nodomain.neonbranch.treasurehunt /home/daniel/AndroidStudioProjects/schatzsuche
+      - pushd /home/daniel/AndroidStudioProjects/schatzsuche
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --target-platform=android-arm64
+        --no-shrink
+      - popd
+      - mv /home/daniel/AndroidStudioProjects/schatzsuche nodomain.neonbranch.treasurehunt
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^v[\d.]+$
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 0.7.2
+CurrentVersionCode: 83
