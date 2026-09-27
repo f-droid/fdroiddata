@@ -1,0 +1,53 @@
+AntiFeatures:
+  TetheredNet:
+    en-US: On first use the TeX package bundle is downloaded from the Tectonic project's
+      server (fullyjustified.net); afterwards compilation works offline.
+Categories:
+  - Writing
+License: GPL-3.0-or-later
+AuthorName: thobgg
+SourceCode: https://github.com/thobgg/TeXslate
+IssueTracker: https://github.com/thobgg/TeXslate/issues
+
+AutoName: TeXslate
+
+RepoType: git
+Repo: https://github.com/thobgg/TeXslate.git
+Binaries: 
+  https://github.com/thobgg/TeXslate/releases/download/v%v/TeXslate-%v-core-arm64-v8a.apk
+
+Builds:
+  - versionName: 1.0-alpha26
+    versionCode: 26
+    commit: 315c8fd2a9b8e9063c88fc27b37f949b6e4cd71c
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y rustup build-essential cmake ninja-build pkg-config autoconf
+        automake libtool-bin bison flex gettext gperf autoconf-archive zip
+    gradle:
+      - core
+    srclibs:
+      - vcpkg@2026.06.24
+    prebuild:
+      - sed -i -e '/foojay/d' ../settings.gradle.kts
+      - sed -i 's/include("arm64-v8a", "x86_64")/include("arm64-v8a")/' build.gradle.kts
+    build:
+      - cd ..
+      - export RUST_VERSION=$(sed -n -E 's/channel = "(.*)"/\1/p' rust-toolchain.toml)
+      - rustup default $RUST_VERSION
+      - rustup target add aarch64-linux-android
+      - cargo install cargo-ndk --version 3.5.4 --locked
+      - $$vcpkg$$/bootstrap-vcpkg.sh -disableMetrics
+      - VCPKG_ROOT=$$vcpkg$$ $$vcpkg$$/vcpkg install --triplet arm64-android "harfbuzz[core,freetype,graphite2,icu,png]"
+        freetype graphite2 icu libpng fontconfig
+      - cd rust && cargo fetch --target aarch64-linux-android && cd ..
+      - VCPKG_ROOT=$$vcpkg$$ ./build-native.sh arm64-v8a
+    ndk: 27.2.12479018
+
+AllowedAPKSigningKeys: 42f7bed83cb0b21bac74a14dc7aebdde50e7b37f2259bcf1e0dc1aca672e9f5c
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: 1.0-alpha26
+CurrentVersionCode: 26
