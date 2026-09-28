@@ -62,6 +62,55 @@ Builds:
       TetheredNet:
         en-US: Depends on the OpenStreetMap map tiles
 
+  - versionName: 1.1.1
+    versionCode: 2003
+    commit: 441a848bea4913ddbd4c9c8e51774fb3b155d097
+    sudo:
+      - mkdir -p /home/runner/work/Pinpoint
+      - chown -R vagrant /home/runner
+    output: build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+      - macos
+      - windows
+      - linux
+      - web
+    prebuild:
+      - export repo=/home/runner/work/Pinpoint
+      - cd ..
+      - mv org.pinpoint $repo/Pinpoint
+      - pushd $repo/Pinpoint
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - flutterVersion=$(sed -n -E "s/.*flutter-version:\ '(.*)'/\1/p" .github/workflows/release.yml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PATH=$$flutter$$/bin:$PATH
+      - flutter config --no-analytics
+      - flutter pub get --enforce-lockfile
+      - cd $PUB_CACHE/hosted/pub.dev/geolocator_android-*/android
+      - sed -i -e '/gms/d' build.gradle
+      - cd src/main/java/com/baseflow/geolocator/location
+      - rm FusedLocationClient.java
+      - sed -i -e '/if (forceAndroidLocationManager) {/,/^  }/c return new LocationManagerClient(context,
+        locationOptions);}' -e '/isGooglePlayServicesAvailable/,/^  }/d' -e '/gms/d'
+        GeolocationManager.java
+      - popd
+      - mv $repo/Pinpoint org.pinpoint
+    scandelete:
+      - .pub-cache
+    build:
+      - export repo=/home/runner/work/Pinpoint
+      - cd ..
+      - mv org.pinpoint $repo/Pinpoint
+      - pushd $repo/Pinpoint
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export PATH=$$flutter$$/bin:$PATH
+      - flutter build apk --release --split-per-abi --target-platform=android-arm64
+      - popd
+      - mv $repo/Pinpoint org.pinpoint
+
 AllowedAPKSigningKeys: e9b4343e4902564189972e532f17a16d9511a089035e26fe37698b9ae1d6ae52
 
 AutoUpdateMode: Version
@@ -69,5 +118,5 @@ UpdateCheckMode: Tags
 VercodeOperation:
   - '%c + 2000'
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 1.0.0
-CurrentVersionCode: 2001
+CurrentVersion: 1.1.1
+CurrentVersionCode: 2003
