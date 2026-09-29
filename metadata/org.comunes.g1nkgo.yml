@@ -1,0 +1,127 @@
+Categories:
+  - Wallet
+License: AGPL-3.0-or-later
+AuthorName: Comunes
+AuthorWebSite: https://comunes.org
+WebSite: https://g1nkgo.comunes.org
+SourceCode: https://git.comunes.org/comunes/g1nkgo
+IssueTracker: https://git.duniter.org/vjrj/ginkgo/-/issues
+Translation: https://weblate.duniter.org/projects/g1nkgo
+
+Name: Ğ1nkgo
+AutoName: G1nkgo
+
+RepoType: git
+Repo: https://git.comunes.org/comunes/g1nkgo.git
+
+Builds:
+  - versionName: 2.0.27
+    versionCode: 1041
+    commit: 01f8d095a68c814b624dceb1445fefd4c2aac7d6
+    output: build/app/outputs/flutter-apk/app-armeabi-v7a-production-release.apk
+    binary: 
+      https://git.comunes.org/comunes/g1nkgo/releases/download/v%v/app-production-armeabi-v7a-release.apk
+    srclibs:
+      - flutter@stable
+    prebuild:
+      - export flutterVersion=$(sed -n -E 's,.*cirruslabs/flutter:([0-9.]+).*,\1,p'
+        .forgejo/workflows/release.yml | head -1)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - pushd packages/duniter_datapod
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - popd
+      - pushd packages/duniter_indexer
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - popd
+      - cp dot.env.sample .env
+      - cp dot.env.sample .env.dev
+      - cp assets/translations/ast.json assets/translations/es-AST.json
+      - $$flutter$$/bin/dart run build_runner build --delete-conflicting-outputs
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --flavor production -t lib/main.dart
+        --dart-define=FDROID=true --split-per-abi --target-platform=android-arm
+
+  - versionName: 2.0.27
+    versionCode: 1042
+    commit: 01f8d095a68c814b624dceb1445fefd4c2aac7d6
+    output: build/app/outputs/flutter-apk/app-arm64-v8a-production-release.apk
+    binary: 
+      https://git.comunes.org/comunes/g1nkgo/releases/download/v%v/app-production-arm64-v8a-release.apk
+    srclibs:
+      - flutter@stable
+    prebuild:
+      - export flutterVersion=$(sed -n -E 's,.*cirruslabs/flutter:([0-9.]+).*,\1,p'
+        .forgejo/workflows/release.yml | head -1)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - pushd packages/duniter_datapod
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - popd
+      - pushd packages/duniter_indexer
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - popd
+      - cp dot.env.sample .env
+      - cp dot.env.sample .env.dev
+      - cp assets/translations/ast.json assets/translations/es-AST.json
+      - $$flutter$$/bin/dart run build_runner build --delete-conflicting-outputs
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --flavor production -t lib/main.dart
+        --dart-define=FDROID=true --split-per-abi --target-platform=android-arm64
+
+  - versionName: 2.0.27
+    versionCode: 1044
+    commit: 01f8d095a68c814b624dceb1445fefd4c2aac7d6
+    output: build/app/outputs/flutter-apk/app-x86_64-production-release.apk
+    binary: 
+      https://git.comunes.org/comunes/g1nkgo/releases/download/v%v/app-production-x86_64-release.apk
+    srclibs:
+      - flutter@stable
+    prebuild:
+      - export flutterVersion=$(sed -n -E 's,.*cirruslabs/flutter:([0-9.]+).*,\1,p'
+        .forgejo/workflows/release.yml | head -1)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - pushd packages/duniter_datapod
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - popd
+      - pushd packages/duniter_indexer
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - popd
+      - cp dot.env.sample .env
+      - cp dot.env.sample .env.dev
+      - cp assets/translations/ast.json assets/translations/es-AST.json
+      - $$flutter$$/bin/dart run build_runner build --delete-conflicting-outputs
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --flavor production -t lib/main.dart
+        --dart-define=FDROID=true --split-per-abi --target-platform=android-x64
+
+AllowedAPKSigningKeys: 0d23ad51c4708ea627f6f8807b9148c938b40bf06afb434043d7cca517fc2573
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags v[\d.]+
+VercodeOperation:
+  - '%c * 10 + 1'
+  - '%c * 10 + 2'
+  - '%c * 10 + 4'
+UpdateCheckData: pubspec.yaml|version:\s*[\d.]+\+(\d+)|pubspec.yaml|version:\s*([\d.]+)\+
+CurrentVersion: 2.0.27
+CurrentVersionCode: 1044
