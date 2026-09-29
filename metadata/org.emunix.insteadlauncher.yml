@@ -148,8 +148,26 @@ Builds:
       - sed -i -e 's/jcenter.bintray.com/maven.google.com/' src/main/c/SDL2_image/SDL2_image/external/libwebp-1.0.2/build.gradle
     ndk: r20b
 
+  - versionName: '0.10'
+    versionCode: 100000
+    commit: a39cf8db2070b7892c613bbd7276bed066e74a53
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y make gcc-multilib libc6-dev-i386
+    gradle:
+      - yes
+    prebuild:
+      - sed -i -e '/releaseConfig./d' build.gradle.kts
+      - cd ../instead
+      - gradle downloadDependencies
+      - sed -i -e 's/jcenter.bintray.com/maven.google.com/' src/main/c/SDL3_image/SDL3_image/external/libwebp/build.gradle
+      - gradle fdroidRemoveBinaries
+    ndk: 29.0.14206865
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-UpdateCheckData: build.gradle|version_code = (\d+)|.|version_name = '([\d.]+)'
-CurrentVersion: 0.9.2
-CurrentVersionCode: 90200
+UpdateCheckData: gradle/libs.versions.toml|appVersionCode = "(\d+)"|.|appVersionName
+  = "([\d.]+)"
+CurrentVersion: '0.10'
+CurrentVersionCode: 100000
