@@ -126,8 +126,93 @@ Builds:
       - $$flutter$$/bin/flutter gen-l10n
       - $$flutter$$/bin/flutter build apk --release
 
+  - versionName: 0.10.2
+    versionCode: 91
+    commit: 5f45a2d55401351678139c05ba6833489ef8e635
+    subdir: banana_split_flutter
+    output: build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - banana_split_flutter/ios
+    prebuild:
+      - sed -i -e '/mobile_scanner/d' pubspec.yaml
+      - cp pubspec.lock.fdroid pubspec.lock
+      - mv lib/widgets/shard_scanner.dart.fdroid lib/widgets/shard_scanner.dart
+      - flutterVersion=$(sed -n -E "s/.*FLUTTER_VERSION:\ '(.*)'/\1/p" ../.github/workflows/release.yml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+    scandelete:
+      - banana_split_flutter/.pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter gen-l10n
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform
+        android-arm
+
+  - versionName: 0.10.2
+    versionCode: 92
+    commit: 5f45a2d55401351678139c05ba6833489ef8e635
+    subdir: banana_split_flutter
+    output: build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - banana_split_flutter/ios
+    prebuild:
+      - sed -i -e '/mobile_scanner/d' pubspec.yaml
+      - cp pubspec.lock.fdroid pubspec.lock
+      - mv lib/widgets/shard_scanner.dart.fdroid lib/widgets/shard_scanner.dart
+      - flutterVersion=$(sed -n -E "s/.*FLUTTER_VERSION:\ '(.*)'/\1/p" ../.github/workflows/release.yml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+    scandelete:
+      - banana_split_flutter/.pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter gen-l10n
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform
+        android-arm64
+
+  - versionName: 0.10.2
+    versionCode: 93
+    commit: 5f45a2d55401351678139c05ba6833489ef8e635
+    subdir: banana_split_flutter
+    output: build/app/outputs/flutter-apk/app-x86_64-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - banana_split_flutter/ios
+    prebuild:
+      - sed -i -e '/mobile_scanner/d' pubspec.yaml
+      - cp pubspec.lock.fdroid pubspec.lock
+      - mv lib/widgets/shard_scanner.dart.fdroid lib/widgets/shard_scanner.dart
+      - flutterVersion=$(sed -n -E "s/.*FLUTTER_VERSION:\ '(.*)'/\1/p" ../.github/workflows/release.yml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+    scandelete:
+      - banana_split_flutter/.pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter gen-l10n
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform
+        android-x64
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
+VercodeOperation:
+  - '%c * 10 + 1'
+  - '%c * 10 + 2'
+  - '%c * 10 + 3'
 UpdateCheckData: banana_split_flutter/pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 0.10.0
-CurrentVersionCode: 7
+CurrentVersion: 0.10.2
+CurrentVersionCode: 93
