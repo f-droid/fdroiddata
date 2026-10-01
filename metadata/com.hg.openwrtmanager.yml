@@ -220,8 +220,31 @@ Builds:
       - export PUB_CACHE=$(pwd)/.pub-cache
       - $$flutter$$/bin/flutter build apk
 
+  - versionName: 1.42.0
+    versionCode: 201420
+    commit: 86b9ecf2b4e5bb2d803b303dbcb2f1485732c6cf
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+      - windows
+    prebuild:
+      - sed -i -e 's/Xmx1536M/Xmx4G/' android/gradle.properties
+      - export flutterVersion=$(cat flutter.version)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter packages pub get --enforce-lockfile
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 1.41.0
-CurrentVersionCode: 201410
+CurrentVersion: 1.42.0
+CurrentVersionCode: 201420
