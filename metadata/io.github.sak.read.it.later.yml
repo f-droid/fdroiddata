@@ -1,0 +1,58 @@
+Categories:
+  - Bookmark
+  - Reading
+License: MIT
+AuthorName: Sanket Arun Kamath
+AuthorEmail: sanketkamath1996@gmail.com
+AuthorWebSite: https://sak96.github.io/
+WebSite: https://sak96.github.io/read_later/
+SourceCode: https://github.com/sak96/read_later
+IssueTracker: https://github.com/sak96/read_later/issues
+
+AutoName: Read Later
+
+RepoType: git
+Repo: https://github.com/sak96/read_later.git
+Binaries: https://github.com/sak96/read_later/releases/download/v%v/app-arm64-release.apk
+
+Builds:
+  - versionName: 0.1.98
+    versionCode: 1098
+    commit: cc37d0f15dacb670f019c8766b2f120a718ee8bd
+    sudo:
+      - apt-get update
+      - apt-get install -y nodejs npm rustup build-essential
+      - mkdir -p /home/runner/
+      - chown -R vagrant /home/runner/
+    output: 
+      src-tauri/gen/android/app/build/outputs/apk/arm64/release/app-arm64-release-unsigned.apk
+    prebuild:
+      - rm -f src-tauri/gen/android/keystore.properties
+      - RUST_TOOLCHAIN="$(sed -rn 's/rust\s+(.+)/\1/p' .build-tool-versions)"
+      - TAURICLI="$(sed -rn 's/tauricli\s+(.+)/\1/p' .build-tool-versions)"
+      - export ANDROID_NDK=$$NDK$$
+      - export NDK_HOME=$ANDROID_NDK
+      - export CARGO_HOME="/home/runner/.cargo"
+      - rustup toolchain install $RUST_TOOLCHAIN --target aarch64-linux-android
+      - rustup default $RUST_TOOLCHAIN
+      - cargo install tauri-cli@$TAURICLI --locked
+    build:
+      - export ANDROID_NDK=$$NDK$$
+      - export NDK_HOME=$ANDROID_NDK
+      - export RUSTFLAGS="--remap-path-prefix $PWD=. -C metadata=deadbeef --emit=llvm-bc"
+      - export CARGO_HOME="/home/runner/.cargo"
+      - export CARGOFLAGS="--locked"
+      - export CARGO_HOME="/home/runner/.cargo"
+      - export SOURCE_DATE_EPOCH=1700000000
+      - npm ci
+      - cargo tauri android build --split-per-abi --target aarch64
+    ndk: 28.0.13004108
+
+AllowedAPKSigningKeys: ed3f4d85af06e1fe0ab487df5a12ce9bc9df0bdc75229cb92cf5c0ecc820cfe1
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: 
+  src-tauri/tauri.conf.json|"versionCode"\s*:\s*([0-9]+)|"version"\s*:\s*"([^"]+)"|
+CurrentVersion: v0.1.98
+CurrentVersionCode: 1098
