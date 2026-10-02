@@ -77,7 +77,30 @@ Builds:
         build --release
     ndk: r26b
 
+  - versionName: 2.3.0
+    versionCode: 7
+    commit: 3423af3a01e58737d3d797d9151857578c08edc9
+    subdir: android/app
+    sudo:
+      - apt-get update
+      - apt-get install -y build-essential rustup
+    gradle:
+      - fdroid
+    prebuild:
+      - rustup default 1.86.0
+      - rustup target add aarch64-linux-android armv7-linux-androideabi x86_64-linux-android
+        i686-linux-android
+    scandelete:
+      - .tooling
+      - release
+    build:
+      - cargo install cargo-ndk --version "4.1.2" --locked
+      - cd ../neuron-encrypt-jni
+      - cargo ndk --platform 24 -t arm64-v8a -t armeabi-v7a -t x86_64 -t x86 -o ../app/src/main/jniLibs
+        build --release
+    ndk: r26b
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 2.2.0
-CurrentVersionCode: 6
+CurrentVersion: 2.3.0
+CurrentVersionCode: 7
