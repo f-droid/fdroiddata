@@ -1,0 +1,42 @@
+Categories:
+  - Audiobook
+License: GPL-3.0-or-later
+AuthorName: Georg
+SourceCode: https://github.com/mryx007/clio-audiobook-player
+IssueTracker: https://github.com/mryx007/clio-audiobook-player/issues
+Changelog: https://github.com/mryx007/clio-audiobook-player/releases
+
+AutoName: Clio Audiobook Player
+
+RepoType: git
+Repo: https://github.com/mryx007/clio-audiobook-player.git
+
+Builds:
+  - versionName: 1.0.3
+    versionCode: 10003
+    commit: cdc22ec7c897b63ea91ad4941f1d667cf29cbff7
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y openjdk-25-jdk-headless
+      - update-alternatives --auto java
+    gradle:
+      - free
+    prebuild:
+      - sed -i -e '/withPlugin/,/^      }/d' -e '/crashlytics/d' -e '/googleServices/d'
+        -e '/firebase/d' -e '/playPublish/d' -e '/play {/,/^}/d' -e '/= createSigningConfig/d'
+        build.gradle.kts
+      - sed -i -e '/review/d' ../features/review/play/build.gradle.kts
+      - sed -i -e '/crashlytics/d' ../core/logging/crashlytics/build.gradle.kts
+      - echo -e "\norg.gradle.jvmargs=-XX:MaxHeapSize=2048m" >> ../gradle.properties
+      - echo -e "\norg.gradle.unsafe.configuration-cache=false" >> ../gradle.properties
+      - sed -i -e '/foojay/d' ../{.,plugins}/settings.gradle.kts
+    scandelete:
+      - core/analytics/firebase
+      - core/remoteconfig/firebase
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^v[\d.]+$
+UpdateCheckData: 'app/build.gradle.kts|versionCode.*?(\d+)|.|versionName.*?: "([^"]+)"'
+CurrentVersion: 1.0.3
+CurrentVersionCode: 10003
