@@ -421,10 +421,32 @@ Builds:
       - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
         --replace unaligned.apk $$OUT$$
 
+  - versionName: alpha-0.8.3
+    versionCode: 60
+    commit: 11c2dbcf176453a903ef1917b4aeee15e44721d9
+    subdir: androidApp
+    sudo:
+      - apt-get update
+      - apt-get install -y openjdk-25-jdk-headless
+      - update-alternatives --auto java
+    gradle:
+      - ShikiApp
+    srclibs:
+      - reproducible-apk-tools@v0.3.2
+    rm:
+      - desktopApp
+    prebuild: sed -i -e '/desktopApp/d' ../settings.gradle.kts
+    scandelete:
+      - composeApp
+    postbuild:
+      - mv $$OUT$$ unaligned.apk
+      - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
+        --replace unaligned.apk $$OUT$$
+
 AllowedAPKSigningKeys: b1a781cb8dbf7eb0dae9ff41972cb936e2ccf18b462defefbd0a21d3ac5f113d
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: gradle.properties|APP_VERSION_CODE=(\d+)|.|APP_VERSION_NAME=(.+)
-CurrentVersion: alpha-0.8.2
-CurrentVersionCode: 59
+CurrentVersion: alpha-0.8.3
+CurrentVersionCode: 60
