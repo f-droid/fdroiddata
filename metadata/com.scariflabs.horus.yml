@@ -1,0 +1,57 @@
+AntiFeatures:
+  NonFreeNet:
+    en-US: Downloads Alpine Linux, its packages, and the coding agents from their
+      upstream servers; Claude Code and Codex need accounts with their providers.
+  NonFreeAdd:
+    en-US: Offers to install Claude Code, which is proprietary.
+Categories:
+  - Development
+  - System
+License: MIT
+AuthorName: Scarif Labs
+SourceCode: https://github.com/scarif-labs/horus
+IssueTracker: https://github.com/scarif-labs/horus/issues
+Changelog: 
+  https://github.com/scarif-labs/horus/tree/HEAD/fastlane/metadata/android/en-US/changelogs
+
+AutoName: Horus
+
+RepoType: git
+Repo: https://github.com/scarif-labs/horus.git
+
+Builds:
+  - versionName: 1.0.3
+    versionCode: 4
+    commit: 3a089349a893894b67c6c655aa6c3a55eaed9fb0
+    subdir: android/app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y make cmake ninja-build python3 g++ libicu-dev gawk
+      - echo "deb https://deb.debian.org/debian forky main" > /etc/apt/sources.list.d/forky.list
+      - apt-get update
+      - apt-get install -y -t forky nodejs npm
+    init:
+      - cd ../..
+      - npm ci --no-audit --no-fund
+    gradle:
+      - yes
+    srclibs:
+      - hermes@hermes-v250829098.0.16
+    prebuild:
+      - cd ../..
+      - sed -i '/jvmToolchain\|JavaVersion/s/17/21/' node_modules/@react-native/gradle-plugin/*/build.gradle.kts
+        node_modules/@react-native/gradle-plugin/react-native-gradle-plugin/src/main/kotlin/com/facebook/react/utils/JdkConfiguratorUtils.kt
+      - rm -rf node_modules/hermes-compiler/hermesc node_modules/fb-dotslash/bin
+      - printf '\nhorus.hermesCommand=%s\n' "$$hermes$$/build/bin/hermesc" >> android/gradle.properties
+    scandelete:
+      - node_modules
+    build:
+      - cmake -S $$hermes$$ -B $$hermes$$/build -G Ninja -DCMAKE_BUILD_TYPE=Release
+      - cmake --build $$hermes$$/build --target hermesc
+    ndk: 27.1.12297006
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^v[0-9.]+$
+CurrentVersion: 1.0.3
+CurrentVersionCode: 4
