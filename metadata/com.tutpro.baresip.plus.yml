@@ -5047,10 +5047,33 @@ Builds:
       - make all
     ndk: r30
 
+  - versionName: 82.0.0
+    versionCode: 318
+    commit: 83068029313e161859afa2056e264d362524da0d
+    subdir: app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y automake cmake libre-dev libtool make pkg-config wget lbzip2
+    gradle:
+      - yes
+    prebuild:
+      - sed -i -e '/jvmToolchain/s/17/21/' -e 's/VERSION_17/VERSION_21/g' build.gradle.kts
+      - sed -i -e 's|/opt/Android/ndk/.*|$$NDK$$|' -e "s|/usr/src/baresip-studio|$(realpath
+        ..)|" ../libbaresip-android.video/Makefile
+      - sed -i -e '/foojay/d' ../settings.gradle.kts
+      - sed -i -e '/scijava/d' ../build.gradle.kts
+      - sdkmanager 'cmake;3.31.6'
+    build:
+      - cd ../libbaresip-android.video
+      - make download-sources
+      - make all
+    ndk: r30
+
 MaintainerNotes: make download-sources checks out master branches of several libraries;
   this can cause build failures.
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags v.*[0-9]$
-CurrentVersion: 81.1.1
-CurrentVersionCode: 317
+CurrentVersion: 82.0.0
+CurrentVersionCode: 318
