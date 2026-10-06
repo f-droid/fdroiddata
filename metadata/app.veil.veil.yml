@@ -1,0 +1,170 @@
+Categories:
+  - Note
+License: GPL-3.0-only
+AuthorName: Veil contributors
+SourceCode: https://github.com/veil-notes/app
+IssueTracker: https://github.com/veil-notes/app/issues
+Changelog: https://github.com/veil-notes/app/releases
+
+AutoName: Veil
+
+RepoType: git
+Repo: https://github.com/veil-notes/app.git
+
+Builds:
+  - versionName: 1.0.0-beta.8
+    versionCode: 70111
+    commit: 9ad1272fdb11063f370f3201d3ff001bff0ac34b
+    sudo:
+      - apt-get update
+      - apt-get install -y golang-go make gcc libc-dev
+    output: build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
+    binary: https://github.com/veil-notes/app/releases/download/v%v/%c.apk
+    srclibs:
+      - flutter@stable
+      - openpgp-mobile@v1.13.0
+    rm:
+      - ios
+      - linux
+      - macos
+      - web
+      - windows
+    prebuild:
+      - "flutterVersion=$(sed -n 's/^[[:space:]]*flutter-version: \"\\([^\"]*\\)\"\
+        [[:space:]]*$/\\1/p' .github/workflows/android-release.yml)"
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f "$flutterVersion"
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - python3 tool/fdroid/prepare_reproducible_build.py . "$$flutter$$"
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export SOURCE_DATE_EPOCH=$(git log -1 --pretty=%ct)
+      - python3 tool/fdroid/build_openpgp.py "$$openpgp-mobile$$" --ndk "$$NDK$$"
+      - pushd "$$openpgp-mobile$$"
+      - pushd output/binding/android
+      - openpgp_dir=($PUB_CACHE/hosted/pub.dev/openpgp-*)
+      - find . -type f -name '*.so' -print0 | xargs --null -I{} mv "{}" "$openpgp_dir/android/src/main/{}"
+      - popd
+      - popd
+      - $$flutter$$/bin/flutter build apk --release --build-number=$(( $$VERCODE$$
+        / 10 )) --split-per-abi --target-platform="android-arm" --android-project-arg="filesystem-roots=$(pwd)"
+        --android-project-arg=filesystem-scheme=org-dartlang-root
+    ndk: 28.2.13676358
+
+  - versionName: 1.0.0-beta.8
+    versionCode: 70112
+    commit: 9ad1272fdb11063f370f3201d3ff001bff0ac34b
+    sudo:
+      - apt-get update
+      - apt-get install -y golang-go make gcc libc-dev
+    output: build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+    binary: https://github.com/veil-notes/app/releases/download/v%v/%c.apk
+    srclibs:
+      - flutter@stable
+      - openpgp-mobile@v1.13.0
+    rm:
+      - ios
+      - linux
+      - macos
+      - web
+      - windows
+    prebuild:
+      - "flutterVersion=$(sed -n 's/^[[:space:]]*flutter-version: \"\\([^\"]*\\)\"\
+        [[:space:]]*$/\\1/p' .github/workflows/android-release.yml)"
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f "$flutterVersion"
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - python3 tool/fdroid/prepare_reproducible_build.py . "$$flutter$$"
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export SOURCE_DATE_EPOCH=$(git log -1 --pretty=%ct)
+      - python3 tool/fdroid/build_openpgp.py "$$openpgp-mobile$$" --ndk "$$NDK$$"
+      - pushd "$$openpgp-mobile$$"
+      - pushd output/binding/android
+      - openpgp_dir=($PUB_CACHE/hosted/pub.dev/openpgp-*)
+      - find . -type f -name '*.so' -print0 | xargs --null -I{} mv "{}" "$openpgp_dir/android/src/main/{}"
+      - popd
+      - popd
+      - $$flutter$$/bin/flutter build apk --release --build-number=$(( $$VERCODE$$
+        / 10 )) --split-per-abi --target-platform="android-arm64" --android-project-arg="filesystem-roots=$(pwd)"
+        --android-project-arg=filesystem-scheme=org-dartlang-root
+    ndk: 28.2.13676358
+
+  - versionName: 1.0.0-beta.8
+    versionCode: 70113
+    commit: 9ad1272fdb11063f370f3201d3ff001bff0ac34b
+    sudo:
+      - apt-get update
+      - apt-get install -y golang-go make gcc libc-dev
+    output: build/app/outputs/flutter-apk/app-x86_64-release.apk
+    binary: https://github.com/veil-notes/app/releases/download/v%v/%c.apk
+    srclibs:
+      - flutter@stable
+      - openpgp-mobile@v1.13.0
+    rm:
+      - ios
+      - linux
+      - macos
+      - web
+      - windows
+    prebuild:
+      - "flutterVersion=$(sed -n 's/^[[:space:]]*flutter-version: \"\\([^\"]*\\)\"\
+        [[:space:]]*$/\\1/p' .github/workflows/android-release.yml)"
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f "$flutterVersion"
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - python3 tool/fdroid/prepare_reproducible_build.py . "$$flutter$$"
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export SOURCE_DATE_EPOCH=$(git log -1 --pretty=%ct)
+      - python3 tool/fdroid/build_openpgp.py "$$openpgp-mobile$$" --ndk "$$NDK$$"
+      - pushd "$$openpgp-mobile$$"
+      - pushd output/binding/android
+      - openpgp_dir=($PUB_CACHE/hosted/pub.dev/openpgp-*)
+      - find . -type f -name '*.so' -print0 | xargs --null -I{} mv "{}" "$openpgp_dir/android/src/main/{}"
+      - popd
+      - popd
+      - $$flutter$$/bin/flutter build apk --release --build-number=$(( $$VERCODE$$
+        / 10 )) --split-per-abi --target-platform="android-x64" --android-project-arg="filesystem-roots=$(pwd)"
+        --android-project-arg=filesystem-scheme=org-dartlang-root
+    ndk: 28.2.13676358
+
+AllowedAPKSigningKeys: 600008c667784b0d2b7c224784da2b14f962b9ab8c5c869be476cee813b3f643
+
+MaintainerNotes: |
+  Veil is an Android-first local-first encrypted notes application.
+  Stable releases and numbered beta tags are tracked automatically.
+  The repository keeps the existing application ID app.veil.veil so
+  users can update existing installations without losing app-private data.
+
+  Beta.8 uses base 7011 and version codes base * 10 + ABI (1, 2, 3).
+  Increment the base by at least one for each future release.
+
+  The openpgp package contains Android native libraries. The build recipe
+  replaces those libraries with bindings compiled from openpgp-mobile source.
+
+  Upstream-signed APK verification is enabled so the F-Droid build can remain
+  compatible with existing GitHub installations. Do not accept the release if
+  the reproducibility or signature checks fail.
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^v[0-9]+\.[0-9]+\.[0-9]+(-beta\.[0-9]+)?$
+VercodeOperation:
+  - '%c * 10 + 1'
+  - '%c * 10 + 2'
+  - '%c * 10 + 3'
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 1.0.0-beta.8
+CurrentVersionCode: 70113
