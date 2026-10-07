@@ -104,6 +104,36 @@ Builds:
       - $$flutter$$/bin/dart tool/prepare_reproducible_package_config.dart .dart_tool/package_config.json
       - $$flutter$$/bin/flutter build apk --release --no-pub --android-project-arg=mobileMaiaSourceDateEpoch=$SOURCE_DATE_EPOCH
 
+  - versionName: 2.3.0
+    versionCode: 80
+    commit: b03017a1e549992f620a41fdb29a292083e68723
+    sudo:
+      - apt-get update
+      - apt-get install -y git-lfs
+      - git lfs install
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@stable
+    prebuild:
+      - git lfs pull
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - flutterVersion=$(sed -n -E 's/.*"flutter"\s*:\s*"([^"]+)".*/\1/p' .fvmrc)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - python3 tool/prepare_reproducible_flutter_sdk.py --flutter-root $$flutter$$
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - python3 tool/prepare_reproducible_stockfish.py --package-config .dart_tool/package_config.json
+      - python3 tool/verify_model.py
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export SOURCE_DATE_EPOCH=$(git log -1 --format=%ct)
+      - $$flutter$$/bin/flutter build apk --release --config-only
+      - $$flutter$$/bin/dart tool/prepare_reproducible_package_config.dart .dart_tool/package_config.json
+      - $$flutter$$/bin/flutter build apk --release --no-pub --android-project-arg=mobileMaiaSourceDateEpoch=$SOURCE_DATE_EPOCH
+
 AllowedAPKSigningKeys: cd6c07c4efacf52bcccb83009b522c1dcad4a171197505a486f0a58edb6f172e
 
 MaintainerNotes: |-
@@ -118,5 +148,5 @@ MaintainerNotes: |-
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 2.2.2
-CurrentVersionCode: 79
+CurrentVersion: 2.3.0
+CurrentVersionCode: 80
