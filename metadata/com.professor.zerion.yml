@@ -231,35 +231,6 @@ Builds:
       - $$reproducible-apk-tools$$/zipalign.py --page-size 4 --pad-like-apksigner
         --replace unaligned.apk $$OUT$$
 
-  - versionName: 3.0.15
-    versionCode: 31500
-    commit: 0849b088105c1fb53c8ea8cb7677d09576e0d612
-    subdir: zerion-android
-    sudo:
-      - apt-get update
-      - apt-get install -y g++ libc-dev cmake pkg-config libtool automake autoconf
-        gperf file xz-utils lbzip2 make patch perl
-      - mkdir -p /build
-      - chown vagrant:vagrant /build
-    gradle:
-      - official
-    srclibs:
-      - reproducible-apk-tools@v0.3.0
-    rm:
-      - gradle/verification-metadata.xml
-    build:
-      - ANDROID_NDK_HOME=$$NDK$$ ../packaging/monero-android/fdroid-build.sh > /tmp/libzmonero-build.log
-        2>&1 || (tail -n 300 /tmp/libzmonero-build.log; false)
-      - NDK_CACHE=/build ../packaging/tor-android/fdroid-build.sh > /tmp/libtor-build.log
-        2>&1 || (tail -n 300 /tmp/libtor-build.log; false)
-    ndk: r27b
-    gradleprops:
-      - fdroid
-    postbuild:
-      - mv $$OUT$$ unaligned.apk
-      - $$reproducible-apk-tools$$/zipalign.py --page-size 4 --pad-like-apksigner
-        --replace unaligned.apk $$OUT$$
-
   - versionName: 3.0.16
     versionCode: 31600
     commit: e79a212212d0e567d48d8456a6c76eae8fec3da9
