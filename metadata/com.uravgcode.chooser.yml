@@ -128,9 +128,28 @@ Builds:
         's/jvmToolchain(17)/compilerOptions.jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)/'
         build.gradle.kts
 
+  - versionName: 1.5.0
+    versionCode: 26
+    commit: fa13e9469ee5c5e4b2e836bc697ddecd6f183433
+    subdir: app
+    gradle:
+      - foss
+    srclibs:
+      - reproducible-apk-tools@v0.3.2
+    prebuild:
+      - sed -i -e '/foojay/d' ../settings.gradle.kts
+      - sed -i -e 
+        's/jvmToolchain(17)/compilerOptions.jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)/'
+        build.gradle.kts
+    ndk: r28c
+    postbuild:
+      - mv $$OUT$$ unaligned.apk
+      - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
+        --replace unaligned.apk $$OUT$$
+
 AllowedAPKSigningKeys: 6d0e376dc6a19ea8430f8dcbe29eca57c1c0146595c1dcc75886ec8bf4d09963
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 1.4.11
-CurrentVersionCode: 25
+CurrentVersion: 1.5.0
+CurrentVersionCode: 26
