@@ -1,0 +1,181 @@
+Categories:
+  - Diet
+  - Health Manager
+  - Sports & Health
+License: AGPL-3.0-only
+AuthorName: Drexel Development
+AuthorWebSite: https://github.com/Drexel2k/
+SourceCode: https://github.com/Drexel2k/OpenEatsJournal/
+IssueTracker: https://github.com/Drexel2k/OpenEatsJournal/issues
+Donate: https://ko-fi.com/openeatsjournal
+
+AutoName: Open Eats Journal
+
+RepoType: git
+Repo: https://github.com/Drexel2k/OpenEatsJournal.git
+
+Builds:
+  - versionName: '1.19'
+    versionCode: 371
+    commit: e011e3f53b5d6be00516d75e9ea6ad30ba7bb93e
+    sudo:
+      - mkdir -p /home/runner/work/OpenEatsJournal
+      - chown -R vagrant /home/runner
+    output: src/build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
+    binary: 
+      https://github.com/Drexel2k/OpenEatsJournal/releases/download/%v/openeatsjournal-fdroid-v%v-armeabi-v7a.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - src/ios
+    prebuild:
+      - export repo=/home/runner/work/OpenEatsJournal/OpenEatsJournal
+      - cd ..
+      - mv com.drexeldevelopment.openeatsjournal $repo
+      - pushd $repo/src
+      - export APP_CONTACT_EMAIL="$(printf '%s' 'ZHJleGVsLmRldmVsb3BtZW50QGdtYWlsLmNvbQ=='
+        | base64 -d)"
+      - export APP_CONTACT_ADDRESS="$(printf '%s' 
+        'TWF0dGhpYXMgTmFja2VcXG5GYWxrc3RyLiAxMmJcXG40NDgwOSBCb2NodW1cXG5cXG4ke2FwcENvbnRhY3RNYWlsIX0='
+        | base64 -d)"
+      - sed -i "s|String? get appContactMail => null;|String? get appContactMail =>
+        \"$APP_CONTACT_EMAIL\";|g" lib/repository/settings_repository.dart
+      - sed -i "s|String? get appContactAddress => null;|String? get appContactAddress
+        => \"$APP_CONTACT_ADDRESS\";|g" lib/repository/settings_repository.dart
+      - flutterVersion=$(sed -n -E "s/.*flutter-version:\ '(.*)'/\1/p" ../.github/workflows/release.yml
+        | head -n1)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - sed -i -e 's/-Wl,/-Wl,--build-id=none,/' $PUB_CACHE/hosted/pub.dev/jni-*/src/CMakeLists.txt
+      - sed -i -e 's/-Wl,/-Wl,--build-id=none,/' $PUB_CACHE/hosted/pub.dev/flutter_zxing-*/src/CMakeLists.txt
+      - popd
+      - mv $repo com.drexeldevelopment.openeatsjournal
+    scandelete:
+      - src/.pub-cache
+    build:
+      - export repo=/home/runner/work/OpenEatsJournal/OpenEatsJournal
+      - cd ..
+      - mv com.drexeldevelopment.openeatsjournal $repo
+      - pushd $repo/src
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform="android-arm"
+        --split-debug-info=build/symbols
+      - popd
+      - mv $repo com.drexeldevelopment.openeatsjournal
+
+  - versionName: '1.19'
+    versionCode: 372
+    commit: e011e3f53b5d6be00516d75e9ea6ad30ba7bb93e
+    sudo:
+      - mkdir -p /home/runner/work/OpenEatsJournal
+      - chown -R vagrant /home/runner
+    output: src/build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+    binary: 
+      https://github.com/Drexel2k/OpenEatsJournal/releases/download/%v/openeatsjournal-fdroid-v%v-arm64-v8a.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - src/ios
+    prebuild:
+      - export repo=/home/runner/work/OpenEatsJournal/OpenEatsJournal
+      - cd ..
+      - mv com.drexeldevelopment.openeatsjournal $repo
+      - pushd $repo/src
+      - export APP_CONTACT_EMAIL="$(printf '%s' 'ZHJleGVsLmRldmVsb3BtZW50QGdtYWlsLmNvbQ=='
+        | base64 -d)"
+      - export APP_CONTACT_ADDRESS="$(printf '%s' 
+        'TWF0dGhpYXMgTmFja2VcXG5GYWxrc3RyLiAxMmJcXG40NDgwOSBCb2NodW1cXG5cXG4ke2FwcENvbnRhY3RNYWlsIX0='
+        | base64 -d)"
+      - sed -i "s|String? get appContactMail => null;|String? get appContactMail =>
+        \"$APP_CONTACT_EMAIL\";|g" lib/repository/settings_repository.dart
+      - sed -i "s|String? get appContactAddress => null;|String? get appContactAddress
+        => \"$APP_CONTACT_ADDRESS\";|g" lib/repository/settings_repository.dart
+      - flutterVersion=$(sed -n -E "s/.*flutter-version:\ '(.*)'/\1/p" ../.github/workflows/release.yml
+        | head -n1)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - sed -i -e 's/-Wl,/-Wl,--build-id=none,/' $PUB_CACHE/hosted/pub.dev/jni-*/src/CMakeLists.txt
+      - sed -i -e 's/-Wl,/-Wl,--build-id=none,/' $PUB_CACHE/hosted/pub.dev/flutter_zxing-*/src/CMakeLists.txt
+      - popd
+      - mv $repo com.drexeldevelopment.openeatsjournal
+    scandelete:
+      - src/.pub-cache
+    build:
+      - export repo=/home/runner/work/OpenEatsJournal/OpenEatsJournal
+      - cd ..
+      - mv com.drexeldevelopment.openeatsjournal $repo
+      - pushd $repo/src
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform="android-arm64"
+        --split-debug-info=build/symbols
+      - popd
+      - mv $repo com.drexeldevelopment.openeatsjournal
+
+  - versionName: '1.19'
+    versionCode: 373
+    commit: e011e3f53b5d6be00516d75e9ea6ad30ba7bb93e
+    sudo:
+      - mkdir -p /home/runner/work/OpenEatsJournal
+      - chown -R vagrant /home/runner
+    output: src/build/app/outputs/flutter-apk/app-x86_64-release.apk
+    binary: 
+      https://github.com/Drexel2k/OpenEatsJournal/releases/download/%v/openeatsjournal-fdroid-v%v-x86_64.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - src/ios
+    prebuild:
+      - export repo=/home/runner/work/OpenEatsJournal/OpenEatsJournal
+      - cd ..
+      - mv com.drexeldevelopment.openeatsjournal $repo
+      - pushd $repo/src
+      - export APP_CONTACT_EMAIL="$(printf '%s' 'ZHJleGVsLmRldmVsb3BtZW50QGdtYWlsLmNvbQ=='
+        | base64 -d)"
+      - export APP_CONTACT_ADDRESS="$(printf '%s' 
+        'TWF0dGhpYXMgTmFja2VcXG5GYWxrc3RyLiAxMmJcXG40NDgwOSBCb2NodW1cXG5cXG4ke2FwcENvbnRhY3RNYWlsIX0='
+        | base64 -d)"
+      - sed -i "s|String? get appContactMail => null;|String? get appContactMail =>
+        \"$APP_CONTACT_EMAIL\";|g" lib/repository/settings_repository.dart
+      - sed -i "s|String? get appContactAddress => null;|String? get appContactAddress
+        => \"$APP_CONTACT_ADDRESS\";|g" lib/repository/settings_repository.dart
+      - flutterVersion=$(sed -n -E "s/.*flutter-version:\ '(.*)'/\1/p" ../.github/workflows/release.yml
+        | head -n1)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - sed -i -e 's/-Wl,/-Wl,--build-id=none,/' $PUB_CACHE/hosted/pub.dev/jni-*/src/CMakeLists.txt
+      - sed -i -e 's/-Wl,/-Wl,--build-id=none,/' $PUB_CACHE/hosted/pub.dev/flutter_zxing-*/src/CMakeLists.txt
+      - popd
+      - mv $repo com.drexeldevelopment.openeatsjournal
+    scandelete:
+      - src/.pub-cache
+    build:
+      - export repo=/home/runner/work/OpenEatsJournal/OpenEatsJournal
+      - cd ..
+      - mv com.drexeldevelopment.openeatsjournal $repo
+      - pushd $repo/src
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform="android-x64"
+        --split-debug-info=build/symbols
+      - popd
+      - mv $repo com.drexeldevelopment.openeatsjournal
+
+AllowedAPKSigningKeys: cb527cf6afb3d14cbf749af15c5773ab4f297f198cf0ba999fe43222cbcf5e58
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+VercodeOperation:
+  - '%c * 10 + 1'
+  - '%c * 10 + 2'
+  - '%c * 10 + 3'
+UpdateCheckData: src/pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 1.19.0
+CurrentVersionCode: 373
