@@ -1,8 +1,8 @@
 ## Abstract
 
-### Please introduce the function and usage of your app in summary. Please also attach one screenshots.
+### Please introduce the functions and usage of your app in summary, and also attach some screenshots.
 
-### Please elabrate why you write this app. Please highlight the unique function it provides over other similiar apps in F-Droid.
+### Please elaborate why you wrote this app. Please highlight the unique functions it provides over other similar apps in F-Droid.
 
 ## Checklist
 
