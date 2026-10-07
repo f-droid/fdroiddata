@@ -1,0 +1,78 @@
+AntiFeatures:
+  NonFreeNet:
+    en-US: "Integrates proprietary network services: hosted AI model providers you
+      choose to configure (a self-hosted OpenAI-compatible endpoint works instead),
+      messaging channels such as Telegram, the agent's default web search (Sogou;
+      SearXNG and others are selectable) and the ClawHub skill registry. Nothing is
+      contacted until you configure a model or a channel."
+Categories:
+  - AI Chat
+  - Development
+License: MIT
+AuthorName: Lord1Egypt
+SourceCode: https://github.com/Lord1Egypt/PocketClaw
+IssueTracker: https://github.com/Lord1Egypt/PocketClaw/issues
+Changelog: https://github.com/Lord1Egypt/PocketClaw/releases
+
+AutoName: PocketClaw
+
+RepoType: git
+Repo: https://github.com/Lord1Egypt/PocketClaw.git
+Binaries: 
+  https://github.com/Lord1Egypt/PocketClaw/releases/download/v%v/PocketClaw-v%v-arm64-v8a.apk
+
+Builds:
+  - versionName: 0.2.3
+    versionCode: 65
+    commit: ee68747ba385d59f9719b475b98e298825899717
+    timeout: 14400
+    sudo:
+      - apt-get update
+      - apt-get install -y --no-install-recommends build-essential bzip2 cmake file
+        golang-go make nodejs npm pkg-config rustup unzip xz-utils zlib1g-dev
+    output: build/app/outputs/apk/release/app-release-unsigned.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - android/app/src/main/jniLibs/arm64-v8a/*.so
+    prebuild:
+      - npm install --prefix $HOME/pnpm --no-audit --no-fund pnpm@10.33.0
+      - rustup toolchain install 1.94.1 --profile minimal --target aarch64-linux-android
+      - flutterVersion=$(sed -n -E 's/^ +- flutter@([0-9]+\.[0-9]+\.[0-9]+)$/\1/p'
+        fdroid/metadata.yml.in)
+      - '[[ $flutterVersion =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - $$flutter$$/bin/flutter config --no-analytics
+      - export PUB_CACHE="$(pwd)/.pub-cache"
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+    scandelete:
+      - .pub-cache/hosted/pub.dev/*/example
+      - .pub-cache/hosted/pub.dev/*/extension/devtools/build
+    build:
+      - export PATH="$$flutter$$/bin:$PATH"
+      - export PUB_CACHE="$(pwd)/.pub-cache"
+      - export NDK_ROOT="$$NDK$$" GO_CACHE_ROOT="$HOME/go-cache" PNPM_BIN_DIR="$HOME/pnpm/node_modules/.bin"
+      - runtime/build-curl-android-arm64.sh
+      - runtime/build-git-android-arm64.sh
+      - runtime/build-gh-android-arm64.sh
+      - runtime/build-ripgrep-android-arm64.sh
+      - runtime/build-sqlite3-android-arm64.sh
+      - runtime/build-jq-android-arm64.sh
+      - runtime/build-python-android-arm64.sh
+      - source runtime/toolchains.env
+      - pushd core/src
+      - GOTOOLCHAIN=$POCKETCLAW_CORE_GO_TOOLCHAIN GOCACHE=$GO_CACHE_ROOT/go-build
+        GOMODCACHE=$GO_CACHE_ROOT/go-mod go test -tags "stdjson goolm" -count=1 -run
+        TestBundledPayloadsMatchTheirPinnedChecksums ./pkg/pcruntime/
+      - popd
+      - core/build-android-arm64.sh
+      - python3 tool/build_hardened_android.py --signing unsigned
+    ndk: r28c
+
+AllowedAPKSigningKeys: 176dca6b198b9552fb4d9ad3ca18da8d6f23c0a3f5ed4bd6b75a0700f9f0efcf
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 0.2.3
+CurrentVersionCode: 65
