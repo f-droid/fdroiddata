@@ -1,0 +1,162 @@
+Categories:
+  - Internet
+  - VPN & Proxy
+License: GPL-3.0-only
+AuthorName: Nemu-x
+WebSite: https://nemu-x.github.io/ClashFest/
+SourceCode: https://github.com/Nemu-x/ClashFest
+IssueTracker: https://github.com/Nemu-x/ClashFest/issues
+Changelog: https://github.com/Nemu-x/ClashFest/releases
+
+Name: ClashFest
+
+RepoType: git
+Repo: https://github.com/Nemu-x/ClashFest.git
+Binaries: 
+  https://github.com/Nemu-x/ClashFest/releases/download/v%v/clashfest-v%v-fdroid-%c.apk
+
+Builds:
+  - versionName: 1.2.2
+    versionCode: 10202001
+    commit: 9525c0a417b8c4b0be9550f9d9ab69682033ef85
+    subdir: app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y -t trixie-backports golang-go
+    init: cp /etc/ssl/certs/ca-certificates.crt ../core/src/foss/golang/clash/component/ca/ca-certificates.crt
+    output: build/outputs/apk/alpha/release/clashfest-v*-alpha-release-unsigned.apk
+    srclibs:
+      - go@go1.26.8
+    prebuild:
+      - sed -i -e 
+        's|maven(rootProject.projectDir.resolve("maven").toURI())|maven("https://jitpack.io")|'
+        -e '/isEnable = true/d' -e '/signingConfig /d' -e 's/versionCode = [0-9]*/versionCode
+        = $$VERCODE$$/' -e 's/"arm64-v8a", "armeabi-v7a", "x86", "x86_64"/"armeabi-v7a"/g'
+        ../build.gradle.kts
+      - sed -i -e 
+        's/com.github.kr328.golang:gradle-plugin/com.github.Kr328.golang-android-plugin:gradle-plugin/'
+        -e '/^golang = /s/1.0.4/cc84891461/' -e '/^kaidl = /s/1.15/7710f4347c/' ../gradle/libs.versions.toml
+      - patch -d $$go$$ -p1 < ../.github/patch/disable_pidfd_on_android.patch
+      - patch -d $$go$$ -p1 < ../.github/patch/remove_64bits_syscall_on_32bit_linux.patch
+    scandelete:
+      - maven
+    build:
+      - pushd $$go$$/src
+      - ./make.bash
+      - popd
+      - PATH=$$go$$/bin:$PATH gradle -Pclashfest.selfUpdate=false -Pclashfest.bundleGeo=false
+        assembleAlphaRelease
+    ndk: 29.0.14206865
+
+  - versionName: 1.2.2
+    versionCode: 10202002
+    commit: 9525c0a417b8c4b0be9550f9d9ab69682033ef85
+    subdir: app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y -t trixie-backports golang-go
+    init: cp /etc/ssl/certs/ca-certificates.crt ../core/src/foss/golang/clash/component/ca/ca-certificates.crt
+    output: build/outputs/apk/alpha/release/clashfest-v*-alpha-release-unsigned.apk
+    srclibs:
+      - go@go1.26.8
+    prebuild:
+      - sed -i -e 
+        's|maven(rootProject.projectDir.resolve("maven").toURI())|maven("https://jitpack.io")|'
+        -e '/isEnable = true/d' -e '/signingConfig /d' -e 's/versionCode = [0-9]*/versionCode
+        = $$VERCODE$$/' -e 's/"arm64-v8a", "armeabi-v7a", "x86", "x86_64"/"arm64-v8a"/g'
+        ../build.gradle.kts
+      - sed -i -e 
+        's/com.github.kr328.golang:gradle-plugin/com.github.Kr328.golang-android-plugin:gradle-plugin/'
+        -e '/^golang = /s/1.0.4/cc84891461/' -e '/^kaidl = /s/1.15/7710f4347c/' ../gradle/libs.versions.toml
+      - patch -d $$go$$ -p1 < ../.github/patch/disable_pidfd_on_android.patch
+      - patch -d $$go$$ -p1 < ../.github/patch/remove_64bits_syscall_on_32bit_linux.patch
+    scandelete:
+      - maven
+    build:
+      - pushd $$go$$/src
+      - ./make.bash
+      - popd
+      - PATH=$$go$$/bin:$PATH gradle -Pclashfest.selfUpdate=false -Pclashfest.bundleGeo=false
+        assembleAlphaRelease
+    ndk: 29.0.14206865
+
+  - versionName: 1.2.2
+    versionCode: 10202003
+    commit: 9525c0a417b8c4b0be9550f9d9ab69682033ef85
+    subdir: app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y -t trixie-backports golang-go
+    init: cp /etc/ssl/certs/ca-certificates.crt ../core/src/foss/golang/clash/component/ca/ca-certificates.crt
+    output: build/outputs/apk/alpha/release/clashfest-v*-alpha-release-unsigned.apk
+    srclibs:
+      - go@go1.26.8
+    prebuild:
+      - sed -i -e 
+        's|maven(rootProject.projectDir.resolve("maven").toURI())|maven("https://jitpack.io")|'
+        -e '/isEnable = true/d' -e '/signingConfig /d' -e 's/versionCode = [0-9]*/versionCode
+        = $$VERCODE$$/' -e 's/"arm64-v8a", "armeabi-v7a", "x86", "x86_64"/"x86"/g'
+        ../build.gradle.kts
+      - sed -i -e 
+        's/com.github.kr328.golang:gradle-plugin/com.github.Kr328.golang-android-plugin:gradle-plugin/'
+        -e '/^golang = /s/1.0.4/cc84891461/' -e '/^kaidl = /s/1.15/7710f4347c/' ../gradle/libs.versions.toml
+      - patch -d $$go$$ -p1 < ../.github/patch/disable_pidfd_on_android.patch
+      - patch -d $$go$$ -p1 < ../.github/patch/remove_64bits_syscall_on_32bit_linux.patch
+    scandelete:
+      - maven
+    build:
+      - pushd $$go$$/src
+      - ./make.bash
+      - popd
+      - PATH=$$go$$/bin:$PATH gradle -Pclashfest.selfUpdate=false -Pclashfest.bundleGeo=false
+        assembleAlphaRelease
+    ndk: 29.0.14206865
+
+  - versionName: 1.2.2
+    versionCode: 10202004
+    commit: 9525c0a417b8c4b0be9550f9d9ab69682033ef85
+    subdir: app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y -t trixie-backports golang-go
+    init: cp /etc/ssl/certs/ca-certificates.crt ../core/src/foss/golang/clash/component/ca/ca-certificates.crt
+    output: build/outputs/apk/alpha/release/clashfest-v*-alpha-release-unsigned.apk
+    srclibs:
+      - go@go1.26.8
+    prebuild:
+      - sed -i -e 
+        's|maven(rootProject.projectDir.resolve("maven").toURI())|maven("https://jitpack.io")|'
+        -e '/isEnable = true/d' -e '/signingConfig /d' -e 's/versionCode = [0-9]*/versionCode
+        = $$VERCODE$$/' -e 's/"arm64-v8a", "armeabi-v7a", "x86", "x86_64"/"x86_64"/g'
+        ../build.gradle.kts
+      - sed -i -e 
+        's/com.github.kr328.golang:gradle-plugin/com.github.Kr328.golang-android-plugin:gradle-plugin/'
+        -e '/^golang = /s/1.0.4/cc84891461/' -e '/^kaidl = /s/1.15/7710f4347c/' ../gradle/libs.versions.toml
+      - patch -d $$go$$ -p1 < ../.github/patch/disable_pidfd_on_android.patch
+      - patch -d $$go$$ -p1 < ../.github/patch/remove_64bits_syscall_on_32bit_linux.patch
+    scandelete:
+      - maven
+    build:
+      - pushd $$go$$/src
+      - ./make.bash
+      - popd
+      - PATH=$$go$$/bin:$PATH gradle -Pclashfest.selfUpdate=false -Pclashfest.bundleGeo=false
+        assembleAlphaRelease
+    ndk: 29.0.14206865
+
+AllowedAPKSigningKeys: 91b980057c555ba85b0fb9068f7b5cdee0d39d3810a1c08c34929290e1905fc7
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^v1\.\d+\.\d+$
+VercodeOperation:
+  - '%c + 1'
+  - '%c + 2'
+  - '%c + 3'
+  - '%c + 4'
+UpdateCheckName: Ignore
+CurrentVersion: 1.2.2
+CurrentVersionCode: 10202004
