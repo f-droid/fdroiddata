@@ -1,0 +1,42 @@
+AntiFeatures:
+  NonFreeNet:
+    en-US: Optional playlist downloads use third-party services.
+Categories:
+  - Music Practice Tool
+License: GPL-3.0-or-later
+AuthorName: Alexandre Campo
+SourceCode: https://github.com/AlexandreCampo/OpenChordBook
+IssueTracker: https://github.com/AlexandreCampo/OpenChordBook/issues
+
+AutoName: OpenChordBook
+
+RepoType: git
+Repo: https://github.com/AlexandreCampo/OpenChordBook.git
+Binaries: 
+  https://github.com/AlexandreCampo/OpenChordBook/releases/download/v%v/openchordbook-%v.apk
+
+Builds:
+  - versionName: '1.18'
+    versionCode: 19
+    commit: cd3fcf40e7c8476d81fc350c893c11f2e7092ded
+    subdir: android/app
+    sudo:
+      - apt-get update
+      - apt-get install -y openjdk-25-jdk-headless
+    gradle:
+      - yes
+    srclibs:
+      - reproducible-apk-tools@v0.3.0
+    gradleprops:
+      - unsignedRelease=true
+    postbuild:
+      - mv $$OUT$$ unaligned.apk
+      - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
+        --replace unaligned.apk $$OUT$$
+
+AllowedAPKSigningKeys: 5a0b2be71342089e1eddef9d478914dbe3115d3a8390791a11daec89f730aaea
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^v[0-9]+\.[0-9]+$
+CurrentVersion: '1.18'
+CurrentVersionCode: 19
