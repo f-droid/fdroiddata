@@ -1,0 +1,133 @@
+Categories:
+  - News
+License: AGPL-3.0-or-later
+AuthorName: Jose T. Monagas
+AuthorEmail: lfj.softworks.ajar384@passmail.com
+WebSite: https://drift-af34e0.gitlab.io
+SourceCode: https://gitlab.com/lfj-softworks/drift
+IssueTracker: https://gitlab.com/lfj-softworks/drift/-/issues
+Changelog: https://gitlab.com/lfj-softworks/drift/-/blob/HEAD/app/CHANGELOG.md
+
+AutoName: Drift
+
+RepoType: git
+Repo: https://gitlab.com/lfj-softworks/drift.git
+
+Builds:
+  - versionName: 1.1.2
+    versionCode: 41
+    commit: 948014b18076c6d5d3d733b88b67e6c83742a194
+    subdir: app
+    output: build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - app/linux
+      - app/macos
+      - app/web
+      - server
+      - site
+    prebuild:
+      - flutterVersion=$(sed -n -E 's/.*FLUTTER_VERSION:\s*"(.*)"/\1/p' ../.gitlab-ci.yml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - sed -i -e '/signingConfig = if/,+4d' android/app/build.gradle.kts
+      - curl -L -o sqlite.zip https://sqlite.org/2026/sqlite-amalgamation-3530400.zip
+      - echo '1e71ddf93849c6a6ecf58b827c0692073d2dd7ee40196158068f7b29f422e87d  sqlite.zip'
+        | sha256sum -c
+      - mkdir -p third_party/sqlite
+      - unzip -j sqlite.zip '*/sqlite3.c' -d third_party/sqlite
+      - rm sqlite.zip
+      - "printf '\\nhooks:\\n  user_defines:\\n    sqlite3:\\n      source: source\\\
+        n      path: third_party/sqlite/sqlite3.c\\n' >> pubspec.yaml"
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+    scandelete:
+      - app/.pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform=android-arm
+    ndk: r28c
+
+  - versionName: 1.1.2
+    versionCode: 42
+    commit: 948014b18076c6d5d3d733b88b67e6c83742a194
+    subdir: app
+    output: build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - app/linux
+      - app/macos
+      - app/web
+      - server
+      - site
+    prebuild:
+      - flutterVersion=$(sed -n -E 's/.*FLUTTER_VERSION:\s*"(.*)"/\1/p' ../.gitlab-ci.yml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - sed -i -e '/signingConfig = if/,+4d' android/app/build.gradle.kts
+      - curl -L -o sqlite.zip https://sqlite.org/2026/sqlite-amalgamation-3530400.zip
+      - echo '1e71ddf93849c6a6ecf58b827c0692073d2dd7ee40196158068f7b29f422e87d  sqlite.zip'
+        | sha256sum -c
+      - mkdir -p third_party/sqlite
+      - unzip -j sqlite.zip '*/sqlite3.c' -d third_party/sqlite
+      - rm sqlite.zip
+      - "printf '\\nhooks:\\n  user_defines:\\n    sqlite3:\\n      source: source\\\
+        n      path: third_party/sqlite/sqlite3.c\\n' >> pubspec.yaml"
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+    scandelete:
+      - app/.pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform=android-arm64
+    ndk: r28c
+
+  - versionName: 1.1.2
+    versionCode: 43
+    commit: 948014b18076c6d5d3d733b88b67e6c83742a194
+    subdir: app
+    output: build/app/outputs/flutter-apk/app-x86_64-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - app/linux
+      - app/macos
+      - app/web
+      - server
+      - site
+    prebuild:
+      - flutterVersion=$(sed -n -E 's/.*FLUTTER_VERSION:\s*"(.*)"/\1/p' ../.gitlab-ci.yml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - sed -i -e '/signingConfig = if/,+4d' android/app/build.gradle.kts
+      - curl -L -o sqlite.zip https://sqlite.org/2026/sqlite-amalgamation-3530400.zip
+      - echo '1e71ddf93849c6a6ecf58b827c0692073d2dd7ee40196158068f7b29f422e87d  sqlite.zip'
+        | sha256sum -c
+      - mkdir -p third_party/sqlite
+      - unzip -j sqlite.zip '*/sqlite3.c' -d third_party/sqlite
+      - rm sqlite.zip
+      - "printf '\\nhooks:\\n  user_defines:\\n    sqlite3:\\n      source: source\\\
+        n      path: third_party/sqlite/sqlite3.c\\n' >> pubspec.yaml"
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+    scandelete:
+      - app/.pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform=android-x64
+    ndk: r28c
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^v[\d.]+$
+VercodeOperation:
+  - 10 * %c + 1
+  - 10 * %c + 2
+  - 10 * %c + 3
+UpdateCheckData: app/pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 1.1.2
+CurrentVersionCode: 43
