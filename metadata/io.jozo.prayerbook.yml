@@ -386,9 +386,36 @@ Builds:
       - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
         --replace unaligned.apk $$OUT$$
 
+  - versionName: 0.11.0
+    versionCode: 24
+    commit: 033015ca9d2801d62918118b55caeb1a1cffc400
+    subdir: android/app
+    sudo:
+      - echo "deb http://deb.debian.org/debian forky main" > /etc/apt/sources.list.d/forky.list
+      - apt-get update
+      - apt-get install -y -t forky nodejs npm
+    init:
+      - cd ../..
+      - npm install
+      - npm run build
+      - npx cap sync android
+    gradle:
+      - yes
+    srclibs:
+      - reproducible-apk-tools@v0.3.2
+    prebuild:
+      - sed -i -e '/gms/d' ../build.gradle
+      - sed -i -e '/foojay/d' ../settings.gradle
+    scandelete:
+      - node_modules
+    postbuild:
+      - mv $$OUT$$ unaligned.apk
+      - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
+        --replace unaligned.apk $$OUT$$
+
 AllowedAPKSigningKeys: f5f597716444fd6672f0a011ebe96b1356e37b28866489c664139c6027a8cc14
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 0.10.3
-CurrentVersionCode: 21
+CurrentVersion: 0.11.0
+CurrentVersionCode: 24
