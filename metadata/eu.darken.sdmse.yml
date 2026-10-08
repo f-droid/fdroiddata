@@ -759,10 +759,29 @@ Builds:
         break; sha256sum apk/assets/dexopt/baseline.prof; rm -fr apk; gradle clean
         assembleFossRelease; done
 
+  - versionName: 2.2.1-rc0
+    versionCode: 20201000
+    commit: 97abb43ed8498f77d8a9ed942f1cd170f565c73d
+    subdir: app
+    gradle:
+      - foss
+    rm:
+      - crowdin-cli.jar
+      - tooling/testdata-generator/dirt-sources.zip
+    postbuild:
+      - curl -Lo upstream.apk 
+        https://github.com/d4rken-org/sdmaid-se/releases/download/v$$VERSION$$/eu.darken.sdmse-v$$VERSION$$-$$VERCODE$$-FOSS-RELEASE.apk
+      - unzip -q upstream.apk -d apk
+      - export hash=$(sha256sum apk/assets/dexopt/baseline.prof)
+      - rm -rf apk upstream.apk
+      - for i in {1..10}; do unzip -q $$OUT$$ -d apk; sha256sum -c - <<< $hash &&
+        break; sha256sum apk/assets/dexopt/baseline.prof; rm -fr apk; gradle clean
+        assembleFossRelease; done
+
 AllowedAPKSigningKeys: f490032be5383f55900495fa7fc207ece2e786a5c2c6cc52027b99548a9ce938
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v[0-9.]*(|-rc[0-9])$
 UpdateCheckData: VERSION|.* (\d+)|.|(.*) \d+
-CurrentVersion: 2.2.0-rc0
-CurrentVersionCode: 20200000
+CurrentVersion: 2.2.1-rc0
+CurrentVersionCode: 20201000
