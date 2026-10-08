@@ -11,7 +11,6 @@ AutoName: Pile
 
 RepoType: git
 Repo: https://github.com/rubenalfon/Pile.git
-Binaries: https://github.com/rubenalfon/Pile/releases/download/%v/Pile-v%v.apk
 
 Builds:
   - versionName: 1.1.0
@@ -20,6 +19,7 @@ Builds:
     subdir: app
     gradle:
       - yes
+    binary: https://github.com/rubenalfon/Pile/releases/download/%v/Pile-v%v.apk
     prebuild: sed -i '/foojay-resolver/d' ../settings.gradle.kts
 
   - versionName: 1.1.3
@@ -28,11 +28,27 @@ Builds:
     subdir: app
     gradle:
       - yes
+    binary: https://github.com/rubenalfon/Pile/releases/download/%v/Pile-v%v.apk
     prebuild: sed -i '/foojay-resolver/d' ../settings.gradle.kts
+
+  - versionName: 1.2.7
+    versionCode: 19
+    commit: ce5e7e8167e87568c245674a814c7f8231872413
+    subdir: app
+    gradle:
+      - foss
+    binary: https://github.com/rubenalfon/Pile/releases/download/%v/Pile-foss-v%v.apk
+    srclibs:
+      - reproducible-apk-tools@v0.3.2
+    prebuild: sed -i '/foojay-resolver/d' ../settings.gradle.kts
+    postbuild:
+      - mv $$OUT$$ unaligned.apk
+      - $$reproducible-apk-tools$$/zipalign.py --page-size 4 --pad-like-apksigner
+        --replace unaligned.apk $$OUT$$
 
 AllowedAPKSigningKeys: fa225f0552c10c23b4d932ce3a55dd9bb6d88d2f7e1cfe627331bf3d579454fc
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 1.1.3
-CurrentVersionCode: 10
+CurrentVersion: 1.2.7
+CurrentVersionCode: 19
