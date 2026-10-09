@@ -181,10 +181,28 @@ Builds:
       - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
         --replace unaligned.apk $$OUT$$
 
+  - versionName: 2.1.0-beta1
+    versionCode: 3157
+    commit: d3a72640f4bb1867c70ed7dc46a554c2589812ea
+    subdir: presentation
+    gradle:
+      - lite
+    srclibs:
+      - reproducible-apk-tools@v0.3.0
+    prebuild:
+      - sed -i -e '/googleFlavors.*{$/,/}$/d' -e '/googleFlavors/d' -e '/cloudFlavors/d'
+        ../data/build.gradle
+      - sed -i -e '/com.microsoft.device.display/,+12d' ../buildsystem/dependencies.gradle
+      - sed -i -e '/prebuild.gradle/d' build.gradle
+    postbuild:
+      - mv $$OUT$$ unaligned.apk
+      - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
+        --replace unaligned.apk $$OUT$$
+
 AllowedAPKSigningKeys: f7c3ec3b0d588d3cb52983e9eb1a7421c93d4339a286398e71d7b651e8d8ecdd
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^[\d.]+$
 UpdateCheckData: build.gradle|androidVersionCode\s=\s(\d+)|.|androidVersionName\s=\s'(.+)'
-CurrentVersion: 1.12.3
-CurrentVersionCode: 3030
+CurrentVersion: 2.1.0-beta1
+CurrentVersionCode: 3157
