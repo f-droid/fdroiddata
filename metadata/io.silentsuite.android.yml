@@ -18,49 +18,6 @@ Binaries:
   https://github.com/silent-suite/silentsuite/releases/download/v%v/silentsuite-android-v%v.apk
 
 Builds:
-  - versionName: 0.5.12-beta
-    versionCode: 26
-    commit: 1eee02f8459743bcfee67d64d7450384e5411d65
-    subdir: android/app
-    sudo:
-      - echo "deb https://deb.debian.org/debian bookworm main" > "/etc/apt/sources.list.d/b.list"
-      - apt-get update
-      - apt-get install -y rustup build-essential binutils
-      - apt-get install -y -t bookworm openjdk-17-jdk-headless
-    gradle:
-      - yes
-    srclibs:
-      - reproducible-apk-tools@v0.3.0
-    prebuild:
-      - sdkmanager 'cmake;3.22.1'
-      - r=/tmp/silentsuite-reproducible-build
-      - export CARGO_HOME="$r/cargo"
-      - export RUSTUP_HOME="$r/rustup"
-      - rustup toolchain install --profile minimal --no-self-update 1.98.0
-      - rustup target add --toolchain 1.98.0 aarch64-linux-android
-      - rustup target add --toolchain 1.98.0 x86_64-linux-android
-    scanignore:
-      - android/build.gradle
-    build:
-      - unset RUSTFLAGS CARGO_ENCODED_RUSTFLAGS CFLAGS CXXFLAGS || true
-      - unset CPPFLAGS LDFLAGS JAVA_TOOL_OPTIONS _JAVA_OPTIONS || true
-      - export ANDROID_NDK_HOME="$$NDK$$"
-      - export PATH="/tmp/silentsuite-reproducible-build/cargo/bin:$PATH"
-      - jdk="$(../scripts/reproducible-build-contract.sh provision-jdk)"
-      - test -x "$jdk/bin/javac"
-      - export SILENTSUITE_RELEASE_JDK_HOME="$jdk"
-      - export JAVA_HOME="$jdk"
-      - export PATH="$jdk/bin:$PATH"
-      - ../scripts/build-etebase-client-16kb.sh
-      - cd ..
-      - scripts/build-conscrypt-android-r28.sh
-      - cd app
-    ndk: 28.2.13676358
-    postbuild:
-      - mv $$OUT$$ unaligned.apk
-      - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
-        --replace unaligned.apk $$OUT$$
-
   - versionName: 0.5.13-beta
     versionCode: 27
     commit: 4bc87d1f841144db35a91f5a64fbe05004315b42
