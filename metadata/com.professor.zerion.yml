@@ -183,9 +183,36 @@ Builds:
       - $$reproducible-apk-tools$$/zipalign.py --page-size 4 --pad-like-apksigner
         --replace unaligned.apk $$OUT$$
 
+  - versionName: 3.0.17
+    versionCode: 31700
+    commit: cc2eceed42a36429b4d8d1d54dcff40e38020859
+    subdir: zerion-android
+    sudo:
+      - apt-get update
+      - apt-get install -y g++ libc-dev cmake pkg-config libtool automake autoconf
+        gperf file xz-utils lbzip2 make patch perl
+      - mkdir -p /build
+      - chown vagrant:vagrant /build
+    gradle:
+      - official
+    srclibs:
+      - reproducible-apk-tools@v0.3.0
+    build:
+      - ANDROID_NDK_HOME=$$NDK$$ ../packaging/monero-android/fdroid-build.sh > /tmp/libzmonero-build.log
+        2>&1 || (tail -n 300 /tmp/libzmonero-build.log; false)
+      - NDK_CACHE=/build ../packaging/tor-android/fdroid-build.sh > /tmp/libtor-build.log
+        2>&1 || (tail -n 300 /tmp/libtor-build.log; false)
+    ndk: r27b
+    gradleprops:
+      - fdroid
+    postbuild:
+      - mv $$OUT$$ unaligned.apk
+      - $$reproducible-apk-tools$$/zipalign.py --page-size 4 --pad-like-apksigner
+        --replace unaligned.apk $$OUT$$
+
 AllowedAPKSigningKeys: d7fdb11125890d133ae89d8ba4f4331d9045e21ef01d9899a7cdee6888f704c8
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v[0-9]+\.[0-9]+\.[0-9]+$
-CurrentVersion: 3.0.16
-CurrentVersionCode: 31600
+CurrentVersion: 3.0.17
+CurrentVersionCode: 31700
