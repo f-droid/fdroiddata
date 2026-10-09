@@ -1,0 +1,44 @@
+Categories:
+  - File Transfer
+License: GPL-3.0-or-later
+AuthorName: Denny Subke
+SourceCode: https://github.com/dennysubke/oniondrop
+IssueTracker: https://github.com/dennysubke/oniondrop/issues
+Changelog: https://github.com/dennysubke/oniondrop/blob/HEAD/CHANGELOG.md
+
+AutoName: OnionDrop
+
+RepoType: git
+Repo: https://github.com/dennysubke/oniondrop.git
+
+Builds:
+  - versionName: 1.0.2
+    versionCode: 10002
+    commit: c92b9f2795146a97c8edbc297bf1fb57d79045ba
+    subdir: android-standalone/app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y autoconf automake libtool autopoint gettext pkg-config
+        build-essential po4a libzstd-dev
+    gradle:
+      - yes
+    rm:
+      - android-standalone/third_party/tor-android/settings.gradle.kts
+      - android-standalone/third_party/tor-android/tor-android-binary/build.gradle.kts
+      - android-standalone/third_party/tor-android/external/openssl/cloudflare-quiche
+      - android-standalone/third_party/tor-android/external/openssl/fuzz/corpora
+      - android-standalone/third_party/tor-android/external/openssl/gost-engine
+      - android-standalone/third_party/tor-android/external/openssl/pkcs11-provider
+      - android-standalone/third_party/tor-android/external/openssl/tlsfuzzer
+      - android-standalone/third_party/tor-android/external/openssl/tlslite-ng
+      - android-standalone/third_party/tor-android/external/zstd/tests
+    build:
+      - ONIONDROP_OFFLINE=1 bash ../scripts/build-native-tor.sh arm64-v8a x86_64
+      - python3 ../scripts/collect-native-licenses.py ../third_party/tor-android src/main/assets/licenses/native
+    ndk: 28.2.13676358
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^v[0-9]+\.[0-9]+\.[0-9]+$
+CurrentVersion: 1.0.2
+CurrentVersionCode: 10002
