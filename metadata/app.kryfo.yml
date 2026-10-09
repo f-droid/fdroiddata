@@ -171,6 +171,161 @@ Builds:
       - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform=android-x64
     ndk: r28c
 
+  - versionName: 0.5.0
+    versionCode: 221
+    commit: b9bd6d031ca984b4930cb8c62a2530a5e74d99ff
+    subdir: mobile
+    sudo:
+      - apt-get update
+      - apt-get install -y --no-install-recommends -t trixie-backports golang-go
+    output: build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
+    binary: 
+      https://github.com/GnosiWorks/Kryfo/releases/download/v%v/app-armeabi-v7a-release.apk
+    srclibs:
+      - flutter@stable
+      - go@go1.25.14
+    rm:
+      - mobile/ios
+      - mobile/linux
+      - mobile/macos
+      - mobile/web
+      - mobile/windows
+    prebuild:
+      - sed -i '/android.builder.sdkDownload=false/d' android/gradle.properties
+      - 'flutterVersion=$(sed -n -E "s/^  flutter: ([0-9.]+)$/\1/p" pubspec.yaml)'
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+    scanignore:
+      - mobile/assets/geo/places.bin.gz
+      - mobile/assets/geo/world.bin
+    scandelete:
+      - mobile/.pub-cache
+      - engine/vendor/github.com/bytedance/sonic/testdata
+      - engine/vendor/github.com/alexballas/go-libtor/linux/tor/src/ext/equix/Cargo.toml
+    build:
+      - pushd $$go$$/src
+      - ./make.bash
+      - popd
+      - export GOROOT=$$go$$
+      - export PATH=$GOROOT/bin:$PATH
+      - export ANDROID_NDK_HOME=$$NDK$$
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export CGO_ENABLED=1
+      - export GOFLAGS=-trimpath
+      - export CGO_LDFLAGS="-Wl,--build-id=none"
+      - export HALO_FULL=1
+      - cd ../engine
+      - bash build.sh
+      - cd ../mobile
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform=android-arm
+    ndk: r28c
+
+  - versionName: 0.5.0
+    versionCode: 222
+    commit: b9bd6d031ca984b4930cb8c62a2530a5e74d99ff
+    subdir: mobile
+    sudo:
+      - apt-get update
+      - apt-get install -y --no-install-recommends -t trixie-backports golang-go
+    output: build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+    binary: 
+      https://github.com/GnosiWorks/Kryfo/releases/download/v%v/app-arm64-v8a-release.apk
+    srclibs:
+      - flutter@stable
+      - go@go1.25.14
+    rm:
+      - mobile/ios
+      - mobile/linux
+      - mobile/macos
+      - mobile/web
+      - mobile/windows
+    prebuild:
+      - sed -i '/android.builder.sdkDownload=false/d' android/gradle.properties
+      - 'flutterVersion=$(sed -n -E "s/^  flutter: ([0-9.]+)$/\1/p" pubspec.yaml)'
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+    scanignore:
+      - mobile/assets/geo/places.bin.gz
+      - mobile/assets/geo/world.bin
+    scandelete:
+      - mobile/.pub-cache
+      - engine/vendor/github.com/bytedance/sonic/testdata
+      - engine/vendor/github.com/alexballas/go-libtor/linux/tor/src/ext/equix/Cargo.toml
+    build:
+      - pushd $$go$$/src
+      - ./make.bash
+      - popd
+      - export GOROOT=$$go$$
+      - export PATH=$GOROOT/bin:$PATH
+      - export ANDROID_NDK_HOME=$$NDK$$
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export CGO_ENABLED=1
+      - export GOFLAGS=-trimpath
+      - export CGO_LDFLAGS="-Wl,--build-id=none"
+      - export HALO_FULL=1
+      - cd ../engine
+      - bash build.sh
+      - cd ../mobile
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform=android-arm64
+    ndk: r28c
+
+  - versionName: 0.5.0
+    versionCode: 223
+    commit: b9bd6d031ca984b4930cb8c62a2530a5e74d99ff
+    subdir: mobile
+    sudo:
+      - apt-get update
+      - apt-get install -y --no-install-recommends -t trixie-backports golang-go
+    output: build/app/outputs/flutter-apk/app-x86_64-release.apk
+    binary: https://github.com/GnosiWorks/Kryfo/releases/download/v%v/app-x86_64-release.apk
+    srclibs:
+      - flutter@stable
+      - go@go1.25.14
+    rm:
+      - mobile/ios
+      - mobile/linux
+      - mobile/macos
+      - mobile/web
+      - mobile/windows
+    prebuild:
+      - sed -i '/android.builder.sdkDownload=false/d' android/gradle.properties
+      - 'flutterVersion=$(sed -n -E "s/^  flutter: ([0-9.]+)$/\1/p" pubspec.yaml)'
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+    scanignore:
+      - mobile/assets/geo/places.bin.gz
+      - mobile/assets/geo/world.bin
+    scandelete:
+      - mobile/.pub-cache
+      - engine/vendor/github.com/bytedance/sonic/testdata
+      - engine/vendor/github.com/alexballas/go-libtor/linux/tor/src/ext/equix/Cargo.toml
+    build:
+      - pushd $$go$$/src
+      - ./make.bash
+      - popd
+      - export GOROOT=$$go$$
+      - export PATH=$GOROOT/bin:$PATH
+      - export ANDROID_NDK_HOME=$$NDK$$
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export CGO_ENABLED=1
+      - export GOFLAGS=-trimpath
+      - export CGO_LDFLAGS="-Wl,--build-id=none"
+      - export HALO_FULL=1
+      - cd ../engine
+      - bash build.sh
+      - cd ../mobile
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform=android-x64
+    ndk: r28c
+
 AllowedAPKSigningKeys: 10928a61642c5cc471a99869e2ea4e2d4d70026e797dfba48c0f306b5b3473db
 
 AutoUpdateMode: Version
@@ -180,5 +335,5 @@ VercodeOperation:
   - '%c * 10 + 2'
   - '%c * 10 + 3'
 UpdateCheckData: mobile/pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 0.4.2
-CurrentVersionCode: 203
+CurrentVersion: 0.5.0
+CurrentVersionCode: 223
