@@ -591,8 +591,32 @@ Builds:
       - export PUB_CACHE=$(pwd)/.pub-cache
       - $$flutter$$/bin/flutter build apk
 
+  - versionName: 26.10.08
+    versionCode: 139
+    commit: 69004197775e0397abe3667da9355e98dde8b82d
+    subdir: SlimSocial_for_Facebook
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - _old
+      - SlimSocial_for_Facebook/ios
+    prebuild:
+      - flutterVersion=$(grep flutter\" .fvmrc | cut -d "\"" -f 4)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - bash ./scripts/fdroid_prepare.sh
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter packages pub get --enforce-lockfile
+    scandelete:
+      - SlimSocial_for_Facebook/.pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: SlimSocial_for_Facebook/pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 26.09.28
-CurrentVersionCode: 138
+CurrentVersion: 26.10.08
+CurrentVersionCode: 139
