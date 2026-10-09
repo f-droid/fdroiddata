@@ -132,11 +132,52 @@ Builds:
         pnpm -C ../../../.. --filter @how2vote/web build:app
       - pnpm -C ../../../.. --filter @how2vote/mobile exec cap copy android
 
+  - versionName: 1.4.4
+    versionCode: 10404000
+    commit: 08060c5b6c7a9dd6511d6374a5c40415fc8e32d4
+    subdir: apps/mobile/android/app
+    sudo:
+      - echo "deb https://deb.debian.org/debian forky main" > /etc/apt/sources.list.d/forky.list
+      - apt-get update
+      - apt-get install -y -t forky nodejs npm golang-go cargo cmake build-essential
+      - npm install -g pnpm@11.12.0
+    init: pnpm -C ../../../.. install --frozen-lockfile --no-optional --filter @how2vote/web...
+      --filter @how2vote/mobile
+    gradle:
+      - yes
+    srclibs:
+      - esbuild@v0.28.1
+      - rollup@v4.62.4
+    prebuild:
+      - printf 'versionCode=$$VERCODE$$\nversionName=$$VERSION$$\n' >> ../gradle.properties
+      - cargo fetch --locked --manifest-path $$rollup$$/rust/Cargo.toml
+      - mkdir -p src/main/assets
+      - mkdir -p ../../../web/build
+      - touch ../../../web/build/index.html
+      - pnpm -C ../../../.. --filter @how2vote/mobile exec cap update android
+    scanignore:
+      - node_modules/.pnpm/@capacitor+cli@*/node_modules/@capacitor/cli/assets/capacitor-cordova-android-plugins.tar.gz
+    scandelete:
+      - node_modules
+    build:
+      - go build -C $$esbuild$$ ./cmd/esbuild
+      - cargo build --release --offline --manifest-path $$rollup$$/rust/bindings_napi/Cargo.toml
+      - install -D -m644 $$rollup$$/rust/target/release/libbindings_napi.so 
+        ../../../../node_modules/.pnpm/rollup@4.62.4/node_modules/@rollup/rollup-linux-x64-gnu/rollup.linux-x64-gnu.node
+      - printf 
+        '{"name":"@rollup/rollup-linux-x64-gnu","version":"4.62.4","main":"./rollup.linux-x64-gnu.node"}'
+        > 
+        ../../../../node_modules/.pnpm/rollup@4.62.4/node_modules/@rollup/rollup-linux-x64-gnu/package.json
+      - pnpm -C ../../../.. --filter @how2vote/web^... build
+      - ESBUILD_BINARY_PATH=$$esbuild$$/esbuild APP_VERSION=$$VERSION$$ PUBLIC_DIST_CHANNEL=fdroid
+        pnpm -C ../../../.. --filter @how2vote/web build:app
+      - pnpm -C ../../../.. --filter @how2vote/mobile exec cap copy android
+
 AllowedAPKSigningKeys: 617efd39535bb3af10ce0778b6f20ee4597f221baeb3f3e07547bfcc1ac7d213
 
 AutoUpdateMode: Version v%v
 UpdateCheckMode: HTTP
 UpdateCheckData: 
   https://how2vote.au/app-version.json|"versionCode":\s*(\d+)|.|"versionName":\s*"([\d.]+)"
-CurrentVersion: 1.4.3
-CurrentVersionCode: 10403000
+CurrentVersion: 1.4.4
+CurrentVersionCode: 10404000
