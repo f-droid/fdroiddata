@@ -897,9 +897,43 @@ Builds:
       - echo "odr.version=$version" >> ../gradle.properties
     ndk: 28.1.13356709
 
+  - versionName: 4.22.1
+    versionCode: 42201
+    commit: aff378de1c1d464b8ced52b13d4fbd0330287053
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y build-essential ccache cmake ninja-build pkgconf pipx python3
+      - PIPX_HOME=/opt/pipx PIPX_BIN_DIR=/usr/local/bin pipx install conan
+    gradle:
+      - foss
+    srclibs:
+      - OpenDocument.core@v6.5.0
+    prebuild:
+      - conan remote remove "*"
+      - conan remote add conancenter https://center2.conan.io
+      - conan profile detect
+      - core=$(sed -n 's/^odrCore = "\(.*\)"/\1/p' ../gradle/libs.versions.toml)
+      - pushd $$OpenDocument.core$$
+      - git fetch --tags origin
+      - git checkout "v$core"
+      - sed -i -e "s/ndk_version = \"[^\"]*\"/ndk_version = \"$(basename $$NDK$$)\"/"
+        .github/config/conan/profiles/android.jinja
+      - popd
+      - pushd $$OpenDocument.core$$/android
+      - gradle publishToMavenLocal -Podr.version="$core"
+      - popd
+      - sed -i -e '/^dependencyResolutionManagement {/,/^}/ s|^        google()|        exclusiveContent
+        { forRepository { mavenLocal() }; filter { includeModule("app.opendocument",
+        "odr-core-android") } }\n        google()|' ../settings.gradle
+      - sed -i -e '/applicationIdSuffix = ".foss"/d' build.gradle
+      - version=$(git -c column.ui=never tag --points-at HEAD | grep -m1 -E '^v[0-9]+\.[0-9]+\.[0-9]+$')
+      - echo "odr.version=$version" >> ../gradle.properties
+    ndk: 28.2.13676358
+
 AutoUpdateMode: Version v%v
 UpdateCheckMode: HTTP
 UpdateCheckData: 
   https://github.com/opendocument-app/OpenDocument.droid/releases/latest/download/version.json|"versionCode":\s*(\d+)|.|"versionName":\s*"([^"]+)"
-CurrentVersion: 4.21.0
-CurrentVersionCode: 42100
+CurrentVersion: 4.22.1
+CurrentVersionCode: 42201
