@@ -1,21 +1,23 @@
 AntiFeatures:
   TetheredNet:
-    en-US: Depends on Github, Gitlab, kcubeterm.com, easycli.sh and more for packages
-      and scripts
+    en-US: Downloads distro rootfs archives from GitHub release tag rootfs (and optional
+      guest GPU / SDK archives) after an in-app opt-in. The host bootstrap is built
+      from source and bundled in the APK.
 Categories:
   - Development
   - System
 License: GPL-3.0-only
 AuthorName: Abhay Raj
 AuthorWebSite: https://github.com/abhay-byte
-SourceCode: https://github.com/abhay-byte/fluxlinux
-IssueTracker: https://github.com/abhay-byte/fluxlinux/issues
+SourceCode: https://github.com/zenithblue-oss/fluxlinux
+IssueTracker: https://github.com/zenithblue-oss/fluxlinux/issues
 
 AutoName: FluxLinux
 
 RepoType: git
-Repo: https://github.com/abhay-byte/fluxlinux
-Binaries: https://github.com/abhay-byte/fluxlinux/releases/download/v%v/app-release.apk
+Repo: https://github.com/zenithblue-oss/fluxlinux
+Binaries: 
+  https://github.com/zenithblue-oss/fluxlinux/releases/download/v%v/app-release.apk
 
 Builds:
   - versionName: '1.6'
@@ -54,9 +56,55 @@ Builds:
       - assets/xfce4/cursor/cursor.zip
       - assets/wallpaper/wallpaper.zip
 
+  - versionName: 2.0.1
+    versionCode: 13
+    commit: 7f6e61d5bcc19ce6814d07607f8c122d1b4beb33
+    subdir: app
+    submodules: true
+    sudo:
+      - echo "deb https://deb.debian.org/debian bookworm main" > /etc/apt/sources.list.d/bookworm.list
+      - apt-get update
+      - apt-get install -y --no-install-recommends openjdk-17-jdk-headless pandoc
+        gtk-doc-tools clang lld autoconf-archive gobject-introspection bash-static
+        libssl-dev zlib1g-dev libffi-dev libbz2-dev liblzma-dev libsqlite3-dev libreadline-dev
+        autoconf autogen automake autopoint bison bzip2 curl ed file flex fuse-overlayfs
+        g++ gawk gettext git gperf groff help2man intltool jq libglib2.0-dev libltdl-dev
+        libtool-bin lzip m4 make patch pkg-config python-is-python3 python3 python3-setuptools
+        rsync tcl texinfo unzip xutils-dev xz-utils zip zstd gcc-aarch64-linux-gnu
+        libc6-dev-arm64-cross
+      - mkdir -p /data/data/com.ivarna.fluxlinux/files/usr
+      - chown -R vagrant:vagrant /data
+    gradle:
+      - ivarna
+    scanignore:
+      - assets/xfce4/
+      - assets/wallpaper/
+      - native/termux-packages/packages/python-torch/0011-dlopen-libc.so.patch
+      - native/termux-packages/packages/sideloader/plist-d-Add-filename-for-termux-libplist-2.0.so.diff
+    scandelete:
+      - native/bootstrap/
+      - app/src/ivarna/assets/pulse-runtime/
+      - app/src/zenithblue/assets/pulse-runtime/
+      - app/src/main/assets/scripts/common/setup/bwrap-proot-shim
+      - app/src/main/assets/scripts/opensuse/common/libevp_md2.so
+    build:
+      - umask 022
+      - cd .. && rm -rf native/output/com.ivarna.fluxlinux native/bootstrap/com.ivarna.fluxlinux
+      - mkdir -p $HOME/.termux-build/less/cache && curl -fL --retry 5 -o $HOME/.termux-build/less/cache/less-704.tar.gz.tmp
+        https://sources.buildroot.net/less/less-704.tar.gz && echo "20a0b0a2bb2525fa53c7eee9beb854b4c9cf172eabb209af7020743547bfe9fb  $HOME/.termux-build/less/cache/less-704.tar.gz.tmp"
+        | sha256sum -c - && mv $HOME/.termux-build/less/cache/less-704.tar.gz.tmp
+        $HOME/.termux-build/less/cache/less-704.tar.gz || exit 1
+      - NDK=$$NDK$$ NO_DOCKER=1 ./scripts/build_packages_for_appid.sh com.ivarna.fluxlinux
+        --list termux-lib-ssot
+      - ./scripts/build_loader_apk.sh
+      - ./scripts/build_guest_helpers.sh
+      - python3 scripts/assemble_bootstrap.py --package-name com.ivarna.fluxlinux
+        --list native/package-lists/termux-lib-ssot.txt --mode full
+    ndk: r29
+
 AllowedAPKSigningKeys: 34f011660e5bb7140de5452e169e1399fd0e6586746daa5431d29d637f6d1a3c
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 1.8.0
-CurrentVersionCode: 10
+CurrentVersion: 2.0.1
+CurrentVersionCode: 13
