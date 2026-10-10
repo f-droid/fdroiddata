@@ -1,0 +1,61 @@
+Categories:
+  - Inventory
+  - Schedule
+License: AGPL-3.0-only
+AuthorName: Tim Barsch
+AuthorWebSite: https://github.com/domai-tb
+WebSite: https://github.com/domai-tb/OpenPlants
+SourceCode: https://github.com/domai-tb/OpenPlants
+IssueTracker: https://github.com/domai-tb/OpenPlants/issues
+
+AutoName: OpenPlants
+
+RepoType: git
+Repo: https://github.com/domai-tb/OpenPlants
+Binaries: https://github.com/domai-tb/OpenPlants/releases/download/v%v/OpenPlants-v%v.apk
+
+Builds:
+  - versionName: 1.1.3
+    versionCode: 6
+    commit: 0c94f266bdbc4549d2c98bdd3667899047008651
+    sudo:
+      - apt-get update
+      - apt-get install -y python3-venv
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+    prebuild:
+      - flutterVersion=$(sed -n -E 's/.*"flutter":[[:space:]]*"([^"]+)".*/\1/p' .fvmrc)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export REPO=/tmp/com.domai_tb.openplants
+      - cd ..
+      - mv com.domai_tb.openplants "$REPO"
+      - pushd "$REPO"
+      - export PUB_CACHE="$REPO/.pub-cache"
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - popd
+      - mv "$REPO" com.domai_tb.openplants
+    scandelete:
+      - .pub-cache
+    build:
+      - export REPO=/tmp/com.domai_tb.openplants
+      - cd ..
+      - mv com.domai_tb.openplants "$REPO"
+      - pushd "$REPO"
+      - export PUB_CACHE="$REPO/.pub-cache"
+      - ./scripts/run_export.sh
+      - $$flutter$$/bin/flutter build apk --release
+      - popd
+      - mv "$REPO" com.domai_tb.openplants
+
+AllowedAPKSigningKeys: 89f6989461547845d61ad1b2254db9d9e3799cda7b7cf47d65ab4147396a4110
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^v[0-9]+\.[0-9]+\.[0-9]+$
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 1.1.3
+CurrentVersionCode: 6
