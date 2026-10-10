@@ -1,0 +1,95 @@
+AntiFeatures:
+  NonFreeNet:
+    en-US: Fetches stock, fund and crypto prices from the Yahoo Finance API and currency
+      exchange rates from open.er-api.com, both non-free network services. Only ticker
+      symbols and currency codes are sent; no personal or portfolio data leaves the
+      device.
+Categories:
+  - Finance Manager
+License: MIT
+AuthorName: Cairn Labworks
+SourceCode: https://github.com/cairn-labworks/Okanzo
+IssueTracker: https://github.com/cairn-labworks/Okanzo/issues
+
+AutoName: Okanzo
+
+RepoType: git
+Repo: https://github.com/cairn-labworks/Okanzo.git
+Binaries: 
+  https://github.com/cairn-labworks/Okanzo/releases/download/v%v/com.cairnlabworks.okanzo_%c.apk
+
+Builds:
+  - versionName: 1.2.5
+    versionCode: 81
+    commit: dc78d5134e33681da8c108271879d9e9aea57dc3
+    output: build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+    prebuild:
+      - flutterVersion=$(sed -n -E "s/.*flutter-version:\ '(.*)'/\1/p" .github/workflows/release.yml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform=android-arm
+
+  - versionName: 1.2.5
+    versionCode: 82
+    commit: dc78d5134e33681da8c108271879d9e9aea57dc3
+    output: build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+    prebuild:
+      - flutterVersion=$(sed -n -E "s/.*flutter-version:\ '(.*)'/\1/p" .github/workflows/release.yml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform=android-arm64
+
+  - versionName: 1.2.5
+    versionCode: 83
+    commit: dc78d5134e33681da8c108271879d9e9aea57dc3
+    output: build/app/outputs/flutter-apk/app-x86_64-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+    prebuild:
+      - flutterVersion=$(sed -n -E "s/.*flutter-version:\ '(.*)'/\1/p" .github/workflows/release.yml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform=android-x64
+
+AllowedAPKSigningKeys: 03bd539e7e649d11c7d0ce67aece3fcc05bfc9257a23694c2178082396695218
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^v[\d.]+$
+VercodeOperation:
+  - '%c * 10 + 1'
+  - '%c * 10 + 2'
+  - '%c * 10 + 3'
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 1.2.5
+CurrentVersionCode: 83
