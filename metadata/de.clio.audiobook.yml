@@ -35,8 +35,31 @@ Builds:
       - core/analytics/firebase
       - core/remoteconfig/firebase
 
+  - versionName: 1.0.4
+    versionCode: 10004
+    commit: 5a630e50d1c494104809888b7247b9e9e8d297c5
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y openjdk-25-jdk-headless
+      - update-alternatives --auto java
+    gradle:
+      - free
+    prebuild:
+      - sed -i -e '/withPlugin/,/^      }/d' -e '/crashlytics/d' -e '/googleServices/d'
+        -e '/firebase/d' -e '/playPublish/d' -e '/play {/,/^}/d' -e '/= createSigningConfig/d'
+        build.gradle.kts
+      - sed -i -e '/review/d' ../features/review/play/build.gradle.kts
+      - sed -i -e '/crashlytics/d' ../core/logging/crashlytics/build.gradle.kts
+      - echo -e "\norg.gradle.jvmargs=-XX:MaxHeapSize=2048m" >> ../gradle.properties
+      - echo -e "\norg.gradle.unsafe.configuration-cache=false" >> ../gradle.properties
+      - sed -i -e '/foojay/d' ../{.,plugins}/settings.gradle.kts
+    scandelete:
+      - core/analytics/firebase
+      - core/remoteconfig/firebase
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v[\d.]+$
 UpdateCheckData: 'app/build.gradle.kts|versionCode.*?(\d+)|.|versionName.*?: "([^"]+)"'
-CurrentVersion: 1.0.3
-CurrentVersionCode: 10003
+CurrentVersion: 1.0.4
+CurrentVersionCode: 10004
