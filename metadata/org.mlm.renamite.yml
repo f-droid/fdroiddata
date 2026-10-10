@@ -1,0 +1,172 @@
+Categories:
+  - Graphics
+License: MPL-2.0
+AuthorName: MLM Games
+AuthorWebSite: https://ragebreaker.itch.io
+SourceCode: https://github.com/mlm-games/renamite
+IssueTracker: https://github.com/mlm-games/renamite/issues
+Changelog: https://github.com/mlm-games/renamite/blob/HEAD/CHANGELOG.md
+Donate: https://github.com/sponsors/mlm-games
+
+AutoName: Renamite
+
+RepoType: git
+Repo: https://github.com/mlm-games/renamite.git
+
+Builds:
+  - versionName: 0.3.8
+    versionCode: 16778061
+    commit: 12477cf6f6068de3d48bdf3e98e2e4f24ca5e2fb
+    subdir: apps/renamite-editor
+    sudo:
+      - apt-get update
+      - apt-get install -y gcc libc6-dev rustup openjdk-21-jdk-headless
+    output: ../../target/release/apk/renamite.apk
+    binary: https://github.com/mlm-games/renamite/releases/download/v%v/renamite-%v-x86.apk
+    srclibs:
+      - reproducible-apk-tools@v0.3.0
+    prebuild:
+      - export PATH="$HOME/.cargo/bin:$PATH"
+      - ANDROID_API=$(sed -nE 's/.*android-api.*"([^"]+)".*/\1/p' ../../.github/workflows/release.yml)
+      - ANDROID_BUILD_TOOLS=$(sed -nE 's/.*android-build-tools.*"([^"]+)".*/\1/p'
+        ../../.github/workflows/release.yml)
+      - sdkmanager "platforms;android-$ANDROID_API" "build-tools;$ANDROID_BUILD_TOOLS"
+      - rustup target add i686-linux-android
+      - CARGO_RAPK_VERSION=$(sed -nE 's/.*cargo-rapk-version.*"([^"]+)".*/\1/p' ../../.github/workflows/release.yml)
+      - cargo install "cargo-rapk@$CARGO_RAPK_VERSION" --locked
+    build:
+      - export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+      - export PATH="$JAVA_HOME/bin:$HOME/.cargo/bin:$PATH"
+      - export ANDROID_BUILD_TOOLS=$(sed -nE 's/.*android-build-tools.*"([^"]+)".*/\1/p'
+        ../../.github/workflows/release.yml)
+      - export CARGO_RAPK_KOTLIN_VERSION=$(sed -nE 's/.*kotlin-version.*"([^"]+)".*/\1/p'
+        ../../.github/workflows/release.yml)
+      - cargo rapk build --release --deterministic --timestamp 0 --unsigned --target
+        i686-linux-android --lib
+    ndk: 29.0.14206865
+    postbuild:
+      - mv "$$OUT$$" unaligned.apk
+      - $$reproducible-apk-tools$$/zipalign.py -P 16 --pad-like-apksigner --replace
+        unaligned.apk "$$OUT$$"
+
+  - versionName: 0.3.8
+    versionCode: 16778062
+    commit: 12477cf6f6068de3d48bdf3e98e2e4f24ca5e2fb
+    subdir: apps/renamite-editor
+    sudo:
+      - apt-get update
+      - apt-get install -y gcc libc6-dev rustup openjdk-21-jdk-headless
+    output: ../../target/release/apk/renamite.apk
+    binary: 
+      https://github.com/mlm-games/renamite/releases/download/v%v/renamite-%v-x86_64.apk
+    srclibs:
+      - reproducible-apk-tools@v0.3.0
+    prebuild:
+      - export PATH="$HOME/.cargo/bin:$PATH"
+      - ANDROID_API=$(sed -nE 's/.*android-api.*"([^"]+)".*/\1/p' ../../.github/workflows/release.yml)
+      - ANDROID_BUILD_TOOLS=$(sed -nE 's/.*android-build-tools.*"([^"]+)".*/\1/p'
+        ../../.github/workflows/release.yml)
+      - sdkmanager "platforms;android-$ANDROID_API" "build-tools;$ANDROID_BUILD_TOOLS"
+      - rustup target add x86_64-linux-android
+      - CARGO_RAPK_VERSION=$(sed -nE 's/.*cargo-rapk-version.*"([^"]+)".*/\1/p' ../../.github/workflows/release.yml)
+      - cargo install "cargo-rapk@$CARGO_RAPK_VERSION" --locked
+    build:
+      - export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+      - export PATH="$JAVA_HOME/bin:$HOME/.cargo/bin:$PATH"
+      - export ANDROID_BUILD_TOOLS=$(sed -nE 's/.*android-build-tools.*"([^"]+)".*/\1/p'
+        ../../.github/workflows/release.yml)
+      - export CARGO_RAPK_KOTLIN_VERSION=$(sed -nE 's/.*kotlin-version.*"([^"]+)".*/\1/p'
+        ../../.github/workflows/release.yml)
+      - cargo rapk build --release --deterministic --timestamp 0 --unsigned --target
+        x86_64-linux-android --lib
+    ndk: 29.0.14206865
+    postbuild:
+      - mv "$$OUT$$" unaligned.apk
+      - $$reproducible-apk-tools$$/zipalign.py -P 16 --pad-like-apksigner --replace
+        unaligned.apk "$$OUT$$"
+
+  - versionName: 0.3.8
+    versionCode: 16778063
+    commit: 12477cf6f6068de3d48bdf3e98e2e4f24ca5e2fb
+    subdir: apps/renamite-editor
+    sudo:
+      - apt-get update
+      - apt-get install -y gcc libc6-dev rustup openjdk-21-jdk-headless
+    output: ../../target/release/apk/renamite.apk
+    binary: 
+      https://github.com/mlm-games/renamite/releases/download/v%v/renamite-%v-armeabi-v7a.apk
+    srclibs:
+      - reproducible-apk-tools@v0.3.0
+    prebuild:
+      - export PATH="$HOME/.cargo/bin:$PATH"
+      - ANDROID_API=$(sed -nE 's/.*android-api.*"([^"]+)".*/\1/p' ../../.github/workflows/release.yml)
+      - ANDROID_BUILD_TOOLS=$(sed -nE 's/.*android-build-tools.*"([^"]+)".*/\1/p'
+        ../../.github/workflows/release.yml)
+      - sdkmanager "platforms;android-$ANDROID_API" "build-tools;$ANDROID_BUILD_TOOLS"
+      - rustup target add armv7-linux-androideabi
+      - CARGO_RAPK_VERSION=$(sed -nE 's/.*cargo-rapk-version.*"([^"]+)".*/\1/p' ../../.github/workflows/release.yml)
+      - cargo install "cargo-rapk@$CARGO_RAPK_VERSION" --locked
+    build:
+      - export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+      - export PATH="$JAVA_HOME/bin:$HOME/.cargo/bin:$PATH"
+      - export ANDROID_BUILD_TOOLS=$(sed -nE 's/.*android-build-tools.*"([^"]+)".*/\1/p'
+        ../../.github/workflows/release.yml)
+      - export CARGO_RAPK_KOTLIN_VERSION=$(sed -nE 's/.*kotlin-version.*"([^"]+)".*/\1/p'
+        ../../.github/workflows/release.yml)
+      - cargo rapk build --release --deterministic --timestamp 0 --unsigned --target
+        armv7-linux-androideabi --lib
+    ndk: 29.0.14206865
+    postbuild:
+      - mv "$$OUT$$" unaligned.apk
+      - $$reproducible-apk-tools$$/zipalign.py -P 16 --pad-like-apksigner --replace
+        unaligned.apk "$$OUT$$"
+
+  - versionName: 0.3.8
+    versionCode: 16778064
+    commit: 12477cf6f6068de3d48bdf3e98e2e4f24ca5e2fb
+    subdir: apps/renamite-editor
+    sudo:
+      - apt-get update
+      - apt-get install -y gcc libc6-dev rustup openjdk-21-jdk-headless
+    output: ../../target/release/apk/renamite.apk
+    binary: 
+      https://github.com/mlm-games/renamite/releases/download/v%v/renamite-%v-arm64-v8a.apk
+    srclibs:
+      - reproducible-apk-tools@v0.3.0
+    prebuild:
+      - export PATH="$HOME/.cargo/bin:$PATH"
+      - ANDROID_API=$(sed -nE 's/.*android-api.*"([^"]+)".*/\1/p' ../../.github/workflows/release.yml)
+      - ANDROID_BUILD_TOOLS=$(sed -nE 's/.*android-build-tools.*"([^"]+)".*/\1/p'
+        ../../.github/workflows/release.yml)
+      - sdkmanager "platforms;android-$ANDROID_API" "build-tools;$ANDROID_BUILD_TOOLS"
+      - rustup target add aarch64-linux-android
+      - CARGO_RAPK_VERSION=$(sed -nE 's/.*cargo-rapk-version.*"([^"]+)".*/\1/p' ../../.github/workflows/release.yml)
+      - cargo install "cargo-rapk@$CARGO_RAPK_VERSION" --locked
+    build:
+      - export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+      - export PATH="$JAVA_HOME/bin:$HOME/.cargo/bin:$PATH"
+      - export ANDROID_BUILD_TOOLS=$(sed -nE 's/.*android-build-tools.*"([^"]+)".*/\1/p'
+        ../../.github/workflows/release.yml)
+      - export CARGO_RAPK_KOTLIN_VERSION=$(sed -nE 's/.*kotlin-version.*"([^"]+)".*/\1/p'
+        ../../.github/workflows/release.yml)
+      - cargo rapk build --release --deterministic --timestamp 0 --unsigned --target
+        aarch64-linux-android --lib
+    ndk: 29.0.14206865
+    postbuild:
+      - mv "$$OUT$$" unaligned.apk
+      - $$reproducible-apk-tools$$/zipalign.py -P 16 --pad-like-apksigner --replace
+        unaligned.apk "$$OUT$$"
+
+AllowedAPKSigningKeys: 4aed2f691df64a7b0fea25a6b8c80183c6dc520e049dac0178defa1d6472228f
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+VercodeOperation:
+  - '%c - 3'
+  - '%c - 2'
+  - '%c - 1'
+  - '%c'
+UpdateCheckData: 
+  apps/renamite-editor/Cargo.toml|version_code\s*=\s*([0-9]+)|Cargo.toml|version\s*=\s*"([^"]+)"
+CurrentVersion: 0.3.8
+CurrentVersionCode: 16778064
