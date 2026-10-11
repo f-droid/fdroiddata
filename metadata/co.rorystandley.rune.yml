@@ -1,0 +1,140 @@
+Categories:
+  - Note
+License: GPL-3.0-or-later
+AuthorName: Rory Standley
+SourceCode: https://github.com/rorystandley/rune
+IssueTracker: https://github.com/rorystandley/rune/issues
+Changelog: https://github.com/rorystandley/rune/releases
+
+AutoName: Rune
+
+RepoType: git
+Repo: https://github.com/rorystandley/rune.git
+
+Builds:
+  - versionName: 0.5.7
+    versionCode: 151
+    commit: a9eb4d43b516423efc1587c5faf177df33134da7
+    subdir: app
+    submodules: true
+    output: build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - app/ios
+      - app/macos
+      - app/linux
+      - app/windows
+      - third_party/whisper.cpp/examples
+      - third_party/whisper.cpp/bindings
+      - third_party/whisper.cpp/models/for-tests-*.bin
+    prebuild:
+      - flutterVersion=$(sed -n -E 's/.*FLUTTER_VERSION:.*"([^"]*)".*/\1/p' ../.github/workflows/release.yml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - sed -i -e 's|//f ||' android/app/build.gradle.kts
+      - export PUB_CACHE="$(pwd)/.pub-cache"
+      - $$flutter$$/bin/flutter config --no-analytics --no-cli-animations
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+    scanignore:
+      - packages/notes_core/pubspec.yaml
+      - app/assets/models/ggml-tiny.en-q5_1.bin
+    scandelete:
+      - app/.pub-cache
+    build:
+      - export PATH="$$flutter$$/bin:$PATH"
+      - export PUB_CACHE="$(pwd)/.pub-cache"
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform=android-arm
+    ndk: 28.2.13676358
+
+  - versionName: 0.5.7
+    versionCode: 152
+    commit: a9eb4d43b516423efc1587c5faf177df33134da7
+    subdir: app
+    submodules: true
+    output: build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - app/ios
+      - app/macos
+      - app/linux
+      - app/windows
+      - third_party/whisper.cpp/examples
+      - third_party/whisper.cpp/bindings
+      - third_party/whisper.cpp/models/for-tests-*.bin
+    prebuild:
+      - flutterVersion=$(sed -n -E 's/.*FLUTTER_VERSION:.*"([^"]*)".*/\1/p' ../.github/workflows/release.yml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - sed -i -e 's|//f ||' android/app/build.gradle.kts
+      - export PUB_CACHE="$(pwd)/.pub-cache"
+      - $$flutter$$/bin/flutter config --no-analytics --no-cli-animations
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+    scanignore:
+      - packages/notes_core/pubspec.yaml
+      - app/assets/models/ggml-tiny.en-q5_1.bin
+    scandelete:
+      - app/.pub-cache
+    build:
+      - export PATH="$$flutter$$/bin:$PATH"
+      - export PUB_CACHE="$(pwd)/.pub-cache"
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform=android-arm64
+    ndk: 28.2.13676358
+
+  - versionName: 0.5.7
+    versionCode: 153
+    commit: a9eb4d43b516423efc1587c5faf177df33134da7
+    subdir: app
+    submodules: true
+    output: build/app/outputs/flutter-apk/app-x86_64-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - app/ios
+      - app/macos
+      - app/linux
+      - app/windows
+      - third_party/whisper.cpp/examples
+      - third_party/whisper.cpp/bindings
+      - third_party/whisper.cpp/models/for-tests-*.bin
+    prebuild:
+      - flutterVersion=$(sed -n -E 's/.*FLUTTER_VERSION:.*"([^"]*)".*/\1/p' ../.github/workflows/release.yml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - sed -i -e 's|//f ||' android/app/build.gradle.kts
+      - export PUB_CACHE="$(pwd)/.pub-cache"
+      - $$flutter$$/bin/flutter config --no-analytics --no-cli-animations
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+    scanignore:
+      - packages/notes_core/pubspec.yaml
+      - app/assets/models/ggml-tiny.en-q5_1.bin
+    scandelete:
+      - app/.pub-cache
+    build:
+      - export PATH="$$flutter$$/bin:$PATH"
+      - export PUB_CACHE="$(pwd)/.pub-cache"
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform=android-x64
+    ndk: 28.2.13676358
+
+MaintainerNotes: |
+  The bundled ggml-tiny.en-q5_1.bin is MIT-licensed Whisper model data, not
+  executable code. Its source revision and SHA-256 are documented upstream:
+  https://github.com/rorystandley/rune/blob/a9eb4d43b516423efc1587c5faf177df33134da7/docs/transcription.md#pinned-inputs
+  https://github.com/openai/whisper#license
+
+  Unused whisper.cpp examples, language bindings and test models are removed.
+  The native library is built from the pinned submodule's C/C++ sources.
+
+  The R8 hook and ABI version mapping must remain in upstream release tags:
+  https://github.com/rorystandley/rune/pull/92
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^v[0-9]+\.[0-9]+\.[0-9]+$
+VercodeOperation:
+  - '%c * 10 + 1'
+  - '%c * 10 + 2'
+  - '%c * 10 + 3'
+UpdateCheckData: app/pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 0.5.7
+CurrentVersionCode: 153
