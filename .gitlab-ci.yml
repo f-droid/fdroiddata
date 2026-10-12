@@ -515,7 +515,7 @@ check apk:
   variables:
     ANDROID_HOME: /opt/android-sdk
   before_script:
-    - ls tmp/*.apk 2> /dev/null || exit 0
+    - ls tmp/*.apk 2> /dev/null || ls tmp/signed/*.apk 2> /dev/null || exit 0
     - apt-get update
     - apt-get install -qy --no-install-recommends fdroidserver curl unzip zip jq binutils
     - export fdroidserver=$PWD/fdroidserver
@@ -538,6 +538,12 @@ check apk:
       }
     - echo '[' > codequality.json
     - |
+      for apk in tmp/signed/*.signed.apk; do
+        [[ -e "$apk" ]] || continue
+        mkdir -p tmp/binaries
+        cp $apk $(echo $apk | sed -e 's|signed/||' -e 's|\.signed\.apk$|.apk|');
+        cp $apk $(echo $apk | sed -e 's|signed/|binaries/|' -e 's|\.signed\.apk$|.binary.apk|');
+      done
       for apk in tmp/*.apk; do
         appid=$(echo $apk | sed -n 's|tmp/\(.*\)_[0-9]\+\.apk$|\1|p');
         vercode=$(echo $apk | sed -n 's|tmp/.*_\([0-9]\+\)\.apk$|\1|p');
@@ -601,6 +607,15 @@ check apk:
               ;;
           esac
           generate_report $appid $location "Permission $permission" "permission" "$file $permission" "$severity" >> codequality.json;
+        done
+        for intent in $(sed 's/>/>\n/g' AndroidManifest.xml | sed -n 's|.*<action android:name="\([^"]\+\)".*|\1|p' | uniq); do
+          case "$intent" in
+            android.net.VpnService) ;&
+            android.view.InputMethod) ;&
+            android.accessibilityservice.AccessibilityService)
+              generate_report $appid $location "Intent filter $intent" "intent" "$file $intent" "minor" >> codequality.json;
+              ;;
+          esac
         done
         grep 'android:usesCleartextTraffic="true"' AndroidManifest.xml && \
           generate_report $appid $location "Cleartext Traffic Permitted" "application_attribution" "$file cleartextTrafficPermitted" "major" >> codequality.json;
