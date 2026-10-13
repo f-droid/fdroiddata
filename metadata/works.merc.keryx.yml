@@ -1,0 +1,50 @@
+AntiFeatures:
+  NonFreeNet:
+    en-US: Optional sync via Dropbox or OneDrive.
+    ja-JP: Dropbox / OneDrive による任意の同期。
+Categories:
+  - News
+  - Reading
+License: MIT
+AuthorName: shimataro
+WebSite: https://keryx.merc.works
+SourceCode: https://github.com/shimataro/keryx
+IssueTracker: https://github.com/shimataro/keryx/issues
+Changelog: https://github.com/shimataro/keryx/releases
+
+AutoName: Keryx
+
+RepoType: git
+Repo: https://github.com/shimataro/keryx.git
+Binaries: 
+  https://github.com/shimataro/keryx/releases/download/v%v/Keryx-%v-android-fdroid.apk
+
+Builds:
+  - versionName: 0.23.0
+    versionCode: 230099
+    commit: 5b8e6e3268a7c008862c622c37f5e349729d750b
+    subdir: androidApp
+    sudo:
+      - apt-get update
+      - apt-get install -y openjdk-25-jdk-headless
+      - update-java-alternatives -a
+    gradle:
+      - fdroid
+    rm:
+      - androidGms
+    prebuild:
+      - sed -i -e '/foojay/d' ../settings.gradle.kts
+      - sed -i -e '/androidGms/d' ../settings.gradle.kts build.gradle.kts
+      - echo "appVersion=$$VERSION$$" >> ../gradle.properties
+    gradleprops:
+      - dropboxAppKey=x0df310b9t8a94n
+      - oneDriveClientId=1ed27627-5a42-4f37-87f5-d0b402d6f9d4
+
+AllowedAPKSigningKeys: 536f7155021d73419135cb67dd3c7c3e316cfdc607735208dfd45d971e426d20
+
+AutoUpdateMode: Version v%v
+UpdateCheckMode: HTTP
+UpdateCheckData: 
+  https://github.com/shimataro/keryx/releases/latest/download/fdroid-version.json|"versionCode":\s*(\d+)|.|"versionName":\s*"([^"]+)"
+CurrentVersion: 0.23.0
+CurrentVersionCode: 230099
