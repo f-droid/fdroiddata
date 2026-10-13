@@ -1037,11 +1037,55 @@ Builds:
     gradleprops:
       - buildDeps=false
 
+  - versionName: 2026.13.1
+    versionCode: 20261301
+    commit: 336e7e12adb92633142924fd466cdcd4a6b8200b
+    subdir: nym-vpn-android/app
+    sudo:
+      - apt-get update
+      - apt-get install -y make gcc libc-dev rustup
+      - apt-get install -y -t trixie-backports golang-go
+    gradle:
+      - fdroid
+    binary: 
+      https://github.com/nymtech/nym-vpn-client/releases/download/nym-vpn-v%v/nym-vpn-fdroid-%v-release.apk
+    srclibs:
+      - go@go1.24.4
+    rm:
+      - nym-vpn-apple
+      - nym-vpn-app
+    prebuild:
+      - source '../../.env'
+      - '[[ $GOLANG_VERSION ]]'
+      - git -C $$go$$ checkout -f go$GOLANG_VERSION
+      - rustup default "$RUST_VERSION"
+      - rustup target add x86_64-linux-android aarch64-linux-android armv7-linux-androideabi
+      - sed -i -e '/foojay/d' ../settings.gradle.kts
+      - sdkmanager 'ndk;r28c'
+    scanignore:
+      - nym-vpn-core/crates/nym-vpn-lib/src/adblocker/builtin/*.txt.gz
+      - nym-vpn-core/crates/nym-socks5-proxy/builtin/*.txt.gz
+      - nym-vpn-core/crates/nym-socks5-proxy/builtin/*.json.gz
+      - nym-vpn-core/crates/nym-gateway-directory/builtin/*.json.gz
+    build:
+      - pushd $$go$$/src
+      - ./make.bash
+      - popd
+      - export PATH="$$go$$/bin:$PATH"
+      - cargo install cargo-ndk@4.1.2 cargo-license@0.7.0 --locked
+      - export 
+        NDK_TOOLCHAIN_DIR="/opt/android-sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/linux-x86_64/bin"
+      - export ANDROID_NDK_HOME="/opt/android-sdk/ndk/28.2.13676358"
+      - export RELEASE="true"
+      - make -C ../../nym-vpn-core -f Android.mk
+    gradleprops:
+      - buildDeps=false
+
 AllowedAPKSigningKeys: 3c98a016aa4f14a3ba185c764ed363415cf7ff3c3d328a87ffff2ff1b140ff06
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^nym-vpn-v[\d.]+$
 UpdateCheckData: nym-vpn-android/buildSrc/src/main/kotlin/Constants.kt|VERSION_CODE
   = (\d+)|.|VERSION_NAME = "(v?[\d.]+)"
-CurrentVersion: 2026.12.6
-CurrentVersionCode: 20261206
+CurrentVersion: 2026.13.1
+CurrentVersionCode: 20261301
