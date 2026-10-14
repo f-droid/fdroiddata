@@ -81,11 +81,43 @@ Builds:
       - cargo tauri android build --split-per-abi --target aarch64
     ndk: 28.0.13004108
 
+  - versionName: v0.1.100
+    versionCode: 1100
+    commit: ad44bb8ff753d2fe927ed3dd62d80274b6978013
+    sudo:
+      - apt-get update
+      - apt-get install -y nodejs npm rustup build-essential
+      - mkdir -p /home/runner/
+      - chown -R vagrant /home/runner/
+    output: 
+      src-tauri/gen/android/app/build/outputs/apk/arm64/release/app-arm64-release-unsigned.apk
+    prebuild:
+      - rm -f src-tauri/gen/android/keystore.properties
+      - RUST_TOOLCHAIN="$(sed -rn 's/rust\s+(.+)/\1/p' .build-tool-versions)"
+      - TAURICLI="$(sed -rn 's/tauricli\s+(.+)/\1/p' .build-tool-versions)"
+      - export ANDROID_NDK=$$NDK$$
+      - export NDK_HOME=$ANDROID_NDK
+      - export CARGO_HOME="/home/runner/.cargo"
+      - rustup toolchain install $RUST_TOOLCHAIN --target aarch64-linux-android
+      - rustup default $RUST_TOOLCHAIN
+      - cargo install tauri-cli@$TAURICLI --locked
+    build:
+      - export ANDROID_NDK=$$NDK$$
+      - export NDK_HOME=$ANDROID_NDK
+      - export RUSTFLAGS="--remap-path-prefix $PWD=. -C metadata=deadbeef --emit=llvm-bc"
+      - export CARGO_HOME="/home/runner/.cargo"
+      - export CARGOFLAGS="--locked"
+      - export CARGO_HOME="/home/runner/.cargo"
+      - export SOURCE_DATE_EPOCH=1700000000
+      - npm ci
+      - cargo tauri android build --split-per-abi --target aarch64
+    ndk: 28.0.13004108
+
 AllowedAPKSigningKeys: ed3f4d85af06e1fe0ab487df5a12ce9bc9df0bdc75229cb92cf5c0ecc820cfe1
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: 
   src-tauri/tauri.conf.json|"versionCode"\s*:\s*([0-9]+)|"version"\s*:\s*"([^"]+)"|
-CurrentVersion: v0.1.99
-CurrentVersionCode: 1099
+CurrentVersion: v0.1.100
+CurrentVersionCode: 1100
