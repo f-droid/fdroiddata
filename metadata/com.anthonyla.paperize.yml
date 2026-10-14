@@ -174,9 +174,26 @@ Builds:
     postbuild: $$reproducible-apk-tools$$/inplace-fix.py --page-size 16 fix-newlines
       $$OUT$$ 'res/*.json'
 
+  - versionName: 4.2.1
+    versionCode: 58
+    commit: 66766c7926e0ff95dbe42dc734050d4483c98429
+    subdir: app
+    sudo:
+      - export CPUS_MAX=6
+      - export CPUS=$(getconf _NPROCESSORS_ONLN)
+      - for (( c=$CPUS_MAX; c<$CPUS; c++ )) ; do echo 0 > /sys/devices/system/cpu/cpu$c/online
+        ; done
+    gradle:
+      - yes
+    srclibs:
+      - reproducible-apk-tools@v0.3.2
+    prebuild: sed -i -e '/foojay/d' ../settings.gradle.kts
+    postbuild: $$reproducible-apk-tools$$/inplace-fix.py --page-size 16 fix-newlines
+      $$OUT$$ 'res/*.json'
+
 AllowedAPKSigningKeys: deda8675d63793cb0cf7bc2decb6a2506b16b33040a1fcb1d30807a511e270ac
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v[\d.]+$
-CurrentVersion: 4.2.0
-CurrentVersionCode: 57
+CurrentVersion: 4.2.1
+CurrentVersionCode: 58
