@@ -1,0 +1,105 @@
+AntiFeatures:
+  NonFreeNet:
+    en-US: SnowRaven relies on network services that are not free software, namely
+      eBird for checklist details, hotspots, and recent sightings, and OpenWeather
+      for weather, each used with your own API key, plus Esri's World Imagery for
+      the optional Satellite map.
+Categories:
+  - Science & Education
+License: AGPL-3.0-only
+AuthorName: Dave Gibson
+WebSite: https://snowraven.dtgibson.com/
+SourceCode: https://github.com/dtgibson/snowraven
+IssueTracker: https://github.com/dtgibson/snowraven/issues
+Changelog: https://github.com/dtgibson/snowraven/blob/HEAD/CHANGELOG.md
+
+AutoName: SnowRaven
+
+RepoType: git
+Repo: https://github.com/dtgibson/snowraven.git
+
+Builds:
+  - versionName: 1.0.53
+    versionCode: 10000531
+    commit: c4c15a9624c299f62bf3f82af7f111750666b579
+    timeout: 10800
+    sudo:
+      - apt-get update
+      - apt-get install -y nodejs npm rustup build-essential pkg-config libssl-dev
+        cmake
+    output: 
+      src-tauri/gen/android/app/build/outputs/apk/universal/release/app-universal-release-unsigned.apk
+    prebuild:
+      - rustup toolchain install 1.96.1 --profile minimal --target aarch64-linux-android
+        --target armv7-linux-androideabi --target x86_64-linux-android
+      - rustup default 1.96.1
+      - cargo install tauri-cli --version 2.11.2 --locked
+      - npm --prefix frontend ci
+      - npm --prefix frontend run build
+      - rm -rf frontend/node_modules
+      - sed -i -e 's/--target aarch64 armv7 x86_64/--target armv7/' scripts/android/build-apk.sh
+      - sed -i -e 's/"versionCode":[^,]*/"versionCode":$$VERCODE$$/' src-tauri/tauri.conf.json
+    scandelete:
+      - src-tauri/dmg/dmg-DS_Store
+    build: sh scripts/android/build-apk.sh
+    ndk: r27c
+
+  - versionName: 1.0.53
+    versionCode: 10000532
+    commit: c4c15a9624c299f62bf3f82af7f111750666b579
+    timeout: 10800
+    sudo:
+      - apt-get update
+      - apt-get install -y nodejs npm rustup build-essential pkg-config libssl-dev
+        cmake
+    output: 
+      src-tauri/gen/android/app/build/outputs/apk/universal/release/app-universal-release-unsigned.apk
+    prebuild:
+      - rustup toolchain install 1.96.1 --profile minimal --target aarch64-linux-android
+        --target armv7-linux-androideabi --target x86_64-linux-android
+      - rustup default 1.96.1
+      - cargo install tauri-cli --version 2.11.2 --locked
+      - npm --prefix frontend ci
+      - npm --prefix frontend run build
+      - rm -rf frontend/node_modules
+      - sed -i -e 's/--target aarch64 armv7 x86_64/--target aarch64/' scripts/android/build-apk.sh
+      - sed -i -e 's/"versionCode":[^,]*/"versionCode":$$VERCODE$$/' src-tauri/tauri.conf.json
+    scandelete:
+      - src-tauri/dmg/dmg-DS_Store
+    build: sh scripts/android/build-apk.sh
+    ndk: r27c
+
+  - versionName: 1.0.53
+    versionCode: 10000534
+    commit: c4c15a9624c299f62bf3f82af7f111750666b579
+    timeout: 10800
+    sudo:
+      - apt-get update
+      - apt-get install -y nodejs npm rustup build-essential pkg-config libssl-dev
+        cmake
+    output: 
+      src-tauri/gen/android/app/build/outputs/apk/universal/release/app-universal-release-unsigned.apk
+    prebuild:
+      - rustup toolchain install 1.96.1 --profile minimal --target aarch64-linux-android
+        --target armv7-linux-androideabi --target x86_64-linux-android
+      - rustup default 1.96.1
+      - cargo install tauri-cli --version 2.11.2 --locked
+      - npm --prefix frontend ci
+      - npm --prefix frontend run build
+      - rm -rf frontend/node_modules
+      - sed -i -e 's/--target aarch64 armv7 x86_64/--target x86_64/' scripts/android/build-apk.sh
+      - sed -i -e 's/"versionCode":[^,]*/"versionCode":$$VERCODE$$/' src-tauri/tauri.conf.json
+    scandelete:
+      - src-tauri/dmg/dmg-DS_Store
+    build: sh scripts/android/build-apk.sh
+    ndk: r27c
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^v[0-9.]+$
+VercodeOperation:
+  - 10 * %c + 1
+  - 10 * %c + 2
+  - 10 * %c + 4
+UpdateCheckData: src-tauri/tauri.conf.json|"versionCode":\s*(\d+)|.|"version":\s*"([\d.]+)"
+CurrentVersion: 1.0.53
+CurrentVersionCode: 10000534
