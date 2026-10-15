@@ -1,0 +1,46 @@
+Categories:
+  - Note
+License: AGPL-3.0-or-later
+AuthorName: Clément Pera
+AuthorWebSite: https://clem.nextmiracle.eu
+SourceCode: https://github.com/ClemPera/Nooto
+IssueTracker: https://github.com/ClemPera/Nooto/issues
+
+AutoName: Nooto
+
+RepoType: git
+Repo: https://github.com/ClemPera/Nooto
+Binaries: 
+  https://github.com/ClemPera/Nooto/releases/download/client-v%v/app-arm64-release.apk
+
+Builds:
+  - versionName: 0.2.5
+    versionCode: 2005
+    commit: b6cd5299adb595891382921f4273fca8b3fcae04
+    subdir: client
+    sudo:
+      - apt-get update
+      - apt-get install -y rustup npm make build-essential wget
+      - mkdir -p /cargo
+      - chown vagrant /cargo
+    init:
+      - rustup default 1.98.0
+      - rustup target add aarch64-linux-android
+    output: src-tauri/gen/android/app/build/outputs/apk/arm64/release/*.apk
+    build:
+      - export RUSTFLAGS="--remap-path-prefix=$HOME/.cargo=/cargo --remap-path-prefix=$PWD=/build"
+      - export CARGO_HOME=/cargo
+      - export CARGO_TARGET_DIR=/tmp/build
+      - export TARGET_RANLIB="$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ranlib"
+      - npm ci
+      - npm run tauri android build -- --apk --split-per-abi --target aarch64
+    ndk: 27.0.12077973
+
+AllowedAPKSigningKeys: 46ce9259dd8eba36470faaf0dcdcd1fc958b6d3c5f84f0303645603a5b86e8b0
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^client-v[0-9.]+$
+UpdateCheckData: 
+  client/src-tauri/gen/android/app/tauri.properties|tauri\.android\.versionCode=(\d+)|.|tauri\.android\.versionName=(.+)
+CurrentVersion: 0.2.5
+CurrentVersionCode: 2005
