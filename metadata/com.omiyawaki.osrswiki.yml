@@ -1,0 +1,77 @@
+AntiFeatures:
+  NonFreeNet:
+    en-US: Loads content from oldschool.runescape.wiki (User-Agent includes the app
+      version, Android version, and device model) and related community APIs. Feedback
+      posts to https://osrswiki-feedback.omiyawaki.workers.dev/ include device model
+      and Android version. YouTube thumbnails load from i.ytimg.com. GE charts call
+      prices.runescape.wiki. Voice search uses the platform SpeechRecognizer, often
+      Google online.
+  NonFreeAssets:
+    en-US: Bundles map_floor_*.mbtiles rendered from the game cache, and the RuneScape
+      fonts runescape_plain.ttf and runescape_bold.ttf (Jagex Ltd. named as manufacturer
+      and designer).
+Categories:
+  - Internet
+  - Reading
+License: GPL-3.0-or-later
+AuthorName: Osamu Miyawaki
+AuthorEmail: contact.omiyawaki@gmail.com
+WebSite: https://oldschool.runescape.wiki/
+SourceCode: https://github.com/osrswiki/osrswiki-android
+IssueTracker: https://github.com/osrswiki/osrswiki-android/issues
+Donate: https://github.com/sponsors/omiyawaki
+
+AutoName: OSRS Wiki
+
+RepoType: git
+Repo: https://github.com/osrswiki/osrswiki-android.git
+Binaries: 
+  https://github.com/osrswiki/osrswiki-android/releases/download/v%v/app-foss-release.apk
+
+Builds:
+  - versionName: 2.1.4
+    versionCode: 72
+    commit: 9e5eae4a959aa65809809005cd4f897256eed144
+    subdir: app
+    gradle:
+      - foss
+    prebuild:
+      - mkdir -p src/main/assets
+      - curl --fail --location --retry 3 --retry-all-errors -o map_floors.zip 
+        https://github.com/osrswiki/osrswiki-tooling/releases/download/map-assets-v1-949feadd10f7/map_floors.zip
+      - echo '169281ddcd742402abca56b5535df4310654cc6212cd399bd41e7682dfaab213  map_floors.zip'
+        | sha256sum -c -
+      - unzip -o -j map_floors.zip -d src/main/assets
+      - rm -f map_floors.zip
+
+AllowedAPKSigningKeys: 27bd896eeefe8f1e831d3113ddb159c637af4f76fb9ef161caceba18d57f1f43
+
+MaintainerNotes: |-
+  Build from public osrswiki-android repo root (gradlew at root; app in
+  subdir app).
+
+  Flavor: distribution=foss (productFlavors play|foss).
+  Explicit task: ./gradlew :app:assembleFossRelease
+  F-Droid gradle: [foss] with subdir app runs assembleFossRelease.
+
+  Map mbtiles are immutable release assets (not in git). prebuild downloads
+  a single pinned map_floors.zip from osrswiki/osrswiki-tooling
+  map-assets-v1-949feadd10f7, verifies the zip sha256, and unpacks the
+  four map_floor_*.mbtiles into src/main/assets (zip pin is enough; no
+  per-member re-check).
+
+  Reproducible: Binaries from GitHub Releases (v%v/app-foss-release.apk)
+  with AllowedAPKSigningKeys.
+
+  Notes:
+    - SpeechRecognizer is optional platform API; not a proprietary dependency.
+    - No Play Billing / billingclient on fossRuntimeClasspath.
+    - Charts: Chart.js (MIT), not Highcharts.
+    - applicationId is com.omiyawaki.osrswiki (same as Play).
+    - Store listing copy + images: upstream fastlane/metadata/android/.
+    - tools sanitize the MapLibre AAR by byte-patching libmaplibre.so (undergroundmaps/sanitize_osrs_maplibre_aar.py).
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: 2.1.4
+CurrentVersionCode: 72
