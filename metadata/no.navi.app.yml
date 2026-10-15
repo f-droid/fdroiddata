@@ -1,0 +1,64 @@
+AntiFeatures:
+  TetheredNet:
+    en-US: Optional online features talk to specific hosts that are not trivial to
+      replace without changing the app or a config the user does not see. Hosts include
+      map packs from navigate-me.duckdns.org (Geofabrik-derived extracts), OpenFreeMap
+      basemap tiles, Mapterhorn elevation, DATEX traffic feeds, and amateur-radio
+      repeater bundles from the same pack server. Optional online place search (off
+      by default) queries a Nominatim-compatible geocoder. Routing and navigation
+      run offline after map data is on the device.
+Categories:
+  - Navigation
+License: GPL-3.0-or-later
+AuthorName: Navi contributors
+WebSite: https://github.com/Supermagnum/Navi
+SourceCode: https://github.com/Supermagnum/Navi
+IssueTracker: https://github.com/Supermagnum/Navi/issues
+Changelog: https://github.com/Supermagnum/Navi/releases
+Donate: https://github.com/Supermagnum/Navi#support-navi
+
+AutoName: Navi
+
+RepoType: git
+Repo: https://github.com/Supermagnum/Navi.git
+
+Builds:
+  - versionName: 0.3.25-beta
+    versionCode: 30
+    commit: f5e923580e72408b4f72edde26c8ee0e15351fde
+    timeout: 14400
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y --no-install-recommends build-essential curl ca-certificates
+        python3 pkg-config libssl-dev rustup
+    gradle:
+      - yes
+    prebuild:
+      - rustup toolchain install 1.98.0 --profile minimal
+      - rustup default 1.98.0
+      - rustup target add aarch64-linux-android x86_64-linux-android wasm32-unknown-unknown
+      - CLANG_PRE="$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin"
+      - mkdir -p ../.cargo
+      - echo '[target.x86_64-linux-android]' > ../.cargo/config.toml
+      - echo "linker = \"$CLANG_PRE/x86_64-linux-android34-clang\"" >> ../.cargo/config.toml
+      - echo 'rustflags = ["-C", "link-arg=-lc++_shared"]' >> ../.cargo/config.toml
+      - echo '[target.aarch64-linux-android]' >> ../.cargo/config.toml
+      - echo "linker = \"$CLANG_PRE/aarch64-linux-android34-clang\"" >> ../.cargo/config.toml
+      - echo 'rustflags = ["-C", "link-arg=-lc++_shared"]' >> ../.cargo/config.toml
+      - printf 'sdk.dir=%s\nndk.dir=%s\n' "$$SDK$$" "$$NDK$$" > ../local.properties
+    scanignore:
+      - core/src/long_trip/data/region_adjacency.bin
+      - core/src/routing/elevation/data/country_polys.bin
+    build:
+      - export ANDROID_NDK_HOME="$$NDK$$"
+      - export ANDROID_HOME="$$SDK$$"
+      - ../scripts/build-android-native.sh all release
+      - ../scripts/build-plugin-wasm.sh
+    ndk: r27c
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^v[0-9]+\.[0-9]+\.[0-9]+(-[A-Za-z0-9]+)?$
+UpdateCheckData: app/build.gradle.kts|versionCode\s=\s(\d+)|.|versionName\s=\s"(.*)"
+CurrentVersion: 0.3.25-beta
+CurrentVersionCode: 30
