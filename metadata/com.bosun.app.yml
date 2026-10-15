@@ -1,0 +1,54 @@
+Categories:
+  - Multimedia
+License: GPL-3.0-or-later
+AuthorName: Danilo Migliarino
+SourceCode: https://github.com/danmigdev/bosun-midi-captain
+IssueTracker: https://github.com/danmigdev/bosun-midi-captain/issues
+
+AutoName: Bosun
+
+RepoType: git
+Repo: https://github.com/danmigdev/bosun-midi-captain
+Binaries: https://github.com/danmigdev/bosun-midi-captain/releases/download/v%v/bosun.apk
+
+Builds:
+  - versionName: 0.8.4
+    versionCode: 45
+    commit: 4b4d2127662785d7259f53c105d295dfa078d74c
+    subdir: editor/src-tauri/gen/android
+    sudo:
+      - apt-get update
+      - apt-get install -y build-essential gcc-13 g++-13 nodejs npm rustup
+    output: app/build/outputs/apk/universal/release/app-universal-release-unsigned.apk
+    prebuild:
+      - cd ../../../..
+      - sed -i -e 's/"versionCode":[[:space:]]*[0-9]*/"versionCode":$$VERCODE$$/'
+        editor/src-tauri/tauri.conf.json
+    scandelete:
+      - bosun-stand
+      - editor/src-tauri/vendor/picotool/flash_id.bin
+    build:
+      - rustup set profile minimal
+      - rustup default 1.97.1
+      - rustup target add aarch64-linux-android armv7-linux-androideabi i686-linux-android
+        x86_64-linux-android
+      - export CC=gcc-13 CXX=g++-13 CARGO_TARGET_X86_64_UNKNOWN_LINUX_GNU_LINKER=gcc-13
+      - export RUSTFLAGS="--remap-path-prefix=$HOME=/build"
+      - export NDK_HOME=$$NDK$$
+      - printf '#!/bin/sh\nexec gradlew-fdroid "$@"\n' > gradlew
+      - chmod +x gradlew
+      - cd ../../../..
+      - cd editor
+      - npm ci --no-audit --no-fund
+      - npx tauri android init --ci
+      - npx tauri android build --apk --ci -- --locked
+    ndk: 29.0.14206865
+
+AllowedAPKSigningKeys: 53fd21db1e975195c7f6faf45f9c3f3a3fdcb310738762a61397be175e136e93
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^v[0-9]+\.[0-9]+\.[0-9]+$
+UpdateCheckData: 
+  editor/src-tauri/android-version-code.txt|(\d+)|editor/src-tauri/tauri.conf.json|"version":\s*"([^"]+)"
+CurrentVersion: 0.8.4
+CurrentVersionCode: 45
