@@ -548,6 +548,230 @@ Builds:
     gradleprops:
       - abiFilters=x86_64
 
+  - versionName: 1.4.0
+    versionCode: 108
+    commit: ab6898b2b2ff310bcc4e133db3492ed8bdb0ae30
+    subdir: formulus/android/app
+    sudo:
+      - echo "deb http://deb.debian.org/debian forky main" > /etc/apt/sources.list.d/forky.list
+      - apt-get update
+      - apt-get install -y -t forky npm
+      - npm install -g pnpm@11.22.0
+    init:
+      - cd ../../../packages/tokens
+      - pnpm install --frozen-lockfile
+      - pnpm run build
+      - cd ../../formulus-formplayer
+      - pnpm install --frozen-lockfile
+      - pnpm run build
+      - pnpm run copy-to-rn
+      - cd ../formulus
+      - 'echo "nodeLinker: hoisted" >> pnpm-workspace.yaml'
+      - pnpm install --frozen-lockfile
+      - pnpm run vendor:notifee
+      - pnpm run patch:android-foss
+      - pnpm run generate
+      - rm -rf ../formulus-formplayer/node_modules ../packages/tokens/node_modules
+    gradle:
+      - yes
+    prebuild:
+      - sed -i -e '/applicationVariants.all/,/^    }/d' build.gradle
+      - sed -i 's/versionCode = .*/versionCode = $$VERCODE$$/' build.gradle
+      - cd ../..
+      - sed -i '/jvmToolchain\|JavaVersion/s/17/21/' node_modules/@react-native/gradle-plugin/*/build.gradle.kts
+        node_modules/@react-native/gradle-plugin/react-native-gradle-plugin/src/main/kotlin/com/facebook/react/utils/JdkConfiguratorUtils.kt
+      - sed -i -e '/installReferrerVersion/,+12d' node_modules/react-native-device-info/android/build.gradle
+      - npx @react-native-community/cli config > android/autolinking.json
+      - sed -i '3s/FromCommand/FromConfigFile/' android/settings.gradle
+      - sed -i '3s/()/(file("autolinking.json"))/' android/settings.gradle
+    scanignore:
+      - formulus/node_modules/hermes-compiler/hermesc/linux64-bin/hermesc
+      - formulus/node_modules/@notifee/react-native/android/build.gradle
+      - formulus/node_modules/@react-native-community/geolocation/android/build.gradle
+      - formulus/node_modules/react-native-screens/android/build.gradle
+      - formulus/node_modules/react-native-webview/android/build.gradle
+      - formulus/node_modules/react-native-safe-area-context/android/build.gradle
+      - formulus/node_modules/react-native-localize/android/build.gradle
+      - formulus/node_modules/react-native-permissions/android/build.gradle
+      - formulus/node_modules/@react-native-community/blur/android/build.gradle
+      - formulus/node_modules/react-native/ReactAndroid/publish.gradle
+      - formulus/node_modules/react-native-device-info/android/build.gradle
+      - formulus/node_modules/@react-native-async-storage/async-storage/android/build.gradle
+      - formulus/node_modules/react-native-svg/android/build.gradle
+      - formulus/node_modules/react-native-image-picker/android/build.gradle
+    scandelete:
+      - formulus/node_modules
+    gradleprops:
+      - abiFilters=armeabi-v7a
+
+  - versionName: 1.4.0
+    versionCode: 109
+    commit: ab6898b2b2ff310bcc4e133db3492ed8bdb0ae30
+    subdir: formulus/android/app
+    sudo:
+      - echo "deb http://deb.debian.org/debian forky main" > /etc/apt/sources.list.d/forky.list
+      - apt-get update
+      - apt-get install -y -t forky npm
+      - npm install -g pnpm@11.22.0
+    init:
+      - cd ../../../packages/tokens
+      - pnpm install --frozen-lockfile
+      - pnpm run build
+      - cd ../../formulus-formplayer
+      - pnpm install --frozen-lockfile
+      - pnpm run build
+      - pnpm run copy-to-rn
+      - cd ../formulus
+      - 'echo "nodeLinker: hoisted" >> pnpm-workspace.yaml'
+      - pnpm install --frozen-lockfile
+      - pnpm run vendor:notifee
+      - pnpm run patch:android-foss
+      - pnpm run generate
+      - rm -rf ../formulus-formplayer/node_modules ../packages/tokens/node_modules
+    gradle:
+      - yes
+    prebuild:
+      - sed -i -e '/applicationVariants.all/,/^    }/d' build.gradle
+      - sed -i 's/versionCode = .*/versionCode = $$VERCODE$$/' build.gradle
+      - cd ../..
+      - sed -i '/jvmToolchain\|JavaVersion/s/17/21/' node_modules/@react-native/gradle-plugin/*/build.gradle.kts
+        node_modules/@react-native/gradle-plugin/react-native-gradle-plugin/src/main/kotlin/com/facebook/react/utils/JdkConfiguratorUtils.kt
+      - sed -i -e '/installReferrerVersion/,+12d' node_modules/react-native-device-info/android/build.gradle
+      - npx @react-native-community/cli config > android/autolinking.json
+      - sed -i '3s/FromCommand/FromConfigFile/' android/settings.gradle
+      - sed -i '3s/()/(file("autolinking.json"))/' android/settings.gradle
+    scanignore:
+      - formulus/node_modules/hermes-compiler/hermesc/linux64-bin/hermesc
+      - formulus/node_modules/@notifee/react-native/android/build.gradle
+      - formulus/node_modules/@react-native-community/geolocation/android/build.gradle
+      - formulus/node_modules/react-native-screens/android/build.gradle
+      - formulus/node_modules/react-native-webview/android/build.gradle
+      - formulus/node_modules/react-native-safe-area-context/android/build.gradle
+      - formulus/node_modules/react-native-localize/android/build.gradle
+      - formulus/node_modules/react-native-permissions/android/build.gradle
+      - formulus/node_modules/@react-native-community/blur/android/build.gradle
+      - formulus/node_modules/react-native/ReactAndroid/publish.gradle
+      - formulus/node_modules/react-native-device-info/android/build.gradle
+      - formulus/node_modules/@react-native-async-storage/async-storage/android/build.gradle
+      - formulus/node_modules/react-native-svg/android/build.gradle
+      - formulus/node_modules/react-native-image-picker/android/build.gradle
+    scandelete:
+      - formulus/node_modules
+    gradleprops:
+      - abiFilters=arm64-v8a
+
+  - versionName: 1.4.0
+    versionCode: 110
+    commit: ab6898b2b2ff310bcc4e133db3492ed8bdb0ae30
+    subdir: formulus/android/app
+    sudo:
+      - echo "deb http://deb.debian.org/debian forky main" > /etc/apt/sources.list.d/forky.list
+      - apt-get update
+      - apt-get install -y -t forky npm
+      - npm install -g pnpm@11.22.0
+    init:
+      - cd ../../../packages/tokens
+      - pnpm install --frozen-lockfile
+      - pnpm run build
+      - cd ../../formulus-formplayer
+      - pnpm install --frozen-lockfile
+      - pnpm run build
+      - pnpm run copy-to-rn
+      - cd ../formulus
+      - 'echo "nodeLinker: hoisted" >> pnpm-workspace.yaml'
+      - pnpm install --frozen-lockfile
+      - pnpm run vendor:notifee
+      - pnpm run patch:android-foss
+      - pnpm run generate
+      - rm -rf ../formulus-formplayer/node_modules ../packages/tokens/node_modules
+    gradle:
+      - yes
+    prebuild:
+      - sed -i -e '/applicationVariants.all/,/^    }/d' build.gradle
+      - sed -i 's/versionCode = .*/versionCode = $$VERCODE$$/' build.gradle
+      - cd ../..
+      - sed -i '/jvmToolchain\|JavaVersion/s/17/21/' node_modules/@react-native/gradle-plugin/*/build.gradle.kts
+        node_modules/@react-native/gradle-plugin/react-native-gradle-plugin/src/main/kotlin/com/facebook/react/utils/JdkConfiguratorUtils.kt
+      - sed -i -e '/installReferrerVersion/,+12d' node_modules/react-native-device-info/android/build.gradle
+      - npx @react-native-community/cli config > android/autolinking.json
+      - sed -i '3s/FromCommand/FromConfigFile/' android/settings.gradle
+      - sed -i '3s/()/(file("autolinking.json"))/' android/settings.gradle
+    scanignore:
+      - formulus/node_modules/hermes-compiler/hermesc/linux64-bin/hermesc
+      - formulus/node_modules/@notifee/react-native/android/build.gradle
+      - formulus/node_modules/@react-native-community/geolocation/android/build.gradle
+      - formulus/node_modules/react-native-screens/android/build.gradle
+      - formulus/node_modules/react-native-webview/android/build.gradle
+      - formulus/node_modules/react-native-safe-area-context/android/build.gradle
+      - formulus/node_modules/react-native-localize/android/build.gradle
+      - formulus/node_modules/react-native-permissions/android/build.gradle
+      - formulus/node_modules/@react-native-community/blur/android/build.gradle
+      - formulus/node_modules/react-native/ReactAndroid/publish.gradle
+      - formulus/node_modules/react-native-device-info/android/build.gradle
+      - formulus/node_modules/@react-native-async-storage/async-storage/android/build.gradle
+      - formulus/node_modules/react-native-svg/android/build.gradle
+      - formulus/node_modules/react-native-image-picker/android/build.gradle
+    scandelete:
+      - formulus/node_modules
+    gradleprops:
+      - abiFilters=x86
+
+  - versionName: 1.4.0
+    versionCode: 111
+    commit: ab6898b2b2ff310bcc4e133db3492ed8bdb0ae30
+    subdir: formulus/android/app
+    sudo:
+      - echo "deb http://deb.debian.org/debian forky main" > /etc/apt/sources.list.d/forky.list
+      - apt-get update
+      - apt-get install -y -t forky npm
+      - npm install -g pnpm@11.22.0
+    init:
+      - cd ../../../packages/tokens
+      - pnpm install --frozen-lockfile
+      - pnpm run build
+      - cd ../../formulus-formplayer
+      - pnpm install --frozen-lockfile
+      - pnpm run build
+      - pnpm run copy-to-rn
+      - cd ../formulus
+      - 'echo "nodeLinker: hoisted" >> pnpm-workspace.yaml'
+      - pnpm install --frozen-lockfile
+      - pnpm run vendor:notifee
+      - pnpm run patch:android-foss
+      - pnpm run generate
+      - rm -rf ../formulus-formplayer/node_modules ../packages/tokens/node_modules
+    gradle:
+      - yes
+    prebuild:
+      - sed -i -e '/applicationVariants.all/,/^    }/d' build.gradle
+      - sed -i 's/versionCode = .*/versionCode = $$VERCODE$$/' build.gradle
+      - cd ../..
+      - sed -i '/jvmToolchain\|JavaVersion/s/17/21/' node_modules/@react-native/gradle-plugin/*/build.gradle.kts
+        node_modules/@react-native/gradle-plugin/react-native-gradle-plugin/src/main/kotlin/com/facebook/react/utils/JdkConfiguratorUtils.kt
+      - sed -i -e '/installReferrerVersion/,+12d' node_modules/react-native-device-info/android/build.gradle
+      - npx @react-native-community/cli config > android/autolinking.json
+      - sed -i '3s/FromCommand/FromConfigFile/' android/settings.gradle
+      - sed -i '3s/()/(file("autolinking.json"))/' android/settings.gradle
+    scanignore:
+      - formulus/node_modules/hermes-compiler/hermesc/linux64-bin/hermesc
+      - formulus/node_modules/@notifee/react-native/android/build.gradle
+      - formulus/node_modules/@react-native-community/geolocation/android/build.gradle
+      - formulus/node_modules/react-native-screens/android/build.gradle
+      - formulus/node_modules/react-native-webview/android/build.gradle
+      - formulus/node_modules/react-native-safe-area-context/android/build.gradle
+      - formulus/node_modules/react-native-localize/android/build.gradle
+      - formulus/node_modules/react-native-permissions/android/build.gradle
+      - formulus/node_modules/@react-native-community/blur/android/build.gradle
+      - formulus/node_modules/react-native/ReactAndroid/publish.gradle
+      - formulus/node_modules/react-native-device-info/android/build.gradle
+      - formulus/node_modules/@react-native-async-storage/async-storage/android/build.gradle
+      - formulus/node_modules/react-native-svg/android/build.gradle
+      - formulus/node_modules/react-native-image-picker/android/build.gradle
+    scandelete:
+      - formulus/node_modules
+    gradleprops:
+      - abiFilters=x86_64
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags v[\d.]+$
 VercodeOperation:
@@ -555,5 +779,5 @@ VercodeOperation:
   - '%c + 1'
   - '%c + 2'
   - '%c + 3'
-CurrentVersion: 1.3.0
-CurrentVersionCode: 38
+CurrentVersion: 1.4.0
+CurrentVersionCode: 111
