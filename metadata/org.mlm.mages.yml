@@ -8292,37 +8292,6 @@ Builds:
       - includeUniversalApk=false
       - targetAbi=armeabi-v7a
 
-  - versionName: 5.1.3
-    versionCode: 1581
-    commit: 343887642c229c2195ba33d49fa5093037990944
-    subdir: androidApp
-    sudo:
-      - mkdir -p /home/runner
-      - chown vagrant /home/runner
-      - apt-get update
-      - apt-get install -y gcc libc-dev rustup
-    gradle:
-      - yes
-    binary: https://github.com/mlm-games/mages/releases/download/%v/mages-%v-arm64-v8a.apk
-    prebuild:
-      - sed -i -e 's|workingDir|environment("CARGO_HOME","/home/runner/.cargo");workingDir|'
-        ../shared/build.gradle.kts
-      - echo 'rustUniffi { cargoHome.set("/home/runner/.cargo") }' >> ../shared/build.gradle.kts
-      - sed -i -e '/foojay/d' ../settings.gradle.kts
-    build:
-      - export CARGO_HOME=/home/runner/.cargo
-      - export RUST_VERSION=$(sed -n -E 's/channel = "(.*)"/\1/p' ../rust-toolchain.toml)
-      - rustup default $RUST_VERSION
-      - rustup target add aarch64-linux-android
-      - export CARGO_NDK_VERSION=$(sed -E -n 's/.*CARGO_NDK_VERSION.*"(.*)".*/\1/p'
-        ../.github/workflows/release-android.yml)
-      - cargo install cargo-ndk@$CARGO_NDK_VERSION --locked
-    ndk: r29
-    gradleprops:
-      - enableApkSplits=true
-      - includeUniversalApk=false
-      - targetAbi=arm64-v8a
-
   - versionName: 5.1.4
     versionCode: 1588
     commit: 2db7d5a71fe911c25bb7f89a3bd05bf395c8e663
