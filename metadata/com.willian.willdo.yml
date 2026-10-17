@@ -1,0 +1,107 @@
+Categories:
+  - Task
+License: GPL-3.0-or-later
+AuthorName: Willian Ferreira
+AuthorEmail: adm@whats.men
+WebSite: https://github.com/willf444/faz-agora
+SourceCode: https://github.com/willf444/faz-agora
+IssueTracker: https://github.com/willf444/faz-agora/issues
+Donate: https://faz.whats.men/apoie
+
+AutoName: Faz agora!
+
+RepoType: git
+Repo: https://github.com/willf444/faz-agora.git
+Binaries: https://github.com/willf444/faz-agora/releases/download/v%v/faz-agora-v%v-%c.apk
+
+Builds:
+  - versionName: 2.3.14
+    versionCode: 341
+    commit: c3a35ec8c4b55d34fe73da4fb5c1590bb424f521
+    subdir: android/app
+    sudo:
+      - echo "deb https://deb.debian.org/debian bookworm main" > /etc/apt/sources.list.d/bookworm.list
+      - apt-get update
+      - apt-get install -y -t bookworm openjdk-17-jdk-headless
+      - update-java-alternatives -s java-1.17.0-openjdk-amd64
+      - apt-get install -y npm
+    init:
+      - cd ../..
+      - npm ci
+    gradle:
+      - yes
+    srclibs:
+      - firebase-stub@ce90a956aacda17a85c60577ee443aeb83d876ef
+    prebuild:
+      - cd ../..
+      - bash scripts/prepare-fdroid-node-modules.sh $$firebase-stub$$
+      - sed -i -e 's/versionCode .*/versionCode $$VERCODE$$/' -e "/defaultConfig {/a
+        ndk { abiFilters 'armeabi-v7a' }" android/app/build.gradle
+      - sed -i -E 's/^reactNativeArchitectures=.*/reactNativeArchitectures=armeabi-v7a/'
+        android/gradle.properties
+    scanignore:
+      - node_modules/@react-native-async-storage/async-storage/android/build.gradle
+      - node_modules/react-native-get-random-values/android/build.gradle
+      - node_modules/react-native-safe-area-context/android/build.gradle
+      - node_modules/react-native-screens/android/build.gradle
+      - node_modules/react-native-webview/android/build.gradle
+      - node_modules/react-native/sdks/hermesc/linux64-bin/hermesc
+      - android/build.gradle
+      - node_modules/expo-modules-core/android/ExpoModulesCorePlugin.gradle
+      - node_modules/expo-modules-autolinking/scripts/android/autolinking_implementation.gradle
+    scandelete:
+      - node_modules/
+    gradleprops:
+      - android.enableProguardInReleaseBuilds=true
+
+  - versionName: 2.3.14
+    versionCode: 342
+    commit: c3a35ec8c4b55d34fe73da4fb5c1590bb424f521
+    subdir: android/app
+    sudo:
+      - echo "deb https://deb.debian.org/debian bookworm main" > /etc/apt/sources.list.d/bookworm.list
+      - apt-get update
+      - apt-get install -y -t bookworm openjdk-17-jdk-headless
+      - update-java-alternatives -s java-1.17.0-openjdk-amd64
+      - apt-get install -y npm
+    init:
+      - cd ../..
+      - npm ci
+    gradle:
+      - yes
+    srclibs:
+      - firebase-stub@ce90a956aacda17a85c60577ee443aeb83d876ef
+    prebuild:
+      - cd ../..
+      - bash scripts/prepare-fdroid-node-modules.sh $$firebase-stub$$
+      - sed -i -e 's/versionCode .*/versionCode $$VERCODE$$/' -e "/defaultConfig {/a
+        ndk { abiFilters 'arm64-v8a' }" android/app/build.gradle
+      - sed -i -E 's/^reactNativeArchitectures=.*/reactNativeArchitectures=arm64-v8a/'
+        android/gradle.properties
+    scanignore:
+      - node_modules/@react-native-async-storage/async-storage/android/build.gradle
+      - node_modules/react-native-get-random-values/android/build.gradle
+      - node_modules/react-native-safe-area-context/android/build.gradle
+      - node_modules/react-native-screens/android/build.gradle
+      - node_modules/react-native-webview/android/build.gradle
+      - node_modules/react-native/sdks/hermesc/linux64-bin/hermesc
+      - android/build.gradle
+      - node_modules/expo-modules-core/android/ExpoModulesCorePlugin.gradle
+      - node_modules/expo-modules-autolinking/scripts/android/autolinking_implementation.gradle
+    scandelete:
+      - node_modules/
+    gradleprops:
+      - android.enableProguardInReleaseBuilds=true
+
+AllowedAPKSigningKeys: 989a3fab64a0bece165e2397a30197299b10f1cdecbf60f1f338284b3a16dc4c
+
+MaintainerNotes: Binary scanner detects `com/google/firebase` classes from the libre
+  firebase-stub srclib used by expo-notifications.
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+VercodeOperation:
+  - 10 * %c + 1
+  - 10 * %c + 2
+CurrentVersion: 2.3.14
+CurrentVersionCode: 342
