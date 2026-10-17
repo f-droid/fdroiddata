@@ -1,0 +1,91 @@
+Categories:
+  - Wallpaper
+License: GPL-3.0-or-later
+AuthorName: Studio Coldstream
+SourceCode: https://codeberg.org/mathewmolt/ArtificialKoi
+IssueTracker: https://codeberg.org/mathewmolt/ArtificialKoi/issues
+Donate: https://buymeacoffee.com/coldstream
+
+AutoName: Artificial Koi
+
+RepoType: git
+Repo: https://codeberg.org/mathewmolt/ArtificialKoi.git
+
+Builds:
+  - versionName: 1.2.0
+    versionCode: 61
+    commit: 8834094e2357e5482e1495b80516f12360ff72dc
+    output: build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
+    binary: 
+      https://codeberg.org/mathewmolt/ArtificialKoi/releases/download/v%v/ArtificialKoi-%v-armeabi-v7a.apk
+    srclibs:
+      - flutter@stable
+    prebuild:
+      - export version=$(sed -nE 's/^  flutter:\s*([0-9.]+)$/\1/p' pubspec.yaml)
+      - git -C $$flutter$$ checkout -f $version
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - sed -i -e 's/-Wl,/-Wl,--build-id=none,/' $PUB_CACHE/hosted/*/jni-*/src/CMakeLists.txt
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform=android-arm
+    ndk: 28.2.13676358
+
+  - versionName: 1.2.0
+    versionCode: 62
+    commit: 8834094e2357e5482e1495b80516f12360ff72dc
+    output: build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+    binary: 
+      https://codeberg.org/mathewmolt/ArtificialKoi/releases/download/v%v/ArtificialKoi-%v-arm64-v8a.apk
+    srclibs:
+      - flutter@stable
+    prebuild:
+      - export version=$(sed -nE 's/^  flutter:\s*([0-9.]+)$/\1/p' pubspec.yaml)
+      - git -C $$flutter$$ checkout -f $version
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - sed -i -e 's/-Wl,/-Wl,--build-id=none,/' $PUB_CACHE/hosted/*/jni-*/src/CMakeLists.txt
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform=android-arm64
+    ndk: 28.2.13676358
+
+  - versionName: 1.2.0
+    versionCode: 63
+    commit: 8834094e2357e5482e1495b80516f12360ff72dc
+    output: build/app/outputs/flutter-apk/app-x86_64-release.apk
+    binary: 
+      https://codeberg.org/mathewmolt/ArtificialKoi/releases/download/v%v/ArtificialKoi-%v-x86_64.apk
+    srclibs:
+      - flutter@stable
+    prebuild:
+      - export version=$(sed -nE 's/^  flutter:\s*([0-9.]+)$/\1/p' pubspec.yaml)
+      - git -C $$flutter$$ checkout -f $version
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - sed -i -e 's/-Wl,/-Wl,--build-id=none,/' $PUB_CACHE/hosted/*/jni-*/src/CMakeLists.txt
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform=android-x64
+    ndk: 28.2.13676358
+
+AllowedAPKSigningKeys: 71457797202647610247ccdef74f89adf6f8e63a713641ea5cccd63d2273b474
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^v[\d.]+$
+VercodeOperation:
+  - 10 * %c + 1
+  - 10 * %c + 2
+  - 10 * %c + 3
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 1.2.0
+CurrentVersionCode: 63
