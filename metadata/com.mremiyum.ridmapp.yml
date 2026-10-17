@@ -1,0 +1,57 @@
+AntiFeatures:
+  NonFreeNet:
+    en-US: Downloads from YouTube/Instagram etc. via yt-dlp; opt-in yt-dlp updates
+      from GitHub.
+Categories:
+  - Download
+License: MIT
+AuthorName: mremiyum
+SourceCode: https://github.com/mremiyum/ridm-app
+IssueTracker: https://github.com/mremiyum/ridm-app/issues
+Bitcoin: bc1qa5v5vlppp5nn9kdtt2wz4x9pfuupm92hjpd6eu
+Litecoin: Lf4HincsmEvEJ1cxwJkomXLN72JH7etWRY
+
+AutoName: Ridm
+
+RepoType: git
+Repo: https://github.com/mremiyum/ridm-app
+
+Builds:
+  - versionName: 1.1.2
+    versionCode: 12
+    commit: 01215d738bad925b551ebf6f1d425dcdb0ef61b3
+    subdir: android/app
+    sudo:
+      - apt-get update
+      - apt-get install -y npm
+    init:
+      - cd ../..
+      - npm install
+    gradle:
+      - yes
+    output: build/outputs/apk/release/app-arm64-v8a-release-unsigned.apk
+    prebuild:
+      - cd ../..
+      - sed -i -e '1a "expo":{"autolinking":{"android":{"buildFromSource":[".*"]}}},'
+        package.json
+      - sed -i '/"expo-dev-client"/d' package.json
+      - rm -rf node_modules/expo-dev-client
+      - rm -rf node_modules/expo-dev-launcher
+      - rm -rf node_modules/expo-dev-menu
+      - rm -rf node_modules/expo-dev-menu-interface
+      - sed -i '/jvmToolchain\|JavaVersion/s/17/21/' node_modules/@react-native/gradle-plugin/*/build.gradle.kts
+        node_modules/@react-native/gradle-plugin/react-native-gradle-plugin/src/main/kotlin/com/facebook/react/utils/JdkConfiguratorUtils.kt
+      - sed -i -e '/signingConfig /d' android/app/build.gradle
+      - sed -i 's/MaxMetaspaceSize=512m/MaxMetaspaceSize=2048m/' android/gradle.properties
+    scanignore:
+      - node_modules/react-native/sdks/hermesc/linux64-bin/hermesc
+      - node_modules/expo-modules-core/android/ExpoModulesCorePlugin.gradle
+      - node_modules/expo-modules-autolinking/scripts/android/autolinking_implementation.gradle
+      - node_modules/react-native-svg/android/build.gradle
+    scandelete:
+      - node_modules
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: 1.1.2
+CurrentVersionCode: 12
