@@ -1,0 +1,56 @@
+Categories:
+  - Finance Manager
+License: AGPL-3.0-only
+AuthorName: DowarDev
+AuthorEmail: gonzalo@dowar.xyz
+WebSite: https://onespend.dowar.xyz
+SourceCode: https://gitlab.com/dowardev/onespend
+IssueTracker: https://gitlab.com/dowardev/onespend/-/issues
+
+AutoName: OneSpend
+Description: |-
+  OneSpend is an offline-first personal finance manager. (i) Sync is opt-in: the app never connects to a hardcoded server - the user picks the backend URL in Ajustes -> Conexiones (the bundled default is the author's public server, only used if the user enables sync, and overridable in-app without a rebuild). (ii) UI is wrapped for es + en; the language selector is in the side menu.
+
+  **Default servers** — the build ships with these defaults, which you can override in `Settings → Connections` after install:
+
+  * Sync server: `https://onespend-back.dowar.xyz`
+  * SSO server: `https://auth.dowar.xyz/api` (login panel: `https://auth-panel.dowar.xyz`)
+
+  The author maintains these as a public service for anyone who does not want to self-host. To use a self-hosted sync server and/or SSO, change the URLs in the Connections screen (no rebuild needed). The SSO source is public at `https://gitlab.com/dowardev/sso`.
+
+RepoType: git
+Repo: https://gitlab.com/dowardev/onespend.git
+Binaries: https://gitlab.com/dowardev/onespend/-/releases/v%v/downloads/onespend-%v.apk
+
+Builds:
+  - versionName: 0.79.0
+    versionCode: 7900
+    commit: f43930894c0bac0ac303843d78f41d28c3014af5
+    subdir: front/android/app
+    sudo:
+      - echo "deb https://deb.debian.org/debian forky main" > /etc/apt/sources.list.d/forky.list
+      - apt-get update
+      - apt-get install -y -t forky npm
+      - npm install --global pnpm@latest-10
+    init:
+      - cd ../..
+      - export VITE_APP_NAME=OneSpend
+      - export VITE_API_URL=https://onespend-back.dowar.xyz
+      - export VITE_SSO_URL=https://auth.dowar.xyz/api
+      - export VITE_SSO_FRONTEND_URL=https://auth-panel.dowar.xyz
+      - export SSO_CLIENT_ID_NATIVE=onespend-android
+      - pnpm install --frozen-lockfile
+      - pnpm run build:native
+      - npx cap sync android
+    gradle:
+      - yes
+    scandelete:
+      - front/node_modules
+
+AllowedAPKSigningKeys: c6d2961a958ea23a36925ea818e0605b28c9f8e60f84f0432c7e68ee595fccce
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^v[\d.]+$
+UpdateCheckData: front/package.json|"versionCode":\s*(\d+)|.|"version":\s*"([\d.]+)"
+CurrentVersion: 0.79.0
+CurrentVersionCode: 7900
