@@ -698,8 +698,59 @@ Builds:
       - sed -i -e '/signingConfig /d' build.gradle
       - gradle assembleRelease
 
+  - versionName: 4.0.5
+    versionCode: 414
+    commit: 0eca3f2ec9ae17f98bda224467878c1c9d93c30e
+    sudo:
+      - echo "deb https://deb.debian.org/debian forky main" > /etc/apt/sources.list.d/forky.list
+      - apt-get update
+      - apt-get install -y -t forky npm
+    init: npm ci
+    output: android/app/build/outputs/apk/release/app-release-unsigned.apk
+    rm:
+      - components/storeReview/storeRating.tsx
+      - node_modules/expo-maps
+      - node_modules/expo-store-review
+    prebuild:
+      - npm pkg delete dependencies.expo-maps dependencies.expo-store-review
+      - npm pkg set --json 'expo.autolinking.android.buildFromSource=[".*"]'
+      - node -e 'const fs = require("node:fs"); const app = require("./app.json");
+        app.expo.plugins = app.expo.plugins.filter(p => [p].flat()[0] !== "expo-maps");
+        fs.writeFileSync("app.json", JSON.stringify(app));'
+      - sed -i -e '/Rating/d' screens/settings.tsx
+      - printf 'export { WebOperatorMap as NativeOperatorMap } from "./webOperatorMap";\n'
+        > components/map/nativeOperatorMap.android.tsx
+      - sed -i -e 's/com.google.android.gms/org.microg.gms/' -e 's/:21.0.1/:0.3.14.250932/'
+        node_modules/expo-location/android/build.gradle
+      - sed -i '/jvmToolchain\|JavaVersion\|jvmTarget/s/17/21/' node_modules/@react-native/gradle-plugin/*/build.gradle.kts
+        node_modules/@react-native/gradle-plugin/react-native-gradle-plugin/src/main/kotlin/com/facebook/react/utils/JdkConfiguratorUtils.kt
+        node_modules/react-native-{worklets,reanimated}/android/build.gradle.kts
+      - npx expo prebuild --clean --platform android --no-install
+      - sed -i -e '/signingConfig /d' android/app/build.gradle
+    scanignore:
+      - node_modules/hermes-compiler/hermesc/linux64-bin/hermesc
+      - node_modules/expo-modules-core/android/ExpoModulesCorePlugin.gradle
+      - node_modules/lottie-react-native/android/build.gradle
+      - node_modules/@react-native-async-storage/async-storage/android/build.gradle
+      - node_modules/@react-native-picker/picker/android/build.gradle
+      - node_modules/react-native-edge-to-edge/android/build.gradle
+      - node_modules/react-native-safe-area-context/android/build.gradle
+      - node_modules/react-native-screens/android/build.gradle
+      - node_modules/react-native-svg/android/build.gradle
+      - node_modules/react-native-webview/android/build.gradle
+    scandelete:
+      - node_modules
+    build:
+      - cd android
+      - gradle assembleRelease
+
+MaintainerNotes: The binary scanner detects 'com/google/android/gms/...' classes
+  from 'org.microg.gms:play-services-location', the free microG reimplementation
+  of Play services, which reuses the original package names. No proprietary code
+  is bundled.
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: app.json|"versionCode":\s(\d+),|.|"version":\s"(.*)",
-CurrentVersion: 3.5.5
-CurrentVersionCode: 365
+CurrentVersion: 4.0.5
+CurrentVersionCode: 414
