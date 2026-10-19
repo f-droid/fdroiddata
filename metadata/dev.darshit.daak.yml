@@ -1,0 +1,89 @@
+Categories:
+  - File Transfer
+License: Apache-2.0
+AuthorName: Darshit Patel
+WebSite: https://github.com/darshitpp/daak
+SourceCode: https://github.com/darshitpp/daak
+IssueTracker: https://github.com/darshitpp/daak/issues
+
+AutoName: Daak
+
+RepoType: git
+Repo: https://github.com/darshitpp/daak.git
+
+Builds:
+  - versionName: 0.1.4
+    versionCode: 51
+    commit: 53c49398bcc060fbcf75cc9dd7133ac8fd5bba0a
+    subdir: apps/mobile/android
+    sudo:
+      - apt-get update
+      - apt-get install -y rustup nodejs npm build-essential
+      - npm install -g pnpm@9.12.0
+    init:
+      - rustup default 1.98.1
+      - rustup target add aarch64-linux-android armv7-linux-androideabi
+    gradle:
+      - yes
+    output: app/build/outputs/apk/release/daak-*-armeabi-v7a.apk
+    binary: https://github.com/darshitpp/daak/releases/download/v%v/daak-%v-armeabi-v7a.apk
+    prebuild:
+      - cd ../../..
+      - sed -i -e 's/^reactNativeArchitectures=.*/reactNativeArchitectures=armeabi-v7a/'
+        apps/mobile/android/gradle.properties
+      - pnpm install --frozen-lockfile
+      - cd apps/mobile/node_modules/@react-native/gradle-plugin
+      - find . -name '*.kt*' -exec sed -i 's/(17)/(21)/;s/_17/_21/' {} +
+      - cd -
+      - cargo fetch --locked
+    scanignore:
+      - node_modules/.pnpm/hermes-compiler@*/node_modules/hermes-compiler/hermesc/linux64-bin/hermesc
+    scandelete:
+      - node_modules
+    build:
+      - cd ../../..
+      - DAAK_CARGO_OFFLINE=0 bash apps/mobile/scripts/gen-android-ffi.sh
+    ndk: 27.1.12297006
+
+  - versionName: 0.1.4
+    versionCode: 52
+    commit: 53c49398bcc060fbcf75cc9dd7133ac8fd5bba0a
+    subdir: apps/mobile/android
+    sudo:
+      - apt-get update
+      - apt-get install -y rustup nodejs npm build-essential
+      - npm install -g pnpm@9.12.0
+    init:
+      - rustup default 1.98.1
+      - rustup target add aarch64-linux-android armv7-linux-androideabi
+    gradle:
+      - yes
+    output: app/build/outputs/apk/release/daak-*-arm64-v8a.apk
+    binary: https://github.com/darshitpp/daak/releases/download/v%v/daak-%v-arm64-v8a.apk
+    prebuild:
+      - cd ../../..
+      - sed -i -e 's/^reactNativeArchitectures=.*/reactNativeArchitectures=arm64-v8a/'
+        apps/mobile/android/gradle.properties
+      - pnpm install --frozen-lockfile
+      - cd apps/mobile/node_modules/@react-native/gradle-plugin
+      - find . -name '*.kt*' -exec sed -i 's/(17)/(21)/;s/_17/_21/' {} +
+      - cd -
+      - cargo fetch --locked
+    scanignore:
+      - node_modules/.pnpm/hermes-compiler@*/node_modules/hermes-compiler/hermesc/linux64-bin/hermesc
+    scandelete:
+      - node_modules
+    build:
+      - cd ../../..
+      - DAAK_CARGO_OFFLINE=0 bash apps/mobile/scripts/gen-android-ffi.sh
+    ndk: 27.1.12297006
+
+AllowedAPKSigningKeys: 0d825cdc0069c9176bc9232f4be5a5266d51888f54c8fc2ff123c5b41f8f9df5
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^v[0-9.]+$
+VercodeOperation:
+  - '%c * 10 + 1'
+  - '%c * 10 + 2'
+CurrentVersion: 0.1.4
+CurrentVersionCode: 52
