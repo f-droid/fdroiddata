@@ -1,5 +1,5 @@
 Categories:
-  - Platformer Game
+  - Action Game
 License: GPL-3.0-or-later
 AuthorName: Haxya One
 AuthorWebSite: https://hexyea.itch.io/
@@ -40,8 +40,45 @@ Builds:
         'Android' bin/jSlide2.apk
     ndk: r28b
 
+  - versionName: 101.0.11_fdr
+    versionCode: 1001111
+    commit: 8939ca53d41eccd48d2021e5a73e6324d2443774
+    sudo:
+      - apt-get update
+      - apt-get install -y python3-invoke build-essential scons clang pkg-config libx11-dev
+        libxcursor-dev libxinerama-dev libgl1-mesa-dev libglu-dev libasound2-dev libpulse-dev
+        libudev-dev libxi-dev libxrandr-dev wget apt-transport-https gpg
+      - mkdir -p /opt/android-sdk/cmdline-tools/latest/bin/
+      - ln /opt/android-sdk/tools/bin/sdkmanager /opt/android-sdk/cmdline-tools/latest/bin/sdkmanager
+    output: bin/jSlide2.apk
+    srclibs:
+      - Godot@4.6.3-stable
+    prebuild:
+      - mkdir -p bin
+      - mkdir -p android
+      - sed -i -e '/custom_template\/release/s|""|"$$Godot$$/bin/android_release.apk"|'
+        export_presets.cfg
+    build:
+      - export ANDROID_SDK_ROOT=$$SDK$$
+      - export ANDROID_NDK_ROOT=$$NDK$$
+      - export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+      - pushd $$Godot$$
+      - sed -i '/install_ndk_if_needed(env)/d' platform/android/detect.py
+      - sed -i 's/ndk_root = env\[\"ANDROID_NDK_ROOT\"\]/ndk_root =\"\/opt\/android-sdk\/ndk\/28.1.13356709\"/'
+        platform/android/detect.py
+      - sed -i 's/{env\['\''ANDROID_NDK_ROOT'\''\]}/\/opt\/android-sdk\/ndk\/28.1.13356709/'
+        platform/android/SCsub
+      - scons -j `nproc` platform=android target=template_release arch=arm64 use_llvm=yes
+      - scons -j `nproc` platform=linuxbsd target=editor use_llvm=yes
+      - cd platform/android/java
+      - gradle generateGodotTemplates
+      - popd
+      - $$Godot$$/bin/godot.linuxbsd.editor.x86_64.llvm --headless --export-release
+        'Android' bin/jSlide2.apk
+    ndk: r28b
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: export_presets.cfg|version/code=(\d+)|.|version/name="(.+)"
-CurrentVersion: 101.0.1
-CurrentVersionCode: 1001110
+CurrentVersion: '1011.11'
+CurrentVersionCode: 1001111
