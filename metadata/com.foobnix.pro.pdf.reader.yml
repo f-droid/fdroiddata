@@ -2152,6 +2152,47 @@ Builds:
       - ./link_to_mupdf_1.28.5.sh
     ndk: r29
 
+  - versionName: 10.0.0-fdroid
+    versionCode: 7447
+    commit: a9bf6e6e4e19d955c407af803be9535155218173
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y g++ libglu1-mesa-dev libxcursor-dev libxi-dev libxinerama-dev
+        libxrandr-dev make mesa-common-dev pkg-config xxd
+    gradle:
+      - fdroid
+    srclibs:
+      - MuPDF@1.28.5
+    rm:
+      - Builder/src/libs
+      - libDepFree
+      - libDepPro
+    prebuild:
+      - export MUPDF_VERSION=1.28.5
+      - echo "librera_ndk_dir=$$NDK$$" >> $HOME/.gradle/gradle.properties
+      - sed -i -e '/libDepFree/d' -e '/libDepPro/d' -e '/foojay/d' ../settings.gradle.kts
+      - sed -i -e '/enable = true/d' -e '/_appGdriveKey/d' -e '/_admob/d' -e '/googleServices/d'
+        -e '/dep_/d' build.gradle
+      - mkdir src/main/jniLibs
+      - cd ../Builder
+      - sed -i -e '1a set -e' -e '/git clone/d' -e 's/mkdir/mkdir -p/g' -e 's|"$PATH1/$NDK_VERSION/ndk-build"|"$$NDK$$/ndk-build"|'
+        -e 's/$NDK /$NDK -j$(nproc) /' link_to_mupdf_$MUPDF_VERSION.sh
+      - cp -r $$MuPDF$$ mupdf-$MUPDF_VERSION
+      - rm -rf 
+        mupdf-$MUPDF_VERSION/thirdparty/{harfbuzz/test,curl/tests,leptonica/prog/fuzzing}
+    scanignore:
+      - Builder/fonts/fonts.zip
+      - Builder/mupdf-*/resources/hyphen/hyph-*.zip
+    scandelete:
+      - Builder/mupdf-*/platform/wasm/package.json
+      - Builder/mupdf-*/thirdparty
+      - docs
+    build:
+      - pushd ../Builder/
+      - ./link_to_mupdf_1.28.5.sh
+    ndk: r29
+
 MaintainerNotes: |-
   * Upstream builds separate APKs for each architecture but we build an universal APK.
   * scanner will detect GMS (/com/google/android/gms) in these APKs; those are only stubs here, see https://gitlab.com/fdroid/fdroiddata/-/issues/2272#note_493741256
@@ -2161,5 +2202,5 @@ AutoUpdateMode: Version +-fdroid %v
 UpdateCheckMode: Tags
 UpdateCheckData: app/build.gradle|\s+FDroidCodeNumber = (\d+)|.|\s+FDroidVersionNumber
   = "([^\"]+)"
-CurrentVersion: 9.6.39
-CurrentVersionCode: 7398
+CurrentVersion: 10.0.0
+CurrentVersionCode: 7447
