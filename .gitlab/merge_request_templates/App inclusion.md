@@ -48,3 +48,10 @@
 * [ ] All pipelines should pass.
 * [ ] All warnings and errors in the Reports tab should be fixed or explained.
 * [ ] F-Droid CI runners are under GitLab's FOSS program, so there's no need for you to pay for any CI time. If Gitlab starts asking for phone numbers or credit cards don't submit anything, just leave a note in the MR so we know we need to trigger the CI.
+
+---------------------
+
+<!--Add the corresponding issue number or remove this if this merge request does not close an issue at rfp.-->
+Closes rfp#<RFP issue number>
+
+/label ~"New App"
