@@ -1,0 +1,49 @@
+AntiFeatures:
+  NonFreeNet:
+    en-US: Relies on the counted.fr server, whose source is not published.
+  TetheredNet:
+    en-US: Only works with the counted.fr server.
+Categories:
+  - Finance Manager
+License: AGPL-3.0-only
+AuthorName: Jonathan Bosi
+AuthorEmail: jonathan.bosi@protonmail.com
+WebSite: https://counted.fr
+SourceCode: https://github.com/counted-labs/counted
+IssueTracker: https://github.com/counted-labs/counted/issues
+
+AutoName: Counted
+
+RepoType: git
+Repo: https://github.com/counted-labs/counted.git
+Binaries: 
+  https://github.com/counted-labs/counted/releases/download/mobile-v%v/Counted-%c.apk
+
+Builds:
+  - versionName: 3.2.5
+    versionCode: 3002005
+    commit: b02dfae8896eb395a3e1db2cb88947ddbd0be17d
+    subdir: packages/mobile
+    sudo:
+      - apt-get update
+      - apt-get install -y make gcc g++ libc-dev pkg-config libssl-dev rustup
+    output: ../../Counted-unsigned.apk
+    prebuild:
+      - rustup toolchain install 1.98.1 --profile minimal --target aarch64-linux-android
+      - rustup default 1.98.1
+      - cargo install dioxus-cli --version 0.7.10 --locked
+    build:
+      - export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64 ANDROID_NDK_HOME=$$NDK$$
+        PATH=$HOME/.cargo/bin:$PATH
+      - cd ../..
+      - cargo fetch --locked
+      - make -f packages/mobile/android.mk android-fdroid-apk
+    ndk: 25.2.9519653
+
+AllowedAPKSigningKeys: d8d4026f496f3c2154f138e81710332ea5288aaab8567a2f8d0e713de1d593e8
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^mobile-v
+UpdateCheckData: packages/mobile/Cargo.toml|version_code = (\d+)|.|version = "(\d+\.\d+\.\d+)"
+CurrentVersion: 3.2.5
+CurrentVersionCode: 3002005
