@@ -1,0 +1,59 @@
+AntiFeatures:
+  NonFreeNet:
+    en-US: Dive-site suggestions send coordinates to the DiveFrame-hosted API, which
+      connects to Nominatim and Overpass.
+  TetheredNet:
+    en-US: Production builds use a fixed DiveFrame API origin for dive-site suggestions;
+      users cannot configure an alternative service.
+Categories:
+  - Sports & Health
+License: GPL-3.0-or-later
+AuthorName: fishese
+WebSite: https://divelog.fishese.cc
+SourceCode: https://github.com/fishese/diveframe
+IssueTracker: https://github.com/fishese/diveframe/issues
+
+AutoName: DiveFrame
+
+RepoType: git
+Repo: https://github.com/fishese/diveframe.git
+Binaries: 
+  https://github.com/fishese/diveframe/releases/download/fdroid-v%v/diveframe-%v.apk
+
+Builds:
+  - versionName: 1.0.31
+    versionCode: 32
+    commit: 645159213f05fa6e86883de3ad5e2632246dd45b
+    subdir: android/app
+    submodules: true
+    sudo:
+      - echo "deb https://deb.debian.org/debian forky main" > /etc/apt/sources.list.d/forky.list
+      - echo "deb https://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
+      - apt-get update
+      - apt-get install -y -t trixie emscripten=3.1.69+dfsg-3 make unzip
+      - apt-get install -y -t forky npm
+    gradle:
+      - yes
+    prebuild:
+      - cd ../..
+      - sh scripts/fetch-libdivecomputer.sh
+      - npm ci
+      - node scripts/ensure-sql-wasm.mjs --sources-only
+      - rm -rf .sqljs-cache/downloads
+    scanignore:
+      - node_modules/@capacitor/cli/assets/capacitor-cordova-android-plugins.tar.gz
+    scandelete:
+      - node_modules/
+    build:
+      - cd ../..
+      - npm ci --offline
+      - DIVEFRAME_SQLJS_OFFLINE=1 npm run native:sync
+    ndk: 27.0.12077973
+
+AllowedAPKSigningKeys: 90311d4a659f32a767199164791dba0aa5e05ffa5ed9f73b93baffc9112bb25a
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^v[0-9]+\.[0-9]+\.[0-9]+$
+UpdateCheckData: android/app/build.gradle|versionCode\s+(\d+)|.|versionName\s+"([^"]+)"
+CurrentVersion: 1.0.31
+CurrentVersionCode: 32
