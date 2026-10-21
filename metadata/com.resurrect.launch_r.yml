@@ -271,6 +271,135 @@ Builds:
       - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
         --replace unaligned.apk $$OUT$$
 
+  - versionName: 0.4.2
+    versionCode: 121
+    commit: 63abcd99c2095bdafa4bf5e9ba3bf337723c2fcf
+    sudo:
+      - mkdir -p /home/resurrectdev
+      - chown -R vagrant /home/resurrectdev
+    output: build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
+    binary: 
+      https://github.com/resurrectdev1/launch-r/releases/download/v%v/app-armeabi-v7a-release.apk
+    srclibs:
+      - reproducible-apk-tools@v0.3.0
+      - flutter@stable
+    prebuild:
+      - flutterVersion=$(cat .flutter-version)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - sed -i -e '/buildTypes {/,/^    }/d' android/app/build.gradle.kts
+      - export repo=/home/resurrectdev/launch_r
+      - cd ..
+      - mv com.resurrect.launch_r $repo
+      - pushd $repo
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - popd
+      - mv $repo com.resurrect.launch_r
+    scandelete:
+      - .pub-cache
+    build:
+      - export repo=/home/resurrectdev/launch_r
+      - cd ..
+      - mv com.resurrect.launch_r $repo
+      - pushd $repo
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform="android-arm"
+      - popd
+      - mv $repo com.resurrect.launch_r
+    ndk: r28c
+    postbuild:
+      - mv $$OUT$$ unaligned.apk
+      - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
+        --replace unaligned.apk $$OUT$$
+
+  - versionName: 0.4.2
+    versionCode: 122
+    commit: 63abcd99c2095bdafa4bf5e9ba3bf337723c2fcf
+    sudo:
+      - mkdir -p /home/resurrectdev
+      - chown -R vagrant /home/resurrectdev
+    output: build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+    binary: 
+      https://github.com/resurrectdev1/launch-r/releases/download/v%v/app-arm64-v8a-release.apk
+    srclibs:
+      - reproducible-apk-tools@v0.3.0
+      - flutter@stable
+    prebuild:
+      - flutterVersion=$(cat .flutter-version)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - sed -i -e '/buildTypes {/,/^    }/d' android/app/build.gradle.kts
+      - export repo=/home/resurrectdev/launch_r
+      - cd ..
+      - mv com.resurrect.launch_r $repo
+      - pushd $repo
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - popd
+      - mv $repo com.resurrect.launch_r
+    scandelete:
+      - .pub-cache
+    build:
+      - export repo=/home/resurrectdev/launch_r
+      - cd ..
+      - mv com.resurrect.launch_r $repo
+      - pushd $repo
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform="android-arm64"
+      - popd
+      - mv $repo com.resurrect.launch_r
+    ndk: r28c
+    postbuild:
+      - mv $$OUT$$ unaligned.apk
+      - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
+        --replace unaligned.apk $$OUT$$
+
+  - versionName: 0.4.2
+    versionCode: 123
+    commit: 63abcd99c2095bdafa4bf5e9ba3bf337723c2fcf
+    sudo:
+      - mkdir -p /home/resurrectdev
+      - chown -R vagrant /home/resurrectdev
+    output: build/app/outputs/flutter-apk/app-x86_64-release.apk
+    binary: 
+      https://github.com/resurrectdev1/launch-r/releases/download/v%v/app-x86_64-release.apk
+    srclibs:
+      - reproducible-apk-tools@v0.3.0
+      - flutter@stable
+    prebuild:
+      - flutterVersion=$(cat .flutter-version)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - sed -i -e '/buildTypes {/,/^    }/d' android/app/build.gradle.kts
+      - export repo=/home/resurrectdev/launch_r
+      - cd ..
+      - mv com.resurrect.launch_r $repo
+      - pushd $repo
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - popd
+      - mv $repo com.resurrect.launch_r
+    scandelete:
+      - .pub-cache
+    build:
+      - export repo=/home/resurrectdev/launch_r
+      - cd ..
+      - mv com.resurrect.launch_r $repo
+      - pushd $repo
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform="android-x64"
+      - popd
+      - mv $repo com.resurrect.launch_r
+    ndk: r28c
+    postbuild:
+      - mv $$OUT$$ unaligned.apk
+      - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
+        --replace unaligned.apk $$OUT$$
+
 AllowedAPKSigningKeys: d4cd942d568de25817b37ee4536f2fe2f52022a3e4b845f358a896bfd34d3c37
 
 AutoUpdateMode: Version
@@ -280,5 +409,5 @@ VercodeOperation:
   - '%c * 10 + 2'
   - '%c * 10 + 3'
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 0.4.0
-CurrentVersionCode: 113
+CurrentVersion: 0.4.2
+CurrentVersionCode: 123
