@@ -1,0 +1,288 @@
+AntiFeatures:
+  NonFreeNet:
+    en-US: Relies on the non-free services provided by Sichuan University.
+    zh-CN: 依赖四川大学提供的非自由校园服务。
+Categories:
+  - Science & Education
+License: AGPL-3.0-only
+AuthorName: The-Brotherhood-of-SCU
+WebSite: https://bugaoshan.scubro.dev/
+SourceCode: https://github.com/The-Brotherhood-of-SCU/Bugaoshan
+IssueTracker: https://github.com/The-Brotherhood-of-SCU/Bugaoshan/issues
+Changelog: https://github.com/The-Brotherhood-of-SCU/Bugaoshan/blob/main/CHANGELOG.md
+
+AutoName: Bugaoshan
+
+RepoType: git
+Repo: https://github.com/The-Brotherhood-of-SCU/Bugaoshan.git
+
+Builds:
+  - versionName: 2.5.3
+    versionCode: 205031
+    commit: c00faeb76f1fee8dbf8fb21b43f43bc375248470
+    sudo:
+      - mkdir -p /home/runner/work/Bugaoshan
+      - chown -R vagrant /home/runner
+      - mkdir -p /opt/hostedtoolcache/flutter
+      - chown vagrant /opt/hostedtoolcache/flutter
+    output: build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
+    binary: 
+      https://github.com/The-Brotherhood-of-SCU/Bugaoshan/releases/download/v%v/bugaoshan_%v_armeabi-v7a.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+      - linux
+      - macos
+      - windows
+      - web
+    prebuild:
+      - flutterVersion=$(sed -n -E 's/.*flutter-version:[[:space:]]*"([^"]+)".*/\1/p'
+        .github/actions/setup/action.yml)
+      - '[[ $flutterVersion ]]'
+      - flutterDir=/opt/hostedtoolcache/flutter/stable-$flutterVersion-x64
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export repo=/home/runner/work/Bugaoshan/Bugaoshan
+      - export PUB_CACHE=/home/runner/.pub-cache
+      - export PATH=$flutterDir/bin:$PATH
+      - rm -rf $flutterDir
+      - mv $$flutter$$ $flutterDir
+      - cd ..
+      - mv io.github.the_brotherhood_of_scu.bugaoshan $repo
+      - pushd $repo
+      - sed -i 's#https://pub.flutter-io.cn#https://pub.dev#g' pubspec.lock
+      - flutter config --no-analytics
+      - flutter pub get --enforce-lockfile
+      - rm -rf $PUB_CACHE/hosted/pub.flutter-io.cn
+      - ln -s $PUB_CACHE/hosted/pub.dev $PUB_CACHE/hosted/pub.flutter-io.cn
+      - sed -i 's#hosted/pub\.dev#hosted/pub.flutter-io.cn#g' .dart_tool/package_config.json
+      - sed -i -E 's/(-Wl,)(--build-id=none,)?/\1--build-id=none,/' $PUB_CACHE/hosted/*/jni-*/src/CMakeLists.txt
+      - dart run build_runner build --delete-conflicting-outputs
+      - flutter gen-l10n
+      - popd
+      - mv $repo io.github.the_brotherhood_of_scu.bugaoshan
+      - mv $PUB_CACHE io.github.the_brotherhood_of_scu.bugaoshan
+    scanignore:
+      - .pub-cache/git/flutter_inappwebview-*/flutter_inappwebview_android/android/build.gradle
+    scandelete:
+      - .pub-cache
+    build:
+      - export repo=/home/runner/work/Bugaoshan/Bugaoshan
+      - export PUB_CACHE=/home/runner/.pub-cache
+      - mv .pub-cache $PUB_CACHE
+      - cd ..
+      - mv io.github.the_brotherhood_of_scu.bugaoshan $repo
+      - pushd $repo
+      - flutterVersion=$(sed -n -E 's/.*flutter-version:[[:space:]]*"([^"]+)".*/\1/p'
+        .github/actions/setup/action.yml)
+      - flutterDir=/opt/hostedtoolcache/flutter/stable-$flutterVersion-x64
+      - "export GIT_TAG=v$(grep '^version:' pubspec.yaml | sed 's/.*version: *//;
+        s/+.*//')"
+      - export GIT_COMMIT=$(git rev-parse HEAD)
+      - export GIT_COMMIT_DATE=$(git log -1 --format=%ci)
+      - rm -rf $PUB_CACHE/hosted/pub.flutter-io.cn
+      - ln -s $PUB_CACHE/hosted/pub.dev $PUB_CACHE/hosted/pub.flutter-io.cn
+      - sed -i 's#hosted/pub\.dev#hosted/pub.flutter-io.cn#g' .dart_tool/package_config.json
+      - plugin=$(ls -d $PUB_CACHE/git/flutter_inappwebview-*/flutter_inappwebview_android/android)
+      - find $plugin/src/main/res -name '*.xml' -exec sed -z -i 's/\r\n/\n/g;s/\n/\r\n/g'
+        {} +
+      - sed -i 's#version "9.0.1"#version "8.13.2"#' android/settings.gradle.kts
+      - gradle --project-dir android :flutter_inappwebview_android:assembleRelease
+        --configure-on-demand -Pandroid.defaults.buildfeatures.buildconfig=true -Pandroid.nonTransitiveRClass=false
+        -Pandroid.nonFinalResIds=false
+      - sed -i 's#version "8.13.2"#version "9.0.1"#' android/settings.gradle.kts
+      - cp 
+        build/flutter_inappwebview_android/outputs/aar/flutter_inappwebview_android-release.aar
+        $plugin/prebuilt/release/
+      - cp $plugin/prebuilt/release/flutter_inappwebview_android-release.aar $plugin/prebuilt/release/maven-local/i/a/1.2.0-beta.4/a-1.2.0-beta.4.aar
+      - $flutterDir/bin/flutter build apk --release --split-per-abi --build-number=$((
+        $$VERCODE$$ / 10 )) --obfuscate --split-debug-info=build/app/outputs/symbols/fdroid
+        --dart-define=GIT_TAG=$GIT_TAG --dart-define=GIT_COMMIT=$GIT_COMMIT --dart-define=GIT_COMMIT_DATE="$GIT_COMMIT_DATE"
+      - popd
+      - mv $repo io.github.the_brotherhood_of_scu.bugaoshan
+    gradleprops:
+      - android.r8.failOnMissingClasses=false
+
+  - versionName: 2.5.3
+    versionCode: 205032
+    commit: c00faeb76f1fee8dbf8fb21b43f43bc375248470
+    sudo:
+      - mkdir -p /home/runner
+      - chown vagrant /home/runner
+      - mkdir -p /opt/hostedtoolcache/flutter
+      - chown vagrant /opt/hostedtoolcache/flutter
+    output: build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+    binary: 
+      https://github.com/The-Brotherhood-of-SCU/Bugaoshan/releases/download/v%v/bugaoshan_%v_arm64-v8a.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+      - linux
+      - macos
+      - windows
+      - web
+    prebuild:
+      - flutterVersion=$(sed -n -E 's/.*flutter-version:[[:space:]]*"([^"]+)".*/\1/p'
+        .github/actions/setup/action.yml)
+      - '[[ $flutterVersion ]]'
+      - flutterDir=/opt/hostedtoolcache/flutter/stable-$flutterVersion-x64
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export repo=/home/runner/work/Bugaoshan/Bugaoshan
+      - export PUB_CACHE=/home/runner/.pub-cache
+      - export PATH=$flutterDir/bin:$PATH
+      - rm -rf $flutterDir
+      - mv $$flutter$$ $flutterDir
+      - cd ..
+      - mv io.github.the_brotherhood_of_scu.bugaoshan $repo
+      - pushd $repo
+      - sed -i 's#https://pub.flutter-io.cn#https://pub.dev#g' pubspec.lock
+      - flutter config --no-analytics
+      - flutter pub get --enforce-lockfile
+      - rm -rf $PUB_CACHE/hosted/pub.flutter-io.cn
+      - ln -s $PUB_CACHE/hosted/pub.dev $PUB_CACHE/hosted/pub.flutter-io.cn
+      - sed -i 's#hosted/pub\.dev#hosted/pub.flutter-io.cn#g' .dart_tool/package_config.json
+      - sed -i -E 's/(-Wl,)(--build-id=none,)?/\1--build-id=none,/' $PUB_CACHE/hosted/*/jni-*/src/CMakeLists.txt
+      - dart run build_runner build --delete-conflicting-outputs
+      - flutter gen-l10n
+      - popd
+      - mv $repo io.github.the_brotherhood_of_scu.bugaoshan
+      - mv $PUB_CACHE io.github.the_brotherhood_of_scu.bugaoshan
+    scanignore:
+      - .pub-cache/git/flutter_inappwebview-*/flutter_inappwebview_android/android/build.gradle
+    scandelete:
+      - .pub-cache
+    build:
+      - export repo=/home/runner/work/Bugaoshan/Bugaoshan
+      - export PUB_CACHE=/home/runner/.pub-cache
+      - mv .pub-cache $PUB_CACHE
+      - cd ..
+      - mv io.github.the_brotherhood_of_scu.bugaoshan $repo
+      - pushd $repo
+      - flutterVersion=$(sed -n -E 's/.*flutter-version:[[:space:]]*"([^"]+)".*/\1/p'
+        .github/actions/setup/action.yml)
+      - flutterDir=/opt/hostedtoolcache/flutter/stable-$flutterVersion-x64
+      - "export GIT_TAG=v$(grep '^version:' pubspec.yaml | sed 's/.*version: *//;
+        s/+.*//')"
+      - export GIT_COMMIT=$(git rev-parse HEAD)
+      - export GIT_COMMIT_DATE=$(git log -1 --format=%ci)
+      - rm -rf $PUB_CACHE/hosted/pub.flutter-io.cn
+      - ln -s $PUB_CACHE/hosted/pub.dev $PUB_CACHE/hosted/pub.flutter-io.cn
+      - sed -i 's#hosted/pub\.dev#hosted/pub.flutter-io.cn#g' .dart_tool/package_config.json
+      - plugin=$(ls -d $PUB_CACHE/git/flutter_inappwebview-*/flutter_inappwebview_android/android)
+      - find $plugin/src/main/res -name '*.xml' -exec sed -z -i 's/\r\n/\n/g;s/\n/\r\n/g'
+        {} +
+      - sed -i 's#version "9.0.1"#version "8.13.2"#' android/settings.gradle.kts
+      - gradle --project-dir android :flutter_inappwebview_android:assembleRelease
+        --configure-on-demand -Pandroid.defaults.buildfeatures.buildconfig=true -Pandroid.nonTransitiveRClass=false
+        -Pandroid.nonFinalResIds=false
+      - sed -i 's#version "8.13.2"#version "9.0.1"#' android/settings.gradle.kts
+      - cp 
+        build/flutter_inappwebview_android/outputs/aar/flutter_inappwebview_android-release.aar
+        $plugin/prebuilt/release/
+      - cp $plugin/prebuilt/release/flutter_inappwebview_android-release.aar $plugin/prebuilt/release/maven-local/i/a/1.2.0-beta.4/a-1.2.0-beta.4.aar
+      - $flutterDir/bin/flutter build apk --release --split-per-abi --build-number=$((
+        $$VERCODE$$ / 10 )) --obfuscate --split-debug-info=build/app/outputs/symbols/fdroid
+        --dart-define=GIT_TAG=$GIT_TAG --dart-define=GIT_COMMIT=$GIT_COMMIT --dart-define=GIT_COMMIT_DATE="$GIT_COMMIT_DATE"
+      - popd
+      - mv $repo io.github.the_brotherhood_of_scu.bugaoshan
+    gradleprops:
+      - android.r8.failOnMissingClasses=false
+
+  - versionName: 2.5.3
+    versionCode: 205034
+    commit: c00faeb76f1fee8dbf8fb21b43f43bc375248470
+    sudo:
+      - mkdir -p /home/runner
+      - chown vagrant /home/runner
+      - mkdir -p /opt/hostedtoolcache/flutter
+      - chown vagrant /opt/hostedtoolcache/flutter
+    output: build/app/outputs/flutter-apk/app-x86_64-release.apk
+    binary: 
+      https://github.com/The-Brotherhood-of-SCU/Bugaoshan/releases/download/v%v/bugaoshan_%v_x86_64.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+      - linux
+      - macos
+      - windows
+      - web
+    prebuild:
+      - flutterVersion=$(sed -n -E 's/.*flutter-version:[[:space:]]*"([^"]+)".*/\1/p'
+        .github/actions/setup/action.yml)
+      - '[[ $flutterVersion ]]'
+      - flutterDir=/opt/hostedtoolcache/flutter/stable-$flutterVersion-x64
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export repo=/home/runner/work/Bugaoshan/Bugaoshan
+      - export PUB_CACHE=/home/runner/.pub-cache
+      - export PATH=$flutterDir/bin:$PATH
+      - rm -rf $flutterDir
+      - mv $$flutter$$ $flutterDir
+      - cd ..
+      - mv io.github.the_brotherhood_of_scu.bugaoshan $repo
+      - pushd $repo
+      - sed -i 's#https://pub.flutter-io.cn#https://pub.dev#g' pubspec.lock
+      - flutter config --no-analytics
+      - flutter pub get --enforce-lockfile
+      - rm -rf $PUB_CACHE/hosted/pub.flutter-io.cn
+      - ln -s $PUB_CACHE/hosted/pub.dev $PUB_CACHE/hosted/pub.flutter-io.cn
+      - sed -i 's#hosted/pub\.dev#hosted/pub.flutter-io.cn#g' .dart_tool/package_config.json
+      - sed -i -E 's/(-Wl,)(--build-id=none,)?/\1--build-id=none,/' $PUB_CACHE/hosted/*/jni-*/src/CMakeLists.txt
+      - dart run build_runner build --delete-conflicting-outputs
+      - flutter gen-l10n
+      - popd
+      - mv $repo io.github.the_brotherhood_of_scu.bugaoshan
+      - mv $PUB_CACHE io.github.the_brotherhood_of_scu.bugaoshan
+    scanignore:
+      - .pub-cache/git/flutter_inappwebview-*/flutter_inappwebview_android/android/build.gradle
+    scandelete:
+      - .pub-cache
+    build:
+      - export repo=/home/runner/work/Bugaoshan/Bugaoshan
+      - export PUB_CACHE=/home/runner/.pub-cache
+      - mv .pub-cache $PUB_CACHE
+      - cd ..
+      - mv io.github.the_brotherhood_of_scu.bugaoshan $repo
+      - pushd $repo
+      - flutterVersion=$(sed -n -E 's/.*flutter-version:[[:space:]]*"([^"]+)".*/\1/p'
+        .github/actions/setup/action.yml)
+      - flutterDir=/opt/hostedtoolcache/flutter/stable-$flutterVersion-x64
+      - "export GIT_TAG=v$(grep '^version:' pubspec.yaml | sed 's/.*version: *//;
+        s/+.*//')"
+      - export GIT_COMMIT=$(git rev-parse HEAD)
+      - export GIT_COMMIT_DATE=$(git log -1 --format=%ci)
+      - rm -rf $PUB_CACHE/hosted/pub.flutter-io.cn
+      - ln -s $PUB_CACHE/hosted/pub.dev $PUB_CACHE/hosted/pub.flutter-io.cn
+      - sed -i 's#hosted/pub\.dev#hosted/pub.flutter-io.cn#g' .dart_tool/package_config.json
+      - plugin=$(ls -d $PUB_CACHE/git/flutter_inappwebview-*/flutter_inappwebview_android/android)
+      - find $plugin/src/main/res -name '*.xml' -exec sed -z -i 's/\r\n/\n/g;s/\n/\r\n/g'
+        {} +
+      - sed -i 's#version "9.0.1"#version "8.13.2"#' android/settings.gradle.kts
+      - gradle --project-dir android :flutter_inappwebview_android:assembleRelease
+        --configure-on-demand -Pandroid.defaults.buildfeatures.buildconfig=true -Pandroid.nonTransitiveRClass=false
+        -Pandroid.nonFinalResIds=false
+      - sed -i 's#version "8.13.2"#version "9.0.1"#' android/settings.gradle.kts
+      - cp 
+        build/flutter_inappwebview_android/outputs/aar/flutter_inappwebview_android-release.aar
+        $plugin/prebuilt/release/
+      - cp $plugin/prebuilt/release/flutter_inappwebview_android-release.aar $plugin/prebuilt/release/maven-local/i/a/1.2.0-beta.4/a-1.2.0-beta.4.aar
+      - $flutterDir/bin/flutter build apk --release --split-per-abi --build-number=$((
+        $$VERCODE$$ / 10 )) --obfuscate --split-debug-info=build/app/outputs/symbols/fdroid
+        --dart-define=GIT_TAG=$GIT_TAG --dart-define=GIT_COMMIT=$GIT_COMMIT --dart-define=GIT_COMMIT_DATE="$GIT_COMMIT_DATE"
+      - popd
+      - mv $repo io.github.the_brotherhood_of_scu.bugaoshan
+    gradleprops:
+      - android.r8.failOnMissingClasses=false
+
+AllowedAPKSigningKeys: 1b0a09e3e7e3b3b9fadff06a7795bf7448a22e5803f2a18f62267dc2273be391
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^v[0-9]+\.[0-9]+\.[0-9]+$
+VercodeOperation:
+  - 10 * %c + 1
+  - 10 * %c + 2
+  - 10 * %c + 4
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 2.5.3
+CurrentVersionCode: 205034
