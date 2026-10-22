@@ -194,7 +194,32 @@ Builds:
       - ./build-openssl.sh
     ndk: r28b
 
+  - versionName: 1.6.1
+    versionCode: 21
+    commit: d9f6a8cb0cc8e44f926b71c4272301fe36922a99
+    subdir: app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y gcc cmake make
+    gradle:
+      - yes
+    output: build/outputs/apk/release/app-universal-release-unsigned.apk
+    rm:
+      - app/src/main/cpplibs/openssl/fuzz/corpora
+      - app/src/main/cpplibs/openssl/cloudflare-quiche/fuzz
+      - app/src/main/cpplibs/openssl/cloudflare-quiche/quiche/deps/boringssl/src/fuzz
+    prebuild:
+      - sed -i -e '/enable true/d' build.gradle
+      - mv ../gradle.properties.example ../gradle.properties
+    scandelete:
+      - app/src/main/cpplibs/openssl
+    build:
+      - cd ..
+      - ./build-openssl.sh
+    ndk: r28b
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 1.6.0
-CurrentVersionCode: 20
+CurrentVersion: 1.6.1
+CurrentVersionCode: 21
