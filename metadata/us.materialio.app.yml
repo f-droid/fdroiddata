@@ -3653,7 +3653,45 @@ Builds:
       - cp -a $$NodejsMobile$$/out_android/* ../../node_modules/capacitor-nodejs/android/libnode/bin/
     ndk: r27
 
+  - versionName: 1.18.10
+    versionCode: 277
+    commit: 814fe0ff464b921f454d1192a9eebab8ac1a704c
+    timeout: 20000
+    subdir: materialious/android/app
+    sudo:
+      - apt-get update
+      - apt-get install -y libc-dev cmake golang-go gcc-multilib g++-multilib make
+        python3-setuptools
+      - curl -Lo node.tar.gz https://nodejs.org/dist/v26.11.1/node-v26.11.1-linux-x64.tar.gz
+      - echo "15fc043a51a5783f2f4b634561091658f5a7f0e3db03f997dca3a8033a33e45b node.tar.gz"
+        | sha256sum -c -
+      - tar xzf node.tar.gz --strip-components=1 -C /usr/local/
+    gradle:
+      - yes
+    srclibs:
+      - NodejsMobile@v18.20.4
+    prebuild:
+      - sed -i -e '/enable true/d' build.gradle
+      - sed -i -e '/gms/d' ../build.gradle
+      - sed -i -e 's/-Xmx1G/-Xmx4G/' ../gradle.properties
+      - cd ../..
+      - npm install --allow-remote all
+      - pushd static/nodejsAndroid
+      - npm install
+      - popd
+      - npm run build
+      - npx cap sync
+      - sed -i -e 's/acceptable_pythons = .*/acceptable_pythons = ((3, 13),)/' $$NodejsMobile$$/{android-configure,configure}
+    scandelete:
+      - materialious/node_modules
+    build:
+      - pushd $$NodejsMobile$$
+      - ./tools/android_build.sh $$NDK$$ 24
+      - popd
+      - cp -a $$NodejsMobile$$/out_android/* ../../node_modules/capacitor-nodejs/android/libnode/bin/
+    ndk: r27
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 1.18.9
-CurrentVersionCode: 276
+CurrentVersion: 1.18.10
+CurrentVersionCode: 277
