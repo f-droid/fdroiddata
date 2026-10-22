@@ -772,8 +772,39 @@ Builds:
     build: make TARGET=ANDROIDFAT DEBUG=n TESTING=n FOSS=n PLAY=n -j$(nproc)
     ndk: 26.3.11579264
 
+  - versionName: '7.46'
+    versionCode: 74600000
+    commit: 1998c3e492634ec056d3f01718c6c339a8e5b445
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y automake cmake g++ gettext imagemagick librsvg2-bin libtool
+        make ninja-build pkg-config quilt sox vorbis-tools xsltproc xz-utils zip
+      - echo "deb https://deb.debian.org/debian bookworm main" > /etc/apt/sources.list.d/bookworm.list
+      - apt-get update
+      - apt-get install -y -t bookworm openjdk-17-jdk-headless
+    output: output/ANDROID/bin/XCSoar.apk
+    srclibs:
+      - bundletool@1.18.3
+    prebuild:
+      - platforms=$(grep ANDROID_SDK_PLATFORM build/targets.mk | sed -E 's/.*android-([0-9]+)/\1/')
+      - build_tools=$(grep build-tools build/android.mk | sed -E 's/.*\/([0-9.]+)$/\1/')
+      - sdkmanager "platforms;android-$platforms" "build-tools;$build_tools"
+      - sed -i -e 's|BUNDLETOOL = $(HOME).*|BUNDLETOOL = java -jar $$bundletool$$/build/libs/bundletool-all.jar|'
+        build/android.mk
+    scandelete:
+      - android/ioio
+      - android/UsbSerial/usbserial/eclipse_lib
+    build:
+      - pushd $$bundletool$$
+      - JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64 gradle executableJar
+      - popd
+      - make TARGET=ANDROIDFAT DEBUG=n TESTING=n FOSS=n PLAY=n BUNDLE_KS_PASS_FILE=n
+        -j$(nproc) output/ANDROID/bin/XCSoar.apk
+    ndk: 26.3.11579264
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: android/AndroidManifest.xml.template|versionCode="(\d+)"|.|versionName="(.*)"
-CurrentVersion: 7.45.3
-CurrentVersionCode: 74530000
+CurrentVersion: '7.46'
+CurrentVersionCode: 74600000
