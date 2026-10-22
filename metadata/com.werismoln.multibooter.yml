@@ -1,0 +1,51 @@
+Categories:
+  - System
+License: GPL-3.0-or-later
+AuthorName: Volkan Belek
+AuthorEmail: vlkanblek@gmail.com
+SourceCode: https://github.com/werimsoln/MultiBooter
+IssueTracker: https://github.com/werimsoln/MultiBooter/issues
+
+AutoName: MultiBooter
+
+RepoType: git
+Repo: https://github.com/werimsoln/MultiBooter.git
+
+Builds:
+  - versionName: v0.1.0
+    versionCode: 1000
+    commit: 87dc373904025c9152fe0f75912344ccab678f15
+    sudo:
+      - apt-get update
+      - apt-get install -y dosfstools faketime mtools
+    output: app-release-unsigned.apk
+    srclibs:
+      - Ventoy@7cbdc5cf69935bcf1f085ae67f40e70ea7e74bae
+    prebuild:
+      - sdkmanager "platforms;android-36" "build-tools;36.0.0"
+      - rm -f "$$Ventoy$$/INSTALL/EFI/BOOT/BOOTX64.EFI"
+      - rm -f "$$Ventoy$$/INSTALL/EFI/BOOT/mmx64.efi"
+      - rm -f "$$Ventoy$$/INSTALL/EFI/BOOT/fbx64.efi"
+      - rm -f "$$Ventoy$$/INSTALL/EFI/BOOT/grubx64_real.efi"
+      - mcopy -i src/main/assets/ventoy.disk.img ::/EFI/BOOT/BOOTX64.EFI "$$Ventoy$$/INSTALL/EFI/BOOT/BOOTX64.EFI"
+      - mcopy -i src/main/assets/ventoy.disk.img ::/EFI/BOOT/mmx64.efi "$$Ventoy$$/INSTALL/EFI/BOOT/mmx64.efi"
+      - mcopy -i src/main/assets/ventoy.disk.img ::/EFI/BOOT/fbx64.efi "$$Ventoy$$/INSTALL/EFI/BOOT/fbx64.efi"
+      - mcopy -i src/main/assets/ventoy.disk.img ::/EFI/BOOT/grubx64_real.efi "$$Ventoy$$/INSTALL/EFI/BOOT/grubx64_real.efi"
+      - echo "1ff3f223c2fcf5b11615d042fcb5674c4651bbbc8505b5b2987d60da0cb65d1a $$Ventoy$$/INSTALL/EFI/BOOT/BOOTX64.EFI"
+        | sha256sum -c -
+      - echo "1a3687f923d077080fe49feb470e3932c2b1d3fd4c6439123aa0226246a24522 $$Ventoy$$/INSTALL/EFI/BOOT/mmx64.efi"
+        | sha256sum -c -
+      - echo "c8fc4661f4b64b916e37e4fdd68042d3d64290a696add9199afb84c12ad896c8 $$Ventoy$$/INSTALL/EFI/BOOT/fbx64.efi"
+        | sha256sum -c -
+      - echo "907c99a8370e953eb4ec34df2c314cf979356bfca97733ccb1139ee3f5e98cce $$Ventoy$$/INSTALL/EFI/BOOT/grubx64_real.efi"
+        | sha256sum -c -
+    build:
+      - chmod +x build.sh
+      - VENTOY_SRC="$$Ventoy$$" ANDROID_NDK_HOME="$$NDK$$" VENTOY_IMAGE_EPOCH=1735689600
+        ./build.sh
+    ndk: 30.0.16248370
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: v0.1.0
+CurrentVersionCode: 1000
