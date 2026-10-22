@@ -47,11 +47,44 @@ Builds:
       - gradle :app:assembleRelease --no-daemon -PreactNativeArchitectures=arm64-v8a
     ndk: r27b
 
+  - versionName: 0.3.5
+    versionCode: 8
+    commit: 922dec6fe28d5a415b808436f83e0406dfc0e4c8
+    sudo:
+      - apt-get update
+      - apt-get install -y nodejs npm
+    init:
+      - export EXPO_NO_TELEMETRY=1
+      - npm ci --no-audit --no-fund
+    output: android/app/build/outputs/apk/release/app-arm64-v8a-release-unsigned.apk
+    prebuild:
+      - node -e 'const fs=require("fs"); const p=JSON.parse(fs.readFileSync("package.json"));
+        p.expo={...p.expo,autolinking:{...p.expo?.autolinking,android:{...p.expo?.autolinking?.android,buildFromSource:[".*"]}}};
+        fs.writeFileSync("package.json",JSON.stringify(p,null,2)+"\n");'
+      - sed -i '/jvmToolchain\|JavaVersion/s/17/21/' node_modules/@react-native/gradle-plugin/*/build.gradle.kts
+        node_modules/@react-native/gradle-plugin/react-native-gradle-plugin/src/main/kotlin/com/facebook/react/utils/JdkConfiguratorUtils.kt
+      - export EXPO_NO_TELEMETRY=1
+      - npx expo prebuild --platform android --no-install
+      - sed -i '/signingConfig signingConfigs.debug/d; /android.buildTypes.release.signingConfig
+        =/d' android/app/build.gradle
+    scanignore:
+      - node_modules/hermes-compiler/hermesc/linux64-bin/hermesc
+      - node_modules/react-native/ReactAndroid/publish.gradle
+      - node_modules/expo-modules-core/android/ExpoModulesCorePlugin.gradle
+      - node_modules/react-native-svg/android/build.gradle
+      - node_modules/react-native-safe-area-context/android/build.gradle
+    scandelete:
+      - node_modules
+    build:
+      - cd android
+      - gradle :app:assembleRelease --no-daemon -PreactNativeArchitectures=arm64-v8a
+    ndk: r27b
+
 AllowedAPKSigningKeys: beac197d53b5f35d548f8e3b4050a306b30d233cd235830e2d92b1f62183feec
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v[0-9]+\.[0-9]+\.[0-9]+$
 UpdateCheckName: Ignore
 UpdateCheckData: app.json|"versionCode":\s*(\d+)|.|"version":\s*"([^"]+)"
-CurrentVersion: 0.3.4
-CurrentVersionCode: 7
+CurrentVersion: 0.3.5
+CurrentVersionCode: 8
