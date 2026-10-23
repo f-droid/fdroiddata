@@ -1,0 +1,65 @@
+Categories:
+  - Social Network
+License: Apache-2.0
+AuthorName: EvilPlagueDoctor
+AuthorWebSite: https://github.com/EvilPlagueDoctor
+WebSite: https://evilplaguedoctor.github.io/weave.html
+SourceCode: https://github.com/EvilPlagueDoctor/Weave
+IssueTracker: https://github.com/EvilPlagueDoctor/Weave/issues
+
+AutoName: Weave
+
+RepoType: git
+Repo: https://github.com/EvilPlagueDoctor/Weave.git
+Binaries: https://github.com/EvilPlagueDoctor/Weave/releases/download/v%v/Weave-%v.apk
+
+Builds:
+  - versionName: 0.11.6-startup-tips
+    versionCode: 44
+    commit: dd5f1f63eb8d76bdb6c58da67cfff431c07aebe3
+    subdir: Android/Source/app
+    sudo:
+      - apt-get update
+      - apt-get install -y gcc libc-dev rustup
+    gradle:
+      - yes
+    prebuild:
+      - sdkmanager "platforms;android-36.1" "build-tools;36.1.0"
+      - rustup default 1.97.1
+      - rustup target add aarch64-linux-android x86_64-linux-android
+      - cargo install cargo-ndk@4.1.2 --locked
+      - pushd ../native/veilknit-daemon
+      - cargo fetch --locked
+      - popd
+      - sed -i -e 's|"cargo",|"/usr/bin/cargo",|' build.gradle.kts
+    ndk: r28c
+    gradleprops:
+      - weaveFdroidBuild=true
+
+AllowedAPKSigningKeys: 10013c64a8fa36fff40e2718823ea3e7bf5aa1878cb8d2507c1446151891060c
+
+MaintainerNotes: |-
+  Weave includes two pre-trained ONNX models used exclusively for local
+  on-device content filtering.
+
+  image_safety_xs.onnx:
+  upstream: OwenElliott/image-safety-classifier-xs
+  license: MIT
+  revision: 606ad3dfd6a023215e3ab0797040437cc365977b
+  SHA-256: 8c28c49d9075f3ad15ebdc2961f02d5b3f99be944815b848b49c9f0e6f3fb689
+
+  toxic_minilm_int8.onnx and vocab.txt:
+  upstream: minuva/MiniLMv2-toxic-jigsaw-onnx
+  license: Apache-2.0
+  revision: edeaa44a3eed98842d1139619bfb5dc55fafcfad
+
+  toxic_minilm_int8.onnx SHA-256:
+  bcd9dfb48cad802ac8f7cd789e1294f1f0b22d532797bd41f5a11694e3c269a0
+
+  vocab.txt SHA-256:
+  07eced375cec144d27c900241f3e339478dec958f92fddbc551f295c992038a3
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: 0.11.6-startup-tips
+CurrentVersionCode: 44
