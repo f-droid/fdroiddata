@@ -1,0 +1,68 @@
+Categories:
+  - Ebook Reader
+  - OCR
+License: MIT
+AuthorName: artcraft-android
+SourceCode: https://github.com/artcraft-android/pdfcraft-android
+IssueTracker: https://github.com/artcraft-android/pdfcraft-android/issues
+Changelog: https://github.com/artcraft-android/pdfcraft-android/releases
+
+AutoName: PdfCraft
+
+RepoType: git
+Repo: https://github.com/artcraft-android/pdfcraft-android.git
+
+Builds:
+  - versionName: 0.0.5-beta
+    versionCode: 5011
+    commit: 36a8e113bd653f28017488feba4c07f50a6a3f4a
+    subdir: apps/pdfcraft-android/android/app
+    sudo:
+      - apt-get update
+      - apt-get install -y gcc libc-dev rustup
+    gradle:
+      - yes
+    binary: 
+      https://github.com/artcraft-android/pdfcraft-android/releases/download/v%v/pdfcraft-android-%v-armeabi-v7a.apk
+    prebuild:
+      - rustup toolchain install $(sed -n -E 's/^channel = "(.*)"/\1/p' ../../../../rust-toolchain.toml)
+        --profile minimal --target armv7-linux-androideabi
+      - cargo install --locked --version $(sed -n -E 's/.*cargo install cargo-ndk
+        --version ([0-9.]+).*/\1/p' ../../../../.github/workflows/release.yml) cargo-ndk
+    ndk: 29.0.14206865
+    gradleprops:
+      - pdfcraft.abis=armeabi-v7a
+      - pdfcraft.unsigned=true
+
+  - versionName: 0.0.5-beta
+    versionCode: 5012
+    commit: 36a8e113bd653f28017488feba4c07f50a6a3f4a
+    subdir: apps/pdfcraft-android/android/app
+    sudo:
+      - apt-get update
+      - apt-get install -y gcc libc-dev rustup
+    gradle:
+      - yes
+    binary: 
+      https://github.com/artcraft-android/pdfcraft-android/releases/download/v%v/pdfcraft-android-%v.apk
+    prebuild:
+      - rustup toolchain install $(sed -n -E 's/^channel = "(.*)"/\1/p' ../../../../rust-toolchain.toml)
+        --profile minimal --target aarch64-linux-android
+      - cargo install --locked --version $(sed -n -E 's/.*cargo install cargo-ndk
+        --version ([0-9.]+).*/\1/p' ../../../../.github/workflows/release.yml) cargo-ndk
+    ndk: 29.0.14206865
+    gradleprops:
+      - pdfcraft.abis=arm64-v8a
+      - pdfcraft.unsigned=true
+
+AllowedAPKSigningKeys: 7356d58ae3446b3e6cc457d0b9901700376c787310c9dba14e9c11866588eeb5
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+VercodeOperation:
+  - '%c * 10 + 1'
+  - '%c * 10 + 2'
+UpdateCheckData: 
+  apps/pdfcraft-android/android/gradle.properties|pdfcraft\.versionCode=(\d+)|.|pdfcraft\.version=(.+)
+CurrentVersion: 0.0.5-beta
+CurrentVersionCode: 5012
