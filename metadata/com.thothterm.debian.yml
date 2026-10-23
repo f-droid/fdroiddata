@@ -1,0 +1,50 @@
+AntiFeatures:
+  TetheredNet:
+    en-US: On first run the app must download the Debian 13 root filesystem after
+      explicit consent; there is no way to import a local rootfs archive. Container
+      images are separately downloaded only when the user runs docker pull or run.
+Categories:
+  - Development
+  - System
+License: Apache-2.0
+AuthorName: Lord1Egypt
+SourceCode: https://github.com/Lord1Egypt/AndroidThothTerm
+IssueTracker: https://github.com/Lord1Egypt/AndroidThothTerm/issues
+Changelog: https://github.com/Lord1Egypt/AndroidThothTerm/releases
+
+AutoName: ThothTerm Trixie
+
+RepoType: git
+Repo: https://github.com/Lord1Egypt/AndroidThothTerm.git
+Binaries: 
+  https://github.com/Lord1Egypt/AndroidThothTerm/releases/download/trixie-v%v/ThothTerm-ThothDock-v%v.apk
+
+Builds:
+  - versionName: 0.4.1
+    versionCode: 401
+    commit: ca923f86757b2e376c7cca2c77037ef3eb325bb4
+    subdir: garden-debian
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y -t trixie-backports golang-go
+    gradle:
+      - fdroid
+    srclibs:
+      - go@go1.26.8
+    scanignore:
+      - third_party/docker-cli/cli/command/container/testdata/utf16.env
+      - third_party/docker-cli/cli/command/container/testdata/utf16be.env
+    build:
+      - pushd $$go$$/src
+      - ./make.bash
+      - popd
+      - echo "thothtermGoRoot=$$go$$" >> ../gradle.properties
+    ndk: 23.2.8568313
+
+AllowedAPKSigningKeys: ca326f0676474f7de4813cd27ec8c618767926790be5e6936c4c112e2bab5ca6
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^trixie-v[0-9.]+$
+CurrentVersion: 0.4.1
+CurrentVersionCode: 401
