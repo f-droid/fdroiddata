@@ -1,0 +1,82 @@
+AntiFeatures:
+  Tracking:
+    en-US: Connects to Mozilla services that can track users.
+Categories:
+  - Browser
+  - Internet
+License: MPL-2.0
+AuthorName: by-architect
+WebSite: https://dejavubrowser.com/
+SourceCode: https://github.com/by-architect/Dejavu
+IssueTracker: https://github.com/by-architect/Dejavu/issues
+Changelog: https://github.com/by-architect/Dejavu/releases
+
+Name: Dejavu
+
+RepoType: git
+Repo: https://gitlab.com/by-architect/dejavubuild.git
+
+Builds:
+  - versionName: 2.3.4
+    versionCode: 2016210304
+    commit: a6892b2ec076b029b485308d3329dbf24b0c6e3c
+    timeout: 36000
+    sudo:
+      - echo "deb https://deb.debian.org/debian bookworm main" > /etc/apt/sources.list.d/bookworm.list
+      - apt-get update
+      - apt-get install -y -t bookworm openjdk-17-jdk-headless
+      - update-java-alternatives -s java-1.17.0-openjdk-amd64
+      - apt-get install -y cmake make m4 pkg-config python-is-python3 python3-venv
+        tcl gyp ninja-build bzip2 libffi-dev libsqlite3-dev binutils-dev clang lld
+        libssl-dev zlib1g-dev nodejs terser rustup
+    output: 
+      ../srclib/MozFennec/obj/gradle/build/mobile/android/fenix/app/outputs/apk/release/app-*-release-unsigned.apk
+    srclibs:
+      - MozFennec@FIREFOX-ANDROID_159_0_BUILD1
+      - MozAppServices@v159.0.1
+      - MozGlean@v70.2.1
+      - MozGleanAS@v70.0.0
+      - wasi-sdk@wasi-sdk-20
+      - llvm@2d287f51eff2a5fbf84458a33f7fb2493cf67965
+      - llvm_android@9e20ac0b949feedcfe3da791189310f6ebcbc7a8
+      - toolchain-utils@d71e320ab860721f764fe7403588641c8a7bc65d
+    prebuild: ./prebuild.sh $$VERSION$$ $$VERCODE$$
+    build: ./build.sh
+    ndk: 30.0.16248370
+
+MaintainerNotes: |-
+  Built like Fennec F-Droid: the Repo is dejavubuild, a fork of relan's fennecbuild, and Firefox comes in as the
+  MozFennec srclib at a FIREFOX-ANDROID tag. 2.3.4 uses FIREFOX-ANDROID_159_0_BUILD1, the 159.0 release build, as
+  Mozilla's FIREFOX-ANDROID_159_0_RELEASE tag is not out yet (159.0 ships 2026-10-27); later builds use the
+  FIREFOX-ANDROID_*_RELEASE tags. prebuild.sh applies dejavu.patch
+  (Dejavu's changes to that Firefox, generated from the Dejavu repository) and copies dejavu-overlay (Dejavu's
+  pictures) before fennecbuild's own patches. Application Services, Glean, WASI SDK and LLVM are built from source as in Fennec.
+
+  Dejavu builds without Google's and Adjust's libraries by itself (stand-ins in src/foss), so dejavubuild drops
+  fennecbuild's gecko-liberate, a-c-liberate and fenix-liberate, and needs no microG. m-c-liberate still takes the
+  Google libraries out of the version catalog. UnifiedPush and Fennec's search engine overlay are not used, so there
+  is nothing to scanignore.
+
+  Version code scheme: 2016190000 + major * 10000 + minor * 100 + patch of the Dejavu version, so 2.3.4 is
+  2016210304. arm64-v8a only.
+
+  MozAppServices, Glean versions:
+  grep 'VERSION =' build/srclib/MozFennec/mobile/android/android-components/plugins/dependencies/src/main/java/ApplicationServices.kt
+  grep '^glean =' build/srclib/MozFennec/gradle/libs.versions.toml
+
+  GleanAS version:
+  grep '^glean =' build/srclib/MozAppServices/gradle/libs.versions.toml
+
+  llvm, llvm_android, toolchain-utils: the libclang bindgen uses must match the NDK's clang (NDK r30 is clang-r574158c,
+  LLVM 21; LLVM_SVN in prebuild.sh). From the NDK:
+  grep 'Base revision:' {NDK}/toolchains/llvm/prebuilt/linux-x86_64/clang_source_info.md
+  llvm_android is the commit its patch links point to; toolchain-utils is its latest commit.
+
+  NDK versions: ndk is Firefox's; build.sh installs the one Glean and Application Services ask for with sdkmanager:
+  grep 'NDK_VERSION =' build/srclib/MozFennec/python/mozboot/mozboot/android.py
+  grep ndkVersion build/srclib/MozGlean/build.gradle build/srclib/MozAppServices/settings.gradle
+
+AutoUpdateMode: None
+UpdateCheckMode: None
+CurrentVersion: 2.3.4
+CurrentVersionCode: 2016210304
