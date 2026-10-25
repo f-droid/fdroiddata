@@ -1,0 +1,45 @@
+Categories:
+  - Remote Access
+License: AGPL-3.0-only
+AuthorName: junkerderprovinz
+WebSite: https://junkerderprovinz.github.io/bombvault/
+SourceCode: https://github.com/junkerderprovinz/bombvault
+IssueTracker: https://github.com/junkerderprovinz/bombvault/issues
+Changelog: https://github.com/junkerderprovinz/bombvault/releases
+Donate: https://buymeacoffee.com/junkerderprovinz
+
+AutoName: BombVault
+
+RepoType: git
+Repo: https://github.com/junkerderprovinz/bombvault.git
+
+Builds:
+  - versionName: 10.2.2
+    versionCode: 100202
+    commit: 35ddd2704055adc6c7ec3daa6eff7d7fe700014c
+    subdir: android/app
+    sudo:
+      - apt-get update
+      - apt-get install -y nodejs npm
+    gradle:
+      - yes
+    prebuild:
+      - cd ../../web
+      - node -e 'const fs = require("fs"); const p = JSON.parse(fs.readFileSync("package.json"));
+        delete p.devDependencies["bombvault-lint-ts"]; fs.writeFileSync("package.json",
+        JSON.stringify(p, null, 2)); const l = JSON.parse(fs.readFileSync("package-lock.json"));
+        delete l.packages[""].devDependencies["bombvault-lint-ts"]; for (const k of
+        ["lint-ts", "lint-ts/node_modules/typescript", "node_modules/bombvault-lint-ts"])
+        delete l.packages[k]; fs.writeFileSync("package-lock.json", JSON.stringify(l,
+        null, 2))'
+      - npm ci --legacy-peer-deps
+      - npm run build:launcher
+    scandelete:
+      - web/node_modules
+      - internal/zfs/testdata
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^v[0-9.]+$
+UpdateCheckData: android/gradle.properties|bombvaultVersionCode=(\d+)|.|bombvaultVersion=([\d.]+)
+CurrentVersion: 10.2.2
+CurrentVersionCode: 100202
