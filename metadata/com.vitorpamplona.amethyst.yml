@@ -1075,6 +1075,38 @@ Builds:
       - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
         --replace unaligned.apk $$OUT$$
 
+  - versionName: 1.20.0
+    versionCode: 465
+    commit: 38a4883cc70f2dfa9f2f8236adea970bb1d7d493
+    subdir: amethyst
+    sudo:
+      - apt-get update
+      - apt-get install -y rustup gcc libc-dev cmake ninja-build
+    gradle:
+      - fdroid
+    srclibs:
+      - reproducible-apk-tools@v0.3.0
+    scandelete:
+      - amethyst/src/main/jniLibs
+      - amethyst/src/test
+      - commons/src/jvmTest
+      - benchmark/src/androidTest
+    build:
+      - cd ../tools/arti-build
+      - sdkmanager "ndk;$(cat ANDROID_NDK_VERSION)"
+      - rustup target add aarch64-linux-android x86_64-linux-android
+      - cargo install cargo-ndk@4.1.2 --locked
+      - export PATH=$HOME/.cargo/bin:$PATH
+      - ./build-arti.sh
+      - cd ../zxing-cpp-build
+      - ./build-zxingcpp.sh
+    gradleprops:
+      - disableAbiSplits=true
+    postbuild:
+      - mv $$OUT$$ unaligned.apk
+      - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
+        --replace unaligned.apk $$OUT$$
+
 AllowedAPKSigningKeys: c2d0aa86bcb6b62090561a41bbe336e98b78c2d0210a498dc885f28e1348cf17
 
 MaintainerNotes: see https://gitlab.com/fdroid/fdroiddata/-/issues/2973#note_1428295385
@@ -1083,5 +1115,5 @@ MaintainerNotes: see https://gitlab.com/fdroid/fdroiddata/-/issues/2973#note_142
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: gradle/libs.versions.toml|appCode = "(\d+)"|.|app = "(.+)"
-CurrentVersion: 1.19.0
-CurrentVersionCode: 464
+CurrentVersion: 1.20.0
+CurrentVersionCode: 465
