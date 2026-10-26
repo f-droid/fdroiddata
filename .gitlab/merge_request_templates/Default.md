@@ -1,10 +1,4 @@
-<!--For updates or other types of MRs replace the text below-->
-
-
-
-
-
-
+<!--TEMPLATE FOR NEW APP INCLUSION! For updates or other types of MRs replace the text below-->
 
 
 
@@ -18,7 +12,7 @@
 
 ### Policy
 
-* [ ] The app complies with the [inclusion criteria](https://f-droid.org/docs/Inclusion_Policy).
+* [ ] The app complies with the [inclusion criteria](https://f-droid.org/docs/Inclusion_Policy). _Pay special attention to Quality point 6._
 * [ ] The original app author has been notified (and does not oppose the inclusion). If you are not the author, please paste the link of the reply from the author.
 * [ ] The upstream app source code repo contains the app metadata in a [Fastlane](https://gitlab.com/snippets/1895688) or [Triple-T](https://gitlab.com/snippets/1901490) folder structure. The summary and description must be included and images, icon, and changelog should also be provided for better user experience. The `en-US` locale must be included.
 
