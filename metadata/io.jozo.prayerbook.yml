@@ -440,9 +440,31 @@ Builds:
       - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
         --replace unaligned.apk $$OUT$$
 
+  - versionName: 0.14.0
+    versionCode: 27
+    commit: a3929f491e14421daa2524cfd1331f34e3af8cec
+    subdir: android/app
+    sudo:
+      - echo "deb http://deb.debian.org/debian forky main" > /etc/apt/sources.list.d/forky.list
+      - apt-get update
+      - apt-get install -y -t forky nodejs npm
+    init:
+      - cd ../..
+      - npm install
+      - npm run build
+      - npx cap sync android
+    gradle:
+      - yes
+    binary: https://codeberg.org/jozo/prayer-book/releases/download/%v/prayer-book-%v.apk
+    prebuild:
+      - sed -i -e '/gms/d' ../build.gradle
+      - sed -i -e '/foojay/d' ../settings.gradle
+    scandelete:
+      - node_modules
+
 AllowedAPKSigningKeys: f5f597716444fd6672f0a011ebe96b1356e37b28866489c664139c6027a8cc14
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 0.12.0
-CurrentVersionCode: 25
+CurrentVersion: 0.14.0
+CurrentVersionCode: 27
