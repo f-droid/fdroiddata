@@ -200,9 +200,26 @@ Builds:
     gradleprops:
       - voyager.enableAbiSplits=true
 
+  - versionName: 1.14.0
+    versionCode: 23
+    commit: 6c666245e7443146181f6cdf95d016adc86237c3
+    subdir: app
+    sudo:
+      - export CPUS_MAX=16
+      - export CPUS=$(getconf _NPROCESSORS_ONLN)
+      - for (( c=$CPUS_MAX; c<$CPUS; c++ )) ; do echo 0 > /sys/devices/system/cpu/cpu$c/online
+        ; done
+    gradle:
+      - yes
+    output: build/outputs/apk/release/app-universal-release-unsigned.apk
+    prebuild: sed -i -e 's/Xmx2048m/Xmx8g -XX:+UseParallelGC -XX:MaxMetaspaceSize=2g/'
+      ../gradle.properties
+    gradleprops:
+      - voyager.enableAbiSplits=true
+
 AllowedAPKSigningKeys: db496277d456751abe8ca6405026337c81a561a134e38d49c8e21fb8f036badf
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 1.13.0
-CurrentVersionCode: 22
+CurrentVersion: 1.14.0
+CurrentVersionCode: 23
