@@ -885,9 +885,39 @@ Builds:
       - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --replace unaligned.apk
         $$OUT$$
 
+  - versionName: 0.8.2
+    versionCode: 103
+    commit: 1d0c06b79829dbe8b86d6c7f57418a969956ae14
+    subdir: androidApp
+    sudo:
+      - export CPUS_MAX=6
+      - export CPUS=$(getconf _NPROCESSORS_ONLN)
+      - for (( c=$CPUS_MAX; c<$CPUS; c++ )) ; do echo 0 > /sys/devices/system/cpu/cpu$c/online
+        ; done
+    gradle:
+      - foss
+    binary: 
+      https://github.com/fast4x/RiPlay/releases/download/v%v/RiPlay-v%v-Android-foss.apk
+    srclibs:
+      - reproducible-apk-tools@v0.3.0
+    rm:
+      - bundletool.jar
+      - assets/chromecast/chromecast-receiver.zip
+      - desktopDistribution
+    prebuild:
+      - sed -i -e '/jetbrains.space/d' -e '/androidx.dev/d' -e '/maven.mozilla.org/d'
+        -e '/jogamp/d' -e '/foojay/d' ../settings.gradle.kts build.gradle.kts
+      - sed -i -e '/media3.cast/d' ../modules/aypcast/build.gradle.kts ../composeApp/build.gradle.kts
+        build.gradle.kts
+    ndk: r28c
+    postbuild:
+      - mv $$OUT$$ unaligned.apk
+      - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --replace unaligned.apk
+        $$OUT$$
+
 AllowedAPKSigningKeys: 9762e9ab732b0a1cf3c721168450533c8b1905ae1c9e658f488abb84debef2fb
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 0.8.1
-CurrentVersionCode: 102
+CurrentVersion: 0.8.2
+CurrentVersionCode: 103
