@@ -35,7 +35,31 @@ Builds:
     scandelete:
       - node_modules
 
+  - versionName: '0.10'
+    versionCode: 10
+    commit: 01095d2d06e8a31f6a014ab8a08580ac78a3e170
+    subdir: android/app
+    sudo:
+      - echo "deb https://deb.debian.org/debian forky main" > /etc/apt/sources.list.d/forky.list
+      - apt-get update
+      - apt-get install -y nodejs
+      - corepack enable
+    init:
+      - pushd ../..
+      - npm_config_engine_strict=false pnpm install --frozen-lockfile
+      - popd
+    gradle:
+      - yes
+    prebuild:
+      - pushd ../..
+      - bash setup.sh
+      - pnpm exec svelte-kit sync
+      - bash ./scripts/native/build-nogms.sh
+      - popd
+    scandelete:
+      - node_modules
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: '0.9'
-CurrentVersionCode: 9
+CurrentVersion: '0.10'
+CurrentVersionCode: 10
