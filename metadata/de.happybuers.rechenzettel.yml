@@ -205,6 +205,44 @@ Builds:
       - popd
       - mv $repo de.happybuers.rechenzettel
 
+  - versionName: 0.1.70
+    versionCode: 2070
+    commit: af6d9234d7f7ebbe9747d92e84170fd1f5c540b3
+    sudo:
+      - mkdir -p /builds/DaWasch
+      - chown -R vagrant /builds
+    output: build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+    prebuild:
+      - flutterVersion=$(sed -n -E "s/^[[:space:]]*FLUTTER_VERSION:[[:space:]]*(.*)$/\1/p"
+        .gitlab-ci.yml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export repo=/builds/DaWasch/rechenzettel-app
+      - cd ..
+      - mv de.happybuers.rechenzettel $repo
+      - pushd $repo
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - popd
+      - mv $repo de.happybuers.rechenzettel
+    scandelete:
+      - .pub-cache
+    build:
+      - export repo=/builds/DaWasch/rechenzettel-app
+      - cd ..
+      - mv de.happybuers.rechenzettel $repo
+      - pushd $repo
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export ORG_GRADLE_PROJECT_rechenzettelLegacyPackaging=true
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform="android-arm64"
+      - popd
+      - mv $repo de.happybuers.rechenzettel
+
 AllowedAPKSigningKeys: 5abfb05fc9cdab0ffaabc839be334e77c144878b68474ee0d1a70f3246eb0474
 
 AutoUpdateMode: Version
@@ -212,5 +250,5 @@ UpdateCheckMode: Tags ^v[0-9.]+$
 VercodeOperation:
   - '%c + 2000'
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 0.1.69
-CurrentVersionCode: 2069
+CurrentVersion: 0.1.70
+CurrentVersionCode: 2070
