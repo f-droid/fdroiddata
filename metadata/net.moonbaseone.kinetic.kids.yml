@@ -1,0 +1,85 @@
+Categories:
+  - Note
+  - Task
+License: AGPL-3.0-or-later
+AuthorName: Ingmar Struijs
+WebSite: https://github.com/ingmarstruijs/Kinetic
+SourceCode: https://github.com/ingmarstruijs/Kinetic
+IssueTracker: https://github.com/ingmarstruijs/Kinetic/issues
+
+Name: Kinetic Kids
+AutoName: Kinetic Kids
+
+RepoType: git
+Repo: https://github.com/ingmarstruijs/Kinetic.git
+
+Builds:
+  - versionName: 0.4.6
+    versionCode: 161
+    commit: 66e9f8e90fc73a7a1e2f9a3b1a033e8ef7a6d05e
+    subdir: apps/kids
+    output: build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
+    srclibs:
+      - flutter@stable
+    prebuild:
+      - cd ../..
+      - flutterVersion=$(tr -d '\r\n' < .flutter-version)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PATH="$$flutter$$/bin:$PATH"
+      - flutter config --no-analytics
+      - flutter pub get --enforce-lockfile
+    build:
+      - export PATH="$$flutter$$/bin:$PATH"
+      - flutter build apk --release --split-per-abi --target-platform=android-arm
+        --build-name=$$VERSION$$ --build-number=$(($$VERCODE$$ / 10))
+
+  - versionName: 0.4.6
+    versionCode: 162
+    commit: 66e9f8e90fc73a7a1e2f9a3b1a033e8ef7a6d05e
+    subdir: apps/kids
+    output: build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+    srclibs:
+      - flutter@stable
+    prebuild:
+      - cd ../..
+      - flutterVersion=$(tr -d '\r\n' < .flutter-version)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PATH="$$flutter$$/bin:$PATH"
+      - flutter config --no-analytics
+      - flutter pub get --enforce-lockfile
+    build:
+      - export PATH="$$flutter$$/bin:$PATH"
+      - flutter build apk --release --split-per-abi --target-platform=android-arm64
+        --build-name=$$VERSION$$ --build-number=$(($$VERCODE$$ / 10))
+
+  - versionName: 0.4.6
+    versionCode: 163
+    commit: 66e9f8e90fc73a7a1e2f9a3b1a033e8ef7a6d05e
+    subdir: apps/kids
+    output: build/app/outputs/flutter-apk/app-x86_64-release.apk
+    srclibs:
+      - flutter@stable
+    prebuild:
+      - cd ../..
+      - flutterVersion=$(tr -d '\r\n' < .flutter-version)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PATH="$$flutter$$/bin:$PATH"
+      - flutter config --no-analytics
+      - flutter pub get --enforce-lockfile
+    build:
+      - export PATH="$$flutter$$/bin:$PATH"
+      - flutter build apk --release --split-per-abi --target-platform=android-x64
+        --build-name=$$VERSION$$ --build-number=$(($$VERCODE$$ / 10))
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^v[0-9.]+-kids$
+VercodeOperation:
+  - '%c * 10 + 1'
+  - '%c * 10 + 2'
+  - '%c * 10 + 3'
+UpdateCheckData: apps/kids/pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 0.4.6
+CurrentVersionCode: 163
