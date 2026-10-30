@@ -91,8 +91,42 @@ Builds:
       - ../scripts/build-plugin-wasm.sh
     ndk: r27c
 
+  - versionName: 0.3.29-beta
+    versionCode: 32
+    commit: a5029e10fe50444a85203a2504ba48408a1a778b
+    timeout: 14400
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y --no-install-recommends make gcc libc-dev autoconf automake
+        libtool pkg-config libssl-dev rustup
+    gradle:
+      - yes
+    prebuild:
+      - rustup toolchain install 1.98.0 --profile minimal
+      - rustup default 1.98.0
+      - rustup target add aarch64-linux-android x86_64-linux-android wasm32-unknown-unknown
+      - CLANG_PRE="$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin"
+      - mkdir -p ../.cargo
+      - echo '[target.x86_64-linux-android]' > ../.cargo/config.toml
+      - echo "linker = \"$CLANG_PRE/x86_64-linux-android34-clang\"" >> ../.cargo/config.toml
+      - echo 'rustflags = ["-C", "link-arg=-lc++_shared"]' >> ../.cargo/config.toml
+      - echo '[target.aarch64-linux-android]' >> ../.cargo/config.toml
+      - echo "linker = \"$CLANG_PRE/aarch64-linux-android34-clang\"" >> ../.cargo/config.toml
+      - echo 'rustflags = ["-C", "link-arg=-lc++_shared"]' >> ../.cargo/config.toml
+      - printf 'sdk.dir=%s\nndk.dir=%s\n' "$$SDK$$" "$$NDK$$" > ../local.properties
+    scanignore:
+      - core/src/long_trip/data/region_adjacency.bin
+      - core/src/routing/elevation/data/country_polys.bin
+    build:
+      - export ANDROID_NDK_HOME="$$NDK$$"
+      - export ANDROID_HOME="$$SDK$$"
+      - ../scripts/build-android-native.sh all release
+      - ../scripts/build-plugin-wasm.sh
+    ndk: r27c
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v[0-9]+\.[0-9]+\.[0-9]+(-[A-Za-z0-9]+)?$
 UpdateCheckData: app/build.gradle.kts|versionCode\s=\s(\d+)|.|versionName\s=\s"(.*)"
-CurrentVersion: 0.3.26-beta
-CurrentVersionCode: 31
+CurrentVersion: 0.3.29-beta
+CurrentVersionCode: 32
