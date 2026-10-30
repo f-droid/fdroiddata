@@ -386,8 +386,31 @@ Builds:
       - export PUB_CACHE=$(pwd)/.pub-cache
       - ./flutterw build apk
 
+  - versionName: 1.0.2
+    versionCode: 202
+    commit: e27c7b328f7937a479a1a3ba041e41df378d6e2b
+    sudo:
+      - apt-get update
+      - apt-get install -y build-essential rustup
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+    prebuild:
+      - sed -i -e '/signingConfig /,/minifyEnabled/d' android/app/build.gradle
+      - git -C $$flutter$$ checkout -f $(cat .flutter-version)
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^[\d.]+$
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 0.6.27
-CurrentVersionCode: 52
+CurrentVersion: 1.0.2
+CurrentVersionCode: 202
