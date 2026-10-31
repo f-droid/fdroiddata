@@ -1,0 +1,63 @@
+Categories:
+  - Download
+License: AGPL-3.0-only
+AuthorName: junkerderprovinz
+WebSite: https://junkerderprovinz.github.io/knightloader/
+SourceCode: https://github.com/junkerderprovinz/knightloader
+IssueTracker: https://github.com/junkerderprovinz/knightloader/issues
+Changelog: https://github.com/junkerderprovinz/knightloader/releases
+Donate: https://buymeacoffee.com/junkerderprovinz
+
+AutoName: KnightLoader
+
+RepoType: git
+Repo: https://github.com/junkerderprovinz/knightloader.git
+
+Builds:
+  - versionName: 2.4.0
+    versionCode: 20400
+    commit: 2e67504cfd76a2cbd119b684f618599f4b57d065
+    subdir: mobile/android/app
+    sudo:
+      - apt-get update
+      - apt-get install -y nodejs npm
+    init:
+      - cd ../..
+      - npm ci
+      - find node_modules -type d -name local-maven-repo -prune -exec rm -rf {} +
+    gradle:
+      - yes
+    output: build/outputs/apk/release/app-release-unsigned.apk
+    prebuild:
+      - cd ../..
+      - node -e 'const fs = require("fs"); const p = JSON.parse(fs.readFileSync("package.json"));
+        p.expo = {autolinking:{android:{buildFromSource:[".*"]}}}; fs.writeFileSync("package.json",
+        JSON.stringify(p, null, 2))'
+      - find node_modules -type f \( -name "*.gradle" -o -name "*.gradle.kts" -o -name
+        "*.kt" \) -exec sed -i -e 's/JavaVersion.VERSION_17/JavaVersion.VERSION_21/g'
+        -e 's/jvmToolchain(17)/jvmToolchain(21)/g' -e 's/JvmTarget.fromTarget("17")/JvmTarget.fromTarget("21")/g'
+        -e 's/JvmTarget.JVM_17/JvmTarget.JVM_21/g' -e "s/jvmTarget = '17'/jvmTarget
+        = '21'/g" {} +
+      - npx expo prebuild -p android --clean
+      - sed -i -e '/signingConfig /d' android/app/build.gradle
+      - sed -i -e 's/^org.gradle.jvmargs=.*/org.gradle.jvmargs=-Xmx3072m -XX:MaxMetaspaceSize=1024m/'
+        android/gradle.properties
+      - printf '\norg.gradle.workers.max=2\n' >> android/gradle.properties
+    scanignore:
+      - mobile/node_modules/hermes-compiler/hermesc/linux64-bin/hermesc
+      - mobile/node_modules/expo-modules-core/android/ExpoModulesCorePlugin.gradle
+      - mobile/node_modules/react-native-safe-area-context/android/build.gradle
+      - mobile/node_modules/react-native-screens/android/build.gradle
+      - mobile/node_modules/react-native-webview/android/build.gradle
+    scandelete:
+      - mobile/node_modules
+      - internal/par2/testdata
+      - scripts/screenshots
+    gradleprops:
+      - reactNativeArchitectures=arm64-v8a
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^v[0-9.]+$
+UpdateCheckData: mobile/app.json|"versionCode":\s*(\d+)|.|"version":\s*"([\d.]+)"
+CurrentVersion: 2.4.0
+CurrentVersionCode: 20400
