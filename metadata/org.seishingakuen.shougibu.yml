@@ -1,0 +1,122 @@
+Categories:
+  - Board Game
+License: GPL-3.0-or-later
+AuthorName: Hui-Hong You
+SourceCode: https://github.com/hiroshiyui/SeiShinGakuen_ShougiBu
+IssueTracker: https://github.com/hiroshiyui/SeiShinGakuen_ShougiBu/issues
+Changelog: https://github.com/hiroshiyui/SeiShinGakuen_ShougiBu/blob/HEAD/CHANGELOG.md
+
+AutoName: 清正学園将棋部
+
+RepoType: git
+Repo: https://github.com/hiroshiyui/SeiShinGakuen_ShougiBu.git
+
+Builds:
+  - versionName: 1.0.12
+    versionCode: 20
+    commit: c167ceebc644ff66d65f4bf8e8c2d4839af382a7
+    timeout: 14400
+    sudo:
+      - apt-get update
+      - apt-get install -y pkgconf scons g++ rustup libx11-dev libxcursor-dev libxinerama-dev
+        libgl1-mesa-dev libglu1-mesa-dev libasound2-dev libpulse-dev libudev-dev libxi-dev
+        libxrandr-dev
+    output: seishingakuen.apk
+    srclibs:
+      - Godot@4.7.2-stable
+    scandelete:
+      - tools/fixtures/fixtures.bin
+    build:
+      - export ANDROID_NDK_ROOT=$$NDK$$
+      - export ANDROID_HOME=$$SDK$$
+      - export ANDROID_SDK_ROOT=$$SDK$$
+      - export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+      - export PATH="$HOME/.cargo/bin:$PATH"
+      - rustup toolchain install 1.99.1 --profile minimal --target aarch64-linux-android
+      - cargo install cargo-ndk --version 4.1.2 --locked
+      - pushd native/shogi_core
+      - cargo build --release --locked
+      - cargo ndk --platform 24 -t arm64-v8a --output-dir ../bin/android build --release
+        --locked
+      - popd
+      - mkdir -p native/bin/linux/x86_64
+      - cp native/shogi_core/target/release/libshogi_core.so native/bin/linux/x86_64/
+      - pushd $$Godot$$
+      - export SCONS="scons -j `nproc` verbose=no warnings=no progress=no"
+      - export COMMON_OFF="module_webrtc_enabled=no module_webxr_enabled=no module_websocket_enabled=no
+        module_jsonrpc_enabled=no module_enet_enabled=no module_upnp_enabled=no module_theora_enabled=no
+        module_mp3_enabled=no module_tinyexr_enabled=no module_noise_enabled=no module_interactive_music_enabled=no
+        module_camera_enabled=no module_visual_shader_enabled=no"
+      - export EDITOR_OFF="disable_xr=yes module_jolt_physics_enabled=no module_godot_physics_3d_enabled=no
+        module_navigation_3d_enabled=no module_raycast_enabled=no module_lightmapper_rd_enabled=no
+        module_csg_enabled=no module_gridmap_enabled=no module_vhacd_enabled=no module_xatlas_unwrap_enabled=no
+        module_gltf_enabled=no module_fbx_enabled=no module_objectdb_profiler_enabled=no"
+      - $SCONS target=editor platform=linuxbsd $COMMON_OFF $EDITOR_OFF
+      - $SCONS target=template_release platform=android arch=arm64 production=yes
+        swappy=no generate_android_binaries=yes generate_apk=yes
+      - popd
+      - mv $$Godot$$/bin/android_release.apk ./android_release.apk
+      - sed -i -e 's|^package/signed=.*|package/signed=false|' export_presets.cfg
+      - sed -i -e 's|^custom_template/release=.*|custom_template/release="./android_release.apk"|'
+        export_presets.cfg
+      - $$Godot$$/bin/godot.linuxbsd.editor.x86_64 --headless --import
+      - export GODOT_CFG=$(ls ~/.config/godot/editor_settings-*.tres)
+      - sed -i -e "s|^export/android/java_sdk_path.*|export/android/java_sdk_path
+        = \"$JAVA_HOME\"|" $GODOT_CFG
+      - sed -i -e 's|^export/android/android_sdk_path.*|export/android/android_sdk_path
+        = "$$SDK$$"|' $GODOT_CFG
+      - grep -q '^export/android/java_sdk_path' $GODOT_CFG || echo "export/android/java_sdk_path
+        = \"$JAVA_HOME\"" >> $GODOT_CFG
+      - grep -q '^export/android/android_sdk_path' $GODOT_CFG || echo 'export/android/android_sdk_path
+        = "$$SDK$$"' >> $GODOT_CFG
+      - $$Godot$$/bin/godot.linuxbsd.editor.x86_64 --headless --export-release "Android
+        arm64" seishingakuen.apk
+    ndk: 29.0.14206865
+
+MaintainerNotes: |-
+  Godot 4.7.2 project with a Rust GDExtension (native/shogi_core: move
+  generation, rules, MCTS, ONNX inference via tract). Both the engine
+  (editor + arm64 Android template) and the GDExtension are built from
+  source; the export uses the scons-built android_release.apk as
+  custom template and package/signed=false, so F-Droid signs the result.
+
+  rustup comes from the Debian repository; the Rust toolchain is pinned
+  in native/shogi_core/rust-toolchain.toml (1.99.1) — keep the
+  `rustup toolchain install` version in sync with it. cargo-ndk version
+  follows the one used upstream (4.1.2).
+
+  Godot's android gradle template requires the NDK version from
+  platform/android/java/app/config.gradle (29.0.14206865 for 4.7.2);
+  swappy=no avoids Godot downloading a prebuilt Swappy binary.
+
+  The Android template must be a full engine build: the GDExtension is
+  built with godot-rust, which loads the method tables of every engine
+  class at startup and panics ("Failed to load class method
+  OpenXRExtensionWrapper::get_openxr_api") if any class is missing, so
+  the extension never registers and the board stays empty. Do not pass
+  disable_3d / disable_xr or module_*_enabled=no to the template_release
+  build. Only the editor build (used just for --import and --export)
+  drops unused modules to cut compile time; the extension is not needed
+  there. Texture encoders (etcpak/astcenc) stay enabled because some
+  textures are imported VRAM-compressed.
+
+  models/bonanza.onnx (12 MB) is the policy + value network, trained by
+  the upstream author with the sibling ShogiDojo project (GPL-3.0-or-later)
+  on Floodgate game records published by the shogi-server project
+  (Bonanza-method supervised training). The weights ship under the repo's
+  GPL-3.0-or-later; provenance is in models/README.md upstream and in
+  ShogiDojo's NOTICE.md. It is an app asset (export
+  include_filter="*.onnx") loaded at runtime, not executable code.
+
+  tools/fixtures/fixtures.bin is a byte-parity test fixture for the Rust
+  position encoder (generated by tools/gen_fixtures.py from the ShogiDojo
+  Python encoder); it is only read by `cargo test`, hence scandelete.
+
+  The app UI is Japanese-only; fastlane metadata exists for ja and en-US.
+  See models/README.md upstream for the ONNX model's provenance and licence.
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: export_presets.cfg|version/code=(\d+)|.|version/name="([\d.]+)"
+CurrentVersion: 1.0.12
+CurrentVersionCode: 20
