@@ -1,0 +1,52 @@
+AntiFeatures:
+  NonFreeNet:
+    en-US: Everything it shows and writes goes through AniList, a proprietary online
+      service.
+Categories:
+  - Internet
+  - Multimedia
+License: AGPL-3.0-or-later
+AuthorName: Kyu
+WebSite: https://suzora.github.io/Karasu/
+SourceCode: https://github.com/Suzora/Karasu
+IssueTracker: https://github.com/Suzora/Karasu/issues
+Changelog: https://github.com/Suzora/Karasu/blob/HEAD/CHANGELOG.md
+
+AutoName: Karasu
+
+RepoType: git
+Repo: https://github.com/Suzora/Karasu
+
+Builds:
+  - versionName: 1.68.0.926
+    versionCode: 1000926
+    commit: 5fa9e7c35b8216b8760182f7ddce20e5205ddf3e
+    subdir: src-tauri/gen/android/app
+    sudo:
+      - apt-get update
+      - apt-get install -y --no-install-recommends build-essential pkg-config nodejs
+        npm rustup
+    init:
+      - rustup toolchain install 1.97.1 --profile minimal --target aarch64-linux-android
+      - cd ../../../..
+      - npm ci
+    output: build/outputs/apk/arm64/release/app-arm64-release-unsigned.apk
+    prebuild: sed -i -e '/REQUEST_INSTALL_PACKAGES/d' src/main/AndroidManifest.xml
+    scandelete:
+      - node_modules
+    build:
+      - export KARASU_NO_SELF_UPDATE=1 KARASU_UNSIGNED=1
+      - ln -s "$(command -v gradle)" ../gradlew
+      - cd ../../../..
+      - export RUSTFLAGS="--remap-path-prefix=$PWD=/build --remap-path-prefix=$HOME/.cargo=/cargo"
+      - npx tauri android build --apk --target aarch64 --split-per-abi
+    ndk: r27b
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^v[0-9.]+$
+VercodeOperation:
+  - '%c + 1000000'
+UpdateCheckData: 
+  src-tauri/src/commands/update.rs|COMMIT_NUMBER:\s*u32\s*=\s*(\d+);|.|FULL_VERSION:\s*&str\s*=\s*"([^"]+)";
+CurrentVersion: 1.68.0.926
+CurrentVersionCode: 1000926
