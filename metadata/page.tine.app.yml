@@ -411,8 +411,31 @@ Builds:
         aarch64 --apk
     ndk: 26.3.11579264
 
+  - versionName: 0.8.3
+    versionCode: 8003
+    commit: e09f71d59ed72f0d9f553a815817b28354dc08fc
+    sudo:
+      - apt-get update
+      - apt-get install -y nodejs npm binaryen gcc make libc-dev rustup
+    output: 
+      src-tauri/gen/android/app/build/outputs/apk/universal/release/app-universal-release-unsigned.apk
+    prebuild: sed -i 's/page\.tine\.Tine/page.tine.app/' src-tauri/tauri.conf.json
+    scandelete:
+      - fixtures/plugin-graph-ownership/plugin.wasm
+      - fixtures/plugin-revocation/plugin.wasm
+    build:
+      - rustup default 1.96.0
+      - export PATH="$HOME/.cargo/bin:$PATH"
+      - cargo install wasm-pack --version 0.15.0 --locked
+      - rustup target add aarch64-linux-android wasm32-unknown-unknown
+      - npm ci
+      - npm run build:wasm
+      - TINE_COMMUNITY_REGISTRY=0 ./node_modules/.bin/tauri android build --target
+        aarch64 --apk
+    ndk: 26.3.11579264
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v[0-9.]+$
 UpdateCheckData: src-tauri/tauri.conf.json|"versionCode":\s*([0-9]+)|.|"version":\s*"([0-9.]+)"
-CurrentVersion: 0.8.2
-CurrentVersionCode: 8002
+CurrentVersion: 0.8.3
+CurrentVersionCode: 8003
