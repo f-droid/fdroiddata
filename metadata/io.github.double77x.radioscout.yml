@@ -1,0 +1,61 @@
+AntiFeatures:
+  NonFreeNet:
+    en-US: Station artwork loads through third-party image proxies; BBC track titles
+      resolve through a companion web service.
+Categories:
+  - Radio
+License: MIT
+AuthorName: Double77x
+WebSite: https://radioscout.pages.dev
+SourceCode: https://github.com/Double77x/radioscout
+IssueTracker: https://github.com/Double77x/radioscout/issues
+Changelog: https://github.com/Double77x/radioscout/releases
+
+AutoName: RadioScout
+
+RepoType: git
+Repo: https://github.com/Double77x/radioscout.git
+Binaries: 
+  https://github.com/Double77x/radioscout/releases/download/fdroid-reference-%v-%c/radioscout-fdroid-%v-%c.apk
+
+Builds:
+  - versionName: 0.4.6
+    versionCode: 406
+    commit: 8581c5d4b51481033a70004c00da29f9c714ad6c
+    subdir: android/app
+    sudo:
+      - echo "deb https://deb.debian.org/debian forky main" > /etc/apt/sources.list.d/forky.list
+      - apt-get update
+      - apt-get install -y -t forky npm jq
+      - npm install --global pnpm@12.8.1
+    gradle:
+      - yes
+    prebuild:
+      - cd ../..
+      - export SOURCE_DATE_EPOCH="$(git log -1 --format=%ct)"
+      - export TZ=UTC
+      - pnpm install --frozen-lockfile
+      - VITE_DISTRIBUTION=fdroid pnpm exec vp run build
+      - node scripts/strip-sw.mjs
+      - node scripts/normalize-ssr-timestamps.mjs dist/client
+      - mv capacitor.config.ts capacitor.config.ts.fdroid
+      - cp capacitor.config.fdroid.json capacitor.config.json
+      - VITE_DISTRIBUTION=fdroid npx cap sync android
+      - rm capacitor.config.json
+      - mv capacitor.config.ts.fdroid capacitor.config.ts
+      - rm -rf node_modules/@capgo/capacitor-updater node_modules/.pnpm/@capgo+capacitor-updater@*
+      - cd android
+      - sed -i '/capgo-capacitor-updater/d' capacitor.settings.gradle app/capacitor.build.gradle
+      - registry=app/src/main/assets/capacitor.plugins.json
+      - jq -j '[.[] | select(.pkg != "@capgo/capacitor-updater")]' "$registry" > "$registry.tmp"
+      - mv "$registry.tmp" "$registry"
+    scandelete:
+      - node_modules
+
+AllowedAPKSigningKeys: 31a9b5f8ea747d0dd9ad9e8428e27d8a6e4219ecdf5a88d2f28f3f4a56417761
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^v[0-9.]+$
+UpdateCheckData: android/app/build.gradle|versionCode\s(\d+)||v([\d.]+)
+CurrentVersion: 0.4.6
+CurrentVersionCode: 406
