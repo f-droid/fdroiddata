@@ -86,8 +86,32 @@ Builds:
       - web/node_modules
       - internal/zfs/testdata
 
+  - versionName: 10.4.0
+    versionCode: 100400
+    commit: 48c7597cc1e1673ef58977e5b4509d8c0f87abc2
+    subdir: android/app
+    sudo:
+      - apt-get update
+      - apt-get install -y nodejs npm
+    gradle:
+      - yes
+    prebuild:
+      - cd ../../web
+      - node -e 'const fs = require("fs"); const p = JSON.parse(fs.readFileSync("package.json"));
+        delete p.devDependencies["bombvault-lint-ts"]; fs.writeFileSync("package.json",
+        JSON.stringify(p, null, 2)); const l = JSON.parse(fs.readFileSync("package-lock.json"));
+        delete l.packages[""].devDependencies["bombvault-lint-ts"]; for (const k of
+        ["lint-ts", "lint-ts/node_modules/typescript", "node_modules/bombvault-lint-ts"])
+        delete l.packages[k]; fs.writeFileSync("package-lock.json", JSON.stringify(l,
+        null, 2))'
+      - npm ci --legacy-peer-deps
+      - npm run build:launcher
+    scandelete:
+      - web/node_modules
+      - internal/zfs/testdata
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v[0-9.]+$
 UpdateCheckData: android/gradle.properties|bombvaultVersionCode=(\d+)|.|bombvaultVersion=([\d.]+)
-CurrentVersion: 10.3.8
-CurrentVersionCode: 100308
+CurrentVersion: 10.4.0
+CurrentVersionCode: 100400
