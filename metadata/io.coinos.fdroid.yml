@@ -1,0 +1,53 @@
+AntiFeatures:
+  NonFreeNet:
+    en-US: Posts load pictures, videos and link previews from third-party media hosts
+      (nostr.build, primal.net and others, YouTube thumbnails from i.ytimg.com), name@domain
+      payment addresses are looked up through Cloudflare's and Google's DNS-over-HTTPS
+      resolvers, and block explorer data comes from mempool.space.
+  TetheredNet:
+    en-US: Spending and Lightning payments go through the coinos Ark server (ark.coinos.io),
+      @coinos.io payment addresses through the coinos name registrar, and chat and
+      notifications through the coinos relays. The server code is published at git.coinos.io,
+      but this build is fixed to the coinos instances.
+Categories:
+  - Wallet
+License: MIT
+AuthorName: Adam Soltys
+WebSite: https://v3.coinos.io
+SourceCode: https://git.coinos.io/coinosv3.git/
+IssueTracker: 
+  https://gitworkshop.dev/npub1w27mc4aa6m0ufe3xs5z3m6qyr52gc0rglept7vqlwx4xeaf72tasnqz70r/coinosv3/issues
+
+AutoName: Coinos
+
+RepoType: git
+Repo: https://git.coinos.io/coinosv3.git
+Binaries: https://git.coinos.io/releases/download/fdroid-v%v/coinos-fdroid-%v.apk
+
+Builds:
+  - versionName: '1.9'
+    versionCode: 10
+    commit: e1bc34923bed8fd00c5a3cdacdfb7f102c87d7a3
+    subdir: android/app
+    sudo:
+      - curl -fsSL -o /tmp/bun.zip 
+        https://github.com/oven-sh/bun/releases/download/bun-v1.3.9/bun-linux-x64-baseline.zip
+      - echo "104d4d037f4b35e10215c0507e1779691f39c57bd91ddeefe11cad781e3fc4b9  /tmp/bun.zip"
+        | sha256sum -c
+      - unzip -q /tmp/bun.zip -d /tmp/bun
+      - install -m 0755 /tmp/bun/bun-linux-x64-baseline/bun /usr/local/bin/bun
+    gradle:
+      - fdroid
+    prebuild:
+      - cd ../..
+      - bun install --frozen-lockfile
+      - HAL_NO_SW=1 bun run build
+    scandelete:
+      - node_modules
+
+AllowedAPKSigningKeys: 766483ab8372c02f8406d29595e7389a2869190b429e0ffd092ebb0bfa2bc2f4
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^fdroid-v[0-9.]+$
+CurrentVersion: '1.9'
+CurrentVersionCode: 10
