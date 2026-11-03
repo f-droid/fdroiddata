@@ -44,13 +44,41 @@ Builds:
     build: ./build.sh
     ndk: 30.0.16248370
 
+  - versionName: 3.0.0
+    versionCode: 2016220003
+    commit: 36b75a504e3abb0c4a95c9c35642234ce5e3820c
+    timeout: 36000
+    sudo:
+      - echo "deb https://deb.debian.org/debian bookworm main" > /etc/apt/sources.list.d/bookworm.list
+      - apt-get update
+      - apt-get install -y -t bookworm openjdk-17-jdk-headless
+      - update-java-alternatives -s java-1.17.0-openjdk-amd64
+      - apt-get install -y cmake make m4 pkg-config python-is-python3 python3-venv
+        tcl gyp ninja-build bzip2 libffi-dev libsqlite3-dev binutils-dev clang lld
+        libssl-dev zlib1g-dev nodejs terser rustup
+    output: 
+      ../srclib/MozFennec/obj/gradle/build/mobile/android/fenix/app/outputs/apk/release/app-*-release-unsigned.apk
+    srclibs:
+      - MozFennec@FIREFOX-ANDROID_159_0_BUILD1
+      - MozAppServices@v159.0.1
+      - MozGlean@v70.2.1
+      - MozGleanAS@v70.0.0
+      - wasi-sdk@wasi-sdk-20
+      - llvm@2d287f51eff2a5fbf84458a33f7fb2493cf67965
+      - llvm_android@9e20ac0b949feedcfe3da791189310f6ebcbc7a8
+      - toolchain-utils@d71e320ab860721f764fe7403588641c8a7bc65d
+    prebuild: ./prebuild.sh $$VERSION$$ $$VERCODE$$
+    build: ./build.sh
+    ndk: 30.0.16248370
+
 MaintainerNotes: |-
   Built like Fennec F-Droid: the Repo is dejavubuild, a fork of relan's fennecbuild, and Firefox comes in as the
-  MozFennec srclib at a FIREFOX-ANDROID tag. 2.3.4 uses FIREFOX-ANDROID_159_0_BUILD1, the 159.0 release build, as
+  MozFennec srclib at a FIREFOX-ANDROID tag. 2.3.4 and 3.0.0 use FIREFOX-ANDROID_159_0_BUILD1, the 159.0 release build, as
   Mozilla's FIREFOX-ANDROID_159_0_RELEASE tag is not out yet (159.0 ships 2026-10-27); later builds use the
   FIREFOX-ANDROID_*_RELEASE tags. prebuild.sh applies dejavu.patch
   (Dejavu's changes to that Firefox, generated from the Dejavu repository) and copies dejavu-overlay (Dejavu's
-  pictures) before fennecbuild's own patches. Application Services, Glean, WASI SDK and LLVM are built from source as in Fennec.
+  pictures) before fennecbuild's own patches, skipping those Dejavu already carries (m-c-liberate and the
+  marionette.hide option since 3.0.0). Application Services, Glean, WASI SDK and LLVM are built from source as in Fennec.
 
   Dejavu builds without Google's and Adjust's libraries by itself (stand-ins in src/foss), so dejavubuild drops
   fennecbuild's gecko-liberate, a-c-liberate and fenix-liberate, and needs no microG. m-c-liberate still takes the
@@ -78,5 +106,5 @@ MaintainerNotes: |-
 
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: 2.3.4
-CurrentVersionCode: 2016210304
+CurrentVersion: 3.0.0
+CurrentVersionCode: 2016220003
