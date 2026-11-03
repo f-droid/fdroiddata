@@ -1,0 +1,46 @@
+Categories:
+  - Social Network
+License: AGPL-3.0-or-later
+AuthorName: Vadim Filin
+AuthorEmail: contact@warpnet.site
+WebSite: https://warpnet.site
+SourceCode: https://github.com/Warp-net/warpnet
+IssueTracker: https://github.com/Warp-net/warpnet/issues
+
+RepoType: git
+Repo: https://github.com/Warp-net/warpnet.git
+Binaries: https://github.com/Warp-net/warpnet/releases/download/v%v/warpdroid.apk
+
+Builds:
+  - versionName: 0.8.83
+    versionCode: 800830
+    commit: ffd98a7b3763b37dc120308dc37fb258164577ab
+    subdir: warpdroid/app
+    sudo:
+      - apt-get update
+      - apt-get install -y gcc libc-dev make golang-go
+    gradle:
+      - yes
+    srclibs:
+      - go@go1.26.3
+    prebuild: sdkmanager "platforms;android-21"
+    scandelete:
+      - vendor
+    build:
+      - pushd $$go$$/src
+      - GOROOT_BOOTSTRAP="$(go env GOROOT)" ./make.bash && popd
+      - export GOROOT="$$go$$"
+      - export PATH="$$go$$/bin:$PATH"
+      - cd ../..
+      - go mod download
+      - cd warpdroid/node
+      - bash build-native.sh
+    ndk: r27c
+
+AllowedAPKSigningKeys: eabdd61e5bcbd6615a3f54977c06646c0f5422d845d37c818286b7d34285dfec
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^v[0-9.]+$
+UpdateCheckData: warpdroid/fdroid/versionCode|(\d+)|version|([\d.]+)
+CurrentVersion: 0.8.83
+CurrentVersionCode: 800830
