@@ -1,0 +1,67 @@
+AntiFeatures:
+  NonFreeNet:
+    en-US: Relies on the devnull service.
+Categories:
+  - Social Network
+License: MPL-2.0
+AuthorName: Siddarth Kumar
+AuthorWebSite: https://siddarthkay.com
+WebSite: https://siddarthkay.com/null-pointer/support
+SourceCode: https://github.com/sidtech-solutions/null-pointer
+IssueTracker: https://github.com/sidtech-solutions/null-pointer/issues
+Changelog: https://github.com/sidtech-solutions/null-pointer/releases
+
+AutoName: null-pointer
+
+RepoType: git
+Repo: https://github.com/sidtech-solutions/null-pointer.git
+Binaries: 
+  https://github.com/sidtech-solutions/null-pointer/releases/download/v%v/null-pointer-v%v-arm64-v8a.apk
+
+Builds:
+  - versionName: 1.1.2
+    versionCode: 9
+    commit: 4aff54ede34433fe2af0f872ec4d3c946ab518b5
+    sudo:
+      - echo "deb https://deb.debian.org/debian bookworm main" > /etc/apt/sources.list.d/bookworm.list
+      - echo "deb https://deb.debian.org/debian forky main" > /etc/apt/sources.list.d/forky.list
+      - apt-get update
+      - apt-get install -y -t bookworm openjdk-17-jdk-headless
+      - update-java-alternatives -s java-1.17.0-openjdk-amd64
+      - apt-get install -y -t forky nodejs npm
+    output: android/app/build/outputs/apk/release/app-release-unsigned.apk
+    srclibs:
+      - reproducible-apk-tools@v0.3.2
+    prebuild:
+      - npm ci
+      - rm -rf node_modules/expo-dev-client node_modules/expo-dev-launcher node_modules/expo-dev-menu
+        node_modules/expo-dev-menu-interface
+      - rm -rf ios
+      - npx expo prebuild --platform android --no-install
+    scanignore:
+      - node_modules/hermes-compiler/hermesc/linux64-bin/hermesc
+      - node_modules/expo-modules-core/android/ExpoModulesCorePlugin.gradle
+      - node_modules/react-native-screens/android/build.gradle
+      - node_modules/react-native-safe-area-context/android/build.gradle
+      - node_modules/react-native-svg/android/build.gradle
+      - node_modules/react-native-pager-view/android/build.gradle
+      - node_modules/@react-native-async-storage/async-storage/android/build.gradle
+      - node_modules/@react-native-masked-view/masked-view/android/build.gradle
+      - node_modules/@siteed/audio-studio/android/build.gradle
+      - node_modules/react-native-view-shot/android/build.gradle
+    scandelete:
+      - node_modules
+    build:
+      - cd android
+      - gradle assembleRelease -PreactNativeArchitectures=arm64-v8a
+    ndk: r27b
+    postbuild: $$reproducible-apk-tools$$/inplace-fix.py --internal --zipalign --page-size
+      16 fix-pg-map-id $$OUT$$ '0000000000000000000000000000000000000000000000000000000000000000'
+
+AllowedAPKSigningKeys: 3a56e65473fb6156bc6cd0458063f5478d7a94a022cd8a718316ed245c305458
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^v[0-9.]+$
+UpdateCheckData: 'app.json|"versionCode": (\d+)|.|"version": "([\d.]+)"'
+CurrentVersion: 1.1.2
+CurrentVersionCode: 9
