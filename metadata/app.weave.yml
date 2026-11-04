@@ -36,6 +36,28 @@ Builds:
     gradleprops:
       - weaveFdroidBuild=true
 
+  - versionName: 0.12.0
+    versionCode: 59
+    commit: 1938c7d65b7531a0067877b3c0f5d66542dee62a
+    subdir: Android/Source/app
+    sudo:
+      - apt-get update
+      - apt-get install -y gcc libc-dev rustup
+    gradle:
+      - yes
+    prebuild:
+      - sdkmanager "platforms;android-36.1" "build-tools;36.1.0"
+      - rustup default 1.97.1
+      - rustup target add aarch64-linux-android x86_64-linux-android
+      - cargo install cargo-ndk@4.1.2 --locked
+      - pushd ../native/veilknit-daemon
+      - cargo fetch --locked
+      - popd
+      - sed -i -e 's|"cargo",|"/usr/bin/cargo",|' build.gradle.kts
+    ndk: r28c
+    gradleprops:
+      - weaveFdroidBuild=true
+
 AllowedAPKSigningKeys: 10013c64a8fa36fff40e2718823ea3e7bf5aa1878cb8d2507c1446151891060c
 
 MaintainerNotes: |-
@@ -61,5 +83,5 @@ MaintainerNotes: |-
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 0.11.6-startup-tips
-CurrentVersionCode: 44
+CurrentVersion: 0.12.0
+CurrentVersionCode: 59
