@@ -1,0 +1,42 @@
+Categories:
+  - Messaging
+License: AGPL-3.0-only
+AuthorName: 大贤者一秀
+AuthorEmail: 4722522@gmail.com
+AuthorWebSite: https://github.com/619dev
+SourceCode: https://github.com/619dev/ppp-f-droid
+IssueTracker: https://github.com/619dev/ppp-f-droid/issues
+
+AutoName: PaperPhonePlus
+
+RepoType: git
+Repo: https://github.com/619dev/ppp-f-droid.git
+
+Builds:
+  - versionName: 2.6.2
+    versionCode: 26002
+    commit: 83f2d82770d83ec69d7aa424c1c17d0326f7cc75
+    subdir: android/app
+    sudo:
+      - echo "deb https://deb.debian.org/debian forky main" > /etc/apt/sources.list.d/forky.list
+      - apt-get update
+      - apt-get install -y -t forky npm
+    init:
+      - cd ../..
+      - sh scripts/check-fdroid.sh
+      - npm ci --ignore-scripts
+    gradle:
+      - yes
+    prebuild:
+      - cd ../..
+      - sh scripts/check-fdroid.sh
+      - npm run build
+      - npx --no-install cap sync android
+      - sh scripts/check-fdroid.sh
+    scandelete:
+      - node_modules
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: 2.6.2
+CurrentVersionCode: 26002
