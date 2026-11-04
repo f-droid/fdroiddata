@@ -1,0 +1,41 @@
+Categories:
+  - Internet
+  - Science & Education
+License: MIT
+AuthorName: Quavon Development
+AuthorEmail: contact@quavon.de
+WebSite: https://jackpoll.org
+SourceCode: https://github.com/jackpoll-org/jackpoll
+IssueTracker: https://github.com/jackpoll-org/jackpoll/issues
+
+AutoName: Jackpoll
+
+RepoType: git
+Repo: https://github.com/jackpoll-org/jackpoll.git
+Binaries: https://github.com/jackpoll-org/jackpoll/releases/download/v%v/jackpoll-%v.apk
+
+Builds:
+  - versionName: 1.0.5
+    versionCode: 6
+    commit: 4693c57876de801cd0a911e33e017db42b4ea03d
+    subdir: apps/frontend/android/app
+    sudo:
+      - echo "deb https://deb.debian.org/debian forky main" > /etc/apt/sources.list.d/forky.list
+      - apt-get update
+      - apt-get install -y -t forky npm
+      - npm install -g pnpm@11.4.0
+    gradle:
+      - fdroid
+    prebuild:
+      - cd ../..
+      - pnpm install --frozen-lockfile --ignore-scripts --store-dir /tmp/pnpm-store
+      - pnpm exec cap sync android
+    scandelete:
+      - apps/frontend/node_modules/
+
+AllowedAPKSigningKeys: 879d9185bb491834aea31c81c7f29308c317ea255920bb778947378c33974998
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^v[0-9.]+$
+CurrentVersion: 1.0.5
+CurrentVersionCode: 6
