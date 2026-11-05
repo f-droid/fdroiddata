@@ -5,8 +5,8 @@ License: Apache-2.0
 AuthorName: Jigsaw
 AuthorEmail: jigsaw-code@google.com
 WebSite: https://getoutline.org
-SourceCode: https://github.com/Jigsaw-Code/outline-apps
-IssueTracker: https://github.com/Jigsaw-Code/outline-apps/issues
+SourceCode: https://github.com/OutlineFoundation/outline-apps
+IssueTracker: https://github.com/OutlineFoundation/outline-apps/issues
 
 AutoName: Outline
 Description: |-
@@ -15,7 +15,7 @@ Description: |-
   with any Shadowsocks server.
 
 RepoType: git
-Repo: https://github.com/Jigsaw-Code/outline-apps.git
+Repo: https://github.com/OutlineFoundation/outline-apps.git
 
 Builds:
   - versionName: 1.8.1
@@ -631,11 +631,54 @@ Builds:
       - npx cordova compile android --release -- --packageType=apk --gradleArg=--include-build=../../src/cordova/android/OutlineAndroidLib
     ndk: r28c
 
+  - versionName: 1.22.5
+    versionCode: 56
+    commit: a801d78848e4d5333f3b0fb48bc5a172252352c5
+    sudo:
+      - apt-get update
+      - apt-get install -y make g++ libc-dev
+      - apt-get install -y -t trixie-backports golang-1.26-go
+      - echo "deb https://deb.debian.org/debian forky main" > /etc/apt/sources.list.d/forky.list
+      - apt-get update
+      - apt-get install -y -t forky npm
+    output: client/capacitor/android/app/build/outputs/apk/release/*.apk
+    rm:
+      - client/src/cordova/apple
+      - client/src/cordova/plugin/apple
+      - client/src/cordova/android/OutlineAndroidLib/gradle/wrapper
+      - client/electron
+      - client/web/app/main.electron.ts
+      - client/web/app/outline_server_repository/vpn.electron.ts
+      - server_manager
+      - third_party
+    prebuild:
+      - sed -i -e '/"electron/d' -e '/puppeteer/d' -e '/engines/,/^  },/d' {.,client}/package.json
+      - sed -i -e "/if (buildMode === 'release') {/,/^  }$/d" client/capacitor/web_bundle.mjs
+      - npm install --allow-git=all
+      - sdkmanager 'build-tools;36.0.0' 'build-tools;35.0.0' 'platforms;android-36'
+    scanignore:
+      - client/capacitor/android/build.gradle
+      - client/capacitor/plugins/capacitor-plugin-outline/android/build.gradle
+      - client/src/cordova/android/OutlineAndroidLib/settings.gradle
+      - client/src/cordova/plugin/android/build-extras.gradle
+      - node_modules/@capacitor/cli/assets/capacitor-cordova-android-plugins.tar.gz
+    scandelete:
+      - node_modules
+      - client/node_modules
+    build:
+      - export PATH=/usr/lib/go-1.26/bin:$PATH
+      - npm run action client/capacitor/web_build android -- --buildMode=release --versionName=$$VERSION$$
+        --buildNumber=$$VERCODE$$
+      - cd client/capacitor
+      - npx cap sync android
+      - cd android
+      - gradle assembleRelease -PoutlineVersionName=$$VERSION$$ -PoutlineVersionCode=$$VERCODE$$
+    ndk: r28c
+
 MaintainerNotes: The upstream version code is generated based on the timestamp. We
   just increase it for every update.
 
-ArchivePolicy: 12
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: 1.19.6-rc.1
-CurrentVersionCode: 55
+CurrentVersion: 1.22.5
+CurrentVersionCode: 56
