@@ -63,8 +63,58 @@ Builds:
     gradleprops:
       - reactNativeArchitectures=arm64-v8a
 
+  - versionName: 2.4.5
+    versionCode: 20405
+    commit: acddb106441f8e50fcc2236b7bdee3d9814a020d
+    subdir: mobile/android/app
+    sudo:
+      - apt-get update
+      - apt-get install -y nodejs npm
+      - apt-get install -y -t trixie-backports golang-go
+    init:
+      - cd ../../..
+      - npm --prefix web ci
+      - npm --prefix mobile ci
+    gradle:
+      - yes
+    output: build/outputs/apk/release/app-arm64-v8a-release-unsigned.apk
+    prebuild:
+      - cd ../../..
+      - npm --prefix web run build
+      - cd mobile
+      - sed -i -e '1a "expo":{"autolinking":{"android":{"buildFromSource":[".*"]}}},'
+        package.json
+      - find node_modules -type f \( -name "*.gradle" -o -name "*.gradle.kts" -o -name
+        "*.kt" \) -exec sed -i -e 's/JavaVersion.VERSION_17/JavaVersion.VERSION_21/g'
+        -e 's/jvmToolchain(17)/jvmToolchain(21)/g' -e 's/JvmTarget.fromTarget("17")/JvmTarget.fromTarget("21")/g'
+        -e 's/JvmTarget.JVM_17/JvmTarget.JVM_21/g' -e "s/jvmTarget = '17'/jvmTarget
+        = '21'/g" {} +
+      - ARROWLOOP_ENGINE_AFTER_PREBUILD=1 npx expo prebuild -p android --clean
+      - sed -i -e '/signingConfig /d' android/app/build.gradle
+      - sed -i -e 's/^org.gradle.jvmargs=.*/org.gradle.jvmargs=-Xmx3072m -XX:MaxMetaspaceSize=1024m/'
+        android/gradle.properties
+      - printf '\norg.gradle.workers.max=2\n' >> android/gradle.properties
+    scanignore:
+      - mobile/node_modules/hermes-compiler/hermesc/linux64-bin/hermesc
+      - mobile/node_modules/expo-modules-core/android/ExpoModulesCorePlugin.gradle
+      - mobile/node_modules/react-native-pager-view/android/build.gradle
+      - mobile/node_modules/react-native-safe-area-context/android/build.gradle
+      - mobile/node_modules/react-native-screens/android/build.gradle
+      - mobile/node_modules/react-native-svg/android/build.gradle
+    scandelete:
+      - mobile/node_modules
+      - web/node_modules
+    build:
+      - cd ../../..
+      - mkdir -p mobile/android/app/src/main/jniLibs/arm64-v8a
+      - CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -trimpath -ldflags="-s -w -X
+        github.com/junkerderprovinz/arrowloop/internal/boot.Version=$$VERSION$$" -o
+        mobile/android/app/src/main/jniLibs/arm64-v8a/libarrowloop.so ./cmd/arrowloop
+    gradleprops:
+      - reactNativeArchitectures=arm64-v8a
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v[0-9.]+$
 UpdateCheckData: mobile/app.json|"versionCode":\s*(\d+)|.|"version":\s*"([\d.]+)"
-CurrentVersion: 2.4.4
-CurrentVersionCode: 20404
+CurrentVersion: 2.4.5
+CurrentVersionCode: 20405
