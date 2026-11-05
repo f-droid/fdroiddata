@@ -399,7 +399,31 @@ Builds:
       - node_modules
     build: cat -n build.gradle
 
+  - versionName: 0.8.3
+    versionCode: 20
+    commit: a806704a20f97ba6a84e6cc5666d1e731d275218
+    subdir: android/app
+    sudo:
+      - echo "deb https://deb.debian.org/debian forky main" > /etc/apt/sources.list.d/forky.list
+      - apt-get update
+      - apt-get install -y -t forky npm
+      - apt-get install -y make g++ libc-dev
+    init:
+      - cd ../..
+      - npm install
+      - npm run build-only
+      - npx cap sync
+    gradle:
+      - yes
+    rm:
+      - ios
+    prebuild: sed -i -e '/keystoreProperties/d' -e '/keystoreAvailable/,+1d' -e '/signingAvailable/,+1d'
+      build.gradle
+    scandelete:
+      - node_modules
+    build: cat -n build.gradle
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 0.8.2
-CurrentVersionCode: 19
+CurrentVersion: 0.8.3
+CurrentVersionCode: 20
