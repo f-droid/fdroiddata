@@ -609,6 +609,82 @@ Builds:
       - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
         --replace unaligned.apk $$OUT$$
 
+  - versionName: 1.10.0Beta
+    versionCode: 251
+    commit: d26328e7af18f7338c4b0b43b4c713fcf67b4277
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install cmake make gcc libc-dev rustup
+    output: build/outputs/apk/release/app-armeabi-v7a-release-unsigned.apk
+    binary: https://dist.torproject.org/torvpn/%v/tor-vpn-android-armv7-%v.apk
+    srclibs:
+      - onionmasq@037911a1627a78a7408a93b5894d7dc87d299609
+      - reproducible-apk-tools@v0.3.0
+    prebuild:
+      - rustup default $(cat ./../scripts/msrv.txt)
+      - rustup target add armv7-linux-androideabi
+      - ./../scripts/reproducible_fetch_rust_deps.sh
+      - export ANDROID_NDK_ROOT=$$NDK$$
+      - sed -i 's|url = uri("https://gitlab.torproject.org[^"]*")|url = uri("https://maven.google.com")|g'
+        ../settings.gradle.kts
+    build:
+      - export ENFORCE_LOCAL_MAVEN=1
+      - export ANDROID_NDK_ROOT=$$NDK$$
+      - export ONIONMASQ_HASH=$(cat ../scripts/onionmasq.hash)
+      - echo $ONIONMASQ_HASH
+      - pushd $$onionmasq$$
+      - git checkout -f $ONIONMASQ_HASH
+      - ./build-ndk.sh armeabi-v7a
+      - cd android/OnionmasqAndroid
+      - gradle :onionmasq:build
+      - gradle :onionmasq:publishReleasePublicationToMavenLocal
+      - popd
+      - gradle :app:assembleRelease
+    ndk: r27d
+    postbuild:
+      - mv $$OUT$$ unaligned.apk
+      - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
+        --replace unaligned.apk $$OUT$$
+
+  - versionName: 1.10.0Beta
+    versionCode: 252
+    commit: d26328e7af18f7338c4b0b43b4c713fcf67b4277
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install cmake make gcc libc-dev rustup
+    output: build/outputs/apk/release/app-arm64-v8a-release-unsigned.apk
+    binary: https://dist.torproject.org/torvpn/%v/tor-vpn-android-aarch64-%v.apk
+    srclibs:
+      - onionmasq@037911a1627a78a7408a93b5894d7dc87d299609
+      - reproducible-apk-tools@v0.3.0
+    prebuild:
+      - rustup default $(cat ./../scripts/msrv.txt)
+      - rustup target add aarch64-linux-android
+      - ./../scripts/reproducible_fetch_rust_deps.sh
+      - export ANDROID_NDK_ROOT=$$NDK$$
+      - sed -i 's|url = uri("https://gitlab.torproject.org[^"]*")|url = uri("https://maven.google.com")|g'
+        ../settings.gradle.kts
+    build:
+      - export ENFORCE_LOCAL_MAVEN=1
+      - export ANDROID_NDK_ROOT=$$NDK$$
+      - export ONIONMASQ_HASH=$(cat ../scripts/onionmasq.hash)
+      - echo $ONIONMASQ_HASH
+      - pushd $$onionmasq$$
+      - git checkout -f $ONIONMASQ_HASH
+      - ./build-ndk.sh arm64-v8a
+      - cd android/OnionmasqAndroid
+      - gradle :onionmasq:build
+      - gradle :onionmasq:publishReleasePublicationToMavenLocal
+      - popd
+      - gradle :app:assembleRelease
+    ndk: r27d
+    postbuild:
+      - mv $$OUT$$ unaligned.apk
+      - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
+        --replace unaligned.apk $$OUT$$
+
 AllowedAPKSigningKeys: c2f6ffa30e56a7c53a226248ef908612ee539df2f52bede5a55037425b83331d
 
 AutoUpdateMode: Version
@@ -616,6 +692,6 @@ UpdateCheckMode: Tags
 VercodeOperation:
   - 10 * %c + 1
   - 10 * %c + 2
-UpdateCheckData: app/build.gradle|versionCode = (\d+)|.|versionName = "(.+)"
-CurrentVersion: 1.9.1Beta
-CurrentVersionCode: 242
+UpdateCheckData: app/build.gradle.kts|versionCode = (\d+)|.|versionName = "(.+)"
+CurrentVersion: 1.10.0Beta
+CurrentVersionCode: 252
