@@ -1,0 +1,45 @@
+AntiFeatures:
+  NonFreeNet:
+    en-US: Offers integrations with proprietary AI services. Users provide their own
+      accounts and can configure other compatible endpoints.
+Categories:
+  - Development
+  - Internet
+License: AGPL-3.0-or-later
+AuthorName: Leen Hawk
+WebSite: https://gproxy.leenhawk.com
+SourceCode: https://github.com/LeenHawk/gproxy
+IssueTracker: https://github.com/LeenHawk/gproxy/issues
+Changelog: https://github.com/LeenHawk/gproxy/releases
+
+AutoName: GPROXY
+
+RepoType: git
+Repo: https://github.com/LeenHawk/gproxy.git
+Binaries: 
+  https://github.com/LeenHawk/gproxy/releases/download/v%v/gproxy-fdroid-universal.apk
+
+Builds:
+  - versionName: 4.1.14
+    versionCode: 4001014
+    commit: c54d6aaf055cc9d3f478bcfede25b9b4b9b4f765
+    timeout: 10800
+    sudo:
+      - apt-get update
+      - apt-get install -y clang cmake g++ libclang-dev make pkg-config ninja-build
+        python3 rustup unzip xz-utils
+    output: dist/mobile/fdroid/universal/gproxy-fdroid-universal.apk
+    prebuild: bash scripts/mobile/fdroid-tools.sh
+    build:
+      - export ANDROID_HOME=$$SDK$$ ANDROID_NDK_HOME=$$NDK$$
+      - bash scripts/mobile/fdroid-build.sh
+    ndk: 30.0.15729638
+
+AllowedAPKSigningKeys: 80b7795d2d557bad6fba2a956771c91f77f1ceef5e2b536e45eee314a74eed1c
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^v[0-9]+\.[0-9]+\.[0-9]+$
+UpdateCheckData: 
+  distribution/mobile/tauri.store.conf.json|"versionCode":\s*(\d+)|crates/gproxy-host-tauri/tauri.conf.json|"version":\s*"([^"]+)"
+CurrentVersion: 4.1.14
+CurrentVersionCode: 4001014
