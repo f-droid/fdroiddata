@@ -4177,11 +4177,93 @@ Builds:
     scandelete:
       - node_modules
 
+  - versionName: 0.9.5
+    versionCode: 10303
+    commit: a10bf73336ff32dbedfa7c72532e82e2b5347f2f
+    subdir: android/app
+    sudo:
+      - echo "deb https://deb.debian.org/debian forky main" > /etc/apt/sources.list.d/forky.list
+      - apt-get update
+      - apt-get install -y -t forky npm
+      - npm -g install bun --allow-scripts=bun
+    gradle:
+      - foss
+    prebuild:
+      - cd ../..
+      - sed -i -e '/"workspaces"/,/]/d' package.json
+      - sed -i -e '1a "expo":{"autolinking":{"android":{"buildFromSource":[".*"]}}},'
+        package.json
+      - python3 -c 'import json; p=json.load(open("package.json")); p["dependencies"]["@radix-ui/colors"]="^3.0.0";
+        json.dump(p,open("package.json","w"))'
+      - bun install
+      - sed -i '/jvmToolchain/s/17/21/' node_modules/@react-native/gradle-plugin/*/build.gradle.kts
+      - sed -i -e '/jvmToolchain/s/17/21/' -e 's/fromTarget("17")/fromTarget("21")/'
+        node_modules/react-native-worklets/android/build.gradle.kts node_modules/react-native-reanimated/android/build.gradle.kts
+      - sed -i -e 's/JavaVersion.VERSION_17/JavaVersion.VERSION_21/g' -e 's/jvmToolchain(17)/jvmToolchain(21)/g'
+        node_modules/@react-native/gradle-plugin/react-native-gradle-plugin/src/main/kotlin/com/facebook/react/utils/JdkConfiguratorUtils.kt
+      - bun run bundle:es
+      - bunx expo prebuild -p android --clean --no-install
+      - sed -i -e 's/-Xmx[0-9]*[mg]/-Xmx4g/g' -e 's/-XX:MaxMetaspaceSize=[0-9]*[mg]/-XX:MaxMetaspaceSize=1g/g'
+        android/gradle.properties
+      - sed -i -e "s/ext.abiCodes = .*/ext.abiCodes = ['armeabi-v7a':3]/" android/app/build.gradle
+    scanignore:
+      - node_modules/hermes-compiler/hermesc/linux64-bin/hermesc
+      - node_modules/expo-modules-core/android/ExpoModulesCorePlugin.gradle
+      - node_modules/react-native-safe-area-context/android/build.gradle
+      - node_modules/react-native-screens/android/build.gradle
+      - node_modules/react-native-svg/android/build.gradle
+      - node_modules/react-native-get-random-values/android/build.gradle
+      - node_modules/@react-native-async-storage/async-storage/android/build.gradle
+      - node_modules/@react-native-masked-view/masked-view/android/build.gradle
+    scandelete:
+      - node_modules
+
+  - versionName: 0.9.5
+    versionCode: 10304
+    commit: a10bf73336ff32dbedfa7c72532e82e2b5347f2f
+    subdir: android/app
+    sudo:
+      - echo "deb https://deb.debian.org/debian forky main" > /etc/apt/sources.list.d/forky.list
+      - apt-get update
+      - apt-get install -y -t forky npm
+      - npm -g install bun --allow-scripts=bun
+    gradle:
+      - foss
+    prebuild:
+      - cd ../..
+      - sed -i -e '/"workspaces"/,/]/d' package.json
+      - sed -i -e '1a "expo":{"autolinking":{"android":{"buildFromSource":[".*"]}}},'
+        package.json
+      - python3 -c 'import json; p=json.load(open("package.json")); p["dependencies"]["@radix-ui/colors"]="^3.0.0";
+        json.dump(p,open("package.json","w"))'
+      - bun install
+      - sed -i '/jvmToolchain/s/17/21/' node_modules/@react-native/gradle-plugin/*/build.gradle.kts
+      - sed -i -e '/jvmToolchain/s/17/21/' -e 's/fromTarget("17")/fromTarget("21")/'
+        node_modules/react-native-worklets/android/build.gradle.kts node_modules/react-native-reanimated/android/build.gradle.kts
+      - sed -i -e 's/JavaVersion.VERSION_17/JavaVersion.VERSION_21/g' -e 's/jvmToolchain(17)/jvmToolchain(21)/g'
+        node_modules/@react-native/gradle-plugin/react-native-gradle-plugin/src/main/kotlin/com/facebook/react/utils/JdkConfiguratorUtils.kt
+      - bun run bundle:es
+      - bunx expo prebuild -p android --clean --no-install
+      - sed -i -e 's/-Xmx[0-9]*[mg]/-Xmx4g/g' -e 's/-XX:MaxMetaspaceSize=[0-9]*[mg]/-XX:MaxMetaspaceSize=1g/g'
+        android/gradle.properties
+      - sed -i -e "s/ext.abiCodes = .*/ext.abiCodes = ['arm64-v8a':4]/" android/app/build.gradle
+    scanignore:
+      - node_modules/hermes-compiler/hermesc/linux64-bin/hermesc
+      - node_modules/expo-modules-core/android/ExpoModulesCorePlugin.gradle
+      - node_modules/react-native-safe-area-context/android/build.gradle
+      - node_modules/react-native-screens/android/build.gradle
+      - node_modules/react-native-svg/android/build.gradle
+      - node_modules/react-native-get-random-values/android/build.gradle
+      - node_modules/@react-native-async-storage/async-storage/android/build.gradle
+      - node_modules/@react-native-masked-view/masked-view/android/build.gradle
+    scandelete:
+      - node_modules
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 VercodeOperation:
   - 100 * %c + 3
   - 100 * %c + 4
 UpdateCheckData: package.json|"versionCode":\s*(\d+)|package.json|"version":\s*"([^"]+)"
-CurrentVersion: 0.9.4
-CurrentVersionCode: 10204
+CurrentVersion: 0.9.5
+CurrentVersionCode: 10304
