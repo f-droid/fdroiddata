@@ -203,7 +203,36 @@ Builds:
       - npm run build
       - npx cap sync android
 
+  - versionName: 2.5.1
+    versionCode: 15
+    commit: 106d2abd5f8617906e0f2fbff4fc86f26cdecc66
+    subdir: android/app
+    sudo:
+      - apt-get update
+      - apt-get install -y golang-go make npm
+    gradle:
+      - foss
+    srclibs:
+      - esbuild@v0.21.5
+    prebuild:
+      - cd ../..
+      - npm ci
+    scanignore:
+      - node_modules/@capacitor/cli/assets/capacitor-cordova-android-plugins.tar.gz
+      - public/data/seerah/sirah.json.gz
+    scandelete:
+      - node_modules
+    build:
+      - pushd $$esbuild$$
+      - make esbuild
+      - popd
+      - cd ../..
+      - cp $$esbuild$$/esbuild node_modules/@esbuild/linux-x64/bin/
+      - cp $$esbuild$$/esbuild node_modules/esbuild/bin/
+      - npm run build
+      - npx cap sync android
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 2.5.0
-CurrentVersionCode: 14
+CurrentVersion: 2.5.1
+CurrentVersionCode: 15
