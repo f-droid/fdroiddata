@@ -81,9 +81,33 @@ Builds:
       - speechRuntimeToolsDir=/tmp/voice-keyboard-onnxruntime-tools
       - speechRuntimeJobs=2
 
+  - versionName: 1.15.2
+    versionCode: 71
+    commit: 597797d69f71bf98851be165d73d61af07e256d6
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y build-essential patch python3-venv
+    gradle:
+      - yes
+    prebuild:
+      - printf '\nspeechRuntimeNdk=%s\n' "$$NDK$$" >> ../gradle.properties
+      - sed -i '/implementation(files(/s/)))/)).builtBy("buildSpeechRuntime"))/' build.gradle.kts
+      - grep -Fq 'file(speechRuntimeAar)).builtBy("buildSpeechRuntime"))' build.gradle.kts
+    build: python3 ../tools/onnxruntime/build.py prepare --work-dir ../external/onnxruntime
+      --tools-dir /tmp/voice-keyboard-onnxruntime-tools --model src/main/assets/silero_vad.ort
+    ndk: 28.0.13004108
+    preassemble:
+      - buildSpeechRuntime
+    gradleprops:
+      - speechRuntimeAar=build/onnxruntime/onnxruntime-reduced.aar
+      - speechRuntimeWorkDir=external/onnxruntime
+      - speechRuntimeToolsDir=/tmp/voice-keyboard-onnxruntime-tools
+      - speechRuntimeJobs=2
+
 AllowedAPKSigningKeys: 59799188ebba74894b1b41928a3a8456221461d12f80899784dba7579ba7a988
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v[0-9.]+$
-CurrentVersion: 1.14.0
-CurrentVersionCode: 68
+CurrentVersion: 1.15.2
+CurrentVersionCode: 71
