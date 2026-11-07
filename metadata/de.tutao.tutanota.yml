@@ -6885,7 +6885,63 @@ Builds:
       - node --max-old-space-size=4096 webapp prod --app mail --mobile-build
     ndk: r28c
 
+  - versionName: 366.261105.0
+    versionCode: 396737
+    commit: 332e57461cdc4fe4a4ad9bdc8555f56df02931c0
+    subdir: app-android/app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y g++ make emscripten tclsh rustup golang-go
+      - echo "deb https://deb.debian.org/debian forky main" > /etc/apt/sources.list.d/forky.list
+      - apt-get update
+      - apt-get install -t forky nodejs npm tsx
+      - npm install -g npm@10.0.0
+    gradle:
+      - fdroid
+    srclibs:
+      - TypeScript@v7.1-beta
+    rm:
+      - app-ios
+    prebuild:
+      - cd ../..
+      - node buildSrc/fixFdroidDeps.js
+      - rustup default 1.84.1
+      - rustup target add aarch64-linux-android armv7-linux-androideabi x86_64-linux-android
+        i686-linux-android
+      - npm install
+      - npm run build-packages
+      - rm -rf packages/node-mimimi/dist/*.node
+      - mkdir -p build/app-android
+      - node buildSrc/prepareMobileBuild.js --app mail
+      - sed -i '/com.android.vending.BILLING/d' app-android/app/src/main/AndroidManifest.xml
+      - sed -i '/com.android.billingclient/d' app-android/gradle/libs.versions.toml
+      - sed -i '/libs.billing/d' app-android/tutashared/build.gradle.kts
+      - rm -rf app-android/tutashared/src/tutao
+    scandelete:
+      - node_modules
+      - src/app-kit/mimimi/node_modules
+      - app-android/libs
+    build:
+      - pushd $$TypeScript$$
+      - npm ci
+      - tsx ./node_modules/.bin/hereby build
+      - popd
+      - cd ../..
+      - cp $$TypeScript$$/built/local/tsc node_modules/@typescript/typescript-linux-x64/lib/tsc
+      - set -o allexport
+      - . libs/sqlcipher-android/android-sqlcipher-ver
+      - set +o allexport
+      - pushd libs/sqlcipher-android
+      - ANDROID_SQLCIPHER_OUTPUT_DIR=../../app-android/libs ANDROID_NDK_VERSION=$(basename
+        $$NDK$$) bash build-sqlcipher-android.sh
+      - popd
+      - mv app-android/libs/sqlcipher-android-${SQLCIPHER_ANDROID_VERSION}-release.aar
+        app-android/libs/sqlcipher-android.aar
+      - node --max-old-space-size=4096 webapp prod --app mail --mobile-build
+    ndk: r28c
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags tutanota-fdroid-release-*
-CurrentVersion: 365.261030.0
-CurrentVersionCode: 396734
+CurrentVersion: 366.261105.0
+CurrentVersionCode: 396737
