@@ -2132,8 +2132,65 @@ Builds:
       - tools/build_wsnet.sh
       - bash ./tools/build_strongswan.sh $(pwd)/strongswan-src $$OpenSSL$$ $(pwd)/strongswan/libs
 
+  - versionName: '4.4'
+    versionCode: 2412
+    commit: 5a37e6afafded0279d67714eec878f9524ae90dc
+    subdir: mobile
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y automake bison flex gettext gperf libtool make pkg-config
+        swig jq zip cmake musl-dev golang ninja-build g++
+    gradle:
+      - fdroid
+    srclibs:
+      - OpenSSL@openssl-3.6.5
+      - vcpkg@2025.01.13
+    rm:
+      - base/src/google/libs/in-app-purchasing-2.0.76.jar
+      - openvpn/src/main/cpp/lz4/tests
+      - openvpn/src/main/cpp/mbedtls/tests
+      - openvpn/src/main/cpp/openvpn3/test/unittests
+      - openvpn/src/main/cpp/mbedtls/programs/fuzz/corpuses/client
+      - openvpn/src/main/cpp/mbedtls/programs/fuzz/corpuses/dtlsclient
+      - openvpn/src/main/cpp/mbedtls/programs/fuzz/corpuses/server
+      - openvpn/src/main/cpp/mbedtls/programs/fuzz/corpuses/dtlsserver
+      - openvpn/src/main/cpp/mbedtls/tests/data_files/hash_file_1
+      - openvpn/src/main/cpp/mbedtls/tests/data_files/hash_file_2
+      - openvpn/src/main/cpp/mbedtls/tests/data_files/hash_file_3
+      - tv
+      - strongswan/libs
+      - strongswan-src/testing/hosts/alice/etc/raddb/certs/random
+      - wgtunnel/tools/wireguard-tools/contrib/external-tests
+      - wgtunnel/tools/elf-cleaner/tests
+      - wgtunnel/.cxx
+      - base/src/main/libs/wsnet.aar
+    prebuild:
+      - sed -i -e '/jvmToolchain/d' -e '/JavaLanguageVersion/d' ../*/build.gradle*
+      - sed -i -e '/include(":tv")/d' -e '/include(":windscribe-core")/d' -e '/include(":partner-stub")/d'
+        ../settings.gradle.kts
+      - sed -i -e '/^chmod +x /d' -e 's|"$APP_DIR/../gradlew" assembleRelease|gradle
+        :app:mergeReleaseNativeLibs|' ../tools/build_strongswan.sh
+    build:
+      - sdkmanager 'ndk;27.2.12479018'
+      - sdkmanager 'ndk;27.3.13750724'
+      - pushd $$vcpkg$$
+      - export VCPKG_FEATURE_FLAGS=-binarycaching
+      - ./bootstrap-vcpkg.sh -disableMetrics
+      - popd
+      - export VCPKG_ROOT=$$vcpkg$$
+      - export NDK=$$SDK$$/ndk/27.2.12479018
+      - export ANDROID_NDK_ROOT=$NDK
+      - export ANDROID_NDK_HOME=$NDK
+      - export ANDROID_NDK=$NDK
+      - export PATH=$PATH:$$SDK$$/tools:$$SDK$$/platform-tools:$NDK
+      - cd ..
+      - git apply hide_release_block.patch
+      - tools/build_wsnet.sh fdroid 1.5.45
+      - bash ./tools/build_strongswan.sh $(pwd)/strongswan-src $$OpenSSL$$ $(pwd)/strongswan/libs
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: build.gradle.kts|appVersionCode.*=\s*(\d+)||([\d.]+)
-CurrentVersion: '4.3'
-CurrentVersionCode: 2360
+CurrentVersion: '4.4'
+CurrentVersionCode: 2412
