@@ -417,8 +417,39 @@ Builds:
       - $$flutter$$/bin/flutter build apk --release
     ndk: r27d
 
+  - versionName: 1.0.3
+    versionCode: 203
+    commit: 5732efbd6a5ce75363b279fcebe6688c9e4627b4
+    sudo:
+      - apt-get update
+      - apt-get install -y gcc-multilib libc-dev make rustup libclang-dev
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+    prebuild:
+      - sed -i -e '/signingConfig /,/minifyEnabled/d' android/app/build.gradle
+      - git -C $$flutter$$ checkout -f $(cat .flutter-version)
+      - read -r ISAR_REPO ISAR_VERSION <<< $(cat fdroid_isar_version)
+      - git clone $ISAR_REPO .isar
+      - git -C .isar checkout -f $ISAR_VERSION
+      - rustup default 1.88.0
+      - rustup target add aarch64-linux-android armv7-linux-androideabi x86_64-linux-android
+        i686-linux-android
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+    scandelete:
+      - .pub-cache
+    build:
+      - bash fdroid_build_isar.sh
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release
+    ndk: r27d
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^[\d.]+$
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 1.0.2
-CurrentVersionCode: 202
+CurrentVersion: 1.0.3
+CurrentVersionCode: 203
