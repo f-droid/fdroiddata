@@ -1,0 +1,143 @@
+AntiFeatures:
+  NonFreeNet:
+    en-US: Optional crash reports and analytics use Sentry and PostHog. The startup
+      choices take effect after Continue and can be disabled in Settings.
+  Tracking:
+    en-US: Crash reports and usage analytics are preselected on first launch. Uncheck
+      either option before Continue to keep it disabled.
+  TetheredNet:
+    en-US: Search uses a hosted Dorar Hadith API endpoint that cannot be changed in
+      the app settings.
+Categories:
+  - Religion
+License: GPL-3.0-only
+AuthorName: MAymanKH
+AuthorWebSite: https://github.com/MAymanKH
+SourceCode: https://github.com/MAymanKH/HadithSearcher
+IssueTracker: https://github.com/MAymanKH/HadithSearcher/issues
+
+AutoName: Hadith Searcher
+
+RepoType: git
+Repo: https://github.com/MAymanKH/HadithSearcher.git
+
+Builds:
+  - versionName: 3.0.4
+    versionCode: 231
+    commit: e0ac1a88348d74ab923e572f7842a15e1a5afa12
+    output: build/app/outputs/flutter-apk/app-arm64-v8a-foss-release.apk
+    binary: 
+      https://github.com/MAymanKH/HadithSearcher/releases/download/%v/HadithSearcher-%v+%c-foss-arm64-v8a.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - android/app/src/play
+    prebuild:
+      - flutterVersion=$(cat .flutter-version)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f "$flutterVersion"
+      - sed -i '/"playImplementation"/d' android/app/build.gradle.kts
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+    scandelete:
+      - .pub-cache
+    build:
+      - export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - python3 scripts/build_foss_unsigned.py --flutter $$flutter$$/bin/flutter --abi
+        arm64-v8a
+    ndk: 29.0.13113456
+
+  - versionName: 3.0.4
+    versionCode: 232
+    commit: e0ac1a88348d74ab923e572f7842a15e1a5afa12
+    output: build/app/outputs/flutter-apk/app-armeabi-v7a-foss-release.apk
+    binary: 
+      https://github.com/MAymanKH/HadithSearcher/releases/download/%v/HadithSearcher-%v+%c-foss-armeabi-v7a.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - android/app/src/play
+    prebuild:
+      - flutterVersion=$(cat .flutter-version)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f "$flutterVersion"
+      - sed -i '/"playImplementation"/d' android/app/build.gradle.kts
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+    scandelete:
+      - .pub-cache
+    build:
+      - export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - python3 scripts/build_foss_unsigned.py --flutter $$flutter$$/bin/flutter --abi
+        armeabi-v7a
+    ndk: 29.0.13113456
+
+  - versionName: 3.0.4
+    versionCode: 233
+    commit: e0ac1a88348d74ab923e572f7842a15e1a5afa12
+    output: build/app/outputs/flutter-apk/app-x86_64-foss-release.apk
+    binary: 
+      https://github.com/MAymanKH/HadithSearcher/releases/download/%v/HadithSearcher-%v+%c-foss-x86_64.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - android/app/src/play
+    prebuild:
+      - flutterVersion=$(cat .flutter-version)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f "$flutterVersion"
+      - sed -i '/"playImplementation"/d' android/app/build.gradle.kts
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+    scandelete:
+      - .pub-cache
+    build:
+      - export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - python3 scripts/build_foss_unsigned.py --flutter $$flutter$$/bin/flutter --abi
+        x86_64
+    ndk: 29.0.13113456
+
+AllowedAPKSigningKeys: 2f64e27afe52527d62b314f5ee896add96c3adedb63366aeca372504c095d0c4
+
+MaintainerNotes: |-
+  Publish all three signed FOSS APKs from scripts/release.py foss on the
+  <versionName> GitHub release. GitHub and F-Droid distribute the same APKs.
+  Each ABI has a per-build binary URL. F-Droid must reproduce each APK before
+  publishing the upstream signature. The updater checks both sources once a day
+  unless disabled in Settings.
+
+  Search uses https://hadith-searcher-dorar-api-amx.vercel.app, backed by
+  https://github.com/MAymanKH/dorar-hadith-api and content from https://dorar.net.
+  The API endpoint can be changed at build time, but not in the app settings.
+  Please review service and content licensing during inclusion.
+
+  Sentry and PostHog SDKs are included. Both options are preselected on first
+  launch; SDKs start only after Continue with the saved selections.
+  See docs/telemetry.md and the privacy policy linked in the store description.
+
+  The unsigned builder uses /var/tmp/hadithsearcher-foss for stable Dart URIs
+  and disables the JNI native library build ID. Both upstream and recipe use it.
+
+  The Flutter version is read from upstream .flutter-version. The foss flavor
+  excludes the Shorebird asset and does not enable the Play update implementation.
+  Play-only sources and the Play dependency declaration are removed before scanning.
+
+  Base version codes in pubspec.yaml are divisible by 10. ABI suffixes are
+  1 for arm64-v8a, 2 for armeabi-v7a, and 3 for x86_64. VercodeOperation
+  generates all three update recipes from each new base version code.
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^[0-9]+\.[0-9]+\.[0-9]+$
+VercodeOperation:
+  - '%c+1'
+  - '%c+2'
+  - '%c+3'
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 3.0.4
+CurrentVersionCode: 233
