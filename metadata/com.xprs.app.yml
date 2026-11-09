@@ -295,6 +295,155 @@ Builds:
         --dart-define=AUTO_UPDATE_CHECK=false
     ndk: r28c
 
+  - versionName: 1.6.0
+    versionCode: 4005951
+    commit: a0f130de8d8fcefcb8c0705bdafb0884a2b05c48
+    sudo:
+      - apt-get update
+      - apt-get install -y make clang-19 lld-19 llvm-19 wasi-libc libclang-rt-19-dev-wasm32
+        libc++-19-dev-wasm32 libc++abi-19-dev-wasm32 meson ninja-build python3 rustup
+        gcc libc-dev
+    output: build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
+    binary: 
+      https://github.com/xprs-dev/app/releases/download/v%v/xprs-%v-android-armeabi-v7a.apk
+    srclibs:
+      - flutter@stable
+      - xprs-reticulum-dart@31b84911bb966f8d2f1cc239bccdae810d95b3dc
+      - xprs-core@7ff2df6c5e0c04282215ddfcf59793055cb6dcf0
+      - xprs-wapps@15d5561589c1fcfd3b5c15625494b17c86f70395
+      - dav1d@1.4.3
+    rm:
+      - artwork
+      - assets/editor/app-creator/app.wasm
+      - desktop
+      - ios
+      - linux
+      - macos
+      - web
+      - windows
+    prebuild:
+      - flutterVersion=$(cat .flutter-version)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - git -C $$xprs-reticulum-dart$$ checkout -f $(cat .reticulum-dart-commit)
+      - git -C $$xprs-core$$ checkout -f $(cat .core-commit)
+      - git -C $$xprs-wapps$$ checkout -f $(cat .wapps-commit)
+      - cp -r $$xprs-reticulum-dart$$ ../reticulum-dart
+      - cp -r $$xprs-core$$ ../core
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+    scandelete:
+      - .pub-cache
+    build:
+      - WASI_SYSROOT=/usr WASM_CLANG=clang-19 WASM_CLANGXX=clang++-19 WASM_AR=llvm-ar-19
+        DAV1D_SRC=$$dav1d$$ python3 tool/build_bundled_wapps.py $$xprs-wapps$$
+      - rustup default 1.89.0
+      - rustup target add armv7-linux-androideabi
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform=android-arm
+        --dart-define=AUTO_UPDATE_CHECK=false
+    ndk: r28c
+
+  - versionName: 1.6.0
+    versionCode: 4005952
+    commit: a0f130de8d8fcefcb8c0705bdafb0884a2b05c48
+    sudo:
+      - apt-get update
+      - apt-get install -y make clang-19 lld-19 llvm-19 wasi-libc libclang-rt-19-dev-wasm32
+        libc++-19-dev-wasm32 libc++abi-19-dev-wasm32 meson ninja-build python3 rustup
+        gcc libc-dev
+    output: build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+    binary: 
+      https://github.com/xprs-dev/app/releases/download/v%v/xprs-%v-android-arm64-v8a.apk
+    srclibs:
+      - flutter@stable
+      - xprs-reticulum-dart@31b84911bb966f8d2f1cc239bccdae810d95b3dc
+      - xprs-core@7ff2df6c5e0c04282215ddfcf59793055cb6dcf0
+      - xprs-wapps@15d5561589c1fcfd3b5c15625494b17c86f70395
+      - dav1d@1.4.3
+    rm:
+      - artwork
+      - assets/editor/app-creator/app.wasm
+      - desktop
+      - ios
+      - linux
+      - macos
+      - web
+      - windows
+    prebuild:
+      - flutterVersion=$(cat .flutter-version)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - git -C $$xprs-reticulum-dart$$ checkout -f $(cat .reticulum-dart-commit)
+      - git -C $$xprs-core$$ checkout -f $(cat .core-commit)
+      - git -C $$xprs-wapps$$ checkout -f $(cat .wapps-commit)
+      - cp -r $$xprs-reticulum-dart$$ ../reticulum-dart
+      - cp -r $$xprs-core$$ ../core
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+    scandelete:
+      - .pub-cache
+    build:
+      - WASI_SYSROOT=/usr WASM_CLANG=clang-19 WASM_CLANGXX=clang++-19 WASM_AR=llvm-ar-19
+        DAV1D_SRC=$$dav1d$$ python3 tool/build_bundled_wapps.py $$xprs-wapps$$
+      - rustup default 1.89.0
+      - rustup target add aarch64-linux-android
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform=android-arm64
+        --dart-define=AUTO_UPDATE_CHECK=false
+    ndk: r28c
+
+  - versionName: 1.6.0
+    versionCode: 4005953
+    commit: a0f130de8d8fcefcb8c0705bdafb0884a2b05c48
+    sudo:
+      - apt-get update
+      - apt-get install -y make clang-19 lld-19 llvm-19 wasi-libc libclang-rt-19-dev-wasm32
+        libc++-19-dev-wasm32 libc++abi-19-dev-wasm32 meson ninja-build python3 rustup
+        gcc libc-dev
+    output: build/app/outputs/flutter-apk/app-x86_64-release.apk
+    binary: https://github.com/xprs-dev/app/releases/download/v%v/xprs-%v-android-x86_64.apk
+    srclibs:
+      - flutter@stable
+      - xprs-reticulum-dart@31b84911bb966f8d2f1cc239bccdae810d95b3dc
+      - xprs-core@7ff2df6c5e0c04282215ddfcf59793055cb6dcf0
+      - xprs-wapps@15d5561589c1fcfd3b5c15625494b17c86f70395
+      - dav1d@1.4.3
+    rm:
+      - artwork
+      - assets/editor/app-creator/app.wasm
+      - desktop
+      - ios
+      - linux
+      - macos
+      - web
+      - windows
+    prebuild:
+      - flutterVersion=$(cat .flutter-version)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - git -C $$xprs-reticulum-dart$$ checkout -f $(cat .reticulum-dart-commit)
+      - git -C $$xprs-core$$ checkout -f $(cat .core-commit)
+      - git -C $$xprs-wapps$$ checkout -f $(cat .wapps-commit)
+      - cp -r $$xprs-reticulum-dart$$ ../reticulum-dart
+      - cp -r $$xprs-core$$ ../core
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+    scandelete:
+      - .pub-cache
+    build:
+      - WASI_SYSROOT=/usr WASM_CLANG=clang-19 WASM_CLANGXX=clang++-19 WASM_AR=llvm-ar-19
+        DAV1D_SRC=$$dav1d$$ python3 tool/build_bundled_wapps.py $$xprs-wapps$$
+      - rustup default 1.89.0
+      - rustup target add x86_64-linux-android
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform=android-x64
+        --dart-define=AUTO_UPDATE_CHECK=false
+    ndk: r28c
+
 AllowedAPKSigningKeys: 2a4b4625895e700839415a81c091d949699167abe03c22794376d18f2f7ec2d2
 
 AutoUpdateMode: Version
@@ -304,5 +453,5 @@ VercodeOperation:
   - '%c * 10 + 2'
   - '%c * 10 + 3'
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 1.4.0
-CurrentVersionCode: 4005423
+CurrentVersion: 1.6.0
+CurrentVersionCode: 4005953
