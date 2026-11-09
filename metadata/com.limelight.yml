@@ -4679,7 +4679,37 @@ Builds:
       - popd
     ndk: r21e
 
+  - versionName: '12.2'
+    versionCode: 315
+    commit: b48494cb96bff23d8886c4775cc4f39a1075495d
+    subdir: app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y autoconf automake libtool make
+    gradle:
+      - nonRoot
+    srclibs:
+      - moonlight-mobile-deps@419349aa689e8749a9fb91a22dc45531ddd3df45
+    rm:
+      - app/src/main/jni/moonlight-core/openssl/include
+      - app/src/main/jni/moonlight-core/opus/include
+    prebuild:
+      - sed -i -e '/applicationIdSuffix/d' build.gradle
+      - git -C $$moonlight-mobile-deps$$ submodule update --init openssl opus
+      - sed -i -e '/zip/d' $$moonlight-mobile-deps$$/archive-android.sh
+    scandelete:
+      - app/src/main/jni/moonlight-core/openssl
+      - app/src/main/jni/moonlight-core/opus
+    build:
+      - pushd $$moonlight-mobile-deps$$
+      - ./build-android.sh
+      - ./archive-android.sh
+      - popd
+      - cp -a $$moonlight-mobile-deps$$/output/* src/main/jni/moonlight-core
+    ndk: r29
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: '12.1'
-CurrentVersionCode: 314
+CurrentVersion: '12.2'
+CurrentVersionCode: 315
