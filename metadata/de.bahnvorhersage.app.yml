@@ -17,10 +17,13 @@ AutoName: Bahn-Vorhersage
 
 RepoType: git
 Repo: https://gitlab.com/bahnvorhersage/bahnvorhersage_frontend.git
+Binaries: 
+  https://gitlab.com/api/v4/projects/33463524/packages/generic/bahnvorhersage/v%v/bahnvorhersage-v%v.apk
 
 Builds:
   - versionName: '0.3'
     versionCode: 3
+    disable: switched to reproducible
     commit: fdb4eba942bf4377f73acd8e14349e4db233f445
     subdir: android
     sudo:
@@ -47,6 +50,7 @@ Builds:
 
   - versionName: '0.4'
     versionCode: 4
+    disable: switched to reproducible
     commit: 19724d8d5bed5a27d217a3e502079cceb3859e7b
     subdir: android
     sudo:
@@ -73,6 +77,7 @@ Builds:
 
   - versionName: 0.4.1
     versionCode: 5
+    disable: switched to reproducible
     commit: 005042e6936df7daf84dacef5e4a446b294d1c4d
     subdir: android
     sudo:
@@ -99,6 +104,7 @@ Builds:
 
   - versionName: 0.4.2
     versionCode: 6
+    disable: switched to reproducible
     commit: fdf3c06afdfc1574a2c2c291c9ddb38e268d3a1a
     subdir: android
     sudo:
@@ -125,6 +131,7 @@ Builds:
 
   - versionName: 0.4.3
     versionCode: 7
+    disable: switched to reproducible
     commit: bff0ae284abd0bfe1d640c4c6a97c3f9079fe03a
     subdir: android
     sudo:
@@ -151,6 +158,7 @@ Builds:
 
   - versionName: 0.4.4
     versionCode: 8
+    disable: switched to reproducible
     commit: 60476689ed177394a75fe2a39eaa0aa5dcf3ba6b
     subdir: android
     sudo:
@@ -177,6 +185,7 @@ Builds:
 
   - versionName: 0.4.5
     versionCode: 9
+    disable: switched to reproducible
     commit: aa06e83ad526eddd0879d826ef4f74305bccca3c
     subdir: android
     sudo:
@@ -203,6 +212,7 @@ Builds:
 
   - versionName: 0.4.6
     versionCode: 10
+    disable: switched to reproducible
     commit: 35e0d2ef68c79d90f407b8d01bb93de5da57abdc
     subdir: android
     sudo:
@@ -229,6 +239,7 @@ Builds:
 
   - versionName: 0.5.0
     versionCode: 11
+    disable: switched to reproducible
     commit: 996d8f2955c6f2d8be0c312a6aaf99cf3bf45621
     subdir: android
     sudo:
@@ -255,6 +266,7 @@ Builds:
 
   - versionName: 0.6.1
     versionCode: 14
+    disable: switched to reproducible
     commit: a94605eabe9d26e187ac082d6ce0a0ce6a062a89
     subdir: android
     sudo:
@@ -282,6 +294,7 @@ Builds:
 
   - versionName: 0.6.2
     versionCode: 15
+    disable: switched to reproducible
     commit: 12a752f3a16ae1f0abd09fec4249609929adf321
     subdir: android/app
     sudo:
@@ -309,6 +322,7 @@ Builds:
 
   - versionName: 0.7.0
     versionCode: 16
+    disable: switched to reproducible
     commit: 24f03e30a997143a3db4de90c797157f30caa02d
     subdir: android/app
     sudo:
@@ -333,6 +347,7 @@ Builds:
 
   - versionName: 0.8.0
     versionCode: 17
+    disable: switched to reproducible
     commit: 48ac6a0c97bbe89d61d6713a527d188dbd2fe030
     subdir: android/app
     sudo:
@@ -355,6 +370,7 @@ Builds:
 
   - versionName: 0.8.1
     versionCode: 18
+    disable: switched to reproducible
     commit: eb7d3615cf61d9ead3edbb7744f9ff5b75ad7ddd
     subdir: android/app
     sudo:
@@ -377,6 +393,7 @@ Builds:
 
   - versionName: 0.8.2
     versionCode: 19
+    disable: switched to reproducible
     commit: 24caaf5d9338eef27211ce60aea3fe57d6f59719
     subdir: android/app
     sudo:
@@ -401,29 +418,74 @@ Builds:
 
   - versionName: 0.8.3
     versionCode: 20
+    disable: switched to reproducible
     commit: a806704a20f97ba6a84e6cc5666d1e731d275218
     subdir: android/app
     sudo:
+      - apt-get update
+      - apt-get install -y make g++ libc-dev
       - echo "deb https://deb.debian.org/debian forky main" > /etc/apt/sources.list.d/forky.list
       - apt-get update
       - apt-get install -y -t forky npm
-      - apt-get install -y make g++ libc-dev
     init:
       - cd ../..
-      - npm install
+      - npm ci
       - npm run build-only
-      - npx cap sync
+      - rm dist/nitro.json
+      - npx cap sync android
     gradle:
       - yes
+    binary: 
+      https://gitlab.com/api/v4/projects/33463524/packages/generic/bahnvorhersage/v%v/bahnvorhersage-v%v.apk
+    srclibs:
+      - reproducible-apk-tools@v0.3.2
     rm:
       - ios
     prebuild: sed -i -e '/keystoreProperties/d' -e '/keystoreAvailable/,+1d' -e '/signingAvailable/,+1d'
       build.gradle
     scandelete:
       - node_modules
-    build: cat -n build.gradle
+    postbuild:
+      - mv $$OUT$$ unaligned.apk
+      - $$reproducible-apk-tools$$/zipalign.py --page-size 4 --pad-like-apksigner
+        --replace unaligned.apk $$OUT$$
+
+  - versionName: 0.8.4
+    versionCode: 21
+    commit: 7259e5e1fc1561b185d0e9ad821a85098944ba6c
+    subdir: android/app
+    sudo:
+      - apt-get update
+      - apt-get install -y make g++ libc-dev
+      - echo "deb https://deb.debian.org/debian forky main" > /etc/apt/sources.list.d/forky.list
+      - apt-get update
+      - apt-get install -y -t forky npm
+    init:
+      - cd ../..
+      - npm ci
+      - npm run build-only
+      - rm dist/nitro.json
+      - npx cap sync android
+    gradle:
+      - yes
+    binary: 
+      https://gitlab.com/api/v4/projects/33463524/packages/generic/bahnvorhersage/v%v/bahnvorhersage-v%v.apk
+    srclibs:
+      - reproducible-apk-tools@v0.3.2
+    rm:
+      - ios
+    prebuild: sed -i -e '/keystoreProperties/d' -e '/keystoreAvailable/,+1d' -e '/signingAvailable/,+1d'
+      build.gradle
+    scandelete:
+      - node_modules
+    postbuild:
+      - mv $$OUT$$ unaligned.apk
+      - $$reproducible-apk-tools$$/zipalign.py --page-size 4 --pad-like-apksigner
+        --replace unaligned.apk $$OUT$$
+
+AllowedAPKSigningKeys: 110d331e6d13eb1a8a9ab83f721bfa35fc8d31b867d38a061f363e5dfc5ef8c2
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 0.8.3
-CurrentVersionCode: 20
+CurrentVersion: 0.8.4
+CurrentVersionCode: 21
