@@ -1,0 +1,92 @@
+AntiFeatures:
+  NonFreeNet:
+    en-US: Depends on hosted Supabase, Scryfall, Archidekt, Moxfield, EDHREC, Resend,
+      Turnstile, and other fixed network services that are not user-configurable in
+      this release.
+Categories:
+  - Card Game
+License: MIT
+AuthorName: blackistoostrong
+AuthorEmail: support@21life.win
+AuthorWebSite: https://github.com/marco201091-glitch
+WebSite: https://21life.win
+SourceCode: https://github.com/marco201091-glitch/21life
+IssueTracker: https://github.com/marco201091-glitch/21life/issues
+Changelog: https://github.com/marco201091-glitch/21life/releases
+
+AutoName: 21Life
+
+RepoType: git
+Repo: https://github.com/marco201091-glitch/21life.git
+Binaries: 
+  https://github.com/marco201091-glitch/21life/releases/download/fdroid-v%v/mtg-tracker-fdroid-v%v.apk
+
+Builds:
+  - versionName: 9.2.0
+    versionCode: 90200
+    commit: a51d9890444303d131d825cb19744dce30e1b673
+    subdir: expo
+    sudo:
+      - echo 'deb [check-valid-until=no] https://snapshot.debian.org/archive/debian/20261001T000000Z/
+        forky main' > /etc/apt/sources.list.d/forky.list
+      - apt-get update
+      - apt-get install -y -t forky nodejs npm
+      - test "$(node --version)" = v24.21.0
+      - test "$(npm --version)" = 12.0.2
+    init:
+      - cd ..
+      - npm ci
+      - cd expo
+      - npm ci
+      - node ../scripts/prepare-fdroid-env.mjs
+      - node scripts/patch-fdroid-java-toolchains.mjs
+      - node scripts/patch-fdroid-reproducibility.mjs
+    output: android/app/build/outputs/apk/release/app-release-unsigned.apk
+    prebuild:
+      - export APP_VARIANT=fdroid
+      - export EXPO_PUBLIC_FDROID_BUILD=true
+      - export EXPO_PUBLIC_SENTRY_ENABLED=false
+      - export EXPO_PUBLIC_DISABLE_PUSH_NOTIFICATIONS=true
+      - npx --no-install expo prebuild --platform android --clean --no-install
+      - sed -i 's/-Xmx2048m/-Xmx4g/' android/gradle.properties
+      - sed -i 's/MaxMetaspaceSize=512m/MaxMetaspaceSize=1g/' android/gradle.properties
+      - printf '\norg.gradle.workers.max=1\n' >> android/gradle.properties
+      - grep -qx 'android.enableMinifyInReleaseBuilds=true' android/gradle.properties
+      - cd ..
+      - npm run verify:fdroid
+      - cd expo
+      - npm run typecheck
+      - node ../scripts/verify-fdroid-autolinking.mjs
+    scanignore:
+      - expo/node_modules/hermes-compiler/hermesc/linux64-bin/hermesc
+      - expo/node_modules/expo-modules-core/android/ExpoModulesCorePlugin.gradle
+      - expo/node_modules/@react-native-async-storage/async-storage/android/build.gradle
+      - expo/node_modules/@react-native-community/netinfo/android/build.gradle
+      - expo/node_modules/@react-native-masked-view/masked-view/android/build.gradle
+      - expo/node_modules/react-native-get-random-values/android/build.gradle
+      - expo/node_modules/react-native-keyboard-controller/android/build.gradle
+      - expo/node_modules/react-native-safe-area-context/android/build.gradle
+      - expo/node_modules/react-native-screens/android/build.gradle
+      - expo/node_modules/react-native-svg/android/build.gradle
+      - expo/node_modules/react-native-view-shot/android/build.gradle
+      - expo/node_modules/react-native-webview/android/build.gradle
+      - expo/node_modules/react-native/ReactAndroid/publish.gradle
+    scandelete:
+      - node_modules
+      - expo/node_modules
+    build:
+      - export APP_VARIANT=fdroid
+      - export EXPO_PUBLIC_FDROID_BUILD=true
+      - export EXPO_PUBLIC_SENTRY_ENABLED=false
+      - export EXPO_PUBLIC_DISABLE_PUSH_NOTIFICATIONS=true
+      - cd android
+      - gradle :app:assembleRelease -PfdroidBuild=true -PreactNativeArchitectures=arm64-v8a
+        -PreactNativeDevServerIp=localhost --no-daemon --console=plain
+
+AllowedAPKSigningKeys: 5d25e32cdf901becfba81adf93189e1d755e50a90b897efa21da4c2ab3002106
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags fdroid-v[0-9.]+$
+UpdateCheckData: expo/app.json|"versionCode":\s*(\d+),|.|"version":\s*"([^"]+)"
+CurrentVersion: 9.2.0
+CurrentVersionCode: 90200
