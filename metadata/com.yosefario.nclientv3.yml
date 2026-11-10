@@ -43,9 +43,42 @@ Builds:
     gradle:
       - yes
 
+  - versionName: 4.3.0
+    versionCode: 425
+    commit: 0482afabe8c10acf89ff0ee5da45f93b74770ddb
+    timeout: 36000
+    subdir: app
+    sudo:
+      - echo "deb https://deb.debian.org/debian bookworm main" > /etc/apt/sources.list.d/bookworm.list
+      - apt-get update
+      - apt-get install -y -t bookworm openjdk-17-jdk-headless
+      - apt-get install -y cmake make m4 pkg-config python-is-python3 python3-venv
+        python3-zstandard tcl gyp ninja-build bzip2 libffi-dev libsqlite3-dev binutils-dev
+        clang lld llvm libssl-dev libxml2-dev zlib1g-dev nodejs terser rustup
+    gradle:
+      - yes
+    srclibs:
+      - MozFennec@FIREFOX-ANDROID_158_0_2_RELEASE
+      - MozFennecComponents@23f95d7d51a457b8828b45f3371254461fb6deed
+      - MozGlean@v70.2.0
+      - gmscore@v0.3.17.252432
+      - wasi-sdk@wasi-sdk-34
+      - llvm@ca7933e47d3a3451d81e72ac174dcb5aa28b59d1
+    build: ../gecko/build.sh
+    ndk: 30.0.16248370
+
 AllowedAPKSigningKeys: 22ec856249b5cc990573ce112ba21eee59b701d98ba3253e269cf8a0060dd12a
 
+MaintainerNotes: |-
+  GeckoView is built from source by gecko/build.sh in the app repo. The build is
+  reproducible, so the APK matches the developer-signed release.
+
+  When GeckoView is updated, the srclibs change together with gecko/build.sh. The
+  versions the script expects are pinned at the top of that file.
+
+  Scanner detects 'com/google/android/gms/...' from microG libs for webauth.
+
 AutoUpdateMode: Version
-UpdateCheckMode: Tags
-CurrentVersion: 4.2.0
-CurrentVersionCode: 424
+UpdateCheckMode: Tags ^[0-9]
+CurrentVersion: 4.3.0
+CurrentVersionCode: 425
