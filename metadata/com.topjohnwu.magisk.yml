@@ -1069,11 +1069,77 @@ Builds:
         native
       - python3 ./build.py -rv app
 
+  - versionName: '31.1'
+    versionCode: 31100
+    commit: 0972f67d97f9b6302b67c5171283330c74114b4a
+    timeout: 14400
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y clang-19 lld-19 libc++-19-dev g++ make pkg-config libssl-dev
+        ninja-build cmake xz-utils libflashrom-dev libnss3-dev zip libzstd-dev file
+        binutils-dev bzip2
+      - apt-get install -y openjdk-25-jdk-headless
+      - update-java-alternatives -a
+    output: out/app-release.apk
+    srclibs:
+      - ondk@r30.1
+      - vboot@release-R110-15278.B
+      - ndk-box-kitchen@14d189ea3070a8167b3576bf83fe070d4a3441af
+      - Busybox@1_36_1
+      - SELinux-android@android-15.0.0_r3
+      - pcre@android-15.0.0_r3
+    prebuild:
+      - echo -e 'version=$$VERSION$$' > ./config.prop
+      - sed -i -e '/"src",/,/^]/c "src"]' $$ondk$$/bootstrap.toml
+      - sed -i -e '/LINUX_HOST_LLVM_VER=/s/20/19/' $$ondk$$/build.sh
+      - sed -i -e '/Key.CHECK_UPDATES/s/true/false/' app/core/src/main/java/com/topjohnwu/magisk/core/Config.kt
+      - sed -i -e '/downloadFile/s|BUSYBOX_DOWNLOAD_URL|"file://$$ndk-box-kitchen$$/busybox.zip"|'
+        -e '/downloadFile(BOOTCTL_DOWNLOAD_URL/,+1d' -e 's/abiList.size \* 7/abiList.size
+        * 6/' app/build-logic/src/main/java/Setup.kt
+      - curl -Lo stub-release.apk https://f-droid.org/archive/com.topjohnwu.magisk_13.apk
+      - apksigner verify --print-certs-pem stub-release.apk | sed -n '/BEGIN CERTIFICATE/,/END
+        CERTIFICATE/p' > fdroid.pem
+      - sed -i -e 's/cert = b""/cert = ssl.PEM_cert_to_DER_cert(Path("fdroid.pem").read_text())/'
+        build.py
+    scandelete:
+      - native/src/external
+    build:
+      - ln -s $(which gradle) ./app/gradlew
+      - pushd $$vboot$$
+      - make ARCH=arm futil
+      - popd
+      - cp $$vboot$$/build/futility/futility tools
+      - pushd $$ondk$$
+      - ./build.sh
+      - popd
+      - python3 ./build.py -rv ndk
+      - mkdir -p $$SDK$$/ndk/magisk
+      - tar xJf $$ondk$$/dist/*.tar.xz --strip-components=1 -C $$SDK$$/ndk/magisk
+      - pushd $$ndk-box-kitchen$$
+      - cp -r $$Busybox$$ busybox
+      - cp -r $$SELinux-android$$ jni/selinux
+      - cp -r $$pcre$$ jni/pcre
+      - pushd busybox
+      - git config user.email test@test.com
+      - git config user.name test
+      - popd
+      - ./run.sh patch
+      - ./run.sh generate
+      - $$SDK$$/ndk/magisk/ndk-build -j$(nproc)
+      - ./run.sh archive
+      - popd
+      - PATH=$$SDK$$/ndk/magisk/toolchains/rust/bin/:$PATH python3 ./build.py -rv
+        native
+      - python3 ./build.py -rv app
+
 MaintainerNotes: |-
   22.1: https://github.com/topjohnwu/ndk-busybox/commit/31b2b5780bf9fe982e1f3d9df0bd4b1b44d6e394
   in submodule is removed for some unknown reasons. Re-add it to fix the multiple definition error.
   27.0: The build failed with -Zthread=8, see https://github.com/rust-lang/rust/issues/111522. The
   option is patched out for now.
+  31.1: The build script for busybox is not updated so selinux and pcre can't be updated. There is
+  no stub anymore and the cert is embeded directly.
 
   The stub apk is built as a standalone apk first. It goes into the archive directly. It's downloaded
   from f-droid.org later when building the corresponding main apk. The stub apk needs to be added
