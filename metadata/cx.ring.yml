@@ -4923,7 +4923,31 @@ Builds:
       - cd ../../daemon/bin/jni
       - PACKAGEDIR=../../../jami-android/libjamiclient/src/main/java ./make-swig.sh
 
+  - versionName: 20261106-01
+    versionCode: 507
+    commit: f85c3e94dc72acd038f041a785ba2d006ff9a486
+    timeout: 10800
+    subdir: jami-android/app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y automake autopoint bzip2 cmake g++ gettext libtool libyaml-cpp-dev
+        make pkg-config python-is-python3 yasm swig npm ninja-build meson rustup
+    gradle:
+      - withUnifiedPush
+    prebuild:
+      - sed -i -e "/android {/a lint { abortOnError = false }" build.gradle.kts
+      - sed -i -e '/gms/d' ../build.gradle.kts
+      - sed -i -e '/foojay/d' ../settings.gradle.kts
+      - sed -i '/DCMAKE_INTERPROCEDURAL_OPTIMIZATION/d' build.gradle.kts ../../daemon/contrib/src/main.mak
+      - sdkmanager 'cmake;4.1.2'
+      - rustup toolchain install 1.99.1 --profile minimal --target aarch64-linux-android
+        x86_64-linux-android x86_64-linux-android
+    build:
+      - cd ../../daemon/bin/jni
+      - PACKAGEDIR=../../../jami-android/libjamiclient/src/main/java ./make-swig.sh
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 20260807-01
-CurrentVersionCode: 503
+CurrentVersion: 20261106-01
+CurrentVersionCode: 507
