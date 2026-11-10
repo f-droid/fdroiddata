@@ -1,0 +1,251 @@
+AntiFeatures:
+  NonFreeAdd:
+    en-US: Offers optional add-ons (push notifications, reCAPTCHA helper) that include
+      Google's proprietary libraries.
+  NonFreeNet:
+    en-US: The app is a client for Grindr's proprietary, closed API. Optional GIF
+      search uses GIPHY's proprietary API.
+  TetheredNet:
+    en-US: Depends on Grindr's servers, which cannot be self-hosted or replaced.
+Categories:
+  - Internet
+  - Social Network
+License: MIT
+AuthorName: Open Grind Governance
+WebSite: https://opengrind.org
+SourceCode: https://git.opengrind.org/open-grind/open-grind
+IssueTracker: https://git.opengrind.org/open-grind/open-grind/issues
+Changelog: https://git.opengrind.org/open-grind/open-grind/releases
+
+AutoName: Open Grind
+
+RepoType: git
+Repo: https://git.opengrind.org/open-grind/open-grind.git
+
+Builds:
+  - versionName: 0.1.0-rc.1.1
+    versionCode: 11011
+    commit: f0297aac70da65fde65fa9462b4e71ef0135c004
+    sudo:
+      - apt-get update
+      - apt-get install -y gcc libc-dev rustup golang-go
+      - apt-get install -y -t trixie-backports libclang1-21 libclang-common-21-dev
+      - curl -fsSL -o /tmp/bun.zip https://github.com/oven-sh/bun/releases/download/bun-v1.3.13/bun-linux-x64.zip
+      - echo "79c0771fa8b92c33aae41e15a0e0d307ea99d0e2f00317c71c6c53237a78e25a  /tmp/bun.zip"
+        | sha256sum -c -
+      - unzip -qo /tmp/bun.zip -d /opt
+      - echo "deb https://deb.debian.org/debian forky main" > /etc/apt/sources.list.d/forky.list
+      - 'printf "Package: *\nPin: release n=forky\nPin-Priority: 100\n" > /etc/apt/preferences.d/forky'
+      - apt-get update
+      - apt-get install -y -t forky nodejs
+    output: 
+      src-tauri/gen/android/app/build/outputs/apk/*/release/open-grind-v*-android-armeabi-v7a-unsigned.apk
+    binary: 
+      https://git.opengrind.org/open-grind/open-grind/releases/download/v%v/open-grind-v%v-android-armeabi-v7a.apk
+    srclibs:
+      - esbuild@v0.25.12
+    prebuild:
+      - sdkmanager "platforms;android-36" "build-tools;35.0.0" "cmake;3.22.1"
+      - rustup toolchain install 1.95.0 --profile minimal --target 
+        aarch64-linux-android,armv7-linux-androideabi,i686-linux-android,x86_64-linux-android
+      - export PATH=/opt/bun-linux-x64:$PATH
+      - bun run patch-deps
+      - mkdir -p $HOME/.gradle-opengrind
+      - echo "android.aapt2FromMavenOverride=$$SDK$$/build-tools/35.0.0/aapt2" > $HOME/.gradle-opengrind/gradle.properties
+      - bun ci
+      - go build -C $$esbuild$$ ./cmd/esbuild
+    scandelete:
+      - node_modules
+    build:
+      - unset SOURCE_DATE_EPOCH
+      - export CARGO_HOME=$HOME/.cargo JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+      - export ANDROID_HOME=$$SDK$$ ANDROID_SDK_ROOT=$$SDK$$
+      - export ANDROID_NDK_HOME=$$NDK$$ ANDROID_NDK_ROOT=$$NDK$$ NDK_HOME=$$NDK$$
+      - export LIBCLANG_PATH=/usr/lib/llvm-21/lib CMAKE_GENERATOR=Ninja
+      - export NODE_OPTIONS=--max-old-space-size=4096
+      - export 
+        PATH=$$SDK$$/build-tools/35.0.0:$$SDK$$/cmake/3.22.1/bin:$CARGO_HOME/bin:/opt/bun-linux-x64:$JAVA_HOME/bin:$PATH
+      - ROOT=$(pwd -P)
+      - export RUSTFLAGS="--remap-path-prefix=$CARGO_HOME=/cargo --remap-path-prefix=$ROOT=/open-grind"
+      - export CFLAGS="-ffile-prefix-map=$CARGO_HOME=/cargo -ffile-prefix-map=$ROOT=/open-grind"
+      - export CXXFLAGS="$CFLAGS"
+      - export GRADLE_USER_HOME=$HOME/.gradle-opengrind
+      - export ESBUILD_BINARY_PATH=$$esbuild$$/esbuild
+      - rm -rf src-tauri/gen/android/app/build/outputs/apk
+      - bun run tauri android build --apk --split-per-abi --target armv7
+      - ci/android-outputs.sh
+    ndk: 29.0.14206865
+
+  - versionName: 0.1.0-rc.1.1
+    versionCode: 11012
+    commit: f0297aac70da65fde65fa9462b4e71ef0135c004
+    sudo:
+      - apt-get update
+      - apt-get install -y gcc libc-dev rustup golang-go
+      - apt-get install -y -t trixie-backports libclang1-21 libclang-common-21-dev
+      - curl -fsSL -o /tmp/bun.zip https://github.com/oven-sh/bun/releases/download/bun-v1.3.13/bun-linux-x64.zip
+      - echo "79c0771fa8b92c33aae41e15a0e0d307ea99d0e2f00317c71c6c53237a78e25a  /tmp/bun.zip"
+        | sha256sum -c -
+      - unzip -qo /tmp/bun.zip -d /opt
+      - echo "deb https://deb.debian.org/debian forky main" > /etc/apt/sources.list.d/forky.list
+      - 'printf "Package: *\nPin: release n=forky\nPin-Priority: 100\n" > /etc/apt/preferences.d/forky'
+      - apt-get update
+      - apt-get install -y -t forky nodejs
+    output: 
+      src-tauri/gen/android/app/build/outputs/apk/*/release/open-grind-v*-android-arm64-v8a-unsigned.apk
+    binary: 
+      https://git.opengrind.org/open-grind/open-grind/releases/download/v%v/open-grind-v%v-android-arm64-v8a.apk
+    srclibs:
+      - esbuild@v0.25.12
+    prebuild:
+      - sdkmanager "platforms;android-36" "build-tools;35.0.0" "cmake;3.22.1"
+      - rustup toolchain install 1.95.0 --profile minimal --target 
+        aarch64-linux-android,armv7-linux-androideabi,i686-linux-android,x86_64-linux-android
+      - export PATH=/opt/bun-linux-x64:$PATH
+      - bun run patch-deps
+      - mkdir -p $HOME/.gradle-opengrind
+      - echo "android.aapt2FromMavenOverride=$$SDK$$/build-tools/35.0.0/aapt2" > $HOME/.gradle-opengrind/gradle.properties
+      - bun ci
+      - go build -C $$esbuild$$ ./cmd/esbuild
+    scandelete:
+      - node_modules
+    build:
+      - unset SOURCE_DATE_EPOCH
+      - export CARGO_HOME=$HOME/.cargo JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+      - export ANDROID_HOME=$$SDK$$ ANDROID_SDK_ROOT=$$SDK$$
+      - export ANDROID_NDK_HOME=$$NDK$$ ANDROID_NDK_ROOT=$$NDK$$ NDK_HOME=$$NDK$$
+      - export LIBCLANG_PATH=/usr/lib/llvm-21/lib CMAKE_GENERATOR=Ninja
+      - export NODE_OPTIONS=--max-old-space-size=4096
+      - export 
+        PATH=$$SDK$$/build-tools/35.0.0:$$SDK$$/cmake/3.22.1/bin:$CARGO_HOME/bin:/opt/bun-linux-x64:$JAVA_HOME/bin:$PATH
+      - ROOT=$(pwd -P)
+      - export RUSTFLAGS="--remap-path-prefix=$CARGO_HOME=/cargo --remap-path-prefix=$ROOT=/open-grind"
+      - export CFLAGS="-ffile-prefix-map=$CARGO_HOME=/cargo -ffile-prefix-map=$ROOT=/open-grind"
+      - export CXXFLAGS="$CFLAGS"
+      - export GRADLE_USER_HOME=$HOME/.gradle-opengrind
+      - export ESBUILD_BINARY_PATH=$$esbuild$$/esbuild
+      - rm -rf src-tauri/gen/android/app/build/outputs/apk
+      - bun run tauri android build --apk --split-per-abi --target aarch64
+      - ci/android-outputs.sh
+    ndk: 29.0.14206865
+
+  - versionName: 0.1.0-rc.1.1
+    versionCode: 11013
+    commit: f0297aac70da65fde65fa9462b4e71ef0135c004
+    sudo:
+      - apt-get update
+      - apt-get install -y gcc libc-dev rustup golang-go
+      - apt-get install -y -t trixie-backports libclang1-21 libclang-common-21-dev
+      - curl -fsSL -o /tmp/bun.zip https://github.com/oven-sh/bun/releases/download/bun-v1.3.13/bun-linux-x64.zip
+      - echo "79c0771fa8b92c33aae41e15a0e0d307ea99d0e2f00317c71c6c53237a78e25a  /tmp/bun.zip"
+        | sha256sum -c -
+      - unzip -qo /tmp/bun.zip -d /opt
+      - echo "deb https://deb.debian.org/debian forky main" > /etc/apt/sources.list.d/forky.list
+      - 'printf "Package: *\nPin: release n=forky\nPin-Priority: 100\n" > /etc/apt/preferences.d/forky'
+      - apt-get update
+      - apt-get install -y -t forky nodejs
+    output: 
+      src-tauri/gen/android/app/build/outputs/apk/*/release/open-grind-v*-android-x86-unsigned.apk
+    binary: 
+      https://git.opengrind.org/open-grind/open-grind/releases/download/v%v/open-grind-v%v-android-x86.apk
+    srclibs:
+      - esbuild@v0.25.12
+    prebuild:
+      - sdkmanager "platforms;android-36" "build-tools;35.0.0" "cmake;3.22.1"
+      - rustup toolchain install 1.95.0 --profile minimal --target 
+        aarch64-linux-android,armv7-linux-androideabi,i686-linux-android,x86_64-linux-android
+      - export PATH=/opt/bun-linux-x64:$PATH
+      - bun run patch-deps
+      - mkdir -p $HOME/.gradle-opengrind
+      - echo "android.aapt2FromMavenOverride=$$SDK$$/build-tools/35.0.0/aapt2" > $HOME/.gradle-opengrind/gradle.properties
+      - bun ci
+      - go build -C $$esbuild$$ ./cmd/esbuild
+    scandelete:
+      - node_modules
+    build:
+      - unset SOURCE_DATE_EPOCH
+      - export CARGO_HOME=$HOME/.cargo JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+      - export ANDROID_HOME=$$SDK$$ ANDROID_SDK_ROOT=$$SDK$$
+      - export ANDROID_NDK_HOME=$$NDK$$ ANDROID_NDK_ROOT=$$NDK$$ NDK_HOME=$$NDK$$
+      - export LIBCLANG_PATH=/usr/lib/llvm-21/lib CMAKE_GENERATOR=Ninja
+      - export NODE_OPTIONS=--max-old-space-size=4096
+      - export 
+        PATH=$$SDK$$/build-tools/35.0.0:$$SDK$$/cmake/3.22.1/bin:$CARGO_HOME/bin:/opt/bun-linux-x64:$JAVA_HOME/bin:$PATH
+      - ROOT=$(pwd -P)
+      - export RUSTFLAGS="--remap-path-prefix=$CARGO_HOME=/cargo --remap-path-prefix=$ROOT=/open-grind"
+      - export CFLAGS="-ffile-prefix-map=$CARGO_HOME=/cargo -ffile-prefix-map=$ROOT=/open-grind"
+      - export CXXFLAGS="$CFLAGS"
+      - export GRADLE_USER_HOME=$HOME/.gradle-opengrind
+      - export ESBUILD_BINARY_PATH=$$esbuild$$/esbuild
+      - rm -rf src-tauri/gen/android/app/build/outputs/apk
+      - bun run tauri android build --apk --split-per-abi --target i686
+      - ci/android-outputs.sh
+    ndk: 29.0.14206865
+
+  - versionName: 0.1.0-rc.1.1
+    versionCode: 11014
+    commit: f0297aac70da65fde65fa9462b4e71ef0135c004
+    sudo:
+      - apt-get update
+      - apt-get install -y gcc libc-dev rustup golang-go
+      - apt-get install -y -t trixie-backports libclang1-21 libclang-common-21-dev
+      - curl -fsSL -o /tmp/bun.zip https://github.com/oven-sh/bun/releases/download/bun-v1.3.13/bun-linux-x64.zip
+      - echo "79c0771fa8b92c33aae41e15a0e0d307ea99d0e2f00317c71c6c53237a78e25a  /tmp/bun.zip"
+        | sha256sum -c -
+      - unzip -qo /tmp/bun.zip -d /opt
+      - echo "deb https://deb.debian.org/debian forky main" > /etc/apt/sources.list.d/forky.list
+      - 'printf "Package: *\nPin: release n=forky\nPin-Priority: 100\n" > /etc/apt/preferences.d/forky'
+      - apt-get update
+      - apt-get install -y -t forky nodejs
+    output: 
+      src-tauri/gen/android/app/build/outputs/apk/*/release/open-grind-v*-android-x86_64-unsigned.apk
+    binary: 
+      https://git.opengrind.org/open-grind/open-grind/releases/download/v%v/open-grind-v%v-android-x86_64.apk
+    srclibs:
+      - esbuild@v0.25.12
+    prebuild:
+      - sdkmanager "platforms;android-36" "build-tools;35.0.0" "cmake;3.22.1"
+      - rustup toolchain install 1.95.0 --profile minimal --target 
+        aarch64-linux-android,armv7-linux-androideabi,i686-linux-android,x86_64-linux-android
+      - export PATH=/opt/bun-linux-x64:$PATH
+      - bun run patch-deps
+      - mkdir -p $HOME/.gradle-opengrind
+      - echo "android.aapt2FromMavenOverride=$$SDK$$/build-tools/35.0.0/aapt2" > $HOME/.gradle-opengrind/gradle.properties
+      - bun ci
+      - go build -C $$esbuild$$ ./cmd/esbuild
+    scandelete:
+      - node_modules
+    build:
+      - unset SOURCE_DATE_EPOCH
+      - export CARGO_HOME=$HOME/.cargo JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+      - export ANDROID_HOME=$$SDK$$ ANDROID_SDK_ROOT=$$SDK$$
+      - export ANDROID_NDK_HOME=$$NDK$$ ANDROID_NDK_ROOT=$$NDK$$ NDK_HOME=$$NDK$$
+      - export LIBCLANG_PATH=/usr/lib/llvm-21/lib CMAKE_GENERATOR=Ninja
+      - export NODE_OPTIONS=--max-old-space-size=4096
+      - export 
+        PATH=$$SDK$$/build-tools/35.0.0:$$SDK$$/cmake/3.22.1/bin:$CARGO_HOME/bin:/opt/bun-linux-x64:$JAVA_HOME/bin:$PATH
+      - ROOT=$(pwd -P)
+      - export RUSTFLAGS="--remap-path-prefix=$CARGO_HOME=/cargo --remap-path-prefix=$ROOT=/open-grind"
+      - export CFLAGS="-ffile-prefix-map=$CARGO_HOME=/cargo -ffile-prefix-map=$ROOT=/open-grind"
+      - export CXXFLAGS="$CFLAGS"
+      - export GRADLE_USER_HOME=$HOME/.gradle-opengrind
+      - export ESBUILD_BINARY_PATH=$$esbuild$$/esbuild
+      - rm -rf src-tauri/gen/android/app/build/outputs/apk
+      - bun run tauri android build --apk --split-per-abi --target x86_64
+      - ci/android-outputs.sh
+    ndk: 29.0.14206865
+
+AllowedAPKSigningKeys: 2805fdd8f0badb9424d3244c5e5b3473cef5b8798ec1117382e89eda45c3658c
+
+MaintainerNotes: Mirrors the Nix release build's toolchain so the APK reproduces.
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^v\d+\.\d+\.\d+(-[0-9A-Za-z.-]+)?$
+VercodeOperation:
+  - '%c + 1'
+  - '%c + 2'
+  - '%c + 3'
+  - '%c + 4'
+UpdateCheckData: src-tauri/tauri.conf.json|"versionCode":\s*(\d+)|.|"version":\s*"([^"]+)"
+CurrentVersion: 0.1.0-rc.1.1
+CurrentVersionCode: 11014
