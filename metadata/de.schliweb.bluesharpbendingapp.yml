@@ -177,11 +177,41 @@ Builds:
       - webapp
       - package.json
 
+  - versionName: 3.9.0
+    versionCode: 30900
+    commit: 10865112635957f658451cda4610f54df69742a5
+    timeout: 14400
+    subdir: android/app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y make ninja-build cmake python3-flatbuffers zip unzip
+    gradle:
+      - yes
+    rm:
+      - npm
+      - desktop
+      - webapp
+      - package.json
+      - external/onnxruntime/onnxruntime/test
+      - external/onnxruntime/samples
+      - external/onnxruntime/js
+      - external/onnxruntime/java/build-android.gradle
+    prebuild:
+      - sed -i -e '/^apply plugin. .maven-publish./d' -e '/^publishing {/,/^}/d' ../../external/onnxruntime_pinned/build-android.gradle
+      - sed -i -e 's/maven(MavenPublication)/create("maven", MavenPublication)/' ../../external/onnxruntime/java/build.gradle
+    scandelete:
+      - external/onnxruntime
+    build:
+      - cd ../..
+      - ./scripts/build_onnxruntime_android.sh
+    ndk: 28.0.13004108
+
 AllowedAPKSigningKeys: ae322d3fb71afe21df4727e37a5c6803511d5a2fe1fc3135430cee0699fa1b34
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v
 UpdateCheckData: 
   android/app/build.gradle|versionCode\s*=?\s*(\d+)|build.gradle|version\s*=\s*['"](.+?)['"]
-CurrentVersion: 3.8.0
-CurrentVersionCode: 30800
+CurrentVersion: 3.9.0
+CurrentVersionCode: 30900
