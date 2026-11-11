@@ -1,0 +1,79 @@
+Categories:
+  - Graphics
+  - Science & Education
+License: AGPL-3.0-or-later
+AuthorName: GlassOnTin
+SourceCode: https://github.com/GlassOnTin/fieldsmith
+IssueTracker: https://github.com/GlassOnTin/fieldsmith/issues
+Changelog: https://github.com/GlassOnTin/fieldsmith/releases
+
+AutoName: Fieldsmith
+
+RepoType: git
+Repo: https://github.com/GlassOnTin/fieldsmith.git
+Binaries: 
+  https://github.com/GlassOnTin/fieldsmith/releases/download/v%v/fieldsmith-v%v-arm64-v8a.apk
+
+Builds:
+  - versionName: 0.16.0
+    versionCode: 1601
+    commit: bf1499094ffc79e4dcb5d439f08aa707fd0a66de
+    subdir: android/app
+    submodules: true
+    sudo:
+      - echo "deb https://deb.debian.org/debian forky main" > /etc/apt/sources.list.d/forky.list
+      - apt-get update
+      - apt-get install -y build-essential pkg-config libssl-dev golang-go rustup
+        cmake
+      - apt-get install -y -t forky nodejs npm
+    gradle:
+      - arm64
+    srclibs:
+      - esbuild@v0.28.2
+      - rollup@v4.64.0
+    prebuild:
+      - sdkmanager "platforms;android-35" "build-tools;35.0.0"
+      - pushd ../../web
+      - npm ci --ignore-scripts
+      - rm -f node_modules/@rollup/rollup-linux-x64-gnu/rollup.linux-x64-gnu.node
+      - popd
+    scandelete:
+      - fenics-rs/web/pkg
+      - web/node_modules/@dimforge/rapier3d-compat
+      - web/node_modules/@esbuild
+      - web/node_modules/playwright-core
+      - web/node_modules/source-map
+      - web/node_modules/three/examples/jsm/libs
+    build:
+      - export PATH="$HOME/.cargo/bin:$PATH"
+      - rustup default 1.97.1
+      - rustup target add aarch64-linux-android wasm32-unknown-unknown
+      - cargo install cargo-ndk@3.5.4 --locked
+      - cargo install wasm-bindgen-cli@0.2.129 --locked
+      - pushd $$esbuild$$
+      - go build ./cmd/esbuild
+      - popd
+      - pushd $$rollup$$
+      - npm install --no-save --no-audit --no-fund @napi-rs/cli@3.4.1
+      - ./node_modules/.bin/napi build --cwd rust/bindings_napi --platform --release
+        --no-js --dts native.d.ts --output-dir ../.. --package-json-path ../../package.json
+      - popd
+      - pushd ../..
+      - FIELDSMITH_WASM_ST_ONLY=1 bash scripts/build-wasm.sh
+      - popd
+      - pushd ../../web
+      - cp -f $$rollup$$/rollup.linux-x64-gnu.node node_modules/@rollup/rollup-linux-x64-gnu/rollup.linux-x64-gnu.node
+      - ESBUILD_BINARY_PATH="$$esbuild$$/esbuild" npm run build
+      - popd
+      - ANDROID_NDK_HOME="$$NDK$$" cargo ndk -t arm64-v8a -o src/main/jniLibs build
+        --release -p fieldsmith-mcp
+    ndk: 29.0.14206865
+
+AllowedAPKSigningKeys: 820814fa8e99713d706f5080b1829836533212c453d42131164b01460b676c07
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^v[0-9.]+$
+VercodeOperation:
+  - 10 * %c + 1
+CurrentVersion: 0.16.0
+CurrentVersionCode: 1601
