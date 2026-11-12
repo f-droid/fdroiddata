@@ -3520,10 +3520,36 @@ Builds:
       - ./build-jnilibs4atalk.sh
     ndk: r28c
 
+  - versionName: 6.5.2
+    versionCode: 605020
+    commit: 534cebbf7ed1623e32163f6d4be4aefa687845f4
+    subdir: aTalk
+    sudo:
+      - apt-get update
+      - apt-get install bzip2 file gcc-multilib make pkg-config wget
+    gradle:
+      - fdroid
+    rm:
+      - aTalk/lib/src_reference/
+      - aTalk/jni/ffmpeg/android/
+      - aTalk/jni/openssl/android/
+      - aTalk/jni/vpx/android/
+    prebuild:
+      - sed -i -e '/foojay/d' ../settings.gradle
+      - sed -i -e '/JavaLanguageVersion/s/17/21/' {.,../android-youtube-player/core}/build.gradle
+      - sed -i -e 's|/opt/android/android-sdk|$$SDK$$|' jni/{vpx,static_library_built/{openssl,ffmpeg-x264,libvpx}}/_settings.sh
+      - sdkmanager 'ndk;22.1.7171670'
+    scandelete:
+      - aTalk/jni/static_library_built
+    build:
+      - cd jni/static_library_built
+      - ./build-jnilibs4atalk.sh
+    ndk: r28c
+
 MaintainerNotes: scanignore is used to allow the local "third_party/m2" Gradle repository
   (which is populated by libraries we build).
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 6.5.1
-CurrentVersionCode: 605010
+CurrentVersion: 6.5.2
+CurrentVersionCode: 605020
