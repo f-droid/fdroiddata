@@ -70,11 +70,63 @@ Builds:
     gradleprops:
       - skywireFdroid=true
 
+  - versionName: 0.0.11
+    versionCode: 11
+    commit: 28e238412ece22cb01c7e1ccae36fc41b1acb861
+    subdir: android/app
+    sudo:
+      - apt-get update
+      - apt-get install -y make
+      - apt-get install -y -t trixie-backports golang-go
+      - apt-get install -y g++ llvm-19-dev libclang-19-dev clang-19 lld-19 binaryen
+    gradle:
+      - yes
+    srclibs:
+      - go@go1.27.2
+      - tinygo@bdc4a21af007d8f059b5cefe5644b7ee7bda5b2d
+    rm:
+      - pkg/router/policy/wasm/presets/bundle.wasm
+    scandelete:
+      - pkg/geoip/GeoLite2-City.mmdb.gz
+      - docs/examples/routing-policies/wasm/*/*.wasm
+      - vendor/github.com/blang/semver/package.json
+      - vendor/github.com/go-redis/redis/v8/package.json
+      - vendor/golang.org/x/net/publicsuffix/data/nodes
+      - vendor/golang.org/x/net/publicsuffix/data/children
+      - vendor/github.com/skycoin/skycoin/src/skycoin-lite/wasm-tinygo/skycoin-lite.wasm.gz
+      - pkg/tpviz/netview/netview.wasm.gz
+      - pkg/hostbridge/dist/*.gz
+      - vendor/github.com/0magnet/websh/term/term.wasm.gz
+      - vendor/github.com/0magnet/progterm/glterm/kana.gz
+    build:
+      - cd ../..
+      - git -C $$go$$ checkout -q -f "go$(sed -n 's/^go //p' go.mod)"
+      - (cd $$go$$/src && ./make.bash)
+      - export PATH="$$go$$/bin:$PATH" GOTOOLCHAIN=local
+      - go version
+      - git -C $$tinygo$$ submodule update --init lib/wasi-libc
+      - git init -q $$tinygo$$/llvm-project
+      - git -C $$tinygo$$/llvm-project sparse-checkout set compiler-rt/lib/builtins
+      - git -C $$tinygo$$/llvm-project fetch -q --depth=1 --filter=blob:none https://github.com/tinygo-org/llvm-project
+        "$(cat $$tinygo$$/llvm-version.txt)"
+      - git -C $$tinygo$$/llvm-project checkout -q FETCH_HEAD
+      - (cd $$tinygo$$ && GOPROXY=https://proxy.golang.org,direct GOSUMDB=sum.golang.org
+        go build -tags=llvm19 -o build/tinygo .)
+      - export PATH="$$tinygo$$/build:$PATH"
+      - tinygo version
+      - export GOPROXY=off
+      - make bundle-wasm
+      - ANDROID_NDK_HOME=$$NDK$$ make android-mobile-ndk DATE="$(TZ=UTC git log -1
+        --format=%cd --date=format-local:%Y-%m-%dT%H:%M:%SZ)"
+    ndk: r27c
+    gradleprops:
+      - skywireFdroid=true
+
 AllowedAPKSigningKeys: 8b960eab847e8acc3e21e641b1d708d8415754971f53bb1caaee2998f267037d
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^fdroid-v[0-9]+\.[0-9]+\.[0-9]+$
 UpdateCheckData: 
   android/version.properties|(?m)^versionCode=(\d+)$|android/version.properties|(?m)^versionName=(\S+)$
-CurrentVersion: 0.0.10
-CurrentVersionCode: 10
+CurrentVersion: 0.0.11
+CurrentVersionCode: 11
