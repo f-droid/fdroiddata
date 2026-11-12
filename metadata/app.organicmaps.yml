@@ -3548,11 +3548,50 @@ Builds:
         en-US: Compiled binary data files (including but not limited to `.mwm` map
           files) under a non-FOSS license
 
+  - versionName: 2026.11.11-39-FDroid
+    versionCode: 26111139
+    commit: 5c0c5ec0a706b9bea17b4d5b0b40e7b60f916a13
+    subdir: android/app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y g++ ninja-build
+    gradle:
+      - fdroid
+    rm:
+      - iphone
+      - qt
+      - tools/shaders_compiler
+      - tools/python/twine
+      - xcode
+    prebuild:
+      - sdkmanager 'cmake;3.30.3'
+      - sed -i -e '/google.gms/d' -e '/firebase/d' ../build.gradle
+      - sed -i '/libs.google.gms.wearable/d' ../wear/build.gradle ../sdk/wear/gms/build.gradle
+      - sed -i -e '/google.firebase/d' -e '/gms.google-services/d' -e '/^      if
+        (googleFirebaseServicesEnabled) {/,/^      }/d' build.gradle
+      - touch secure.properties
+      - sed -i -e '/def signingStoreFile = {/,+3d' -e '/if (securityPropertiesFileExists)
+        {/,+8d' -e '/storeFile/d' -e '/signingConfig = /d' ../groovy/application-signing.gradle
+      - sed -i -e '/publishing {/,/^  }/d' ../groovy/publishing.gradle
+    scanignore:
+      - data/*.bin
+      - android/sdk/src/main/assets/geoid_model.bin
+    scandelete:
+      - 3party
+      - android/libs/wear-protocol-gms
+      - android/sdk/location/gms
+      - package.json
+    antifeatures:
+      NonFreeAssets:
+        en-US: Compiled binary data files (including but not limited to `.mwm` map
+          files) under a non-FOSS license
+
 MaintainerNotes: scanner might detect 'com/google/android/gms/location' and more from
   'org.microg.gms:play-services-location`
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags .*android$
 UpdateCheckData: android/app/src/fdroid/play/version.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 2026.09.29-32-FDroid
-CurrentVersionCode: 26092932
+CurrentVersion: 2026.11.11-39-FDroid
+CurrentVersionCode: 26111139
