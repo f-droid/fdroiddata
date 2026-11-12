@@ -37,10 +37,35 @@ Builds:
       - bash build-native.sh
     ndk: r27c
 
+  - versionName: 0.8.97
+    versionCode: 800970
+    commit: 0eb7edb50c8a22a1e7595c02dd28662eca16a803
+    subdir: warpdroid/app
+    sudo:
+      - apt-get update
+      - apt-get install -y gcc libc-dev make golang-go
+    gradle:
+      - yes
+    srclibs:
+      - go@go1.26.3
+    prebuild: sdkmanager "platforms;android-21"
+    scandelete:
+      - vendor
+    build:
+      - pushd $$go$$/src
+      - GOROOT_BOOTSTRAP="$(go env GOROOT)" ./make.bash && popd
+      - export GOROOT="$$go$$"
+      - export PATH="$$go$$/bin:$PATH"
+      - cd ../..
+      - go mod download
+      - cd warpdroid/node
+      - bash build-native.sh
+    ndk: r27c
+
 AllowedAPKSigningKeys: eabdd61e5bcbd6615a3f54977c06646c0f5422d845d37c818286b7d34285dfec
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v[0-9.]+$
 UpdateCheckData: warpdroid/fdroid/versionCode|(\d+)|version|([\d.]+)
-CurrentVersion: 0.8.83
-CurrentVersionCode: 800830
+CurrentVersion: 0.8.97
+CurrentVersionCode: 800970
