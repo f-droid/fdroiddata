@@ -49,9 +49,44 @@ Builds:
       - popd
     ndk: 28.0.13004108
 
+  - versionName: 0.1.0-beta11
+    versionCode: 11
+    commit: 397bc5582255b47259ad5b911a7c120ebefe577c
+    subdir: apps/messages
+    sudo:
+      - apt-get update
+      - apt-get install -y --no-install-recommends build-essential protobuf-compiler
+        libprotobuf-dev cmake ninja-build clang libclang-dev pkg-config rustup
+    gradle:
+      - yes
+    srclibs:
+      - libsignal@v0.102.2
+      - Secp256k1Kmp@v0.24.0
+    prebuild:
+      - export PATH="$HOME/.cargo/bin:$PATH"
+      - rustup default 1.98.1
+      - rustup target add aarch64-linux-android armv7-linux-androideabi
+      - sed -i '/libsignal repository (start)/,/libsignal repository (end)/c\exclusiveContent
+        { forRepository { mavenLocal() } ; filter { includeGroup("org.signal") ; includeModule("fr.acinq.secp256k1",
+        "secp256k1-kmp-jni-android") } }' ../../settings.gradle.kts
+      - echo 'target_link_options( secp256k1-jni PRIVATE -Wl,--build-id=none )' >>
+        $$Secp256k1Kmp$$/jni/android/src/main/CMakeLists.txt
+      - cd $$libsignal$$ && export CFLAGS="-ffile-prefix-map=$(pwd -P)=." CXXFLAGS="-ffile-prefix-map=$(pwd
+        -P)=."
+      - export RUSTFLAGS="-C link-arg=-Wl,--build-id=none"
+      - sed -i 's|-Wl,--build-id|-Wl,--build-id=none|' $$libsignal$$/rust/bridge/jni/build.rs
+      - cd $$libsignal$$/java && ANDROID_NDK_HOME=$$NDK$$ ./gradlew --no-daemon -PandroidArchs=aarch64,arm
+        :android:publishToMavenLocal :client:publishToMavenLocal
+    build:
+      - sdkmanager "cmake;3.31.5"
+      - pushd $$Secp256k1Kmp$$
+      - gradle :jni:android:publishToMavenLocal
+      - popd
+    ndk: 28.0.13004108
+
 AllowedAPKSigningKeys: 2fdea7b46beffe16459bb4dcdd34db5e0cb912274a5eb628e4b0d8a596211790
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 0.1.0-beta10
-CurrentVersionCode: 10
+CurrentVersion: 0.1.0-beta11
+CurrentVersionCode: 11
