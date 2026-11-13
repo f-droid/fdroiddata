@@ -1,0 +1,62 @@
+AntiFeatures:
+  NonFreeNet:
+    en-US: Optional Telegram gateway and third-party AI provider endpoints are non-free
+      network services.
+Categories:
+  - Internet
+  - System
+License: GPL-3.0-only
+AuthorName: Ubaid ur Rehman
+SourceCode: https://gitlab.com/theredhacker0345/pocket-relay
+IssueTracker: https://gitlab.com/theredhacker0345/pocket-relay/issues
+
+AutoName: Pocket Relay
+
+RepoType: git
+Repo: https://gitlab.com/theredhacker0345/pocket-relay.git
+
+Builds:
+  - versionName: 1.0.0
+    versionCode: 1
+    commit: 2a328d493b76b847c692c2841f4344bb38f425c0
+    subdir: android/app
+    sudo:
+      - echo "deb https://deb.debian.org/debian bookworm main" > /etc/apt/sources.list.d/bookworm.list
+      - apt-get update
+      - apt-get install -y build-essential nodejs npm rustup
+      - apt-get install -y -t bookworm openjdk-17-jdk-headless
+    init:
+      - cd ../..
+      - npm exec --yes --package=pnpm@9.12.0 -- pnpm install --frozen-lockfile
+      - node scripts/prepare-fdroid-expo-autolinking.mjs
+    gradle:
+      - yes
+    prebuild:
+      - rustup default 1.88.0
+      - rustup target add aarch64-linux-android
+    scanignore:
+      - node_modules/react-native/sdks/hermesc/linux64-bin/hermesc
+    scandelete:
+      - node_modules
+      - third_party/pydantic-core/vendor/regex-automata-*/tests/fuzz/testdata
+    build: bash ../../scripts/build-android-python-wheels.sh
+    ndk: 27.1.12297006
+
+MaintainerNotes: |-
+  Requires Android 7.0+ (API 24+) and targets ARM64. No upstream Binaries are supplied:
+  byte-for-byte verification against the upstream APK cannot pass outside the exact
+  fdroid buildserver image (build paths in pip/chaquopy metadata, R8/dex output, GNU
+  build-ids in native libs, and the React Native dev-server IP baked into
+  resources.arsc all differ with the build environment), so F-Droid builds and signs
+  the release APK from source. Hermes Agent 0.20.1 and Pydantic Core
+  2.46.4 source, licenses, provenance records, and required local build inputs are vendored
+  under third_party/. The offline wheel-build script (run in the build phase) is fail-closed and
+  must run without network access.
+  F-Droid builds keep upstream's Hermes engine: the prebuilt host hermesc compiler is
+  scanignored (templates/build-react-native.yml pattern, pnpm path) so the JS bundle
+  ships as Hermes bytecode and libhermes.so comes from the hermes-android Maven artifact.
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: 1.0.0
+CurrentVersionCode: 1
