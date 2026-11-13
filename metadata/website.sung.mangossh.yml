@@ -1,0 +1,74 @@
+Categories:
+  - Remote Access
+  - Security
+License: GPL-3.0-or-later
+AuthorName: sunging
+AuthorWebSite: https://github.com/sunging
+SourceCode: https://github.com/sunging/MangoSSH
+IssueTracker: https://github.com/sunging/MangoSSH/issues
+Changelog: https://github.com/sunging/MangoSSH/releases
+
+AutoName: MangoSSH
+
+RepoType: git
+Repo: https://github.com/sunging/MangoSSH.git
+Binaries: 
+  https://github.com/sunging/MangoSSH/releases/download/v%v/MangoSSH-v%v-fdroid.apk
+
+Builds:
+  - versionName: 0.8.2
+    versionCode: 8002
+    commit: 881fddb05434d32d21655d2ad5f314079274f45d
+    timeout: 14400
+    subdir: app
+    submodules: true
+    sudo:
+      - echo "deb https://deb.debian.org/debian bookworm main" > /etc/apt/sources.list.d/bookworm.list
+      - apt-get update
+      - apt-get install -y autoconf automake binutils bison build-essential cmake
+        curl gettext git gperf libtool ninja-build pkg-config python3 rsync texinfo
+        unzip zip
+      - apt-get install -y -t bookworm openjdk-17-jdk-headless
+      - apt-get install -y -t trixie-backports golang-1.27-go
+    gradle:
+      - fdroid
+    srclibs:
+      - go@go1.27.3
+      - zlib@da607da739fa6047df13e66a2af6b8bec7c2a498
+      - protobuf@796e49f6ca82f763d1087d2ff7355d2f0d7b71b1
+      - ncurses@79b9071f2be20a24c7be031655a5638f6032f29f
+      - nettle@d9e983c664772f8cbacba9fa084bc079978e3c98
+    prebuild:
+      - echo 'org.gradle.java.home=/usr/lib/jvm/java-17-openjdk-amd64' >> ../gradle.properties
+      - sdkmanager 'cmake;3.22.1' 'platforms;android-26'
+    scanignore:
+      - native/tsnetbridge/vendor/tailscale.com/util/eventbus/assets/htmx-websocket.min.js.gz
+      - native/tsnetbridge/vendor/tailscale.com/util/eventbus/assets/htmx.min.js.gz
+      - third_party/mosh4android/src/fuzz/terminal_corpus
+      - third_party/mosh4android/src/fuzz/terminal_parser_corpus
+    build:
+      - cd ..
+      - export GOTOOLCHAIN=local
+      - export GOROOT_BOOTSTRAP=/usr/lib/go-1.27
+      - pushd $$go$$/src
+      - ./make.bash
+      - popd
+      - mkdir -p .fdroid/sources
+      - ln -s $$zlib$$ .fdroid/sources/zlib
+      - ln -s $$protobuf$$ .fdroid/sources/protobuf
+      - ln -s $$ncurses$$ .fdroid/sources/ncurses
+      - ln -s $$nettle$$ .fdroid/sources/nettle
+      - mkdir -p .tools/go
+      - ln -s $$go$$ .tools/go/1.27.3
+      - python3 tools/native/build.py verify-sources
+    ndk: r27d
+    gradleprops:
+      - mangosshOfflineBuild=true
+
+AllowedAPKSigningKeys: 6ad86ccb0026c60606b016a643fb5f90c090035591c2c734d0fd66004b9373be
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^v[0-9]+\.[0-9]+\.[0-9]+$
+UpdateCheckData: version-code.txt|^(\d+)$||^v([0-9]+\.[0-9]+\.[0-9]+)$
+CurrentVersion: 0.8.2
+CurrentVersionCode: 8002
