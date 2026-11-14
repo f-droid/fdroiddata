@@ -542,9 +542,34 @@ Builds:
         >> localbuildsettings.py
       - ./build.py fdroid
 
+  - versionName: 0.43.3
+    versionCode: 1794591267
+    commit: 14879cd9e658bae8b6d0ed2f7ffec7a6b186f6b7
+    subdir: mobile/app
+    sudo:
+      - apt-get update
+      - apt-get install -y cargo
+    gradle:
+      - yes
+    srclibs:
+      - lightningcss@v1.33.0
+    rm:
+      - package.json
+    build:
+      - pushd $$lightningcss$$
+      - cargo build --release --locked --features cli --bin lightningcss
+      - popd
+      - cd ../..
+      - mkdir -p node_modules/.bin
+      - ln -s $$lightningcss$$/target/release/lightningcss node_modules/.bin/lightningcss
+      - echo 
+        "builds={'fdroid':{'post_build':['build_mobile.py'],'gradle_buildtype':'copyonly'}}"
+        >> localbuildsettings.py
+      - ./build.py fdroid
+
 AutoUpdateMode: Version v%v
 UpdateCheckMode: HTTP
 UpdateCheckData: 
   https://iitc.app/build/release/version_fdroid.txt|versionCode=(\d+)|.|versionName=(.+)
-CurrentVersion: 0.43.2
-CurrentVersionCode: 1793876047
+CurrentVersion: 0.43.3
+CurrentVersionCode: 1794591267
