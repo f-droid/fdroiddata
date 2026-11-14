@@ -1037,6 +1037,246 @@ Builds:
       - $$flutter$$/bin/flutter build apk --release --split-per-abi --flavor foss
     ndk: r28c
 
+  - versionName: 0.6.1
+    versionCode: 301
+    commit: e2843c96a32f8f7efb7869192d70b9e88f17eabf
+    subdir: mobile
+    sudo:
+      - apt-get update
+      - apt-get install -y --no-install-recommends -t trixie-backports golang-go
+      - apt-get install -y --no-install-recommends gcc libc-dev protobuf-compiler
+      - apt-get install -y --no-install-recommends rustup
+    output: build/app/outputs/flutter-apk/app-armeabi-v7a-foss-release.apk
+    binary: 
+      https://github.com/GnosiWorks/Kryfo/releases/download/v%v/app-armeabi-v7a-release.apk
+    srclibs:
+      - flutter@stable
+      - go@go1.26.9
+      - whisper.cpp@d1be6fde11ac6e0407606b4e42fe72d34add8037
+    rm:
+      - mobile/ios
+      - mobile/linux
+      - mobile/macos
+      - mobile/web
+      - mobile/windows
+    prebuild:
+      - sed -i '/android.builder.sdkDownload=false/d' android/gradle.properties
+      - 'flutterVersion=$(sed -n -E "s/^  flutter: ([0-9.]+)$/\1/p" pubspec.yaml)'
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - goVersion=$(grep go ../engine/go.mod | head -n1 | cut -d " " -f2)
+      - '[[ $goVersion ]]'
+      - git -C $$go$$ checkout -f go$goVersion
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - sdkmanager 'cmake;3.22.1'
+      - bash ../engine/translate/native/fetch-bergamot.sh
+      - git -C $$whisper.cpp$$ checkout -- .
+      - KV_WHISPER_DIR=$$whisper.cpp$$ bash ../engine/voice/native/fetch-whisper.sh
+    scanignore:
+      - mobile/assets/geo/places.bin.gz
+      - mobile/assets/geo/world.bin
+      - mobile/assets/opencc/HKVariants.txt.gz
+      - mobile/assets/opencc/STCharacters.txt.gz
+      - mobile/assets/opencc/STPhrases.txt.gz
+      - mobile/assets/opencc/TWVariants.txt.gz
+    scandelete:
+      - mobile/.pub-cache
+      - engine/vendor/github.com/bytedance/sonic/testdata
+      - engine/vendor/github.com/alexballas/go-libtor/linux/tor/src/ext/equix/Cargo.toml
+      - engine/translate/native/.third_party/dl
+      - engine/voice/native/.third_party/whisper.cpp-d1be6fde11ac6e0407606b4e42fe72d34add8037/models
+      - engine/voice/native/.third_party/whisper.cpp-d1be6fde11ac6e0407606b4e42fe72d34add8037/examples
+      - engine/voice/native/.third_party/whisper.cpp-d1be6fde11ac6e0407606b4e42fe72d34add8037/bindings
+    build:
+      - pushd $$go$$/src
+      - ./make.bash
+      - popd
+      - export GOROOT=$$go$$
+      - export PATH=$GOROOT/bin:$PATH
+      - export ANDROID_NDK_HOME=$$NDK$$
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export CGO_ENABLED=1
+      - export GOFLAGS=-trimpath
+      - export CGO_LDFLAGS="-Wl,--build-id=none"
+      - export HALO_FULL=1
+      - rustVersion=$(sed -n -E 's/^channel = "([0-9.]+)"$/\1/p' native/kryfo_signal/rust-toolchain.toml)
+      - '[[ $rustVersion ]]'
+      - rustup toolchain install $rustVersion --profile minimal
+      - rustup default $rustVersion
+      - rustup target add aarch64-linux-android armv7-linux-androideabi x86_64-linux-android
+      - bash native/kryfo_signal/build-android.sh
+      - cd ../engine
+      - bash build.sh
+      - cd ../mobile
+      - KT_JNI_LIBS_DIR=$(pwd)/android/app/src/main/jniLibs KT_CMAKE=$$SDK$$/cmake/3.22.1/bin/cmake
+        bash ../engine/translate/native/build.sh
+      - KV_JNI_LIBS_DIR=$(pwd)/android/app/src/main/jniLibs KV_CMAKE=$$SDK$$/cmake/3.22.1/bin/cmake
+        bash ../engine/voice/native/build.sh
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --flavor foss
+        --target-platform=android-arm
+    ndk: r28c
+
+  - versionName: 0.6.1
+    versionCode: 302
+    commit: e2843c96a32f8f7efb7869192d70b9e88f17eabf
+    subdir: mobile
+    sudo:
+      - apt-get update
+      - apt-get install -y --no-install-recommends -t trixie-backports golang-go
+      - apt-get install -y --no-install-recommends gcc libc-dev protobuf-compiler
+      - apt-get install -y --no-install-recommends rustup
+    output: build/app/outputs/flutter-apk/app-arm64-v8a-foss-release.apk
+    binary: 
+      https://github.com/GnosiWorks/Kryfo/releases/download/v%v/app-arm64-v8a-release.apk
+    srclibs:
+      - flutter@stable
+      - go@go1.26.9
+      - whisper.cpp@d1be6fde11ac6e0407606b4e42fe72d34add8037
+    rm:
+      - mobile/ios
+      - mobile/linux
+      - mobile/macos
+      - mobile/web
+      - mobile/windows
+    prebuild:
+      - sed -i '/android.builder.sdkDownload=false/d' android/gradle.properties
+      - 'flutterVersion=$(sed -n -E "s/^  flutter: ([0-9.]+)$/\1/p" pubspec.yaml)'
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - goVersion=$(grep go ../engine/go.mod | head -n1 | cut -d " " -f2)
+      - '[[ $goVersion ]]'
+      - git -C $$go$$ checkout -f go$goVersion
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - sdkmanager 'cmake;3.22.1'
+      - bash ../engine/translate/native/fetch-bergamot.sh
+      - git -C $$whisper.cpp$$ checkout -- .
+      - KV_WHISPER_DIR=$$whisper.cpp$$ bash ../engine/voice/native/fetch-whisper.sh
+    scanignore:
+      - mobile/assets/geo/places.bin.gz
+      - mobile/assets/geo/world.bin
+      - mobile/assets/opencc/HKVariants.txt.gz
+      - mobile/assets/opencc/STCharacters.txt.gz
+      - mobile/assets/opencc/STPhrases.txt.gz
+      - mobile/assets/opencc/TWVariants.txt.gz
+    scandelete:
+      - mobile/.pub-cache
+      - engine/vendor/github.com/bytedance/sonic/testdata
+      - engine/vendor/github.com/alexballas/go-libtor/linux/tor/src/ext/equix/Cargo.toml
+      - engine/translate/native/.third_party/dl
+      - engine/voice/native/.third_party/whisper.cpp-d1be6fde11ac6e0407606b4e42fe72d34add8037/models
+      - engine/voice/native/.third_party/whisper.cpp-d1be6fde11ac6e0407606b4e42fe72d34add8037/examples
+      - engine/voice/native/.third_party/whisper.cpp-d1be6fde11ac6e0407606b4e42fe72d34add8037/bindings
+    build:
+      - pushd $$go$$/src
+      - ./make.bash
+      - popd
+      - export GOROOT=$$go$$
+      - export PATH=$GOROOT/bin:$PATH
+      - export ANDROID_NDK_HOME=$$NDK$$
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export CGO_ENABLED=1
+      - export GOFLAGS=-trimpath
+      - export CGO_LDFLAGS="-Wl,--build-id=none"
+      - export HALO_FULL=1
+      - rustVersion=$(sed -n -E 's/^channel = "([0-9.]+)"$/\1/p' native/kryfo_signal/rust-toolchain.toml)
+      - '[[ $rustVersion ]]'
+      - rustup toolchain install $rustVersion --profile minimal
+      - rustup default $rustVersion
+      - rustup target add aarch64-linux-android armv7-linux-androideabi x86_64-linux-android
+      - bash native/kryfo_signal/build-android.sh
+      - cd ../engine
+      - bash build.sh
+      - cd ../mobile
+      - KT_JNI_LIBS_DIR=$(pwd)/android/app/src/main/jniLibs KT_CMAKE=$$SDK$$/cmake/3.22.1/bin/cmake
+        bash ../engine/translate/native/build.sh
+      - KV_JNI_LIBS_DIR=$(pwd)/android/app/src/main/jniLibs KV_CMAKE=$$SDK$$/cmake/3.22.1/bin/cmake
+        bash ../engine/voice/native/build.sh
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --flavor foss
+    ndk: r28c
+
+  - versionName: 0.6.1
+    versionCode: 303
+    commit: e2843c96a32f8f7efb7869192d70b9e88f17eabf
+    subdir: mobile
+    sudo:
+      - apt-get update
+      - apt-get install -y --no-install-recommends -t trixie-backports golang-go
+      - apt-get install -y --no-install-recommends gcc libc-dev protobuf-compiler
+      - apt-get install -y --no-install-recommends rustup
+    output: build/app/outputs/flutter-apk/app-x86_64-foss-release.apk
+    binary: https://github.com/GnosiWorks/Kryfo/releases/download/v%v/app-x86_64-release.apk
+    srclibs:
+      - flutter@stable
+      - go@go1.26.9
+      - whisper.cpp@d1be6fde11ac6e0407606b4e42fe72d34add8037
+    rm:
+      - mobile/ios
+      - mobile/linux
+      - mobile/macos
+      - mobile/web
+      - mobile/windows
+    prebuild:
+      - sed -i '/android.builder.sdkDownload=false/d' android/gradle.properties
+      - 'flutterVersion=$(sed -n -E "s/^  flutter: ([0-9.]+)$/\1/p" pubspec.yaml)'
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - goVersion=$(grep go ../engine/go.mod | head -n1 | cut -d " " -f2)
+      - '[[ $goVersion ]]'
+      - git -C $$go$$ checkout -f go$goVersion
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - sdkmanager 'cmake;3.22.1'
+      - bash ../engine/translate/native/fetch-bergamot.sh
+      - git -C $$whisper.cpp$$ checkout -- .
+      - KV_WHISPER_DIR=$$whisper.cpp$$ bash ../engine/voice/native/fetch-whisper.sh
+    scanignore:
+      - mobile/assets/geo/places.bin.gz
+      - mobile/assets/geo/world.bin
+      - mobile/assets/opencc/HKVariants.txt.gz
+      - mobile/assets/opencc/STCharacters.txt.gz
+      - mobile/assets/opencc/STPhrases.txt.gz
+      - mobile/assets/opencc/TWVariants.txt.gz
+    scandelete:
+      - mobile/.pub-cache
+      - engine/vendor/github.com/bytedance/sonic/testdata
+      - engine/vendor/github.com/alexballas/go-libtor/linux/tor/src/ext/equix/Cargo.toml
+      - engine/translate/native/.third_party/dl
+      - engine/voice/native/.third_party/whisper.cpp-d1be6fde11ac6e0407606b4e42fe72d34add8037/models
+      - engine/voice/native/.third_party/whisper.cpp-d1be6fde11ac6e0407606b4e42fe72d34add8037/examples
+      - engine/voice/native/.third_party/whisper.cpp-d1be6fde11ac6e0407606b4e42fe72d34add8037/bindings
+    build:
+      - pushd $$go$$/src
+      - ./make.bash
+      - popd
+      - export GOROOT=$$go$$
+      - export PATH=$GOROOT/bin:$PATH
+      - export ANDROID_NDK_HOME=$$NDK$$
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export CGO_ENABLED=1
+      - export GOFLAGS=-trimpath
+      - export CGO_LDFLAGS="-Wl,--build-id=none"
+      - export HALO_FULL=1
+      - rustVersion=$(sed -n -E 's/^channel = "([0-9.]+)"$/\1/p' native/kryfo_signal/rust-toolchain.toml)
+      - '[[ $rustVersion ]]'
+      - rustup toolchain install $rustVersion --profile minimal
+      - rustup default $rustVersion
+      - rustup target add aarch64-linux-android armv7-linux-androideabi x86_64-linux-android
+      - bash native/kryfo_signal/build-android.sh
+      - cd ../engine
+      - bash build.sh
+      - cd ../mobile
+      - KT_JNI_LIBS_DIR=$(pwd)/android/app/src/main/jniLibs KT_CMAKE=$$SDK$$/cmake/3.22.1/bin/cmake
+        bash ../engine/translate/native/build.sh
+      - KV_JNI_LIBS_DIR=$(pwd)/android/app/src/main/jniLibs KV_CMAKE=$$SDK$$/cmake/3.22.1/bin/cmake
+        bash ../engine/voice/native/build.sh
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --flavor foss
+    ndk: r28c
+
 AllowedAPKSigningKeys: 10928a61642c5cc471a99869e2ea4e2d4d70026e797dfba48c0f306b5b3473db
 
 AutoUpdateMode: Version
@@ -1046,5 +1286,5 @@ VercodeOperation:
   - '%c * 10 + 2'
   - '%c * 10 + 3'
 UpdateCheckData: mobile/pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 0.6.0
-CurrentVersionCode: 293
+CurrentVersion: 0.6.1
+CurrentVersionCode: 303
