@@ -7,14 +7,7 @@ SourceCode: https://github.com/teal77/trireme
 IssueTracker: https://github.com/teal77/trireme/issues
 Changelog: https://github.com/teal77/trireme/releases
 
-Name: Trireme for Deluge
 AutoName: Deluge
-Description: |-
-  Use this app to connect and manage your Deluge Daemon.
-
-  Deluge is a popular torrent client which follows a server client model.
-
-  This app will act as a client.
 
 RepoType: git
 Repo: https://github.com/teal77/trireme.git
@@ -176,12 +169,27 @@ Builds:
       - export PUB_CACHE=$(pwd)/.pub-cache
       - $$flutter$$/bin/flutter build apk --flavor fdroid
 
-MaintainerNotes: |-
-  Builds will fail when the srclib ref of flutter and the version with which
-  upstream has been built with differ.
-  In that case we need to manually give the correct ref to srclib.
+  - versionName: 1.5.0-beta.1
+    versionCode: 33
+    commit: bd95f150bdea0375aca3a98624151eb966365eb2
+    output: build/app/outputs/flutter-apk/app-fdroid-release.apk
+    srclibs:
+      - flutter@stable
+    prebuild:
+      - flutterVersion=$(sed -nE 's/^[[:space:]]+flutter:[[:space:]]*"([^"]+)".*/\1/p'
+        pubspec.yaml)
+      - test -n "$flutterVersion"
+      - git -C $$flutter$$ checkout -f "$flutterVersion"
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --flavor fdroid
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v[0-9.]*$
-CurrentVersion: 1.4.4
-CurrentVersionCode: 31
+CurrentVersion: 1.5.0-beta.1
+CurrentVersionCode: 33
