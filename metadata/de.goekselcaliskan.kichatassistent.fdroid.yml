@@ -1,0 +1,107 @@
+AntiFeatures:
+  NonFreeNet:
+    en-US: Connects to OpenAI-compatible APIs, DuckDuckGo, and Hugging Face.
+Categories:
+  - AI Chat
+License: MIT
+AuthorName: Göksel Caliskan
+AuthorEmail: goeksel.caliskan@gmx.de
+SourceCode: https://gitlab.com/goeksel.caliskan.Repository/ki-chat-assistent
+IssueTracker: https://gitlab.com/goeksel.caliskan.Repository/ki-chat-assistent/-/issues
+Changelog: https://gitlab.com/goeksel.caliskan.Repository/ki-chat-assistent/-/tags
+Donate: https://gitlab.com/goeksel.caliskan.Repository/ki-chat-assistent
+
+AutoName: KI Chat Assistent
+
+RepoType: git
+Repo: https://gitlab.com/goeksel.caliskan.Repository/ki-chat-assistent.git
+Binaries: 
+  https://gitlab.com/api/v4/projects/85441266/packages/generic/kichat/v%v/app-arm64-v8a-fdroid-release.apk
+
+Builds:
+  - versionName: 1.1.6
+    versionCode: 110060002
+    commit: 38b24563f5e314a64a704809117f2bace142aca7
+    sudo:
+      - apt-get update
+      - apt-get install -y cmake ninja-build gcc g++
+    output: build/app/outputs/flutter-apk/app-arm64-v8a-fdroid-release.apk
+    binary: 
+      https://gitlab.com/api/v4/projects/85441266/packages/generic/kichat/v%v/app-arm64-v8a-fdroid-release.apk
+    srclibs:
+      - flutter@stable
+      - llamadart-native@0ba009799d7b88ea2851cff4c273a41aa7137224
+    rm:
+      - ios
+      - linux
+    prebuild:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - flutterVersion=$(sed -n -E "s/.*flutter-version:\ '(.*)'/\1/p" .github/workflows/release.yml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - $$flutter$$/bin/flutter config --no-analytics
+      - "sed -i '/llamadart_native_runtimes:/a\\      llamadart_native_path: native_bundles'
+        pubspec.yaml"
+      - "grep -q 'llamadart_native_path: native_bundles' pubspec.yaml"
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export ANDROID_NDK_HOME=$$NDK$$
+      - git -C $$llamadart-native$$ submodule update --init --recursive --depth 1
+      - python3 $$llamadart-native$$/tools/build.py android --abi arm64-v8a
+      - mkdir -p native_bundles
+      - cp -r $$llamadart-native$$/bin/android/arm64 native_bundles/android-arm64
+      - $$flutter$$/bin/flutter build apk --release --flavor fdroid --split-per-abi
+        --target-platform=android-arm64
+    ndk: 28.2.13676358
+
+  - versionName: 1.1.6
+    versionCode: 110060003
+    commit: 38b24563f5e314a64a704809117f2bace142aca7
+    sudo:
+      - apt-get update
+      - apt-get install -y cmake ninja-build gcc g++
+    output: build/app/outputs/flutter-apk/app-x86_64-fdroid-release.apk
+    binary: 
+      https://gitlab.com/api/v4/projects/85441266/packages/generic/kichat/v%v/app-x86_64-fdroid-release.apk
+    srclibs:
+      - flutter@stable
+      - llamadart-native@0ba009799d7b88ea2851cff4c273a41aa7137224
+    rm:
+      - ios
+      - linux
+    prebuild:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - flutterVersion=$(sed -n -E "s/.*flutter-version:\ '(.*)'/\1/p" .github/workflows/release.yml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - $$flutter$$/bin/flutter config --no-analytics
+      - "sed -i '/llamadart_native_runtimes:/a\\      llamadart_native_path: native_bundles'
+        pubspec.yaml"
+      - "grep -q 'llamadart_native_path: native_bundles' pubspec.yaml"
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export ANDROID_NDK_HOME=$$NDK$$
+      - git -C $$llamadart-native$$ submodule update --init --recursive --depth 1
+      - python3 $$llamadart-native$$/tools/build.py android --abi x86_64
+      - mkdir -p native_bundles
+      - cp -r $$llamadart-native$$/bin/android/x64 native_bundles/android-x64
+      - $$flutter$$/bin/flutter build apk --release --flavor fdroid --split-per-abi
+        --target-platform=android-x64
+    ndk: 28.2.13676358
+
+AllowedAPKSigningKeys: 445c5d72920196f6017a44db3a1c7f52eecb0211bc39a2e0bc3ddaa2d82946aa
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+VercodeOperation:
+  - '%c * 10 + 2'
+  - '%c * 10 + 3'
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 1.1.6
+CurrentVersionCode: 110060003
