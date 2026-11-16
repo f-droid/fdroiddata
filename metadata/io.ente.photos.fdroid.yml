@@ -7651,8 +7651,169 @@ Builds:
         en-US: Downloads assets (like ML models, release info and FAQs) from Ente's
           CDN
 
+  - versionName: 1.3.70
+    versionCode: 2355
+    commit: 9f7d4af0c87d8bd0e9f3a76e9d0e1ed952698693
+    timeout: 21600
+    subdir: mobile/apps/photos/
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y g++ gcc-multilib libc-dev make automake pkg-config libtool
+        nasm python3-jsonschema wget meson python3-jinja2 zip doxygen cmake gperf
+        texinfo yasm bison autogen wget autopoint ninja-build ragel groff gtk-doc-tools
+        libtasn1-6-dev libtasn1-bin libgnutls28-dev libunistring-dev gettext rustup
+        ripgrep curl autoconf xz-utils patch python3-venv
+    output: build/app/outputs/flutter-apk/app-fdroid-release.apk
+    srclibs:
+      - libsodium@1.0.22-RELEASE
+      - media-kit-libmpv-android-video-build-preddit@3b7ddcf8a0e965a33c3b1443d06674b9ccadb134
+      - flutter@stable
+      - ffmpeg-packaging@cbb612976d83669cb81c5a13a658a0a90e878058
+      - ort-packaging@109fcf922a0a8287c9bec36d1c527cea12b82555
+      - onnxruntime@402979ac1bef89dcd55add41eaa7277c407599eb
+      - vcpkg@2025.08.27
+    rm:
+      - android
+      - cli
+      - desktop
+      - docs
+      - infra
+      - mobile/apps/photos/ios
+      - server
+      - web
+    prebuild:
+      - sed -i "/^  String get _toolchain/ s/=>.*/=> '1.97.0';/" ../../cargokit/build_tool/lib/src/builder.dart
+      - flutterVersion=$(sed -n -E 's/^[[:space:]]*FLUTTER_VERSION:[^0-9]*([0-9]+\.[0-9]+\.[0-9]+).*$/\1/p'
+        ../../../.github/actions/setup-flutter/action.yml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - ./scripts/prepare_fdroid_source.sh
+      - sed -i '/^repositories {/,/^}/d' ../locker/android/app/build.gradle
+      - sed -i '/^repositories {/,/^}/d' android/app/build.gradle
+      - sed -i "s|implementation 'io.ente.onnxruntime:onnxruntime-webgpu-android:1.31.0-r1@aar'|implementation
+        files(System.getenv('ORT_AAR'))|" android/app/build.gradle
+      - sed -i '/^if (localAar == null) {/,/^}/d' plugins/ffmpeg/android/build.gradle
+      - sdkmanager 'platforms;android-35' 'ndk;28.0.13004108'
+      - sed -i 's/com.android.tools.build:gradle:7.4.2/com.android.tools.build:gradle:8.5.2/'
+        $$onnxruntime$$/java/build-android.gradle
+      - sed -i -e 's/^setuptools==78.1.1$/setuptools==84.1.0/' -e 's/^wheel==0.45.1$/wheel==0.46.2/'
+        $$onnxruntime$$/tools/ci_build/github/linux/docker/scripts/requirements.txt
+      - python3 -m venv $$ort-packaging$$/.venv
+      - $$ort-packaging$$/.venv/bin/python -m pip install --disable-pip-version-check
+        -r $$onnxruntime$$/tools/ci_build/github/linux/docker/scripts/requirements.txt
+      - sed -i 's/for abi in arm64-v8a armeabi-v7a x86_64/for abi in arm64-v8a armeabi-v7a/'
+        $$ort-packaging$$/scripts/merge-android-aars.sh
+      - sed -i -e '/firebase_\|in_app_purchase\|_flutterfire_internals/,/version:/d'
+        ../../pubspec.lock
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - pushd $$ffmpeg-packaging$$
+      - export FFMPEG_WORKSPACE=$PWD/.fdroid-workspace
+      - scripts/fetch-sources.sh
+      - rm -rf "$FFMPEG_WORKSPACE/work/git-cache"
+      - sed -i -e '/^copy_abi android-x86_64 x86_64$/d' -e 's/arm64-v8a armeabi-v7a
+        x86_64/arm64-v8a armeabi-v7a/g' -e 's/android-arm64 android-armv7 android-x86_64/android-arm64
+        android-armv7/g' scripts/package-android-aar.sh
+      - popd
+      - sed -i -e '/play-services-cronet/d' $PUB_CACHE/hosted/pub.dev/cronet_http-*/android/build.gradle
+      - sed -i -e '/downloadDependencies/,/dependsOn/d' $PUB_CACHE/hosted/pub.dev/media_kit_libs_android_video-*/android/build.gradle
+      - cd $$media-kit-libmpv-android-video-build-preddit$$/buildscripts
+      - sed -i -e 's/archs=(armv7l arm64 x86 x86_64)/archs=(armv7l arm64)/' build.sh
+      - sed -i -e '/x86/d' bundle_default.sh
+      - sed -i -e '/download-sdk/d' download.sh
+      - sed -i -e '/git reset --hard/d' patch.sh
+      - sed -i -e 's/sudo rm -r/echo/g' bundle_default.sh
+      - sed -i -e 's/sudo//g' -e 's|./gradlew|gradle|g' *.sh
+    scandelete:
+      - mobile/apps/auth
+      - mobile/apps/photos/.pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export PATH=$$flutter$$/bin:$HOME/.cargo/bin:$PATH
+      - rustup default 1.97.0
+      - pushd ../../../rust
+      - cargo codegen frb photos
+      - rm -rf target
+      - popd
+      - pushd $$libsodium$$
+      - export NDK_PLATFORM="android-21"
+      - ./autogen.sh -s
+      - ./dist-build/android-armv7-a.sh
+      - ./dist-build/android-armv8-a.sh
+      - ./dist-build/android-x86.sh
+      - ./dist-build/android-x86_64.sh
+      - popd
+      - flutter_sodium=$(echo .pub-cache/git/flutter_sodium-*/android/src/main/jniLibs)
+      - cp $$libsodium$$/libsodium-android-armv7-a/lib/libsodium.so $flutter_sodium/armeabi-v7a/
+      - cp $$libsodium$$/libsodium-android-westmere/lib/libsodium.so $flutter_sodium/x86_64/
+      - cp $$libsodium$$/libsodium-android-armv8-a+crypto/lib/libsodium.so $flutter_sodium/arm64-v8a/
+      - cp $$libsodium$$/libsodium-android-i686/lib/libsodium.so $flutter_sodium/x86/
+      - pushd $$media-kit-libmpv-android-video-build-preddit$$/buildscripts
+      - export PATH=$$NDK$$/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
+      - mkdir sdk
+      - ln -s $$SDK$$ ./sdk/android-sdk-linux
+      - bash bundle_default.sh >/tmp/ente-media-kit.log 2>&1 || { tail -n 300 /tmp/ente-media-kit.log;
+        exit 1; }
+      - popd
+      - mkdir -p build/media_kit_libs_android_video/output
+      - cp $$media-kit-libmpv-android-video-build-preddit$$/buildscripts/*.jar build/media_kit_libs_android_video/output
+      - rm -rf $$media-kit-libmpv-android-video-build-preddit$$/buildscripts/deps
+        $$media-kit-libmpv-android-video-build-preddit$$/buildscripts/prefix $$media-kit-libmpv-android-video-build-preddit$$/buildscripts/temp
+      - pushd $$ffmpeg-packaging$$
+      - export FFMPEG_WORKSPACE=$PWD/.fdroid-workspace
+      - export ANDROID_NDK_ROOT=$$NDK$$
+      - export FFMPEG_AAR=$FFMPEG_WORKSPACE/dist/mobile/android/ffmpeg-runtime.aar
+      - "for target in android-arm64 android-armv7; do\n  scripts/build-mobile.sh
+        \"$target\" >>/tmp/ente-ffmpeg-runtime.log 2>&1 || { tail -n 300 /tmp/ente-ffmpeg-runtime.log;
+        exit 1; }\n  find \"$FFMPEG_WORKSPACE/build/$target\" -mindepth 1 -maxdepth
+        1 ! -name package -exec rm -rf {} +\ndone"
+      - scripts/package-android-aar.sh
+      - rm -rf "$FFMPEG_WORKSPACE/build" "$FFMPEG_WORKSPACE/work" "$FFMPEG_WORKSPACE/sources"
+        "$FFMPEG_WORKSPACE/downloads"
+      - popd
+      - pushd $$vcpkg$$
+      - sed -i '/^# Do the download or build\.$/i vcpkgDownloadTool="OFF"; vcpkgToolReleaseSha=$VCPKG_TOOL_SOURCE_SHA'
+        scripts/bootstrap.sh
+      - ./bootstrap-vcpkg.sh -disableMetrics
+      - popd
+      - export VCPKG_INSTALLATION_ROOT=$$vcpkg$$ VCPKG_DISABLE_METRICS=1 VCPKG_FEATURE_FLAGS=-binarycaching
+      - pushd $$ort-packaging$$
+      - export ORT_REF=v1.31.0 ORT_VERSION=1.31.0 ORT_COMMIT=402979ac1bef89dcd55add41eaa7277c407599eb
+        PACKAGE_REVISION=1 ORT_SOURCE_DIR=$$onnxruntime$$ ANDROID_HOME=$$SDK$$ ANDROID_NDK_HOME=$$SDK$$/ndk/28.0.13004108
+      - export PATH=$PWD/.venv/bin:$PATH
+      - scripts/build-android.sh arm64-v8a
+      - rm -rf "$PWD/build/android-arm64-v8a"
+      - scripts/build-android.sh armeabi-v7a
+      - scripts/merge-android-aars.sh "$PWD/dist/android" "$PWD/dist/android-arm64-v8a/onnxruntime-webgpu-android-arm64-v8a-1.31.0-r1.aar"
+        "$PWD/dist/android-armeabi-v7a/onnxruntime-webgpu-android-armeabi-v7a-1.31.0-r1.aar"
+      - rm -rf "$PWD/build/android-armeabi-v7a"
+      - export ORT_AAR=$PWD/dist/android/onnxruntime-webgpu-android-1.31.0-r1.aar
+      - popd
+      - rm -rf $$onnxruntime$$
+      - rm -rf $$vcpkg$$/buildtrees $$vcpkg$$/packages $$vcpkg$$/downloads
+      - rm -rf $$ort-packaging$$/.venv
+      - df -h .
+      - rm -f /tmp/ente-media-kit.log
+      - $$flutter$$/bin/flutter build apk --flavor fdroid -t lib/main.dart --dart-define=cronetHttpNoPlay=true
+        --target-platform android-arm,android-arm64
+      - apk=build/app/outputs/flutter-apk/app-fdroid-release.apk
+      - sha256sum "$apk" > .fdroid-apk.sha256
+      - mv "$apk" .fdroid-output.apk
+      - rm -rf build
+      - mkdir -p build/app/outputs/flutter-apk
+      - mv .fdroid-output.apk "$apk"
+      - sha256sum -c .fdroid-apk.sha256
+      - rm -f .fdroid-apk.sha256
+    ndk: 28.2.13676358
+    antifeatures:
+      NonFreeNet:
+        en-US: Downloads assets (like ML models, release info and FAQs) from Ente's
+          CDN
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^photos-v[0-9.]+$
 UpdateCheckData: mobile/apps/photos/pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 1.3.69
-CurrentVersionCode: 2346
+CurrentVersion: 1.3.70
+CurrentVersionCode: 2355
