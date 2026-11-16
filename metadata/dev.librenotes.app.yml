@@ -223,8 +223,33 @@ Builds:
       - export PUB_CACHE=$(pwd)/.pub-cache
       - $$flutter$$/bin/flutter build apk --release --target-platform=android-arm64
 
+  - versionName: 1.6.6
+    versionCode: 14
+    commit: 43df7789369510827988ab2334cba9bad8588733
+    subdir: clients/app
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - clients/app/linux
+      - clients/app/web
+    prebuild:
+      - flutterVersion=$(sed -n -E "s/.*flutter-version:\ '(.*)'/\1/p" ../../.github/workflows/release.yml
+        | head -n 1)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - sed -i -e '/signingConfig = if/,+4d' android/app/build.gradle.kts
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+    scandelete:
+      - clients/app/.pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --target-platform=android-arm64
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: clients/app/pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 1.6.3
-CurrentVersionCode: 12
+CurrentVersion: 1.6.6
+CurrentVersionCode: 14
