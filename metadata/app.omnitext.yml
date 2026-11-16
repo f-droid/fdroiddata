@@ -1,0 +1,48 @@
+Categories:
+  - Local Media Player
+  - Reading
+  - Text Editor
+License: MIT
+AuthorName: hikashop-nicolas
+AuthorWebSite: https://github.com/hikashop-nicolas
+SourceCode: https://github.com/hikashop-nicolas/omnitext
+IssueTracker: https://github.com/hikashop-nicolas/omnitext/issues
+
+AutoName: Omnitext
+
+RepoType: git
+Repo: https://github.com/hikashop-nicolas/omnitext.git
+Binaries: 
+  https://github.com/hikashop-nicolas/omnitext/releases/download/fdroid-%v/omnitext-fdroid-%v.apk
+
+Builds:
+  - versionName: '2.2'
+    versionCode: 20200
+    commit: c95c3cf6a81de6093f3167c2187d9074eb027954
+    subdir: android/app
+    sudo:
+      - apt-get update
+      - apt-get install -y --no-install-recommends python3 make patch gcc libc6-dev
+        clang lld wasi-libc curl unzip pkg-config libatomic1 perl libdigest-sha3-perl
+        xz-utils bzip2 cmake ragel libtool libtool-bin itstool python3-ply gettext
+        autopoint automake autoconf m4 gperf licensecheck gawk rustc cargo libstd-rust-dev-wasm32
+        binaryen libssl-dev nodejs npm g++ ninja-build protobuf-compiler libprotobuf-dev
+        python3-flatbuffers python3-packaging
+    gradle:
+      - yes
+    build:
+      - cd ../..
+      - export ONNXRUNTIME_NODE_INSTALL=skip; npm ci || npm ci || npm ci
+      - scripts/fdroid/build-wasm.sh
+      - CRAFTBRIDGE_DIR=$PWD/vendor/craftbridge OMNITEXT_BUNDLE_TESSERACT=1 OMNITEXT_BUNDLE_ONNXRUNTIME=1
+        npm run build
+      - node scripts/fdroid/cap-sync.cjs sync android
+
+AllowedAPKSigningKeys: 764e7ec37f86865288d4826095d4c649010d911653fd00ba016e037e5a663261
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^fdroid-
+UpdateCheckData: android/app/build.gradle|fdroidVersionCode = (\d+)|.|versionName
+  "(.*)"
+CurrentVersion: '2.2'
+CurrentVersionCode: 20200
