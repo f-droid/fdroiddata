@@ -1,0 +1,151 @@
+Categories:
+  - Calendar & Agenda
+License: GPL-3.0-or-later
+AuthorName: Starboard Home
+WebSite: https://starboardhome.github.io/nomad-days/
+SourceCode: https://github.com/starboardhome/nomad-days
+IssueTracker: https://github.com/starboardhome/nomad-days/issues
+
+AutoName: Nomad Days
+
+RepoType: git
+Repo: https://github.com/starboardhome/nomad-days.git
+
+Builds:
+  - versionName: 1.0.5
+    versionCode: 6001
+    commit: 19c941f394192a7d1fe9bbf019640114b62eadae
+    sudo:
+      - echo "deb https://deb.debian.org/debian forky main" > /etc/apt/sources.list.d/forky.list
+      - apt-get update
+      - apt-get install -y -t forky npm
+    output: android/app/build/outputs/apk/release/app-release-unsigned.apk
+    prebuild:
+      - sed -i -e '1a "expo":{"autolinking":{"android":{"buildFromSource":[".*"]}}},'
+        package.json
+      - npm ci --loglevel=error
+      - sdkmanager 'cmake;3.22.1'
+      - sed -i -e '/JavaVersion\|jvmToolchain/s/17/21/' node_modules/@react-native/gradle-plugin/*/build.gradle.kts
+        node_modules/@react-native/gradle-plugin/react-native-gradle-plugin/src/main/kotlin/com/facebook/react/utils/JdkConfiguratorUtils.kt
+      - find node_modules -path '*/android/build.gradle*' -exec sed -i -e "s/jvmTarget
+        = '17'/jvmTarget = '21'/" -e 's/JvmTarget.fromTarget("17")/JvmTarget.fromTarget("21")/'
+        -e 's/JvmTarget.JVM_17/JvmTarget.JVM_21/' -e '/JavaVersion/s/17/21/' {} +
+      - npx expo prebuild --platform android --no-install
+      - sed -i -e '/signingConfig /d' android/app/build.gradle
+      - sed -i 's/versionCode \([0-9][0-9]*\)/versionCode (\1 * 1000 + 1)/' android/app/build.gradle
+      - sed -i '/reactNativeArchitectures=/d' android/gradle.properties
+      - printf '\nreactNativeArchitectures=armeabi-v7a\n' >> android/gradle.properties
+      - printf '\norg.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=2g\norg.gradle.workers.max=2\n'
+        >> android/gradle.properties
+      - grep -qx 'expo.sqlite.useSQLCipher=true' android/gradle.properties
+      - grep -qx 'reactNativeArchitectures=armeabi-v7a' android/gradle.properties
+    scanignore:
+      - node_modules/hermes-compiler/hermesc/linux64-bin/hermesc
+      - node_modules/expo-modules-core/android/ExpoModulesCorePlugin.gradle
+      - node_modules/react-native-screens/android/build.gradle
+      - node_modules/react-native-safe-area-context/android/build.gradle
+      - node_modules/@react-native-masked-view/masked-view/android/build.gradle
+    scandelete:
+      - node_modules
+    build:
+      - cd android/app
+      - gradle assembleRelease -PreactNativeArchitectures=armeabi-v7a
+    ndk: 27.1.12297006
+
+  - versionName: 1.0.5
+    versionCode: 6002
+    commit: 19c941f394192a7d1fe9bbf019640114b62eadae
+    sudo:
+      - echo "deb https://deb.debian.org/debian forky main" > /etc/apt/sources.list.d/forky.list
+      - apt-get update
+      - apt-get install -y -t forky npm
+    output: android/app/build/outputs/apk/release/app-release-unsigned.apk
+    prebuild:
+      - sed -i -e '1a "expo":{"autolinking":{"android":{"buildFromSource":[".*"]}}},'
+        package.json
+      - npm ci --loglevel=error
+      - sdkmanager 'cmake;3.22.1'
+      - sed -i -e '/JavaVersion\|jvmToolchain/s/17/21/' node_modules/@react-native/gradle-plugin/*/build.gradle.kts
+        node_modules/@react-native/gradle-plugin/react-native-gradle-plugin/src/main/kotlin/com/facebook/react/utils/JdkConfiguratorUtils.kt
+      - find node_modules -path '*/android/build.gradle*' -exec sed -i -e "s/jvmTarget
+        = '17'/jvmTarget = '21'/" -e 's/JvmTarget.fromTarget("17")/JvmTarget.fromTarget("21")/'
+        -e 's/JvmTarget.JVM_17/JvmTarget.JVM_21/' -e '/JavaVersion/s/17/21/' {} +
+      - npx expo prebuild --platform android --no-install
+      - sed -i -e '/signingConfig /d' android/app/build.gradle
+      - sed -i 's/versionCode \([0-9][0-9]*\)/versionCode (\1 * 1000 + 2)/' android/app/build.gradle
+      - sed -i '/reactNativeArchitectures=/d' android/gradle.properties
+      - printf '\nreactNativeArchitectures=arm64-v8a\n' >> android/gradle.properties
+      - printf '\norg.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=2g\norg.gradle.workers.max=2\n'
+        >> android/gradle.properties
+      - grep -qx 'expo.sqlite.useSQLCipher=true' android/gradle.properties
+      - grep -qx 'reactNativeArchitectures=arm64-v8a' android/gradle.properties
+    scanignore:
+      - node_modules/hermes-compiler/hermesc/linux64-bin/hermesc
+      - node_modules/expo-modules-core/android/ExpoModulesCorePlugin.gradle
+      - node_modules/react-native-screens/android/build.gradle
+      - node_modules/react-native-safe-area-context/android/build.gradle
+      - node_modules/@react-native-masked-view/masked-view/android/build.gradle
+    scandelete:
+      - node_modules
+    build:
+      - cd android/app
+      - gradle assembleRelease -PreactNativeArchitectures=arm64-v8a
+    ndk: 27.1.12297006
+
+  - versionName: 1.0.5
+    versionCode: 6003
+    commit: 19c941f394192a7d1fe9bbf019640114b62eadae
+    sudo:
+      - echo "deb https://deb.debian.org/debian forky main" > /etc/apt/sources.list.d/forky.list
+      - apt-get update
+      - apt-get install -y -t forky npm
+    output: android/app/build/outputs/apk/release/app-release-unsigned.apk
+    prebuild:
+      - sed -i -e '1a "expo":{"autolinking":{"android":{"buildFromSource":[".*"]}}},'
+        package.json
+      - npm ci --loglevel=error
+      - sdkmanager 'cmake;3.22.1'
+      - sed -i -e '/JavaVersion\|jvmToolchain/s/17/21/' node_modules/@react-native/gradle-plugin/*/build.gradle.kts
+        node_modules/@react-native/gradle-plugin/react-native-gradle-plugin/src/main/kotlin/com/facebook/react/utils/JdkConfiguratorUtils.kt
+      - find node_modules -path '*/android/build.gradle*' -exec sed -i -e "s/jvmTarget
+        = '17'/jvmTarget = '21'/" -e 's/JvmTarget.fromTarget("17")/JvmTarget.fromTarget("21")/'
+        -e 's/JvmTarget.JVM_17/JvmTarget.JVM_21/' -e '/JavaVersion/s/17/21/' {} +
+      - npx expo prebuild --platform android --no-install
+      - sed -i -e '/signingConfig /d' android/app/build.gradle
+      - sed -i 's/versionCode \([0-9][0-9]*\)/versionCode (\1 * 1000 + 3)/' android/app/build.gradle
+      - sed -i '/reactNativeArchitectures=/d' android/gradle.properties
+      - printf '\nreactNativeArchitectures=x86_64\n' >> android/gradle.properties
+      - printf '\norg.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=2g\norg.gradle.workers.max=2\n'
+        >> android/gradle.properties
+      - grep -qx 'expo.sqlite.useSQLCipher=true' android/gradle.properties
+      - grep -qx 'reactNativeArchitectures=x86_64' android/gradle.properties
+    scanignore:
+      - node_modules/hermes-compiler/hermesc/linux64-bin/hermesc
+      - node_modules/expo-modules-core/android/ExpoModulesCorePlugin.gradle
+      - node_modules/react-native-screens/android/build.gradle
+      - node_modules/react-native-safe-area-context/android/build.gradle
+      - node_modules/@react-native-masked-view/masked-view/android/build.gradle
+    scandelete:
+      - node_modules
+    build:
+      - cd android/app
+      - gradle assembleRelease -PreactNativeArchitectures=x86_64
+    ndk: 27.1.12297006
+
+MaintainerNotes: |-
+  android/ is generated by `expo prebuild` at build time (Continuous Native Generation),
+  so checkupdates reads the version from app.json. Expo modules are built from source
+  (autolinking buildFromSource) instead of their prebuilt local-maven-repo AARs.
+  Reminders use WorkManager locally; there is no Firebase or Google Play Services code.
+  Per-ABI APKs: versionCode 1000*upstream + 1/2/3 for armeabi-v7a/arm64-v8a/x86_64
+  (a universal APK is 131 MB, one ABI about 45 MB).
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^v\d+\.\d+\.\d+$
+VercodeOperation:
+  - 1000 * %c + 1
+  - 1000 * %c + 2
+  - 1000 * %c + 3
+UpdateCheckData: app.json|"versionCode":\s*(\d+)|.|"version":\s*"([^"]+)"
+CurrentVersion: 1.0.5
+CurrentVersionCode: 6003
