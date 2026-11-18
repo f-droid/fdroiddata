@@ -1019,28 +1019,103 @@ Builds:
       --android-abi=x86_64
     ndk: r22b
 
+  - versionName: 5.3.5
+    versionCode: 5030502
+    commit: 1706bc8e0469b330017001fe9ddf89ddbfe15950
+    timeout: 30000
+    sudo:
+      - apt-get update
+      - apt-get install -y cmake meson make automake g++ python-is-python3 gettext
+        subversion bzip2 xz-utils ninja-build pkg-config ccache python3-venv python3-certifi
+        python3-charset-normalizer python3-idna python3-lxml python3-packaging python3-ply
+        python3-gitlab python3-yaml python3-requests python3-requests-toolbelt python3-toml
+        python3-tomli python3-urllib3 python3-wheel python3-setuptools
+      - rm -rf /opt/android-sdk/platforms/*
+    output: _packaging/krita-arm64-v8a-$$VERSION$$-release-unsigned.apk
+    srclibs:
+      - krita-deps-management@de99ddce916c900753a24351afdb50d28a9ec214
+      - krita-ci-utilities@b591f0ef834d061329707e8841b97ff6a0b3c48b
+    rm:
+      - libs/flake/tests/data/*.zip
+      - packaging/linux
+      - packaging/macos
+      - packaging/steam
+      - packaging/windows
+      - plugins/extensions/pykrita/plugin/krita/sceditor/rope.zip
+      - packaging/android/apk/src/org/krita/android/Donation*.java
+    prebuild:
+      - sdkmanager 'platforms;android-36'
+      - sed -i -e 's/donationLink->show();/donationLink->hide();/' libs/ui/KisWelcomePageWidget.cpp
+      - pushd packaging/android/apk
+      - echo 'gradle "$@"' > gradlew
+      - sed -i -e '/billing/d' -e 's/versionCode .*/versionCode $$VERCODE$$/' build.gradle
+      - sed -i -e '/BILLING/d' AndroidManifest.xml
+      - sed -i -e '/void 
+        \(showDonationDialogInternal\|updateDonationDialog\|showPurchaseConfirmation\|doWithDonationDialog\|doWithDonationDialogInternal\|updateDonationDialogProducts\|updateDonationDialogProductsInternal\|showScalingDialog\)/,/^    }/d'
+        -e '/void showDonationDialog/,/^    }/d' -e '/Donation/d' src/org/krita/android/MainActivity.java
+      - popd
+      - cp -r $$krita-deps-management$$ .
+      - cp -r $$krita-ci-utilities$$ krita-deps-management/ci-utilities
+      - sed -i -e 's/CROSS_EXE_LINKER_FLAGS/CROSS_LINKER_FLAGS/' -e 's/CROSS_LINKER_FLAGS
+        "--sysroot=${CMAKE_SYSROOT}"/CROSS_LINKER_FLAGS "--sysroot=${CMAKE_SYSROOT}
+        -lc++_shared"/' krita-deps-management/cmake/krita_initialize_meson.cmake
+      - sed -i -e 's/-android-sdk/-android-javac-source 8 -android-javac-target 8
+        -android-sdk/' krita-deps-management/ext_qt/CMakeLists.txt
+      - sed -i -e 's/-DWEBP_BUILD_CWEBP=OFF/-DWEBP_BUILD_CWEBP=OFF -DWEBP_BUILD_VWEBP=OFF/'
+        krita-deps-management/ext_webp/CMakeLists.txt
+      - export KDECI_ANDROID_SDK_ROOT=$$SDK$$
+      - export KDECI_ANDROID_NDK_ROOT=$$NDK$$
+      - export KDECI_ANDROID_ABI=arm64-v8a
+      - python krita-deps-management/tools/setup-env.py --android-abi $KDECI_ANDROID_ABI
+        -s _install
+      - set +u
+      - source ./base-env
+      - unset KDECI_GLOBAL_CONFIG_OVERRIDE_PATH
+      - python krita-deps-management/tools/generate-deps-file.py -s krita-deps-management/latest/krita-deps.yml
+        -o .kde-ci.yml
+      - python krita-deps-management/ci-utilities/run-ci-build.py --project krita
+        --branch master --platform Android/$KDECI_ANDROID_ABI --only-env --skip-dependencies-fetch
+    scandelete:
+      - benchmarks/data
+      - libs/image/tests/data/liquify_mask_rendering
+    build:
+      - export KDECI_ANDROID_SDK_ROOT=$$SDK$$
+      - export KDECI_ANDROID_NDK_ROOT=$$NDK$$
+      - export KDECI_ANDROID_ABI=arm64-v8a
+      - set +u
+      - source ./base-env
+      - pushd krita-deps-management
+      - export CMAKE_TOOLCHAIN_FILE=$(pwd)/tools/android-toolchain.cmake
+      - python -u tools/concatenate-files.py -i latest/deps-build-tools.yml -i latest/krita-deps.yml
+        -o all-deps-to-build.yml
+      - python -u ci-utilities/seed-package-registry.py --platform Android/$KDECI_ANDROID_ABI
+        --seed-file all-deps-to-build.yml --publish-to-cache --missing-only
+      - popd
+      - unset KDECI_GLOBAL_CONFIG_OVERRIDE_PATH CMAKE_TOOLCHAIN_FILE
+      - source ./env
+      - pushd _build
+      - cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DHIDE_SAFE_ASSERTS=OFF -DBUILD_TESTING=OFF
+        -DCMAKE_INSTALL_PREFIX=$(realpath ../_install) 
+        -DCMAKE_TOOLCHAIN_FILE=../krita-deps-management/tools/android-toolchain-krita.cmake
+        -DANDROID_ENABLE_STDIO_FORWARDING=ON ..
+      - make -j$(nproc) install
+      - popd
+      - python build-tools/ci-scripts/build-android-package.py --package-type release
+    ndk: r27d
+
 MaintainerNotes: |-
   (1) Compilation fails if older versions of the SDK are present, so we're
   removing unneeded ones.
-  (2) Dependencies are built using a recent commit from the master branch.
-  The exact commits and the logs for the deps and the app builds can be
-  found on KDE jenkins:
-  The apk is built in https://binary-factory.kde.org/job/Krita_Release_Android_arm64-v8a_Build
-  The dep job can be find in the full log by searching "Krita_Android_arm64-v8a_Dependency_Build".
-  Then the commit can be found in https://binary-factory.kde.org/job/Krita_Android_arm64-v8a_Dependency_Build
-  (3) Translations are downloaded as part of the release process. They are
+  (2) Translations are downloaded as part of the release process. They are
   included in the release tarball, and the official builds are based upon it.
   We can add FETCH_TRANSLATIONS to the build options or just run copy_po.py
   before building krita.
-  (4) Patches at metadata/org.krita/*.patch actually create another patches
-  in the project's root directory, since otherwise fdroid lint fails with
-  unused file.
-  (7) Version code schema:
+  (3) Version code schema:
   abi: ['armeabi-v7a': 1, 'arm64-v8a': 2, 'x86': 3, 'x86_64': 4]
   versionMajor * 1000000 + versionMinor * 10000 + versionRelease * 100 + abi
 
 ArchivePolicy: 12
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: 5.1.5
-CurrentVersionCode: 5011804
+CurrentVersion: 5.3.5
+CurrentVersionCode: 5030502
