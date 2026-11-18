@@ -118,8 +118,17 @@ Builds:
       - printf '\nspeechRuntimeNdk=%s\n' "$$NDK$$" >> ../gradle.properties
       - sed -i '/implementation(files(/s/)))/)).builtBy("buildSpeechRuntime"))/' build.gradle.kts
       - grep -Fq 'file(speechRuntimeAar)).builtBy("buildSpeechRuntime"))' build.gradle.kts
-    build: python3 ../tools/onnxruntime/build.py prepare --work-dir ../external/onnxruntime
-      --tools-dir /tmp/voice-keyboard-onnxruntime-tools --model src/main/assets/silero_vad.ort
+    build:
+      - tools=/tmp/voice-keyboard-onnxruntime-tools
+      - read -r url sha < <(python3 -c 'import json; s = json.load(open("../tools/onnxruntime/source-lock.json"))["onnxruntime"];
+        print(s["url"], s["sha256"])')
+      - archive="$tools/archives/$sha-${url##*/}"
+      - mkdir -p "$tools/archives"
+      - if [ ! -f "$archive" ]; then tmp=$(mktemp "$tools/archives/onnxruntime.XXXXXXXX");
+        trap 'rm -f "$tmp"' EXIT; curl -fLsS "$url" -o "$tmp" || curl -fLsS "https://codeload.github.com/amd/onnxruntime/tar.gz/${url##*/}"
+        -o "$tmp"; echo "$sha  $tmp" | sha256sum -c -; mv "$tmp" "$archive"; fi
+      - python3 ../tools/onnxruntime/build.py prepare --work-dir ../external/onnxruntime
+        --tools-dir "$tools" --model src/main/assets/silero_vad.ort
     ndk: 28.0.13004108
     preassemble:
       - buildSpeechRuntime
