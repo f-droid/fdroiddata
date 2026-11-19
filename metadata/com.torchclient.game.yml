@@ -1,0 +1,45 @@
+AntiFeatures:
+  NonFreeDep:
+    en-US: Requires the proprietary Minecraft client and its assets, downloaded from
+      Mojang on first launch.
+  NonFreeNet:
+    en-US: Downloads the game's assets from Mojang on first launch, player skins and
+      capes from Mojang's servers during play and optional sign in with Microsoft
+      account for online-mode servers.
+Categories:
+  - Action Game
+License: AGPL-3.0-or-later
+AuthorName: xpncvr
+WebSite: https://torchclient.com
+SourceCode: https://github.com/torch-client/torch-client
+IssueTracker: https://github.com/torch-client/torch-client/issues
+
+AutoName: Torch Client
+
+RepoType: git
+Repo: https://github.com/torch-client/torch-client.git
+Binaries: 
+  https://github.com/torch-client/torch-client/releases/download/v%v/torch-client-android-arm64.apk
+
+Builds:
+  - versionName: 0.1.8
+    versionCode: 8
+    commit: ed079d267b11d574301e7b41ae6176351da75b00
+    sudo:
+      - apt-get update
+      - apt-get install -y build-essential rustup zip
+    output: dist/torch-client-unsigned.apk
+    prebuild: sdkmanager 'platforms;android-36' 'build-tools;36.0.0'
+    build:
+      - rustup toolchain install $(sed -n -E 's/channel = "(.*)"/\1/p' rust-toolchain.toml)
+        --profile minimal --target aarch64-linux-android
+      - UNSIGNED=1 tools/build_android.sh --no-default-features --features 
+        asset_download,multiversion,full_font,skins,online_mode,resourcepacks,hud_editor,module_panel,small_audio
+    ndk: 27.1.12297006
+
+AllowedAPKSigningKeys: 8b5aa7d71788b6101b14519ed87f96f5267695c27559e48cb0328f525c4b3f20
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: 0.1.8
+CurrentVersionCode: 8
