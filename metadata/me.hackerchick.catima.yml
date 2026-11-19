@@ -1398,6 +1398,36 @@ Builds:
       - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
         --replace unaligned.apk $$OUT$$
 
+  - versionName: 2.46.0
+    versionCode: 1007
+    disable: https://github.com/CatimaLoyalty/Android/issues/3432
+    commit: 1dc52e2a7831f7e16537551f3e9147b07c77b43e
+    subdir: app
+    gradle:
+      - fdroidLegacy
+    postbuild:
+      - sha256sum="$( curl -L 
+        https://github.com/CatimaLoyalty/Android/releases/download/v$$VERSION$$/SHA256SUMS
+        | grep -F app-fdroidLegacy-release-unsigned.apk | cut -c-64 | tr -cd '0-9a-f'
+        )"
+      - sha256sum -c <<< "$sha256sum  $$OUT$$"
+
+  - versionName: 2.46.0
+    versionCode: 1008
+    disable: https://github.com/CatimaLoyalty/Android/issues/3432
+    commit: 1dc52e2a7831f7e16537551f3e9147b07c77b43e
+    subdir: app
+    gradle:
+      - foss
+    binary: 
+      https://github.com/CatimaLoyalty/Android/releases/download/v%v/app-foss-release.apk
+    srclibs:
+      - reproducible-apk-tools@v0.3.0
+    postbuild:
+      - mv $$OUT$$ unaligned.apk
+      - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
+        --replace unaligned.apk $$OUT$$
+
 AllowedAPKSigningKeys:
   - 62864db787cc31928dc2c114673cdbb017beabb13ba6df6ae5256e738bb953ae
   - d405cd69ede4c22074c328fb825689a84ab3fca4b3fdf0b6cc1333af62c67eb3
@@ -1407,5 +1437,5 @@ UpdateCheckMode: Tags
 VercodeOperation:
   - '%c - 1'
   - '%c'
-CurrentVersion: 2.45.2
-CurrentVersionCode: 1006
+CurrentVersion: 2.46.0
+CurrentVersionCode: 1008
