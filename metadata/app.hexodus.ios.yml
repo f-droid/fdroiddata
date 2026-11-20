@@ -1,0 +1,40 @@
+Categories:
+  - Puzzle Game
+License: MIT
+AuthorName: Luke Steuber
+AuthorWebSite: https://lukesteuber.com/
+WebSite: https://dr.eamer.dev/games/hexsweeper/
+SourceCode: https://github.com/lukeslp/hexsweeper
+IssueTracker: https://github.com/lukeslp/hexsweeper/issues
+
+AutoName: Hexsweeper
+
+RepoType: git
+Repo: https://github.com/lukeslp/hexsweeper.git
+Binaries: https://github.com/lukeslp/hexsweeper/releases/download/v%v/hexsweeper-%v.apk
+
+Builds:
+  - versionName: 1.0.17
+    versionCode: 42
+    commit: 435c8557ee218245d23d42ffa44b32308ff9cfcb
+    subdir: app/android/app
+    sudo:
+      - echo "deb https://deb.debian.org/debian forky main" > /etc/apt/sources.list.d/forky.list
+      - apt-get update
+      - apt-get install -y -t forky npm
+      - npm install -g pnpm@10.18.0
+    gradle:
+      - yes
+    prebuild:
+      - cd ../..
+      - pnpm install --frozen-lockfile
+      - HEXSWEEPER_FDROID=1 pnpm exec cap sync android
+    scandelete:
+      - app/node_modules/.pnpm/@capacitor+cli@8.3.1/node_modules/@capacitor/cli/assets
+
+AllowedAPKSigningKeys: 404fd13d59f95b59fb9342e20e5953b15603832dda8ca75181c959b41fb5d592
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^v[0-9.]+$
+CurrentVersion: 1.0.17
+CurrentVersionCode: 42
