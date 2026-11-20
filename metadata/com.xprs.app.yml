@@ -304,9 +304,10 @@ Builds:
         --dart-define=AUTO_UPDATE_CHECK=false
     ndk: r28c
 
-  - versionName: 1.11.0
-    versionCode: 4007081
-    commit: 8a9c00b31a6c4ee05afceb9d7997cef7143ea3b8
+  - versionName: 1.12.1
+    versionCode: 4007931
+    commit: 315db8d413af1cfb396a9ac20771621a07dcae87
+    submodules: true
     sudo:
       - apt-get update
       - apt-get install -y make clang-19 lld-19 llvm-19 wasi-libc libclang-rt-19-dev-wasm32
@@ -317,13 +318,11 @@ Builds:
       https://github.com/xprs-dev/app/releases/download/v%v/xprs-%v-android-armeabi-v7a.apk
     srclibs:
       - flutter@stable
-      - xprs-reticulum-dart@c4b72ac0daa1ff488984046ffc5ceaccc4cc49d7
-      - xprs-core@d9fcd6fabce792451b489c083f6bce54a88db55c
-      - xprs-zx@d3fa4dca7dbb674bea09edadecfd8a0be6925107
-      - xprs-wapps@a8cb532841460c8793e130081c266e5255959c71
       - dav1d@1.4.3
     rm:
       - artwork
+      - assets/compiler/cc.wasm
+      - assets/compiler/usr.zip
       - assets/editor/app-creator/app.wasm
       - desktop
       - ios
@@ -335,15 +334,7 @@ Builds:
       - flutterVersion=$(cat .flutter-version)
       - '[[ $flutterVersion ]]'
       - git -C $$flutter$$ checkout -f $flutterVersion
-      - git -C $$xprs-reticulum-dart$$ checkout -f $(cat .reticulum-dart-commit)
-      - git -C $$xprs-core$$ checkout -f $(cat .core-commit)
-      - git -C $$xprs-zx$$ checkout -f $(cat .zx-commit)
-      - git -C $$xprs-wapps$$ checkout -f $(cat .wapps-commit)
-      - cp -r $$xprs-reticulum-dart$$ ../reticulum-dart
-      - cp -r $$xprs-core$$ ../core
-      - rm -rf ../../x1watt/zx
-      - mkdir -p ../../x1watt
-      - cp -r $$xprs-zx$$ ../../x1watt/zx
+      - sh tool/fdroid_deps.sh
       - export PUB_CACHE=$(pwd)/.pub-cache
       - $$flutter$$/bin/flutter config --no-analytics
       - $$flutter$$/bin/flutter pub get --enforce-lockfile
@@ -351,7 +342,8 @@ Builds:
       - .pub-cache
     build:
       - WASI_SYSROOT=/usr WASM_CLANG=clang-19 WASM_CLANGXX=clang++-19 WASM_AR=llvm-ar-19
-        DAV1D_SRC=$$dav1d$$ python3 tool/build_bundled_wapps.py $$xprs-wapps$$
+        DAV1D_SRC=$$dav1d$$ python3 tool/build_bundled_wapps.py ../apps
+      - XCC_SRC=../xcc sh tool/build_compiler.sh ../apps
       - rustup default 1.89.0
       - rustup target add armv7-linux-androideabi
       - export PUB_CACHE=$(pwd)/.pub-cache
@@ -359,9 +351,10 @@ Builds:
         --dart-define=AUTO_UPDATE_CHECK=false
     ndk: r28c
 
-  - versionName: 1.11.0
-    versionCode: 4007082
-    commit: 8a9c00b31a6c4ee05afceb9d7997cef7143ea3b8
+  - versionName: 1.12.1
+    versionCode: 4007932
+    commit: 315db8d413af1cfb396a9ac20771621a07dcae87
+    submodules: true
     sudo:
       - apt-get update
       - apt-get install -y make clang-19 lld-19 llvm-19 wasi-libc libclang-rt-19-dev-wasm32
@@ -372,13 +365,11 @@ Builds:
       https://github.com/xprs-dev/app/releases/download/v%v/xprs-%v-android-arm64-v8a.apk
     srclibs:
       - flutter@stable
-      - xprs-reticulum-dart@c4b72ac0daa1ff488984046ffc5ceaccc4cc49d7
-      - xprs-core@d9fcd6fabce792451b489c083f6bce54a88db55c
-      - xprs-zx@d3fa4dca7dbb674bea09edadecfd8a0be6925107
-      - xprs-wapps@a8cb532841460c8793e130081c266e5255959c71
       - dav1d@1.4.3
     rm:
       - artwork
+      - assets/compiler/cc.wasm
+      - assets/compiler/usr.zip
       - assets/editor/app-creator/app.wasm
       - desktop
       - ios
@@ -390,15 +381,7 @@ Builds:
       - flutterVersion=$(cat .flutter-version)
       - '[[ $flutterVersion ]]'
       - git -C $$flutter$$ checkout -f $flutterVersion
-      - git -C $$xprs-reticulum-dart$$ checkout -f $(cat .reticulum-dart-commit)
-      - git -C $$xprs-core$$ checkout -f $(cat .core-commit)
-      - git -C $$xprs-zx$$ checkout -f $(cat .zx-commit)
-      - git -C $$xprs-wapps$$ checkout -f $(cat .wapps-commit)
-      - cp -r $$xprs-reticulum-dart$$ ../reticulum-dart
-      - cp -r $$xprs-core$$ ../core
-      - rm -rf ../../x1watt/zx
-      - mkdir -p ../../x1watt
-      - cp -r $$xprs-zx$$ ../../x1watt/zx
+      - sh tool/fdroid_deps.sh
       - export PUB_CACHE=$(pwd)/.pub-cache
       - $$flutter$$/bin/flutter config --no-analytics
       - $$flutter$$/bin/flutter pub get --enforce-lockfile
@@ -406,7 +389,8 @@ Builds:
       - .pub-cache
     build:
       - WASI_SYSROOT=/usr WASM_CLANG=clang-19 WASM_CLANGXX=clang++-19 WASM_AR=llvm-ar-19
-        DAV1D_SRC=$$dav1d$$ python3 tool/build_bundled_wapps.py $$xprs-wapps$$
+        DAV1D_SRC=$$dav1d$$ python3 tool/build_bundled_wapps.py ../apps
+      - XCC_SRC=../xcc sh tool/build_compiler.sh ../apps
       - rustup default 1.89.0
       - rustup target add aarch64-linux-android
       - export PUB_CACHE=$(pwd)/.pub-cache
@@ -414,9 +398,10 @@ Builds:
         --dart-define=AUTO_UPDATE_CHECK=false
     ndk: r28c
 
-  - versionName: 1.11.0
-    versionCode: 4007083
-    commit: 8a9c00b31a6c4ee05afceb9d7997cef7143ea3b8
+  - versionName: 1.12.1
+    versionCode: 4007933
+    commit: 315db8d413af1cfb396a9ac20771621a07dcae87
+    submodules: true
     sudo:
       - apt-get update
       - apt-get install -y make clang-19 lld-19 llvm-19 wasi-libc libclang-rt-19-dev-wasm32
@@ -426,66 +411,6 @@ Builds:
     binary: https://github.com/xprs-dev/app/releases/download/v%v/xprs-%v-android-x86_64.apk
     srclibs:
       - flutter@stable
-      - xprs-reticulum-dart@c4b72ac0daa1ff488984046ffc5ceaccc4cc49d7
-      - xprs-core@d9fcd6fabce792451b489c083f6bce54a88db55c
-      - xprs-zx@d3fa4dca7dbb674bea09edadecfd8a0be6925107
-      - xprs-wapps@a8cb532841460c8793e130081c266e5255959c71
-      - dav1d@1.4.3
-    rm:
-      - artwork
-      - assets/editor/app-creator/app.wasm
-      - desktop
-      - ios
-      - linux
-      - macos
-      - web
-      - windows
-    prebuild:
-      - flutterVersion=$(cat .flutter-version)
-      - '[[ $flutterVersion ]]'
-      - git -C $$flutter$$ checkout -f $flutterVersion
-      - git -C $$xprs-reticulum-dart$$ checkout -f $(cat .reticulum-dart-commit)
-      - git -C $$xprs-core$$ checkout -f $(cat .core-commit)
-      - git -C $$xprs-zx$$ checkout -f $(cat .zx-commit)
-      - git -C $$xprs-wapps$$ checkout -f $(cat .wapps-commit)
-      - cp -r $$xprs-reticulum-dart$$ ../reticulum-dart
-      - cp -r $$xprs-core$$ ../core
-      - rm -rf ../../x1watt/zx
-      - mkdir -p ../../x1watt
-      - cp -r $$xprs-zx$$ ../../x1watt/zx
-      - export PUB_CACHE=$(pwd)/.pub-cache
-      - $$flutter$$/bin/flutter config --no-analytics
-      - $$flutter$$/bin/flutter pub get --enforce-lockfile
-    scandelete:
-      - .pub-cache
-    build:
-      - WASI_SYSROOT=/usr WASM_CLANG=clang-19 WASM_CLANGXX=clang++-19 WASM_AR=llvm-ar-19
-        DAV1D_SRC=$$dav1d$$ python3 tool/build_bundled_wapps.py $$xprs-wapps$$
-      - rustup default 1.89.0
-      - rustup target add x86_64-linux-android
-      - export PUB_CACHE=$(pwd)/.pub-cache
-      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform=android-x64
-        --dart-define=AUTO_UPDATE_CHECK=false
-    ndk: r28c
-
-  - versionName: 1.12.0
-    versionCode: 4007881
-    commit: ff825f1b2ed0791d962846368226be3b19f42c46
-    sudo:
-      - apt-get update
-      - apt-get install -y make clang-19 lld-19 llvm-19 wasi-libc libclang-rt-19-dev-wasm32
-        libc++-19-dev-wasm32 libc++abi-19-dev-wasm32 meson ninja-build python3 rustup
-        gcc libc-dev
-    output: build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
-    binary: 
-      https://github.com/xprs-dev/app/releases/download/v%v/xprs-%v-android-armeabi-v7a.apk
-    srclibs:
-      - flutter@stable
-      - xprs-reticulum-dart@c4b72ac0daa1ff488984046ffc5ceaccc4cc49d7
-      - xprs-core@e6c4cd9a359acaf0aa3fd6d1cc3af6659c50dd4d
-      - xprs-zx@d3fa4dca7dbb674bea09edadecfd8a0be6925107
-      - xprs-wapps@6488ab15821aea0a7e10d2b51e5337915f140c11
-      - xcc@659a1773f20499864a8c3fdc7cd25cb506092bc1
       - dav1d@1.4.3
     rm:
       - artwork
@@ -502,16 +427,7 @@ Builds:
       - flutterVersion=$(cat .flutter-version)
       - '[[ $flutterVersion ]]'
       - git -C $$flutter$$ checkout -f $flutterVersion
-      - git -C $$xprs-reticulum-dart$$ checkout -f $(cat .reticulum-dart-commit)
-      - git -C $$xprs-core$$ checkout -f $(cat .core-commit)
-      - git -C $$xprs-zx$$ checkout -f $(cat .zx-commit)
-      - git -C $$xprs-wapps$$ checkout -f $(cat .wapps-commit)
-      - git -C $$xcc$$ checkout -f $(cat .xcc-commit)
-      - cp -r $$xprs-reticulum-dart$$ ../reticulum-dart
-      - cp -r $$xprs-core$$ ../core
-      - rm -rf ../../x1watt/zx
-      - mkdir -p ../../x1watt
-      - cp -r $$xprs-zx$$ ../../x1watt/zx
+      - sh tool/fdroid_deps.sh
       - export PUB_CACHE=$(pwd)/.pub-cache
       - $$flutter$$/bin/flutter config --no-analytics
       - $$flutter$$/bin/flutter pub get --enforce-lockfile
@@ -519,127 +435,8 @@ Builds:
       - .pub-cache
     build:
       - WASI_SYSROOT=/usr WASM_CLANG=clang-19 WASM_CLANGXX=clang++-19 WASM_AR=llvm-ar-19
-        DAV1D_SRC=$$dav1d$$ python3 tool/build_bundled_wapps.py $$xprs-wapps$$
-      - XCC_SRC=$$xcc$$ sh tool/build_compiler.sh $$xprs-wapps$$
-      - rustup default 1.89.0
-      - rustup target add armv7-linux-androideabi
-      - export PUB_CACHE=$(pwd)/.pub-cache
-      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform=android-arm
-        --dart-define=AUTO_UPDATE_CHECK=false
-    ndk: r28c
-
-  - versionName: 1.12.0
-    versionCode: 4007882
-    commit: ff825f1b2ed0791d962846368226be3b19f42c46
-    sudo:
-      - apt-get update
-      - apt-get install -y make clang-19 lld-19 llvm-19 wasi-libc libclang-rt-19-dev-wasm32
-        libc++-19-dev-wasm32 libc++abi-19-dev-wasm32 meson ninja-build python3 rustup
-        gcc libc-dev
-    output: build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
-    binary: 
-      https://github.com/xprs-dev/app/releases/download/v%v/xprs-%v-android-arm64-v8a.apk
-    srclibs:
-      - flutter@stable
-      - xprs-reticulum-dart@c4b72ac0daa1ff488984046ffc5ceaccc4cc49d7
-      - xprs-core@e6c4cd9a359acaf0aa3fd6d1cc3af6659c50dd4d
-      - xprs-zx@d3fa4dca7dbb674bea09edadecfd8a0be6925107
-      - xprs-wapps@6488ab15821aea0a7e10d2b51e5337915f140c11
-      - xcc@659a1773f20499864a8c3fdc7cd25cb506092bc1
-      - dav1d@1.4.3
-    rm:
-      - artwork
-      - assets/compiler/cc.wasm
-      - assets/compiler/usr.zip
-      - assets/editor/app-creator/app.wasm
-      - desktop
-      - ios
-      - linux
-      - macos
-      - web
-      - windows
-    prebuild:
-      - flutterVersion=$(cat .flutter-version)
-      - '[[ $flutterVersion ]]'
-      - git -C $$flutter$$ checkout -f $flutterVersion
-      - git -C $$xprs-reticulum-dart$$ checkout -f $(cat .reticulum-dart-commit)
-      - git -C $$xprs-core$$ checkout -f $(cat .core-commit)
-      - git -C $$xprs-zx$$ checkout -f $(cat .zx-commit)
-      - git -C $$xprs-wapps$$ checkout -f $(cat .wapps-commit)
-      - git -C $$xcc$$ checkout -f $(cat .xcc-commit)
-      - cp -r $$xprs-reticulum-dart$$ ../reticulum-dart
-      - cp -r $$xprs-core$$ ../core
-      - rm -rf ../../x1watt/zx
-      - mkdir -p ../../x1watt
-      - cp -r $$xprs-zx$$ ../../x1watt/zx
-      - export PUB_CACHE=$(pwd)/.pub-cache
-      - $$flutter$$/bin/flutter config --no-analytics
-      - $$flutter$$/bin/flutter pub get --enforce-lockfile
-    scandelete:
-      - .pub-cache
-    build:
-      - WASI_SYSROOT=/usr WASM_CLANG=clang-19 WASM_CLANGXX=clang++-19 WASM_AR=llvm-ar-19
-        DAV1D_SRC=$$dav1d$$ python3 tool/build_bundled_wapps.py $$xprs-wapps$$
-      - XCC_SRC=$$xcc$$ sh tool/build_compiler.sh $$xprs-wapps$$
-      - rustup default 1.89.0
-      - rustup target add aarch64-linux-android
-      - export PUB_CACHE=$(pwd)/.pub-cache
-      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform=android-arm64
-        --dart-define=AUTO_UPDATE_CHECK=false
-    ndk: r28c
-
-  - versionName: 1.12.0
-    versionCode: 4007883
-    commit: ff825f1b2ed0791d962846368226be3b19f42c46
-    sudo:
-      - apt-get update
-      - apt-get install -y make clang-19 lld-19 llvm-19 wasi-libc libclang-rt-19-dev-wasm32
-        libc++-19-dev-wasm32 libc++abi-19-dev-wasm32 meson ninja-build python3 rustup
-        gcc libc-dev
-    output: build/app/outputs/flutter-apk/app-x86_64-release.apk
-    binary: https://github.com/xprs-dev/app/releases/download/v%v/xprs-%v-android-x86_64.apk
-    srclibs:
-      - flutter@stable
-      - xprs-reticulum-dart@c4b72ac0daa1ff488984046ffc5ceaccc4cc49d7
-      - xprs-core@e6c4cd9a359acaf0aa3fd6d1cc3af6659c50dd4d
-      - xprs-zx@d3fa4dca7dbb674bea09edadecfd8a0be6925107
-      - xprs-wapps@6488ab15821aea0a7e10d2b51e5337915f140c11
-      - xcc@659a1773f20499864a8c3fdc7cd25cb506092bc1
-      - dav1d@1.4.3
-    rm:
-      - artwork
-      - assets/compiler/cc.wasm
-      - assets/compiler/usr.zip
-      - assets/editor/app-creator/app.wasm
-      - desktop
-      - ios
-      - linux
-      - macos
-      - web
-      - windows
-    prebuild:
-      - flutterVersion=$(cat .flutter-version)
-      - '[[ $flutterVersion ]]'
-      - git -C $$flutter$$ checkout -f $flutterVersion
-      - git -C $$xprs-reticulum-dart$$ checkout -f $(cat .reticulum-dart-commit)
-      - git -C $$xprs-core$$ checkout -f $(cat .core-commit)
-      - git -C $$xprs-zx$$ checkout -f $(cat .zx-commit)
-      - git -C $$xprs-wapps$$ checkout -f $(cat .wapps-commit)
-      - git -C $$xcc$$ checkout -f $(cat .xcc-commit)
-      - cp -r $$xprs-reticulum-dart$$ ../reticulum-dart
-      - cp -r $$xprs-core$$ ../core
-      - rm -rf ../../x1watt/zx
-      - mkdir -p ../../x1watt
-      - cp -r $$xprs-zx$$ ../../x1watt/zx
-      - export PUB_CACHE=$(pwd)/.pub-cache
-      - $$flutter$$/bin/flutter config --no-analytics
-      - $$flutter$$/bin/flutter pub get --enforce-lockfile
-    scandelete:
-      - .pub-cache
-    build:
-      - WASI_SYSROOT=/usr WASM_CLANG=clang-19 WASM_CLANGXX=clang++-19 WASM_AR=llvm-ar-19
-        DAV1D_SRC=$$dav1d$$ python3 tool/build_bundled_wapps.py $$xprs-wapps$$
-      - XCC_SRC=$$xcc$$ sh tool/build_compiler.sh $$xprs-wapps$$
+        DAV1D_SRC=$$dav1d$$ python3 tool/build_bundled_wapps.py ../apps
+      - XCC_SRC=../xcc sh tool/build_compiler.sh ../apps
       - rustup default 1.89.0
       - rustup target add x86_64-linux-android
       - export PUB_CACHE=$(pwd)/.pub-cache
@@ -656,5 +453,5 @@ VercodeOperation:
   - '%c * 10 + 2'
   - '%c * 10 + 3'
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 1.12.0
-CurrentVersionCode: 4007883
+CurrentVersion: 1.12.1
+CurrentVersionCode: 4007933
