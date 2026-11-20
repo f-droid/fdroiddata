@@ -1,0 +1,176 @@
+Categories:
+  - Multimedia
+  - Online Media Player
+License: AGPL-3.0-or-later
+AuthorName: Mirlo
+AuthorEmail: hi@mirlo.space
+WebSite: https://mirlo.space
+SourceCode: https://github.com/funmusicplace/mirlo-mobile
+IssueTracker: https://github.com/funmusicplace/mirlo-mobile/issues
+Changelog: https://github.com/funmusicplace/mirlo-mobile/releases
+
+AutoName: Mirlo
+
+RepoType: git
+Repo: https://github.com/funmusicplace/mirlo-mobile.git
+
+Builds:
+  - versionName: 1.0.6
+    versionCode: 100061
+    commit: c0f413bd71046a3a5355ea065b66a94bc940cef3
+    sudo:
+      - echo "deb https://deb.debian.org/debian forky main" > /etc/apt/sources.list.d/forky.list
+      - apt-get update
+      - apt-get install -y -t forky nodejs npm
+    init:
+      - npm ci --ignore-scripts
+      - npm uninstall --ignore-scripts expo-dev-client
+      - npx patch-package
+    output: android/app/build/outputs/apk/release/app-release-unsigned.apk
+    prebuild:
+      - export APP_VARIANT=fdroid EXPO_NO_TELEMETRY=1
+      - cp .env.fdroid .env
+      - node -e 'const fs=require("fs"); const p=JSON.parse(fs.readFileSync("package.json"));
+        p.expo={...p.expo,autolinking:{...p.expo?.autolinking,android:{...p.expo?.autolinking?.android,buildFromSource:[".*"]}}};
+        fs.writeFileSync("package.json",JSON.stringify(p,null,2)+"\n");'
+      - sed -i -e '/jvmToolchain\|JavaVersion/s/17/21/' node_modules/@react-native/gradle-plugin/*/build.gradle.kts
+        node_modules/@react-native/gradle-plugin/react-native-gradle-plugin/src/main/kotlin/com/facebook/react/utils/JdkConfiguratorUtils.kt
+      - sed -i -e '/foojay/d' node_modules/@react-native/gradle-plugin/settings.gradle.kts
+      - rm -rf node_modules/hermes-compiler/hermesc/osx-bin node_modules/hermes-compiler/hermesc/win64-bin
+      - sed -i -e '/expo-dev-client/d' app.config.js
+      - npx expo prebuild --platform android --no-install
+      - sed -i -e 's/^org.gradle.jvmargs=.*/org.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=2g/'
+        android/gradle.properties
+      - sed -i -e '/signingConfig signingConfigs.debug/d' -e 's/versionCode [0-9]*/versionCode
+        $$VERCODE$$/' android/app/build.gradle
+    scanignore:
+      - node_modules/hermes-compiler/hermesc/linux64-bin/hermesc
+      - node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/Fontisto.ttf
+      - node_modules/react-native-vector-icons/Fonts/Fontisto.ttf
+      - node_modules/expo-modules-core/android/ExpoModulesCorePlugin.gradle
+      - node_modules/react-native-webview/android/build.gradle
+      - node_modules/react-native-safe-area-context/android/build.gradle
+      - node_modules/react-native-vector-icons/android/build.gradle
+      - node_modules/react-native-linear-gradient/android/build.gradle
+      - node_modules/react-native-track-player/android/build.gradle
+      - node_modules/react-native-screens/android/build.gradle
+      - node_modules/react-native-svg/android/build.gradle
+      - node_modules/@react-native-async-storage/async-storage/android/build.gradle
+    scandelete:
+      - node_modules
+    build:
+      - export APP_VARIANT=fdroid EXPO_NO_TELEMETRY=1
+      - cd android
+      - gradle :app:assembleRelease -PreactNativeArchitectures=armeabi-v7a -Pandroid.enableMinifyInReleaseBuilds=true
+        -Pandroid.enableShrinkResourcesInReleaseBuilds=true
+    ndk: 27.1.12297006
+
+  - versionName: 1.0.6
+    versionCode: 100062
+    commit: c0f413bd71046a3a5355ea065b66a94bc940cef3
+    sudo:
+      - echo "deb https://deb.debian.org/debian forky main" > /etc/apt/sources.list.d/forky.list
+      - apt-get update
+      - apt-get install -y -t forky nodejs npm
+    init:
+      - npm ci --ignore-scripts
+      - npm uninstall --ignore-scripts expo-dev-client
+      - npx patch-package
+    output: android/app/build/outputs/apk/release/app-release-unsigned.apk
+    prebuild:
+      - export APP_VARIANT=fdroid EXPO_NO_TELEMETRY=1
+      - cp .env.fdroid .env
+      - node -e 'const fs=require("fs"); const p=JSON.parse(fs.readFileSync("package.json"));
+        p.expo={...p.expo,autolinking:{...p.expo?.autolinking,android:{...p.expo?.autolinking?.android,buildFromSource:[".*"]}}};
+        fs.writeFileSync("package.json",JSON.stringify(p,null,2)+"\n");'
+      - sed -i -e '/jvmToolchain\|JavaVersion/s/17/21/' node_modules/@react-native/gradle-plugin/*/build.gradle.kts
+        node_modules/@react-native/gradle-plugin/react-native-gradle-plugin/src/main/kotlin/com/facebook/react/utils/JdkConfiguratorUtils.kt
+      - sed -i -e '/foojay/d' node_modules/@react-native/gradle-plugin/settings.gradle.kts
+      - rm -rf node_modules/hermes-compiler/hermesc/osx-bin node_modules/hermes-compiler/hermesc/win64-bin
+      - sed -i -e '/expo-dev-client/d' app.config.js
+      - npx expo prebuild --platform android --no-install
+      - sed -i -e 's/^org.gradle.jvmargs=.*/org.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=2g/'
+        android/gradle.properties
+      - sed -i -e '/signingConfig signingConfigs.debug/d' -e 's/versionCode [0-9]*/versionCode
+        $$VERCODE$$/' android/app/build.gradle
+    scanignore:
+      - node_modules/hermes-compiler/hermesc/linux64-bin/hermesc
+      - node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/Fontisto.ttf
+      - node_modules/react-native-vector-icons/Fonts/Fontisto.ttf
+      - node_modules/expo-modules-core/android/ExpoModulesCorePlugin.gradle
+      - node_modules/react-native-webview/android/build.gradle
+      - node_modules/react-native-safe-area-context/android/build.gradle
+      - node_modules/react-native-vector-icons/android/build.gradle
+      - node_modules/react-native-linear-gradient/android/build.gradle
+      - node_modules/react-native-track-player/android/build.gradle
+      - node_modules/react-native-screens/android/build.gradle
+      - node_modules/react-native-svg/android/build.gradle
+      - node_modules/@react-native-async-storage/async-storage/android/build.gradle
+    scandelete:
+      - node_modules
+    build:
+      - export APP_VARIANT=fdroid EXPO_NO_TELEMETRY=1
+      - cd android
+      - gradle :app:assembleRelease -PreactNativeArchitectures=arm64-v8a -Pandroid.enableMinifyInReleaseBuilds=true
+        -Pandroid.enableShrinkResourcesInReleaseBuilds=true
+    ndk: 27.1.12297006
+
+  - versionName: 1.0.6
+    versionCode: 100063
+    commit: c0f413bd71046a3a5355ea065b66a94bc940cef3
+    sudo:
+      - echo "deb https://deb.debian.org/debian forky main" > /etc/apt/sources.list.d/forky.list
+      - apt-get update
+      - apt-get install -y -t forky nodejs npm
+    init:
+      - npm ci --ignore-scripts
+      - npm uninstall --ignore-scripts expo-dev-client
+      - npx patch-package
+    output: android/app/build/outputs/apk/release/app-release-unsigned.apk
+    prebuild:
+      - export APP_VARIANT=fdroid EXPO_NO_TELEMETRY=1
+      - cp .env.fdroid .env
+      - node -e 'const fs=require("fs"); const p=JSON.parse(fs.readFileSync("package.json"));
+        p.expo={...p.expo,autolinking:{...p.expo?.autolinking,android:{...p.expo?.autolinking?.android,buildFromSource:[".*"]}}};
+        fs.writeFileSync("package.json",JSON.stringify(p,null,2)+"\n");'
+      - sed -i -e '/jvmToolchain\|JavaVersion/s/17/21/' node_modules/@react-native/gradle-plugin/*/build.gradle.kts
+        node_modules/@react-native/gradle-plugin/react-native-gradle-plugin/src/main/kotlin/com/facebook/react/utils/JdkConfiguratorUtils.kt
+      - sed -i -e '/foojay/d' node_modules/@react-native/gradle-plugin/settings.gradle.kts
+      - rm -rf node_modules/hermes-compiler/hermesc/osx-bin node_modules/hermes-compiler/hermesc/win64-bin
+      - sed -i -e '/expo-dev-client/d' app.config.js
+      - npx expo prebuild --platform android --no-install
+      - sed -i -e 's/^org.gradle.jvmargs=.*/org.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=2g/'
+        android/gradle.properties
+      - sed -i -e '/signingConfig signingConfigs.debug/d' -e 's/versionCode [0-9]*/versionCode
+        $$VERCODE$$/' android/app/build.gradle
+    scanignore:
+      - node_modules/hermes-compiler/hermesc/linux64-bin/hermesc
+      - node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/Fontisto.ttf
+      - node_modules/react-native-vector-icons/Fonts/Fontisto.ttf
+      - node_modules/expo-modules-core/android/ExpoModulesCorePlugin.gradle
+      - node_modules/react-native-webview/android/build.gradle
+      - node_modules/react-native-safe-area-context/android/build.gradle
+      - node_modules/react-native-vector-icons/android/build.gradle
+      - node_modules/react-native-linear-gradient/android/build.gradle
+      - node_modules/react-native-track-player/android/build.gradle
+      - node_modules/react-native-screens/android/build.gradle
+      - node_modules/react-native-svg/android/build.gradle
+      - node_modules/@react-native-async-storage/async-storage/android/build.gradle
+    scandelete:
+      - node_modules
+    build:
+      - export APP_VARIANT=fdroid EXPO_NO_TELEMETRY=1
+      - cd android
+      - gradle :app:assembleRelease -PreactNativeArchitectures=x86_64 -Pandroid.enableMinifyInReleaseBuilds=true
+        -Pandroid.enableShrinkResourcesInReleaseBuilds=true
+    ndk: 27.1.12297006
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^v[\d.]+$
+VercodeOperation:
+  - 10 * %c + 1
+  - 10 * %c + 2
+  - 10 * %c + 3
+UpdateCheckData: app.json|"versionCode":\s*(\d+)|.|"version":\s*"([\d.]+)"
+CurrentVersion: 1.0.6
+CurrentVersionCode: 100063
