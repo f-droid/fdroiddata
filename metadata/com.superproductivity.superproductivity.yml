@@ -2822,7 +2822,33 @@ Builds:
       - dist/browser/assets/test-plugin.zip
       - src/assets/test-plugin.zip
 
+  - versionName: 20.1.0
+    versionCode: 2001009000
+    commit: 93d5249d51f4fcfb9ccaab14a89438ae52925a10
+    subdir: android/app
+    sudo:
+      - apt-get update
+      - apt-get install -y g++ make libc-dev libvips-dev
+      - echo "deb https://deb.debian.org/debian forky main" > /etc/apt/sources.list.d/forky.list
+      - apt-get update
+      - apt-get install -y -t forky npm
+    gradle:
+      - fdroid
+    prebuild:
+      - cd ../..
+      - sed -i -e "s/getEnv('UNSPLASH_KEY')/''/" src/app/core/unsplash/unsplash.service.ts
+      - npm install
+      - npm run buildFrontend:prodWeb
+      - npm run sync:android
+    scanignore:
+      - android/app/src/main/assets/public/assets/test-plugin.zip
+    scandelete:
+      - node_modules
+      - packages/plugin-dev/node_modules
+      - dist/browser/assets/test-plugin.zip
+      - src/assets/test-plugin.zip
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v(?!11.0.3)[\d.]+$
-CurrentVersion: 20.0.0
-CurrentVersionCode: 2000009000
+CurrentVersion: 20.1.0
+CurrentVersionCode: 2001009000
