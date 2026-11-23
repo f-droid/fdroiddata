@@ -826,8 +826,33 @@ Builds:
       - $$flutter$$/bin/flutter build apk --flavor fdroid || $$flutter$$/bin/flutter
         build apk --flavor fdroid
 
+  - versionName: 1.7.4
+    versionCode: 89
+    commit: fa5dcef98d1d9de3f3b80ba4149eb70f8670411e
+    output: build/app/outputs/flutter-apk/app-fdroid-release.apk
+    srclibs:
+      - flutter@3.50.0
+    rm:
+      - ios
+      - linux
+      - macos
+      - test
+      - web
+    prebuild:
+      - sed -i -e '/foojay/d' android/settings.gradle
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter packages pub get --enforce-lockfile
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter packages pub run build_runner build --delete-conflicting-outputs
+      - $$flutter$$/bin/flutter build apk --flavor fdroid || $$flutter$$/bin/flutter
+        build apk --flavor fdroid
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 1.7.2
-CurrentVersionCode: 86
+CurrentVersion: 1.7.4
+CurrentVersionCode: 89
