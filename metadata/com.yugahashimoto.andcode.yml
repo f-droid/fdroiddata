@@ -77,9 +77,35 @@ Builds:
       - andcode.fdroidBuild=true
       - andcode.sourceNativeLibs=true
 
+  - versionName: 1.2.30
+    versionCode: 69
+    commit: 9b6c2863f5385dc6774708842e5d5bbb1f379f42
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y autoconf autogen automake autopoint bison build-essential
+        curl file flex g++ g++-multilib gawk gettext gnupg gperf git intltool jq libfl-dev
+        libglib2.0-dev libltdl-dev libtool-bin lrzip lzip lz4 lzop m4 patch patchelf
+        pkg-config python-is-python3 python3-pip python3-setuptools python3-venv python-wheel-common
+        rsync scons tar unzip wget xz-utils zip zstd
+      - mkdir -p /data/data /tmp/andcode-termux-build
+      - chown -R vagrant /data /tmp/andcode-termux-build
+    gradle:
+      - fdroid
+    srclibs:
+      - TermuxPackages@2a342d4bd78454dd20760e1fded33939f1712b2d
+    prebuild:
+      - sed -i -e '/firebase/d' -e '/gms/d' {..,.}/build.gradle.kts
+      - export REPO_ROOT=$(git rev-parse --show-toplevel); TERMUX_PACKAGES_DIR=$$TermuxPackages$$
+        NDK=$$NDK$$ ANDROID_HOME=$$SDK$$ bash "$REPO_ROOT/scripts/build_android_runtime_native_debs.sh"
+    ndk: r29
+    gradleprops:
+      - andcode.fdroidBuild=true
+      - andcode.sourceNativeLibs=true
+
 AllowedAPKSigningKeys: f036e07002d8c2e6a5a64000f1211398d4831ff37cf280456a9a26d2f12617df
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 1.2.29
-CurrentVersionCode: 68
+CurrentVersion: 1.2.30
+CurrentVersionCode: 69
