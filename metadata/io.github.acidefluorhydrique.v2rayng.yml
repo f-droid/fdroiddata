@@ -549,11 +549,12 @@ Builds:
     postbuild:
       - curl -Lo upstream.apk 
         https://github.com/AcideFluorhydrique/v2rayNG/releases/download/v$$VERSION$$/v2rayNG_$$VERSION$$-fdroid_x86_64.apk
+      - unzip -q upstream.apk -d apk
       - export hash=$(sha256sum apk/assets/dexopt/baseline.prof)
       - rm -rf apk upstream.apk
       - for i in {1..10}; do unzip -q $$OUT$$ -d apk; sha256sum -c - <<< $hash &&
-        break; sha256sum apk/assets/dexopt/baseline.prof; rm -fr apk; gradle clean
-        assembleFdroidRelease; done
+        break; sha256sum apk/assets/dexopt/baseline.prof; rm -fr apk; taskset --cpu-list
+        0-15 gradle clean assembleFdroidRelease; done
 
   - versionName: 2.4.0
     versionCode: 5076003
@@ -633,11 +634,12 @@ Builds:
     postbuild:
       - curl -Lo upstream.apk 
         https://github.com/AcideFluorhydrique/v2rayNG/releases/download/v$$VERSION$$/v2rayNG_$$VERSION$$-fdroid_arm64-v8a.apk
+      - unzip -q upstream.apk -d apk
       - export hash=$(sha256sum apk/assets/dexopt/baseline.prof)
       - rm -rf apk upstream.apk
       - for i in {1..10}; do unzip -q $$OUT$$ -d apk; sha256sum -c - <<< $hash &&
-        break; sha256sum apk/assets/dexopt/baseline.prof; rm -fr apk; gradle clean
-        assembleFdroidRelease; done
+        break; sha256sum apk/assets/dexopt/baseline.prof; rm -fr apk; taskset --cpu-list
+        0-15 gradle clean assembleFdroidRelease; done
 
 AllowedAPKSigningKeys: 561d282e03be3557d09073fc317fcc2f4d3231fa26da662e290222f4b34f78d9
 
