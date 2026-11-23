@@ -189,7 +189,27 @@ Builds:
       - export PUB_CACHE=$(pwd)/.pub-cache
       - $$flutter$$/bin/flutter build apk --flavor fdroid
 
+  - versionName: 1.5.0
+    versionCode: 35
+    commit: e06a2856df23bae54919eaf11ab94b1bb95350a6
+    output: build/app/outputs/flutter-apk/app-fdroid-release.apk
+    srclibs:
+      - flutter@stable
+    prebuild:
+      - flutterVersion=$(sed -nE 's/^[[:space:]]+flutter:[[:space:]]*"([^"]+)".*/\1/p'
+        pubspec.yaml)
+      - test -n "$flutterVersion"
+      - git -C $$flutter$$ checkout -f "$flutterVersion"
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --flavor fdroid
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v[0-9.]*$
-CurrentVersion: 1.5.0-beta.1
-CurrentVersionCode: 33
+CurrentVersion: 1.5.0
+CurrentVersionCode: 35
