@@ -1,0 +1,47 @@
+AntiFeatures:
+  NonFreeNet:
+    en-US: Optional features use non-free online services (Google Translate, DeepL,
+      OpenAI, YouTube subtitles, YouGlish) when the user turns them on.
+Categories:
+  - Reading
+License: AGPL-3.0-or-later
+AuthorName: Ironship
+WebSite: https://ironship.github.io/WordHunter-site/
+SourceCode: https://github.com/Ironship/WordHunter
+IssueTracker: https://github.com/Ironship/WordHunter/issues
+Changelog: https://github.com/Ironship/WordHunter/releases
+
+AutoName: Word Hunter Pocket
+
+RepoType: git
+Repo: https://github.com/Ironship/WordHunter.git
+
+Builds:
+  - versionName: 1.1.5
+    versionCode: 101100599
+    commit: f1fb4a1940c150f6e39bf00d70f77eb25f707c54
+    sudo:
+      - apt-get update
+      - apt-get install -y build-essential npm rustup
+    output: 
+      src-tauri/gen/android/app/build/outputs/apk/universal/release/app-universal-release-unsigned.apk
+    build:
+      - rustup set profile minimal
+      - rustup default 1.97.1
+      - rustup target add aarch64-linux-android
+      - export PATH="$HOME/.cargo/bin:$PATH"
+      - cargo install tauri-cli --version 2.11.4 --locked
+      - export NDK_HOME=$$NDK$$
+      - printf '#!/bin/sh\nexec gradlew-fdroid "$@"\n' > src-tauri/gen/android/gradlew
+      - npm ci --no-audit --no-fund
+      - npm run build:frontend
+      - node scripts/prepare-android.mjs
+      - cargo tauri android build --apk --target aarch64 --ci -- --locked
+    ndk: 27.0.12077973
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^WordHunter[0-9]+\.[0-9]+\.[0-9]+$
+UpdateCheckData: 
+  src-tauri/tauri.android.conf.json|"versionCode":\s*(\d+)|src-tauri/tauri.conf.json|"version":\s*"([^"]+)"
+CurrentVersion: 1.1.5
+CurrentVersionCode: 101100599
