@@ -4898,8 +4898,57 @@ Builds:
       - $$flutter$$/bin/flutter build apk --flavor nightly
     ndk: r28c
 
+  - versionName: 2.6.4-rc.0
+    versionCode: 208
+    commit: 33dbc32f3b3ef0c57cd4a811b430ff901d914eae
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y rustup gcc libc-dev
+    init: sed -i -e '/signingConfig = /,/}$/d' android/app/build.gradle.kts
+    output: build/app/outputs/flutter-apk/app-nightly-release.apk
+    srclibs:
+      - flutter@stable
+      - pdfium-binaries@chromium/8125
+    rm:
+      - app/ios
+      - app/linux
+      - app/macos
+      - app/web
+      - app/windows
+    prebuild:
+      - flutterVersion=$(sed -n -E "s/^  flutter:\ (.*)/\1/p" pubspec.yaml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - sed -i -e '/signingConfig/,+4d' android/app/build.gradle.kts
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - grep chromium%2F8125 $PUB_CACHE/hosted/pub.dev/pdfium_dart-*/lib/src/pdfium_archive_integrity.dart
+      - sed -i -e '/getPdfiumArchiveWithApiFallback(archiveUri)/,+5c final bytes =
+        await File("$$pdfium-binaries$$/$archiveName").readAsBytes();' -e 's/response.bodyBytes/bytes/'
+        -e '/verifyPdfiumArchive/d' -e '/http/d' $PUB_CACHE/hosted/pub.dev/pdfium_dart-*/hook/build.dart
+    scandelete:
+      - app/.pub-cache
+    build:
+      - pushd $$pdfium-binaries$$
+      - export PDFium_BRANCH="chromium/8125"
+      - export PDFium_VERSION="158.0.8125.0"
+      - sed -i 's|sudo |echo |g' steps/01-install.sh
+      - echo 'sed -i "s|  sys.exit(main())|  sys.exit(0)|g" pdfium/build/install-build-deps.py'
+        >> steps/02-checkout.sh
+      - truncate -s 0 steps/09-test.sh
+      - ./build.sh -b "$PDFium_BRANCH" android arm
+      - ./build.sh -b "$PDFium_BRANCH" android arm64
+      - ./build.sh -b "$PDFium_BRANCH" android x64
+      - cp pdfium-android-x64.tgz pdfium-android-x86.tgz
+      - popd
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --flavor nightly
+    ndk: r28c
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v.+-.+$
 UpdateCheckData: app/pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 2.6.3-rc.1
-CurrentVersionCode: 206
+CurrentVersion: 2.6.4-rc.0
+CurrentVersionCode: 208
