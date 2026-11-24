@@ -1,0 +1,125 @@
+Categories:
+  - Finance Manager
+License: MIT
+AuthorName: Gianluigi Calcaterra
+SourceCode: https://github.com/calca/caravella
+IssueTracker: https://github.com/calca/caravella/issues
+Changelog: https://github.com/calca/caravella/blob/HEAD/CHANGELOG.md
+
+AutoName: Caravella
+
+RepoType: git
+Repo: https://github.com/calca/caravella.git
+
+Builds:
+  - versionName: 2.5.0
+    versionCode: 1391
+    commit: c7ffe89cd4fd1c09d38f8cea6ef4247c259ea01b
+    output: build/app/outputs/flutter-apk/app-armeabi-v7a-prod-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+      - macos
+      - web
+      - windows
+      - packages/caravella_gms
+      - packages/google_drive_sync
+      - packages/play_store_updates
+    prebuild:
+      - sdkmanager 'platforms;android-37.0' 'build-tools;36.0.0'
+      - flutterVersion=$(sed -n -E "s/.*flutter-version:\ '(.*)'/\1/p" .github/workflows/Development*Android.yml
+        | head -1)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - ./build_variant.sh fdroid-prepare
+      - sed -i -e 's/^android {$/android { lint { checkReleaseBuilds = false }/' -e
+        '/signingConfig = signingConfigs.getByName("release")/d' android/app/build.gradle.kts
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --flavor prod --dart-define=FLAVOR=prod
+        --split-per-abi --target-platform=android-arm
+    ndk: r28c
+
+  - versionName: 2.5.0
+    versionCode: 1392
+    commit: c7ffe89cd4fd1c09d38f8cea6ef4247c259ea01b
+    output: build/app/outputs/flutter-apk/app-arm64-v8a-prod-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+      - macos
+      - web
+      - windows
+      - packages/caravella_gms
+      - packages/google_drive_sync
+      - packages/play_store_updates
+    prebuild:
+      - sdkmanager 'platforms;android-37.0' 'build-tools;36.0.0'
+      - flutterVersion=$(sed -n -E "s/.*flutter-version:\ '(.*)'/\1/p" .github/workflows/Development*Android.yml
+        | head -1)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - ./build_variant.sh fdroid-prepare
+      - sed -i -e 's/^android {$/android { lint { checkReleaseBuilds = false }/' -e
+        '/signingConfig = signingConfigs.getByName("release")/d' android/app/build.gradle.kts
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --flavor prod --dart-define=FLAVOR=prod
+        --split-per-abi --target-platform=android-arm64
+    ndk: r28c
+
+  - versionName: 2.5.0
+    versionCode: 1393
+    commit: c7ffe89cd4fd1c09d38f8cea6ef4247c259ea01b
+    output: build/app/outputs/flutter-apk/app-x86_64-prod-release.apk
+    srclibs:
+      - flutter@stable
+    rm:
+      - ios
+      - macos
+      - web
+      - windows
+      - packages/caravella_gms
+      - packages/google_drive_sync
+      - packages/play_store_updates
+    prebuild:
+      - sdkmanager 'platforms;android-37.0' 'build-tools;36.0.0'
+      - flutterVersion=$(sed -n -E "s/.*flutter-version:\ '(.*)'/\1/p" .github/workflows/Development*Android.yml
+        | head -1)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - ./build_variant.sh fdroid-prepare
+      - sed -i -e 's/^android {$/android { lint { checkReleaseBuilds = false }/' -e
+        '/signingConfig = signingConfigs.getByName("release")/d' android/app/build.gradle.kts
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --flavor prod --dart-define=FLAVOR=prod
+        --split-per-abi --target-platform=android-x64
+    ndk: r28c
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^v\d+\.\d+\.\d+$
+VercodeOperation:
+  - 10 * %c + 1
+  - 10 * %c + 2
+  - 10 * %c + 3
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 2.5.0
+CurrentVersionCode: 1393
