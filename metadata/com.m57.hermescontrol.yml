@@ -270,11 +270,28 @@ Builds:
       - sed -i -e '/versionCode =/c versionCode = $$VERCODE$$' build.gradle.kts
       - sed -i -e '/versionName =/c versionName = "$$VERSION$$"' build.gradle.kts
 
+  - versionName: 3.6.1
+    versionCode: 30601
+    commit: eb707ed863720c2b6abb130a3ef2bd3b83618e17
+    subdir: app
+    gradle:
+      - yes
+    srclibs:
+      - reproducible-apk-tools@v0.3.0
+    prebuild:
+      - sed -i '/foojay/d' ../settings.gradle.kts
+      - sed -i -e '/versionCode =/c versionCode = $$VERCODE$$' build.gradle.kts
+      - sed -i -e '/versionName =/c versionName = "$$VERSION$$"' build.gradle.kts
+    postbuild:
+      - mv $$OUT$$ unaligned.apk
+      - $$reproducible-apk-tools$$/zipalign.py --page-size 16 --pad-like-apksigner
+        --replace unaligned.apk $$OUT$$
+
 AllowedAPKSigningKeys: b512258d20fd4e65a1ea4f62623bd4f18700c1ce48c302ae0fbb5e31736d192f
 
 AutoUpdateMode: Version v%v
 UpdateCheckMode: HTTP
 UpdateCheckData: 
   https://github.com/Hy4ri/hermes-mobile/releases/latest/download/version.txt|versionCode=(\d+)|.|versionName=(.+)
-CurrentVersion: 3.5.6
-CurrentVersionCode: 30506
+CurrentVersion: 3.6.1
+CurrentVersionCode: 30601
