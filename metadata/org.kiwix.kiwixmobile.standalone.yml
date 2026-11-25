@@ -1,0 +1,37 @@
+Categories:
+  - Reading
+License: GPL-3.0-only
+AuthorName: Kiwix
+AuthorEmail: contact+github@kiwix.org
+AuthorWebSite: https://kiwix.org/
+WebSite: https://www.kiwix.org/
+SourceCode: https://github.com/kiwix/kiwix-android
+IssueTracker: https://github.com/kiwix/kiwix-android/issues
+Changelog: https://github.com/kiwix/kiwix-android/blob/HEAD/CHANGELOG
+
+AutoName: Kiwix
+
+RepoType: git
+Repo: https://github.com/kiwix/kiwix-android.git
+
+Builds:
+  - versionName: 4.0.1
+    versionCode: 7231955
+    commit: d84b63ee0c7fb47cb1179dfe54ddb8d046d2c538
+    subdir: app
+    output: build/outputs/apk/standalone/app-standalone-unsigned.apk
+    rm:
+      - contrib/move-string-resource
+    prebuild:
+      - sed -i -e '/create("releaseSigningConfig")/,+5d' -e '/releaseSigningConfig/d'
+        -e '/output.versionCode.set/d' ../buildSrc/src/main/kotlin/plugin/AppConfigurer.kt
+      - sed -i -e 's/versionCode = .*/versionCode = $$VERCODE$$/' build.gradle.kts
+      - sed -i -e 's/"VERSION_CODE", .*)/"VERSION_CODE", "$$VERCODE$$")/' ../core/build.gradle.kts
+    build: gradle assembleStandalone
+    ndk: 27.3.13750724
+
+AutoUpdateMode: Version %v
+UpdateCheckMode: HTTP
+UpdateCheckData: https://download.kiwix.org/release/kiwix-android/VERSION_INFO|\n([0-9]+)|.|(.*)
+CurrentVersion: 4.0.1
+CurrentVersionCode: 7231955
