@@ -3,15 +3,15 @@ Categories:
 License: MIT
 AuthorName: ma7moud3ly
 AuthorEmail: m.aly@gasable.com
-SourceCode: https://github.com/Ma7moud3ly/micro-repl
-IssueTracker: https://github.com/Ma7moud3ly/micro-repl/issues
+SourceCode: https://github.com/micro-repl/micro-repl
+IssueTracker: https://github.com/micro-repl/micro-repl/issues
 
 AutoName: Micro REPL
 
 RepoType: git
-Repo: https://github.com/Ma7moud3ly/micro-repl.git
+Repo: https://github.com/micro-repl/micro-repl.git
 Binaries: 
-  https://github.com/Ma7moud3ly/micro-repl/releases/download/v%v/micro-repl-v%v.apk
+  https://github.com/micro-repl/micro-repl/releases/download/v%v/micro-repl-v%v.apk
 
 Builds:
   - versionName: '1.7'
@@ -78,9 +78,30 @@ Builds:
     postbuild: $$reproducible-apk-tools$$/inplace-fix.py --zipalign --page-size 16
       fix-newlines $$OUT$$ 'assets/python/*' 'assets/themes/*'
 
+  - versionName: 4.0.0
+    versionCode: 19
+    commit: ca0f233c20eff97f98d776fcd9fd01e402072001
+    subdir: androidApp
+    sudo:
+      - echo "deb https://deb.debian.org/debian bookworm main" > /etc/apt/sources.list.d/bookworm.list
+      - apt-get update
+      - apt-get install -y -t bookworm openjdk-17-jdk-headless
+      - update-java-alternatives -s java-1.17.0-openjdk-amd64
+    gradle:
+      - default
+    rm:
+      - desktopApp
+      - webApp
+    prebuild:
+      - sed -i -e '/firebase/d' ../build.gradle.kts
+      - sed -i -e '/desktopApp/d' -e '/webApp/d' -e '/Wasm plugin/,+15d' -e '/foojay/d'
+        ../settings.gradle.kts
+
 AllowedAPKSigningKeys: e632303f5c22a8aec2165f8ca75cf11d1376eb456bba92dc621e4464c6818489
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: '3.1'
-CurrentVersionCode: 18
+UpdateCheckData: 
+  gradle/libs.versions.toml|project-versionCode\s=\s"(\d+)"|.|project-versionName\s=\s"(.*)"
+CurrentVersion: 4.0.0
+CurrentVersionCode: 19
