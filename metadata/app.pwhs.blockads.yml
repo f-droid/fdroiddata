@@ -317,10 +317,48 @@ Builds:
         -extldflags=-Wl,-z,max-page-size=16384' -o ../build/tunnel/tunnel.aar github.com/nqmgaming/blockads-tunnel
     ndk: r26b
 
+  - versionName: 7.2.1
+    versionCode: 70
+    commit: 975883473858aec4187beaa7bacb715eed13ff48
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y gcc libc-dev make
+      - apt-get install -y -t trixie-backports golang-go
+    gradle:
+      - yes
+    output: build/outputs/apk/release/app-universal-release-unsigned.apk
+    srclibs:
+      - go@go1.26.11
+    prebuild:
+      - export goVersion=$(grep go\  ../tunnel/go.mod | head -n1 | cut -d " " -f2)
+      - '[[ $goVersion ]]'
+      - git -C $$go$$ checkout -f go$goVersion
+      - sdkmanager 'platforms;android-24'
+    scanignore:
+      - settings.gradle.kts
+    build:
+      - echo "tunnel.source=prebuilt" >> ../gradle.properties
+      - pushd $$go$$/src
+      - ./make.bash
+      - popd
+      - export PATH="$$go$$/bin:$PATH"
+      - export GOPATH="$PWD/.gopath"
+      - export PATH="$GOPATH/bin:$PATH"
+      - export GOFLAGS="-buildvcs=false"
+      - go version
+      - go install github.com/sagernet/gomobile/cmd/gomobile@v0.1.12
+      - gomobile init
+      - mkdir -p ../build/tunnel
+      - cd ../tunnel
+      - gomobile bind -target=android -androidapi 24 -trimpath -ldflags='-s -w -buildid=
+        -extldflags=-Wl,-z,max-page-size=16384' -o ../build/tunnel/tunnel.aar github.com/nqmgaming/blockads-tunnel
+    ndk: r26b
+
 AllowedAPKSigningKeys: 229ea49584360b22a8c7e7e530cfb7e1103faa1b6ba5f32837691fb96fdcfe5a
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: app/build.gradle.kts|versionCode\s=\s(\d+)|.|versionName\s=\s"([\d.]+)"
-CurrentVersion: 7.2.0
-CurrentVersionCode: 69
+CurrentVersion: 7.2.1
+CurrentVersionCode: 70
