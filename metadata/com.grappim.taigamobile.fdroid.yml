@@ -138,6 +138,15 @@ Builds:
       - sed -i -e '/foojay/d' ../settings.gradle.kts
       - sed -i -e '/firebase/d' ../build.gradle.kts
       - sed -i -e '/firebase/d' build.gradle.kts
+    postbuild:
+      - curl -Lo upstream.apk 
+        https://github.com/Grigoriym/TaigaMobileNova/releases/download/v$$VERSION$$/app-fdroid-release.apk
+      - unzip -q upstream.apk -d apk
+      - export hash=$(sha256sum apk/assets/dexopt/baseline.prof)
+      - rm -rf apk upstream.apk
+      - for i in {1..10}; do unzip -q $$OUT$$ -d apk; sha256sum -c - <<< $hash &&
+        break; sha256sum apk/assets/dexopt/baseline.prof; rm -fr apk; taskset --cpu-list
+        0-15 gradle clean assembleFdroidRelease; done
 
 AllowedAPKSigningKeys: 061f82a8c2958dafcf488fdc1cfcd4676b3d751ecf4aac014855123cdbec3af0
 
