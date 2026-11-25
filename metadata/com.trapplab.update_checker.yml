@@ -56,10 +56,50 @@ Builds:
       - mv $repo com.trapplab.update_checker
     ndk: 28.2.13676358
 
+  - versionName: 1.1.2
+    versionCode: 10102
+    commit: 26d10b622e6e77aa3a4e999bcd814d92d57ec4f4
+    submodules: true
+    sudo:
+      - mkdir -p /home/runner/work/update-checker
+      - chown -R vagrant /home/runner
+    output: build/app/outputs/flutter-apk/app-fdroid-release.apk
+    binary: 
+      https://github.com/trapplab/update-checker/releases/download/%v/update-checker-fdroid-arm64-v8a-%v.apk
+    rm:
+      - linux
+    prebuild:
+      - export repo=/home/runner/work/update-checker/update-checker
+      - cd ..
+      - mv com.trapplab.update_checker $repo
+      - pushd $repo
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - flutter/bin/flutter config --no-analytics
+      - flutter/bin/flutter pub get --enforce-lockfile
+      - popd
+      - mv $repo com.trapplab.update_checker
+    scanignore:
+      - flutter/bin/cache
+    scandelete:
+      - flutter
+      - .pub-cache
+    build:
+      - export repo=/home/runner/work/update-checker/update-checker
+      - cd ..
+      - mv com.trapplab.update_checker $repo
+      - pushd $repo
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - ./scripts/prepare_flavor.sh fdroid
+      - flutter/bin/flutter build apk --flavor fdroid --target-platform=android-arm64
+        --release --extra-gen-snapshot-options=--deterministic --split-debug-info=/tmp/debug-info
+      - popd
+      - mv $repo com.trapplab.update_checker
+    ndk: 28.2.13676358
+
 AllowedAPKSigningKeys: 2a379f0243074469e075a1b9d51a72f0ea67428995bd4dd54fd0bb76a77ebe92
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 0.1.4
-CurrentVersionCode: 104
+CurrentVersion: 1.1.2
+CurrentVersionCode: 10102
