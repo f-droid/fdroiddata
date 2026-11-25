@@ -1,0 +1,119 @@
+Categories:
+  - VPN & Proxy
+License: GPL-3.0-only
+AuthorName: Break The Barriers
+WebSite: https://unbar.cc
+SourceCode: https://github.com/viahamed/unbar
+IssueTracker: https://github.com/viahamed/unbar/issues
+Changelog: https://github.com/viahamed/unbar/releases
+
+AutoName: Unbar
+
+RepoType: git
+Repo: https://github.com/viahamed/unbar.git
+
+Builds:
+  - versionName: 1.0.1
+    versionCode: 21
+    commit: 93a652464d9699371793722a85d116c5b1816c0f
+    subdir: android/app
+    sudo:
+      - apt-get update
+      - apt-get install -y -t trixie-backports golang-1.26-go
+    gradle:
+      - yes
+    output: build/outputs/apk/release/app-armeabi-v7a-release-unsigned.apk
+    rm:
+      - core/unbar-core-sources.jar
+    prebuild:
+      - sed -i -e '/REQUEST_INSTALL_PACKAGES/d' src/main/AndroidManifest.xml
+      - sed -i -e 's/versionCode = .*/versionCode = $$VERCODE$$/' -e 's/include("arm64-v8a",
+        "armeabi-v7a", "x86_64")/include("armeabi-v7a")/' -e 's/isUniversalApk = true/isUniversalApk
+        = false/' build.gradle.kts
+    build:
+      - export PATH=/usr/lib/go-1.26/bin:$PATH GOTOOLCHAIN=local
+      - export ANDROID_HOME=$$SDK$$ ANDROID_NDK_HOME=$$NDK$$
+      - sdkmanager 'platforms;android-35'
+      - pushd ../../core
+      - go install golang.org/x/mobile/cmd/gomobile golang.org/x/mobile/cmd/gobind
+      - export PATH=$(go env GOPATH)/bin:$PATH
+      - gomobile init
+      - gomobile bind -androidapi 21 -target android/arm -o ../android/app/libs/unbar-core.aar
+        .
+      - popd
+    ndk: 27.2.12479018
+    gradleprops:
+      - fdroid
+
+  - versionName: 1.0.1
+    versionCode: 22
+    commit: 93a652464d9699371793722a85d116c5b1816c0f
+    subdir: android/app
+    sudo:
+      - apt-get update
+      - apt-get install -y -t trixie-backports golang-1.26-go
+    gradle:
+      - yes
+    output: build/outputs/apk/release/app-arm64-v8a-release-unsigned.apk
+    rm:
+      - core/unbar-core-sources.jar
+    prebuild:
+      - sed -i -e '/REQUEST_INSTALL_PACKAGES/d' src/main/AndroidManifest.xml
+      - sed -i -e 's/versionCode = .*/versionCode = $$VERCODE$$/' -e 's/include("arm64-v8a",
+        "armeabi-v7a", "x86_64")/include("arm64-v8a")/' -e 's/isUniversalApk = true/isUniversalApk
+        = false/' build.gradle.kts
+    build:
+      - export PATH=/usr/lib/go-1.26/bin:$PATH GOTOOLCHAIN=local
+      - export ANDROID_HOME=$$SDK$$ ANDROID_NDK_HOME=$$NDK$$
+      - sdkmanager 'platforms;android-35'
+      - pushd ../../core
+      - go install golang.org/x/mobile/cmd/gomobile golang.org/x/mobile/cmd/gobind
+      - export PATH=$(go env GOPATH)/bin:$PATH
+      - gomobile init
+      - gomobile bind -androidapi 21 -target android/arm64 -o ../android/app/libs/unbar-core.aar
+        .
+      - popd
+    ndk: 27.2.12479018
+    gradleprops:
+      - fdroid
+
+  - versionName: 1.0.1
+    versionCode: 23
+    commit: 93a652464d9699371793722a85d116c5b1816c0f
+    subdir: android/app
+    sudo:
+      - apt-get update
+      - apt-get install -y -t trixie-backports golang-1.26-go
+    gradle:
+      - yes
+    output: build/outputs/apk/release/app-x86_64-release-unsigned.apk
+    rm:
+      - core/unbar-core-sources.jar
+    prebuild:
+      - sed -i -e '/REQUEST_INSTALL_PACKAGES/d' src/main/AndroidManifest.xml
+      - sed -i -e 's/versionCode = .*/versionCode = $$VERCODE$$/' -e 's/include("arm64-v8a",
+        "armeabi-v7a", "x86_64")/include("x86_64")/' -e 's/isUniversalApk = true/isUniversalApk
+        = false/' build.gradle.kts
+    build:
+      - export PATH=/usr/lib/go-1.26/bin:$PATH GOTOOLCHAIN=local
+      - export ANDROID_HOME=$$SDK$$ ANDROID_NDK_HOME=$$NDK$$
+      - sdkmanager 'platforms;android-35'
+      - pushd ../../core
+      - go install golang.org/x/mobile/cmd/gomobile golang.org/x/mobile/cmd/gobind
+      - export PATH=$(go env GOPATH)/bin:$PATH
+      - gomobile init
+      - gomobile bind -androidapi 21 -target android/amd64 -o ../android/app/libs/unbar-core.aar
+        .
+      - popd
+    ndk: 27.2.12479018
+    gradleprops:
+      - fdroid
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^v[0-9.]+$
+VercodeOperation:
+  - 10 * %c + 1
+  - 10 * %c + 2
+  - 10 * %c + 3
+CurrentVersion: 1.0.1
+CurrentVersionCode: 23
