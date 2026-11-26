@@ -86,11 +86,42 @@ Builds:
       - make -C .. libtailscale
     ndk: r23c
 
+  - versionName: 1.0.3-beta
+    versionCode: 367
+    commit: eba8d0265954a6ec09c5f447346338c3c3022873
+    subdir: android-client/android
+    sudo:
+      - apt-get update
+      - apt-get install -y -t trixie-backports golang-go
+    gradle:
+      - yes
+    srclibs:
+      - go@go1.27.4
+      - MESHnet@v0.2.3-alpha
+    prebuild:
+      - export MESHNET_VERSION=$(sed -n 's/^MESHNET_VERSION := //p' ../Makefile)
+      - git -C $$MESHnet$$ checkout -f "$MESHNET_VERSION"
+      - export GO_VERSION=$(sed -n 's/^go //p' $$MESHnet$$/go.mod)
+      - git -C $$go$$ checkout -f "go$GO_VERSION"
+      - echo -e "\norg.gradle.jvmargs=-Xmx4096m" >> gradle.properties
+      - sdkmanager 'platforms;android-36' 'platform-tools' 'build-tools;36.0.0'
+      - sed -i -e 's/getVersionProperty("VERSION_LONG")/"$$VERSION$$"/' -e '/ndkVersion/d'
+        build.gradle
+    build:
+      - pushd $$go$$/src
+      - ./make.bash
+      - popd
+      - export PATH=$$go$$/bin:$PATH GOTOOLCHAIN=local
+      - ANDROID_NDK_HOME=$$NDK$$ $$MESHnet$$/scripts/build-aar.sh
+      - mkdir -p libs
+      - cp $$MESHnet$$/build/meshnet.aar libs/meshnet.aar
+    ndk: r28c
+
 AllowedAPKSigningKeys: 57ee4b4302bf4f6d5269588d6b4cf8160294c1500dba8c567ec0dfa96d298497
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: 
   android-client/android/build.gradle|versionCode\s(\d+)|android-client/barghest.version|VERSION_LONG="(.*)"
-CurrentVersion: 0.2.1-beta
-CurrentVersionCode: 364
+CurrentVersion: 1.0.3-beta
+CurrentVersionCode: 367
