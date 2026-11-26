@@ -7653,7 +7653,6 @@ Builds:
 
   - versionName: 1.3.70
     versionCode: 2355
-    disable: https://github.com/microsoft/onnxruntime is down
     commit: 9f7d4af0c87d8bd0e9f3a76e9d0e1ed952698693
     timeout: 21600
     subdir: mobile/apps/photos/
@@ -7672,7 +7671,7 @@ Builds:
       - flutter@stable
       - ffmpeg-packaging@cbb612976d83669cb81c5a13a658a0a90e878058
       - ort-packaging@109fcf922a0a8287c9bec36d1c527cea12b82555
-      - onnxruntime@402979ac1bef89dcd55add41eaa7277c407599eb
+      - ente-onnxruntime@402979ac1bef89dcd55add41eaa7277c407599eb
       - vcpkg@2025.08.27
     rm:
       - android
@@ -7698,13 +7697,16 @@ Builds:
         files(System.getenv('ORT_AAR'))|" android/app/build.gradle
       - sed -i '/^if (localAar == null) {/,/^}/d' plugins/ffmpeg/android/build.gradle
       - sdkmanager 'platforms;android-35' 'ndk;28.0.13004108'
+      - sed -i '/^[[:space:]]*unzip -l "\$asset" | grep -q /{s/ | grep -q / | grep
+        /;s/ || die / >\/dev\/null || die /;}' $$ort-packaging$$/scripts/build-android.sh
+        $$ort-packaging$$/scripts/merge-android-aars.sh
       - sed -i 's/com.android.tools.build:gradle:7.4.2/com.android.tools.build:gradle:8.5.2/'
-        $$onnxruntime$$/java/build-android.gradle
+        $$ente-onnxruntime$$/java/build-android.gradle
       - sed -i -e 's/^setuptools==78.1.1$/setuptools==84.1.0/' -e 's/^wheel==0.45.1$/wheel==0.46.2/'
-        $$onnxruntime$$/tools/ci_build/github/linux/docker/scripts/requirements.txt
+        $$ente-onnxruntime$$/tools/ci_build/github/linux/docker/scripts/requirements.txt
       - python3 -m venv $$ort-packaging$$/.venv
       - $$ort-packaging$$/.venv/bin/python -m pip install --disable-pip-version-check
-        -r $$onnxruntime$$/tools/ci_build/github/linux/docker/scripts/requirements.txt
+        -r $$ente-onnxruntime$$/tools/ci_build/github/linux/docker/scripts/requirements.txt
       - sed -i 's/for abi in arm64-v8a armeabi-v7a x86_64/for abi in arm64-v8a armeabi-v7a/'
         $$ort-packaging$$/scripts/merge-android-aars.sh
       - sed -i -e '/firebase_\|in_app_purchase\|_flutterfire_internals/,/version:/d'
@@ -7782,7 +7784,8 @@ Builds:
       - export VCPKG_INSTALLATION_ROOT=$$vcpkg$$ VCPKG_DISABLE_METRICS=1 VCPKG_FEATURE_FLAGS=-binarycaching
       - pushd $$ort-packaging$$
       - export ORT_REF=v1.31.0 ORT_VERSION=1.31.0 ORT_COMMIT=402979ac1bef89dcd55add41eaa7277c407599eb
-        PACKAGE_REVISION=1 ORT_SOURCE_DIR=$$onnxruntime$$ ANDROID_HOME=$$SDK$$ ANDROID_NDK_HOME=$$SDK$$/ndk/28.0.13004108
+        PACKAGE_REVISION=1 ORT_SOURCE_DIR=$$ente-onnxruntime$$ ANDROID_HOME=$$SDK$$
+        ANDROID_NDK_HOME=$$SDK$$/ndk/28.0.13004108
       - export PATH=$PWD/.venv/bin:$PATH
       - scripts/build-android.sh arm64-v8a
       - rm -rf "$PWD/build/android-arm64-v8a"
@@ -7792,7 +7795,7 @@ Builds:
       - rm -rf "$PWD/build/android-armeabi-v7a"
       - export ORT_AAR=$PWD/dist/android/onnxruntime-webgpu-android-1.31.0-r1.aar
       - popd
-      - rm -rf $$onnxruntime$$
+      - rm -rf $$ente-onnxruntime$$
       - rm -rf $$vcpkg$$/buildtrees $$vcpkg$$/packages $$vcpkg$$/downloads
       - rm -rf $$ort-packaging$$/.venv
       - df -h .
