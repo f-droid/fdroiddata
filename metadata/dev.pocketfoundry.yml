@@ -1,0 +1,65 @@
+AntiFeatures:
+  NonFreeDep:
+    en-US: Needs your own copy of Factorio, a paid game.
+Categories:
+  - Emulator
+  - Strategy Game
+License: GPL-3.0-only
+AuthorName: JulioFerrero
+WebSite: https://pocketfoundry.dev
+SourceCode: https://github.com/JulioFerrero/pocket-foundry
+IssueTracker: https://github.com/JulioFerrero/pocket-foundry/issues
+Changelog: https://github.com/JulioFerrero/pocket-foundry/releases
+
+AutoName: Pocket Foundry
+
+RepoType: git
+Repo: https://github.com/JulioFerrero/pocket-foundry.git
+Binaries: 
+  https://github.com/JulioFerrero/pocket-foundry/releases/download/v%v/pocket-foundry-%v.apk
+
+Builds:
+  - versionName: 0.9.4
+    versionCode: 78
+    commit: da21d33317646e0b12f3bb68a1e6790fb67d1310
+    subdir: app
+    submodules: true
+    sudo:
+      - dpkg --add-architecture arm64
+      - echo 'APT::Snapshot "20261114T000000Z";' > /etc/apt/apt.conf.d/50snapshot
+      - echo 'Acquire::Check-Valid-Until "false";' > /etc/apt/apt.conf.d/51snapshot-valid
+      - 'printf "Package: *\nPin: origin snapshot.debian.org\nPin-Priority: 1001\n"
+        > /etc/apt/preferences.d/snapshot'
+      - apt-get update
+      - apt-get install -y --no-install-recommends --allow-downgrades gcc g++ gcc-aarch64-linux-gnu
+        g++-aarch64-linux-gnu qemu-user make gawk bison flex python3 texinfo gettext
+        jq ca-certificates xz-utils patch file meson ninja-build cmake autoconf automake
+        libtool python3-mako python3-yaml python3-packaging glslang-tools xkb-data
+        libx11-data pkgconf:arm64 linux-libc-dev:arm64 libc6-dev:arm64 libdrm-dev:arm64
+        libexpat1-dev:arm64 zlib1g-dev:arm64 libzstd-dev:arm64 libx11-dev:arm64 libx11-xcb-dev:arm64
+        libxext-dev:arm64 libxfixes-dev:arm64 libxrandr-dev:arm64 libxxf86vm-dev:arm64
+        libxshmfence-dev:arm64 libxcb1-dev:arm64 libxcb-glx0-dev:arm64 libxcb-dri2-0-dev:arm64
+        libxcb-dri3-dev:arm64 libxcb-present-dev:arm64 libxcb-sync-dev:arm64 libxcb-shm0-dev:arm64
+        libxcb-randr0-dev:arm64 libxcb-xfixes0-dev:arm64 libglvnd-dev:arm64 libxcursor-dev:arm64
+        libxi-dev:arm64 libxss-dev:arm64 libwayland-dev:arm64 libwayland-egl-backend-dev:arm64
+        libvulkan-dev:arm64 libgl1:arm64 libglx0:arm64 libegl1:arm64 libglvnd0:arm64
+        libvulkan1:arm64 libx11-6:arm64 libx11-xcb1:arm64 libxext6:arm64 libxrandr2:arm64
+        libxi6:arm64 libxcursor1:arm64 libxfixes3:arm64 libxss1:arm64 libxrender1:arm64
+        libxkbcommon0:arm64 libxkbcommon-x11-0:arm64 libxxf86vm1:arm64
+    gradle:
+      - yes
+    prebuild:
+      - ../tools/setup.sh
+      - sed -i -e 's/-Xmx4g/-Xmx2g/' ../gradle.properties
+    scandelete:
+      - runtime
+    build: ../runtime/build.sh --here all
+    ndk: 29.0.14206865
+
+AllowedAPKSigningKeys: 0e301617d64bc294bcc2d1dbee71a8c83f8fcc7b7c3616edc26e9b2e89c7e35f
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^v[0-9.]+$
+UpdateCheckData: gradle.properties|versionCode=(\d+)|.|versionName=(.+)
+CurrentVersion: 0.9.4
+CurrentVersionCode: 78
