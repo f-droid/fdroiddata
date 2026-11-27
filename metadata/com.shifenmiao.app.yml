@@ -1,0 +1,59 @@
+AntiFeatures:
+  NonFreeNet:
+    en-US: Connects to the proprietary OneBox backend (api.oneboxable.com) for AI
+      chat, account, content sync and remote config; downloads assets from images.oneboxable.com;
+      some features call third-party services such as poetry.palemoky.com (poems),
+      cdn.jsdelivr.net and raw.githubusercontent.com (optional fonts), speed.cloudflare.com
+      (speed test), whois.pconline.com.cn (weather city lookup)
+Categories:
+  - AI Chat
+  - Finance Manager
+  - Graphics
+  - Habit Tracker
+  - System
+  - Writing
+License: Apache-2.0
+AuthorName: wangzhishou
+WebSite: https://www.oneboxable.com
+SourceCode: https://github.com/wangzhishou/OneBox
+IssueTracker: https://github.com/wangzhishou/OneBox/issues
+Changelog: https://github.com/wangzhishou/OneBox/releases
+
+AutoName: OneBox
+
+RepoType: git
+Repo: https://github.com/wangzhishou/OneBox.git
+Binaries: 
+  https://github.com/wangzhishou/OneBox/releases/download/%v/OneBox-%v-foss-arm64-release.apk
+
+Builds:
+  - versionName: 1.5.9
+    versionCode: 159
+    commit: 907cf83df83ad2e69419fcc4af75f1265b1181fe
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y make
+    gradle:
+      - foss
+      - arm64
+    prebuild:
+      - sed -i -e '/mirrors.cloud.tencent.com/d' -e '/maven.aliyun.com/d' -e '/foojay/d'
+        -e '/artifact.bytedance.com/,/^        }$/d' ../settings.gradle.kts ../build.gradle.kts
+        ../build-logic/settings.gradle.kts
+      - sed -i -e 's/-Xmx16g/-Xmx8g/' -e 's/-Xmx4g/-Xmx2g/' ../gradle.properties
+      - echo 'org.gradle.workers.max=2' >> ../gradle.properties
+      - echo 'subprojects { tasks.configureEach { if (name.contains("intVital")) enabled
+        = false } }' >> ../build.gradle.kts
+    scandelete:
+      - core/weather/libs
+      - web
+    ndk: 30.0.16248370
+
+AllowedAPKSigningKeys: d9fae06e908409d79e18b661e50fbf675727dd1c3c384a7867ed81aae824c5ff
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^[0-9.]*$
+UpdateCheckData: gradle/libs.versions.toml|versionCode = "(\d+)"|.|versionName = "([\d.]+)"
+CurrentVersion: 1.5.9
+CurrentVersionCode: 159
