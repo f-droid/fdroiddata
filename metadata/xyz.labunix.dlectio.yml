@@ -87,6 +87,43 @@ Builds:
     gradleprops:
       - abiTarget=arm64-v8a
 
+  - versionName: 0.2.5
+    versionCode: 71
+    commit: aca96dd090f923f39a8aa40f17833c1eb224a390
+    subdir: app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y golang-go gcc libc-dev
+    gradle:
+      - yes
+    srclibs:
+      - go@go1.25.0
+    prebuild: sdkmanager "platforms;android-34" "build-tools;34.0.0"
+    scandelete:
+      - art
+      - engine/lectio/sources
+    build:
+      - export GOROOT_BOOTSTRAP=$(go env GOROOT)
+      - pushd $$go$$/src
+      - ./make.bash
+      - popd
+      - export GOROOT=$$go$$
+      - export GOPATH=$$go$$
+      - export PATH="$GOROOT/bin:$GOPATH/bin:$PATH"
+      - mkdir -p libs
+      - pushd ../engine/lectio
+      - go install golang.org/x/mobile/cmd/gomobile@v0.0.0-20260730202154-c700fe717e6e
+      - go install golang.org/x/mobile/cmd/gobind@v0.0.0-20260813181013-1960c775504c
+      - go mod download
+      - gomobile bind -target=android/arm64 -androidapi 26 -javapkg=xyz.labunix.dlectio.engine
+        -tags fullbible -ldflags="-buildid=" -trimpath -o ../../app/libs/dlectio-engine.aar
+        github.com/lukaszkasprzak/lectio/mobile
+      - popd
+    ndk: 26.1.10909125
+    gradleprops:
+      - abiTarget=arm64-v8a
+
 AllowedAPKSigningKeys: f7f20e375a43b544f9694d9eaedd80ebf41c9e40d4d77937017a2911d269e666
 
 AutoUpdateMode: Version
@@ -95,5 +132,5 @@ VercodeOperation:
   - 10*%c+1
 UpdateCheckData: app/build.gradle.kts|val baseVersionCode = (\d+)|.|versionName =
   "([^"]+)"
-CurrentVersion: 0.2.4
-CurrentVersionCode: 61
+CurrentVersion: 0.2.5
+CurrentVersionCode: 71
