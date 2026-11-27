@@ -720,8 +720,112 @@ Builds:
         --dart-define=cronetHttpNoPlay=true
     ndk: r28c
 
+  - versionName: 1.0.13
+    versionCode: 322
+    commit: 64bc07d00f9029b426e24046cda38b912672d248
+    timeout: 21600
+    subdir: mobile/apps/locker
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y automake cmake curl g++ gcc libc-dev libtool make ninja-build
+        pkg-config python3-venv rustup unzip zip
+    output: build/app/outputs/flutter-apk/app-fdroid-release.apk
+    srclibs:
+      - libsodium@1.0.22-RELEASE
+      - flutter@stable
+      - ort-packaging@109fcf922a0a8287c9bec36d1c527cea12b82555
+      - ente-onnxruntime@402979ac1bef89dcd55add41eaa7277c407599eb
+      - vcpkg@2025.08.27
+    rm:
+      - android
+      - architecture
+      - cli
+      - desktop
+      - docs
+      - infra
+      - server
+      - web
+      - mobile/apps/locker/ios
+      - mobile/apps/photos/android
+      - mobile/apps/photos/plugins/ffmpeg/android
+    prebuild:
+      - sed -i "/^  String get _toolchain/ s/=>.*/=> '1.97.0';/" ../../cargokit/build_tool/lib/src/builder.dart
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - flutterVersion=$(grep "FLUTTER_VERSION\:" ../../../.github/actions/setup-flutter/action.yml
+        | cut -d ":" -f2)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
+      - $$flutter$$/bin/flutter config --no-analytics
+      - pushd ../../packages/strings
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - $$flutter$$/bin/flutter gen-l10n
+      - popd
+      - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - sed -i -e '/play-services-cronet/d' $PUB_CACHE/hosted/pub.dev/cronet_http-*/android/build.gradle
+      - sed -i -e '/dependsOn downloadLibsodium/d' $PUB_CACHE/hosted/pub.dev/sodium_libs-*/android/build.gradle
+      - sed -i '/^repositories {/,/^}/d' android/app/build.gradle
+      - sed -i "s|implementation 'io.ente.onnxruntime:onnxruntime-webgpu-android:1.31.0-r1@aar'|implementation
+        files(System.getenv('ORT_AAR'))|" android/app/build.gradle
+      - sdkmanager 'platforms;android-35' 'ndk;28.0.13004108'
+      - sed -i '/^[[:space:]]*unzip -l "\$asset" | grep -q /{s/ | grep -q / | grep
+        /;s/ || die / >\/dev\/null || die /;}' $$ort-packaging$$/scripts/build-android.sh
+        $$ort-packaging$$/scripts/merge-android-aars.sh
+      - sed -i 's/com.android.tools.build:gradle:7.4.2/com.android.tools.build:gradle:8.5.2/'
+        $$ente-onnxruntime$$/java/build-android.gradle
+      - sed -i -e 's/^setuptools==78.1.1$/setuptools==84.1.0/' -e 's/^wheel==0.45.1$/wheel==0.46.2/'
+        $$ente-onnxruntime$$/tools/ci_build/github/linux/docker/scripts/requirements.txt
+      - python3 -m venv $$ort-packaging$$/.venv
+      - $$ort-packaging$$/.venv/bin/python -m pip install --disable-pip-version-check
+        --only-binary=':all:' -r $$ente-onnxruntime$$/tools/ci_build/github/linux/docker/scripts/requirements.txt
+    scandelete:
+      - mobile/apps/locker/.pub-cache
+      - mobile/apps/auth
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - export PATH=$$flutter$$/bin:$HOME/.cargo/bin:$PATH
+      - rustup default 1.97.0
+      - pushd ../../../rust
+      - cargo codegen frb locker
+      - popd
+      - pushd $$libsodium$$
+      - export NDK_PLATFORM="android-21"
+      - ./autogen.sh -s
+      - ./dist-build/android-armv7-a.sh
+      - ./dist-build/android-armv8-a.sh
+      - ./dist-build/android-x86.sh
+      - ./dist-build/android-x86_64.sh
+      - popd
+      - pushd $PUB_CACHE/hosted/pub.dev/sodium_libs-*/android
+      - mkdir -p src/main/jniLibs
+      - cd src/main/jniLibs
+      - mkdir -p armeabi-v7a x86_64 arm64-v8a x86
+      - cp $$libsodium$$/libsodium-android-armv7-a/lib/libsodium.so armeabi-v7a/
+      - cp $$libsodium$$/libsodium-android-westmere/lib/libsodium.so x86_64/
+      - cp $$libsodium$$/libsodium-android-armv8-a+crypto/lib/libsodium.so arm64-v8a/
+      - cp $$libsodium$$/libsodium-android-i686/lib/libsodium.so x86/
+      - popd
+      - pushd $$vcpkg$$
+      - sed -i '/^# Do the download or build\.$/i vcpkgDownloadTool="OFF"; vcpkgToolReleaseSha=$VCPKG_TOOL_SOURCE_SHA'
+        scripts/bootstrap.sh
+      - ./bootstrap-vcpkg.sh -disableMetrics
+      - popd
+      - export VCPKG_INSTALLATION_ROOT=$$vcpkg$$ VCPKG_DISABLE_METRICS=1 VCPKG_FEATURE_FLAGS=-binarycaching
+      - pushd $$ort-packaging$$
+      - export ORT_REF=v1.31.0 ORT_VERSION=1.31.0 ORT_COMMIT=402979ac1bef89dcd55add41eaa7277c407599eb
+        PACKAGE_REVISION=1 ORT_SOURCE_DIR=$$ente-onnxruntime$$ ANDROID_HOME=$$SDK$$
+        ANDROID_NDK_HOME=$$SDK$$/ndk/28.0.13004108
+      - for abi in arm64-v8a armeabi-v7a x86_64; do PATH="$PWD/.venv/bin:$PATH" scripts/build-android.sh
+        "$abi"; rm -rf "$PWD/build/android-$abi"; done
+      - scripts/merge-android-aars.sh "$PWD/dist/android" "$PWD"/dist/android-{arm64-v8a,armeabi-v7a,x86_64}/*.aar
+      - export ORT_AAR=$PWD/dist/android/onnxruntime-webgpu-android-1.31.0-r1.aar
+      - popd
+      - $$flutter$$/bin/flutter build apk --release --flavor fdroid -t lib/main.dart
+        --dart-define=cronetHttpNoPlay=true --target-platform android-arm,android-arm64,android-x64
+    ndk: r28c
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^locker-v[0-9.]+$
 UpdateCheckData: mobile/apps/locker/pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 1.0.12
-CurrentVersionCode: 310
+CurrentVersion: 1.0.13
+CurrentVersionCode: 322
