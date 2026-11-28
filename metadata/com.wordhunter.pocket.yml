@@ -39,9 +39,31 @@ Builds:
       - cargo tauri android build --apk --target aarch64 --ci -- --locked
     ndk: 27.0.12077973
 
+  - versionName: 1.1.6
+    versionCode: 101100699
+    commit: 0840a03689b66382cdd2379fae726a818959d4ed
+    sudo:
+      - apt-get update
+      - apt-get install -y build-essential npm rustup
+    output: 
+      src-tauri/gen/android/app/build/outputs/apk/universal/release/app-universal-release-unsigned.apk
+    build:
+      - rustup set profile minimal
+      - rustup default 1.97.1
+      - rustup target add aarch64-linux-android
+      - export PATH="$HOME/.cargo/bin:$PATH"
+      - cargo install tauri-cli --version 2.11.4 --locked
+      - export NDK_HOME=$$NDK$$
+      - printf '#!/bin/sh\nexec gradlew-fdroid "$@"\n' > src-tauri/gen/android/gradlew
+      - npm ci --no-audit --no-fund
+      - npm run build:frontend
+      - node scripts/prepare-android.mjs
+      - cargo tauri android build --apk --target aarch64 --ci -- --locked
+    ndk: 27.0.12077973
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^WordHunter[0-9]+\.[0-9]+\.[0-9]+$
 UpdateCheckData: 
   src-tauri/tauri.android.conf.json|"versionCode":\s*(\d+)|src-tauri/tauri.conf.json|"version":\s*"([^"]+)"
-CurrentVersion: 1.1.5
-CurrentVersionCode: 101100599
+CurrentVersion: 1.1.6
+CurrentVersionCode: 101100699
