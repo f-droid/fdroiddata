@@ -192,7 +192,209 @@ Builds:
       - mv $repo io.github.picocrypt_ng.picocrypt_ng
     ndk: 29.0.14206865
 
+  - versionName: '3.0'
+    versionCode: 300001
+    commit: 1a057eeb1e63c3d15e83fca8d858bbecf82acd4f
+    subdir: android/app
+    sudo:
+      - apt-get update
+      - apt-get install -y golang-go/trixie-backports golang-src/trixie-backports
+        gcc libc-dev make jq openjdk-21-jdk-headless
+      - update-java-alternatives --set java-1.21.0-openjdk-amd64
+    gradle:
+      - yes
+    output: build/outputs/apk/release/app-armeabi-v7a-release-unsigned.apk
+    binary: 
+      https://github.com/Picocrypt-NG/Picocrypt-NG/releases/download/%v/Picocrypt-NG-android-armeabi-v7a.apk
+    srclibs:
+      - go@7b2881024c95a11ddb86663a616340aa3a88b67f
+    prebuild:
+      - sdkmanager "platforms;android-37.2" "build-tools;36.0.0"
+      - sed -i -e '/^org\.gradle\.jvmargs=/s/$/ -XX:ActiveProcessorCount=4/' ../gradle.properties
+      - printf '\norg.gradle.workers.max=4\nkotlin.daemon.jvmargs=-XX:ActiveProcessorCount=4\n'
+        >> ../gradle.properties
+      - printf '\nPICOCRYPT_VERSION_NAME=%s\nPICOCRYPT_VERSION_CODE=%s\n' "$$VERSION$$"
+        "$(( $$VERCODE$$ / 10 ))" >> ../gradle.properties
+    scandelete:
+      - src/internal
+    build:
+      - pushd $$go$$/src
+      - GOROOT_BOOTSTRAP=/usr/lib/go ./make.bash
+      - popd
+      - export GOROOT=$$go$$
+      - export GOPATH="$HOME/go"
+      - export PATH="$GOROOT/bin:$GOPATH/bin:$PATH"
+      - export GOTOOLCHAIN=local
+      - export GOFLAGS="-buildvcs=false"
+      - go -C ../../src install golang.org/x/mobile/cmd/gomobile golang.org/x/mobile/cmd/gobind
+      - mkdir -p "$HOME/go/pkg/gomobile"
+      - pushd ..
+      - ./build-gomobile.sh
+      - popd
+      - taskset --cpu-list 0-3 gradle --no-daemon --dependency-verification strict
+        :app:assembleRelease
+    ndk: 30.0.16248370
+    postbuild:
+      - expected=fe9df0432ba534f6e6556a01fe60cdf2b88379816b3a34282cfcaa5fea1af60d
+      - for cpus in 0-7 0-15 0-3; do printf '%s  %s\n' "$expected" "$$OUT$$" | sha256sum
+        -c --status && break; taskset --cpu-list "$cpus" gradle --no-daemon --dependency-verification
+        strict :app:minifyReleaseWithR8 --rerun :app:assembleRelease; done
+      - sha256sum "$$OUT$$"
+
+  - versionName: '3.0'
+    versionCode: 300002
+    commit: 1a057eeb1e63c3d15e83fca8d858bbecf82acd4f
+    subdir: android/app
+    sudo:
+      - apt-get update
+      - apt-get install -y golang-go/trixie-backports golang-src/trixie-backports
+        gcc libc-dev make jq openjdk-21-jdk-headless
+      - update-java-alternatives --set java-1.21.0-openjdk-amd64
+    gradle:
+      - yes
+    output: build/outputs/apk/release/app-arm64-v8a-release-unsigned.apk
+    binary: 
+      https://github.com/Picocrypt-NG/Picocrypt-NG/releases/download/%v/Picocrypt-NG-android-arm64-v8a.apk
+    srclibs:
+      - go@7b2881024c95a11ddb86663a616340aa3a88b67f
+    prebuild:
+      - sdkmanager "platforms;android-37.2" "build-tools;36.0.0"
+      - sed -i -e '/^org\.gradle\.jvmargs=/s/$/ -XX:ActiveProcessorCount=4/' ../gradle.properties
+      - printf '\norg.gradle.workers.max=4\nkotlin.daemon.jvmargs=-XX:ActiveProcessorCount=4\n'
+        >> ../gradle.properties
+      - printf '\nPICOCRYPT_VERSION_NAME=%s\nPICOCRYPT_VERSION_CODE=%s\n' "$$VERSION$$"
+        "$(( $$VERCODE$$ / 10 ))" >> ../gradle.properties
+    scandelete:
+      - src/internal
+    build:
+      - pushd $$go$$/src
+      - GOROOT_BOOTSTRAP=/usr/lib/go ./make.bash
+      - popd
+      - export GOROOT=$$go$$
+      - export GOPATH="$HOME/go"
+      - export PATH="$GOROOT/bin:$GOPATH/bin:$PATH"
+      - export GOTOOLCHAIN=local
+      - export GOFLAGS="-buildvcs=false"
+      - go -C ../../src install golang.org/x/mobile/cmd/gomobile golang.org/x/mobile/cmd/gobind
+      - mkdir -p "$HOME/go/pkg/gomobile"
+      - pushd ..
+      - ./build-gomobile.sh
+      - popd
+      - taskset --cpu-list 0-3 gradle --no-daemon --dependency-verification strict
+        :app:assembleRelease
+    ndk: 30.0.16248370
+    postbuild:
+      - expected=9edde4d637baa998b8fab2791bbb55611f6ea5a693e9e12fb8af1a64f12ffd6c
+      - for cpus in 0-7 0-15 0-3; do printf '%s  %s\n' "$expected" "$$OUT$$" | sha256sum
+        -c --status && break; taskset --cpu-list "$cpus" gradle --no-daemon --dependency-verification
+        strict :app:minifyReleaseWithR8 --rerun :app:assembleRelease; done
+      - sha256sum "$$OUT$$"
+
+  - versionName: '3.0'
+    versionCode: 300003
+    commit: 1a057eeb1e63c3d15e83fca8d858bbecf82acd4f
+    subdir: android/app
+    sudo:
+      - apt-get update
+      - apt-get install -y golang-go/trixie-backports golang-src/trixie-backports
+        gcc libc-dev make jq openjdk-21-jdk-headless
+      - update-java-alternatives --set java-1.21.0-openjdk-amd64
+    gradle:
+      - yes
+    output: build/outputs/apk/release/app-x86-release-unsigned.apk
+    binary: 
+      https://github.com/Picocrypt-NG/Picocrypt-NG/releases/download/%v/Picocrypt-NG-android-x86.apk
+    srclibs:
+      - go@7b2881024c95a11ddb86663a616340aa3a88b67f
+    prebuild:
+      - sdkmanager "platforms;android-37.2" "build-tools;36.0.0"
+      - sed -i -e '/^org\.gradle\.jvmargs=/s/$/ -XX:ActiveProcessorCount=4/' ../gradle.properties
+      - printf '\norg.gradle.workers.max=4\nkotlin.daemon.jvmargs=-XX:ActiveProcessorCount=4\n'
+        >> ../gradle.properties
+      - printf '\nPICOCRYPT_VERSION_NAME=%s\nPICOCRYPT_VERSION_CODE=%s\n' "$$VERSION$$"
+        "$(( $$VERCODE$$ / 10 ))" >> ../gradle.properties
+    scandelete:
+      - src/internal
+    build:
+      - pushd $$go$$/src
+      - GOROOT_BOOTSTRAP=/usr/lib/go ./make.bash
+      - popd
+      - export GOROOT=$$go$$
+      - export GOPATH="$HOME/go"
+      - export PATH="$GOROOT/bin:$GOPATH/bin:$PATH"
+      - export GOTOOLCHAIN=local
+      - export GOFLAGS="-buildvcs=false"
+      - go -C ../../src install golang.org/x/mobile/cmd/gomobile golang.org/x/mobile/cmd/gobind
+      - mkdir -p "$HOME/go/pkg/gomobile"
+      - pushd ..
+      - ./build-gomobile.sh
+      - popd
+      - taskset --cpu-list 0-3 gradle --no-daemon --dependency-verification strict
+        :app:assembleRelease
+    ndk: 30.0.16248370
+    postbuild:
+      - expected=0ca92cd6ae5f0e4f1ac69e3f9781011acdf13e81da1548719ba8fe417f7360f5
+      - for cpus in 0-7 0-15 0-3; do printf '%s  %s\n' "$expected" "$$OUT$$" | sha256sum
+        -c --status && break; taskset --cpu-list "$cpus" gradle --no-daemon --dependency-verification
+        strict :app:minifyReleaseWithR8 --rerun :app:assembleRelease; done
+      - sha256sum "$$OUT$$"
+
+  - versionName: '3.0'
+    versionCode: 300004
+    commit: 1a057eeb1e63c3d15e83fca8d858bbecf82acd4f
+    subdir: android/app
+    sudo:
+      - apt-get update
+      - apt-get install -y golang-go/trixie-backports golang-src/trixie-backports
+        gcc libc-dev make jq openjdk-21-jdk-headless
+      - update-java-alternatives --set java-1.21.0-openjdk-amd64
+    gradle:
+      - yes
+    output: build/outputs/apk/release/app-x86_64-release-unsigned.apk
+    binary: 
+      https://github.com/Picocrypt-NG/Picocrypt-NG/releases/download/%v/Picocrypt-NG-android-x86_64.apk
+    srclibs:
+      - go@7b2881024c95a11ddb86663a616340aa3a88b67f
+    prebuild:
+      - sdkmanager "platforms;android-37.2" "build-tools;36.0.0"
+      - sed -i -e '/^org\.gradle\.jvmargs=/s/$/ -XX:ActiveProcessorCount=4/' ../gradle.properties
+      - printf '\norg.gradle.workers.max=4\nkotlin.daemon.jvmargs=-XX:ActiveProcessorCount=4\n'
+        >> ../gradle.properties
+      - printf '\nPICOCRYPT_VERSION_NAME=%s\nPICOCRYPT_VERSION_CODE=%s\n' "$$VERSION$$"
+        "$(( $$VERCODE$$ / 10 ))" >> ../gradle.properties
+    scandelete:
+      - src/internal
+    build:
+      - pushd $$go$$/src
+      - GOROOT_BOOTSTRAP=/usr/lib/go ./make.bash
+      - popd
+      - export GOROOT=$$go$$
+      - export GOPATH="$HOME/go"
+      - export PATH="$GOROOT/bin:$GOPATH/bin:$PATH"
+      - export GOTOOLCHAIN=local
+      - export GOFLAGS="-buildvcs=false"
+      - go -C ../../src install golang.org/x/mobile/cmd/gomobile golang.org/x/mobile/cmd/gobind
+      - mkdir -p "$HOME/go/pkg/gomobile"
+      - pushd ..
+      - ./build-gomobile.sh
+      - popd
+      - taskset --cpu-list 0-3 gradle --no-daemon --dependency-verification strict
+        :app:assembleRelease
+    ndk: 30.0.16248370
+    postbuild:
+      - expected=3d2867f3407934b7a27a426da269d4be0047db17b2b0f555363450b8a372857e
+      - for cpus in 0-7 0-15 0-3; do printf '%s  %s\n' "$expected" "$$OUT$$" | sha256sum
+        -c --status && break; taskset --cpu-list "$cpus" gradle --no-daemon --dependency-verification
+        strict :app:minifyReleaseWithR8 --rerun :app:assembleRelease; done
+      - sha256sum "$$OUT$$"
+
 AllowedAPKSigningKeys: e2f2a971231aa0b86882c63b87b689c71632c6d55168b1ce856952d07f6172b7
+
+MaintainerNotes: |-
+  The 3.0 recipes use the published source and the Go 1.27.4 source tag.
+  Match the release runner's four CPUs for Gradle and Kotlin. A different number
+  of visible CPUs can change the emitted DEX. scanignore covers frozen crypto
+  and ZIP test fixtures.
 
 AutoUpdateMode: None
 UpdateCheckMode: None
@@ -201,5 +403,5 @@ VercodeOperation:
   - 10 * %c + 2
   - 10 * %c + 3
   - 10 * %c + 4
-CurrentVersion: '2.18'
-CurrentVersionCode: 218004
+CurrentVersion: '3.0'
+CurrentVersionCode: 300004
