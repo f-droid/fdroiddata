@@ -37,9 +37,23 @@ Builds:
         asset_download,multiversion,full_font,skins,online_mode,resourcepacks,hud_editor,module_panel,small_audio
     ndk: 27.1.12297006
 
+  - versionName: 0.1.9
+    versionCode: 9
+    commit: c516aeb884df44c74351d365d7f8f8c3ec7e553a
+    sudo:
+      - apt-get update
+      - apt-get install -y build-essential rustup zip
+    output: dist/torch-client-unsigned.apk
+    prebuild: sdkmanager 'platforms;android-36' 'build-tools;36.0.0'
+    build:
+      - rustup toolchain install $(sed -n -E 's/channel = "(.*)"/\1/p' rust-toolchain.toml)
+        --profile minimal --target aarch64-linux-android
+      - UNSIGNED=1 tools/build_android.sh --features android
+    ndk: 27.1.12297006
+
 AllowedAPKSigningKeys: 8b5aa7d71788b6101b14519ed87f96f5267695c27559e48cb0328f525c4b3f20
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 0.1.8
-CurrentVersionCode: 8
+CurrentVersion: 0.1.9
+CurrentVersionCode: 9
